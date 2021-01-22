@@ -1,0 +1,57 @@
+Package: ibis
+Type: Package
+Title: Modelling framework of Integrated Biodiversity distribution scenarios
+Version: 0.1
+Authors@R: 
+    person(given = "Martin",
+           family = "Jung",
+           role = c("aut", "cre"),
+           email = "jung@iiasa.ac.at",
+           comment = c(ORCID = "0000-0002-7569-1390"))
+Maintainer: Martin Jung <jung@iiasa.ac.at>
+Description: Integrated framework of modelling the distribution of species and ecosystems. 
+Language: en-GB
+License: CC BY 4.0
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    proto (>= 1.0.0),
+    methods,
+    raster,
+    sf (>= 0.9),
+    tibble (>= 2.0.0),
+    ggplot2,
+    magrittr,
+    assertthat(>= 0.2.0),
+    raster,
+    uuid,
+    testthat (>= 3.0.0)
+Depends:
+    R(>= 3.5.0)
+Suggests:
+    INLA,
+    progress,
+    rstan,
+    rstantools,
+URL: https://github.com/iiasa/ibis
+BugReports: https://github.com/iiasa/ibis/issues
+RoxygenNote: 7.1.1
+Config/testthat/edition: 3
+Collate: 
+    'utils.R'
+    'bdproto.R'
+    'waiver.R'
+    'bdproto-biodiversitydataset.R'
+    'bdproto-biodiversitydistribution.R'
+    'add_biodiversity.R'
+    'bdproto-predictors.R'
+    'add_predictors.R'
+    'bdproto-prior.R'
+    'spatial_utils.R'
+    'data.R'
+    'distribution.R'
+    'identifier.R'
+    'misc.R'
+    'print.R'
+    'zzz.R'
+Roxygen: list(markdown = TRUE)
