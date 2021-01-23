@@ -18,14 +18,14 @@ NULL
 #' @export
 BiodiversityDistribution <- bdproto(
   "BiodiversityDistribution",
-  equation     = new_waiver(),
-  background   = new_waiver(),
-  biodiversity = bdproto(NULL, BiodiversityDatasetCollection),
-  predictors   = new_waiver(),
-  priors       = new_waiver(),
-  latentfactor = new_waiver(),
-  log          = new_waiver(),
-  engine       = new_waiver(),
+  equation      = new_waiver(),
+  background    = new_waiver(),
+  biodiversity  = bdproto(NULL, BiodiversityDatasetCollection),
+  predictors    = new_waiver(),
+  priors        = new_waiver(),
+  latentfactors = new_waiver(),
+  log           = new_waiver(),
+  engine        = new_waiver(),
 
   # Self printing function
   print = function(self) {
@@ -43,7 +43,7 @@ BiodiversityDistribution <- bdproto(
     # FIXME: Prettify below
 
     ex =  self$show_background()
-    pn = ifelse(is.Waiver(self$predictor_names()),'<None>',name_atomic(self$predictor_names(), "predictors"))
+    pn = ifelse(is.Waiver(self$predictor_names()),'None',name_atomic(self$predictor_names(), "predictors"))
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
                    "\nBackground extent: ",
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
@@ -53,8 +53,8 @@ BiodiversityDistribution <- bdproto(
                    "\n",self$biodiversity$show(),
                    "\n --------- ",
                    "\n  predictors:     ", pn,
-                   "\n  priors:         ", "Default",
-                   "\n  latent factors: ", "None",
+                   "\n  priors:         ", "<Default>",
+                   "\n  latent factors: ", paste(self$get_latent(),collapse = ', '),
                    "\n  log:            ", "None",
                    "\n  engine:         ", "None")
             )
@@ -90,5 +90,18 @@ BiodiversityDistribution <- bdproto(
     } else {
       stop("feature data is of an unrecognized class")
     }
+  },
+  # Adding latent factors
+  set_latent = function(self, type){
+    assertthat::assert_that(is.character(type),
+                            type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'))
+    if(!is.Waiver(self$latentfactors)){
+      self$latentfactors <- unique(c(self$latentfactors,type))
+    } else { self$latentfactors <- type}
+  },
+  # Get latent factors
+  get_latent = function(self){
+    if(is.Waiver(self$latentfactors)) return('None')
+    self$latentfactors
   }
 )

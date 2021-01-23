@@ -25,7 +25,7 @@ BiodiversityDatasetCollection <- bdproto(
   # Print a summary of all datasets
   show = function(self){
     ty = if(is.Waiver(self$get_types())){
-      ty = '\n   \033[31m<None>\033[39m'} else { ty = paste0("\n   ",self$get_types()) }
+      ty = '\n   \033[31mNone\033[39m'} else { ty = paste0("\n   ",self$get_types()) }
     if(self$length()>0){ obs = paste0(" <",self$get_observations()," records>") } else obs = ''
     # FIXME: Prettify
     paste0(self$name(),':',
