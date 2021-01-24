@@ -53,10 +53,11 @@ BiodiversityDistribution <- bdproto(
                    "\n",self$biodiversity$show(),
                    "\n --------- ",
                    "\n  predictors:     ", pn,
-                   "\n  priors:         ", "<Default>",
+                   "\n  priors:         ", "Not yet implemented",
                    "\n  latent factors: ", paste(self$get_latent(),collapse = ', '),
-                   "\n  log:            ", "None",
-                   "\n  engine:         ", "None")
+                   "\n  log:            ", "Not yet implemented",
+                   "\n  engine:         ", self$get_engine()
+                   )
             )
   },
   # Print input messages
@@ -103,5 +104,16 @@ BiodiversityDistribution <- bdproto(
   get_latent = function(self){
     if(is.Waiver(self$latentfactors)) return('None')
     self$latentfactors
+  },
+  # Set Engine
+  set_engine = function(self, x) {
+    assertthat::assert_that(inherits(x, "Engine"))
+    if (!is.Waiver(self$engine)) warning("overwriting previously defined solver")
+    bdproto(NULL, self, engine = x)
+  },
+  # Get Engine
+  get_engine = function(self){
+    if(is.Waiver(self$engine)) return('None')
+    self$engine$show()
   }
 )
