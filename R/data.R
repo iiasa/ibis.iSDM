@@ -1,2 +1,2 @@
-#' @include utils.R spatial_utils.R
+#' @include utils.R utils-spatial.R
 NULL
