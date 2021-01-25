@@ -54,9 +54,11 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) message('Overwriting existing environmental predictors.')
 
     # Finally set the data to the BiodiversityDistribution object
-    x$predictors <- bdproto(NULL, PredictorDataset,
+    x$set_predictors(
+        bdproto(NULL, PredictorDataset,
               id = new_id(),
               data = env
+        )
       )
     return(x)
   }

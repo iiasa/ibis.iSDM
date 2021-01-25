@@ -77,6 +77,16 @@ BiodiversityDistribution <- bdproto(
     o[['proj']] <-  projection(r)
     return(o)
   },
+  # Set equation
+  set_equation = function(self, x){
+    assertthat::assert_that(inherits(x, "formula"))
+    self$formula <- x
+  },
+  # Get equation
+  get_equation = function(self){
+    if(is.Waiver(self$equation)) return('None')
+    self$equation
+  },
   # Function to print the equation
   show_equation = function(self){
     if(!is.Waiver(equation) && !is.null(equation))
@@ -105,15 +115,24 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$latentfactors)) return('None')
     self$latentfactors
   },
+  # Set predictiors
+  set_predictors = function(self, x){
+    assertthat::assert_that(inherits(x, "PredictorDataset"))
+    self$predictors <- x
+  },
   # Set Engine
   set_engine = function(self, x) {
     assertthat::assert_that(inherits(x, "Engine"))
-    if (!is.Waiver(self$engine)) warning("overwriting previously defined solver")
+    if (!is.Waiver(self$engine)) warning("Overwriting previously defined engine.")
     bdproto(NULL, self, engine = x)
   },
   # Get Engine
   get_engine = function(self){
     if(is.Waiver(self$engine)) return('None')
     self$engine$show()
+  },
+  # Show number of biodiversity records
+  show_biodiversity_length = function(self){
+    sum( self$biodiversity$length() )
   }
 )

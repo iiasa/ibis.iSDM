@@ -36,6 +36,8 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
     # Finally add to data to the BiodiversityDistribution object
     x$set_latent(type = '<Spatial>')
+    # TODO:
+    # Create a prototype with prior ranges and sigmas for the matern matrix
     return(x)
   }
 )

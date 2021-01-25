@@ -45,7 +45,12 @@ methods::setMethod(
     )
 
     # Convert to formula object
-    if(!is.null(formula)) formula = as.formula(formula)
+    if(!is.null(formula)) {
+        formula = as.formula(formula)
+    } else {
+      # Asign a new waiver object
+        formula = new_waiver()
+    }
 
     # Create BiodiversityDistribution object
     bdproto(NULL, BiodiversityDistribution,
