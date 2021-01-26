@@ -72,22 +72,10 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
       #   binary_parameter("numeric_focus", numeric_focus),
       #   binary_parameter("verbose", verbose)
       #   ),
-      calculate = function(self, x, ...) {
-        stop('To be done.')
-        # return success
-        invisible(TRUE)
-      },
-      set_variable_ub = function(self, index, value) {
-        self$data$model$ub[index] <- value
-        invisible(TRUE)
-      },
-      set_variable_lb = function(self, index, value) {
-        self$data$model$lb[index] <- value
-        invisible(TRUE)
-      },
       run = function(self, x) {
         stop('To be done.')
         # access input data and parameters
+
         model <- self$get_data("model")
         p <- self$get_data("parameters")
 
@@ -99,7 +87,8 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
         #                control.compute = list(cpo=TRUE, waic = TRUE, dic = TRUE)
         # )
         # out
-      }))
+      }
+      ))
 }
 
 # TODO:
