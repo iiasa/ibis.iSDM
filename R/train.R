@@ -49,15 +49,34 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
 
+    # --- #
+    # Set model object for fitting
+    model <- list()
+
+    # Get biodiversity data
+    model[['data']] <- list()
+    types <- names( x$biodiversity$get_types() )
+    for(ty in types) model[['data']][[ty]] <- x$biodiversity$get_data(ty)
+
+    # Get covariates
+    if(is.Waiver(x$predictor_names())) {
+      # Dummy covariate of background raster
+      dummy <- x$background; names(dummy) <- 'dummy'
+      model[['predictors']] <- dummy
+      } else { model[['predictors']] <- x$predictors$get_data() }
+
     # assign default priors
     if(is.Waiver( x$priors )){
       # TODO: Define prior objects
+      message('TODO: Define prior objects')
+      model['priors'] <- NULL
       #x$set_prior( add_default_priors() )
     }
     # Assign default formula
     if(is.Waiver(x$equation)){
-      # FIXME: Needs tuning so that different formulas are supported
-      x$set_equation('observation ~ .')
+      message('TODO: Support custom formula')
+      model$
+      x$get_biodiversity_equations()
     }
 
     # Generate an id
