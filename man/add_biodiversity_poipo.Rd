@@ -9,6 +9,7 @@ add_biodiversity_poipo(
   poipo,
   name = NULL,
   field_occurrence = "Observed",
+  formula = NULL,
   ...
 )
 

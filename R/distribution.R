@@ -28,7 +28,7 @@ NULL
 #' @export
 methods::setGeneric("distribution",
                     signature = methods::signature("background"),
-                    function(background, formula = NULL, ...) standardGeneric("distribution"))
+                    function(background, ...) standardGeneric("distribution"))
 
 #' @name distribution
 #' @usage \S4method{distribution}{Raster}(background, formula, ...)
@@ -36,25 +36,16 @@ methods::setGeneric("distribution",
 methods::setMethod(
   "distribution",
   methods::signature(background = "Raster"),
-  function(background, formula = NULL, ...) {
+  function(background, ...) {
     # Check that arguments are valid
     assertthat::assert_that(
       inherits(background,'Raster'),
-      inherits(formula,'formula') || is.null(formula) || is.character(formula),
       raster::nlayers(background) == 1
     )
-
-    # Convert to formula object
-    if(!is.null(formula)) {
-        formula = as.formula(formula)
-    } else {
-      # Asign a new waiver object
-        formula = new_waiver()
-    }
 
     # Create BiodiversityDistribution object
     bdproto(NULL, BiodiversityDistribution,
             background = background,
-            equation = formula
+            ...
             )
   })

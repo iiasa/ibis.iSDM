@@ -71,7 +71,19 @@ BiodiversityDatasetCollection <- bdproto(
   # Get observations of all datasets
   get_observations = function(self) {
     x <- sapply(self$data, function(z) z$get_observations())
-    x#ifelse(length(x)==0,0,x)
+    x
+  },
+  # Show equations of all datasets
+  show_equations = function(self, message = TRUE) {
+    x <- sapply(self$data, function(z) z$get_equation())
+    if(length(x)== 0) return(new_waiver())
+    # new names
+    n <- c(poipo = 'Point - Presence only',poipa = 'Point - Presence absence',
+      polpo = 'Polygon - Presence only',polpa = 'Polygon - Presence absence')
+    names(x) <- as.vector(n[match(names(x), names(n))])
+    # Prettify
+    o <- paste0(names(x),":\n ",x,collapse = '\n')
+    if(message) message(o) else o
   }
 )
 
@@ -87,8 +99,25 @@ BiodiversityDataset <- bdproto(
   "BiodiversityDataset",
   name         = character(0),
   id           = character(0),
+  equation     = new_waiver(),
   type         = new_waiver(),
   data         = new_waiver(),
+  # Set new equation
+  set_equation = function(self, x){
+    assertthat::assert_that(inherits(x, "formula"))
+    self$formula <- x
+  },
+  # Get equation
+  get_equation = function(self){
+    if(is.Waiver(self$equation)) return('<Default>')
+    self$equation
+  },
+  # Function to print the equation
+  show_equation = function(self){
+    if(!is.Waiver(equation) && !is.null(equation))
+      message(equation)
+    else message('None set. Default equation used (response ~ .)')
+  },
   # Printing function
   print = function(self){
     message(paste0('Biodiversity data:',

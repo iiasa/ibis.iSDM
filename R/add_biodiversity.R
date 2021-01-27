@@ -26,7 +26,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed',...) standardGeneric("add_biodiversity_poipo"))
+  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL, ...) standardGeneric("add_biodiversity_poipo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -36,10 +36,11 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed', ... ) {
+  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL,  ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo,'Spatial') || inherits(poipo,'sf') || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
-                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo,field_occurrence)
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo,field_occurrence),
+                            inherits(formula,'formula') || is.null(formula) || is.character(formula)
                             )
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
@@ -47,12 +48,16 @@ methods::setMethod(
     # Assess whether poipo data already exists in the distribution object
     if(!is.Waiver( x$biodiversity$get_data('poipo') )) message('Overwriting existing poipo data.')
 
+    # Convert formula if necessary
+    formula = to_formula(formula)
+
     # Finally set the data to the BiodiversityDistribution object
     x$biodiversity$set_data(
       'poipo',
       bdproto(NULL, BiodiversityDataset,
               name = ifelse(is.null(name), 'Species: ',name),
               id = new_id(),
+              equation = formula,
               type = 'poipo',
               data = format_biodiversity_data(poipo,field_occurrence)
       )
@@ -87,7 +92,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed',...) standardGeneric("add_biodiversity_polpo"))
+  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL,...) standardGeneric("add_biodiversity_polpo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -97,10 +102,11 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed', ... ) {
+  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo,'Spatial') || inherits(polpo,'sf') || inherits(polpo,'data.frame') || inherits(polpo,'tibble'),
-                            assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo,field_occurrence)
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo,field_occurrence),
+                            inherits(formula,'formula') || is.null(formula) || is.character(formula)
     )
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
@@ -108,12 +114,16 @@ methods::setMethod(
     # Assess whether poipo data already exists in the distribution object
     if(!is.Waiver( x$biodiversity$get_data('polpo') )) message('Overwriting existing polpo data.')
 
+    # Convert formula if necessary
+    formula = to_formula(formula)
+
     # Finally set the data to the BiodiversityDistribution object
     x$biodiversity$set_data(
       'polpo',
       bdproto(NULL, BiodiversityDataset,
               name = ifelse(is.null(name), 'Species: ',name),
               id = new_id(),
+              equation = formula,
               type = 'polpo',
               data = format_biodiversity_data(polpo,field_occurrence)
       )

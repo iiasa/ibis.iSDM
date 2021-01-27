@@ -9,6 +9,7 @@ add_biodiversity_polpo(
   polpo,
   name = NULL,
   field_occurrence = "Observed",
+  formula = NULL,
   ...
 )
 

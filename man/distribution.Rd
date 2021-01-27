@@ -4,7 +4,7 @@
 \alias{distribution}
 \title{Setup biodiversity distribution modelling procedure}
 \usage{
-distribution(background, formula = NULL, ...)
+distribution(background, ...)
 
 \S4method{distribution}{Raster}(background, formula, ...)
 }
@@ -12,9 +12,9 @@ distribution(background, formula = NULL, ...)
 \item{background}{Specification of the modelling background. Must be a
 \code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object}
 
-\item{formula}{Model formula. Has to be \code{\link{character}} or \code{\link{formula}} object (optional)}
-
 \item{...}{not used.}
+
+\item{formula}{Model formula. Has to be \code{\link{character}} or \code{\link{formula}} object (optional)}
 }
 \value{
 \code{\linkS4class{BiodiversityDistribution}} object containing

@@ -18,7 +18,6 @@ NULL
 #' @export
 BiodiversityDistribution <- bdproto(
   "BiodiversityDistribution",
-  equation      = new_waiver(),
   background    = new_waiver(),
   biodiversity  = bdproto(NULL, BiodiversityDatasetCollection),
   predictors    = new_waiver(),
@@ -42,7 +41,7 @@ BiodiversityDistribution <- bdproto(
     # }, character(1))
     # FIXME: Prettify below
 
-    ex =  self$show_background()
+    ex =  self$show_background_info()
     pn = ifelse(is.Waiver(self$predictor_names()),'None',name_atomic(self$predictor_names(), "predictors"))
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
                    "\nBackground extent: ",
@@ -69,29 +68,13 @@ BiodiversityDistribution <- bdproto(
     "Biodiversity distribution model"
   },
   # Get background stats
-  show_background = function(self){
+  show_background_info = function(self){
     assertthat::assert_that(inherits(self$background,'Raster'))
     r <- self$background
     o <- list()
     o[['extent']] <- round( as.vector(raster::extent(r)), 3)
     o[['proj']] <-  projection(r)
     return(o)
-  },
-  # Set equation
-  set_equation = function(self, x){
-    assertthat::assert_that(inherits(x, "formula"))
-    self$formula <- x
-  },
-  # Get equation
-  get_equation = function(self){
-    if(is.Waiver(self$equation)) return('None')
-    self$equation
-  },
-  # Function to print the equation
-  show_equation = function(self){
-    if(!is.Waiver(equation) && !is.null(equation))
-      message(equation)
-    else message('None set. Default equation used (response ~ .)')
   },
   # Function for querying predictor names if existing
   predictor_names = function(self) {
@@ -134,5 +117,9 @@ BiodiversityDistribution <- bdproto(
   # Show number of biodiversity records
   show_biodiversity_length = function(self){
     sum( self$biodiversity$length() )
+  },
+  # Get Equations fo biodiversity records
+  show_biodiversity_equations = function(self){
+    d1$biodiversity$show_equations()
   }
 )

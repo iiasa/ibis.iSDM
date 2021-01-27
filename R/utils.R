@@ -110,3 +110,19 @@ capitalize_text <- function(x) {
   paste(toupper(substring(s, 1,1)), substring(s, 2),
         sep="", collapse=" ")
 }
+
+#' Convert character to formula object
+#'
+#' @param x [`character`] text.
+#'
+#' @noRd
+
+to_formula <- function(formula){
+  # Convert to formula object
+  if(!is.null(formula)) {
+    formula = as.formula(formula)
+  } else {
+    # Asign a new waiver object
+    formula = new_waiver()
+  }
+}
