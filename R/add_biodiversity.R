@@ -45,8 +45,10 @@ methods::setMethod(
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
+    # FIXME: Implement a check on whether the records fall into background data
+
     # Assess whether poipo data already exists in the distribution object
-    if(!is.Waiver( x$biodiversity$get_data('poipo') )) message('Overwriting existing poipo data.')
+    if(!is.Waiver( x$biodiversity$get_data_object('poipo') )) message('Overwriting existing poipo data.')
 
     # Convert formula if necessary
     formula = to_formula(formula)
@@ -111,8 +113,10 @@ methods::setMethod(
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
+    # FIXME: Implement a check on whether the records fall into background data
+
     # Assess whether poipo data already exists in the distribution object
-    if(!is.Waiver( x$biodiversity$get_data('polpo') )) message('Overwriting existing polpo data.')
+    if(!is.Waiver( x$biodiversity$get_data_object('polpo') )) message('Overwriting existing polpo data.')
 
     # Convert formula if necessary
     formula = to_formula(formula)

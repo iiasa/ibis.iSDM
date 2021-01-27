@@ -36,8 +36,10 @@ PredictorDataset <- bdproto(
     names(self$get_data())
   },
   # Get data
-  get_data = function(self){
-    self$data
+  get_data = function(self, df = FALSE){
+    if(df) {
+      as.data.frame(self$data, xy = TRUE)
+    } else self$data
   },
   # Add a new Predictor dataset to this collection
   set_data = function(self, x, value){
@@ -60,6 +62,7 @@ PredictorDataset <- bdproto(
   # Collect info statistics
   get_summary = function(self) {
     nrow(self$data)
+    message('TBD: Return list of estimates')
   },
   # Number of Predictors in object
   length = function(self) {

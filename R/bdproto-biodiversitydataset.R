@@ -51,11 +51,28 @@ BiodiversityDatasetCollection <- bdproto(
     invisible()
   },
   # Get a specific Biodiversity dataset by name
-  get_data = function(self, x) {
+  get_data_object = function(self, x) {
     assertthat::assert_that(assertthat::is.string(x))
     if (!x %in% names(self$data))
       return(new_waiver())
     return(self$data[[x]])
+  },
+  # Get biodiversity observations
+  get_data = function(self, x){
+    assertthat::assert_that(assertthat::is.string(x))
+    o <- self$get_data_object(x)
+    o$get_data()
+  },
+  # Get coordinates for a given biodiversity dataset. Else return a wkt object
+  get_coordinates = function(self, x){
+    assertthat::assert_that(assertthat::is.string(x))
+    if(x %in% c('poipo','poipa') ){
+      o <- self$get_data(x)
+      o[,c('X','Y')]
+    } else {
+      # TODO: WKT to be implemented
+      return(new_waiver())
+    }
   },
   # Remove a specific biodiversity dataset by name
   rm_data = function(self, x) {

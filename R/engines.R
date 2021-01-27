@@ -45,7 +45,7 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
         # FIXME: This still does not work correctly
 #        boundary = bdry, # boundary
         offset = offset, # Offset of outer boundaries
-        crs = inla.CRS(projargs = proj4string(x$background))
+        crs = inla.CRS(projargs = sp::proj4string(x$background))
       )
     )
     rm(dat)
