@@ -189,7 +189,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
                     dists <- sp::spDistsN1(pts = xy2,pt = xy1, longlat = TRUE)
                     # In a few cases these can be multiple in equal distance
                     d <- which(dists==min(dists))
-                    if(length(d)>2){
+                    if(length(d)>=2){
                       # Average them both
                       o <- as.data.frame(
                         t(
