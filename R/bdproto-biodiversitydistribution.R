@@ -118,8 +118,12 @@ BiodiversityDistribution <- bdproto(
   show_biodiversity_length = function(self){
     sum( self$biodiversity$length() )
   },
-  # Get Equations fo biodiversity records
+  # Get Equations of biodiversity records
   show_biodiversity_equations = function(self){
-    d1$biodiversity$show_equations()
+    self$biodiversity$show_equations()
+  },
+  # Get equations of biodiversity records
+  get_biodiversity_equations = function(self){
+    self$biodiversity$get_equations()
   }
 )

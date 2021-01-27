@@ -73,17 +73,22 @@ BiodiversityDatasetCollection <- bdproto(
     x <- sapply(self$data, function(z) z$get_observations())
     x
   },
+  # Get equations
+  get_equations = function(self){
+    x <- lapply(self$data, function(z) z$get_equation())
+    x
+  },
   # Show equations of all datasets
-  show_equations = function(self, message = TRUE) {
-    x <- sapply(self$data, function(z) z$get_equation())
-    if(length(x)== 0) return(new_waiver())
+  show_equations = function(self, msg = TRUE) {
+    x <- self$get_equations()
+    #if(length(x)== 0) return( new_waiver() )
     # new names
     n <- c(poipo = 'Point - Presence only',poipa = 'Point - Presence absence',
       polpo = 'Polygon - Presence only',polpa = 'Polygon - Presence absence')
-    names(x) <- as.vector(n[match(names(x), names(n))])
+    names(x) <- as.vector( n[match(names(x), names(n))] )
     # Prettify
     o <- paste0(names(x),":\n ",x,collapse = '\n')
-    if(message) message(o) else o
+    if(msg) message(o) else o
   }
 )
 
