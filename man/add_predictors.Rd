@@ -4,7 +4,7 @@
 \alias{add_predictors}
 \title{Add predictors to a Biodiversity distribution object}
 \usage{
-add_predictors(x, env, names = NULL, ...)
+add_predictors(x, env, names = NULL, bgmask = TRUE, ...)
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
 }
@@ -14,6 +14,8 @@ add_predictors(x, env, names = NULL, ...)
 \item{env}{\code{\link{Raster}} A \code{\linkS4class{RasterStack}} or \code{\linkS4class{RasterLayer}} object.}
 
 \item{names}{\code{\link{Vector}} A Vector of character names describing the environmental stack}
+
+\item{bgmask}{Check whether the environmental data should be masked with the background layer (default: TRUE)}
 
 \item{...}{Other parameters passed down}
 }

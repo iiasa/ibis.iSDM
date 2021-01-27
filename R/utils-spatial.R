@@ -159,6 +159,51 @@ emptyraster <- function(x, ...) { # add name, filename,
 }
 
 
+#' Function to extract nearest neighbour predictor values of provided points
+#'
+#'
+#' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
+#' @param env A [`data.frame`] object with the predictors
+#' @param longlat A boolean variable indicating whether the projection is long-lat
+#' @param field_space A [`vector`] highlight the columns from which coordinates
+#'  are to be extracted (default: c('X','Y'))
+#' @return Extracted data from each point
+#' @note If multiple values are of equal distance, average them
+#'
+#' @export
+get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),...) {
+
+  # Security checks
+  assertthat::assert_that(
+    is.data.frame(coords) || inherits(coords,'sf') || inherits(coords,'matrix'),
+    assertthat::is.flag(longlat),
+    is.data.frame(env),assertthat::has_name(env, field_space),
+    length(field_space) == 2, is.vector(field_space)
+  )
+
+  # Convert to matrices
+  coords <- as.matrix(coords)
+  coords_env <- as.matrix(env[,field_space])
+
+  env_sub <- apply(coords, 1, function(xy1, xy2) {
+                    dists <- sp::spDistsN1(pts = xy2,pt = xy1, longlat = TRUE)
+                    # In a few cases these can be multiple in equal distance
+                    d <- which(dists==min(dists))
+                    if(length(d)>2){
+                      # Average them both
+                      o <- as.data.frame(
+                        t(
+                        apply(env[d, ,drop = FALSE], 2, function(x) mean(x, na.rm = TRUE) )
+                         )
+                      )
+                      return(o)
+                    } else return( env[d, ,drop = FALSE] )
+                  }, xy2 = coords_env)
+
+  out <- do.call(rbind,env_sub)
+  return(out)
+}
+
 # Checks whether a given point falls into a polygon
 # Preferably implement with sf
 # TBD
