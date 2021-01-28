@@ -21,7 +21,7 @@ The ibis package - An **I**ntegrated model for **B**iod**I**versity distribution
 
 Currently only as development version on GitHub
 
-```{r gh-installation, eval = FALSE,message=FALSE}
+```{r gh-installation, eval = FALSE, message=FALSE}
 install.packages("devtools")
 devtools::install_github("IIASA/ibis")
 ```
@@ -32,7 +32,7 @@ devtools::install_github("IIASA/ibis")
 
 ### Load package
 
-```{r message=FALSE, eval=FALSE}
+```{r message=FALSE}
 library(ibis)
 background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis'))
 # Get test species
@@ -44,13 +44,20 @@ predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(b
 
 x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points') %>%
-  add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
   add_predictors(predictors) %>% 
   engine_inla()
 
 # In the model
-x$biodiversity
-x$predictors
-x
+#x$biodiversity
+#x$predictors
+#
+
+# Second model with range and spatial effect
+x2 <- x %>% 
+  add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
+  add_latent_spatial()
+
+# Train
+train(x, runname = 'test')
 
 ```

@@ -169,8 +169,8 @@ emptyraster <- function(x, ...) { # add name, filename,
 #'  are to be extracted (default: c('X','Y'))
 #' @return Extracted data from each point
 #' @note If multiple values are of equal distance, average them
-#'
-#' @export
+#' @noRd
+
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),...) {
 
   # Security checks
@@ -186,7 +186,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
   coords_env <- as.matrix(env[,field_space])
 
   env_sub <- apply(coords, 1, function(xy1, xy2) {
-                    dists <- sp::spDistsN1(pts = xy2,pt = xy1, longlat = TRUE)
+                    dists <- sp::spDistsN1(pts = xy2,pt = xy1, longlat = longlat)
                     # In a few cases these can be multiple in equal distance
                     d <- which(dists==min(dists))
                     if(length(d)>=2){
@@ -204,19 +204,20 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
   return(out)
 }
 
-#' Spatial corrections of raster stacks
+#' Spatial adjustment of raster stacks
 #'
 #' @param env A [`Raster`] object
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @return Returns a adjusted [`Raster`] object of identical resolution
 #' @noRd
-#' @export
-
 adjustPredictors <- function(env, option,...){
    assertthat::assert_that(
      inherits(env,'Raster'),
      is.character(option),
      option %in% c('none','pca', 'scale', 'norm')
    )
+  # TODO: Another option would be a windsoriation, e.g. cut of extremes
+  # TODO: incorporate possipibiltiy of doing multiple options at once
 
   # Nothing to be done
   if(option == 'none') return(env)
@@ -243,6 +244,49 @@ adjustPredictors <- function(env, option,...){
   assertthat::assert_that(
     raster::nlayers(env) == raster::nlayers(out),
     is_comparable_raster(out,env)
+  )
+  return(out)
+}
+
+#' Create new raster stack from a given data.frame
+#'
+#' @param post A data.frame
+#' @param background A [`Raster-class`] object for the background raster
+#' @keywords internal
+#' @return A [`Raster-class`] object with number of columns equal to ncol(post)
+#' @noRd
+
+fill_rasters <- function(post, background){
+  assertthat::assert_that(
+    is.data.frame(post),ncol(post)>1,
+    inherits(background,'Raster'),
+    nrow(post) == ncell(background)
+  )
+  # Make names to be sure
+  names(post) <- base::make.names(names(post))
+
+  # If only one raster
+  if(ncol(post)==1){
+    out <- emptyraster(background)
+    out[] <- post[,1]
+  } else {
+    # Loop through each column
+    out <- raster::stack()
+    for(co in 1:ncol(post)){
+      o <- emptyraster(background)
+      o[] <- post[,co] # Assign values
+      # Add to stack
+      out <- raster::addLayer(out, o)
+      rm(o)
+    }
+  }
+  # Assign names
+  names(out) <- names(post)
+
+  # Final check
+  assertthat::assert_that(
+    inherits(out,'Raster'),
+    nlayers(out) == ncol(post)
   )
   return(out)
 }

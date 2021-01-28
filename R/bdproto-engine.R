@@ -48,17 +48,5 @@ Engine <- bdproto(
   set_data = function(self, x, value) {
     self$data[[x]] <- value
     invisible()
-  },
-  # Training function
-  # TODO: Add the training function
-  train = function(self, x, ...) {
-    # build optimization problem
-    self$calculate(x, ...)
-    # run solver and get solution
-    out <- self$run()
-    # clear data store to reduce memory consumption
-    self$data <- list()
-    # return output
-    out
   }
 )

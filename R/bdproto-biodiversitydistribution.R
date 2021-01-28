@@ -42,7 +42,7 @@ BiodiversityDistribution <- bdproto(
     # FIXME: Prettify below
 
     ex =  self$show_background_info()
-    pn = ifelse(is.Waiver(self$predictor_names()),'None',name_atomic(self$predictor_names(), "predictors"))
+    pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
                    "\nBackground extent: ",
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
@@ -77,7 +77,7 @@ BiodiversityDistribution <- bdproto(
     return(o)
   },
   # Function for querying predictor names if existing
-  predictor_names = function(self) {
+  get_predictor_names = function(self) {
     if(is.Waiver(self$predictors)) return(self$predictors)
     if(inherits(self$predictors, "PredictorDataset")) {
       self$predictors$get_names()

@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R
+#' @include bdproto-engine.R utils-inla.R
 NULL
 
 #' Use INLA as engine
@@ -51,6 +51,9 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
     rm(dat)
   }
 
+  # Print a message in case there is already an engine object
+  if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+
   # Set engine in distribution object
   x$set_engine(
     bdproto(
@@ -72,21 +75,46 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
       #   binary_parameter("numeric_focus", numeric_focus),
       #   binary_parameter("verbose", verbose)
       #   ),
-      run = function(self, x) {
+      # Spatial latent function
+      calc_latent_spatial = function(self, alpha = 2,...){
+        # Define Matern SPDE model and save
+        self$data$latentspatial <- inla.spde2.matern(self$data$mesh,alpha = alpha,...)
+        # Make index for spatial field
+        self$data$s.index <- inla.spde.make.index(name = "spatial.field",
+                                                  n.spde = self$data$latentspatial$n.spde)
+        assertthat::assert_that(
+          inherits(self$data$latentspatial,'inla.spde'),
+          length(self$data$s.index$spatial.field) == self$data$mesh$n
+        )
+        invisible()
+      },
+      # Get latent spatial equation bit
+      get_equation_latent_spatial = function(self,spatial_object = 'spde'){
+        assertthat::assert_that('latentspatial' %in% names(x$engine$data),
+                                msg = 'latentspatial object not computed.')
+        return(
+          paste0('f(spatial.field, model = ',spatial_object,')')
+        )
+      },
+      # Setup computation function
+      setup = function(self, model, ...){
+        # TODO: Some assert calls
+
+        # Create Projection
+        mat_proj <- inla.mesh.projector(
+          mesh = self$get_data('mesh'),
+          loc = as.matrix(model$data$poipo_values[,c('x','y')])
+        )
+
+
+      },
+      # Main training function
+      train = function(self, x) {
         stop('To be done.')
         # access input data and parameters
 
         model <- self$get_data("model")
         p <- self$get_data("parameters")
-
-        # result <- inla(formulaN,family="poisson",
-        #                data=inla.stack.data(join.stack),
-        #                control.predictor=list(A=inla.stack.A(join.stack), compute=TRUE),
-        #                control.family = list(link = "log"),
-        #                E = inla.stack.data(join.stack)$e,
-        #                control.compute = list(cpo=TRUE, waic = TRUE, dic = TRUE)
-        # )
-        # out
       }
       ))
 }

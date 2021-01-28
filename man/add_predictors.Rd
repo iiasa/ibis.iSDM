@@ -4,7 +4,15 @@
 \alias{add_predictors}
 \title{Add predictors to a Biodiversity distribution object}
 \usage{
-add_predictors(x, env, names = NULL, bgmask = TRUE, ...)
+add_predictors(
+  x,
+  env,
+  names = NULL,
+  prep = "scale",
+  derivates = "none",
+  bgmask = TRUE,
+  ...
+)
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
 }
@@ -15,7 +23,11 @@ add_predictors(x, env, names = NULL, bgmask = TRUE, ...)
 
 \item{names}{\code{\link{Vector}} A Vector of character names describing the environmental stack}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (default: TRUE)}
+\item{prep}{\code{\link{Vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+
+\item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )}
+
+\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
 
 \item{...}{Other parameters passed down}
 }

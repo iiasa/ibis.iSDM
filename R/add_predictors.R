@@ -60,6 +60,8 @@ methods::setMethod(
       # TODO: Possibly allow this for multiple correction at once?
       env <- adjustPredictors(env,option = prep)
     }
+    # Assign an attribute to this object to keep track of it
+    attr(env,'prep') <- prep
 
     if(derivates !='none'){
       # TODO: See maxnet etc code...

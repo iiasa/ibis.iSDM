@@ -61,6 +61,7 @@ methods::setMethod(
               id = new_id(),
               equation = formula,
               type = 'poipo',
+              field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipo,field_occurrence)
       )
     )
@@ -129,6 +130,7 @@ methods::setMethod(
               id = new_id(),
               equation = formula,
               type = 'polpo',
+              field_occurrence = field_occurrence,
               data = format_biodiversity_data(polpo,field_occurrence)
       )
     )

@@ -95,6 +95,11 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$get_equation())
     x
   },
+  # Get fields with observation columns
+  get_columns_occ = function(self){
+    x <- lapply(self$data, function(z) z$get_column_occ())
+    x
+  },
   # Show equations of all datasets
   show_equations = function(self, msg = TRUE) {
     x <- self$get_equations()
@@ -119,11 +124,12 @@ NULL
 #' @export
 BiodiversityDataset <- bdproto(
   "BiodiversityDataset",
-  name         = character(0),
-  id           = character(0),
-  equation     = new_waiver(),
-  type         = new_waiver(),
-  data         = new_waiver(),
+  name             = character(0),
+  id               = character(0),
+  equation         = new_waiver(),
+  type             = new_waiver(),
+  field_occurrence = character(0),
+  data             = new_waiver(),
   # Set new equation
   set_equation = function(self, x){
     assertthat::assert_that(inherits(x, "formula"))
@@ -163,6 +169,10 @@ BiodiversityDataset <- bdproto(
       polpo = 'Polygon - Presence only',
       polpa = 'Polygon - Presence absence'
     )
+  },
+  # Get field with occurrence information
+  get_column_occ = function(self){
+    self$field_occurrence
   },
   # Get data
   get_data = function(self){

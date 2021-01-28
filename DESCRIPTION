@@ -53,11 +53,11 @@ Collate:
     'utils-spatial.R'
     'data.R'
     'distribution.R'
+    'utils-inla.R'
     'engines.R'
     'identifier.R'
     'misc.R'
     'print.R'
     'train.R'
-    'utils-inla.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

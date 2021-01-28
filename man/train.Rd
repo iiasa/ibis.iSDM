@@ -6,12 +6,14 @@
 \alias{train-method}
 \title{Train the model from a given engine}
 \usage{
-train(x, runname = NULL, ...)
+train(x, runname, ...)
 
 \S4method{train}{BiodiversityDistribution}(x)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}
+
+\item{runname}{A \code{\link{character}} name of the trained run}
 
 \item{...}{further arguments passed on.}
 }

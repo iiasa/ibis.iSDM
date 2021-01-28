@@ -19,7 +19,7 @@ devtools::install_github("IIASA/ibis")
 
 ## Usage
 
-**In development !!!**
+**In development \!\!\!**
 
 ### Load package
 
@@ -33,14 +33,21 @@ virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibi
 ll <- list.files(system.file('extdata/predictors/',package = 'ibis'),full.names = T)
 predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
-d1 <- distribution(background) %>%
+x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points') %>%
-  add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
   add_predictors(predictors) %>% 
   engine_inla()
 
 # In the model
-d1$biodiversity
-d1$predictors
-d1
+#x$biodiversity
+#x$predictors
+#
+
+# Second model with range and spatial effect
+x2 <- x %>% 
+  add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
+  add_latent_spatial()
+
+# Train
+train(x, runname = 'test')
 ```
