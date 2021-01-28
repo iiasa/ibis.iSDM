@@ -204,6 +204,49 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
   return(out)
 }
 
+#' Spatial corrections of raster stacks
+#'
+#' @param env A [`Raster`] object
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @noRd
+#' @export
+
+adjustPredictors <- function(env, option,...){
+   assertthat::assert_that(
+     inherits(env,'Raster'),
+     is.character(option),
+     option %in% c('none','pca', 'scale', 'norm')
+   )
+
+  # Nothing to be done
+  if(option == 'none') return(env)
+
+  # Normalization
+  if(option == 'norm'){
+    out <- (env - raster::cellStats(env, stat="min")) /
+      (raster::cellStats(env, stat="max") -
+         raster::cellStats(env, stat="min"))
+  }
+  # Scaling
+  if(option == 'scale'){
+    out <- raster::scale(env, center = TRUE, scale = TRUE)
+  }
+
+  # PCA
+  if(option == 'pca'){
+    # TODO: Try and not rely on this external dependency. Insert functions here
+    mod <- RStoolbox::rasterPCA(env)
+    out <- mod$map
+  }
+
+  # Final security checks
+  assertthat::assert_that(
+    raster::nlayers(env) == raster::nlayers(out),
+    is_comparable_raster(out,env)
+  )
+  return(out)
+}
+
 # Checks whether a given point falls into a polygon
 # Preferably implement with sf
 # TBD
