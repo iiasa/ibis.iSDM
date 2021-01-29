@@ -48,6 +48,7 @@ Collate:
     'add_latent.R'
     'bdproto-predictors.R'
     'add_predictors.R'
+    'bdproto-distributionmodel.R'
     'bdproto-engine.R'
     'bdproto-prior.R'
     'utils-spatial.R'

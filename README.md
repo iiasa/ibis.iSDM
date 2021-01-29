@@ -19,12 +19,15 @@ devtools::install_github("IIASA/ibis")
 
 ## Usage
 
-**In development \!\!\!**
+**In development !!!**
 
 ### Load package
 
 ``` r
 library(ibis)
+library(raster)
+library(sf)
+
 background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis'))
 # Get test species
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'points',quiet = TRUE)
@@ -35,19 +38,30 @@ predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(b
 
 x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points') %>%
-  add_predictors(predictors) %>% 
+  add_predictors(predictors,prep = 'scale') %>% 
   engine_inla()
+#> Warning in proj4string(sp): CRS object has comment, which is lost in output
 
+# Train a Model
+mod <- train(x, runname = 'test')
+
+# Get model object from prediction
+prediction <- mod$get_data('prediction')
+
+plot(prediction$mean, main = 'Posterior prediction (mean lambda) using INLA')
+plot(as(virtual_points,'Spatial'),add =TRUE)
+```
+
+![](man/figures/README-unnamed-chunk-2-1.png)<!-- -->
+
+``` r
 # In the model
 #x$biodiversity
 #x$predictors
 #
 
 # Second model with range and spatial effect
-x2 <- x %>% 
-  add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
-  add_latent_spatial()
-
-# Train
-train(x, runname = 'test')
+# x2 <- x %>% 
+#   add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range') %>%
+#   add_latent_spatial()
 ```

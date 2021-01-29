@@ -21,7 +21,8 @@ Engine <- bdproto(
   # TODO: Set up parameter objects or cut here
 #  parameters = parameters(),
   data = list(),
-  calculate = function(...) stop("Engine is missing a fitting method"),
+  setup = function(...) stop("Engine is missing functions to setup settings."),
+  train = function(...) stop("Engine is missing a fitting method."),
   # Print message with name of engine
   print = function(self) {
     message(self$name)

@@ -55,17 +55,25 @@ methods::setMethod(
     # Specify a unique id for the run
     model[['id']] <- new_id()
 
+    # Save the background
+    model[['background']] <- x$background
+
     # Get biodiversity data
     model[['data']] <- list()
     types <- names( x$biodiversity$get_types() )
     for(ty in types) model[['data']][[ty]] <- x$biodiversity$get_data(ty)
 
-    # Get covariates
+    # Observed columns
+    for(ty in types) model[['data']][[paste0(ty,'_','response')]] <-  x$biodiversity$get_columns_occ()[[ty]]
+
+    # Get predictors
     if(is.Waiver(x$get_predictor_names())) {
       # Dummy covariate of background raster
       dummy <- x$background; names(dummy) <- 'dummy'
       model[['predictors']] <- dummy
       } else { model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE) }
+    # Also set predictor names
+    model[['predictors_names']] <- x$get_predictor_names()
 
     # assign default priors
     if(is.Waiver( x$priors )){
@@ -106,103 +114,30 @@ methods::setMethod(
     }
 
     # Engine specific preparations
+    if( inherits(x$engine,'INLA-Engine') ){
+      # Sample nearest predictor values
+      types <- names( x$biodiversity$get_types() )
+      if('poipo' %in% types){
+        model[['data']][['poipo_values']] <-
+          get_ngbvalue(
+            coords = x$biodiversity$get_coordinates('poipo'),
+            env = x$predictors$get_data(df = TRUE, na.rm = FALSE),
+            field_space = c('x','y'),
+            longlat = raster::isLonLat(x$background)
+          )
+      }
 
-    # Sample nearest predictor values
-    types <- names( x$biodiversity$get_types() )
-    if('poipo' %in% types){
-      model[['data']][['poipo_values']] <-
-        get_ngbvalue(
-          coords = x$biodiversity$get_coordinates('poipo'),
-          env = x$predictors$get_data(df = TRUE, na.rm = FALSE),
-          field_space = c('x','y'),
-          longlat = raster::isLonLat(x$background)
-        )
-    }
+    # Run the engine setup script
+    x$engine$setup(model)
 
-    # Create INLA projection matrix from mesh to observed data from the points
-    mat_proj <- INLA::inla.spde.make.A(
-                        mesh = x$engine$get_data('mesh'),
-                        loc = as.matrix(model[['data']][['poipo_values']][,c('x','y')])
-                                  )
-    #
-
-    # Create INLA stack
-    # The three main inla.stack() arguments are a vector list with the data (data),
-    # a list of projector matrices (each related to one block effect,
-    # A) and the list of effects (effects).
-
-    # Response for inla stack
-    resp <- x$biodiversity$get_columns_occ()[['poipo']]
-    ll_resp <- list()
-    ll_resp[[ resp ]] <- cbind( x$biodiversity$get_data('poipo')[,resp])
-    # A column for the offset
-    ll_resp[[ 'e' ]] <- rep(0, nrow(model$data$poipo_values) )
-
-    # Effects matrix
-    ll_effects <- list()
-    # Note, order adding this is important apparently...
-    ll_effects[['predictors']] <- model[['data']][['poipo_values']][,x$get_predictor_names()] # Get only the covariates to use
-    ll_effects[['intercept']] <- list(intercept = c(1:x$engine$get_data('mesh')$n) )
-    if(x$get_latent()=='<Spatial>'){
-      spde <- x$engine$data$latentspatial
-      ll_effects[['spatial.field']] <- list(Bnodes = 1:spde$n.spde)
-      # Define projection matrix
-      A = list(mat_proj, 1, 1)
-    } else {
-      spde <- NULL
-      A = list(1, mat_proj)
-    }
-
-    # Create the stack for the fitted model
-    stk_resp <-
-      INLA::inla.stack(
-        data =  ll_resp,             # Response
-        A    =  A,   # Predictor projection matrix. 1 is included to make a list
-        effects = ll_effects,        # Effects matrix
-        tag = paste0('obs_','poipo') # Description tag
-      )
-
-    # Create and join prediction stack
-    stk_pred <- inla_make_prediction_stack(stk_resp = stk_resp,
-                                           cov = model$predictors,
-                                           mesh = x$engine$get_data('mesh'),
-                                           type = 'poipo',
-                                           spde = spde)
-    stk_full <- INLA::inla.stack(stk_resp, stk_pred)
-
-    # Train the object
-    fit <- INLA::inla(formula = model$equation$poipo, # The specified formula
-                      data  = inla.stack.data(stk_full),  # The data stack
-                      quantiles = c(0.05, 0.5, 0.95),
-                      E = inla.stack.data(stk_full)$e,
-                      family= 'poisson',   # Family the data comes from
-                      control.family = list(link = "log"), # Control options
-                      control.predictor=list(A = inla.stack.A(stk_full), compute = FALSE),  # Compute for marginals of the predictors
-                      control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                      verbose = FALSE, # To see the log of the model runs
-#                      control.inla(strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
-                      num.threads = parallel::detectCores()-1
-                      )
-
-
-    index.pred <- INLA::inla.stack.index(stk_full, 'pred_poipo')$data
-    post <- fit$summary.linear.predictor[index.pred, ]
-    # TODO: Wrap Backtransform into a distribution dependent function
-    post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
-    post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
-    names(post) <- make.names(names(post))
-
-    # Fill output rasters
-    out <- fill_rasters(post = post,background = background)
-    out <- raster::mask(out, background) # Mask with background
-    plot(out$mean, main = 'Posterior prediction (mean lambda) using INLA')
-    plot(as(virtual_points,'Spatial'),add =TRUE)
-
-    #out <- x$engine$train()
+    # Now train the model and create a predicted distribution model
+    out <- x$engine$train(model)
 
     # TODO: Implement spatial crossvalidation, e.g. https://arxiv.org/pdf/2004.02324.pdf
 
+    } else { stop('Engines not implemented yet')}
+
     # return output object
-    #return(out)
+    return(out)
   }
 )
