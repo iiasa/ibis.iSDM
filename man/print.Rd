@@ -9,6 +9,7 @@
 \alias{print.BiodiversityDatasetCollection}
 \alias{print.BiodiversityDataset}
 \alias{print.PredictorDataset}
+\alias{print.DistributionModel}
 \alias{print.Id}
 \title{Print}
 \usage{
@@ -21,6 +22,8 @@
 \method{print}{BiodiversityDataset}(x, ...)
 
 \method{print}{PredictorDataset}(x, ...)
+
+\method{print}{DistributionModel}(x, ...)
 
 \method{print}{Id}(x, ...)
 

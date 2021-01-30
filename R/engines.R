@@ -225,7 +225,7 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
               name = model$runname,
               id = model$id,
               fits = list(
-                "fit" = fit_resp,
+                "fit_best" = fit_resp,
                 "fit_pred" = fit_pred,
                 "prediction" = prediction
                 )

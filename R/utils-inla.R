@@ -1,10 +1,10 @@
 #' Function for creating a joint fitted and prediction stack
-
 #' @param stk_resp A stack object
 #' @param cov The covariate data stack
 #' @param mesh The background projection mesh
 #' @param type Name to use
 #' @param spde An spde field if specified
+#' @noRd
 
 inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   # Security checks
@@ -66,4 +66,29 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   #   msg = 'Response stak and prediction stack mismatch.'
   # )
   return(stk_pred)
+}
+
+#' Tidy up summary information from a INLA model
+#'
+#' @param m A trained INLA model object
+#' @param what A [`character`]
+#' @param ... Other options to based on
+#' @noRd
+
+#TODO: Lot more to add here, including options on what to extract
+tidy_inla_summary <- function(m, what = 'fixed',...){
+  assertthat::assert_that(
+    inherits(m,'inla'),
+    is.character(what),length(what)==1,
+    what %in% c('fixed','fitted','random','spde2')
+  )
+
+  w1 <- grep('summary',names(m),value = TRUE) # Grep summary objects
+  w2 <- grep(what, w1,value = TRUE) # Grep specific summary
+  assertthat::assert_that(length(w2)==1)
+
+  # Format the output
+  m[[w2]] %>%
+    tibble::rownames_to_column('variable') %>%
+    tibble::as_tibble()
 }

@@ -55,6 +55,13 @@ print.BiodiversityDataset <- function(x, ...) x$print()
 print.PredictorDataset <- function(x, ...) x$print()
 
 #' @rdname print
+#' @method print DistributionModel
+#'
+#' @export
+#'
+print.DistributionModel <- function(x, ...) x$print()
+
+#' @rdname print
 #'
 #' @method print Id
 #'

@@ -28,18 +28,7 @@ BiodiversityDistribution <- bdproto(
 
   # Self printing function
   print = function(self) {
-    # r <- vapply(list(self$objective, self$targets), function(x) {
-    #   if (is.Waiver(x))
-    #     return("none")
-    #   return(x$name())
-    # }, character(1))
-    #
-    # d <- vapply(list(self$solver, self$decisions, self$portfolio), function(x) {
-    #   if (is.Waiver(x))
-    #     return("default")
-    #   return(x$name())
-    # }, character(1))
-    # FIXME: Prettify below
+    # TODO: Prettify below
 
     ex =  self$show_background_info()
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
