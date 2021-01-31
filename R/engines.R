@@ -34,8 +34,8 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
     # Make a boundary from the background
     bounds <- raster::boundaries(background, type = 'outer', asNA = TRUE)
 
-    bdry <- INLA::as.inla.mesh.segment(rasterToPolygons(bounds),join = TRUE)
-    bdry$loc <- inla.mesh.map(bdry$loc)
+    #bdry <- INLA::as.inla.mesh.segment(rasterToPolygons(bounds),join = TRUE)
+    #bdry$loc <- inla.mesh.map(bdry$loc)
 
     # Prepare the mesh
     suppressWarnings(
@@ -45,11 +45,14 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
         # FIXME: This still does not work correctly
 #        boundary = bdry, # boundary
         offset = offset, # Offset of outer boundaries
-        crs = inla.CRS(projargs = sp::proj4string(x$background))
+        crs = inla.CRS(projargs = crs(x$background))
       )
     )
     rm(dat)
   }
+
+  # Calculate area in km²
+  ar <- mesh_area(mesh,'km2')
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
@@ -61,7 +64,8 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
       Engine,
       name = "<INLA>",
       data = list(
-        'mesh' = mesh
+        'mesh' = mesh,
+        'mesh.area' = ar
       ),
       # parameters = parameters(
       #   numeric_parameter("gap", gap, lower_limit = 0),
@@ -77,10 +81,15 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
       #   ),
       # Spatial latent function
       calc_latent_spatial = function(self, alpha = 2,...){
-        # Define Matern SPDE model and save
-        self$data$latentspatial <- inla.spde2.matern(self$data$mesh,alpha = alpha,...)
+        # Define PC Matern SPDE model and save
+        self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+                                         self$data$mesh,
+                                         alpha = alpha,
+                                         # P(Range < 100 km) = 0.001  and P(sigma > 0.5) = 0.5
+                                         prior.range = c(100,0.001),
+                                         prior.sigma = c(0.5,0.05))
         # Make index for spatial field
-        self$data$s.index <- inla.spde.make.index(name = "spatial.field",
+        self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
                                                   n.spde = self$data$latentspatial$n.spde)
         assertthat::assert_that(
           inherits(self$data$latentspatial,'inla.spde'),

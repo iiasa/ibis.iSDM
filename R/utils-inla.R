@@ -1,3 +1,36 @@
+#' Calculate area of each voronoi polygon in a INLA mesh
+#'
+#' @param A [`inla.mesh`] mesh object
+#' @returns A [`vector`] with the area of each polygon
+#' @noRd
+
+mesh_area = function(mesh){
+  assertthat::assert_that(inherits(mesh,'inla.mesh'),
+                          is.character(outunit))
+  # Precalculate the area of each
+  # Get areas for Voronoi tiles around each integration point
+  dd <- deldir::deldir(mesh$loc[,1], mesh$loc[,2])
+  tiles <- deldir::tile.list(dd)
+
+  # Convert to Spatial Polygons
+  polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
+    p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
+    n <- nrow(p)
+    sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
+  }),proj4string = mesh$crs)
+
+  # Calculate area of each polygon in km2
+  w <- st_area(
+    st_as_sf(polys)
+  ) %>% units::set_units("km²") %>% as.numeric()
+
+  assertthat::assert_that(length(w) == length(polys),
+                          is.vector(w))
+  return(w)
+}
+
+
+
 #' Function for creating a joint fitted and prediction stack
 #' @param stk_resp A stack object
 #' @param cov The covariate data stack
@@ -92,3 +125,31 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
     tibble::rownames_to_column('variable') %>%
     tibble::as_tibble()
 }
+
+#' Plot marginal distributions of effects or hyperparameters from INLA model
+#' @param A INLA model
+#' @param what Either 'fixed' or 'hyper'
+#' @noRd
+plot_inla_marginals = function(inla.model, what = 'fixed'){
+  assertthat::assert_that(inherits(inla.model,'inla'),
+                          is.character(what),
+                          what %in% c('fixed','hyper'))
+  par(mfrow = c(4,4))
+  if(what == 'fixed'){
+    varnames <- names(inla.model$marginals.fixed)
+    for(i in 1: length(varnames)){
+      var.mar <- data.frame(inla.model$marginals.fixed[i])
+      plot(x = var.mar[,1], y=var.mar[, 2], type="l",
+           xlab=paste(names(var.mar)[1]), ylab=paste(names(var.mar)[2]))
+      abline(v=0, col="red")
+    }
+  } else {
+    varnames <- names(inla.model$marginals.hyperpar)
+    for(i in 1: length(varnames)){
+      var.mar <- data.frame(inla.model$marginals.hyperpar[i])
+      plot(x = var.mar[,1], y=var.mar[, 2], type="l",
+           xlab=paste(names(var.mar)[1]), ylab=paste(names(var.mar)[2]))
+    }
+  }
+}
+

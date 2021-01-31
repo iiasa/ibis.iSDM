@@ -37,6 +37,19 @@ check_package <- function(x) {
   }
 }
 
+#' Camel case conversion of a string
+#'
+#' @param x A [`vector`] or [`character`] object.
+#' @keywords internal
+#' @noRd
+to_camelcase <- function(x){
+  assertthat::assert_that(is.character(x) || is.vector(x))
+  substr(x, 1, 1) <- toupper(
+      substr(x, 1, 1)
+    )
+  x
+}
+
 #' Atomic representation of a name
 #'
 #' Return a pretty character representation of an object with elements and
@@ -111,6 +124,21 @@ capitalize_text <- function(x) {
         sep="", collapse=" ")
 }
 
+#' Logistic transformation function
+#' @param x A [`numeric`] value
+#' @noRd
+logistic <- function(a){
+  assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
+  exp(a)/(1 + exp(a))
+}
+#' Logit transformation function
+#' @param x A [`numeric`] value
+#' @noRd
+logit <- function(a){
+  assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
+  log(a/(1-a))
+}
+
 #' Convert character to formula object
 #'
 #' @param x [`character`] text.
@@ -125,4 +153,37 @@ to_formula <- function(formula){
     # Asign a new waiver object
     formula = new_waiver()
   }
+}
+
+#' Create formula matrix
+#'
+#' Function to create list of formulas with all possible combinations of variables
+#' @param form An input [`formula`] object
+#' @returns A [`list`] object with [`formula`] objects
+#' @examples \dontrun{
+#' formula_combinations(form)
+#' }
+#' @noRd
+
+formula_combinations <- function(form, InterceptOnly = T){
+  assertthat::assert_that(inherits(form,'formula'),
+                          'purrr' %in% loadedNamespaces())
+
+  # Extract variables from formula
+  response = all.vars(form)[1]
+  varnames = all.vars(form)[-1]
+
+  # Remove spatial field and spde from the list
+  varnames <- grep('spatial.field',varnames,value = T,invert = T)
+  varnames <- grep('spde',varnames,value = T,invert = T)
+
+  # Construct unique combinations
+  varnames_comb <- 1:length(varnames) %>%
+      purrr::map(~ combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
+    unlist(recursive = F)
+
+  form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ", paste(.x, collapse = " + ")) %>% as.formula)
+  if(InterceptOnly) form_temp <- form_temp %>% append(paste0(response, " ~ 1") %>% as.formula %>% list, .)
+
+  return(form_temp)
 }
