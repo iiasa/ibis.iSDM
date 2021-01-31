@@ -25,9 +25,15 @@ DistributionModel <- bdproto(
     # TODO: Have a lot more information in here and to be prettified
     if( length( self$fits ) != 0 ){
       # Get strongest effects
-      ms <- subset(tidy_inla_summary(self$fits$fit_best),
+      ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
               select = c('variable', 'mean'))
       ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
+
+      # TODO: See if this can be plotted and extracted and shown here
+      # Provides the distance value (in the unit of the point coordinates) above
+      # which spatial dependencies become negligible
+      # model0.res<-inla.spde2.result(model0, 'spatial.field', spde, do.transf=TRUE)
+      # model0.res$summary.log.range.nominal
 
       message(paste0(
         'Trained distribution model (',self$name,')',
@@ -68,6 +74,27 @@ DistributionModel <- bdproto(
         paste0('No trained models found.')
       )
     }
+  },
+  # Plot SPDE if existing
+  plot_spde = function(self,...){
+    if( length( self$fits$fit_best$size.spde2.blc ) == 1)
+      {
+      # Get spatial projections from model
+      # FIXME: Potentially make the plotting of this more flexible
+      gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = c(300, 300))
+      g.mean <- INLA::inla.mesh.project(gproj,
+                                        self$get_data('fit_pred')$summary.random$spatial.field$mean)
+      g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_pred')$summary.random$spatial.field$sd)
+
+      # Plot
+      par(mfrow=c(1,2))
+      raster::image(g.mean,main = 'mean spatial effect')
+      raster::image(g.sd,main = 'sd spatial effect')
+
+
+      } else {
+        message('No spatial covariance in model specified.')
+      }
   },
   # Get specific fit from this Model
   get_data = function(self, x) {

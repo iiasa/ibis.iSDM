@@ -30,7 +30,7 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   if(!is.null(spde)) ll_effects[['spatial.field']] <- list(Bnodes = 1:spde$n.spde)
   # Define A
   if(!is.null(spde)) {
-      A = list(1,1, mat_pred)
+      A = list(mat_pred, 1, mat_pred)
   } else {
       A = list(mat_pred, 1)
   }

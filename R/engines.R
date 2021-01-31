@@ -90,8 +90,7 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
       },
       # Get latent spatial equation bit
       get_equation_latent_spatial = function(self,spatial_object = 'spde'){
-        assertthat::assert_that('latentspatial' %in% names(x$engine$data),
-                                msg = 'latentspatial object not computed.')
+        if( 'latentspatial' %notin% names(self$data) ) self$get_equation_latent_spatial()
         return(
           paste0('f(spatial.field, model = ',spatial_object,')')
         )
@@ -124,19 +123,21 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
         ll_effects <- list()
         pred_names <- model$predictors_names
         # Note, order adding this is important apparently...
+        ll_effects[['intercept']] <- list(intercept = rep(1, self$get_data('mesh')$n ))
         ll_effects[['predictors']] <- model[['data']][['poipo_values']][,pred_names] # Get only the covariates to use
-        ll_effects[['intercept']] <- list(intercept = c(1:self$data$mesh$n) )
         # Add latent
         if(x$get_latent()=='<Spatial>'){
-          if(is.Waiver('latentspatial' %notin% self$data)) self$calc_latent_spatial()
+          if('latentspatial' %notin% names(self$data)) self$calc_latent_spatial()
           # Get spatial object
-          spde <- self$data$latentspatial
-          ll_effects[['spatial.field']] <- list(Bnodes = 1:spde$n.spde)
+          spde <- self$get_data('latentspatial')
+          iset <- self$get_data('s.index')
+          ll_effects[['spatial.field']] <- iset#list(Bnodes = 1:spde$n.spde)
           # Define projection matrix
-          A = list(mat_proj, 1, 1)
+          # FIXME: Check that the below formulation is correct!
+          A = list(mat_proj,1,mat_proj)
         } else {
           spde <- NULL # Set SPDE to NULL
-          A = list(1, mat_proj)
+          A = list(mat_proj, 1)
         }
 
         # Create the stack for the fitted model
@@ -173,46 +174,55 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
           'stk_pred' %in% names(self$data), inherits(self$get_data('stk_pred'),'inla.data.stack'),
           'stk_full' %in% names(self$data), inherits(self$get_data('stk_full'),'inla.data.stack')
         )
+        # Get the datasets
+        if(x$get_latent()=='<Spatial>'){
+            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_resp'),spde = self$get_data('latentspatial'))
+            stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'),spde = self$get_data('latentspatial'))
+          } else {
+            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_resp'))
+            stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'))
+          }
 
         # Train the model on the response
         fit_resp <- INLA::inla(formula = model$equation$poipo, # The specified formula
-                          data  = INLA::inla.stack.data(self$get_data('stk_resp') ),  # The data stack
+                          data  = stack_data_resp,  # The data stack
                           quantiles = c(0.05, 0.5, 0.95),
                           E = INLA::inla.stack.data(self$get_data('stk_resp'))$e, # Exposure (Eta) for Poisson model
                           family= 'poisson',   # Family the data comes from
                           control.family = list(link = "log"), # Control options
-                          control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_resp')), compute = TRUE),  # Compute for marginals of the predictors
+                          control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_resp')),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           verbose = FALSE, # To see the log of the model runs
-                          # control.inla = list(int.strategy = "eb"), # For other speed up
-                          # control.inla(strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                          control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                       strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                           num.threads = parallel::detectCores()-1
         )
 
         # Predict on full
         fit_pred <- INLA::inla(formula = model$equation$poipo, # The specified formula
-                               data  = INLA::inla.stack.data(self$get_data('stk_full') ),  # The data stack
+                               data  = stack_data_full,  # The data stack
                                quantiles = c(0.05, 0.5, 0.95),
                                E = INLA::inla.stack.data(self$get_data('stk_full'))$e,
                                family= 'poisson',   # Family the data comes from
                                control.family = list(link = "log"), # Control options
-                               control.predictor = list(A = INLA::inla.stack.A(self$get_data('stk_full')), compute = FALSE),  # Compute for marginals of the predictors
-                               control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                               control.predictor = list(A = INLA::inla.stack.A(self$get_data('stk_full')), link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                               control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                                verbose = FALSE, # To see the log of the model runs
-                               # control.inla = list(int.strategy = "eb"), # For other speed up
-                               # control.inla(strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                               control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                            strategy = 'simplified.laplace'), # To make it run faster...
                                num.threads = parallel::detectCores() - 1
         )
 
         # Create a spatial prediction
         index.pred <- INLA::inla.stack.index(self$get_data('stk_full'), 'pred_poipo')$data
         post <- fit_pred$summary.linear.predictor[index.pred, ]
+        assertthat::assert_that(nrow(post)>0)
         # TODO: Wrap Backtransform into a distribution dependent function
         post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <-
           exp(
             post[,c('mean','0.05quant','0.5quant','0.95quant','mode')]
             )
-        post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
+        post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
         names(post) <- make.names(names(post))
         # Fill output rasters
         prediction <- fill_rasters(post = post,background = model$background)
@@ -227,6 +237,7 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
               fits = list(
                 "fit_best" = fit_resp,
                 "fit_pred" = fit_pred,
+                "mesh"     = self$get_data('mesh'),
                 "prediction" = prediction
                 )
         )

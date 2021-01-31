@@ -50,7 +50,7 @@ methods::setMethod(
     model <- list()
 
     # Set model name
-    model[['runname']] <- 'test' #runname
+    model[['runname']] <- runname
 
     # Specify a unique id for the run
     model[['id']] <- new_id()
