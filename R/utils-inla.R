@@ -5,8 +5,7 @@
 #' @noRd
 
 mesh_area = function(mesh){
-  assertthat::assert_that(inherits(mesh,'inla.mesh'),
-                          is.character(outunit))
+  assertthat::assert_that(inherits(mesh,'inla.mesh'))
   # Precalculate the area of each
   # Get areas for Voronoi tiles around each integration point
   dd <- deldir::deldir(mesh$loc[,1], mesh$loc[,2])

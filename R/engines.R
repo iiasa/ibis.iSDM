@@ -52,7 +52,7 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
   }
 
   # Calculate area in km²
-  ar <- mesh_area(mesh,'km2')
+  ar <- mesh_area(mesh)
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
