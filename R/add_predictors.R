@@ -45,7 +45,7 @@ methods::setMethod(
                             derivates %in% c('none', 'elu', 'hinge', 'product'),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names)
     )
-    assertthat::assert_that(is_comparable_raster(x$background,env),
+    assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
                             msg = 'Supplied environmental data not aligned with background.')
     if(!is.null(names)) {
       assertthat::assert_that(nlayers(env)==length(names),

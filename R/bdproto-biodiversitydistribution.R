@@ -58,10 +58,10 @@ BiodiversityDistribution <- bdproto(
   },
   # Get background stats
   show_background_info = function(self){
-    assertthat::assert_that(inherits(self$background,'Raster'))
+    assertthat::assert_that(inherits(self$background,'sf'))
     r <- self$background
     o <- list()
-    o[['extent']] <- round( as.vector(raster::extent(r)), 3)
+    o[['extent']] <- round( st_bbox(r), 3)
     o[['proj']] <-  projection(r)
     return(o)
   },

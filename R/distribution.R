@@ -31,16 +31,36 @@ methods::setGeneric("distribution",
                     function(background, ...) standardGeneric("distribution"))
 
 #' @name distribution
-#' @usage \S4method{distribution}{Raster}(background, formula, ...)
-#' @rdname distribution
+#' @import rgeos
+#' @usage \S4method{distribution}{raster}(background, ...)
+#' @rdname pdistribution
 methods::setMethod(
   "distribution",
   methods::signature(background = "Raster"),
   function(background, ...) {
     # Check that arguments are valid
+    assertthat::assert_that( inherits(background,'Raster')  )
+
+    # Convert raster to dissolved polygons to get a study boundary
+    newbg <- sf::st_as_sf(
+      raster::rasterToPolygons(background, dissolve = TRUE)
+    )
+
+    # Rerun the distribution call with the object
+    distribution(newbg, ...)
+  })
+
+#' @name distribution
+#' @usage \S4method{distribution}{sf}(background, ...)
+#' @rdname distribution
+methods::setMethod(
+  "distribution",
+  methods::signature(background = "sf"),
+  function(background, ...) {
+    # Check that arguments are valid
     assertthat::assert_that(
-      inherits(background,'Raster'),
-      raster::nlayers(background) == 1
+      inherits(background,'sf'),
+      unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
 
     # Create BiodiversityDistribution object

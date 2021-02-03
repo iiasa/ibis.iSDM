@@ -13,14 +13,20 @@ NULL
 #' @import INLA
 #' @rdname engine_inla
 #' @export
-engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offset = c(1,1), verbose = TRUE,...) {
+engine_inla <- function(x, optional_mesh = NULL,
+                        max.edge = c(1,5),
+                        offset = c(1,1),
+                        cutoff = 0.1,
+                        verbose = TRUE,...) {
   # TODO:
-  # Find a better way to pass on parameters...
+  # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                          inherits(x$background,'Raster'),
+                          inherits(x$background,'sf'),
                           inherits(optional_mesh,'inla.mesh') || is.null(optional_mesh),
-                          is.vector(max_distance),
+                          is.vector(max.edge),
+                          is.vector(offset) || is.numeric(offset),
+                          is.numeric(cutoff),
                           assertthat::is.flag(verbose),
                           requireNamespace("INLA", quietly = TRUE))
 
@@ -28,27 +34,45 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
   if(inherits(optional_mesh,'inla.mesh')) {
     mesh <- optional_mesh
   } else {
-    # Background points
-    dat <- raster::rasterToPoints(x$background)[,c('x','y')]
 
-    # Make a boundary from the background
-    bounds <- raster::boundaries(background, type = 'outer', asNA = TRUE)
+    # Convert the study region
+    region.poly <- as(sf::st_geometry(x$background), "Spatial")
 
-    #bdry <- INLA::as.inla.mesh.segment(rasterToPolygons(bounds),join = TRUE)
-    #bdry$loc <- inla.mesh.map(bdry$loc)
-
-    # Prepare the mesh
+    # Convert to boundary object for later
     suppressWarnings(
-      mesh <- INLA::inla.mesh.2d(
-        loc = dat[,c("x", "y")], # Define initial triangulation points
-        max.edge = max_distance, # maximum distance between two nodes
-        # FIXME: This still does not work correctly
-#        boundary = bdry, # boundary
-        offset = offset, # Offset of outer boundaries
-        crs = inla.CRS(projargs = crs(x$background))
+      bdry <- INLA::inla.sp2segment(
+        sp = region.poly,
+        join = TRUE,
+        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
       )
     )
-    rm(dat)
+    bdry$loc <- INLA::inla.mesh.map(bdry$loc)
+
+    # --- #
+    # FIXME: Move this to the man description above
+    # Create the mesh
+    # A good mesh needs to have triangles as regular as possible in size and shape: equilateral
+    suppressWarnings(
+      mesh <- INLA::inla.mesh.2d(
+        # Boundary object
+        boundary = bdry,
+        # The largest allowed triangle edge length, must be in the same scale units as the coordinates
+        # Lower bounds affect the density of triangles
+        max.edge = max.edge,
+        # The automatic extension distance.
+        # If positive: same scale units.
+        # If negative, interpreted as a factor relative to the approximate data diameter;
+        #   i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
+        offset = offset,
+        # The minimum allowed distance between points,
+        # it means that points at a closer distance than the supplied value are replaced by a single vertex.
+        # it is critical when there are some points very close to each other,
+        #   either for point locations or in the domain boundary.
+        cutoff = cutoff,
+        # Define the CRS
+        crs = bdry$crs
+      )
+    )
   }
 
   # Calculate area in km²
@@ -233,8 +257,13 @@ engine_inla <- function(x, optional_mesh = NULL, max_distance = c(10,1000), offs
             )
         post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
         names(post) <- make.names(names(post))
+
+        # Create an empty raster from the predictor coordinates
+        ra <- rasterFromXYZ(xyz = model$predictors[,c('x','y')],
+                            crs = raster::projection(x$background)
+                            )
         # Fill output rasters
-        prediction <- fill_rasters(post = post,background = model$background)
+        prediction <- fill_rasters(post = post,background = ra)
         prediction <- raster::mask(prediction, model$background) # Mask with background
 
         # Definition of INLA Model object ----
