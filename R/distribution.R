@@ -33,7 +33,7 @@ methods::setGeneric("distribution",
 #' @name distribution
 #' @import rgeos
 #' @usage \S4method{distribution}{raster}(background, ...)
-#' @rdname pdistribution
+#' @rdname distribution
 methods::setMethod(
   "distribution",
   methods::signature(background = "Raster"),

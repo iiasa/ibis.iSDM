@@ -158,32 +158,89 @@ to_formula <- function(formula){
 #' Create formula matrix
 #'
 #' Function to create list of formulas with all possible combinations of variables
-#' @param form An input [`formula`] object
+#' @param varnames An input [`vector`] object of variable names
+#' @param response A [`character`] object describing the response
+#' @param InterceptOnly Should a model with an intercept only be fitted?
+#' @param special_term Any special term to add to the formulas? Default: NULL
+#' @param spde_term Any spatial covariance to add to the formulas? Default: NULL
+#' @param type Currently implemented are 'All' (All possible combinations) or 'forward'
 #' @returns A [`list`] object with [`formula`] objects
 #' @examples \dontrun{
 #' formula_combinations(form)
 #' }
 #' @noRd
 
-formula_combinations <- function(form, InterceptOnly = T){
-  assertthat::assert_that(inherits(form,'formula'),
+formula_combinations <- function(varnames, response = 'Observed', InterceptOnly = TRUE,
+                                 special_term = NULL, spde_term = NULL,
+                                 type= 'forward'){
+  assertthat::assert_that(is.vector(varnames),
+                          is.character(response),
                           'purrr' %in% loadedNamespaces())
+  if(!is.null(special_term)) varnames <- c(varnames, special_term)
 
-  # Extract variables from formula
-  response = all.vars(form)[1]
-  varnames = all.vars(form)[-1]
+  # Formula length
+  fl <- length(varnames)
 
-  # Remove spatial field and spde from the list
-  varnames <- grep('spatial.field',varnames,value = T,invert = T)
-  varnames <- grep('spde',varnames,value = T,invert = T)
+  if(tolower(type) == 'forward'){
+    form_temp <- c()
+    for(i in 1:fl) {
+      new <- paste0(response, '~ 0 +', paste(varnames[1:i],collapse = ' + ') )
+      if(!is.null(spde_term)) new <- paste0(new, ' + ',spde_term)
+      form_temp <- c(form_temp, new)
+      }
 
-  # Construct unique combinations
-  varnames_comb <- 1:length(varnames) %>%
+  } else if(tolower(type) == 'all'){
+    # Construct unique combinations
+    varnames_comb <- 1:length(varnames) %>%
       purrr::map(~ combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
-    unlist(recursive = F)
+      unlist(recursive = F)
 
-  form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ", paste(.x, collapse = " + ")) %>% as.formula)
+    form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ", paste(.x, collapse = " + ")) %>% as.formula)
+  }
+
   if(InterceptOnly) form_temp <- form_temp %>% append(paste0(response, " ~ 1") %>% as.formula %>% list, .)
 
   return(form_temp)
+}
+
+#' Filter a set of correlated predictors to fewer ones
+#'
+#' Code mostly taken from the [`caret`] package
+#'
+#' @param env A [`data.frame`] with extracted environmental covariates for a given species
+#' @param keep A [`vector`] with variables to keep regardless
+#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff
+#' @param method Which method to use for constructing the correlation matrix (pearson|spearman|kendal)
+#' @returns vector of variable names to exclude
+
+find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.9, method = 'pearson' ){
+  # Security checks
+  assertthat::assert_that(is.data.frame(env),
+                          is.character(method),
+                          is.numeric(cutoff),
+                          is.null(keep) || is.vector(keep)
+  )
+  if(!is.null(keep)) x <- env %>% dplyr::select(-keep) else x <- env
+
+  # Calculate correlation matrix
+  cm <- cor(x, method = method)
+
+  # Copied from the \code{caret} package to avoide further dependencies
+  if (any(!complete.cases(cm))) stop("The correlation matrix has some missing values.")
+  averageCorr <- colMeans(abs(cm))
+  averageCorr <- as.numeric(as.factor(averageCorr))
+  cm[lower.tri(cm, diag = TRUE)] <- NA
+  # Determine combinations over cutoff
+  combsAboveCutoff <- which(abs(cm) > cutoff)
+  colsToCheck <- ceiling(combsAboveCutoff/nrow(cm))
+  rowsToCheck <- combsAboveCutoff%%nrow(cm)
+  # Exclude columns with variables over average correlation
+  colsToDiscard <- averageCorr[colsToCheck] > averageCorr[rowsToCheck]
+  rowsToDiscard <- !colsToDiscard
+  # Get columns to discard
+  deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
+  deletecol <- unique(deletecol)
+
+  # Which variables to discard
+  names(env)[deletecol]
 }

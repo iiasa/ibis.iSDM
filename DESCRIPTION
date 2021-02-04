@@ -55,7 +55,7 @@ Collate:
     'utils-spatial.R'
     'data.R'
     'distribution.R'
-    'engines.R'
+    'engine_inla.R'
     'identifier.R'
     'misc.R'
     'plot.R'

@@ -9,8 +9,6 @@ NULL
 #' @param ... not used.
 #'
 #' @return None.
-#' @seealso [base::plot()].
-#'
 #' @name plot
 NULL
 

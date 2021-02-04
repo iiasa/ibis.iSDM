@@ -18,6 +18,3 @@ None.
 \description{
 Plots information from a given object where a plotting object is available
 }
-\seealso{
-\code{\link[base:plot]{base::plot()}}.
-}

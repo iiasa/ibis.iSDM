@@ -42,7 +42,7 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(env, 'Raster'),
                             prep %in% c('none','pca', 'scale', 'norm'),
-                            derivates %in% c('none', 'elu', 'hinge', 'product'),
+                            derivates %in% c('none', 'elu', 'hinge', 'quadratic'),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names)
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),

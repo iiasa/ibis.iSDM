@@ -7,6 +7,8 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run
+#' @param rm_corPred Remove highly correlated predictors. Default is True
+#' @param varsel Perform a variable selection on the set of predictors
 #' @param ... further arguments passed on.
 #'
 #' @details
@@ -24,8 +26,8 @@ NULL
 #' @export
 methods::setGeneric(
   "train",
-  signature = methods::signature("x", "runname"),
-  function(x, runname,...) standardGeneric("train"))
+  signature = methods::signature("x", "runname","rm_corPred","varsel"),
+  function(x, runname,rm_corPred,varsel,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -33,11 +35,12 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, ...) {
+  function(x, runname, rm_corPred = TRUE, varsel = TRUE, ...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
-      is.character(runname)
+      is.character(runname),
+      is.logical(rm_corPred)
     )
     # Now make checks on completeness of the object
     assertthat::assert_that(!is.Waiver(x$engine),
@@ -75,6 +78,26 @@ methods::setMethod(
     # Also set predictor names
     model[['predictors_names']] <- x$get_predictor_names()
 
+    # Extract estimates for point records
+    poipo_env <- get_ngbvalue(
+      coords = x$biodiversity$get_coordinates('poipo'),
+      env = x$predictors$get_data(df = TRUE, na.rm = FALSE),
+      field_space = c('x','y'),
+      longlat = raster::isLonLat(x$background)
+    )
+
+    # Check whether predictors should be refined and do so
+    if(rm_corPred){
+      co <- find_correlated_predictors(env = poipo_env %>% dplyr::select(-x,-y),
+                                      keep = NULL, cutoff = 0.9, method = 'pear')
+      if(length(co)>0){
+        poipo_env %>% dplyr::select(-all_of(co)) -> poipo_env
+        model[['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
+        model[['predictors']] <- model[['predictors']][which( model[['predictors']] %notin% co )]
+      }
+    }
+
+
     # assign default priors
     if(is.Waiver( x$priors )){
       # TODO: Define prior objects. Also look at PC priors https://www.tandfonline.com/doi/abs/10.1080/01621459.2017.1415907?journalCode=uasa20
@@ -99,7 +122,7 @@ methods::setMethod(
                   paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
                          0, #ifelse(x$show_biodiversity_length()==1,1,0),
                          ' +',
-                         paste( x$get_predictor_names(), collapse = ' + ' )  )
+                         paste( model[['predictors_names']], collapse = ' + ' )  )
                 )
         if(x$get_latent()=="<Spatial>"){
           # Update with spatial term
@@ -117,23 +140,13 @@ methods::setMethod(
     if( inherits(x$engine,'INLA-Engine') ){
       # Sample nearest predictor values
       types <- names( x$biodiversity$get_types() )
-      if('poipo' %in% types){
-        model[['data']][['poipo_values']] <-
-          get_ngbvalue(
-            coords = x$biodiversity$get_coordinates('poipo'),
-            env = x$predictors$get_data(df = TRUE, na.rm = FALSE),
-            field_space = c('x','y'),
-            longlat = raster::isLonLat(x$background)
-          )
-      }
+      if('poipo' %in% types) model[['data']][['poipo_values']] <- poipo_env
 
-    # Run the engine setup script
-    x$engine$setup(model)
+      # Run the engine setup script
+      x$engine$setup(model)
 
-    # Now train the model and create a predicted distribution model
-    out <- x$engine$train(model)
-
-    # TODO: Implement spatial crossvalidation, e.g. https://arxiv.org/pdf/2004.02324.pdf
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model,varsel = varsel)
 
     } else { stop('Engines not implemented yet')}
 

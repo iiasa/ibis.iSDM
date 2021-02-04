@@ -1,30 +1,40 @@
 #' Calculate area of each voronoi polygon in a INLA mesh
 #'
-#' @param A [`inla.mesh`] mesh object
+#' @param mesh [`inla.mesh`] mesh object
+#' @param region.poly A supplied [`region.poly`] object
+#' @param variant A character to which type of area calculation (Default: 'gpc')
 #' @returns A [`vector`] with the area of each polygon
+#' @import deldir
 #' @noRd
 
-mesh_area = function(mesh){
-  assertthat::assert_that(inherits(mesh,'inla.mesh'))
+mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
+  assertthat::assert_that(inherits(mesh,'inla.mesh'),
+                          is.null(region.poly) || inherits(region.poly,'Spatial'),
+                          is.character(variant)
+                          )
   # Precalculate the area of each
   # Get areas for Voronoi tiles around each integration point
   dd <- deldir::deldir(mesh$loc[,1], mesh$loc[,2])
   tiles <- deldir::tile.list(dd)
 
-  # Convert to Spatial Polygons
-  polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
-    p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
-    n <- nrow(p)
-    sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
-  }),proj4string = mesh$crs)
+  if(variant == 'gpc'){
+    poly.gpc <- as(region.poly@polygons[[1]]@Polygons[[1]]@coords,'gpc.poly')
+    w <- sapply(tiles, function(p) rgeos::area.poly(rgeos::intersect(as(cbind(p$x, p$y), 'gpc.poly'), poly.gpc)))
+  } else {
+    # Convert to Spatial Polygons
+    polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
+      p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
+      n <- nrow(p)
+      sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
+    }),proj4string = mesh$crs)
 
-  # Calculate area of each polygon in km2
-  w <- st_area(
-    st_as_sf(polys)
-  ) %>% units::set_units("km²") %>% as.numeric()
+    # Calculate area of each polygon in km2
+    w <- st_area(
+      st_as_sf(polys)
+    ) %>% units::set_units("km²") %>% as.numeric()
+  }
 
-  assertthat::assert_that(length(w) == length(polys),
-                          is.vector(w))
+  assertthat::assert_that(is.vector(w))
   return(w)
 }
 

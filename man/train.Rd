@@ -6,7 +6,7 @@
 \alias{train-method}
 \title{Train the model from a given engine}
 \usage{
-train(x, runname, ...)
+train(x, runname, rm_corPred, varsel, ...)
 
 \S4method{train}{BiodiversityDistribution}(x)
 }
@@ -14,6 +14,10 @@ train(x, runname, ...)
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}
 
 \item{runname}{A \code{\link{character}} name of the trained run}
+
+\item{rm_corPred}{Remove highly correlated predictors. Default is True}
+
+\item{varsel}{Perform a variable selection on the set of predictors}
 
 \item{...}{further arguments passed on.}
 }

@@ -5,7 +5,7 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
-#' @param max_distance Range of maximum distance between two nodes is between 50 and 5000 meter
+#' @param max_distance Range of maximum distance between two nodes
 #' @param offset Offset for INLA mesh
 #' @param ... Other variables
 #' @name engine_inla
@@ -17,7 +17,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
                         cutoff = 0.1,
-                        verbose = TRUE,...) {
+                        ...) {
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
@@ -27,17 +27,17 @@ engine_inla <- function(x, optional_mesh = NULL,
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
                           is.numeric(cutoff),
-                          assertthat::is.flag(verbose),
                           requireNamespace("INLA", quietly = TRUE))
+
+  # Convert the study region
+  region.poly <- as(sf::st_geometry(x$background), "Spatial")
 
   # Set the projection mesh
   if(inherits(optional_mesh,'inla.mesh')) {
+    # Load a provided on
     mesh <- optional_mesh
   } else {
-
-    # Convert the study region
-    region.poly <- as(sf::st_geometry(x$background), "Spatial")
-
+    # Create a new one
     # Convert to boundary object for later
     suppressWarnings(
       bdry <- INLA::inla.sp2segment(
@@ -76,7 +76,9 @@ engine_inla <- function(x, optional_mesh = NULL,
   }
 
   # Calculate area in km²
-  ar <- mesh_area(mesh)
+  ar <- suppressWarnings(
+    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc')
+  )
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
@@ -104,14 +106,21 @@ engine_inla <- function(x, optional_mesh = NULL,
       #   binary_parameter("verbose", verbose)
       #   ),
       # Spatial latent function
-      calc_latent_spatial = function(self, alpha = 2,...){
-        # Define PC Matern SPDE model and save
-        self$data$latentspatial <- INLA::inla.spde2.pcmatern(
-                                         self$data$mesh,
-                                         alpha = alpha,
-                                         # P(Range < 100 km) = 0.001  and P(sigma > 0.5) = 0.5
-                                         prior.range = c(100,0.001),
-                                         prior.sigma = c(0.5,0.05))
+      calc_latent_spatial = function(self,type = 'pc', alpha = 2,
+                                     prior.range = c(5,0.001),
+                                     prior.sigma = c(0.5,0.05),
+                                     ...){
+        if(type=='pc'){
+          # Define PC Matern SPDE model and save
+          self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+            self$data$mesh,
+            alpha = alpha,
+            # P(Range < 1°) = 0.001  and P(sigma > 0.5) = 0.05
+            prior.range = prior.range,
+            prior.sigma = prior.sigma)
+        } else {
+          self$data$latentspatial <- INLA::inla.spde2.matern(mesh = self$data$mesh, alpha = alpha)
+        }
         # Make index for spatial field
         self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
                                                   n.spde = self$data$latentspatial$n.spde)
@@ -148,14 +157,14 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Response for inla stack
         resp <- model$data$poipo_response
         ll_resp <- list()
-        ll_resp[[ resp ]] <- model$data$poipo[,resp]
+        ll_resp[[ resp ]] <- cbind( model$data$poipo[,resp] )
         # A column for the offset
         ll_resp[[ 'e' ]] <- rep(0, nrow(model$data$poipo_values) )
 
         # Effects matrix
         ll_effects <- list()
         pred_names <- model$predictors_names
-        # Note, order adding this is important apparently...
+      # Note, order adding this is important apparently...
         ll_effects[['intercept']] <- list(intercept = rep(1, self$get_data('mesh')$n ))
         ll_effects[['predictors']] <- model[['data']][['poipo_values']][,pred_names] # Get only the covariates to use
         # Add latent
@@ -174,7 +183,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         }
 
         # Create the stack for the fitted model
-        stk_resp <-
+        stk_obs <-
           INLA::inla.stack(
             data =  ll_resp,             # Response
             A    =  A,                   # Predictor projection matrix. 1 is included to make a list
@@ -182,10 +191,10 @@ engine_inla <- function(x, optional_mesh = NULL,
             tag = paste0('obs_','poipo') # Description tag
           )
         # Save this stack in data
-        self$set_data('stk_resp', stk_resp)
+        self$set_data('stk_obs', stk_obs)
 
         # Create and join prediction stack
-        stk_pred <- inla_make_prediction_stack(stk_resp = stk_resp,
+        stk_pred <- inla_make_prediction_stack(stk_resp = stk_obs,
                                                cov = model$predictors,
                                                mesh = self$get_data('mesh'),
                                                type = 'poipo',
@@ -193,37 +202,92 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Save this stack in data
         self$set_data('stk_pred', stk_pred)
         # And also the joined stack
-        self$set_data('stk_full', INLA::inla.stack(stk_resp, stk_pred) )
+        self$set_data('stk_full', INLA::inla.stack(stk_obs, stk_pred) )
 
         invisible()
       },
       # Main INLA training function ----
-      train = function(self, model, varsel = FALSE) {
-        # TODO: Implement variable selection
+      train = function(self, model, varsel = TRUE) {
         # Check that all inputs are there
         assertthat::assert_that(
           is.list(model),length(model)>1,
-          'stk_resp' %in% names(self$data), inherits(self$get_data('stk_resp'),'inla.data.stack'),
+          'stk_obs' %in% names(self$data), inherits(self$get_data('stk_obs'),'inla.data.stack'),
           'stk_pred' %in% names(self$data), inherits(self$get_data('stk_pred'),'inla.data.stack'),
           'stk_full' %in% names(self$data), inherits(self$get_data('stk_full'),'inla.data.stack')
         )
         # Get the datasets
         if(x$get_latent()=='<Spatial>'){
-            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_resp'),spde = self$get_data('latentspatial'))
+            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_obs'),spde = self$get_data('latentspatial'))
             stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'),spde = self$get_data('latentspatial'))
           } else {
-            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_resp'))
+            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_obs'))
             stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'))
           }
+        # ----------- #
+        # Provided or default formula
+        master_form <- model$equation$poipo
+
+        # Perform variable selection
+        if(varsel){
+          message('Performing variable selection...')
+          #
+          if(x$get_latent()=='<Spatial>') speq <- self$get_equation_latent_spatial() else speq <- NULL
+          # Get formula list
+          lf <- formula_combinations(varnames = model$predictors_names,
+                               response = all.vars(master_form)[1],
+                               InterceptOnly = FALSE,
+                               spde_term = speq,
+                               type = 'forward'
+                               )
+
+          # Set progress bar
+          pb <- progress::progress_bar$new(total = length(lf))
+
+          results <- data.frame(stringsAsFactors = FALSE)
+          # Now loop through
+          for(k in 1:length(lf)){
+            pb$tick()
+
+            # Train the model on the response
+            fit <- INLA::inla(formula = as.formula(lf[k]), # The specified formula
+                                   data  = stack_data_resp,  # The data stack
+                                   E = INLA::inla.stack.data(self$get_data('stk_obs'))$e, # Exposure (Eta) for Poisson model
+                                   family= 'poisson',   # Family the data comes from
+                                   control.family = list(link = "log"), # Control options
+                                   control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_obs')),
+                                                          link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                                   control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                                   control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                                strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                                   num.threads = parallel::detectCores()-1
+            )
+            # Add results
+            results <- rbind(results,
+                             data.frame(form = lf[k],
+                                        converged = fit$ok,
+                                        waic = fit$waic$waic,
+                                        dic = fit$dic$dic,
+                                        mean.deviance = fit$dic$mean.deviance ) )
+            rm(fit)
+          }
+          rm(pb)
+          # Determine best model and set of variables
+          results <- results[order(results$dic,decreasing = FALSE),]
+          results$diff_dic <- c(0, diff(results$dic) )
+          # Set new master form
+          master_form <- as.formula(
+            as.character(results$form[results$diff_dic==0])
+          )
+        }
 
         # Train the model on the response
-        fit_resp <- INLA::inla(formula = model$equation$poipo, # The specified formula
+        fit_resp <- INLA::inla(formula = master_form, # The specified formula
                           data  = stack_data_resp,  # The data stack
                           quantiles = c(0.05, 0.5, 0.95),
-                          E = INLA::inla.stack.data(self$get_data('stk_resp'))$e, # Exposure (Eta) for Poisson model
+                          E = INLA::inla.stack.data(self$get_data('stk_obs'))$e, # Exposure (Eta) for Poisson model
                           family= 'poisson',   # Family the data comes from
                           control.family = list(link = "log"), # Control options
-                          control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_resp')),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                          control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_obs')),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           verbose = FALSE, # To see the log of the model runs
                           control.inla(int.strategy = "eb", # Empirical bayes for integration

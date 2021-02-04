@@ -6,7 +6,9 @@
 \usage{
 distribution(background, ...)
 
-\S4method{distribution}{Raster}(background, formula, ...)
+\S4method{distribution}{raster}(background, ...)
+
+\S4method{distribution}{sf}(background, ...)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
