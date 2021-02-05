@@ -87,7 +87,7 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$latentfactors)) return('None')
     self$latentfactors
   },
-  # Set predictiors
+  # Set predictors
   set_predictors = function(self, x){
     assertthat::assert_that(inherits(x, "PredictorDataset"))
     self$predictors <- x
@@ -102,6 +102,14 @@ BiodiversityDistribution <- bdproto(
   get_engine = function(self){
     if(is.Waiver(self$engine)) return('None')
     self$engine$show()
+  },
+  # Remove predictors
+  rm_predictors = function(self, names){
+    assertthat::assert_that(
+      is.character(names) || assertthat::is.scalar(names) || is.vector(names)
+    )
+    self$predictors$rm_data(names)
+    invisible()
   },
   # Show number of biodiversity records
   show_biodiversity_length = function(self){

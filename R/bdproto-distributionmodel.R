@@ -96,6 +96,10 @@ DistributionModel <- bdproto(
         message('No spatial covariance in model specified.')
       }
   },
+  # Get effect tables from model
+  get_effects = function(self, x = 'fit_best'){
+    tidy_inla_summary(self$get_data(x))
+  },
   # Get specific fit from this Model
   get_data = function(self, x) {
     if (!x %in% names(self$fits))

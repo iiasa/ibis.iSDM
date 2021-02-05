@@ -20,6 +20,13 @@ myLog <- function(title = "[Processing]",...) {
   cat(paste0(title,' ', Sys.time(), " | ", ..., "\n"))
 }
 
+#' Calculate the mode
+#' @param A [`vector`] of values or characters
+#' @noRd
+mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 #' Check whether function exist in name space
 #'
 #' @param x The name of a package from which a function is needed
@@ -124,7 +131,7 @@ capitalize_text <- function(x) {
         sep="", collapse=" ")
 }
 
-#' Logistic transformation function
+#' Logistic (invlogit) transformation function
 #' @param x A [`numeric`] value
 #' @noRd
 logistic <- function(a){

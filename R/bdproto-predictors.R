@@ -50,19 +50,25 @@ PredictorDataset <- bdproto(
   },
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
-    assertthat::assert_that(assertthat::is.string(x),
-                            x %in% names(self$get_data()))
-    self$data[[x]] <- NULL
+    assertthat::assert_that(is.vector(x) || is.character(x),
+                            all(x %in% names(self$get_data()))
+                            )
+    # Match indices
+    ind <- match(x, self$get_names())
+    # Overwrite predictor dataset
+    self$data <- raster::dropLayer(self$get_data(), ind)
     invisible()
   },
   # Print input messages
   show = function(self) {
     self$print()
   },
-  # Collect info statistics
-  get_summary = function(self) {
-    nrow(self$data)
-    message('TBD: Return list of estimates')
+  # Collect info statistics with optional decimals
+  get_summary = function(self, digits = 2) {
+    # Maybe make a little bit prettier
+    round(
+      summary( self$get_data()), digits = digits
+         )
   },
   # Number of Predictors in object
   length = function(self) {

@@ -6,7 +6,7 @@ Authors@R:
     person(given = "Martin",
            family = "Jung",
            role = c("aut", "cre"),
-           email = "jung@iiasa.ac.at",
+           email = "jung@@iiasa.ac.at",
            comment = c(ORCID = "0000-0002-7569-1390"))
 Maintainer: Martin Jung <jung@iiasa.ac.at>
 Description: Integrated framework of modelling the distribution of species and ecosystems. 

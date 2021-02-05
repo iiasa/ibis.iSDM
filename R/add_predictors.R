@@ -31,7 +31,7 @@ methods::setGeneric(
   signature = methods::signature("x", "env"),
   function(x, env, names = NULL, prep = 'scale', derivates = 'none', bgmask = TRUE, ...) standardGeneric("add_predictors"))
 
-# TODO: Support other objects other than Raster stacks
+# TODO: Support other objects other than Raster stacks such as data.frames and stars objects
 #' @name add_predictors
 #' @rdname add_predictors
 #' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
@@ -54,8 +54,29 @@ methods::setMethod(
       names(env) <- names
     }
 
+    # Calculate derivates if set
+    if(derivates !='none'){
+      new_predictors <- switch(derivates,
+        'quadratic' = calc(env, function(x) I(x^2))
+      )
+      # Change name
+      names(new_predictors) <- paste0(derivates,'_',names(env))
+      # Add to env
+      env <- addLayer(env, new_predictors)
+
+      # Coarse hinge for 5
+      # TODO: Find a sensible way of calculating at least a few...
+      # coarse_hinge <- names(coarse_predictors[,-(1:2)]) %>%
+      #   purrr::map(~ maxnet::hinge(coarse_predictors[,.x],nknots = 5) )
+      # names(coarse_hinge) <- names(coarse_predictors[,-(1:2)])
+      # # Coarse threshold for 5
+      # coarse_thresh <- names(coarse_predictors[,-(1:2)]) %>%
+      #   purrr::map(~ maxnet::thresholds(coarse_predictors[,.x],nknots = 5) )
+      # names(coarse_thresh) <- names(coarse_predictors[,-(1:2)])
+    }
+
     # Standardization and scaling
-    # TODO: Think whether this makes sense for categorical predictors? Shouldn't affect the data I think
+    # TODO: Think whether this makes sense for categorical predictors? Shouldn't affect the data distribution I think
     if(prep != 'none'){
       # TODO: Possibly allow this for multiple correction at once?
       env <- adjustPredictors(env,option = prep)
@@ -63,10 +84,6 @@ methods::setMethod(
     # Assign an attribute to this object to keep track of it
     attr(env,'prep') <- prep
 
-    if(derivates !='none'){
-      # TODO: See maxnet etc code...
-      message('Derivative features not yet implemented.')
-    }
     # Mask predictors with existing background layer
     if(bgmask){
       env <- raster::mask(env,mask = x$background)
@@ -83,6 +100,44 @@ methods::setMethod(
               data = env
         )
       )
+    return(x)
+  }
+)
+
+#' Remove specific predictors from a distribution object
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param names [`Vector`] A Vector of character names describing the environmental stack
+#' @name rm_predictors
+NULL
+
+#' @name rm_predictors
+#' @rdname rm_predictors
+#' @exportMethod rm_predictors
+#' @export
+methods::setGeneric(
+  "rm_predictors",
+  signature = methods::signature("x", "names"),
+  function(x, names) standardGeneric("rm_predictors"))
+
+#' @name rm_predictors
+#' @rdname rm_predictors
+#' @usage \S4method{rm_predictors}{BiodiversityDistribution,vector}(x, names)
+methods::setMethod(
+  "rm_predictors",
+  methods::signature(x = "BiodiversityDistribution", names = "character"),
+  function(x, names ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.character(names) || assertthat::is.scalar(names) || is.vector(names)
+                            )
+    # TODO: Maybe implement a flexible wildcard, base::startsWith()
+    # Is there anything to remove
+    assertthat::assert_that(!is.Waiver(x$predictors),
+                            all( names %in% x$get_predictor_names() ),
+                            msg = 'Suggested variables not in model!')
+
+    # Finally set the data to the BiodiversityDistribution object
+    x$rm_predictors(names)
     return(x)
   }
 )

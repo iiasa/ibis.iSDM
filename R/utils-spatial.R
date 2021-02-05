@@ -42,6 +42,28 @@ intersecting_extents <- function(x, y) {
     sparse = FALSE)[[1]])
 }
 
+
+#' Extract polygon data from intersecting point data
+#' @param poly A [`sf`] object
+#' @param points A [`Spatial`] or [`sf`] object
+point_in_polygon <- function(poly, points){
+  assertthat::assert_that(
+    inherits(poly,'sf'),
+    inherits(points,'sf') || inherits(points,'Spatial') || inherits(points,'data.frame')
+  )
+  # Convert to sf
+  points <- sf::st_as_sf(points) %>%
+    # Convert to be sure
+    st_transform(crs = st_crs(poly))
+  assertthat::assert_that(
+    st_crs(poly) == st_crs(points)
+  )
+
+  # Within test
+  ov <- sf::st_join(points, poly, join = st_within)
+  return(ov)
+}
+
 #' Converts a bounding box to a Well Known Text polygon
 #'
 #' @param minx Minimum x value, or the most western longitude
@@ -290,8 +312,3 @@ fill_rasters <- function(post, background){
   )
   return(out)
 }
-
-# Checks whether a given point falls into a polygon
-# Preferably implement with sf
-# TBD
-# point.in.polygon()
