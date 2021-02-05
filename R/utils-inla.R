@@ -10,7 +10,8 @@
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
-                          is.character(variant)
+                          is.character(variant),
+                          variant == 'gpc' && !is.null(region.poly)
                           )
   # Precalculate the area of each
   # Get areas for Voronoi tiles around each integration point
@@ -22,23 +23,58 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
     w <- sapply(tiles, function(p) rgeos::area.poly(rgeos::intersect(as(cbind(p$x, p$y), 'gpc.poly'), poly.gpc)))
   } else {
     # Convert to Spatial Polygons
-    polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
-      p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
-      n <- nrow(p)
-      sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
-    }),proj4string = mesh$crs)
+    # polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
+    #   p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
+    #   n <- nrow(p)
+    #   sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
+    # }),proj4string = mesh$crs)
 
     # Calculate area of each polygon in km2
-    w <- st_area(
-      st_as_sf(polys)
-    ) %>% units::set_units("km²") %>% as.numeric()
+    # w <- st_area(
+    #   st_as_sf(polys)
+    # ) %>% units::set_units("km²") %>% as.numeric()
+
+    # Convert to sf object and calculate area of each polygon in km2
+    dp <- mesh_as_sf(mesh)
+    return(dp$areakm2)
   }
 
   assertthat::assert_that(is.vector(w))
   return(w)
 }
 
+#' Mesh to polygon script
+#' @param mesh [`inla.mesh`] mesh object
+#' @returns A [`sf`] object
+#' @noRd
 
+mesh_as_sf <- function(mesh) {
+  assertthat::assert_that(inherits(mesh,'inla.mesh'),
+                          mesh$manifold == 'R2' # Two-dimensional mesh
+  )
+  # Get the delaunay triangle points
+  tv <- mesh$graph$tv
+
+  # Now convert the delaunay triangles to spatial polygons
+  dp <- lapply(X = 1:nrow(tv),
+               FUN = function(index, points, pointindex) {
+    # Retrieve the vertex coordinates of the current triangle
+    cur <- pointindex[index, ]
+    # Construct a Polygons object to contain the triangle
+    Polygons(list(
+             Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
+             ID = index
+             )
+  }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
+    # Convert the polygons to a SpatialPolygons object
+    SpatialPolygons(., proj4string = mesh$crs) %>%
+    # Convert to sf
+    st_as_sf(.)
+  # Calculate and add area to the polygon
+  dp$areakm2 <- st_area(dp) %>% units::set_units("km²") %>% as.numeric()
+  dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
+  return(dp)
+}
 
 #' Function for creating a joint fitted and prediction stack
 #' @param stk_resp A stack object
@@ -61,9 +97,24 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   mat_pred <- INLA::inla.spde.make.A(mesh,
                              loc = as.matrix(cov[,1:2]) )
 
+
+  # Calculate e as relative area from the points
+  sfmesh <- mesh_as_sf( mesh )
+  # Set those not intersecting with the background to 0
+  ind <- suppressMessages( sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry() )
+
+  sfmesh[which( is.na(ind[,1]) ),'relarea'] <- 0
+  e <- suppressMessages(
+    point_in_polygon(
+      poly = sfmesh,
+      points = st_as_sf(cov[,1:2],coords = c('x','y'), crs = sp::proj4string(mesh$crs))
+    )$relarea
+  )
+
   # Single response
   ll_pred <- list()
   ll_pred[[ stk_resp$data$names[[1]] ]] <- NA # Set to NA to predict for fitted area
+  ll_pred[['e']] <- e
   # Effects
   ll_effects <- list()
   # Note, order adding this is important apparently...
@@ -88,7 +139,8 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   } else if("Ntrials" %in% stk_resp$data$names) {
     stop('TBD')
     stack.pred.response <- inla.stack(data=list(y=NA, Ntrials = rep(1,np)),
-                                      effects = list(list(data.frame(interceptA=rep(1,np))), env = pred.grid$cov, list(Bnodes=1:spde$n.spde)),
+                                      effects = list(list(data.frame(interceptA=rep(1,np))), env = pred.grid$cov,
+                                                     list(spatial.field=1:spde$n.spde)),
                                       A = A,
                                       tag = paste0('pred_', type) )
   } else {

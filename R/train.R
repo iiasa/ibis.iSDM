@@ -72,7 +72,7 @@ methods::setMethod(
     # Get predictors
     if(is.Waiver(x$get_predictor_names())) {
       # Dummy covariate of background raster
-      dummy <- x$background; names(dummy) <- 'dummy'
+      dummy <- data.frame(dummy = 1)
       model[['predictors']] <- dummy
       } else { model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE) }
     # Also set predictor names
@@ -81,13 +81,14 @@ methods::setMethod(
     # Extract estimates for point records
     poipo_env <- get_ngbvalue(
       coords = x$biodiversity$get_coordinates('poipo'),
-      env = x$predictors$get_data(df = TRUE, na.rm = FALSE),
+      env = model[['predictors']],
       field_space = c('x','y'),
       longlat = raster::isLonLat(x$background)
     )
 
     # Check whether predictors should be refined and do so
     if(rm_corPred){
+      message('Removing highly correlated variables...')
       co <- find_correlated_predictors(env = poipo_env %>% dplyr::select(-x,-y),
                                       keep = NULL, cutoff = 0.9, method = 'pear')
       if(length(co)>0){
@@ -96,7 +97,6 @@ methods::setMethod(
         model[['predictors']] <- model[['predictors']][which( model[['predictors']] %notin% co )]
       }
     }
-
 
     # assign default priors
     if(is.Waiver( x$priors )){
@@ -108,7 +108,7 @@ methods::setMethod(
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
       # Calculate latent spatial factor (saved in engine data)
-      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial()
+      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'normal')
     }
 
     # Format formulas

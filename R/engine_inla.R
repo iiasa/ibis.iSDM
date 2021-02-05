@@ -149,6 +149,22 @@ engine_inla <- function(x, optional_mesh = NULL,
           loc = as.matrix(model$data$poipo_values[,c('x','y')])
         )
 
+        # Calculate the offset
+        #e <- rep(0, nrow(model$data$poipo_values) )
+        # Calculate e as relative area from the points
+        sfmesh <- mesh_as_sf( self$get_data('mesh'))
+        # Set those not intersecting with the background to 0
+        ind <- suppressMessages(
+          sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry()
+        )
+        sfmesh[which( is.na(ind[,1]) ),'relarea'] <- 0
+        e <- suppressMessages(
+          point_in_polygon(
+            poly = sfmesh,
+            points = model$data$poipo
+          )$relarea
+        )
+
         # Create INLA stack
         # The three main inla.stack() arguments are a vector list with the data (data),
         # a list of projector matrices (each related to one block effect,
@@ -159,7 +175,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         ll_resp <- list()
         ll_resp[[ resp ]] <- cbind( model$data$poipo[,resp] )
         # A column for the offset
-        ll_resp[[ 'e' ]] <- rep(0, nrow(model$data$poipo_values) )
+        ll_resp[[ 'e' ]] <- e
 
         # Effects matrix
         ll_effects <- list()
@@ -173,8 +189,8 @@ engine_inla <- function(x, optional_mesh = NULL,
           # Get spatial object
           spde <- self$get_data('latentspatial')
           iset <- self$get_data('s.index')
-          ll_effects[['spatial.field']] <- iset#list(Bnodes = 1:spde$n.spde)
-          # Define projection matrix
+          ll_effects[['spatial.field']] <- list(spatial.field = 1:spde$n.spde) #iset
+          # Define projection matrix, has to match ll_effects
           # FIXME: Check that the below formulation is correct!
           A = list(mat_proj,1,mat_proj)
         } else {
@@ -186,7 +202,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         stk_obs <-
           INLA::inla.stack(
             data =  ll_resp,             # Response
-            A    =  A,                   # Predictor projection matrix. 1 is included to make a list
+            A    =  A,                   # Predictor projection matrix.
             effects = ll_effects,        # Effects matrix
             tag = paste0('obs_','poipo') # Description tag
           )
@@ -259,7 +275,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                                    control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                                    control.inla(int.strategy = "eb", # Empirical bayes for integration
                                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
-                                   num.threads = parallel::detectCores()-1
+                                   num.threads = parallel::detectCores() - 1
             )
             # Add results
             results <- rbind(results,
@@ -267,6 +283,8 @@ engine_inla <- function(x, optional_mesh = NULL,
                                         converged = fit$ok,
                                         waic = fit$waic$waic,
                                         dic = fit$dic$dic,
+                                        # conditional predictive ordinate values
+                                        cpo = sum(log(fit$cpo$cpo)) * -2,
                                         mean.deviance = fit$dic$mean.deviance ) )
             rm(fit)
           }
@@ -296,7 +314,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         )
 
         # Predict on full
-        fit_pred <- INLA::inla(formula = model$equation$poipo, # The specified formula
+        fit_pred <- INLA::inla(formula = master_form, # The specified formula
                                data  = stack_data_full,  # The data stack
                                quantiles = c(0.05, 0.5, 0.95),
                                E = INLA::inla.stack.data(self$get_data('stk_full'))$e,
