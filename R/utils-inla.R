@@ -103,12 +103,12 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   # Set those not intersecting with the background to 0
   ind <- suppressMessages( sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry() )
 
-  sfmesh[which( is.na(ind[,1]) ),'relarea'] <- 0
+  sfmesh[which( is.na(ind[,1]) ),c('relarea','areakm2')] <- NA
   e <- suppressMessages(
     point_in_polygon(
       poly = sfmesh,
       points = st_as_sf(cov[,1:2],coords = c('x','y'), crs = sp::proj4string(mesh$crs))
-    )$relarea
+    )$areakm2
   )
 
   # Single response
@@ -120,7 +120,7 @@ inla_make_prediction_stack <- function(stk_resp, cov, mesh, type, spde = NULL){
   # Note, order adding this is important apparently...
   ll_effects[['intercept']] <- list(intercept = rep(1,mesh$n) ) # FIXME: Potential source for bug. Think name of intersects need to differ if multiple models specified
   ll_effects[['predictors']] <- cov
-  if(!is.null(spde)) ll_effects[['spatial.field']] <- list(Bnodes = 1:spde$n.spde)
+  if(!is.null(spde)) ll_effects[['spatial.field']] <- list(spatial.field = 1:spde$n.spde)
   # Define A
   if(!is.null(spde)) {
       A = list(mat_pred, 1, mat_pred)

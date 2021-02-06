@@ -150,20 +150,20 @@ engine_inla <- function(x, optional_mesh = NULL,
         )
 
         # Calculate the offset
-        #e <- rep(0, nrow(model$data$poipo_values) )
+        e <- rep(0, nrow(model$data$poipo_values) )
         # Calculate e as relative area from the points
-        sfmesh <- mesh_as_sf( self$get_data('mesh'))
-        # Set those not intersecting with the background to 0
-        ind <- suppressMessages(
-          sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry()
-        )
-        sfmesh[which( is.na(ind[,1]) ),'relarea'] <- 0
-        e <- suppressMessages(
-          point_in_polygon(
-            poly = sfmesh,
-            points = model$data$poipo
-          )$relarea
-        )
+        # sfmesh <- mesh_as_sf( self$get_data('mesh'))
+        # # Set those not intersecting with the background to 0
+        # ind <- suppressMessages(
+        #   sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry()
+        # )
+        # sfmesh[which( is.na(ind[,1]) ),'relarea'] <- NA
+        # e <- suppressMessages(
+        #   point_in_polygon(
+        #     poly = sfmesh,
+        #     points = model$data$poipo
+        #   )$relarea
+        # )
 
         # Create INLA stack
         # The three main inla.stack() arguments are a vector list with the data (data),
