@@ -223,6 +223,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
                   }, xy2 = coords_env)
 
   out <- do.call(rbind,env_sub)
+  out[,field_space] <- as.data.frame(coords) # Ensure that coordinates are back in
   return(out)
 }
 
