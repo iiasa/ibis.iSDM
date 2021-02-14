@@ -3,6 +3,9 @@ NULL
 
 #' Use INLA as engine
 #'
+#' References
+#' https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
 #' @param max_distance Range of maximum distance between two nodes
@@ -16,7 +19,7 @@ NULL
 engine_inla <- function(x, optional_mesh = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
-                        cutoff = 0.1,
+                        cutoff = 1,
                         ...) {
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
@@ -77,7 +80,7 @@ engine_inla <- function(x, optional_mesh = NULL,
 
   # Calculate area in km²
   ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc')
+    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'relarea')
   )
 
   # Print a message in case there is already an engine object
@@ -105,10 +108,11 @@ engine_inla <- function(x, optional_mesh = NULL,
       #   binary_parameter("numeric_focus", numeric_focus),
       #   binary_parameter("verbose", verbose)
       #   ),
+      # https://becarioprecario.bitbucket.io/spde-gitbook/ch-intro.html#sec:toyexample
       # Spatial latent function
       calc_latent_spatial = function(self,type = 'pc', alpha = 2,
-                                     prior.range = c(5,0.001),
-                                     prior.sigma = c(0.5,0.05),
+                                     prior.range = c(1, 0.001),
+                                     prior.sigma = c(0.5, 0.05),
                                      ...){
         if(type=='pc'){
           # Define PC Matern SPDE model and save
@@ -134,37 +138,27 @@ engine_inla <- function(x, optional_mesh = NULL,
       get_equation_latent_spatial = function(self,spatial_object = 'spde'){
         if( 'latentspatial' %notin% names(self$data) ) self$get_equation_latent_spatial()
         return(
-          paste0('f(spatial.field, model = ',spatial_object,')')
+          paste0('f(intercept, model = ',spatial_object,')')
         )
       },
-      # Setup computation function
-      setup = function(self, model, ...){
-        # TODO: Some assert calls
-        # TODO: Potentially add a setup log later for this function
+      # Calculate stack for presence only records
+      calc_stack_poipo = function(self, model, intercept = TRUE) {
+        assertthat::assert_that(
+          is.list(model),
+          'poipo' %in% names(model$data),'poipo_response' %in% names(model$data),
+          'poipo_values' %in% names(model$data), 'poipo_expect' %in% names(model$data)
+        )
+        # Get Environment records
+        env <- model$data$poipo_values
 
-        # For poipo
-        # Create INLA projection matrix from mesh to observed data from the points
+        # Include intercept in here
+        if(intercept) env$intercept_poipo <- 1
+
+        # Set up projection matrix for the data
         mat_proj <- INLA::inla.spde.make.A(
           mesh = self$get_data('mesh'),
-          loc = as.matrix(model$data$poipo_values[,c('x','y')])
+          loc = as.matrix(env[,c('x','y')])
         )
-
-        # Calculate the offset
-        e <- rep(0, nrow(model$data$poipo_values) )
-        # Calculate e as relative area from the points
-        # sfmesh <- mesh_as_sf( self$get_data('mesh'))
-        # # Set those not intersecting with the background to 0
-        # ind <- suppressMessages(
-        #   sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry()
-        # )
-        # sfmesh[which( is.na(ind[,1]) ),'relarea'] <- NA
-        # e <- suppressMessages(
-        #   point_in_polygon(
-        #     poly = sfmesh,
-        #     points = model$data$poipo
-        #   )$relarea
-        # )
-
         # Create INLA stack
         # The three main inla.stack() arguments are a vector list with the data (data),
         # a list of projector matrices (each related to one block effect,
@@ -173,71 +167,108 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Response for inla stack
         resp <- model$data$poipo_response
         ll_resp <- list()
-        ll_resp[[ resp ]] <- cbind( model$data$poipo[,resp] )
-        # A column for the offset
-        ll_resp[[ 'e' ]] <- e
+        ll_resp[[ resp ]] <- cbind( rep(1, nrow(env)) ) #FIXME Set to NA if multiple likelihoods
+        # Add the expect
+        ll_resp[[ 'e' ]] <- model$data$poipo_expect
 
         # Effects matrix
         ll_effects <- list()
         pred_names <- model$predictors_names
-      # Note, order adding this is important apparently...
-        ll_effects[['intercept']] <- list(intercept = rep(1, self$get_data('mesh')$n ))
-        ll_effects[['predictors']] <- model[['data']][['poipo_values']][,pred_names] # Get only the covariates to use
-        # Add latent
-        if(x$get_latent()=='<Spatial>'){
-          if('latentspatial' %notin% names(self$data)) self$calc_latent_spatial()
-          # Get spatial object
-          spde <- self$get_data('latentspatial')
-          iset <- self$get_data('s.index')
-          ll_effects[['spatial.field']] <- list(spatial.field = 1:spde$n.spde) #iset
-          # Define projection matrix, has to match ll_effects
-          # FIXME: Check that the below formulation is correct!
-          A = list(mat_proj,1,mat_proj)
-        } else {
-          spde <- NULL # Set SPDE to NULL
-          A = list(mat_proj, 1)
-        }
+        # Note, order adding this is important apparently...
+        ll_effects[['predictors']] <- env[,pred_names]
+        ll_effects[['intercept']] <- list(intercept = seq(1, self$get_data('mesh')$n) )
 
-        # Create the stack for the fitted model
-        stk_obs <-
-          INLA::inla.stack(
-            data =  ll_resp,             # Response
-            A    =  A,                   # Predictor projection matrix.
-            effects = ll_effects,        # Effects matrix
-            tag = paste0('obs_','poipo') # Description tag
-          )
-        # Save this stack in data
-        self$set_data('stk_obs', stk_obs)
+        # Check whether equation has spatial field
+        # if( 'spde' %in% all.vars(model$equation$poipo) ){
+        #   # Get Objects
+        #   spde <- self$get_data('latentspatial')
+        #   iset <- self$get_data('s.index')
+        #   ll_effects[['spatial.field']] <- iset
+        #   # Define A
+        #   A <- list(1, mat_proj, mat_proj)
+        # } else {
+          A <- list(1, mat_proj )
+        # }
 
-        # Create and join prediction stack
-        stk_pred <- inla_make_prediction_stack(stk_resp = stk_obs,
-                                               cov = model$predictors,
-                                               mesh = self$get_data('mesh'),
-                                               type = 'poipo',
-                                               spde = spde)
-        # Save this stack in data
-        self$set_data('stk_pred', stk_pred)
-        # And also the joined stack
-        self$set_data('stk_full', INLA::inla.stack(stk_obs, stk_pred) )
+        # Define stack
+        stk <- INLA::inla.stack(
+          data     = ll_resp,
+          A        = A,
+          effects  = ll_effects,
+          tag      = 'stk_poipo'
+        )
+        # Set the stack
+        self$set_data('stk_poipo',stk)
+        invisible()
+      },
+      # Setup computation function
+      setup = function(self, model, ...){
+        # TODO: Some assert calls
+        # TODO: Potentially add a setup log later for this function
+
+        # Calculate observation stack INLA stack
+        self$calc_stack_poipo(model, intercept = TRUE)
+        stk_poipo <- self$get_data('stk_poipo')
+
+        # Make integration stack
+        stk_int <- inla_make_integration_stack(
+          mesh      = self$get_data('mesh'),
+          mesh.area = self$get_data('mesh.area'),
+          cov       = model$predictors,
+          pred_names= model$predictors_names,
+          bdry      = model$background,
+          resp      = model$data$poipo_response
+        )
+        self$set_data('stk_int',stk_int)
+
+        if( 'spde' %in% all.vars(model$equation$poipo) ){
+          # Get spatial index
+          spde <- self$get_data('s.index')
+        } else { spde <- NULL}
+        # Make projection stack
+        stk_pred_poipo <- inla_make_prediction_stack(
+          stk_resp = stk_poipo,
+          mesh      = self$get_data('mesh'),
+          mesh.area = self$get_data('mesh.area'),
+          cov       = model$predictors,
+          pred.names= model$predictors_names,
+          type = 'poipo',
+          spde = spde
+        )
+        self$set_data('stk_pred_poipo',stk_pred_poipo)
+
+        # Now join all stacks and save in full
+        # Note: If integrated stack is included, E must be set to relative area (in mesh.area).
+        self$set_data('stk_full', INLA::inla.stack(stk_poipo, stk_int,
+                                                   stk_pred_poipo) )
 
         invisible()
       },
       # Main INLA training function ----
-      train = function(self, model, varsel = TRUE) {
+      train = function(self, model, varsel = TRUE, verbose = FALSE,...) {
         # Check that all inputs are there
         assertthat::assert_that(
           is.list(model),length(model)>1,
-          'stk_obs' %in% names(self$data), inherits(self$get_data('stk_obs'),'inla.data.stack'),
-          'stk_pred' %in% names(self$data), inherits(self$get_data('stk_pred'),'inla.data.stack'),
+          any(  (c('stk_poipo','stk_polpo','stk_polpa','stk_poipa') %in% names(self$data)) ),
+          'stk_int' %in% names(self$data), inherits(self$get_data('stk_int'),'inla.data.stack'),
           'stk_full' %in% names(self$data), inherits(self$get_data('stk_full'),'inla.data.stack')
         )
         # Get the datasets
-        if(x$get_latent()=='<Spatial>'){
-            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_obs'),spde = self$get_data('latentspatial'))
-            stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'),spde = self$get_data('latentspatial'))
+        stk_poipo <- self$get_data('stk_poipo')
+        stk_int <- self$get_data('stk_int')
+        stk_full <- self$get_data('stk_full')
+        # Make joint stack of data and integrations
+        # TODO: Needs to be done for all other types
+        stk_var <- INLA::inla.stack(stk_poipo, stk_int)
+
+        if('spde' %in% all.vars(model$equation$poipo) ){
+            spde <- self$get_data('latentspatial')
+            stack_data_resp <- INLA::inla.stack.data(stk_var, spde = self$get_data('latentspatial'))
+            stack_data_full <- INLA::inla.stack.data(stk_full, spde = self$get_data('latentspatial'))
           } else {
-            stack_data_resp <- INLA::inla.stack.data(self$get_data('stk_obs'))
-            stack_data_full <- INLA::inla.stack.data(self$get_data('stk_full'))
+            # FIXME: Make sure this work for other types in the future
+            stack_data_resp <- INLA::inla.stack.data(stk_var)
+            stack_data_full <- INLA::inla.stack.data(stk_full)
           }
         # ----------- #
         # Provided or default formula
@@ -247,7 +278,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         if(varsel){
           message('Performing variable selection...')
           #
-          if(x$get_latent()=='<Spatial>') speq <- self$get_equation_latent_spatial() else speq <- NULL
+          if('spde' %in% all.vars(model$equation$poipo) ) speq <- self$get_equation_latent_spatial() else speq <- NULL
           # Get formula list
           lf <- formula_combinations(varnames = model$predictors_names,
                                response = all.vars(master_form)[1],
@@ -260,17 +291,17 @@ engine_inla <- function(x, optional_mesh = NULL,
           pb <- progress::progress_bar$new(total = length(lf))
 
           results <- data.frame(stringsAsFactors = FALSE)
-          # Now loop through
+          # Now loop through the formulas
           for(k in 1:length(lf)){
             pb$tick()
 
             # Train the model on the response
             fit <- INLA::inla(formula = as.formula(lf[k]), # The specified formula
                                    data  = stack_data_resp,  # The data stack
-                                   E = INLA::inla.stack.data(self$get_data('stk_obs'))$e, # Exposure (Eta) for Poisson model
+                                   E = INLA::inla.stack.data(stk_var)$e, # Expectation (Eta) for Poisson model
                                    family= 'poisson',   # Family the data comes from
                                    control.family = list(link = "log"), # Control options
-                                   control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_obs')),
+                                   control.predictor=list(A = INLA::inla.stack.A(stk_var),
                                                           link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                                    control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                                    control.inla(int.strategy = "eb", # Empirical bayes for integration
@@ -289,7 +320,9 @@ engine_inla <- function(x, optional_mesh = NULL,
             rm(fit)
           }
           rm(pb)
-          # Determine best model and set of variables
+          # Determine best model by DIC
+          # Alternative: Negative sum of the log CPO
+          #   - sum(log(m$cpo$cpo), na.rm = na.rm)
           results <- results[order(results$dic,decreasing = FALSE),]
           results$diff_dic <- c(0, diff(results$dic) )
           # Set new master form
@@ -302,12 +335,13 @@ engine_inla <- function(x, optional_mesh = NULL,
         fit_resp <- INLA::inla(formula = master_form, # The specified formula
                           data  = stack_data_resp,  # The data stack
                           quantiles = c(0.05, 0.5, 0.95),
-                          E = INLA::inla.stack.data(self$get_data('stk_obs'))$e, # Exposure (Eta) for Poisson model
-                          family= 'poisson',   # Family the data comes from
+                          E = INLA::inla.stack.data(stk_var)$e, # Expectation (Eta) for Poisson model
+                          family = 'poisson',   # Family the data comes from
                           control.family = list(link = "log"), # Control options
-                          control.predictor=list(A = INLA::inla.stack.A(self$get_data('stk_obs')),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                          control.predictor=list(A = INLA::inla.stack.A(stk_var),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                          verbose = FALSE, # To see the log of the model runs
+                          #control.fixed = list(prec.intercept = 0.001), # Added to see whether this changes GMRFlib convergence issues
+                          verbose = verbose, # To see the log of the model runs
                           control.inla(int.strategy = "eb", # Empirical bayes for integration
                                        strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                           num.threads = parallel::detectCores()-1
@@ -317,19 +351,26 @@ engine_inla <- function(x, optional_mesh = NULL,
         fit_pred <- INLA::inla(formula = master_form, # The specified formula
                                data  = stack_data_full,  # The data stack
                                quantiles = c(0.05, 0.5, 0.95),
-                               E = INLA::inla.stack.data(self$get_data('stk_full'))$e,
+                               E = INLA::inla.stack.data(stk_full)$e,
                                family= 'poisson',   # Family the data comes from
                                control.family = list(link = "log"), # Control options
-                               control.predictor = list(A = INLA::inla.stack.A(self$get_data('stk_full')), link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                               control.predictor = list(A = INLA::inla.stack.A(stk_full), link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                                control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                               verbose = FALSE, # To see the log of the model runs
+                               control.mode = list(theta = fit_resp$mode$theta, restart = FALSE), # Don't restart and use previous thetas
+                               #control.fixed = list(prec.intercept = 0.001), # Added to see whether this changes GMRFlib convergence issues
+                               verbose = verbose, # To see the log of the model runs
                                control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                            strategy = 'simplified.laplace'), # To make it run faster...
+                                            strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                                num.threads = parallel::detectCores() - 1
         )
-
+        # Projector
+        # wh <- apply(bbox(border), 1, diff)
+        # nxy <- round(300 * wh / wh[1])
+        # pgrid <- inla.mesh.projector(mesh, xlim = bbox(border)[1, ],
+        #                              ylim = bbox(border)[2, ], dims = nxy)
+        # pj <- inla.mesh.project(pgrid, field = stpred[, j])
         # Create a spatial prediction
-        index.pred <- INLA::inla.stack.index(self$get_data('stk_full'), 'pred_poipo')$data
+        index.pred <- INLA::inla.stack.index(stk_full, 'pred_poipo')$data
         post <- fit_pred$summary.linear.predictor[index.pred, ]
         assertthat::assert_that(nrow(post)>0)
         # TODO: Wrap Backtransform into a distribution dependent function

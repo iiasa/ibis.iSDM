@@ -49,6 +49,7 @@ methods::setMethod(
                              msg = 'No biodiversity data specified.')
 
     # --- #
+    #### Defining model objects ----
     # Set model object for fitting
     model <- list()
 
@@ -72,11 +73,15 @@ methods::setMethod(
     # Get predictors
     if(is.Waiver(x$get_predictor_names())) {
       # Dummy covariate of background raster
-      dummy <- data.frame(dummy = 1)
+      dummy <- as.data.frame( raster(extent(x$background),nrow=100,ncol=100,val=1), xy = TRUE );names(dummy)[3] <- 'dummy'
       model[['predictors']] <- dummy
-      } else { model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE) }
-    # Also set predictor names
-    model[['predictors_names']] <- x$get_predictor_names()
+      model[['predictors_names']] <- 'dummy'
+    } else {
+      # Convert Predictors to data.frame
+      model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
+      # Also set predictor names
+      model[['predictors_names']] <- x$get_predictor_names()
+    }
 
     # Extract estimates for point records
     poipo_env <- get_ngbvalue(
@@ -87,9 +92,10 @@ methods::setMethod(
     )
 
     # Check whether predictors should be refined and do so
-    if(rm_corPred){
+    if(rm_corPred && model[['predictors_names']] != 'dummy'){
       message('Removing highly correlated variables...')
-      co <- find_correlated_predictors(env = poipo_env %>% dplyr::select(-x,-y),
+      test <- subset(poipo_env, complete.cases(poipo_env));test$x <- NULL;test$y <- NULL
+      co <- find_correlated_predictors(env = test,
                                       keep = NULL, cutoff = 0.9, method = 'pear')
       if(length(co)>0){
         poipo_env %>% dplyr::select(-all_of(co)) -> poipo_env
@@ -108,7 +114,7 @@ methods::setMethod(
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
       # Calculate latent spatial factor (saved in engine data)
-      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'normal')
+      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'pc')
     }
 
     # Format formulas
@@ -138,15 +144,32 @@ methods::setMethod(
 
     # Engine specific preparations
     if( inherits(x$engine,'INLA-Engine') ){
-      # Sample nearest predictor values
+      # Include nearest predictor values for each
       types <- names( x$biodiversity$get_types() )
-      if('poipo' %in% types) model[['data']][['poipo_values']] <- poipo_env
+      if('poipo' %in% types) {
+        model[['data']][['poipo_values']] <- poipo_env
+        # Calculate the expectaction
+        # Calculate e as relative area from the points
+        # sfmesh <- mesh_as_sf( self$get_data('mesh'))
+        # # Set those not intersecting with the background to 0
+        # ind <- suppressMessages(
+        #   sf::st_join(sfmesh, x$background, join = st_within)[,3] %>% st_drop_geometry()
+        # )
+        # sfmesh[which( is.na(ind[,1]) ),'relarea'] <- NA
+        # e <- suppressMessages(
+        #   point_in_polygon(
+        #     poly = sfmesh,
+        #     points = model$data$poipo
+        #   )$relarea
+        # )
+        model[['data']][['poipo_expect']] <- rep(0, nrow(poipo_env) )
+      }
 
       # Run the engine setup script
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model,varsel = varsel)
+      out <- x$engine$train(model,varsel = varsel,...)
 
     } else { stop('Engines not implemented yet')}
 

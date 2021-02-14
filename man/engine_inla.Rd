@@ -9,7 +9,7 @@ engine_inla(
   optional_mesh = NULL,
   max.edge = c(1, 5),
   offset = c(1, 1),
-  cutoff = 0.1,
+  cutoff = 1,
   ...
 )
 }
@@ -25,5 +25,6 @@ engine_inla(
 \item{max_distance}{Range of maximum distance between two nodes}
 }
 \description{
-Use INLA as engine
+References
+https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
 }
