@@ -6,7 +6,7 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env [`Raster`] A [`RasterStack-class`] or [`RasterLayer-class`] object.
 #' @param names [`Vector`] A Vector of character names describing the environmental stack
-#' @param prep [`Vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @param transform [`Vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
 #' @param ... Other parameters passed down
@@ -29,7 +29,7 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, prep = 'scale', derivates = 'none', bgmask = TRUE, ...) standardGeneric("add_predictors"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ...) standardGeneric("add_predictors"))
 
 # TODO: Support other objects other than Raster stacks such as data.frames and stars objects
 #' @name add_predictors
@@ -38,10 +38,10 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
-  function(x, env, names = NULL, prep = 'scale', derivates = 'none', bgmask = TRUE, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(env, 'Raster'),
-                            prep %in% c('none','pca', 'scale', 'norm'),
+                            transform %in% c('none','pca', 'scale', 'norm'),
                             derivates %in% c('none', 'elu', 'hinge', 'quadratic'),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names)
     )
@@ -77,12 +77,12 @@ methods::setMethod(
 
     # Standardization and scaling
     # TODO: Think whether this makes sense for categorical predictors? Shouldn't affect the data distribution I think
-    if(prep != 'none'){
+    if(transform != 'none'){
       # TODO: Possibly allow this for multiple correction at once?
-      env <- adjustPredictors(env,option = prep)
+      env <- adjustPredictors(env,option = transform)
     }
     # Assign an attribute to this object to keep track of it
-    attr(env,'prep') <- prep
+    attr(env,'transform') <- transform
 
     # Mask predictors with existing background layer
     if(bgmask){
@@ -138,6 +138,53 @@ methods::setMethod(
 
     # Finally set the data to the BiodiversityDistribution object
     x$rm_predictors(names)
+    return(x)
+  }
+)
+
+#' Select specific predictors from a distribution object
+#' For instance those previously selected
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param names [`Vector`] A Vector of character names describing the environmental stack
+#' @name sel_predictors
+NULL
+
+#' @name sel_predictors
+#' @rdname sel_predictors
+#' @exportMethod sel_predictors
+#' @export
+methods::setGeneric(
+  "sel_predictors",
+  signature = methods::signature("x", "names"),
+  function(x, names) standardGeneric("sel_predictors"))
+
+#' @name sel_predictors
+#' @rdname sel_predictors
+#' @usage \S4method{sel_predictors}{BiodiversityDistribution,vector}(x, names)
+methods::setMethod(
+  "sel_predictors",
+  methods::signature(x = "BiodiversityDistribution", names = "character"),
+  function(x, names ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.character(names) || assertthat::is.scalar(names) || is.vector(names)
+    )
+    # TODO: Maybe implement a flexible wildcard, base::startsWith()
+    # Is there anything to remove
+    assertthat::assert_that(!is.Waiver(x$predictors),
+                            any( names %in% x$get_predictor_names() ),
+                            msg = 'Suggested variables not in model!')
+
+    # Get current predictors
+    varnames <- x$get_predictor_names()
+    varnames <- varnames[which(varnames %notin% names)]
+
+    # Remove all predictors listed
+    if(length(varnames)>=1) x$rm_predictors(varnames)
+    # Check wether any predictors are not in names and raise warning otherwise
+    assertthat::validate_that(
+      all( names %in% x$get_predictor_names()),msg = 'Not all predictors were present in distribution object.'
+    )
     return(x)
   }
 )

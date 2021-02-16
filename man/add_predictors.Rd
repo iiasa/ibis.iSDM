@@ -8,7 +8,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  prep = "scale",
+  transform = "scale",
   derivates = "none",
   bgmask = TRUE,
   ...
@@ -23,7 +23,7 @@ add_predictors(
 
 \item{names}{\code{\link{Vector}} A Vector of character names describing the environmental stack}
 
-\item{prep}{\code{\link{Vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+\item{transform}{\code{\link{Vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
 
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )}
 

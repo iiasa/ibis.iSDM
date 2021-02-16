@@ -136,9 +136,8 @@ engine_inla <- function(x, optional_mesh = NULL,
       },
       # Get latent spatial equation bit
       get_equation_latent_spatial = function(self,spatial_object = 'spde'){
-        if( 'latentspatial' %notin% names(self$data) ) self$get_equation_latent_spatial()
         return(
-          paste0('f(intercept, model = ',spatial_object,')')
+          paste0('f(spatial.field, model = ',spatial_object,')')
         )
       },
       # Calculate stack for presence only records
@@ -179,16 +178,13 @@ engine_inla <- function(x, optional_mesh = NULL,
         ll_effects[['intercept']] <- list(intercept = seq(1, self$get_data('mesh')$n) )
 
         # Check whether equation has spatial field
-        # if( 'spde' %in% all.vars(model$equation$poipo) ){
-        #   # Get Objects
-        #   spde <- self$get_data('latentspatial')
-        #   iset <- self$get_data('s.index')
-        #   ll_effects[['spatial.field']] <- iset
-        #   # Define A
-        #   A <- list(1, mat_proj, mat_proj)
-        # } else {
-          A <- list(1, mat_proj )
-        # }
+         if( 'spde' %in% all.vars(model$equation$poipo) ){
+           # Get Index Objects
+           iset <- self$get_data('s.index')
+           ll_effects[['intercept']] <- c(ll_effects[['intercept']], iset)
+         }
+        # Define A
+        A <- list(1, mat_proj)
 
         # Define stack
         stk <- INLA::inla.stack(

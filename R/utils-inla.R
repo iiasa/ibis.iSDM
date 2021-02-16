@@ -177,13 +177,9 @@ inla_make_prediction_stack <- function(stk_resp, cov, pred.names, mesh, mesh.are
   # Note, order adding this is important apparently...
   ll_effects[['predictors']] <- cov[,pred.names]
   ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) ) # FIXME: Potential source for bug. Think name of intersects need to differ if multiple likelihoods specified
-#  if(!is.null(spde)) ll_effects[['spatial.field']] <- spde
+  if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
   # Define A
-#  if(!is.null(spde)) {
-#    A <- list(1, mat_pred, mat_pred)
-#  } else {
-    A <- list(1, mat_pred )
-#  }
+  A <- list(1, mat_pred )
 
   # Create stack depending on the number of variables in response
   # if( length(stk_resp$data$names[[1]]) > 1) {

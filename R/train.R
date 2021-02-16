@@ -114,7 +114,7 @@ methods::setMethod(
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
       # Calculate latent spatial factor (saved in engine data)
-      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'pc')
+      if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'mat')
     }
 
     # Format formulas
@@ -125,11 +125,11 @@ methods::setMethod(
       if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
         # Construct formula with all variables
         f <- formula(
-                  paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
-                         0, #ifelse(x$show_biodiversity_length()==1,1,0),
-                         ' +',
-                         paste( model[['predictors_names']], collapse = ' + ' )  )
-                )
+          paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
+                 0, #ifelse(x$show_biodiversity_length()==1,1,0),
+                 ' +',
+                 paste('f(', model[['predictors_names']],', model = \'linear\')', collapse = ' + ' )  )
+        )
         if(x$get_latent()=="<Spatial>"){
           # Update with spatial term
           f <- update.formula(f, paste0(" ~ . + ",x$engine$get_equation_latent_spatial() ) )
@@ -137,7 +137,7 @@ methods::setMethod(
       } else{
         stop('TBD')
         # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
-        }
+      }
       model[['equation']][[ty]] <- f
       rm(f)
     }
