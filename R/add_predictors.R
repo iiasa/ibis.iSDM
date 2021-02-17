@@ -31,6 +31,22 @@ methods::setGeneric(
   signature = methods::signature("x", "env"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ...) standardGeneric("add_predictors"))
 
+#' @name add_predictors
+#' @rdname distribution
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
+  function(x, env, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+
+    # Convert env to stack if it is a single layer only
+    env = raster::stack(env)
+
+    add_predictors(x, env, ...)
+  }
+)
+
 # TODO: Support other objects other than Raster stacks such as data.frames and stars objects
 #' @name add_predictors
 #' @rdname add_predictors
