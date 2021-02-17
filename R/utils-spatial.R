@@ -313,3 +313,36 @@ fill_rasters <- function(post, background){
   )
   return(out)
 }
+
+#' Clean up raster layer from disk
+#'
+#' @param A [`raster`] object
+#' @noRd
+clean_rasterfile <- function(x, verbose = FALSE)
+{
+  stopifnot(grepl("Raster", class(x)))
+  if (!fromDisk(x))
+    return(NULL)
+  sink(tempfile())
+  tdir = rasterOptions()[["tmpdir"]]
+  sink(NULL)
+  if (class(x) == "RasterLayer")
+    files = basename(x@file@name)
+  if (class(x) == "RasterStack")
+    files = do.call(c, lapply(methods::slot(x, "layers"),
+                              function(x) x@file@name))
+  files = files[file.exists(files)]
+  if (length(files) == 0)
+    return(NULL)
+  lapply(files, function(f) {
+    if (fromDisk(x) & file.exists(f))
+      file.remove(f, sub("grd", "gri", f))
+    if (verbose) {
+      print(paste("Deleted: ", f))
+      print(paste("Deleted: ", sub("grd", "gri",
+                                   f)))
+    }
+  })
+  parent.var.name <- deparse(substitute(x))
+  rm(list = parent.var.name, envir = sys.frame(-1))
+}
