@@ -52,7 +52,7 @@ methods::setMethod(
     }
 
     # -------------- #
-    if(methid == 'binary'){
+    if(method == 'binary'){
       dis <- ras_range
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){

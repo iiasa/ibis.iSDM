@@ -23,6 +23,20 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
 
     poly.gpc <- as(region.poly@polygons[[1]]@Polygons[[1]]@coords,'gpc.poly')
     w <- sapply(tiles, function(p) rgeos::area.poly(rgeos::intersect(as(cbind(p$x, p$y), 'gpc.poly'), poly.gpc)))
+  } else if (variant == 'gpc2'){
+    # Try to convert to spatial already
+    if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
+    tiles <- SDraw::voronoi.polygons(SpatialPoints(mesh$loc[, 1:2]))
+    w <- sapply(1:length(tiles), function(p) {
+      aux <- tiles[p, ]
+
+      if(rgeos::gIntersects(aux, region.poly) ) {
+        return(rgeos::gArea(rgeos::gIntersection(aux, region.poly)))
+      } else {
+        return(0)
+      }
+    })
+    assertthat::assert_that(assertthat::are_equal(sum(w), rgeos::gArea(region.poly) )) # Security check
   } else {
     # Convert to Spatial Polygons
     polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {

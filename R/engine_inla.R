@@ -80,7 +80,7 @@ engine_inla <- function(x, optional_mesh = NULL,
 
   # Calculate area in km²
   ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'relarea')
+    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
   )
 
   # Print a message in case there is already an engine object
