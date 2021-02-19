@@ -117,6 +117,20 @@ methods::setMethod(
       if(x$get_latent()=="<Spatial>") x$engine$calc_latent_spatial(type = 'mat')
     }
 
+    # Get offset if existing
+    if(!is.Waiver(x$offset)){
+      # FIXME: Only specified for poipo. need to be consistent for other effects
+      # Extract offset for each observed point
+      poipo_offset <- get_ngbvalue(
+        coords = x$biodiversity$get_coordinates('poipo'),
+        env = as.data.frame(x$offset, xy = TRUE),
+        field_space = c('x','y'),
+        longlat = raster::isLonLat(x$background)
+      )
+      model[['offset']] <- as.data.frame(x$offset, xy = TRUE)
+      model[['offset_poipo']] <- poipo_offset
+    }
+
     # Format formulas
     model[['equation']] <- list()
     types <- names( x$biodiversity$get_types() )
@@ -126,10 +140,13 @@ methods::setMethod(
         # Construct formula with all variables
         f <- formula(
           paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
-                 0, #ifelse(x$show_biodiversity_length()==1,1,0),
+                 # Add intercept if offset included
+                 0,#ifelse(is.Waiver(x$offset), 0, 1), #ifelse(x$show_biodiversity_length()==1,1,0),
                  ' +',
                  paste('f(', model[['predictors_names']],', model = \'linear\')', collapse = ' + ' )  )
         )
+        # Add offset if specified
+        if(!is.Waiver(x$offset)){ f <- update.formula(f, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
         if(x$get_latent()=="<Spatial>"){
           # Update with spatial term
           f <- update.formula(f, paste0(" ~ . + ",x$engine$get_equation_latent_spatial() ) )

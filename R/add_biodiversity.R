@@ -155,7 +155,7 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c('X','Y
                                                                                       'POLYGON','MULTIPOLYGON'))
 
   # If data.frame or tibble, check whether coordinates are in there
-  if((!inherits(x,'sf') && is.data.frame(x)) || tibble::is_tibble(x)){
+  if(!(inherits(x,'sf') )){
     # Check whether field_space columns are present
 
     # FIXME: Implement a lookup of commonly used column names

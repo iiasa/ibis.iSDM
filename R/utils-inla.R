@@ -162,13 +162,14 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry, 
 #' @param stk_resp A inla stack object
 #' @param cov The covariate data stack
 #' @param pred.names The predictors to use
+#' @param offset If an offset is specified, use it
 #' @param mesh The background projection mesh
 #' @param mesh.area The area calculate for the mesh
 #' @param type Name to use
 #' @param spde An spde field if specified
 #' @noRd
 
-inla_make_prediction_stack <- function(stk_resp, cov, pred.names, mesh, mesh.area, type, spde = NULL){
+inla_make_prediction_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area, type, spde = NULL){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
@@ -192,6 +193,7 @@ inla_make_prediction_stack <- function(stk_resp, cov, pred.names, mesh, mesh.are
   ll_effects[['predictors']] <- cov[,pred.names]
   ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) ) # FIXME: Potential source for bug. Think name of intersects need to differ if multiple likelihoods specified
   if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+  if(!is.null(offset)) ll_effects[['predictors']] <- cbind(ll_effects[['predictors']], offset)
   # Define A
   A <- list(1, mat_pred )
 

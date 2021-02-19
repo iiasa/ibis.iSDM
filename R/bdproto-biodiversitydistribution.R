@@ -23,6 +23,7 @@ BiodiversityDistribution <- bdproto(
   predictors    = new_waiver(),
   priors        = new_waiver(),
   latentfactors = new_waiver(),
+  offset        = new_waiver(),
   log           = new_waiver(),
   engine        = new_waiver(),
 
@@ -32,6 +33,7 @@ BiodiversityDistribution <- bdproto(
 
     ex =  self$show_background_info()
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
+    of = ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", self$get_offset(),">" ) )
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
                    "\nBackground extent: ",
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
@@ -43,6 +45,7 @@ BiodiversityDistribution <- bdproto(
                    "\n  predictors:     ", pn,
                    "\n  priors:         ", "Not yet implemented",
                    "\n  latent factors: ", paste(self$get_latent(),collapse = ', '),
+                   of,
                    "\n  log:            ", "Not yet implemented",
                    "\n  engine:         ", self$get_engine()
                    )
@@ -102,6 +105,18 @@ BiodiversityDistribution <- bdproto(
   get_engine = function(self){
     if(is.Waiver(self$engine)) return('None')
     self$engine$show()
+  },
+  # Set offset
+  # FIXME: For logical consistency could define a new bdproto object
+  set_offset = function(self, x){
+    assertthat::assert_that(inherits(x, "Raster"))
+    if (!is.Waiver(self$offset)) warning("Overwriting previously defined offset.")
+    self$offset <- x
+  },
+  # Get offset (print name)
+  get_offset = function(self){
+    if(is.Waiver(self$offset)) return('None')
+    names( self$offset )
   },
   # Remove predictors
   rm_predictors = function(self, names){

@@ -177,6 +177,13 @@ engine_inla <- function(x, optional_mesh = NULL,
         ll_effects[['predictors']] <- env[,pred_names]
         ll_effects[['intercept']] <- list(intercept = seq(1, self$get_data('mesh')$n) )
 
+        # Add offset if specified
+        if('offset_poipo' %in% names(model)){
+         ll_effects[['predictors']] <- cbind( ll_effects[['predictors']],
+                                              subset(model[['offset_poipo']],select = 3)
+                                              )
+        }
+
         # Check whether equation has spatial field
          if( 'spde' %in% all.vars(model$equation$poipo) ){
            # Get Index Objects
@@ -217,17 +224,22 @@ engine_inla <- function(x, optional_mesh = NULL,
         )
         self$set_data('stk_int',stk_int)
 
+        # ------------------ #
         if( 'spde' %in% all.vars(model$equation$poipo) ){
           # Get spatial index
           spde <- self$get_data('s.index')
         } else { spde <- NULL}
+        # Check for existence of specified offset and use the full one in this case
+        if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
+
         # Make projection stack
         stk_pred_poipo <- inla_make_prediction_stack(
           stk_resp = stk_poipo,
-          mesh      = self$get_data('mesh'),
-          mesh.area = self$get_data('mesh.area'),
           cov       = model$predictors,
           pred.names= model$predictors_names,
+          offset    = offset,
+          mesh      = self$get_data('mesh'),
+          mesh.area = self$get_data('mesh.area'),
           type = 'poipo',
           spde = spde
         )
@@ -293,7 +305,7 @@ engine_inla <- function(x, optional_mesh = NULL,
 
             # Train the model on the response
             fit <- INLA::inla(formula = as.formula(lf[k]), # The specified formula
-                                   data  = stack_data_resp,  # The data stack
+                                   data = stack_data_resp,  # The data stack
                                    E = INLA::inla.stack.data(stk_var)$e, # Expectation (Eta) for Poisson model
                                    family= 'poisson',   # Family the data comes from
                                    control.family = list(link = "log"), # Control options
@@ -336,7 +348,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                           control.family = list(link = "log"), # Control options
                           control.predictor=list(A = INLA::inla.stack.A(stk_var),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                          #control.fixed = list(prec.intercept = 0.001), # Added to see whether this changes GMRFlib convergence issues
+                          #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
                           control.inla(int.strategy = "eb", # Empirical bayes for integration
                                        strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
@@ -353,7 +365,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                                control.predictor = list(A = INLA::inla.stack.A(stk_full), link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                                control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                                control.mode = list(theta = fit_resp$mode$theta, restart = FALSE), # Don't restart and use previous thetas
-                               #control.fixed = list(prec.intercept = 0.001), # Added to see whether this changes GMRFlib convergence issues
+                               #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
                                verbose = verbose, # To see the log of the model runs
                                control.inla(int.strategy = "eb", # Empirical bayes for integration
                                             strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
