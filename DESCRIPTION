@@ -31,6 +31,7 @@ Depends:
     R(>= 3.5.0)
 Suggests:
     INLA,
+    mboost,
     progress,
     rstan,
     rstantools,
@@ -56,6 +57,7 @@ Collate:
     'utils-spatial.R'
     'data.R'
     'distribution.R'
+    'engine_gdb.R'
     'engine_inla.R'
     'identifier.R'
     'misc.R'

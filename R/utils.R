@@ -229,6 +229,10 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.9, method =
   )
   if(!is.null(keep)) x <- env %>% dplyr::select(-keep) else x <- env
 
+  # Get all variables that are singular or unique in value
+  sing_var <- which(apply(x, 2, var)==0)
+  if(length(sing_var)>0) x <- x[,-sing_var]
+
   # Calculate correlation matrix
   cm <- cor(x, method = method)
 
@@ -249,5 +253,7 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.9, method =
   deletecol <- unique(deletecol)
 
   # Which variables to discard
-  names(env)[deletecol]
+  o <- names(env)[deletecol]
+  if(length(sing_var)>0) o <- c(o,  names(sing_var) )
+  o
 }
