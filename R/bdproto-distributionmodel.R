@@ -23,26 +23,41 @@ DistributionModel <- bdproto(
   # Print message with summary of model
   print = function(self) {
     # TODO: Have a lot more information in here and to be prettified
-    if( length( self$fits ) != 0 ){
-      # Get strongest effects
-      ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
-              select = c('variable', 'mean'))
-      ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
+    # FIXME: Have engine-specific code moved to engine
+    if(inherits(self, 'INLA-Model')){
+      if( length( self$fits ) != 0 ){
+        # Get strongest effects
+        ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
+                     select = c('variable', 'mean'))
+        ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
 
-      # TODO: See if this can be plotted and extracted and shown here
-      # Provides the distance value (in the unit of the point coordinates) above
-      # which spatial dependencies become negligible
-      # model0.res<-inla.spde2.result(model0, 'spatial.field', spde, do.transf=TRUE)
-      # model0.res$summary.log.range.nominal
+        # TODO: See if this can be plotted and extracted and shown here
+        # Provides the distance value (in the unit of the point coordinates) above
+        # which spatial dependencies become negligible
+        # model0.res<-inla.spde2.result(model0, 'spatial.field', spde, do.transf=TRUE)
+        # model0.res$summary.log.range.nominal
 
-      message(paste0(
-        'Trained distribution model (',self$name,')',
-        '\n  \033[2mStrongest summary effects:\033[22m',
-        '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
-        '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
-      ))
+        message(paste0(
+          'Trained ',class(self)[1],' (',self$name,')',
+          '\n  \033[2mStrongest summary effects:\033[22m',
+          '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
+          '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
+        ))
+      }
+    } else if( inherits(self, 'GDB-Model') ) {
 
-    } else {
+        # Get Variable importance
+        vi <- mboost::varimp(
+          self$get_data('fit_best')
+        )
+        vi <- sort( vi[which(vi>0)],decreasing = TRUE )
+
+        message(paste0(
+          'Trained ',class(self)[1],' (',self$name,')',
+          '\n  \033[2mStrongest effects:\033[22m',
+          '\n     ', name_atomic(names(vi))
+        ))
+      } else {
       message(paste0(
         'Trained distribution model (',self$name,')',
         '\n     No fitted model found!'
@@ -60,9 +75,9 @@ DistributionModel <- bdproto(
       assertthat::assert_that(
         inherits(pred,'Raster'), what %in% names(pred)
       )
-      # Magma column
-      cols <- c("#0D0887FF","#47039FFF","#7301A8FF","#9C179EFF","#BD3786FF","#D8576BFF",
-                "#ED7953FF","#FA9E3BFF","#FDC926FF","#F0F921FF")
+      # Custom colour column
+      cols <- colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100)
+
       raster::plot(pred[[what]],
            main = paste0(what, ' prediction (',self$name,')'),
            box = FALSE,

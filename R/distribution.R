@@ -38,6 +38,8 @@ methods::setMethod(
   "distribution",
   methods::signature(background = "Raster"),
   function(background, ...) {
+    assertthat::assert_that(!missing(background) || !exists('background'),
+                            msg = 'No background file supplied!')
     # Check that arguments are valid
     assertthat::assert_that( inherits(background,'Raster')  )
 
@@ -58,6 +60,8 @@ methods::setMethod(
   methods::signature(background = "sf"),
   function(background, ...) {
     # Check that arguments are valid
+    assertthat::assert_that(!missing(background) || !exists('background'),
+                            msg = 'No background file supplied!')
     assertthat::assert_that(
       inherits(background,'sf'),
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')

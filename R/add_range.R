@@ -104,6 +104,24 @@ methods::setGeneric(
   signature = methods::signature("x", "range", "method"),
   function(x, range, method = 'distance', name = 'range_distance', distance_max = 150000) standardGeneric("add_range_offset"))
 
+#' Function for when raster is directly supplied (precomputed)
+#' @name add_range_offset
+#' @rdname add_range_offset
+#' @usage \S4method{add_range_offset}{BiodiversityDistribution, raster}(x, range)
+methods::setMethod(
+  "add_range_offset",
+  methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
+  function(x, range, name = 'range_distance') {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            inherits(range, 'Raster')
+    )
+    names(range) <- name
+    # Add as a new offset
+    x$set_offset(range)
+    return(x)
+  }
+)
+
 #' @name add_range_offset
 #' @rdname add_range_offset
 #' @usage \S4method{add_range_offset}{BiodiversityDistribution,sf, vector}(x, range, method)

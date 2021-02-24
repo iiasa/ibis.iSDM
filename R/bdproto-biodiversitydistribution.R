@@ -78,12 +78,17 @@ BiodiversityDistribution <- bdproto(
     }
   },
   # Adding latent factors
-  set_latent = function(self, type){
+  set_latent = function(self, type, spatial_model = NULL){
     assertthat::assert_that(is.character(type),
                             type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'))
+    # Assign argument if existing
+    if(!is.null(spatial_model)){
+      type <- paste0('<Spatial | ',spatial_model,'>')
+      attr(type, 'spatial_model') <- spatial_model
+    }
     if(!is.Waiver(self$latentfactors)){
       self$latentfactors <- unique(c(self$latentfactors,type))
-    } else { self$latentfactors <- type}
+    } else { self$latentfactors <- type }
   },
   # Get latent factors
   get_latent = function(self){

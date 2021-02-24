@@ -12,6 +12,8 @@ add_range_offset(
   distance_max = 150000
 )
 
+\S4method{add_range_offset}{BiodiversityDistribution, raster}(x, range)
+
 \S4method{add_range_offset}{BiodiversityDistribution,sf, vector}(x, range, method)
 }
 \arguments{
