@@ -44,7 +44,8 @@ PredictorDataset <- bdproto(
   # Add a new Predictor dataset to this collection
   set_data = function(self, x, value){
     assertthat::assert_that(assertthat::is.string(x),
-                            inherits(value, "Raster"))
+                            inherits(value, "Raster"),
+                            is_comparable_raster(self$get_data(), value))
     self$data <- addLayer(self$get_data(),value)
     invisible()
   },
@@ -64,7 +65,7 @@ PredictorDataset <- bdproto(
     self$print()
   },
   # Collect info statistics with optional decimals
-  get_summary = function(self, digits = 2) {
+  summary = function(self, digits = 2) {
     # Maybe make a little bit prettier
     round(
       summary( self$get_data()), digits = digits

@@ -16,7 +16,29 @@ NULL
 methods::setGeneric(
   "add_range_predictor",
   signature = methods::signature("x", "range", "method"),
-  function(x, range, method, distance_max = NULL) standardGeneric("add_range_predictor"))
+  function(x, range, method = 'distance', distance_max = NULL) standardGeneric("add_range_predictor"))
+
+#' Function for when distance raster is directly supplied (precomputed)
+#' @name add_range_predictor
+#' @rdname add_range_predictor
+#' @usage \S4method{add_range_predictor}{BiodiversityDistribution, raster}(x, range)
+methods::setMethod(
+  "add_range_predictor",
+  methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
+  function(x, range, method = 'precomputed_range') {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            inherits(range, 'Raster')
+    )
+    names(range) <- method
+    # Add as predictor
+    if(is.Waiver(x$predictors)){
+      x <- add_predictors(x, env = range,transform = 'none',derivates = 'none')
+    } else {
+      x$predictors$set_data('range_distance', range)
+    }
+    return(x)
+  }
+)
 
 #' @name add_range_predictor
 #' @rdname add_range_predictor
@@ -78,7 +100,6 @@ methods::setMethod(
     } else {
       x$predictors$set_data('range_distance', dis)
     }
-
     return(x)
   }
 )

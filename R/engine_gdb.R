@@ -18,7 +18,7 @@ NULL
 engine_gdb <- function(x,
                        fam = Poisson(),
                        boosting_iterations = 10000,
-                       learning_rate = 0.01,
+                       learning_rate = 0.1,
                        empirical_risk = 'inbag',
                        verbose = TRUE,
                         ...) {
@@ -76,7 +76,7 @@ engine_gdb <- function(x,
       # Function to respecify the control parameters
       set_control = function(self,
                              boosting_iterations = 1000,
-                             learning_rate = 0.01,
+                             learning_rate = 0.1, # Set relatively low to not regularize too much
                              empirical_risk = 'inbag',
                              verbose = TRUE
                              ){
@@ -96,10 +96,10 @@ engine_gdb <- function(x,
       },
       # Get equation for spatial effect
       get_equation_latent_spatial = function(self, spatial_field = c('x','y'),
-                                             df = 5, knots = list('x' = 3, 'y' = 3),...){
+                                             df = 6, knots = list('x' = 10, 'y' = 10),...){
         return(
           paste0(
-            'bspatial(',spatial_field[1],',',spatial_field[2],', df = ',df,', knots = ',knots,')'
+            'bspatial(',spatial_field[1],',',spatial_field[2],', center = TRUE, df = ',df,', knots = ',knots,')'
             )
           )
       },
@@ -138,11 +138,12 @@ engine_gdb <- function(x,
 
         # --- #
         # Fit the base model
-        fit_gdb <- mboost(formula = model$equation$poipo,
+        fit_gdb <- mboost::gamboost(
+                          formula = model$equation$poipo,
                           data = model$data$poipo_values,
                           weights = model$data$poipo_expect,
                           family = fam,
-                          offset = off,
+                          offset = off, # Offset added already
                           control = bc
                           )
         # Variables included

@@ -112,8 +112,28 @@ DistributionModel <- bdproto(
       }
   },
   # Get effect tables from model
-  get_effects = function(self, x = 'fit_best'){
-    tidy_inla_summary(self$get_data(x))
+  summary = function(self, x = 'fit_best'){
+    # Distinguishing between model types
+    if(inherits(self, 'GDB-Model')){
+      mboost:::summary.mboost(mod1$get_data(x))
+    } else if(inherits(self, 'INLA-Model')){
+      tidy_inla_summary(self$get_data(x))
+    }
+  },
+  # Generic plotting function for partial effects
+  effects = function(self, x = 'fit_best', what = 'partial'){
+    if(inherits(self, 'GDB-Model')){
+      # How many effects
+      n <- length( coef( self$get_data(x) ))
+      # Use the base plotting
+      par.ori <- par(no.readonly = TRUE)
+      par(mfrow = c(ceiling(n/3),3))
+
+      mboost:::plot.mboost(x = self$get_data(x),
+                           type = 'b',cex.axis=1.5, cex.lab=1.5)
+
+      par(par.ori)#dev.off()
+    }
   },
   # Get specific fit from this Model
   get_data = function(self, x) {

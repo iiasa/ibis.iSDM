@@ -8,7 +8,7 @@ engine_gdb(
   x,
   fam = Poisson(),
   boosting_iterations = 10000,
-  learning_rate = 0.01,
+  learning_rate = 0.1,
   empirical_risk = "inbag",
   verbose = TRUE,
   ...

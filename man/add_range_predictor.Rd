@@ -4,7 +4,9 @@
 \alias{add_range_predictor}
 \title{Add a range of a species as predictor to a distribution object}
 \usage{
-add_range_predictor(x, range, method, distance_max = NULL)
+add_range_predictor(x, range, method = "distance", distance_max = NULL)
+
+\S4method{add_range_predictor}{BiodiversityDistribution, raster}(x, range)
 
 \S4method{add_range_predictor}{BiodiversityDistribution,sf, vector}(x, range, method)
 }
