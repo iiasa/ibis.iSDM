@@ -1,30 +1,4 @@
-
-# Loading data that comes with the package
-test_that('Loading data',{
-  # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis'))
-  expect_s4_class(background,'Raster')
-
-  # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'range',quiet = TRUE)
-  expect_s3_class(virtual_points,'sf')
-  expect_s3_class(virtual_range,'sf')
-  expect_true(unique(sf::st_geometry_type(virtual_points)) == 'POINT')
-  expect_true(unique(sf::st_geometry_type(virtual_range)) == 'POLYGON')
-
-  # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis'),full.names = T)
-  expect_gt(length(ll),0)
-  expect_true(all( assertthat::has_extension(ll,'tif') ))
-
-  # Load them as rasters
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
-  expect_s4_class(predictors,'Raster')
-  expect_s4_class(predictors,'RasterStack')
-  expect_true(nlayers(predictors)>1)
-  expect_true(is_comparable_raster(background,predictors))
-})
+context('Set up a distribution model')
 
 # Setting up a distribution model
 test_that('Setting up a distribution model',{
@@ -41,27 +15,48 @@ test_that('Setting up a distribution model',{
   # Now set them one up step by step
   x <- distribution(background)
   expect_s3_class(x,'BiodiversityDistribution')
-  expect_s4_class(x$background,'Raster')
+  expect_s3_class(x$background,'sf')
   expect_error(x$biodiversity$get_data())
   expect_equal(x$biodiversity$length(),0)
   expect_type(x$show_background_info(),'list')
+  expect_equal(x$get_engine(),'None')
 
   # Now add one variable
   x <- x %>% add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points')
   expect_message(x$biodiversity,NA)
   expect_equal(x$biodiversity$length(),1)
   expect_equal(x$biodiversity$get_equations()[[1]],'<Default>')
-  # And another
-  x <- x %>% add_biodiversity_polpo(virtual_range,field_occurrence = 'Observed',name = 'Virtual range')
-  expect_equal(x$biodiversity$length(),2)
-  expect_equal(sum(x$biodiversity$get_observations()),210)
+  expect_true(is.Waiver(x$engine))
+  expect_error(train(x)) # Try to solve without solver
+
+  # And a range off
+  x <- x %>% add_range_offset(virtual_range,method = 'binary')
+  expect_equal(x$get_offset(),'binary_range')
+  expect_s4_class(x$offset,'Raster')
 
   # Add Predictors
   x <- x %>% add_predictors(predictors)
   expect_equal(x$predictors$length(),14)
+  expect_true(is.vector(x$get_predictor_names()))
+  # Try removing one
+  x <- x %>% rm_predictors('bio01_mean_50km')
+  expect_equal(x$predictors$length(),13)
+  expect_error( rm_predictors(x,'bio20_mean_50km') )
+  # Finally select all predictors with CLC3
+  n <- grep('CLC',x$get_predictor_names(),value = TRUE)
+  x <- x %>% sel_predictors(x, n)
+  expect_equal(x$predictors$length(),5)
+  expect_equal(x$get_predictor_names(), n)
+
+  # TODO:
+  # Make sure that calling functions does not directly overwrite objects and test for that
 
   x <- x %>% engine_inla()
-  expect_output(x$predictor_names(),'vector')
   expect_s3_class(x$engine$data$mesh,'inla.mesh')
+  expect_equal(x$engine$name,'<INLA>')
+  expect_error(x$engine$calc_stack_poipo()) # Nothing to train on
+
+  expect_type(x$engine$get_data('mesh.area'),'double')
+  expect_gt(sum(x$engine$get_data('mesh.area')),800)
 
 })
