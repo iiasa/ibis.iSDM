@@ -191,7 +191,7 @@ formula_combinations <- function(varnames, response = 'Observed', InterceptOnly 
   if(tolower(type) == 'forward'){
     form_temp <- c()
     for(i in 1:fl) {
-      new <- paste0(response, '~ 0 +', paste(varnames[1:i],collapse = ' + ') )
+      new <- paste0(response, '~ 0 + intercept +', paste(varnames[1:i],collapse = ' + ') )
       if(!is.null(spde_term)) new <- paste0(new, ' + ',spde_term)
       form_temp <- c(form_temp, new)
       }

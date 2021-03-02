@@ -121,7 +121,7 @@ DistributionModel <- bdproto(
     }
   },
   # Generic plotting function for partial effects
-  effects = function(self, x = 'fit_best', what = 'partial'){
+  effects = function(self, x = 'fit_best', what = 'fixed'){
     if(inherits(self, 'GDB-Model')){
       # How many effects
       n <- length( coef( self$get_data(x) ))
@@ -133,6 +133,8 @@ DistributionModel <- bdproto(
                            type = 'b',cex.axis=1.5, cex.lab=1.5)
 
       par(par.ori)#dev.off()
+    } else if(inherits(self, 'INLA-Model')) {
+      plot_inla_marginals(self$get_data(x),what = 'fixed')
     }
   },
   # Get specific fit from this Model

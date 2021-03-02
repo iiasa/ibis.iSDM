@@ -14,5 +14,5 @@ NULL
 
 #' @rdname effects
 #' @method effects DistributionModel
-#' @noRd
+#' @export
 effects.DistributionModel <- function(x, ...) x$effects()

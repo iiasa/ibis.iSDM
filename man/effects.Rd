@@ -2,7 +2,11 @@
 % Please edit documentation in R/effects.R
 \name{effects}
 \alias{effects}
+\alias{effects.DistributionModel}
 \title{effects}
+\usage{
+\method{effects}{DistributionModel}(x, ...)
+}
 \arguments{
 \item{x}{Any prepared object.}
 

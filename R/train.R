@@ -96,6 +96,8 @@ methods::setMethod(
       field_space = c('x','y'),
       longlat = raster::isLonLat(x$background)
     )
+    # Add intercept
+    poipo_env$intercept <- 1
 
     # Check whether predictors should be refined and do so
     if(rm_corPred && model[['predictors_names']] != 'dummy'){
@@ -160,8 +162,9 @@ methods::setMethod(
           f <- formula(
             paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
                    # Add intercept if offset included
-                   0,#ifelse(is.Waiver(x$offset), 0, 1), #ifelse(x$show_biodiversity_length()==1,1,0),
+                   0, ' + intercept +',#ifelse(is.Waiver(x$offset), 0, 1), #ifelse(x$show_biodiversity_length()==1,1,0),
                    ' +',
+                   # paste('f(inla.group(', model[['predictors_names']],'), model = \'rw2\')', collapse = ' + ' )  )
                    paste('f(', model[['predictors_names']],', model = \'linear\')', collapse = ' + ' )  )
           )
           # Add offset if specified
@@ -174,6 +177,7 @@ methods::setMethod(
           }
         } else{
           stop('TBD')
+          # to_formula("")
           # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
         }
         model[['equation']][[ty]] <- f

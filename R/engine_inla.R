@@ -114,31 +114,56 @@ engine_inla <- function(x, optional_mesh = NULL,
                                      prior.range = c(1, 0.001),
                                      prior.sigma = c(0.5, 0.05),
                                      ...){
-        if(type=='pc'){
-          # Define PC Matern SPDE model and save
+        # For calculating iCAR process
+        if(type == 'iCAR'){
+          # convert mesh to sf object
+          ns <- mesh_as_sf(self$data$mesh)
+          # Create adjacency matrix with queen's case
+          nc.nb <- spdep::poly2nb(ns,queen = TRUE)
+          #Convert the adjacency matrix into a file in the INLA format
+          adjmat <- INLA::inla.graph2matrix(nc.nb)
+          # Save the adjaceny matrix as output
+          self$data$latentspatial <- adjmat
+          self$data$s.index <- as.numeric(attr(nc.nb,'region.id'))
+          # Security checks
+          assertthat::assert_that(length( self$data$s.index ) == nrow(ns))
+        }
+        if(type=='spde'){
+        #   # Define PC Matern SPDE model and save
           self$data$latentspatial <- INLA::inla.spde2.pcmatern(
             self$data$mesh,
             alpha = alpha,
             # P(Range < 1°) = 0.001  and P(sigma > 0.5) = 0.05
             prior.range = prior.range,
             prior.sigma = prior.sigma)
-        } else {
-          self$data$latentspatial <- INLA::inla.spde2.matern(mesh = self$data$mesh, alpha = alpha)
+        # } else {
+          # self$data$latentspatial <- INLA::inla.spde2.matern(mesh = self$data$mesh, alpha = alpha)
+          # Make index for spatial field
+          self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
+                                                          n.spde = self$data$latentspatial$n.spde)
+          # Security checks
+          assertthat::assert_that(
+            inherits(self$data$latentspatial,'inla.spde'),
+            length(self$data$s.index$spatial.field) == self$data$mesh$n
+          )
         }
-        # Make index for spatial field
-        self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
-                                                  n.spde = self$data$latentspatial$n.spde)
-        assertthat::assert_that(
-          inherits(self$data$latentspatial,'inla.spde'),
-          length(self$data$s.index$spatial.field) == self$data$mesh$n
-        )
         invisible()
       },
       # Get latent spatial equation bit
-      get_equation_latent_spatial = function(self,spatial_object = 'spde'){
-        return(
-          paste0('f(spatial.field, model = ',spatial_object,')')
-        )
+      get_equation_latent_spatial = function(self,spatial_model){
+        if(spatial_model=='spde'){
+          assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
+                                  msg = 'Latent spatial has not been calculated.')
+          return(
+            paste0('f(spatial.field, model = ',spatial_model,')')
+          )
+        } else if(spatial_model == 'iCAR'){
+          assertthat::assert_that(inherits(self$data$latentspatial,'dgTMatrix'),
+                                  msg = 'Neighborhood matrix has not been calculated.')
+          return(
+            paste0('f(','spatial.index',', model = "besag", graph = ','adjmat',')')
+          )
+        }
       },
       # Calculate stack for presence only records
       calc_stack_poipo = function(self, model, intercept = TRUE) {
@@ -151,7 +176,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         env <- model$data$poipo_values
 
         # Include intercept in here
-        if(intercept) env$intercept_poipo <- 1
+        if(intercept) env$intercept <- 1
 
         # Set up projection matrix for the data
         mat_proj <- INLA::inla.spde.make.A(
@@ -189,6 +214,9 @@ engine_inla <- function(x, optional_mesh = NULL,
            # Get Index Objects
            iset <- self$get_data('s.index')
            ll_effects[['intercept']] <- c(ll_effects[['intercept']], iset)
+         } else if ( 'adjmat' %in% all.vars(model$equation$poipo) ){
+           iset <- self$get_data('s.index')
+           ll_effects[['intercept']] <- c(ll_effects[['intercept']], data.frame(spatial.index = iset) )
          }
         # Define A
         A <- list(1, mat_proj)
@@ -229,6 +257,7 @@ engine_inla <- function(x, optional_mesh = NULL,
           # Get spatial index
           spde <- self$get_data('s.index')
         } else { spde <- NULL}
+
         # Check for existence of specified offset and use the full one in this case
         if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
 
@@ -362,10 +391,10 @@ engine_inla <- function(x, optional_mesh = NULL,
                                E = INLA::inla.stack.data(stk_full)$e,
                                family= 'poisson',   # Family the data comes from
                                control.family = list(link = "log"), # Control options
-                               control.predictor = list(A = INLA::inla.stack.A(stk_full), link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                               control.predictor = list(A = INLA::inla.stack.A(stk_full), link = 1, compute = TRUE),  # Compute for marginals of the predictors
                                control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                               control.mode = list(theta = fit_resp$mode$theta, restart = FALSE), # Don't restart and use previous thetas
-                               #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
+#                               control.mode = list(theta = ifelse(length(fit_resp$mode$theta)==0, 0, fit_resp$mode$theta), restart = FALSE), # Don't restart and use previous thetas
+#                               control.fixed = list(prec.intercept = 0.01, prec = 0.01), # Added to see whether this changes GMRFlib convergence issues
                                verbose = verbose, # To see the log of the model runs
                                control.inla(int.strategy = "eb", # Empirical bayes for integration
                                             strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
@@ -414,6 +443,3 @@ engine_inla <- function(x, optional_mesh = NULL,
       }
       ))
 }
-
-# TODO:
-# Other engines, e.g. STAN or simple estimators such as Maxent?

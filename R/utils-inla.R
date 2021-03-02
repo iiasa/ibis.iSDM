@@ -36,7 +36,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
         return(0)
       }
     })
-    assertthat::assert_that(assertthat::are_equal(sum(w), rgeos::gArea(region.poly) )) # Security check
+  #  assertthat::assert_that(assertthat::are_equal(sum(w), rgeos::gArea(region.poly) )) # Security check
   } else {
     # Convert to Spatial Polygons
     polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
@@ -191,7 +191,7 @@ inla_make_prediction_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   ll_effects <- list()
   # Note, order adding this is important apparently...
   ll_effects[['predictors']] <- cov[,pred.names]
-  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) ) # FIXME: Potential source for bug. Think name of intersects need to differ if multiple likelihoods specified
+  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
   if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
   if(!is.null(offset)) ll_effects[['predictors']] <- cbind(ll_effects[['predictors']], offset)
   # Define A
@@ -264,7 +264,8 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
   assertthat::assert_that(inherits(inla.model,'inla'),
                           is.character(what),
                           what %in% c('fixed','hyper'))
-  par(mfrow = c(4,4))
+  par.ori <- par(no.readonly = TRUE)
+  par(mfrow = c(4,3), mar = c(3,3,1,0.3), mgp = c(2,1,0))
   if(what == 'fixed'){
     varnames <- names(inla.model$marginals.fixed)
     for(i in 1: length(varnames)){
@@ -281,5 +282,6 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
            xlab=paste(names(var.mar)[1]), ylab=paste(names(var.mar)[2]))
     }
   }
+  par(par.ori)
 }
 

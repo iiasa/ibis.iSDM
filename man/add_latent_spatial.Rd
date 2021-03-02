@@ -4,12 +4,14 @@
 \alias{add_latent_spatial}
 \title{Add latent spatial factor to the model}
 \usage{
-add_latent_spatial(x, ...)
+add_latent_spatial(x, spatial_model = "spde", ...)
 
 \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+
+\item{spatial_model}{a \code{\link{character}} describing what kind of spatial to be fitted (Option: 'spde' | 'iCAR')}
 
 \item{...}{Other parameters passed down}
 }
