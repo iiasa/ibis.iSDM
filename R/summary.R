@@ -18,18 +18,18 @@ NULL
 #' @method summary distribution
 #' @export
 #'
-summary.distribution <- function(x, ...) x$summary()
+summary.distribution <- function(x) x$summary()
 
 #' @rdname summary
 #' @method summary DistributionModel
 #'
 #' @export
 #'
-summary.DistributionModel <- function(x, ...) x$summary()
+summary.DistributionModel <- function(x) x$summary()
 
 #' @rdname summary
 #' @method summary PredictorDataset
 #'
 #' @export
 #'
-summary.PredictorDataset <- function(x, ...) x$summary()
+summary.PredictorDataset <- function(x) x$summary()

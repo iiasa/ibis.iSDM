@@ -17,13 +17,11 @@ LazyData: true
 Imports: 
     proto (>= 1.0.0),
     methods,
-    raster,
     sf (>= 0.9),
     tibble (>= 2.0.0),
     ggplot2,
     magrittr,
     assertthat(>= 0.2.0),
-    raster,
     uuid,
     foreach,
     testthat (>= 3.0.0)
@@ -31,6 +29,7 @@ Depends:
     R(>= 3.5.0)
 Suggests:
     INLA,
+    raster,
     mboost,
     progress,
     rstan,

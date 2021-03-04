@@ -262,13 +262,25 @@ engine_inla <- function(x, optional_mesh = NULL,
         if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
 
         # Make projection stack
-        stk_pred_poipo <- inla_make_prediction_stack(
+        # stk_pred_poipo <- inla_make_prediction_stack(
+        #   stk_resp = stk_poipo,
+        #   cov       = model$predictors,
+        #   pred.names= model$predictors_names,
+        #   offset    = offset,
+        #   mesh      = self$get_data('mesh'),
+        #   mesh.area = self$get_data('mesh.area'),
+        #   type = 'poipo',
+        #   spde = spde
+        # )
+        stk_pred_poipo <- inla_make_projection_stack(
           stk_resp = stk_poipo,
           cov       = model$predictors,
           pred.names= model$predictors_names,
           offset    = offset,
           mesh      = self$get_data('mesh'),
           mesh.area = self$get_data('mesh.area'),
+          background = model$background,
+          res = 0.5, # FIXME: Eventually do this downstream
           type = 'poipo',
           spde = spde
         )
@@ -277,8 +289,9 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Now join all stacks and save in full
         # Note: If integrated stack is included, E must be set to relative area (in mesh.area).
         self$set_data('stk_full', INLA::inla.stack(stk_poipo, stk_int,
-                                                   stk_pred_poipo) )
-
+                                                   stk_pred_poipo$stk_proj
+                                                   )
+                      )
         invisible()
       },
       # Main INLA training function ----
@@ -293,7 +306,9 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Get the datasets
         stk_poipo <- self$get_data('stk_poipo')
         stk_int <- self$get_data('stk_int')
+        # Get full stack and projection grid
         stk_full <- self$get_data('stk_full')
+        predcoords <- self$get_data('stk_pred_poipo')$predcoords
         # Make joint stack of data and integrations
         # TODO: Needs to be done for all other types
         stk_var <- INLA::inla.stack(stk_poipo, stk_int)
@@ -379,8 +394,8 @@ engine_inla <- function(x, optional_mesh = NULL,
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
-                          control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                       strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                          control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                                       # strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                           num.threads = parallel::detectCores()-1
         )
 
@@ -396,20 +411,14 @@ engine_inla <- function(x, optional_mesh = NULL,
 #                               control.mode = list(theta = ifelse(length(fit_resp$mode$theta)==0, 0, fit_resp$mode$theta), restart = FALSE), # Don't restart and use previous thetas
 #                               control.fixed = list(prec.intercept = 0.01, prec = 0.01), # Added to see whether this changes GMRFlib convergence issues
                                verbose = verbose, # To see the log of the model runs
-                               control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                            strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                               control.inla(int.strategy = "eb"), # Empirical bayes for integration
                                num.threads = parallel::detectCores() - 1
         )
-        # Projector
-        # wh <- apply(bbox(border), 1, diff)
-        # nxy <- round(300 * wh / wh[1])
-        # pgrid <- inla.mesh.projector(mesh, xlim = bbox(border)[1, ],
-        #                              ylim = bbox(border)[2, ], dims = nxy)
-        # pj <- inla.mesh.project(pgrid, field = stpred[, j])
         # Create a spatial prediction
         index.pred <- INLA::inla.stack.index(stk_full, 'pred_poipo')$data
         post <- fit_pred$summary.linear.predictor[index.pred, ]
-        assertthat::assert_that(nrow(post)>0)
+        assertthat::assert_that(nrow(post)>0,
+                                nrow(post) == nrow(predcoords) ) # Check with cells in projection
         # TODO: Wrap Backtransform into a distribution dependent function
         post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <-
           exp(
@@ -418,13 +427,22 @@ engine_inla <- function(x, optional_mesh = NULL,
         post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
         names(post) <- make.names(names(post))
 
-        # Create an empty raster from the predictor coordinates
-        ra <- rasterFromXYZ(xyz = model$predictors[,c('x','y')],
-                            crs = raster::projection(x$background)
-                            )
-        # Fill output rasters
-        prediction <- fill_rasters(post = post,background = ra)
+        prediction <- raster::stack(
+          sp::SpatialPixelsDataFrame(
+            points = predcoords,
+            data = post,
+            proj4string = CRS( x$show_background_info()$proj )
+          )
+        )
         prediction <- raster::mask(prediction, model$background) # Mask with background
+
+        # # Create an empty raster from the predictor coordinates
+        # ra <- rasterFromXYZ(xyz = model$predictors[,c('x','y')],
+        #                     crs = raster::projection(x$background)
+        #                     )
+        # # Fill output rasters
+        # prediction <- fill_rasters(post = post,background = ra)
+        # prediction <- raster::mask(prediction, model$background) # Mask with background
 
         # Definition of INLA Model object ----
         out <- bdproto(

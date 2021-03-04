@@ -68,7 +68,7 @@ PredictorDataset <- bdproto(
   summary = function(self, digits = 2) {
     # Maybe make a little bit prettier
     round(
-      summary( self$get_data()), digits = digits
+      summary( self$get_data(df = FALSE)), digits = digits
          )
   },
   # Number of Predictors in object

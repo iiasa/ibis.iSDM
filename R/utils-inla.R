@@ -124,7 +124,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry, 
   )
   # Get only target variables
   all_env <-  subset(all_env, select = pred_names)
-  all_env$intercept <- 1 #FIXME: Unsure yet whether this is even necessary. Might kick out
+  all_env$intercept <- 1
 
   # Add diagonal for integration points
   idiag <- Matrix::Diagonal(mesh$n, rep(1, mesh$n))
@@ -229,6 +229,117 @@ inla_make_prediction_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   #   msg = 'Response stak and prediction stack mismatch.'
   # )
   return(stk_pred)
+}
+
+#' Alternative version to create a projection stack
+#' Potentially to replace the function above
+#' @param stk_resp A inla stack object
+#' @param cov The covariate data stack
+#' @param pred.names The predictors to use
+#' @param offset If an offset is specified, use it
+#' @param mesh The background projection mesh
+#' @param mesh.area The area calculate for the mesh
+#' @param type Name to use
+#' @param spde An spde field if specified
+#' @param background A supplied background
+#' @param res Approximate resolution to the projection grid (default: null)
+#' @noRd
+inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area,
+                                       type, background, res = NULL, spde = NULL){
+  # Security checks
+  assertthat::assert_that(
+    inherits(stk_resp, 'inla.data.stack'),
+    inherits(mesh,'inla.mesh'),
+    is.character(type),
+    is.data.frame(cov),
+    is.null(spde)  || 'spatial.field' %in% names(spde)
+  )
+
+  # New formulation of the projection matrix
+  bdry <- mesh$loc[mesh$segm$int$idx[,2],]  # get the boundary of the region
+
+  if(is.null(res)){
+    res <- (diff(range(cov$x)) / 100)
+  }
+
+  # Approximate dimension of the projector matrix
+  Nxy <- round( c(diff(range(bdry[,1])), diff(range(bdry[,2]))) / res )
+
+  # Make a mesh projection
+  projgrid <- INLA::inla.mesh.projector(mesh,
+                                  xlim = range(bdry[,1]),
+                                  ylim = range(bdry[,2]),
+                                  dims = Nxy)
+
+  # Buffer the region to be sure
+  # suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width=0) )
+  # # Get and append coordinates from each polygon
+  # background.bdry <- unique(
+  #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
+  # )
+  # #background.bdry <- background.g@polygons[[1]]@Polygons[[1]]@coords # use the original polygon boundaries to avoid discrepancies in the 'true' points
+  # TODO: Try and find an alternative to the splancs package to remove this dependent package
+  # cellsIn <- !is.na(over(SpatialPoints(projgrid$lattice$loc,
+  #                                     proj4string = as(background,'Spatial')@proj4string),
+  #                                     as(background,'Spatial')))
+  # cellsIn <- splancs::inout(projgrid$lattice$loc,cbind(background.bdry[,1], background.bdry[,2]))
+
+  # Get only those points from the projection grid that are on the background
+  projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  suppressMessages(
+    predcoords <- sf::st_intersection(projpoints, background) %>%
+      st_coordinates()
+    )
+  colnames(predcoords) <- c('x','y')
+  # Also get the cellids of those points
+  suppressMessages(cellsIn <- which(st_intersects(projpoints, background, sparse = FALSE)) )
+  assertthat::assert_that(length(cellsIn) == nrow(predcoords))
+
+  # get the points on the grid within the boundary
+  # predcoords <- projgrid$lattice$loc[which(cellsIn),]
+  Apred <- projgrid$proj$A[cellsIn, ]
+
+  # Extract covariates for points
+  nearest_cov <- get_ngbvalue(coords = predcoords,
+                              env = cov,
+                              field_space = c('x','y'))
+  # nearest_cov[,paste("int","pred",sep=".")] <- 1
+  nearest_cov[,paste("intercept")] <- 1
+
+  # --- #
+  # Prediction surface
+  ll_pred <- list()
+  ll_pred[[ names(stk_resp$data$names)[1] ]] <- cbind( rep(NA, nrow(nearest_cov)) ) # Set to NA to predict for fitted area
+  ll_pred[['e']] <- rep(0, nrow(nearest_cov))
+
+  # Effect data
+  ll_effects <- list()
+  # Note, order adding this is important apparently...
+  ll_effects[['predictors']] <- nearest_cov
+  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
+  if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+  if(!is.null(offset)) ll_effects[['predictors']] <- cbind(ll_effects[['predictors']], offset)
+
+  # Set A
+  A = list(1, Apred)
+  # --- #
+
+  # Build stack
+  stk_proj <-
+    INLA::inla.stack(
+      data =  ll_pred,              # Response
+      A = A,                        # Predictor projection matrix
+      effects = ll_effects,         # Effects matrix
+      tag = paste0('pred_',type) # New description tag
+    )
+
+  # Return a list with the projection grid
+  return(list(
+              stk_proj = stk_proj,
+              predcoords = predcoords,
+              cellsIn = cellsIn
+              )
+    )
 }
 
 #' Tidy up summary information from a INLA model
