@@ -118,7 +118,6 @@ extent_expand <- function(e,f=0.1){
 #' Nearest Neighbour resampling (NGB) is recommended for discrete and Bilinear
 #' resampling for continious data.
 #'
-#' @import raster
 #' @param data [`Raster-class`] object to be resampled
 #' @param template [`Raster-class`] or [`Spatial-class`] object from which geometry can be extracted
 #' @param method method for resampling ("ngb" or "bilinear")
@@ -165,7 +164,7 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 #' @param x a \code{raster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{raster}}
 #' @return an empty raster, i.e. all cells are \code{NA}.
-#' @importFrom raster raster
+#' @import raster
 #' @keywords raster
 #' @examples
 #' require(raster)
@@ -175,7 +174,7 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(inherits(x,'Raster'))
-  raster(nrows=nrow(x), ncols=ncol(x),
+  raster::raster(nrows=nrow(x), ncols=ncol(x),
                         crs=x@crs,
                         ext=extent(x), ...)
 }
@@ -207,8 +206,14 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
   coords <- as.matrix(coords)
   coords_env <- as.matrix(env[,field_space])
 
+  # Pairwise distance function
+  # Use geosphere distance calculation if available as faster
+  if('geosphere' %in% installed.packages()[,1]){
+    disfun <- geosphere::distGeo
+  } else { disfun <- sp::spDistsN1 }
+
   env_sub <- apply(coords, 1, function(xy1, xy2) {
-                    dists <- sp::spDistsN1(pts = xy2,pt = xy1, longlat = longlat)
+                    dists <- disfun(xy2, xy1, TRUE)
                     # In a few cases these can be multiple in equal distance
                     d <- which(dists==min(dists))
                     if(length(d)>=2){

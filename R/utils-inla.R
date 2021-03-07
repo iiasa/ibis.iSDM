@@ -4,7 +4,6 @@
 #' @param region.poly A supplied [`region.poly`] object
 #' @param variant A character to which type of area calculation (Default: 'gpc')
 #' @returns A [`vector`] with the area of each polygon
-#' @import deldir
 #' @noRd
 
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
@@ -266,13 +265,15 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   Nxy <- round( c(diff(range(bdry[,1])), diff(range(bdry[,2]))) / res )
 
   # Make a mesh projection
-  projgrid <- INLA::inla.mesh.projector(mesh,
+  suppressWarnings(
+    projgrid <- INLA::inla.mesh.projector(mesh,
                                   xlim = range(bdry[,1]),
                                   ylim = range(bdry[,2]),
                                   dims = Nxy)
+  )
 
   # Buffer the region to be sure
-  # suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width=0) )
+  suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width=0) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -285,14 +286,33 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # cellsIn <- splancs::inout(projgrid$lattice$loc,cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
-  suppressMessages(
-    predcoords <- sf::st_intersection(projpoints, background) %>%
-      st_coordinates()
-    )
+  # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+
+  suppressWarnings(
+    cellsIn <- !is.na(over(SpatialPoints(projgrid$lattice$loc,
+                                       proj4string = as(background.g,'Spatial')@proj4string),
+                         as(background,'Spatial')))
+  )
+
+  # Get only those points from the projection grid that are on the background
+  # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  # suppressMessages(
+  #   suppressWarnings(
+  #     predcoords <- sf::st_intersection(projpoints, background) %>%  sf::st_coordinates()
+  #     #predcoords <- coordinates( rgeos::gIntersection(as(projpoints,'Spatial'),as(background,'Spatial')) )
+  #     )
+  # )
+  # # Also get the cellids of those points
+  # suppressMessages(cellsIn <- sf::st_intersects(projpoints, background, sparse = FALSE) )
+  # Check for multipolygon and align grid if necessary
+  if(inherits(cellsIn,'matrix')){
+    cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
+  } else { cellsIn <- which(cellsIn) }
+
+  # Get prediction coordinates
+  predcoords <- projgrid$lattice$loc[cellsIn,]
   colnames(predcoords) <- c('x','y')
-  # Also get the cellids of those points
-  suppressMessages(cellsIn <- which(st_intersects(projpoints, background, sparse = FALSE)) )
+
   assertthat::assert_that(length(cellsIn) == nrow(predcoords))
 
   # get the points on the grid within the boundary
@@ -300,6 +320,8 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   Apred <- projgrid$proj$A[cellsIn, ]
 
   # Extract covariates for points
+  if(!is.null(offset)) cov <- cbind(cov, offset)
+
   nearest_cov <- get_ngbvalue(coords = predcoords,
                               env = cov,
                               field_space = c('x','y'))
@@ -318,7 +340,6 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   ll_effects[['predictors']] <- nearest_cov
   ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
   if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
-  if(!is.null(offset)) ll_effects[['predictors']] <- cbind(ll_effects[['predictors']], offset)
 
   # Set A
   A = list(1, Apred)

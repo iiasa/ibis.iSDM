@@ -10,13 +10,13 @@ NULL
 #' @param empirical_risk method for empirical risk calculation ('inbag','oobag','none')
 #' @param verbose Should progress be printed?
 #' @param ... Other variables or control parameters
+#' @import mboost
 #' @name engine_gdb
 NULL
-#' @import mboost
 #' @rdname engine_gdb
 #' @export
 engine_gdb <- function(x,
-                       fam = Poisson(),
+                       fam = 'Poisson',
                        boosting_iterations = 10000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
@@ -31,19 +31,22 @@ engine_gdb <- function(x,
                           is.numeric(learning_rate),
                           is.character(empirical_risk),
                           assertthat::is.flag(verbose),
-                          empirical_risk %in% c('inbag','oobag','none'),
-                          requireNamespace("mboost", quietly = TRUE)
+                          empirical_risk %in% c('inbag','oobag','none')
                           )
+  assertthat::assert_that(
+    'mboost' %in% installed.packages(),msg = 'To run this engine the \"mboost\" package needs to be installed!'
+  )
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster(ext = raster::extent(x$background),
-                       crs = projection(x$background),
-                       res = c(diff( (st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-                               diff( (st_bbox(x$background)[c(1,3)]) ) / 100
-                               )
-                       )
+    template <- raster::raster(
+      ext = raster::extent(x$background),
+      crs = raster::projection(x$background),
+      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+                    )
+                      )
   } else {
     # If predictor existing, use them
     template <- emptyraster(x$predictors$get_data() )
@@ -61,6 +64,11 @@ engine_gdb <- function(x,
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+
+  # Detect and format the family
+  if( grep('pois',fam,ignore.case = TRUE) ) fam <- mboost::Poisson() else if( grep('bino',fam,ignore.case = TRUE) ) fam <- mboost::Binomial()
+
+  assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
 
   # Set engine in distribution object
   x$set_engine(
@@ -181,6 +189,7 @@ engine_gdb <- function(x,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,
+            "fit_best_equation" = model$equation$poipo,
             "prediction" = prediction
           )
         )

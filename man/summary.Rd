@@ -7,11 +7,11 @@
 \alias{summary.PredictorDataset}
 \title{summary}
 \usage{
-\method{summary}{distribution}(x, ...)
+\method{summary}{distribution}(x)
 
-\method{summary}{DistributionModel}(x, ...)
+\method{summary}{DistributionModel}(x)
 
-\method{summary}{PredictorDataset}(x, ...)
+\method{summary}{PredictorDataset}(x)
 }
 \arguments{
 \item{x}{Any prepared object.}

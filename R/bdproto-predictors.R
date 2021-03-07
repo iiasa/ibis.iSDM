@@ -38,7 +38,7 @@ PredictorDataset <- bdproto(
   # Get data
   get_data = function(self, df = FALSE, na.rm = TRUE, ...){
     if(df) {
-      as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
+      raster::as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
     } else self$data
   },
   # Add a new Predictor dataset to this collection

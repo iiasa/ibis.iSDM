@@ -64,8 +64,8 @@ BiodiversityDistribution <- bdproto(
     assertthat::assert_that(inherits(self$background,'sf'))
     r <- self$background
     o <- list()
-    o[['extent']] <- round( st_bbox(r), 3)
-    o[['proj']] <-  projection(r)
+    o[['extent']] <- round( sf::st_bbox(r), 3)
+    o[['proj']] <-  raster::projection(r)
     return(o)
   },
   # Function for querying predictor names if existing

@@ -73,7 +73,7 @@ methods::setMethod(
     # Get predictors
     if(is.Waiver(x$get_predictor_names())) {
       # Dummy covariate of background raster
-      dummy <- as.data.frame( raster(extent(x$background),nrow=100,ncol=100,val=1), xy = TRUE );names(dummy)[3] <- 'dummy'
+      dummy <- as.data.frame( raster::raster(extent(x$background),nrow=100,ncol=100,val=1), xy = TRUE );names(dummy)[3] <- 'dummy'
       model[['predictors']] <- dummy
       model[['predictors_names']] <- 'dummy'
     } else {
@@ -109,6 +109,7 @@ methods::setMethod(
       if(length(co)>0){
         poipo_env %>% dplyr::select(-all_of(co)) -> poipo_env
         model[['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
+        model[['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
         model[['predictors']] <- model[['predictors']][which( model[['predictors']] %notin% co )]
       }
     }
@@ -141,7 +142,7 @@ methods::setMethod(
       # Extract offset for each observed point
       poipo_offset <- get_ngbvalue(
         coords = x$biodiversity$get_coordinates('poipo'),
-        env = as.data.frame(x$offset, xy = TRUE),
+        env = raster::as.data.frame(x$offset, xy = TRUE),
         field_space = c('x','y'),
         longlat = raster::isLonLat(x$background)
       )

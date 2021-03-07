@@ -18,6 +18,8 @@ Imports:
     proto (>= 1.0.0),
     methods,
     sf (>= 0.9),
+    raster (>= 3.4-5),
+    rgeos (>= 0.5-5),
     tibble (>= 2.0.0),
     ggplot2,
     magrittr,
@@ -29,11 +31,11 @@ Depends:
     R(>= 3.5.0)
 Suggests:
     INLA,
-    raster,
+    deldir,
     mboost,
     progress,
     rstan,
-    rstantools,
+    rstantools
 URL: https://github.com/iiasa/ibis
 BugReports: https://github.com/iiasa/ibis/issues
 RoxygenNote: 7.1.1

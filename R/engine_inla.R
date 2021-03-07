@@ -8,18 +8,21 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
-#' @param max_distance Range of maximum distance between two nodes
-#' @param offset Offset for INLA mesh
+#' @param max_edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' @param offset interpreted as a numeric factor relative to the approximate data diameter;
+#' @param cutoff The minimum allowed distance between points on the mesh
+#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (default NULL)
 #' @param ... Other variables
+#' @import INLA
 #' @name engine_inla
 NULL
-#' @import INLA
 #' @rdname engine_inla
 #' @export
 engine_inla <- function(x, optional_mesh = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
                         cutoff = 1,
+                        proj_stepsize = NULL,
                         ...) {
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
@@ -30,7 +33,11 @@ engine_inla <- function(x, optional_mesh = NULL,
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
                           is.numeric(cutoff),
-                          requireNamespace("INLA", quietly = TRUE))
+                          is.null(proj_stepsize) || is.numeric(proj_stepsize)
+                          )
+  assertthat::assert_that(
+    'INLA' %in% installed.packages(),msg = 'To run this engine the \"INLA\" package needs to be installed!'
+  )
 
   # Convert the study region
   region.poly <- as(sf::st_geometry(x$background), "Spatial")
@@ -94,7 +101,8 @@ engine_inla <- function(x, optional_mesh = NULL,
       name = "<INLA>",
       data = list(
         'mesh' = mesh,
-        'mesh.area' = ar
+        'mesh.area' = ar,
+        'proj_stepsize' = proj_stepsize
       ),
       # parameters = parameters(
       #   numeric_parameter("gap", gap, lower_limit = 0),
@@ -176,7 +184,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         env <- model$data$poipo_values
 
         # Include intercept in here
-        if(intercept) env$intercept <- 1
+        if(intercept) env$intercept <- 1 # FIXME: Rename intercepts when using varying likelihoods
 
         # Set up projection matrix for the data
         mat_proj <- INLA::inla.spde.make.A(
@@ -261,6 +269,14 @@ engine_inla <- function(x, optional_mesh = NULL,
         # Check for existence of specified offset and use the full one in this case
         if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
 
+        # Projection stepsize
+        if(is.null( self$get_data('proj_stepsize') )){
+          # Set to stepsize equivalent of the resolution of the grid
+          val <- max(diff(model[['predictors']]$x)) # TODO: Check that it works when dummy variable is used
+          self$set_data('proj_stepsize', val )
+          rm(val)
+        }
+
         # Make projection stack
         # stk_pred_poipo <- inla_make_prediction_stack(
         #   stk_resp = stk_poipo,
@@ -273,16 +289,16 @@ engine_inla <- function(x, optional_mesh = NULL,
         #   spde = spde
         # )
         stk_pred_poipo <- inla_make_projection_stack(
-          stk_resp = stk_poipo,
-          cov       = model$predictors,
-          pred.names= model$predictors_names,
-          offset    = offset,
-          mesh      = self$get_data('mesh'),
-          mesh.area = self$get_data('mesh.area'),
+          stk_resp   = stk_poipo,
+          cov        = model$predictors,
+          pred.names = model$predictors_names,
+          offset     = offset,
+          mesh       = self$get_data('mesh'),
+          mesh.area  = self$get_data('mesh.area'),
           background = model$background,
-          res = 0.5, # FIXME: Eventually do this downstream
-          type = 'poipo',
-          spde = spde
+          res        = self$get_data('proj_stepsize'),
+          type       = 'poipo',
+          spde       = spde
         )
         self$set_data('stk_pred_poipo',stk_pred_poipo)
 
@@ -431,7 +447,7 @@ engine_inla <- function(x, optional_mesh = NULL,
           sp::SpatialPixelsDataFrame(
             points = predcoords,
             data = post,
-            proj4string = CRS( x$show_background_info()$proj )
+            proj4string = CRS( x$show_background_info()$proj ) # x$engine$data$mesh$crs@projargs
           )
         )
         prediction <- raster::mask(prediction, model$background) # Mask with background
@@ -453,6 +469,7 @@ engine_inla <- function(x, optional_mesh = NULL,
               fits = list(
                 "fit_best" = fit_resp,
                 "fit_pred" = fit_pred,
+                "fit_best_equation" = master_form,
                 "mesh"     = self$get_data('mesh'),
                 "prediction" = prediction
                 )
