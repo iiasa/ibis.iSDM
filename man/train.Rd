@@ -6,7 +6,7 @@
 \alias{train-method}
 \title{Train the model from a given engine}
 \usage{
-train(x, runname, rm_corPred, varsel, ...)
+train(x, runname, rm_corPred = FALSE, varsel = FALSE, ...)
 
 \S4method{train}{BiodiversityDistribution}(x)
 }

@@ -212,7 +212,7 @@ formula_combinations <- function(varnames, response = 'Observed', InterceptOnly 
 
 #' Filter a set of correlated predictors to fewer ones
 #'
-#' Code mostly taken from the [`caret`] package
+#' Code mostly taken from the `caret` package
 #'
 #' @param env A [`data.frame`] with extracted environmental covariates for a given species
 #' @param keep A [`vector`] with variables to keep regardless

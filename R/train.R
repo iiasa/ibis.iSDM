@@ -27,7 +27,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname,rm_corPred,varsel,...) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -35,7 +35,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = TRUE, varsel = TRUE, ...) {
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, ...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
@@ -222,13 +222,16 @@ methods::setMethod(
         # Default equation found
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
           # Construct formula with all variables
-          f <- formula(
-            paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ',
-                   # Linear effects
-                   paste0('bols(', model[['predictors_names']], ')', collapse = ' + ' ),
-                   ' +',
-                   # Smooth effects
-                   paste0('bbs(', model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')], ')', collapse = ' + ' )
+          f <- as.formula(
+            paste(
+              paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ',
+
+                     # Linear effects
+                     paste0('bols(', model[['predictors_names']], ')', collapse = ' + ' ),
+                     ' +',
+                     # Smooth effects
+                     paste0('bbs(', model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')], ')', collapse = ' + ' )
+              ), collapse = ' '
             )
           )
           # Add offset if specified
@@ -267,12 +270,17 @@ methods::setMethod(
         # Now get absence environmental data
         abs <- get_ngbvalue(
           coords = raster::xyFromCell(bg,abs),
-          env = subset(model[['predictors']], select = names(poipo_env)),
+          env = subset(model[['predictors']],
+                       # Select everything but the intercept
+                       select = grep('intercept',names(poipo_env),value = TRUE,invert = TRUE) ),
           field_space = c('x','y'),
           longlat = raster::isLonLat(x$background)
         )
+        # Add intercept and observed
+        abs$intercept <- 1
         abs[[x$biodiversity$get_columns_occ()$poipo]] <- 0
 
+        assertthat::assert_that( all( names(abs) %in% names(pres) ) )
         # Format out
         df <- rbind(pres, abs) %>% subset(., complete.cases(.) )
 
@@ -285,7 +293,8 @@ methods::setMethod(
         # Define expectation as very small vector
         w = rep(1e-6, nrow(df) )
         nc = length(bg[bg==0]) # number of non-NA cells
-        w[which(df[[x$biodiversity$get_columns_occ()$poipo]]==0)] <- (nc / sum(df[[x$biodiversity$get_columns_occ()$poipo]]==0) )
+        w[which(df[[x$biodiversity$get_columns_occ()$poipo]]==0)] <-
+          (nc / sum(df[[x$biodiversity$get_columns_occ()$poipo]]==0) )
         df$w <- w # Also add as column
 
         model[['data']][['poipo_values']] <- df

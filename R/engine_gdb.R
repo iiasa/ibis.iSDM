@@ -20,7 +20,7 @@ engine_gdb <- function(x,
                        boosting_iterations = 10000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
-                       verbose = TRUE,
+                       verbose = FALSE,
                         ...) {
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...

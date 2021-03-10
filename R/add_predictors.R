@@ -5,8 +5,8 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env [`Raster`] A [`RasterStack-class`] or [`RasterLayer-class`] object.
-#' @param names [`Vector`] A Vector of character names describing the environmental stack
-#' @param transform [`Vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @param names [`vector`] A Vector of character names describing the environmental stack
+#' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
 #' @param ... Other parameters passed down
@@ -123,7 +123,7 @@ methods::setMethod(
 #' Remove specific predictors from a distribution object
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`Vector`] A Vector of character names describing the environmental stack
+#' @param names [`vector`] A Vector of character names describing the environmental stack
 #' @name rm_predictors
 NULL
 
@@ -162,7 +162,7 @@ methods::setMethod(
 #' For instance those previously selected
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`Vector`] A Vector of character names describing the environmental stack
+#' @param names [`vector`] A Vector of character names describing the environmental stack
 #' @name sel_predictors
 NULL
 

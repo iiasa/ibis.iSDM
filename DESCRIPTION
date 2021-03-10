@@ -1,4 +1,4 @@
-Package: ibis
+Package: ibis.iSDM
 Type: Package
 Title: Modelling framework of Integrated Biodiversity distribution scenarios
 Version: 0.1
@@ -9,7 +9,7 @@ Authors@R:
            email = "jung@@iiasa.ac.at",
            comment = c(ORCID = "0000-0002-7569-1390"))
 Maintainer: Martin Jung <jung@iiasa.ac.at>
-Description: Integrated framework of modelling the distribution of species and ecosystems. 
+Description: Integrated framework of modelling the distribution of species and ecosystems. This package contains the integrated Species distribution Modelling functionalities of the wider ibis framework.
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
@@ -36,8 +36,8 @@ Suggests:
     progress,
     rstan,
     rstantools
-URL: https://github.com/iiasa/ibis
-BugReports: https://github.com/iiasa/ibis/issues
+URL: https://github.com/iiasa/ibis.iSDM
+BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.1
 Config/testthat/edition: 3
 Collate: 

@@ -21,9 +21,9 @@ add_predictors(
 
 \item{env}{\code{\link{Raster}} A \code{\linkS4class{RasterStack}} or \code{\linkS4class{RasterLayer}} object.}
 
-\item{names}{\code{\link{Vector}} A Vector of character names describing the environmental stack}
+\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack}
 
-\item{transform}{\code{\link{Vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+\item{transform}{\code{\link{vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
 
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )}
 
