@@ -10,6 +10,8 @@ add_biodiversity_polpo(
   name = NULL,
   field_occurrence = "Observed",
   formula = NULL,
+  simulate = FALSE,
+  simulate_points = 100,
   ...
 )
 
@@ -18,11 +20,19 @@ add_biodiversity_polpo(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity records.}
+\item{polpo}{A \code{\link{sf}} or \code{\link{Spatial}}) polygon object of presence-only occurrences.}
+
+\item{name}{The name of the biodiversity dataset used as internal identifier}
+
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
+
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified)}
+
+\item{simulate}{Simulate poipa points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipa}} (Default: FALSE)}
+
+\item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation}
 
 \item{...}{Other parameters passed down}
-
-\item{po}{A \code{\link{sf}} or \code{\link{Spatial}}) object of presence-only occurrences.}
 }
 \description{
 Add biodiversity polygon dataset to a distribution object (presence-only)

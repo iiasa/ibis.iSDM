@@ -19,6 +19,8 @@ engine_inla(
 
 \item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: NULL)}
 
+\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
+
 \item{offset}{interpreted as a numeric factor relative to the approximate data diameter;}
 
 \item{cutoff}{The minimum allowed distance between points on the mesh}
@@ -26,8 +28,6 @@ engine_inla(
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (default NULL)}
 
 \item{...}{Other variables}
-
-\item{max_edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
 }
 \description{
 References

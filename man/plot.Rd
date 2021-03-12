@@ -3,9 +3,12 @@
 \name{plot}
 \alias{plot}
 \alias{plot.DistributionModel}
+\alias{plot.BiodiversityDatasetCollection}
 \title{Plot wrappers}
 \usage{
 \method{plot}{DistributionModel}(x, ...)
+
+\method{plot}{BiodiversityDatasetCollection}(x, ...)
 }
 \arguments{
 \item{x}{Any object.}

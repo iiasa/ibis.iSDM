@@ -4,8 +4,10 @@ NULL
 #' Add biodiversity point dataset to a distribution object (presence-only)
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param po A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-only point occurrences.
+#' @param poipo A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-only point occurrences.
+#' @param name The name of the biodiversity dataset used as internal identifier
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
 #' @param ... Other parameters passed down
 #'
 #' @details Say something about presence only biodiversity records in \pkg{ibis}
@@ -45,7 +47,8 @@ methods::setMethod(
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
-    # FIXME: Implement a check on whether the records fall into background data
+    # Get only those records that fall onto the background data
+    suppressMessages( poipo <- point_in_polygon(poly = x$background,points = poipo) )
 
     # Assess whether poipo data already exists in the distribution object
     if(!is.Waiver( x$biodiversity$get_data_object('poipo') )) message('Overwriting existing poipo data.')
@@ -69,11 +72,91 @@ methods::setMethod(
   }
 )
 
+#' Add biodiversity point dataset to a distribution object (presence-absence)
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param poipa A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-absence point occurrences.
+#' @param name The name of the biodiversity dataset used as internal identifier
+#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
+#' @param ... Other parameters passed down
+#'
+#' @details Say something about presence-absence biodiversity records in \pkg{ibis}
+#' @section Notes:
+#' @references
+#'
+#' @examples
+#' \dontrun{
+#'  TBD
+#' }
+#' @name add_biodiversity_poipa
+NULL
+
+#' @name add_biodiversity_poipa
+#' @rdname add_biodiversity_poipa
+#' @exportMethod add_biodiversity_poipa
+#' @export
+methods::setGeneric(
+  "add_biodiversity_poipa",
+  signature = methods::signature("x", "poipa"),
+  function(x, poipa, name = NULL, field_occurrence = 'Observed', formula = NULL, ...) standardGeneric("add_biodiversity_poipa"))
+
+#' @name add_biodiversity_poipa
+#' @rdname add_biodiversity_poipa
+#' @usage \S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf}(x, poipa)
+methods::setMethod(
+  "add_biodiversity_poipa",
+  methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
+  function(x, poipa, name = NULL, field_occurrence = 'Observed', formula = NULL,  ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            inherits(poipa,'Spatial') || inherits(poipa,'sf') || inherits(poipa,'data.frame') || inherits(poipa,'tibble'),
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa,field_occurrence),
+                            inherits(formula,'formula') || is.null(formula) || is.character(formula)
+    )
+    assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
+                            msg = "Presence-Absence requires at exactly 2 unique values.")
+
+    # Get only those records that fall onto the background data
+    suppressMessages( poipa <- point_in_polygon(poly = x$background,points = poipa) )
+
+    # Record presence absence to 0 and 1
+    if(is.character(poipa[[field_occurrence]]) ){
+      # TODO:
+      stop('Guessing conversion to be coded')
+    }
+
+    # Assess whether poipo data already exists in the distribution object
+    if(!is.Waiver( x$biodiversity$get_data_object('poipa') )) message('Overwriting existing poipa data.')
+
+    # Convert formula if necessary
+    formula = to_formula(formula)
+
+    # Finally set the data to the BiodiversityDistribution object
+    x$biodiversity$set_data(
+      'poipa',
+      bdproto(NULL, BiodiversityDataset,
+              name = ifelse(is.null(name), 'Species: ',name),
+              id = new_id(),
+              equation = formula,
+              type = 'poipa',
+              field_occurrence = field_occurrence,
+              data = format_biodiversity_data(poipa,field_occurrence)
+      )
+    )
+    return(x)
+  }
+)
+
+
 #' Add biodiversity polygon dataset to a distribution object (presence-only)
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param po A [`sf`] or [`Spatial`]) object of presence-only occurrences.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
+#' @param polpo A [`sf`] or [`Spatial`]) polygon object of presence-only occurrences.
+#' @param name The name of the biodiversity dataset used as internal identifier
+#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
+#' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: FALSE)
+#' @param simulate_points A [`numeric`] number of points to be created by simulation
 #' @param ... Other parameters passed down
 #'
 #' @details Say something about presence only biodiversity records in \pkg{ibis} and
@@ -95,7 +178,8 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL,...) standardGeneric("add_biodiversity_polpo"))
+  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL,
+           simulate = FALSE, simulate_points = 100, ...) standardGeneric("add_biodiversity_polpo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -105,36 +189,75 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, ... ) {
+  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL,
+           simulate = FALSE, simulate_points = 100, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo,'Spatial') || inherits(polpo,'sf') || inherits(polpo,'data.frame') || inherits(polpo,'tibble'),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo,field_occurrence),
-                            inherits(formula,'formula') || is.null(formula) || is.character(formula)
+                            inherits(formula,'formula') || is.null(formula) || is.character(formula),
+                            assertthat::is.flag(simulate), is.numeric(simulate_points)
     )
+    # Check type and ensure that is a polygon
+    assertthat::assert_that(all( unique( st_geometry_type(polpo) ) %in% c('POLYGON','MULTIPOLYGON') ),
+                            msg = 'This method works for spatial data of type polygon only.')
+
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
-    # FIXME: Implement a check on whether the records fall into background data
-
-    # Assess whether poipo data already exists in the distribution object
-    if(!is.Waiver( x$biodiversity$get_data_object('polpo') )) message('Overwriting existing polpo data.')
-
-    # Convert formula if necessary
-    formula = to_formula(formula)
-
-    # Finally set the data to the BiodiversityDistribution object
-    x$biodiversity$set_data(
-      'polpo',
-      bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), 'Species: ',name),
-              id = new_id(),
-              equation = formula,
-              type = 'polpo',
-              field_occurrence = field_occurrence,
-              data = format_biodiversity_data(polpo,field_occurrence)
+    # Simulate presence absence points rather than using the range directly
+    if(simulate){
+      # FIXME: Consider adding further options as parameter
+      # Sample presence points within
+      suppressMessages(
+        poipa_on <- sf::st_as_sf(
+          sf::st_sample(x = virtual_range, size = simulate_points, type = 'random')
+        )
       )
-    )
-    return(x)
+      names(poipa_on) <- 'geometry'; st_geometry(poipa_on) <- 'geometry'
+      poipa_on[[field_occurrence]] <- 1
+      poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
+      # Get absence data
+      # FIXME: Quick fix. Ideally cookie cut the range out instead.
+      suppressMessages(
+        poipa_off <- sf::st_as_sf(
+          sf::st_sample(x = x$background, size = simulate_points*2,type = 'random')
+        )
+      )
+      names(poipa_off) <- 'geometry'; st_geometry(poipa_off) <- 'geometry'
+      # Remove points on the range
+      suppressMessages(
+        wi <- sf::st_within(poipa_off, virtual_range,sparse = FALSE)
+      )
+      poipa_off <- poipa_off[!apply(wi, 1, any),]
+      poipa_off[[field_occurrence]] <- 0
+      poipa_off$x <- st_coordinates(poipa_off)[,1];poipa_off$y <- st_coordinates(poipa_off)[,2]
+
+      poipa <- rbind(poipa_on,poipa_off)
+
+      # Add simulated poipa object instead
+      add_biodiversity_poipa(x,poipa = poipa,name = paste0(name, ' - simulated'),
+                             field_occurrence = field_occurrence,formula = formula,... )
+    } else {
+      # Assess whether poipo data already exists in the distribution object
+      if(!is.Waiver( x$biodiversity$get_data_object('polpo') )) message('Overwriting existing polpo data.')
+
+      # Convert formula if necessary
+      formula = to_formula(formula)
+
+      # Finally set the data to the BiodiversityDistribution object
+      x$biodiversity$set_data(
+        'polpo',
+        bdproto(NULL, BiodiversityDataset,
+                name = ifelse(is.null(name), 'Species: ',name),
+                id = new_id(),
+                equation = formula,
+                type = 'polpo',
+                field_occurrence = field_occurrence,
+                data = format_biodiversity_data(polpo,field_occurrence)
+        )
+      )
+      return(x)
+    }
   }
 )
 

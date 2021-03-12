@@ -8,7 +8,7 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
-#' @param max_edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (default NULL)
@@ -410,8 +410,8 @@ engine_inla <- function(x, optional_mesh = NULL,
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
-                          control.inla(int.strategy = "eb"), # Empirical bayes for integration
-                                       # strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                          control.inla(#int.strategy = "eb"), # Empirical bayes for integration
+                                       strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                           num.threads = parallel::detectCores()-1
         )
 
@@ -427,7 +427,8 @@ engine_inla <- function(x, optional_mesh = NULL,
 #                               control.mode = list(theta = ifelse(length(fit_resp$mode$theta)==0, 0, fit_resp$mode$theta), restart = FALSE), # Don't restart and use previous thetas
 #                               control.fixed = list(prec.intercept = 0.01, prec = 0.01), # Added to see whether this changes GMRFlib convergence issues
                                verbose = verbose, # To see the log of the model runs
-                               control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                               control.inla(#int.strategy = "eb"), # Empirical bayes for integration
+                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                                num.threads = parallel::detectCores() - 1
         )
         # Create a spatial prediction
@@ -450,15 +451,13 @@ engine_inla <- function(x, optional_mesh = NULL,
             proj4string = CRS( x$show_background_info()$proj ) # x$engine$data$mesh$crs@projargs
           )
         )
-        prediction <- raster::mask(prediction, model$background) # Mask with background
-
-        # # Create an empty raster from the predictor coordinates
-        # ra <- rasterFromXYZ(xyz = model$predictors[,c('x','y')],
-        #                     crs = raster::projection(x$background)
+        # Create an empty raster from the predictor coordinates
+        # ra <- rasterFromXYZ(xyz = predcoords,
+        #                     crs = self$get_data('mesh')$crs
         #                     )
         # # Fill output rasters
         # prediction <- fill_rasters(post = post,background = ra)
-        # prediction <- raster::mask(prediction, model$background) # Mask with background
+        prediction <- raster::mask(prediction, model$background) # Mask with background
 
         # Definition of INLA Model object ----
         out <- bdproto(

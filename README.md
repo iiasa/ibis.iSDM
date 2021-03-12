@@ -58,7 +58,7 @@ devtools::install_github("IIASA/ibis")
 -   ✅ Plotting functions for models and effect are there
 -   🚧 Actually support multiple likelihoods depending on included
     biodiversity dataset
--   🚧 Add a wrapper for PPMs in Stan as new engine
+-   🚧 Add a wrapper for PPMs in Stan as new engine for max flexibility
 -   🚧 Implement options to add occupancy model for detectability, see
     [Altwegg and
     Nichols](https://onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13090)
@@ -69,6 +69,8 @@ devtools::install_github("IIASA/ibis")
     [outperforms](https://arxiv.org/pdf/1204.6087v1.pdf) Matern
     covariance? It likely is also considerably faster, thus could be
     implemented
+-   🚧 Create a pkgdown website for the package with tutorials (see
+    below)
 -   …
 
 ## Development guidelines
@@ -181,6 +183,35 @@ Other datasets can be added to the call above as well as for instance
 specific latent factors \[`add_latent_spatial()`\] or offsets
 \[`add_range_offset()`\].
 
+Equally it is possible to run poisson models with spatial latent effect
+on their (equivalent to a kernel density estimation)
+
+``` r
+# Distribution model with spatial only
+spatialonly <- distribution(background) %>%
+  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+  add_latent_spatial() %>%
+  engine_inla(
+    max.edge = c(1, 5),
+    offset = c(1, 1),
+    cutoff = 1,
+    proj_stepsize = NULL
+    )
+
+# Train a model
+mod1_spatialonly <- train(spatialonly, runname = 'test')
+#> Warning in sparse.model.matrix(object, data = data, contrasts.arg =
+#> contrasts.arg, : variable 'int.strategy' is absent, its contrast will be ignored
+
+#> Warning in sparse.model.matrix(object, data = data, contrasts.arg =
+#> contrasts.arg, : variable 'int.strategy' is absent, its contrast will be ignored
+#> Warning in points2grid(points, tolerance, round): grid has empty column/rows in
+#> dimension 1
+plot(mod1_spatialonly)
+```
+
+![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+
 ### Alternative to INLA - Use Gradient Descent Boosting
 
 ``` r
@@ -209,11 +240,11 @@ mod2
 plot(mod2)
 ```
 
-![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 # Plot the partial effects
 effects(mod2)
 ```
 
-![](man/figures/README-unnamed-chunk-4-2.png)<!-- -->
+![](man/figures/README-unnamed-chunk-5-2.png)<!-- -->

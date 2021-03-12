@@ -105,13 +105,40 @@ BiodiversityDatasetCollection <- bdproto(
     x <- self$get_equations()
     #if(length(x)== 0) return( new_waiver() )
     # new names
-    n <- c(poipo = 'Point - Presence only',poipa = 'Point - Presence absence',
-      polpo = 'Polygon - Presence only',polpa = 'Polygon - Presence absence')
+    n <- c(
+        poipo = 'Point - Presence only',
+        poipa = 'Point - Presence absence',
+        polpo = 'Polygon - Presence only',
+        polpa = 'Polygon - Presence absence'
+      )
     names(x) <- as.vector( n[match(names(x), names(n))] )
     # Prettify
     o <- paste0(names(x),":\n ",x,collapse = '\n')
     if(msg) message(o) else o
+  },
+  # Plot the whole collection
+  plot = function(self){
+    # FIXME: Can quite likely be beautified
+    # Get types
+    ty <- as.data.frame( self$get_columns_occ() )
+
+    par.ori <- par(no.readonly = TRUE)
+    # Base plot
+    g <- ggplot2::ggplot(x$background) + ggplot2::geom_sf() + ggplot2::labs( title = self$name())
+    # Adding the other elements
+    if('polpo' %in% names(ty)) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data('polpo'))[ty$popol], fill = 'lightblue', alpha = .35 )
+
+    if('poipo' %in% names(ty)) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data('poipo'))[ty$poipo], size = 1.5, shape = 19)
+
+    if('poipa' %in% names(ty)) {
+      dd <- st_as_sf(self$get_data('poipa'))[ty$poipa]
+      dd[[ty$poipa]] <- factor(dd[[ty$poipa]])
+      # FIXME: Tidy evaluation via {{}} does not seem to work.
+      g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = Observed) )
+    }
+    g
   }
+
 )
 
 

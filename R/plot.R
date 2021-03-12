@@ -18,3 +18,9 @@ NULL
 #' @export
 #'
 plot.DistributionModel <- function(x, ...) x$plot(...)
+
+#' @rdname plot
+#' @method plot BiodiversityDatasetCollection
+#' @export
+#'
+plot.BiodiversityDatasetCollection <- function(x, ...) x$plot(...)
