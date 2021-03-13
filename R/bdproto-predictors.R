@@ -68,7 +68,7 @@ PredictorDataset <- bdproto(
   summary = function(self, digits = 2) {
     # Maybe make a little bit prettier
     round(
-      summary( self$get_data(df = FALSE)), digits = digits
+      raster::summary( self$get_data() ), digits = digits
          )
   },
   # Number of Predictors in object
@@ -77,5 +77,13 @@ PredictorDataset <- bdproto(
       nlayers(self$get_data())
     else
       ncol(self$get_data)
+  },
+  # Basic Plotting function
+  plot = function(self){
+    cols_civ <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
+    # Plot the predictors
+    par.ori <- par(no.readonly = TRUE)
+    plot( self$get_data(), col = cols_civ  )
+    par(par.ori)
   }
 )

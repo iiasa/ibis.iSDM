@@ -7,7 +7,7 @@ NULL
 #' @param env [`Raster`] A [`RasterStack-class`] or [`RasterLayer-class`] object.
 #' @param names [`vector`] A Vector of character names describing the environmental stack
 #' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
-#' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )
+#' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
 #' @param ... Other parameters passed down
 #'
@@ -57,8 +57,8 @@ methods::setMethod(
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(env, 'Raster'),
-                            transform %in% c('none','pca', 'scale', 'norm'),
-                            derivates %in% c('none', 'elu', 'hinge', 'quadratic'),
+                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
+                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names)
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
@@ -70,33 +70,20 @@ methods::setMethod(
       names(env) <- names
     }
 
-    # Calculate derivates if set
-    if(derivates !='none'){
-      new_predictors <- switch(derivates,
-        'quadratic' = calc(env, function(x) I(x^2))
-      )
-      # Change name
-      names(new_predictors) <- paste0(derivates,'_',names(env))
-      # Add to env
-      env <- addLayer(env, new_predictors)
-
-      # Coarse hinge for 5
-      # TODO: Find a sensible way of calculating at least a few...
-      # coarse_hinge <- names(coarse_predictors[,-(1:2)]) %>%
-      #   purrr::map(~ maxnet::hinge(coarse_predictors[,.x],nknots = 5) )
-      # names(coarse_hinge) <- names(coarse_predictors[,-(1:2)])
-      # # Coarse threshold for 5
-      # coarse_thresh <- names(coarse_predictors[,-(1:2)]) %>%
-      #   purrr::map(~ maxnet::thresholds(coarse_predictors[,.x],nknots = 5) )
-      # names(coarse_thresh) <- names(coarse_predictors[,-(1:2)])
-    }
-
     # Standardization and scaling
-    # TODO: Think whether this makes sense for categorical predictors? Shouldn't affect the data distribution I think
-    if(transform != 'none'){
-      # TODO: Possibly allow this for multiple correction at once?
-      env <- adjustPredictors(env,option = transform)
+    if('none' %notin% transform){
+      for(tt in transform) env <- predictor_transform(env, option = tt)
     }
+
+    # Calculate derivates if set
+    if('none' %notin% derivates){
+      new_env <- raster::stack()
+      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+
+      # Add to env
+      env <- addLayer(env, new_env)
+    }
+
     # Assign an attribute to this object to keep track of it
     attr(env,'transform') <- transform
 

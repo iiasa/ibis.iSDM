@@ -24,3 +24,8 @@ plot.DistributionModel <- function(x, ...) x$plot(...)
 #' @export
 #'
 plot.BiodiversityDatasetCollection <- function(x, ...) x$plot(...)
+
+#' @rdname plot
+#' @method plot PredictorDataset
+#' @export
+plot.PredictorDataset <- function(x, ...) x$plot(...)

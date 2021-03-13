@@ -25,7 +25,7 @@ add_predictors(
 
 \item{transform}{\code{\link{vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
 
-\item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'elu', 'hinge', 'product') )}
+\item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
 
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
 

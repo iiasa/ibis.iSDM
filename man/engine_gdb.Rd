@@ -7,7 +7,7 @@
 engine_gdb(
   x,
   fam = "Poisson",
-  boosting_iterations = 10000,
+  boosting_iterations = 1000,
   learning_rate = 0.1,
   empirical_risk = "inbag",
   verbose = FALSE,

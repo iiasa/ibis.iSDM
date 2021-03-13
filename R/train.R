@@ -90,6 +90,7 @@ methods::setMethod(
     rm(lu)
 
     # Extract estimates for point records
+    # FIXME: This currently works only for presence only
     poipo_env <- get_ngbvalue(
       coords = x$biodiversity$get_coordinates('poipo'),
       env = model[['predictors']],
@@ -230,7 +231,7 @@ methods::setMethod(
                      paste0('bols(', model[['predictors_names']], ')', collapse = ' + ' ),
                      ' +',
                      # Smooth effects
-                     paste0('bbs(', model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')], ')', collapse = ' + ' )
+                     paste0('bbs(', model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')], ', knots = 5)', collapse = ' + ' )
               ), collapse = ' '
             )
           )

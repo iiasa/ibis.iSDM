@@ -17,7 +17,7 @@ NULL
 #' @export
 engine_gdb <- function(x,
                        fam = 'Poisson',
-                       boosting_iterations = 10000,
+                       boosting_iterations = 1000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
                        verbose = FALSE,
@@ -160,9 +160,10 @@ engine_gdb <- function(x,
         # 5 fold Cross validation to prevent overfitting
         # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
         cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
-        cvm <- mboost::cvrisk(fit_gdb,
+        try({cvm <- mboost::cvrisk(fit_gdb,
                               folds = cvf,
                               papply = pbapply::pblapply )
+        },silent = TRUE)
 
         # Check whether crossvalidation has run through successfully
         if(exists('cvm') && mstop(cvm)>0){

@@ -235,10 +235,10 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
 #' Spatial adjustment of raster stacks
 #'
 #' @param env A [`Raster`] object
-#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','scale','norm','pca')
 #' @return Returns a adjusted [`Raster`] object of identical resolution
 #' @noRd
-adjustPredictors <- function(env, option,...){
+predictor_transform <- function(env, option, ...){
    assertthat::assert_that(
      inherits(env,'Raster'),
      is.character(option),
@@ -261,11 +261,31 @@ adjustPredictors <- function(env, option,...){
     out <- raster::scale(env, center = TRUE, scale = TRUE)
   }
 
-  # PCA
+  # Principle component separation of variables
+  # Inspiration taken from RSToolbox package
   if(option == 'pca'){
-    # TODO: Try and not rely on this external dependency. Insert functions here
-    mod <- RStoolbox::rasterPCA(env)
-    out <- mod$map
+    assertthat::assert_that(raster::nlayers(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
+
+    # FIXME: Allow a reduction to few components than nr of layers?
+    nComp <- nlayers(env)
+    # Construct mask of all cells
+    envMask <- !sum(raster::calc(env, is.na))
+    assertthat::assert_that(cellStats(envMask,sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
+    env <- raster::mask(env, envMask, maskvalue = 0)
+
+    # Sample covariance from stack and fit PCA
+    covMat <- raster::layerStats(env, stat = "cov", na.rm = TRUE)
+    pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
+    # Add means and grid cells
+    pca$center <- covMat$mean
+    pca$n.obs <- raster::ncell(env)
+
+    # FIXME: Allow parallel processing for rather large files and check how many nodes are available
+    # Predict principle components
+    out <- raster::predict(env, pca,na.rm = TRUE, index = 1:nComp)
+
+    names(out) <- paste0("PC", 1:nComp)
+    return(out)
   }
 
   # Final security checks
@@ -276,6 +296,90 @@ adjustPredictors <- function(env, option,...){
   return(out)
 }
 
+#' Create spatial derivate of raster stacks
+#'
+#' @param env A [`Raster`] object
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','quadratic', 'hinge', 'thresh')
+#' @return Returns the derived adjusted [`Raster`] objects of identical resolution
+#' @noRd
+predictor_derivate <- function(env, option, ...){
+  assertthat::assert_that(
+    inherits(env,'Raster'),
+    is.character(option),
+    option %in% c('none','quadratic', 'hinge', 'thresh')
+  )
+
+  # Simple quadratic transformation
+  if(option == 'quadratic'){
+    new_env <- calc(env, function(x) I(x^2))
+  }
+
+  # Hinge transformation
+  # From`maxnet` package
+  if(option == 'hinge'){
+    # Function to create hingevalue
+    makeHinge <- function(v, n, nknots = 4){
+      # Function to create hingeval
+      hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+      # Get stats
+      v.min <- raster::cellStats(v, min)
+      v.max <- raster::cellStats(v, max)
+      k <- seq(v.min, v.max, length = nknots)
+      # Hinge up to max
+      lh <- outer(v[], utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
+      # Hinge starting from min
+      rh <- outer(v[], k[-1], function(w, h) hingeval(w, v.min, h))
+      colnames(lh) <- paste("hinge",n, round( utils::head(k, -1), 2),'__', round(v.max, 2),sep = ":")
+      colnames(rh) <- paste("hinge",n, round( v.min, 2),'__', round(k[-1], 2), sep = ":")
+      o <- as.data.frame(
+        cbind(lh, rh)
+      )
+      # Kick out first (min) and last (max) col as those are perfectly correlated
+      o <- o[,-c(1,ncol(o))]
+      return(o)
+    }
+
+    # Build new stacks
+    new_env <- raster::stack()
+    for(val in names(env)){
+      new_env <- raster::addLayer(new_env,
+                              fill_rasters(
+                                makeHinge(env[[val]],n = val,nknots = 4),
+                                           emptyraster(env)
+                                )
+                             )
+    }
+  }
+
+  # For thresholds
+  # Take functionality in maxnet package
+  if(option == 'thresh'){
+    # Function to create derivative thresholds
+    makeThresh <- function(v,n, nknots = 4){
+      # Get min max
+      v.min <- cellStats(v,min)
+      v.max <- cellStats(v,max)
+      k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
+      f <- outer(v[], k, function(w, t) ifelse(w >= t, 1, 0))
+      colnames(f) <- paste("thresh", n, round(k, 2), sep = ":")
+      return(as.data.frame(f))
+    }
+
+    new_env <- raster::stack()
+    for(val in names(env)){
+      new_env <- raster::addLayer(new_env,
+                                  fill_rasters(
+                                    makeThresh(env[[val]],n = val,nknots = 4),
+                                    emptyraster(env)
+                                  )
+      )
+    }
+
+
+  }
+
+  return(new_env)
+}
 #' Create new raster stack from a given data.frame
 #'
 #' @param post A data.frame
