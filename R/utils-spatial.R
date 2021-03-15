@@ -312,6 +312,7 @@ predictor_derivate <- function(env, option, ...){
   # Simple quadratic transformation
   if(option == 'quadratic'){
     new_env <- calc(env, function(x) I(x^2))
+    names(new_env) <- paste0('quad.', names(new_env))
   }
 
   # Hinge transformation

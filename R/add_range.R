@@ -197,7 +197,7 @@ methods::setMethod(
       # If max distance is specified
       if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
       # Convert to relative for better scaling
-      dis <- 1 - adjustPredictors(dis,option = 'norm') #1 - (dis / cellStats(dis,'max') )
+      dis <- 1 - predictor_transform(dis,option = 'norm') #1 - (dis / cellStats(dis,'max') )
       names(dis) <- name
     }
 
