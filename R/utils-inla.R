@@ -98,6 +98,48 @@ mesh_boundary <- function(mesh){
   loc[mesh$segm$int$idx[,2],]
 }
 
+#' Create a barrier representation of a mesh
+#'
+#' Following physical barrier model for SDM
+#' https://www.sciencedirect.com/science/article/pii/S221167531830099X
+#' @param mesh A [`inla.mesh`] object
+#' @param region.poly A [`SpatialPolygons`] object
+#' @noRd
+mesh_barrier <- function(mesh, region.poly){
+  assertthat::assert_that(
+    inherits(mesh,'inla.mesh'),
+    inherits(region.poly,'SpatialPolygons')
+  )
+  # Get number of boundary trianbles on graph
+  tl <- length(mesh$graph$tv[,1])
+  # Define position matrix for triangles
+  posTri <- matrix(0, tl, 2)
+
+  # Loop through triangle
+  for (t in 1:tl){
+    temp <- mesh$loc[mesh$graph$tv[t, ], ]
+    posTri[t,] <- colMeans(temp)[c(1,2)]
+  }
+
+  posTri <- sp::SpatialPoints(posTri)
+  proj4string(posTri) <- proj4string(mesh$crs)
+
+  # Overlay with background
+  ovl <- sp::over(region.poly, posTri, returnList=T)
+  ovl <- unlist(ovl)
+  barrier.triangles <- setdiff(1:tl, ovl)
+
+  # Define INLA barrier polygon
+  suppressMessages(
+    suppressWarnings(
+      poly.barrier <- INLA::inla.barrier.polygon(mesh, barrier.triangles)
+    )
+  )
+
+  return(poly.barrier)
+}
+
+
 #' Make Integration stack
 #' @param mesh The background projection mesh
 #' @param mesh.area The area of the mesh, has to match the number of integration points

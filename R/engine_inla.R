@@ -12,6 +12,7 @@ NULL
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (default NULL)
+#' @param barrier Should a barrier model be added to the model?
 #' @param ... Other variables
 #' @import INLA
 #' @name engine_inla
@@ -23,6 +24,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                         offset = c(1,1),
                         cutoff = 1,
                         proj_stepsize = NULL,
+                        barrier = FALSE,
                         ...) {
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
@@ -85,6 +87,12 @@ engine_inla <- function(x, optional_mesh = NULL,
     )
   }
 
+  # Get barrier from the region polygon
+  # TODO: Add this in addition to spatial field below, possibly specify an option to calculate this
+  if(barrier){
+    mesh_bar <- mesh_barrier(mesh, region.poly)
+  } else { mesh_bar <- new_waiver() }
+
   # Calculate area in km²
   ar <- suppressWarnings(
     mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
@@ -102,6 +110,7 @@ engine_inla <- function(x, optional_mesh = NULL,
       data = list(
         'mesh' = mesh,
         'mesh.area' = ar,
+        'mesh.bar' = mesh_bar,
         'proj_stepsize' = proj_stepsize
       ),
       # parameters = parameters(
@@ -415,6 +424,9 @@ engine_inla <- function(x, optional_mesh = NULL,
                           num.threads = parallel::detectCores()-1
         )
 
+        # Get theta from initiall fitted model as starting parameter
+        thetas = fit_resp$internal.summary.hyperpar$mean
+
         # Predict on full
         fit_pred <- INLA::inla(formula = master_form, # The specified formula
                                data  = stack_data_full,  # The data stack
@@ -424,7 +436,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                                control.family = list(link = "log"), # Control options
                                control.predictor = list(A = INLA::inla.stack.A(stk_full), link = 1, compute = TRUE),  # Compute for marginals of the predictors
                                control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-#                               control.mode = list(theta = ifelse(length(fit_resp$mode$theta)==0, 0, fit_resp$mode$theta), restart = FALSE), # Don't restart and use previous thetas
+                               control.mode = list(theta = thetas, restart = TRUE), # To speed up use previous thetas
 #                               control.fixed = list(prec.intercept = 0.01, prec = 0.01), # Added to see whether this changes GMRFlib convergence issues
                                verbose = verbose, # To see the log of the model runs
                                control.inla(#int.strategy = "eb"), # Empirical bayes for integration
