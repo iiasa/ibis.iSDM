@@ -10,6 +10,8 @@
 \alias{print.BiodiversityDataset}
 \alias{print.PredictorDataset}
 \alias{print.DistributionModel}
+\alias{print.Prior}
+\alias{print.PriorList}
 \alias{print.Id}
 \title{Print}
 \usage{
@@ -24,6 +26,10 @@
 \method{print}{PredictorDataset}(x, ...)
 
 \method{print}{DistributionModel}(x, ...)
+
+\method{print}{Prior}(x, ...)
+
+\method{print}{PriorList}(x, ...)
 
 \method{print}{Id}(x, ...)
 

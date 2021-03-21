@@ -15,17 +15,17 @@ License: CC BY 4.0
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    proto (>= 1.0.0),
     methods,
-    sf (>= 0.9),
-    raster (>= 3.4-5),
-    rgeos (>= 0.5-5),
-    tibble (>= 2.0.0),
     ggplot2,
     magrittr,
-    assertthat(>= 0.2.0),
     uuid,
     foreach,
+    assertthat(>= 0.2.0),
+    rgeos (>= 0.5-5),
+    tibble (>= 2.0.0),
+    proto (>= 1.0.0),
+    sf (>= 0.9),
+    raster (>= 3.4-5),
     testthat (>= 3.0.0)
 Depends:
     R(>= 3.5.0)
@@ -54,6 +54,7 @@ Collate:
     'utils-inla.R'
     'bdproto-distributionmodel.R'
     'bdproto-engine.R'
+    'bdproto-priorlist.R'
     'bdproto-prior.R'
     'utils-spatial.R'
     'data.R'
@@ -65,6 +66,8 @@ Collate:
     'misc.R'
     'plot.R'
     'print.R'
+    'prior_inla.R'
+    'priorlist.R'
     'summary.R'
     'train.R'
     'zzz.R'

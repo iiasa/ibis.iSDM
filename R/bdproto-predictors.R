@@ -16,6 +16,7 @@ PredictorDataset <- bdproto(
   "PredictorDataset",
   id           = character(0),
   data         = new_waiver(),
+  priors       = new_waiver(),
   # Printing function
   # FIXME: Prettify. Print summary values for each layer
   print = function(self){

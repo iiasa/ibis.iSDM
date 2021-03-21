@@ -11,8 +11,11 @@ add_predictors(
   transform = "scale",
   derivates = "none",
   bgmask = TRUE,
+  priors = NULL,
   ...
 )
+
+\S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
 }
@@ -28,6 +31,8 @@ add_predictors(
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
 
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
+
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default INLA priors}
 
 \item{...}{Other parameters passed down}
 }

@@ -9,10 +9,12 @@ NULL
 #' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default INLA priors
 #' @param ... Other parameters passed down
-#'
+
 #' @details TBD
 #' @section Notes:
+#' @aliases add_predictors
 #' @references
 #'
 #' @examples
@@ -29,10 +31,10 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ...) standardGeneric("add_predictors"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ...) standardGeneric("add_predictors"))
 
 #' @name add_predictors
-#' @rdname distribution
+#' @rdname add_predictors
 #' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
 methods::setMethod(
   "add_predictors",
@@ -54,12 +56,13 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(env, 'Raster'),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
-                            is.null(names) || assertthat::is.scalar(names) || is.vector(names)
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.null(priors) || inherits(priors,'PriorList')
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
                             msg = 'Supplied environmental data not aligned with background.')
@@ -100,7 +103,9 @@ methods::setMethod(
     x$set_predictors(
         bdproto(NULL, PredictorDataset,
               id = new_id(),
-              data = env
+              data = env,
+              priors = priors,
+              ...
         )
       )
     return(x)

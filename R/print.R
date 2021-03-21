@@ -62,6 +62,21 @@ print.PredictorDataset <- function(x, ...) x$print()
 print.DistributionModel <- function(x, ...) x$print()
 
 #' @rdname print
+#' @method print Prior
+#'
+#' @export
+#'
+print.Prior <- function(x, ...) x$print()
+
+#' @rdname print
+#' @method print PriorList
+#'
+#' @export
+#'
+print.PriorList <- function(x, ...) x$print()
+
+
+#' @rdname print
 #'
 #' @method print Id
 #'
