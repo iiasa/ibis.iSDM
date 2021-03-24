@@ -11,24 +11,24 @@ NULL
 #'
 #' @seealso [`Prior-class`], [`PriorList-class`]
 #'
-#' @aliases priorlist, priors
-#' @name priorlist
+#' @aliases priors
+#' @name priors
 NULL
 
-#' @name priorlist
-#' @rdname priorlist
-#' @exportMethod priorlist
+#' @name priors
+#' @rdname priors
+#' @exportMethod priors
 #' @export
 methods::setGeneric(
-  "priorlist",
+  "priors",
   signature = methods::signature('x'),
-  function(x,...) standardGeneric("priorlist"))
+  function(x,...) standardGeneric("priors"))
 
-#' @name priorlist
-#' @rdname priorlist
-#' @usage \S4method{priorlist}{Prior}(x)
+#' @name priors
+#' @rdname priors
+#' @usage \S4method{priors}{Prior}(x)
 methods::setMethod(
-  "priorlist",
+  "priors",
   methods::signature(x = "ANY"),
   function(x,...) {
     # Get supplied matched arguments
@@ -56,26 +56,4 @@ methods::setMethod(
       )
 
   }
-)
-
-#' Creates a new PriorList object that contains Priors
-#'
-#' @aliases priorlist, priors
-#' @name priors
-#' @rdname priors
-#' @exportMethod priors
-#' @export
-methods::setGeneric(
-  "priors",
-  signature = methods::signature('x'),
-  function(x,...) standardGeneric("priors")
-)
-# FIXME: Ensure that everything is properly inherited from priorList
-#' @name priors
-#' @rdname priors
-#' @usage \S4method{priors}{Prior}(x)
-methods::setMethod(
-  "priors",
-  methods::signature(x = "ANY"),
-  function(x,...) priorlist(x, ...)
 )

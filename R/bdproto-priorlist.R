@@ -51,15 +51,60 @@ PriorList <- bdproto(
     if(is.Waiver(self$priors)) return( character(0) )
     vapply(self$priors, function(x) x$variable, character(1) )
   },
+  # Exists a specific prior for a variable and type combination?
+  exists = function(self, variable, type){
+    assertthat::assert_that(!missing(variable), !missing(type),
+                            is.character(variable),
+                            is.character(type),msg = 'Specify both variable and type to query a prior.')
+    vn <- self$varnames()
+    ty <- vapply(self$priors, function(x) x$type, character(1) )
+    # Return the id of the combination
+    if((variable %in% vn) && (type %in% ty) ) return( names(vn)[which(variable %in% vn)] ) else return(NULL)
+  },
+  # Get specific prior values from the list if set
+  get = function(self, variable, type){
+    assertthat::assert_that(!missing(variable), !missing(type),
+                            is.character(variable),
+                            is.character(type),msg = 'Specify both variable and type to query a prior.')
+    # Check whether there is an id
+    ex <- self$exists(variable, type)
+    # Catch and return NULL in case if not set
+    if(is.null(ex)) {ex} else {
+      # Otherwise get values
+      self$priors[[names(vn)[which(variable %in% vn)]]]$get()
+    }
+  },
   # Add a new prior
   add = function(self, x) {
     assertthat::assert_that(inherits(x, "Prior"))
-    self$priors[[as.character(x$id)]] <- x
+
+    # If variable and type already exist, replace
+    ex <- self$exists(x$variable, x$type)
+    # Catch and return NULL in case if not set
+    if(is.null(ex)) {
+      # Set prior
+      self$priors[[as.character(x$id)]] <- x
+    } else {
+      # Otherwise delete previous prior and add new one
+      self$rm(ex)
+      self$priors[[as.character(x$id)]] <- x
+    }
     invisible()
   },
-  # Remove a set prior
-  rm = function(self, x){
-    assertthat::assert_that(is.Id(x) || is.character(x))
+  # Remove a set prior by id
+  rm = function(self, id){
+    assertthat::assert_that(is.Id(id) || is.character(id),
+                            id %in% self$ids()
+                            )
+    x$priors[[id]] <- NULL
+    invisible()
+  },
+  # Combining function to combine this PriorList with another
+  combine = function(self, x){
+    assertthat::assert_that(inherits(x, 'PriorList'))
+    if(is.Waiver(self$priors)) self$priors <- x$priors
+    # Check whether priors on variable and type already exist. If yes, replace
+    for(p in x$priors) self$add(p)
   }
   # TODO: Plotting function. Plots the distribution of all priors
   # plot = function(self){

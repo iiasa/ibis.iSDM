@@ -9,7 +9,7 @@ NULL
 #' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
-#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default INLA priors
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default priors
 #' @param ... Other parameters passed down
 
 #' @details TBD
@@ -99,12 +99,14 @@ methods::setMethod(
     # TODO: In the future one could think of supplying predictors of varying grain
     if(!is.Waiver(x$predictors)) message('Overwriting existing environmental predictors.')
 
+    # If priors have been set, save them in distribution object
+    if(!is.null(priors)) x$set_priors(priors)
+
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
         bdproto(NULL, PredictorDataset,
               id = new_id(),
               data = env,
-              priors = priors,
               ...
         )
       )

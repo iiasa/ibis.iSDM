@@ -30,10 +30,12 @@ BiodiversityDistribution <- bdproto(
   # Self printing function
   print = function(self) {
     # TODO: Prettify below
-
+    # Query information from the distribution object
     ex =  self$show_background_info()
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
     of = ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", self$get_offset(),">" ) )
+    pio = ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
+
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
                    "\nBackground extent: ",
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
@@ -43,7 +45,7 @@ BiodiversityDistribution <- bdproto(
                    "\n",self$biodiversity$show(),
                    "\n --------- ",
                    "\n  predictors:     ", pn,
-                   "\n  priors:         ", "Not yet implemented",
+                   "\n  priors:         ", pio,
                    "\n  latent factors: ", paste(self$get_latent(),collapse = ', '),
                    of,
                    "\n  log:            ", "Not yet implemented",
@@ -78,9 +80,10 @@ BiodiversityDistribution <- bdproto(
     }
   },
   # Adding latent factors
-  set_latent = function(self, type, spatial_model = NULL){
+  set_latent = function(self, type, spatial_model = NULL, priors = NULL ){
     assertthat::assert_that(is.character(type),
-                            type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'))
+                            type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'),
+                            is.null(priors) || inherits(priors, 'PriorList'))
     # Assign argument if existing
     if(!is.null(spatial_model)){
       type <- paste0('<Spatial | ',spatial_model,'>')
@@ -94,6 +97,23 @@ BiodiversityDistribution <- bdproto(
   get_latent = function(self){
     if(is.Waiver(self$latentfactors)) return('None')
     self$latentfactors
+  },
+  # Get priors
+  get_priors = function(self){
+    return( self$priors )
+  },
+  # Set new priors
+  set_priors = function(self, x ){
+    assertthat::assert_that(inherits(x, 'PriorList'),msg = 'An object created through `priors` has to be provided.')
+    # Check if a priorlist is set. If yes, then combine the new one with existing priors
+    if(is.Waiver(self$priors)){
+      self$priors <- x
+    } else {
+      # Get prior list
+      pl <- self$priors
+      pl$combine( x )
+      self$priors <- pl
+    }
   },
   # Set predictors
   set_predictors = function(self, x){

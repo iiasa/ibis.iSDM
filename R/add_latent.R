@@ -4,7 +4,8 @@ NULL
 #' Add latent spatial factor to the model
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param spatial_model a [`character`] describing what kind of spatial to be fitted (Option: 'spde' | 'iCAR')
+#' @param spatial_model A [`character`] describing what kind of spatial to be fitted (Option: 'spde' | 'iCAR')
+#' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors
 #' @param ... Other parameters passed down
 #'
 #' @details Different for INLA. Otherwise a CAR object
@@ -25,7 +26,7 @@ NULL
 methods::setGeneric(
   "add_latent_spatial",
   signature = methods::signature("x"),
-  function(x, spatial_model = 'spde', ...) standardGeneric("add_latent_spatial"))
+  function(x, spatial_model = 'spde', priors = NULL, ...) standardGeneric("add_latent_spatial"))
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
@@ -33,16 +34,19 @@ methods::setGeneric(
 methods::setMethod(
   "add_latent_spatial",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, spatial_model = 'spde', ... ) {
+  function(x, spatial_model = 'spde', priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            spatial_model %in% c('spde','iCAR') )
+                            spatial_model %in% c('spde','iCAR'),
+                            is.null(priors) || inherits(priors, 'PriorList')
+                            )
     if(spatial_model=='iCAR') stop('Needs to be debugged. ID of mesh not linked.')
-    # Finally add to data to the BiodiversityDistribution object
+
+    # If priors have been set, save them in distribution object
+    if(!is.null(priors)) x$set_priors(priors)
+    # Add to data to the BiodiversityDistribution object
     x$set_latent(type = '<Spatial>', spatial_model)
-    # TODO:
-    # Create a prototype with prior ranges and sigmas for the matern matrix
     return(x)
   }
 )
 
-#TODO: Add other dummy methods for latent factors
+#TODO: Add other dummy methods for latent factors we might want to specify

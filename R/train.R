@@ -115,19 +115,17 @@ methods::setMethod(
       }
     }
 
-    # assign default priors
-    if(is.Waiver( x$priors )){
-      # TODO: Define prior objects. Also look at PC priors https://www.tandfonline.com/doi/abs/10.1080/01621459.2017.1415907?journalCode=uasa20
-      model[['priors']] <- NULL
-      #x$set_prior( add_default_priors() )
-    }
+    # Get and assigne priors
+    # TODO: Define prior objects. Also look at PC priors https://www.tandfonline.com/doi/abs/10.1080/01621459.2017.1415907?journalCode=uasa20
+    model[['priors']] <- x$priors
+    #x$set_prior( add_default_priors() )
 
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
       # Calculate latent spatial factor (saved in engine data)
       if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
         # Calculate the spatial model
-        x$engine$calc_latent_spatial(type = attr(x$get_latent(),'spatial_model') )
+        x$engine$calc_latent_spatial(type = attr(x$get_latent(),'spatial_model'), priors = model[['priors']] )
       }
     }
 
@@ -165,8 +163,9 @@ methods::setMethod(
             paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
                    # Add intercept if offset included
                    0, ' + intercept +',#ifelse(is.Waiver(x$offset), 0, 1), #ifelse(x$show_biodiversity_length()==1,1,0),
-                   ' +',
-                   # paste('f(inla.group(', model[['predictors_names']],'), model = \'rw2\')', collapse = ' + ' )  )
+                   ' + ',
+                   paste('f(inla.group(', model[['predictors_names']],', n = 25), model = \'rw2\')', collapse = ' + ' ),
+                   ' + ',
                    paste('f(', model[['predictors_names']],', model = \'linear\')', collapse = ' + ' )  )
           )
           # Add offset if specified

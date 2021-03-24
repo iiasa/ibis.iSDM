@@ -5,7 +5,8 @@ NULL
 #'
 #' Function to create a new INLA prior that can be added to environmental predictors
 #'
-#' @param variable A [`character`] for the variable name. Has to match an existing predictor
+#' @param variable A [`character`] matched against existing predictors or latent effects
+#' @param type A [`character`] specifying the type of prior to be set
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyperparameters. First entry is treated as mean, the second as precision
 #' @param ... Variables passed on to prior object
 #' @details TBD
@@ -24,19 +25,22 @@ NULL
 #' @export
 methods::setGeneric(
   "INLAPrior",
-  signature = methods::signature("variable", "hyper"),
-  function(variable, hyper = c(mean = 0, precision = 0.001), ...) standardGeneric("INLAPrior"))
+  signature = methods::signature("variable", "type"),
+  function(variable, type, hyper = c(0, 0.001), ...) standardGeneric("INLAPrior"))
 
 # TODO: Consider other INLA priors as well as they become relevant for the modelling, `names(INLA::inla.models()$prior)`
 #' @name INLAPrior
 #' @rdname INLAPrior
-#' @usage \S4method{INLAPrior}{character, vector}(variable, hyper)
+#' @usage \S4method{INLAPrior}{character, character}(variable, type)
 methods::setMethod(
   "INLAPrior",
-  methods::signature(variable = "character", hyper = "vector"),
-  function(variable, hyper = c(mean = 0, precision = 0.001), ... ) {
+  methods::signature(variable = "character", type = "character"),
+  function(variable, type, hyper = c(0, 0.001), ... ) {
+    assertthat::assert_that(!missing(variable), !missing(type),
+                            msg = 'Variable or type unset.')
     assertthat::assert_that(
       is.character(variable),
+      is.character(type),
       is.vector(hyper), length(hyper) == 2,
       all(is.numeric(hyper))
     )
@@ -45,9 +49,8 @@ methods::setMethod(
       all(hyper > -1e2) && all(hyper < 1e2), # Check bounds
       msg = 'Potentially unrealistic priors specified.'
     )
-    # Rename prior
+    # Rename prior?
     # FIXME: This assumes that values have been supplied in this order. Implement checks
-    names(hyper) <- c('mean', 'precision')
 
     # Other supplied arguments
     #args <- as.list(match.call())
@@ -57,18 +60,18 @@ methods::setMethod(
       'INLAPrior',
       Prior,
       id = new_id(),
-      name = "pc.prec",
+      type = type,
       variable = variable,
-      value = hyper,
+      value = hyper
       # FIXME:
       # https://stats.stackexchange.com/questions/350235/how-to-convert-estimated-precision-to-variance
-      distribution = function(mean, prec) stats::rnorm(n = 1000, mean = mean, sd = prec),
+      # distribution = function(mean, prec) stats::rnorm(n = 1000, mean = mean, sd = prec),
       # Custom function for INLA priors
-      format = function(self){
-        return(
-          list(prec = list(prior = self$name, param = self$value))
-        )
-      }
+      # format = function(self){
+      #   return(
+      #     list(prec = list(prior = self$type, param = self$value))
+      #   )
+      # }
     )
   }
 )

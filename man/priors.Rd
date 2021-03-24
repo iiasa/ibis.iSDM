@@ -2,13 +2,30 @@
 % Please edit documentation in R/priorlist.R
 \name{priors}
 \alias{priors}
-\alias{priorlist,}
 \title{Creates a new PriorList object that contains Priors}
 \usage{
 priors(x, ...)
 
 \S4method{priors}{Prior}(x)
 }
+\arguments{
+\item{x}{A \code{\linkS4class{Prior}} object added to the list}
+
+\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list}
+}
 \description{
 Creates a new PriorList object that contains Priors
+}
+\details{
+TBD
+}
+\section{Notes}{
+
+}
+
+\references{
+
+}
+\seealso{
+\code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
 }

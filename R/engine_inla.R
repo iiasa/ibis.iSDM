@@ -113,24 +113,17 @@ engine_inla <- function(x, optional_mesh = NULL,
         'mesh.bar' = mesh_bar,
         'proj_stepsize' = proj_stepsize
       ),
-      # parameters = parameters(
-      #   numeric_parameter("gap", gap, lower_limit = 0),
-      #   integer_parameter("time_limit", time_limit, lower_limit = -1L,
-      #                     upper_limit = as.integer(.Machine$integer.max)),
-      #   integer_parameter("presolve", presolve, lower_limit = -1L,
-      #                     upper_limit = 2L),
-      #   integer_parameter("threads", threads, lower_limit = 1L,
-      #                     upper_limit = parallel::detectCores(TRUE)),
-      #   binary_parameter("first_feasible", first_feasible),
-      #   binary_parameter("numeric_focus", numeric_focus),
-      #   binary_parameter("verbose", verbose)
-      #   ),
-      # https://becarioprecario.bitbucket.io/spde-gitbook/ch-intro.html#sec:toyexample
       # Spatial latent function
-      calc_latent_spatial = function(self,type = 'pc', alpha = 2,
-                                     prior.range = c(1, 0.001),
-                                     prior.sigma = c(0.5, 0.05),
+      # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
+      # Default SPDE prior
+      # It computes the approximate diameter of the mesh, multiplies by 0.2 to get a value for the prior median range, and then transforms it to log-kappa scale by the formula
+      # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
+      calc_latent_spatial = function(self,type = 'spde', alpha = 2,
+                                     priors = NULL,
                                      ...){
+        # Catch prior objects
+        if(is.null(priors) || is.Waiver(priors)) priors <- NULL
+
         # For calculating iCAR process
         if(type == 'iCAR'){
           # convert mesh to sf object
@@ -146,15 +139,25 @@ engine_inla <- function(x, optional_mesh = NULL,
           assertthat::assert_that(length( self$data$s.index ) == nrow(ns))
         }
         if(type=='spde'){
-        #   # Define PC Matern SPDE model and save
-          self$data$latentspatial <- INLA::inla.spde2.pcmatern(
-            self$data$mesh,
-            alpha = alpha,
-            # P(Range < 1°) = 0.001  and P(sigma > 0.5) = 0.05
-            prior.range = prior.range,
-            prior.sigma = prior.sigma)
-        # } else {
-          # self$data$latentspatial <- INLA::inla.spde2.matern(mesh = self$data$mesh, alpha = alpha)
+          # Get prior
+          pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
+          ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
+          # Use default spde
+          if(is.null(priors)){
+            # Define PC Matern SPDE model and save
+            self$data$latentspatial <- INLA::inla.spde2.matern(
+              mesh = self$data$mesh,
+              alpha = alpha
+            )
+          } else {
+            # Define PC Matern SPDE model and save
+            self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+              mesh = self$data$mesh,
+              alpha = alpha,
+              # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
+              prior.range = pr,prior.sigma = ps
+            )
+          }
           # Make index for spatial field
           self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
                                                           n.spde = self$data$latentspatial$n.spde)

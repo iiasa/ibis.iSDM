@@ -4,12 +4,14 @@
 \alias{INLAPrior}
 \title{Create a new INLA prior}
 \usage{
-INLAPrior(variable, hyper = c(mean = 0, precision = 0.001), ...)
+INLAPrior(variable, type, hyper = c(0, 0.001), ...)
 
-\S4method{INLAPrior}{character, vector}(variable, hyper)
+\S4method{INLAPrior}{character, character}(variable, type)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} for the variable name. Has to match an existing predictor}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects}
+
+\item{type}{A \code{\link{character}} specifying the type of prior to be set}
 
 \item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyperparameters. First entry is treated as mean, the second as precision}
 

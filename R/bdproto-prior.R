@@ -20,13 +20,14 @@ Prior <- bdproto(
   "Prior",
   id = new_waiver(),
   name = character(0),
+  type = character(0),
   variable = character(0),
   distribution = new_waiver(),
   value = vector(), # A named vector containing the hyper-parameters
   # Print
   print = function(self) {
     message(paste0(
-      class(self)[1], ': ', self$name, ' prior for \'', self$variable,'\''
+      class(self)[1], ': ', self$type, ' prior for \'', self$variable,'\''
     ))
   },
   # Generic validation function
@@ -37,7 +38,7 @@ Prior <- bdproto(
       all( !is.infinite(x) )
     )
   },
-  # Get prior
+  # Get prior values
   get = function(self){
     return(self$value)
   },
