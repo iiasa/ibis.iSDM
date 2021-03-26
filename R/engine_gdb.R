@@ -2,7 +2,6 @@
 NULL
 #' Use of Gradient Descent Boosting for model estimation
 #'
-#' @references Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param fam Default is [`Poisson`]
 #' @param boosting_iterations An [`integer`] giving the number of boosting iterations
@@ -10,7 +9,9 @@ NULL
 #' @param empirical_risk method for empirical risk calculation ('inbag','oobag','none')
 #' @param verbose Should progress be printed?
 #' @param ... Other variables or control parameters
-#' @import mboost
+#' @references Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
+#' @references Hofner, B., Müller, J., Hothorn, T., 2011. Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
+#'
 #' @name engine_gdb
 NULL
 #' @rdname engine_gdb
@@ -22,6 +23,10 @@ engine_gdb <- function(x,
                        empirical_risk = 'inbag',
                        verbose = FALSE,
                         ...) {
+  # Check whether mboost package is available
+  check_package('mboost')
+  if(!isNamespaceLoaded("mboost")) attachNamespace("mboost")
+
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid

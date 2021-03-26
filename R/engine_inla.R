@@ -14,7 +14,6 @@ NULL
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (default NULL)
 #' @param barrier Should a barrier model be added to the model?
 #' @param ... Other variables
-#' @import INLA
 #' @name engine_inla
 NULL
 #' @rdname engine_inla
@@ -26,6 +25,11 @@ engine_inla <- function(x, optional_mesh = NULL,
                         proj_stepsize = NULL,
                         barrier = FALSE,
                         ...) {
+
+  # Check whether INLA package is available
+  check_package('INLA')
+  if(!isNamespaceLoaded("INLA")) attachNamespace("INLA")
+
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid

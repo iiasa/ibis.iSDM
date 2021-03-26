@@ -31,7 +31,6 @@ methods::setGeneric("distribution",
                     function(background, ...) standardGeneric("distribution"))
 
 #' @name distribution
-#' @import rgeos
 #' @usage \S4method{distribution}{raster}(background, ...)
 #' @rdname distribution
 methods::setMethod(
