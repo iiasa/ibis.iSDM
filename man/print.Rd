@@ -12,6 +12,7 @@
 \alias{print.DistributionModel}
 \alias{print.Prior}
 \alias{print.PriorList}
+\alias{print.Engine}
 \alias{print.Id}
 \title{Print}
 \usage{
@@ -30,6 +31,8 @@
 \method{print}{Prior}(x, ...)
 
 \method{print}{PriorList}(x, ...)
+
+\method{print}{Engine}(x, ...)
 
 \method{print}{Id}(x, ...)
 

@@ -41,8 +41,12 @@ methods::setMethod(
                             )
     if(spatial_model=='iCAR') stop('Needs to be debugged. ID of mesh not linked.')
 
-    # If priors have been set, save them in distribution object
-    if(!is.null(priors)) x$set_priors(priors)
+        # If priors have been set, save them in distribution object
+    if(!is.null(priors)) {
+      assertthat::assert_that(priors$varnames() == 'spde' && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
+                              msg = 'Priors for spatial latent effect misspeficied (required spde | prior.range/prior.sigma)'  )
+      x$set_priors(priors)
+    }
     # Add to data to the BiodiversityDistribution object
     x$set_latent(type = '<Spatial>', spatial_model)
     return(x)

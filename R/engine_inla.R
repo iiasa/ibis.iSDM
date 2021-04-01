@@ -11,24 +11,33 @@ NULL
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (default NULL)
+#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
 #' @param barrier Should a barrier model be added to the model?
+#' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: FALSE) TBD
+#' @param nonconvex.convex Non-convex mimal extension radius for convex curvature TBD
+#' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
+#' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
 #' @param ... Other variables
 #' @name engine_inla
 NULL
 #' @rdname engine_inla
 #' @export
-engine_inla <- function(x, optional_mesh = NULL,
+engine_inla <- function(x,
+                        optional_mesh = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
                         cutoff = 1,
                         proj_stepsize = NULL,
                         barrier = FALSE,
+                        # nonconvex.bdry = FALSE,
+                        # nonconvex.convex = -0.15,
+                        # nonconvex.concave = -0.05,
+                        # nonconvex.res = 40,
                         ...) {
 
   # Check whether INLA package is available
   check_package('INLA')
-  if(!isNamespaceLoaded("INLA")) attachNamespace("INLA")
+  if(!isNamespaceLoaded("INLA")) attachNamespace("INLA");requireNamespace('INLA')
 
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
@@ -41,9 +50,6 @@ engine_inla <- function(x, optional_mesh = NULL,
                           is.numeric(cutoff),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
-  assertthat::assert_that(
-    'INLA' %in% installed.packages(),msg = 'To run this engine the \"INLA\" package needs to be installed!'
-  )
 
   # Convert the study region
   region.poly <- as(sf::st_geometry(x$background), "Spatial")
@@ -53,7 +59,7 @@ engine_inla <- function(x, optional_mesh = NULL,
     # Load a provided on
     mesh <- optional_mesh
   } else {
-    # Create a new one
+    # Create a new mesh
     # Convert to boundary object for later
     suppressWarnings(
       bdry <- INLA::inla.sp2segment(
@@ -117,6 +123,10 @@ engine_inla <- function(x, optional_mesh = NULL,
         'mesh.bar' = mesh_bar,
         'proj_stepsize' = proj_stepsize
       ),
+      # Generic plotting function for the mesh
+      plot = function(self){
+        plot( self$get_data('mesh') )
+      },
       # Spatial latent function
       # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
       # Default SPDE prior
@@ -327,7 +337,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         invisible()
       },
       # Main INLA training function ----
-      train = function(self, model, varsel = TRUE, verbose = FALSE,...) {
+      train = function(self, model, varsel = TRUE, inference_only = FALSE, verbose = FALSE,...) {
         # Check that all inputs are there
         assertthat::assert_that(
           is.list(model),length(model)>1,
@@ -362,7 +372,7 @@ engine_inla <- function(x, optional_mesh = NULL,
         if(varsel){
           message('Performing variable selection...')
           #
-          if('spde' %in% all.vars(model$equation$poipo) ) speq <- self$get_equation_latent_spatial() else speq <- NULL
+          if('spde' %in% all.vars(model$equation$poipo) ) speq <- self$get_equation_latent_spatial('spde') else speq <- NULL
           # Get formula list
           lf <- formula_combinations(varnames = model$predictors_names,
                                response = all.vars(master_form)[1],
@@ -388,7 +398,7 @@ engine_inla <- function(x, optional_mesh = NULL,
                                    control.predictor=list(A = INLA::inla.stack.A(stk_var),
                                                           link = NULL, compute = TRUE),  # Compute for marginals of the predictors
                                    control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                                   control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                   INLA::control.inla(#int.strategy = "eb", # Empirical bayes for integration
                                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                                    num.threads = parallel::detectCores() - 1
             )
@@ -422,75 +432,110 @@ engine_inla <- function(x, optional_mesh = NULL,
                           E = INLA::inla.stack.data(stk_var)$e, # Expectation (Eta) for Poisson model
                           family = 'poisson',   # Family the data comes from
                           control.family = list(link = "log"), # Control options
-                          control.predictor=list(A = INLA::inla.stack.A(stk_var),link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                          control.predictor=list(A = INLA::inla.stack.A(stk_var),link = 1, compute = TRUE),  # Compute for marginals of the predictors. Link to NULL for multiple likelihoods!
                           control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                          #control.fixed = list(prec.intercept = 0.1, prec = 0.1), # Added to see whether this changes GMRFlib convergence issues
+                          # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
-                          control.inla(#int.strategy = "eb"), # Empirical bayes for integration
-                                       strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
+                          INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                       strategy = 'simplified.laplace'
+                                       # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
+                          ), # To make it run faster...
                           num.threads = parallel::detectCores()-1
         )
 
-        # Get theta from initiall fitted model as starting parameter
-        thetas = fit_resp$internal.summary.hyperpar$mean
+        # Predict spatially
+        if(!inference_only){
+          # Get theta from initiall fitted model as starting parameters
+          thetas = fit_resp$internal.summary.hyperpar$mean
 
-        # Predict on full
-        fit_pred <- INLA::inla(formula = master_form, # The specified formula
-                               data  = stack_data_full,  # The data stack
-                               quantiles = c(0.05, 0.5, 0.95),
-                               E = INLA::inla.stack.data(stk_full)$e,
-                               family= 'poisson',   # Family the data comes from
-                               control.family = list(link = "log"), # Control options
-                               control.predictor = list(A = INLA::inla.stack.A(stk_full), link = 1, compute = TRUE),  # Compute for marginals of the predictors
-                               control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                               control.mode = list(theta = thetas, restart = TRUE), # To speed up use previous thetas
-#                               control.fixed = list(prec.intercept = 0.01, prec = 0.01), # Added to see whether this changes GMRFlib convergence issues
-                               verbose = verbose, # To see the log of the model runs
-                               control.inla(#int.strategy = "eb"), # Empirical bayes for integration
-                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
-                               num.threads = parallel::detectCores() - 1
-        )
-        # Create a spatial prediction
-        index.pred <- INLA::inla.stack.index(stk_full, 'pred_poipo')$data
-        post <- fit_pred$summary.linear.predictor[index.pred, ]
-        assertthat::assert_that(nrow(post)>0,
-                                nrow(post) == nrow(predcoords) ) # Check with cells in projection
-        # TODO: Wrap Backtransform into a distribution dependent function
-        post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <-
-          exp(
-            post[,c('mean','0.05quant','0.5quant','0.95quant','mode')]
-            )
-        post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
-        names(post) <- make.names(names(post))
-
-        prediction <- raster::stack(
-          sp::SpatialPixelsDataFrame(
-            points = predcoords,
-            data = post,
-            proj4string = CRS( x$show_background_info()$proj ) # x$engine$data$mesh$crs@projargs
+          # Predict on full
+          fit_pred <- INLA::inla(formula = master_form, # The specified formula
+                                 data  = stack_data_full,  # The data stack
+                                 quantiles = c(0.05, 0.5, 0.95),
+                                 E = INLA::inla.stack.data(stk_full)$e,
+                                 family= 'poisson',   # Family the data comes from
+                                 control.family = list(link = "log"), # Control options
+                                 control.predictor = list(A = INLA::inla.stack.A(stk_full), link = 1, compute = TRUE),  # Compute for marginals of the predictors.  Link to NULL for multiple likelihoods!
+                                 control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE, openmp.strategy	= 'huge' ), #model diagnostics and config = TRUE gives you the GMRF
+                                 control.mode = list(theta = thetas, restart = TRUE), # To speed up use previous thetas
+                                 # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
+                                 verbose = verbose, # To see the log of the model runs
+                                 control.results = list(return.marginals.random = FALSE,
+                                                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
+                                 INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                                    strategy = 'simplified.laplace'
+                                                    # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
+                                 ),
+                                 num.threads = parallel::detectCores() - 1
           )
-        )
-        # Create an empty raster from the predictor coordinates
-        # ra <- rasterFromXYZ(xyz = predcoords,
-        #                     crs = self$get_data('mesh')$crs
-        #                     )
-        # # Fill output rasters
-        # prediction <- fill_rasters(post = post,background = ra)
-        prediction <- raster::mask(prediction, model$background) # Mask with background
+          # Create a spatial prediction
+          index.pred <- INLA::inla.stack.index(stk_full, 'pred_poipo')$data
+          post <- fit_pred$summary.linear.predictor[index.pred, ]
+          assertthat::assert_that(nrow(post)>0,
+                                  nrow(post) == nrow(predcoords) ) # Check with cells in projection
+          # TODO: Wrap Backtransform into a distribution dependent function
+          post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <-
+            exp(
+              post[,c('mean','0.05quant','0.5quant','0.95quant','mode')]
+            )
+          post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
+          names(post) <- make.names(names(post))
+
+          # Fill prediction
+          prediction <- raster::stack(
+            sp::SpatialPixelsDataFrame(
+              points = predcoords,
+              data = post,
+              proj4string = CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+            )
+          )
+          prediction <- raster::mask(prediction, model$background) # Mask with background
+        } else {
+          # No prediction to be conducted
+          fit_pred <- NULL
+          prediction <- NULL
+        }
 
         # Definition of INLA Model object ----
         out <- bdproto(
               "INLA-Model",
               DistributionModel,
-              name = model$runname,
-              id = model$id,
+              model = model,
               fits = list(
                 "fit_best" = fit_resp,
                 "fit_pred" = fit_pred,
                 "fit_best_equation" = master_form,
                 "mesh"     = self$get_data('mesh'),
                 "prediction" = prediction
-                )
+                ),
+              # Function to plot SPDE if existing
+              plot_spde = function(self,...){
+                if( length( self$fits$fit_best$size.spde2.blc ) == 1)
+                {
+                  # Get spatial projections from model
+                  # FIXME: Potentially make the plotting of this more flexible
+                  gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = c(300, 300))
+                  g.mean <- INLA::inla.mesh.project(gproj,
+                                                    self$get_data('fit_pred')$summary.random$spatial.field$mean)
+                  g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_pred')$summary.random$spatial.field$sd)
+
+                  # Out
+                  r.m <- rasterFromXYZ(xyz = cbind(gproj$x,gproj$y ))
+                  r.m[] <- as.vector(g.mean)
+                  r.sd <- rasterFromXYZ(xyz = cbind(gproj$x,gproj$y ))
+                  r.sd[] <- as.vector(g.sd)
+
+                  # Plot
+                  cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
+                  par(mfrow=c(1,2))
+                  plot(raster::flip(r.m,direction = 'y'),col = cols, main = 'mean spatial effect')
+                  plot(raster::flip(r.sd,direction = 'y'), main = 'sd spatial effect')
+                  # raster::image(g.mean,col = cols, main = 'mean spatial effect')
+                  # raster::image(r.sd, main = 'sd spatial effect')
+                } else {
+                  message('No spatial covariance in model specified.')
+                }
+              }
         )
         return(out)
       }

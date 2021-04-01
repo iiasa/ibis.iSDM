@@ -35,16 +35,28 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterBrick}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
+  function(x, env, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+    # Convert env to stack if it is a single layer only
+    env = raster::stack(env)
+    add_predictors(x, env, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
 #' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
   function(x, env, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
-
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-
     add_predictors(x, env, ...)
   }
 )

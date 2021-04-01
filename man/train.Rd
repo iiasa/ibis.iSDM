@@ -6,7 +6,14 @@
 \alias{train-method}
 \title{Train the model from a given engine}
 \usage{
-train(x, runname, rm_corPred = FALSE, varsel = FALSE, ...)
+train(
+  x,
+  runname,
+  rm_corPred = FALSE,
+  varsel = FALSE,
+  inference_only = FALSE,
+  ...
+)
 
 \S4method{train}{BiodiversityDistribution}(x)
 }
@@ -18,6 +25,8 @@ train(x, runname, rm_corPred = FALSE, varsel = FALSE, ...)
 \item{rm_corPred}{Remove highly correlated predictors. Default is True}
 
 \item{varsel}{Perform a variable selection on the set of predictors}
+
+\item{inference_only}{Fit model only without spatial prediction (Default: FALSE)}
 
 \item{...}{further arguments passed on.}
 }

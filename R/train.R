@@ -9,6 +9,7 @@ NULL
 #' @param runname A [`character`] name of the trained run
 #' @param rm_corPred Remove highly correlated predictors. Default is True
 #' @param varsel Perform a variable selection on the set of predictors
+#' @param inference_only Fit model only without spatial prediction (Default: FALSE)
 #' @param ... further arguments passed on.
 #'
 #' @details
@@ -27,7 +28,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE,...) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -35,12 +36,13 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, ...) {
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, ...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
-      is.logical(rm_corPred)
+      is.logical(rm_corPred),
+      is.logical(inference_only)
     )
     # Now make checks on completeness of the object
     assertthat::assert_that(!is.Waiver(x$engine),
@@ -115,10 +117,9 @@ methods::setMethod(
       }
     }
 
-    # Get and assigne priors
+    # Get and assign priors
     # TODO: Define prior objects. Also look at PC priors https://www.tandfonline.com/doi/abs/10.1080/01621459.2017.1415907?journalCode=uasa20
     model[['priors']] <- x$priors
-    #x$set_prior( add_default_priors() )
 
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
@@ -150,6 +151,7 @@ methods::setMethod(
     }
 
     # Engine specific preparations
+    #### INLA Engine ####
     if( inherits(x$engine,'INLA-Engine') ){
 
       # Define Model formula
@@ -157,29 +159,38 @@ methods::setMethod(
       types <- names( x$biodiversity$get_types() )
       for(ty in types) {
         # Default equation found
+        # FIXME: make this work for various datasets
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
+          # Check potential for rw2 fits
+          # MJ: Can lead to to convergence issues with rw2. Removed for now
+          # var_rw2 <- apply(poipo_env[model[['predictors_names']]], 2, function(x) length(unique(x)))
+          # var_rw2 <- names(which(var_rw2 > 100)) # Get only those greater than 100 unique values
+          var_lin <- model[['predictors_names']]#[which( model[['predictors_names']] %notin% var_rw2 )]
+
           # Construct formula with all variables
-          f <- formula(
-            paste( x$biodiversity$get_columns_occ()[[ty]], '~ ',
-                   # Add intercept if offset included
-                   0, ' + intercept +',#ifelse(is.Waiver(x$offset), 0, 1), #ifelse(x$show_biodiversity_length()==1,1,0),
-                   ' + ',
-                   paste('f(inla.group(', model[['predictors_names']],', n = 25), model = \'rw2\')', collapse = ' + ' ),
-                   ' + ',
-                   paste('f(', model[['predictors_names']],', model = \'linear\')', collapse = ' + ' )  )
-          )
+          f <- paste( x$biodiversity$get_columns_occ()[[ty]], '~', 0, ' + intercept')
+          # Linear for those with few observations
+          if(length(var_lin)>0){
+            f <- paste(f, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+          }
+          # Random walk 2 (spline) where feasible
+          # if(length(var_rw2)>0){
+          #   f <- paste(f, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+          # }
+          f <- to_formula(f) # Convert to formula
           # Add offset if specified
           if(!is.Waiver(x$offset)){ f <- update.formula(f, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             f <- update.formula(f, paste0(" ~ . + ",
-                                          x$engine$get_equation_latent_spatial(spatial_model = attr(x$get_latent(),'spatial_model')) )
+                                          x$engine$get_equation_latent_spatial(
+                                            spatial_model = attr(x$get_latent(),'spatial_model'))
+                                          )
             )
           }
         } else{
-          stop('TBD')
-          # to_formula("")
           # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
+          f <- to_formula( x$biodiversity$get_equations()[[ty]] )
         }
         model[['equation']][[ty]] <- f
         rm(f)
@@ -210,8 +221,9 @@ methods::setMethod(
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model,varsel = varsel,...)
+      out <- x$engine$train(model,varsel = varsel, inference_only, ...)
 
+      #### GDB Engine ####
     } else if( inherits(x$engine,"GDB-Engine") ){
 
       # Define the formula
@@ -222,7 +234,7 @@ methods::setMethod(
         # Default equation found
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
           # Construct formula with all variables
-          f <- as.formula(
+          f <- to_formula(
             paste(
               paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ',
 
@@ -243,8 +255,8 @@ methods::setMethod(
             )
           }
         } else{
-          stop('TBD')
           # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
+          f <- to_formula(x$biodiversity$get_equations()[[ty]])
         }
         model[['equation']][[ty]] <- f
         rm(f)
@@ -261,6 +273,7 @@ methods::setMethod(
         bg1 <- raster::rasterize(pres[,c('x','y')], bg, fun = 'count',background = 0)
         bg1 <- raster::mask(bg1, bg)
 
+        pres$intercept <- 1
         pres[[x$biodiversity$get_columns_occ()$poipo]] <- raster::extract(bg1, pres[,c('x','y')])
 
         # Generate pseudo absence data
@@ -283,6 +296,7 @@ methods::setMethod(
         assertthat::assert_that( all( names(abs) %in% names(pres) ) )
         # Format out
         df <- rbind(pres, abs) %>% subset(., complete.cases(.) )
+        assertthat::assert_that(nrow(df)>nrow(pres))
 
         # Add offset if existent
         if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
@@ -305,9 +319,9 @@ methods::setMethod(
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model,...)
+      out <- x$engine$train(model, inference_only, ...)
 
-    } else { stop('Engines not implemented yet') }
+    } else { stop('Specified Engine not implemented yet.') }
 
     # return output object
     return(out)

@@ -69,10 +69,7 @@ PriorList <- bdproto(
     # Check whether there is an id
     ex <- self$exists(variable, type)
     # Catch and return NULL in case if not set
-    if(is.null(ex)) {ex} else {
-      # Otherwise get values
-      self$priors[[names(vn)[which(variable %in% vn)]]]$get()
-    }
+    if(is.null(ex)) ex else self$priors[[ex]]$get()
   },
   # Add a new prior
   add = function(self, x) {

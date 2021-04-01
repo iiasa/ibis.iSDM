@@ -29,3 +29,8 @@ plot.BiodiversityDatasetCollection <- function(x, ...) x$plot(...)
 #' @method plot PredictorDataset
 #' @export
 plot.PredictorDataset <- function(x, ...) x$plot(...)
+
+#' @rdname plot
+#' @method plot Engine
+#' @export
+plot.Engine <- function(x, ...) x$plot(...)

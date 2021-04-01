@@ -15,6 +15,8 @@ add_predictors(
   ...
 )
 
+\S4method{add_predictors}{BiodiversityDistribution,RasterBrick}(x, env)
+
 \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)

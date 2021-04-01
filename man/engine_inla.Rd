@@ -26,11 +26,19 @@ engine_inla(
 
 \item{cutoff}{The minimum allowed distance between points on the mesh}
 
-\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (default NULL)}
+\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
 
 \item{barrier}{Should a barrier model be added to the model?}
 
 \item{...}{Other variables}
+
+\item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: FALSE) TBD}
+
+\item{nonconvex.convex}{Non-convex mimal extension radius for convex curvature TBD}
+
+\item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature TBD}
+
+\item{nonconvex.res}{Computation resolution for nonconvex.hulls TBD}
 }
 \description{
 References

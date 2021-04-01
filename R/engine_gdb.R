@@ -25,10 +25,8 @@ engine_gdb <- function(x,
                         ...) {
   # Check whether mboost package is available
   check_package('mboost')
-  if(!isNamespaceLoaded("mboost")) attachNamespace("mboost")
+  if(!isNamespaceLoaded("mboost")) requireNamespace('mboost');attachNamespace("mboost")
 
-  # TODO:
-  # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
@@ -38,9 +36,6 @@ engine_gdb <- function(x,
                           assertthat::is.flag(verbose),
                           empirical_risk %in% c('inbag','oobag','none')
                           )
-  assertthat::assert_that(
-    'mboost' %in% installed.packages(),msg = 'To run this engine the \"mboost\" package needs to be installed!'
-  )
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
@@ -88,7 +83,7 @@ engine_gdb <- function(x,
       ),
       # Function to respecify the control parameters
       set_control = function(self,
-                             boosting_iterations = 1000,
+                             boosting_iterations = 20,
                              learning_rate = 0.1, # Set relatively low to not regularize too much
                              empirical_risk = 'inbag',
                              verbose = TRUE
@@ -122,6 +117,8 @@ engine_gdb <- function(x,
         assertthat::assert_that(
          assertthat::has_name(model, 'background'),
          assertthat::has_name(model, 'data'),
+         # Check that all predictors are present
+         all( all.vars(model[['equation']][['poipo']]) %in% names(  model$data$poipo_values ) ),
          nrow(model$predictors) == ncell(self$get_data('template')),
          all( sapply(model$equation, is.formula) )
         )
@@ -130,7 +127,7 @@ engine_gdb <- function(x,
       invisible()
       },
       # Training function
-      train = function(self, model, ...){
+      train = function(self, model, inference_only = FALSE, ...){
 
         # Get output raster
         prediction <- self$get_data('template')
@@ -164,9 +161,10 @@ engine_gdb <- function(x,
 
         # 5 fold Cross validation to prevent overfitting
         # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
+        grs <- seq(from = 10, to = 1000, by = 10)
         cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
         try({cvm <- mboost::cvrisk(fit_gdb,
-                              folds = cvf,
+                              folds = cvf, grid = grs,
                               papply = pbapply::pblapply )
         },silent = TRUE)
 
@@ -176,22 +174,25 @@ engine_gdb <- function(x,
           fit_gdb[mstop(cvm)]
         }
 
-        # Make a prediction
-        suppressWarnings(
-          pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-                                             type = 'response', aggregate = 'sum')
-        )
+        # Predict spatially
+        if(!inference_only){
+          # Make a prediction
+          suppressWarnings(
+            pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
+                                               type = 'response', aggregate = 'sum')
+          )
 
-        # Fill output
-        prediction[] <- pred_gdb[,1]
-        names(prediction) <- 'mean'
-
+          # Fill output
+          prediction[] <- pred_gdb[,1]
+          names(prediction) <- 'mean'
+        } else {
+          prediction <- NULL
+        }
         # Create output
         out <- bdproto(
           "GDB-Model",
           DistributionModel,
-          name = model$runname,
-          id = model$id,
+          model = model,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,

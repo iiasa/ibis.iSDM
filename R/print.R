@@ -75,6 +75,13 @@ print.Prior <- function(x, ...) x$print()
 #'
 print.PriorList <- function(x, ...) x$print()
 
+#' @rdname print
+#' @method print Engine
+#'
+#' @export
+#'
+print.Engine <- function(x, ...) x$print()
+
 
 #' @rdname print
 #'
