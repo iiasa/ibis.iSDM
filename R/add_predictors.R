@@ -112,7 +112,7 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) message('Overwriting existing environmental predictors.')
 
     # If priors have been set, save them in distribution object
-    if(!is.null(priors)) x$set_priors(priors)
+    if(!is.null(priors)) {x <- x$set_priors(priors) }
 
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
@@ -122,7 +122,6 @@ methods::setMethod(
               ...
         )
       )
-    return(x)
   }
 )
 
@@ -160,7 +159,6 @@ methods::setMethod(
 
     # Finally set the data to the BiodiversityDistribution object
     x$rm_predictors(names)
-    return(x)
   }
 )
 
@@ -207,6 +205,5 @@ methods::setMethod(
     assertthat::validate_that(
       all( names %in% x$get_predictor_names()),msg = 'Not all predictors were present in distribution object.'
     )
-    return(x)
   }
 )

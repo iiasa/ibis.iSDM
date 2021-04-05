@@ -57,7 +57,7 @@ methods::setMethod(
     formula = to_formula(formula)
 
     # Finally set the data to the BiodiversityDistribution object
-    x$biodiversity$set_data(
+    x$set_biodiversity(
       'poipo',
       bdproto(NULL, BiodiversityDataset,
               name = ifelse(is.null(name), 'Species: ',name),
@@ -68,7 +68,6 @@ methods::setMethod(
               data = format_biodiversity_data(poipo,field_occurrence)
       )
     )
-    return(x)
   }
 )
 
@@ -132,7 +131,7 @@ methods::setMethod(
     formula = to_formula(formula)
 
     # Finally set the data to the BiodiversityDistribution object
-    x$biodiversity$set_data(
+    x$set_biodiversity(
       'poipa',
       bdproto(NULL, BiodiversityDataset,
               name = ifelse(is.null(name), 'Species: ',name),
@@ -143,7 +142,6 @@ methods::setMethod(
               data = format_biodiversity_data(poipa,field_occurrence)
       )
     )
-    return(x)
   }
 )
 
@@ -235,8 +233,8 @@ methods::setMethod(
       poipa <- rbind(poipa_on,poipa_off)
 
       # Add simulated poipa object instead
-      add_biodiversity_poipa(x,poipa = poipa,name = paste0(name, ' - simulated'),
-                             field_occurrence = field_occurrence,formula = formula,... )
+      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, ' - simulated'),
+                             field_occurrence = field_occurrence, formula = formula,... )
     } else {
       # Assess whether poipo data already exists in the distribution object
       if(!is.Waiver( x$biodiversity$get_data_object('polpo') )) message('Overwriting existing polpo data.')
@@ -245,7 +243,7 @@ methods::setMethod(
       formula = to_formula(formula)
 
       # Finally set the data to the BiodiversityDistribution object
-      x$biodiversity$set_data(
+      x$set_biodiversity(
         'polpo',
         bdproto(NULL, BiodiversityDataset,
                 name = ifelse(is.null(name), 'Species: ',name),
@@ -256,7 +254,6 @@ methods::setMethod(
                 data = format_biodiversity_data(polpo,field_occurrence)
         )
       )
-      return(x)
     }
   }
 )

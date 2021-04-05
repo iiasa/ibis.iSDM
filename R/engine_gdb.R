@@ -25,7 +25,7 @@ engine_gdb <- function(x,
                         ...) {
   # Check whether mboost package is available
   check_package('mboost')
-  if(!isNamespaceLoaded("mboost")) requireNamespace('mboost');attachNamespace("mboost")
+  if(!isNamespaceLoaded("mboost")) {requireNamespace('mboost');attachNamespace("mboost")}
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),

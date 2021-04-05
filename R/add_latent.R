@@ -45,11 +45,11 @@ methods::setMethod(
     if(!is.null(priors)) {
       assertthat::assert_that(priors$varnames() == 'spde' && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
                               msg = 'Priors for spatial latent effect misspeficied (required spde | prior.range/prior.sigma)'  )
-      x$set_priors(priors)
+      # Add priors
+      x <- x$set_priors(priors)
     }
     # Add to data to the BiodiversityDistribution object
     x$set_latent(type = '<Spatial>', spatial_model)
-    return(x)
   }
 )
 

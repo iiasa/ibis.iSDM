@@ -90,8 +90,8 @@ BiodiversityDistribution <- bdproto(
       attr(type, 'spatial_model') <- spatial_model
     }
     if(!is.Waiver(self$latentfactors)){
-      self$latentfactors <- unique(c(self$latentfactors,type))
-    } else { self$latentfactors <- type }
+      bdproto(NULL, self, latentfactors = unique(c(self$latentfactors,type)) )
+    } else { bdproto(NULL, self, latentfactors = type ) }
   },
   # Get latent factors
   get_latent = function(self){
@@ -107,18 +107,31 @@ BiodiversityDistribution <- bdproto(
     assertthat::assert_that(inherits(x, 'PriorList'),msg = 'An object created through `priors` has to be provided.')
     # Check if a priorlist is set. If yes, then combine the new one with existing priors
     if(is.Waiver(self$priors)){
-      self$priors <- x
+      bdproto(NULL, self, priors = x )
     } else {
       # Get prior list
       pl <- self$priors
       pl$combine( x )
-      self$priors <- pl
+      bdproto(NULL, self, priors = pl )
     }
+  },
+  # Set biodiversity function
+  set_biodiversity = function(self, type, p){
+    assertthat::assert_that(inherits(self$biodiversity,'BiodiversityDatasetCollection'),
+                            assertthat::is.string(type),
+                            type %in% c('poipo','poipa','polpo','polpa'),
+                            inherits(p, "BiodiversityDataset")
+                            )
+    # Get biodiversity dataset collection
+    bdcol <- bdproto(NULL, self)
+    # Set the object
+    bdcol$biodiversity$set_data(type, p)
+    return(bdcol)
   },
   # Set predictors
   set_predictors = function(self, x){
     assertthat::assert_that(inherits(x, "PredictorDataset"))
-    self$predictors <- x
+    bdproto(NULL, self, predictors = x)
   },
   # Set Engine
   set_engine = function(self, x) {
@@ -136,7 +149,7 @@ BiodiversityDistribution <- bdproto(
   set_offset = function(self, x){
     assertthat::assert_that(inherits(x, "Raster"))
     if (!is.Waiver(self$offset)) warning("Overwriting previously defined offset.")
-    self$offset <- x
+    bdproto(NULL, self, offset = x )
   },
   # Get offset (print name)
   get_offset = function(self){

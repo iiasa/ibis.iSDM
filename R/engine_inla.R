@@ -37,7 +37,7 @@ engine_inla <- function(x,
 
   # Check whether INLA package is available
   check_package('INLA')
-  if(!isNamespaceLoaded("INLA")) attachNamespace("INLA");requireNamespace('INLA')
+  if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
