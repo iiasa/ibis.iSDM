@@ -50,6 +50,9 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
 
+    # Check whether prior objects match the used engine, otherwise raise warning
+    # if( unique(x$priors$classes()) == 'GDBPrior' && x$engine$name == '<INLA>' ) warning('Priors for wrong models specified, which will be ignored in the inference.')
+
     # --- #
     #### Defining model objects ----
     # Set model object for fitting
@@ -118,7 +121,6 @@ methods::setMethod(
     }
 
     # Get and assign priors
-    # TODO: Define prior objects. Also look at PC priors https://www.tandfonline.com/doi/abs/10.1080/01621459.2017.1415907?journalCode=uasa20
     model[['priors']] <- x$priors
 
     # Get latent variables
@@ -159,7 +161,6 @@ methods::setMethod(
       types <- names( x$biodiversity$get_types() )
       for(ty in types) {
         # Default equation found
-        # FIXME: make this work for various datasets
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
           # Check potential for rw2 fits
           # MJ: Can lead to to convergence issues with rw2. Removed for now
@@ -168,21 +169,48 @@ methods::setMethod(
           var_lin <- model[['predictors_names']]#[which( model[['predictors_names']] %notin% var_rw2 )]
 
           # Construct formula with all variables
-          f <- paste( x$biodiversity$get_columns_occ()[[ty]], '~', 0, ' + intercept')
-          # Linear for those with few observations
-          if(length(var_lin)>0){
-            f <- paste(f, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+          form <- paste( x$biodiversity$get_columns_occ()[[ty]], '~', 0, ' + intercept +')
+          # Check whether priors have been specified and if yes, use those
+          if(model$priors$length() > 0 && any(model$priors$classes() == 'INLAPrior')){
+            # Loop through all provided INLA priors
+            supplied_priors <- as.vector(model$priors$varnames())[which(model$priors$classes() == 'INLAPrior')]
+
+            for(v in supplied_priors){
+              # Get prior object
+              # FIXME: This currently only work with normal, e.g. the type of the prior is ignored
+              # pobj <- model$priors$priors[[model$priors$exists(v)]]
+
+              # First add linear effects
+              form <- paste(form, paste0('f(', v, ', model = \'linear\' ,',
+                                   'mean.linear = ', model$priors$get(v)[1],', ',
+                                   'prec.linear = ', model$priors$get(v)[2],')',
+                                    collapse = ' + ' ), ' + ' )
+            }
+            # Add linear for those missed ones
+            miss <- model[['predictors_names']][model[['predictors_names']] %notin% supplied_priors]
+            if(length(miss)>0){
+              # Add linear predictors
+              form <- paste(form,
+                              paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
+                            )
+            }
+          } else {
+            # No priors specified, simply add variables with default
+            # Linear for those with few observations
+            if(length(var_lin)>0){
+              form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+            }
+            # Random walk 2 (spline) where feasible
+            # if(length(var_rw2)>0){
+            #   f <- paste(f, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+            # }
           }
-          # Random walk 2 (spline) where feasible
-          # if(length(var_rw2)>0){
-          #   f <- paste(f, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
-          # }
-          f <- to_formula(f) # Convert to formula
+          form <- to_formula(form) # Convert to formula
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ f <- update.formula(f, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
-            f <- update.formula(f, paste0(" ~ . + ",
+            form <- update.formula(form, paste0(" ~ . + ",
                                           x$engine$get_equation_latent_spatial(
                                             spatial_model = attr(x$get_latent(),'spatial_model'))
                                           )
@@ -190,10 +218,10 @@ methods::setMethod(
           }
         } else{
           # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
-          f <- to_formula( x$biodiversity$get_equations()[[ty]] )
+          form <- to_formula( x$biodiversity$get_equations()[[ty]] )
         }
-        model[['equation']][[ty]] <- f
-        rm(f)
+        model[['equation']][[ty]] <- form
+        rm(form)
       }
 
       # Include nearest predictor values for each
@@ -234,32 +262,54 @@ methods::setMethod(
         # Default equation found
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
           # Construct formula with all variables
-          f <- to_formula(
-            paste(
-              paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ',
-
-                     # Linear effects
-                     paste0('bols(', model[['predictors_names']], ')', collapse = ' + ' ),
-                     ' +',
-                     # Smooth effects
-                     paste0('bbs(', model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')], ', knots = 5)', collapse = ' + ' )
-              ), collapse = ' '
-            )
-          )
+          form <- paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ')
+          if(model$priors$length() > 0 && any(model$priors$classes() == 'GDBPrior')){
+            # Loop through all provided GDB priors
+            supplied_priors <- as.vector(model$priors$varnames())[which(model$priors$classes() == 'GDBPrior')]
+            for(v in supplied_priors){
+              # First add linear effects
+              form <- paste(form, paste0('bmono(', v,
+                                   ', constraint = \'', model$priors$get(v) ,'\'',
+                                   ')', collapse = ' + ' ), ' + ' )
+            }
+            # Add linear and smooth effects for all missing ones
+            miss <- model[['predictors_names']][model[['predictors_names']] %notin% supplied_priors]
+            if(length(miss)>0){
+              # Add linear predictors
+              form <- paste(form, paste0('bols(',miss,')',collapse = ' + '), ' + ')
+              # And smooth effects
+              form <- paste(form, paste0('bbs(', miss,', knots = 5)',
+                                   collapse = ' + '
+              ))
+            }
+          } else {
+            # Add linear predictors
+            form <- paste(form, paste0('bols(',model[['predictors_names']],')',collapse = ' + '), ' + ')
+            # And smooth effects
+            form <- paste(form, paste0('bbs(',
+                                 model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')],', knots = 5)',
+                                 collapse = ' + '
+            ))
+          }
+          # Convert to formula
+          form <- to_formula(form)
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ f <- update.formula(f, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
-            f <- update.formula(f, paste0(" ~ . + ",
+            form <- update.formula(form, paste0(" ~ . + ",
                                           x$engine$get_equation_latent_spatial() )
             )
           }
         } else{
-          # FIXME: Also make checks for correct formula, e.g. if variable is contained within object
-          f <- to_formula(x$biodiversity$get_equations()[[ty]])
+          # FIXME: Also make checks for correctnes in supplied formula, e.g. if variable is contained within object
+          form <- to_formula(x$biodiversity$get_equations()[[ty]])
+          assertthat::assert_that(
+            all( all.vars(form) %in% c(x$biodiversity$get_columns_occ()[[ty]], 'w', 'weight', model[['predictors_names']]) )
+          )
         }
-        model[['equation']][[ty]] <- f
-        rm(f)
+        model[['equation']][[ty]] <- form
+        rm(form)
       }
 
       # Include nearest predictor values for each

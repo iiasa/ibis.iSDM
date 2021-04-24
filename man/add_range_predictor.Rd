@@ -4,7 +4,13 @@
 \alias{add_range_predictor}
 \title{Add a range of a species as predictor to a distribution object}
 \usage{
-add_range_predictor(x, range, method = "distance", distance_max = NULL)
+add_range_predictor(
+  x,
+  range,
+  method = "distance",
+  distance_max = NULL,
+  priors = NULL
+)
 
 \S4method{add_range_predictor}{BiodiversityDistribution, raster}(x, range)
 
@@ -18,6 +24,8 @@ add_range_predictor(x, range, method = "distance", distance_max = NULL)
 \item{method}{\code{\link{character}} describing how the range should be included (binary | distance)}
 
 \item{distance_max}{Numeric threshold on the maximum distance (Default: NULL)}
+
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
 }
 \description{
 As options allow specifying including the range either as binary or distance

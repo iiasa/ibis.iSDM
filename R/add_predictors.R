@@ -9,7 +9,7 @@ NULL
 #' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
-#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default priors
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
 #' @param ... Other parameters passed down
 
 #' @details TBD
@@ -80,9 +80,17 @@ methods::setMethod(
                             msg = 'Supplied environmental data not aligned with background.')
     if(!is.null(names)) {
       assertthat::assert_that(nlayers(env)==length(names),
+                              all(is.character(names)),
                                                 msg = 'Provided names not of same length as environmental data.')
       # Set names of env
       names(env) <- names
+    }
+
+    # If priors have been set, save them in the distribution object
+    if(!is.null(priors)) {
+      # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
+      assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
+      x <- x$set_priors(priors)
     }
 
     # Standardization and scaling
@@ -109,10 +117,7 @@ methods::setMethod(
 
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain
-    if(!is.Waiver(x$predictors)) message('Overwriting existing environmental predictors.')
-
-    # If priors have been set, save them in distribution object
-    if(!is.null(priors)) {x <- x$set_priors(priors) }
+    if(!is.Waiver(x$predictors)) message('Overwriting existing predictors.')
 
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
@@ -147,6 +152,7 @@ methods::setGeneric(
 methods::setMethod(
   "rm_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
+  # rm_predictors ----
   function(x, names ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(names) || assertthat::is.scalar(names) || is.vector(names)
@@ -185,6 +191,7 @@ methods::setGeneric(
 methods::setMethod(
   "sel_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
+  # sel_predictors ----
   function(x, names ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(names) || assertthat::is.scalar(names) || is.vector(names)

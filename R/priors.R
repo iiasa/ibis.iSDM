@@ -33,7 +33,7 @@ methods::setMethod(
   function(x,...) {
     # Get supplied matched arguments
     assertthat::assert_that(
-      inherits(x,'Prior'),
+      inherits(x,'Prior') || is.list(x),
       msg = 'Supply a prior object.'
     )
     # Capture dot objects and check that they are all of class Prior
@@ -43,10 +43,12 @@ methods::setMethod(
       msg = 'Only prior objects are supported.'
     )
 
-    # Prior object list
-    ll <- list()
-    ll[[as.character(x$id)]] <- x
-    for(var in dots) ll[[as.character(var$id)]] <- var
+    if(is.list(x)){ ll <- x } else {
+      # Prior object list
+      ll <- list()
+      ll[[as.character(x$id)]] <- x
+      for(var in dots) ll[[as.character(var$id)]] <- var
+    }
 
     # Create new priorlist object and supply all objects here
     bdproto(

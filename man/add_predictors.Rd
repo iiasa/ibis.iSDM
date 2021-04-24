@@ -34,7 +34,7 @@ add_predictors(
 
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default priors}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
 
 \item{...}{Other parameters passed down}
 }

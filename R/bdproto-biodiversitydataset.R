@@ -100,6 +100,11 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$get_column_occ())
     x
   },
+  # Get ids of all assets in collection
+  get_ids = function(self){
+    x <- lapply(self$data, function(z) z$id)
+    x
+  },
   # Show equations of all datasets
   show_equations = function(self, msg = TRUE) {
     x <- self$get_equations()

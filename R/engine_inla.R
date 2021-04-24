@@ -396,9 +396,9 @@ engine_inla <- function(x,
                                    family= 'poisson',   # Family the data comes from
                                    control.family = list(link = "log"), # Control options
                                    control.predictor=list(A = INLA::inla.stack.A(stk_var),
-                                                          link = NULL, compute = TRUE),  # Compute for marginals of the predictors
+                                                          link = NULL, compute = FALSE),  # Compute for marginals of the predictors
                                    control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                                   INLA::control.inla(#int.strategy = "eb", # Empirical bayes for integration
+                                   INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
                                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
                                    num.threads = parallel::detectCores() - 1
             )
@@ -433,20 +433,20 @@ engine_inla <- function(x,
                           family = 'poisson',   # Family the data comes from
                           control.family = list(link = "log"), # Control options
                           control.predictor=list(A = INLA::inla.stack.A(stk_var),link = 1, compute = TRUE),  # Compute for marginals of the predictors. Link to NULL for multiple likelihoods!
-                          control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                          control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
-                          INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                       strategy = 'simplified.laplace'
-                                       # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
-                          ), # To make it run faster...
+                          # INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
+                          #              strategy = 'simplified.laplace'
+                          #              # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
+                          # ), # To make it run faster...
                           num.threads = parallel::detectCores()-1
         )
 
         # Predict spatially
         if(!inference_only){
-          # Get theta from initiall fitted model as starting parameters
-          thetas = fit_resp$internal.summary.hyperpar$mean
+          # Get thetas from initially fitted model as starting parameters
+          thetas = fit_resp$mode$theta
 
           # Predict on full
           fit_pred <- INLA::inla(formula = master_form, # The specified formula
@@ -456,8 +456,8 @@ engine_inla <- function(x,
                                  family= 'poisson',   # Family the data comes from
                                  control.family = list(link = "log"), # Control options
                                  control.predictor = list(A = INLA::inla.stack.A(stk_full), link = 1, compute = TRUE),  # Compute for marginals of the predictors.  Link to NULL for multiple likelihoods!
-                                 control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE, openmp.strategy	= 'huge' ), #model diagnostics and config = TRUE gives you the GMRF
-                                 control.mode = list(theta = thetas, restart = TRUE), # To speed up use previous thetas
+                                 control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ), #model diagnostics and config = TRUE gives you the GMRF
+                                 control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
                                  # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                                  verbose = verbose, # To see the log of the model runs
                                  control.results = list(return.marginals.random = FALSE,
@@ -509,29 +509,39 @@ engine_inla <- function(x,
                 "prediction" = prediction
                 ),
               # Function to plot SPDE if existing
-              plot_spde = function(self,...){
+              plot_spde = function(self, dim = c(300,300), ...){
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {
                   # Get spatial projections from model
                   # FIXME: Potentially make the plotting of this more flexible
-                  gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = c(300, 300))
+                  gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
                   g.mean <- INLA::inla.mesh.project(gproj,
                                                     self$get_data('fit_pred')$summary.random$spatial.field$mean)
                   g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_pred')$summary.random$spatial.field$sd)
 
-                  # Out
-                  r.m <- rasterFromXYZ(xyz = cbind(gproj$x,gproj$y ))
-                  r.m[] <- as.vector(g.mean)
-                  r.sd <- rasterFromXYZ(xyz = cbind(gproj$x,gproj$y ))
-                  r.sd[] <- as.vector(g.sd)
+                  # Convert to rasters
+                  g.mean <- t(g.mean)
+                  g.mean <- g.mean[rev(1:length(g.mean[,1])),]
+                  r.m <- raster::raster(g.mean,
+                                      xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
+                                      ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
+                                      crs = self$get_data('mesh')$crs
+                  )
+                  g.sd  <- t(g.sd)
+                  g.sd <- g.sd[rev(1:length(g.sd[,1])),]
+                  r.sd <- raster::raster(g.sd,
+                                      xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
+                                      ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
+                                      crs = self$get_data('mesh')$crs
+                  )
+
+                  spatial_field <- raster::stack(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
 
                   # Plot
                   cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
                   par(mfrow=c(1,2))
-                  plot(raster::flip(r.m,direction = 'y'),col = cols, main = 'mean spatial effect')
-                  plot(raster::flip(r.sd,direction = 'y'), main = 'sd spatial effect')
-                  # raster::image(g.mean,col = cols, main = 'mean spatial effect')
-                  # raster::image(r.sd, main = 'sd spatial effect')
+                  plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
+                  plot(spatial_field[[2]], main = 'sd spatial effect')
                 } else {
                   message('No spatial covariance in model specified.')
                 }

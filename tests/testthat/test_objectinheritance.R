@@ -43,14 +43,19 @@ test_that('Check that objects are properly inherited', {
   expect_true(is.Waiver(x$engine))
 
   # Priors
-  x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior('test','abc')))
+  x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'abc')))
   expect_true(is.Waiver(x$priors))
   x %>% add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
   # Two different priors
   x %>%
-    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior('test','abc'))) %>%
+    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'abc'))) %>%
     add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
+
+  # Check variable removal
+  xx <- x %>% add_predictors(predictors)
+  xx %>% rm_predictors("hmi_mean_50km")
+  expect_length(xx$get_predictor_names(), 14)
 
 })

@@ -139,6 +139,38 @@ mesh_barrier <- function(mesh, region.poly){
   return(poly.barrier)
 }
 
+#' Query if a point is inside the mesh boundary
+#'
+#' @param mesh A [`inla.mesh`] object
+#' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
+#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
+#' @noRd
+coords_in_mesh <- function(mesh, coords) {
+  assertthat::assert_that(
+    inherits(mesh,'inla.mesh'),
+    inherits(coords,'sf') || inherits(region.poly,'Spatial') || inherits(coords, 'matrix') || inherits(coords, 'data.frame')
+  )
+
+  # Get coordinates depending on type
+  if (inherits(coords, "Spatial")) {
+    loc <- sp::coordinates(coords)
+  } else if(inherits(coords, 'sf')){
+    loc <- st_coordinates(coords)
+  } else if(inherits(coords, 'matrix') || inherits(coords, 'data.frame') ){
+    assertthat::assert_that(ncol(coords)==2,msg = 'Supplied coordinate matrix is larger than 2 columns.')
+    loc <- coords[,c(1,2)]
+  }
+  loc <- as.matrix(loc)
+
+  loc_inside <- INLA::inla.fmesher.smorg(
+    loc = mesh$loc,
+    tv = mesh$graph$tv,
+    points2mesh = loc
+    )
+  # Return vector with point not in
+  return(loc_inside$p2m.t[,1]!=0)
+}
+
 
 #' Make Integration stack
 #' @param mesh The background projection mesh

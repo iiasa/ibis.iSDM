@@ -6,6 +6,7 @@
 #' @param range A [`sf`] object with the range for the target feature
 #' @param method [`character`] describing how the range should be included (binary | distance)
 #' @param distance_max Numeric threshold on the maximum distance (Default: NULL)
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
 #' @name add_range_predictor
 NULL
 
@@ -16,7 +17,7 @@ NULL
 methods::setGeneric(
   "add_range_predictor",
   signature = methods::signature("x", "range", "method"),
-  function(x, range, method = 'distance', distance_max = NULL) standardGeneric("add_range_predictor"))
+  function(x, range, method = 'distance', distance_max = NULL, priors = NULL) standardGeneric("add_range_predictor"))
 
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_range_predictor
@@ -25,16 +26,21 @@ methods::setGeneric(
 methods::setMethod(
   "add_range_predictor",
   methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
-  function(x, range, method = 'precomputed_range') {
+  function(x, range, method = 'precomputed_range', priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(range, 'Raster')
     )
     names(range) <- method
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = range,transform = 'none',derivates = 'none')
+      x <- add_predictors(x, env = range,transform = 'none',derivates = 'none', priors)
     } else {
       x$predictors$set_data('range_distance', range)
+      if(!is.null(priors)) {
+        # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
+        assertthat::assert_that( all( priors$varnames() %in% names(range) ) )
+        x <- x$set_priors(priors)
+      }
     }
     return(x)
   }
@@ -46,12 +52,13 @@ methods::setMethod(
 methods::setMethod(
   "add_range_predictor",
   methods::signature(x = "BiodiversityDistribution", range = "sf", method = "character"),
-  function(x, range, method = 'distance', distance_max = NULL ) {
+  function(x, range, method = 'distance', distance_max = NULL, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
                             inherits(range, 'sf'),
                             method %in% c('binary','distance'),
-                            is.null(distance_max) || is.numeric(distance_max)
+                            is.null(distance_max) || is.numeric(distance_max),
+                            is.null(priors) || inherits(priors,'PriorList')
     )
     # Reproject if necessary
     if(st_crs(range) != st_crs(x$background)) range <- st_transform(range, st_crs(x$background))
@@ -92,6 +99,13 @@ methods::setMethod(
       # Convert to relative for better scaling
       dis <- 1 - (dis / cellStats(dis,'max'))
       names(dis) <- 'range_distance'
+    }
+
+    # If priors have been set, save them in the distribution object
+    if(!is.null(priors)) {
+      # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
+      assertthat::assert_that( all( priors$varnames() %in% names(dis) ) )
+      x <- x$set_priors(priors)
     }
 
     # Add as predictor

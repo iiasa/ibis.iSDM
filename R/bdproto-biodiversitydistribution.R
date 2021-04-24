@@ -161,8 +161,11 @@ BiodiversityDistribution <- bdproto(
     assertthat::assert_that(
       is.character(names) || assertthat::is.scalar(names) || is.vector(names)
     )
-    self$predictors$rm_data(names)
-    invisible()
+    # Get predictor collection
+    prcol <- bdproto(NULL, self)
+    # Set the object
+    prcol$predictors$rm_data(names)
+    return(prcol)
   },
   # Show number of biodiversity records
   show_biodiversity_length = function(self){

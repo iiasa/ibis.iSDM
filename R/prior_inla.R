@@ -45,10 +45,13 @@ methods::setMethod(
       all(is.numeric(hyper))
     )
     # FIXME: Further checks for mean and precision and whether they are in realistic bounds
-    assertthat::assert_that(
-      all(hyper > -1e2) && all(hyper < 1e2), # Check bounds
-      msg = 'Potentially unrealistic priors specified.'
-    )
+    # assertthat::assert_that(
+    #   all(hyper > -1e2) && all(hyper < 1e2), # Check bounds
+    #   msg = 'Potentially unrealistic priors specified.'
+    # )
+    # Match supplied type in case someone has been lazy
+    type <- match.arg(type, names(INLA::inla.models()$prior), several.ok = FALSE)
+
     # Rename prior?
     # FIXME: This assumes that values have been supplied in this order. Implement checks
 
@@ -76,5 +79,46 @@ methods::setMethod(
   }
 )
 
+#' Helper function when multiple variables and types are supplied
+#' @name INLAPriors
+#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects
+#' @param type A [`character`] specifying the type of prior to be set
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
+#' @param ... Variables passed on to prior object
+#' @rdname INLAPriors
+#' @exportMethod INLAPriors
+#' @export
+methods::setGeneric(
+  "INLAPriors",
+  signature = methods::signature("variables", "type"),
+  function(variables, type, hyper = c(0, 0.001), ...) standardGeneric("INLAPriors"))
+
+#' @name INLAPriors
+#' @rdname INLAPriors
+#' @usage \S4method{INLAPriors}{vector, character}(variables, type)
+methods::setMethod(
+  "INLAPriors",
+  methods::signature(variables = "vector", type = "character"),
+  function(variables, type, hyper = c(0, 0.001), ... ) {
+    assertthat::assert_that(!missing(variables),!missing(type),
+                            msg = 'Variable or Type unset.')
+    assertthat::assert_that(
+      is.vector(variables), is.character(type),
+      is.vector(hyper), length(hyper) == 2,
+      all(is.numeric(hyper))
+    )
+
+    assertthat::assert_that(length(variables)>1, msg = 'Only one prior variable supplied. Use INLAPrior')
+    # Match supplied type in case someone has been lazy
+    type <- match.arg(type, names(INLA::inla.models()$prior), several.ok = FALSE)
+
+    multiple_priors <- list()
+    for(k in variables){
+      np <- INLAPrior(variable = k,type = type, hyper = hyper)
+      multiple_priors[[as.character(np$id)]] <- np
+    }
+    return(multiple_priors)
+  }
+)
 
 

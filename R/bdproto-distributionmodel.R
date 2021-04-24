@@ -78,7 +78,7 @@ DistributionModel <- bdproto(
       cols <- colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100)
 
       raster::plot(pred[[what]],
-           main = paste0(what, ' prediction (',self$model$name,')'),
+           main = paste0(what, ' prediction (',what,')'),
            box = FALSE,
            axes = TRUE,
            colNA = NA, col = cols,...)
