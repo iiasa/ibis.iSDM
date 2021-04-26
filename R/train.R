@@ -104,6 +104,10 @@ methods::setMethod(
     )
     # Add intercept
     poipo_env$intercept <- 1
+    # Security check
+    assertthat::assert_that(
+      all( apply(poipo_env, 1, function(x) all(!is.na(x) )) ),msg = 'Missing values in extracted environmental predictors.'
+    )
 
     # Check whether predictors should be refined and do so
     if(rm_corPred && model[['predictors_names']] != 'dummy'){
@@ -120,8 +124,15 @@ methods::setMethod(
       }
     }
 
-    # Get and assign priors
-    model[['priors']] <- x$priors
+    # Get and assign priors #
+    # First clean and remove all priors that are not relevant to the engine
+    spec_priors <- switch(
+      x$engine$name,
+      "<GDB>" = x$priors$classes() == 'GDBPrior',
+      "<INLA>" = x$priors$classes() == 'INLAPrior'
+    )
+    spec_priors <- x$priors$collect( names(which(spec_priors)) )
+    model[['priors']] <- if(spec_priors$length() == 0) new_waiver() else spec_priors
 
     # Get latent variables
     if(!is.Waiver(x$latentfactors)){
@@ -171,9 +182,9 @@ methods::setMethod(
           # Construct formula with all variables
           form <- paste( x$biodiversity$get_columns_occ()[[ty]], '~', 0, ' + intercept +')
           # Check whether priors have been specified and if yes, use those
-          if(model$priors$length() > 0 && any(model$priors$classes() == 'INLAPrior')){
+          if(!is.Waiver(model$priors)){
             # Loop through all provided INLA priors
-            supplied_priors <- as.vector(model$priors$varnames())[which(model$priors$classes() == 'INLAPrior')]
+            supplied_priors <- as.vector(model$priors$varnames())
 
             for(v in supplied_priors){
               # Get prior object
@@ -182,17 +193,17 @@ methods::setMethod(
 
               # First add linear effects
               form <- paste(form, paste0('f(', v, ', model = \'linear\' ,',
-                                   'mean.linear = ', model$priors$get(v)[1],', ',
-                                   'prec.linear = ', model$priors$get(v)[2],')',
-                                    collapse = ' + ' ), ' + ' )
+                                         'mean.linear = ', model$priors$get(v)[1],', ',
+                                         'prec.linear = ', model$priors$get(v)[2],')',
+                                         collapse = ' + ' ), ' + ' )
             }
             # Add linear for those missed ones
             miss <- model[['predictors_names']][model[['predictors_names']] %notin% supplied_priors]
             if(length(miss)>0){
-              # Add linear predictors
+              # Add linear predictors without priors
               form <- paste(form,
-                              paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
-                            )
+                            paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
+              )
             }
           } else {
             # No priors specified, simply add variables with default
@@ -263,14 +274,14 @@ methods::setMethod(
         if(x$biodiversity$get_equations()[[ty]]=='<Default>'){
           # Construct formula with all variables
           form <- paste( x$biodiversity$get_columns_occ()[[ty]] ,'/w', '~ ')
-          if(model$priors$length() > 0 && any(model$priors$classes() == 'GDBPrior')){
+          if(!is.Waiver(model$priors)){
             # Loop through all provided GDB priors
-            supplied_priors <- as.vector(model$priors$varnames())[which(model$priors$classes() == 'GDBPrior')]
+            supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
-                                   ', constraint = \'', model$priors$get(v) ,'\'',
-                                   ')', collapse = ' + ' ), ' + ' )
+                                         ', constraint = \'', model$priors$get(v) ,'\'',
+                                         ')', collapse = ' + ' ), ' + ' )
             }
             # Add linear and smooth effects for all missing ones
             miss <- model[['predictors_names']][model[['predictors_names']] %notin% supplied_priors]
@@ -279,18 +290,18 @@ methods::setMethod(
               form <- paste(form, paste0('bols(',miss,')',collapse = ' + '), ' + ')
               # And smooth effects
               form <- paste(form, paste0('bbs(', miss,', knots = 5)',
+                                         collapse = ' + '
+              ))
+            }
+            } else {
+              # Add linear predictors
+              form <- paste(form, paste0('bols(',model[['predictors_names']],')',collapse = ' + '), ' + ')
+              # And smooth effects
+              form <- paste(form, paste0('bbs(',
+                                   model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')],', knots = 5)',
                                    collapse = ' + '
               ))
             }
-          } else {
-            # Add linear predictors
-            form <- paste(form, paste0('bols(',model[['predictors_names']],')',collapse = ' + '), ' + ')
-            # And smooth effects
-            form <- paste(form, paste0('bbs(',
-                                 model[['predictors_types']]$predictors[which(model[['predictors_types']]$type == 'numeric')],', knots = 5)',
-                                 collapse = ' + '
-            ))
-          }
           # Convert to formula
           form <- to_formula(form)
           # Add offset if specified
@@ -302,7 +313,7 @@ methods::setMethod(
             )
           }
         } else{
-          # FIXME: Also make checks for correctnes in supplied formula, e.g. if variable is contained within object
+          # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
           form <- to_formula(x$biodiversity$get_equations()[[ty]])
           assertthat::assert_that(
             all( all.vars(form) %in% c(x$biodiversity$get_columns_occ()[[ty]], 'w', 'weight', model[['predictors_names']]) )

@@ -163,7 +163,7 @@ engine_gdb <- function(x,
 
         # 5 fold Cross validation to prevent overfitting
         # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
-        grs <- seq(from = 10, to = 1000, by = 10)
+        grs <- seq(from = 10, to = max(boosting_iterations*5,1000), by = 10)
         cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
         try({cvm <- mboost::cvrisk(fit_gdb,
                               folds = cvf, grid = grs,

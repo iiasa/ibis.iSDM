@@ -83,6 +83,13 @@ PriorList <- bdproto(
     # Catch and return NULL in case if not set
     if(is.null(ex)) ex else self$priors[[ex]]$get()
   },
+  # Collect priors from ids
+  collect = function(self, id){
+    assertthat::assert_that(!missing(id) )
+    id = as.character(id)
+    assertthat::assert_that( all(id %in% as.character(self$ids())) )
+    priors( self$priors[id] )
+  },
   # Add a new prior
   add = function(self, x) {
     assertthat::assert_that(inherits(x, "Prior"))

@@ -46,7 +46,7 @@ BiodiversityDistribution <- bdproto(
                    "\n --------- ",
                    "\n  predictors:     ", pn,
                    "\n  priors:         ", pio,
-                   "\n  latent factors: ", paste(self$get_latent(),collapse = ', '),
+                   "\n  latent fields: ", paste(self$get_latent(),collapse = ', '),
                    of,
                    "\n  log:            ", "Not yet implemented",
                    "\n  engine:         ", self$get_engine()

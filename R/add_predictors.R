@@ -69,6 +69,10 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
+    # Try and match transform and derivatives arguements
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
+
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(env, 'Raster'),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),

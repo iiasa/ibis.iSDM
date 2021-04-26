@@ -153,25 +153,29 @@ engine_inla <- function(x,
           assertthat::assert_that(length( self$data$s.index ) == nrow(ns))
         }
         if(type=='spde'){
+          # Check that everyting is correctly specified
+          if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
+          # if(is.null( priors$get('spde','prior.range') ) || is.null( priors$get('spde','prior.sigma') ) ) priors <- NULL
+
           # Get prior
           pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
           ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
           # Use default spde
-          if(is.null(priors)){
-            # Define PC Matern SPDE model and save
-            self$data$latentspatial <- INLA::inla.spde2.matern(
-              mesh = self$data$mesh,
-              alpha = alpha
-            )
-          } else {
-            # Define PC Matern SPDE model and save
-            self$data$latentspatial <- INLA::inla.spde2.pcmatern(
-              mesh = self$data$mesh,
-              alpha = alpha,
-              # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
-              prior.range = pr,prior.sigma = ps
-            )
-          }
+          # if(is.null(priors)){
+          #   # Define PC Matern SPDE model and save
+          #   self$data$latentspatial <- INLA::inla.spde2.matern(
+          #     mesh = self$data$mesh,
+          #     alpha = alpha
+          #   )
+          # } else {
+          # Define PC Matern SPDE model and save
+          self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+            mesh = self$data$mesh,
+            alpha = alpha,
+            # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
+            prior.range = pr,prior.sigma = ps
+          )
+          # }
           # Make index for spatial field
           self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
                                                           n.spde = self$data$latentspatial$n.spde)
