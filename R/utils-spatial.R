@@ -186,13 +186,13 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
 #' @param longlat A boolean variable indicating whether the projection is long-lat
-#' @param field_space A [`vector`] highlight the columns from which coordinates
-#'  are to be extracted (default: c('X','Y'))
+#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: c('X','Y'))
+#' @param cheap A boolean variable whether the dataset is considered to be large and faster computation could help
 #' @return Extracted data from each point
 #' @note If multiple values are of equal distance, average them
 #' @noRd
 
-get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),...) {
+get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
 
   # Security checks
   assertthat::assert_that(
@@ -207,13 +207,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'),.
   coords_env <- as.matrix(env[,field_space])
 
   # Pairwise distance function
-  # Use geosphere distance calculation if available as faster
-  if('geosphere' %in% installed.packages()[,1]){
-    disfun <- geosphere::distGeo
-  } else { disfun <- sp::spDistsN1 }
+  # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices. Thus making this dependency a suggestion
+  disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
 
   env_sub <- apply(coords, 1, function(xy1, xy2) {
-                    dists <- disfun(xy2, xy1, TRUE)
+                    dists <- disfun(xy2, xy1)
                     # In a few cases these can be multiple in equal distance
                     d <- which(dists==min(dists))
                     if(length(d)>=2){

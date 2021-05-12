@@ -20,6 +20,7 @@ Imports:
     magrittr,
     uuid,
     foreach,
+    geodist,
     assertthat(>= 0.2.0),
     rgeos (>= 0.5-5),
     tibble (>= 2.0.0),
