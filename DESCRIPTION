@@ -73,5 +73,6 @@ Collate:
     'set_priors.R'
     'summary.R'
     'train.R'
+    'utils-gdb.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

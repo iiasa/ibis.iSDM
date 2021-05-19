@@ -35,7 +35,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
         return(0)
       }
     })
-  #  assertthat::assert_that(assertthat::are_equal(sum(w), rgeos::gArea(region.poly) )) # Security check
+   assertthat::assert_that(assertthat::are_equal(round( sum(w) ), round( rgeos::gArea(region.poly) ) )) # Security check
   } else {
     # Convert to Spatial Polygons
     polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
@@ -178,22 +178,27 @@ coords_in_mesh <- function(mesh, coords) {
 #' @param cov The covariate data stack
 #' @param pred_names The names of the used predictors
 #' @param bdry The boundary used to create the mesh
-#' @param resp The column with the Observed value
+#' @param id An id tag for this integration stack
+#' @param joint Whether a model with multiple likelihood functions is to be specified
 #' @noRd
-inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry, resp = 'Observed' ){
+inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
+                                        id,
+                                        joint = FALSE){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
     length(mesh.area) == mesh$n, is.vector(mesh.area),
     is.data.frame(cov), assertthat::has_name(cov, c('x','y')),
-    is.data.frame(bdry), is.character(resp)
+    is.data.frame(bdry),is.logical(joint)
   )
 
   # Get nearest average environmental data
-  all_env <- get_ngbvalue(
-    coords = mesh$loc[,1:2],
-    env = cov,
-    field_space = c('x','y'),
-    longlat = raster::isLonLat(bdry)
+  all_env <- suppressMessages(
+    get_ngbvalue(
+      coords = mesh$loc[,1:2],
+      env = cov,
+      field_space = c('x','y'),
+      longlat = raster::isLonLat(bdry)
+    )
   )
   # Get only target variables
   all_env <-  subset(all_env, select = pred_names)
@@ -210,102 +215,31 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry, 
 
   # Single response
   ll_resp <- list()
-  ll_resp[[ resp ]] <- cbind( rep(0, mesh$n) ) # Provide NA to make data.frame
-  ll_resp[['e']] <- as.numeric( mesh.area )
+
+  # Add the expected estimate and observed note
+  # FIXME: Currently only two likelihoods are supported (binomial/poisson) with the NA order being the determining factor
+  if(joint) ll_resp[[ 'observed' ]] <- cbind( rep(0, mesh$n), NA )
+  if(!joint) ll_resp[[ 'observed' ]] <- cbind( rep(0, mesh$n) )
+  ll_resp[[ 'e' ]] <- as.numeric( mesh.area )
 
   # Effects list
   ll_effects <- list()
   # Note, order adding this is important apparently...
   ll_effects[['predictors']] <- all_env
-  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
+  ll_effects[['intercept']] <- list(intercept = seq(1, mesh$n) )
 
   # Build integration stack of nearest predictors
   stk_int <- INLA::inla.stack(
     data    = ll_resp,
     A       = list(1, idiag),
-    tag     = 'stk_int',
+    tag     = paste0('stk_int_',as.character(id)),
     effects = ll_effects
   )
   return(stk_int)
 }
 
-
-
-#' Function for creating a joint fitted and prediction stack
-#' @param stk_resp A inla stack object
-#' @param cov The covariate data stack
-#' @param pred.names The predictors to use
-#' @param offset If an offset is specified, use it
-#' @param mesh The background projection mesh
-#' @param mesh.area The area calculate for the mesh
-#' @param type Name to use
-#' @param spde An spde field if specified
-#' @noRd
-
-inla_make_prediction_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area, type, spde = NULL){
-  # Security checks
-  assertthat::assert_that(
-    inherits(stk_resp, 'inla.data.stack'),
-    inherits(mesh,'inla.mesh'),
-    is.character(type),
-    is.data.frame(cov),
-    is.null(spde)  || 'spatial.field' %in% names(spde)
-  )
-  # need to create a new A projection matrix for the prediction data
-  mat_pred <- INLA::inla.spde.make.A(mesh,
-                             loc = as.matrix(cov[,1:2]) )
-
-  # Single response
-  ll_pred <- list()
-  ll_pred[[ names(stk_resp$data$names)[1] ]] <- cbind( rep(NA, nrow(cov)) ) # Set to NA to predict for fitted area
-  ll_pred[['e']] <- rep(0, nrow(cov))
-
-  # Effects
-  ll_effects <- list()
-  # Note, order adding this is important apparently...
-  ll_effects[['predictors']] <- cov[,pred.names]
-  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
-  if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
-  if(!is.null(offset)) ll_effects[['predictors']] <- cbind(ll_effects[['predictors']], offset)
-  # Define A
-  A <- list(1, mat_pred )
-
-  # Create stack depending on the number of variables in response
-  # if( length(stk_resp$data$names[[1]]) > 1) {
-  #   stop('TBD')
-  #   ys <- cbind(rep(NA, nrow(pred.grid)), rep(NA, nrow(pred.grid)))
-  #   stack.pred.response <- inla.stack(data=list(y=ys),
-  #                                     effects = list(list(data.frame(interceptA=rep(1,np))), env = pred.grid$cov, list(uns_field=1:spde$n.spde)),
-  #                                     A = A,
-  #                                     tag = paste0('pred_', type))
-  # } else if("Ntrials" %in% stk_resp$data$names) {
-  #   stop('TBD')
-  #   stack.pred.response <- inla.stack(data=list(y=NA, Ntrials = rep(1,np)),
-  #                                     effects = list(list(data.frame(interceptA=rep(1,np))), env = pred.grid$cov,
-  #                                                    list(spatial.field=1:spde$n.spde)),
-  #                                     A = A,
-  #                                     tag = paste0('pred_', type) )
-  # } else {
-    stk_pred <-
-      INLA::inla.stack(
-        data =  ll_pred,              # Response
-        A = A,                        # Predictor projection matrix
-        effects = ll_effects,         # Effects matrix
-        tag = paste0('pred_',type) # New description tag
-      )
-  # }
-
-  # TODO: Insert some security checks that stk_resp and stK_pred are equal in variable names
-  # Final security checks
-  # assertthat::assert_that(
-  #   names(stk_resp$effects$names) %in% names(stk_pred$effects$names),
-  #   msg = 'Response stak and prediction stack mismatch.'
-  # )
-  return(stk_pred)
-}
-
-#' Alternative version to create a projection stack
-#' Potentially to replace the function above
+#' Create a projection stack
+#'
 #' @param stk_resp A inla stack object
 #' @param cov The covariate data stack
 #' @param pred.names The predictors to use
@@ -318,19 +252,22 @@ inla_make_prediction_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 #' @param res Approximate resolution to the projection grid (default: null)
 #' @noRd
 inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area,
-                                       type, background, res = NULL, spde = NULL){
+                                       background, type,
+                                       res = NULL, spde = NULL,joint = FALSE){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
     inherits(mesh,'inla.mesh'),
     is.character(type),
     is.data.frame(cov),
-    is.null(spde)  || 'spatial.field' %in% names(spde)
+    is.null(spde)  || 'spatial.field' %in% names(spde),
+    is.logical(joint)
   )
 
   # New formulation of the projection matrix
   bdry <- mesh$loc[mesh$segm$int$idx[,2],]  # get the boundary of the region
 
+  # Try to make up a projection grid size if not defined
   if(is.null(res)){
     res <- (diff(range(cov$x)) / 100)
   }
@@ -347,7 +284,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   )
 
   # Buffer the region to be sure
-  suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width=0) )
+  suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width = 0) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -363,21 +300,11 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
 
   suppressWarnings(
-    cellsIn <- !is.na(over(SpatialPoints(projgrid$lattice$loc,
+    cellsIn <- !is.na(sp::over(SpatialPoints(projgrid$lattice$loc,
                                        proj4string = as(background.g,'Spatial')@proj4string),
                          as(background,'Spatial')))
   )
 
-  # Get only those points from the projection grid that are on the background
-  # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
-  # suppressMessages(
-  #   suppressWarnings(
-  #     predcoords <- sf::st_intersection(projpoints, background) %>%  sf::st_coordinates()
-  #     #predcoords <- coordinates( rgeos::gIntersection(as(projpoints,'Spatial'),as(background,'Spatial')) )
-  #     )
-  # )
-  # # Also get the cellids of those points
-  # suppressMessages(cellsIn <- sf::st_intersects(projpoints, background, sparse = FALSE) )
   # Check for multipolygon and align grid if necessary
   if(inherits(cellsIn,'matrix')){
     cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
@@ -387,6 +314,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   predcoords <- projgrid$lattice$loc[cellsIn,]
   colnames(predcoords) <- c('x','y')
 
+  # Security check
   assertthat::assert_that(length(cellsIn) == nrow(predcoords))
 
   # get the points on the grid within the boundary
@@ -396,28 +324,63 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # Extract covariates for points
   if(!is.null(offset)) cov <- cbind(cov, offset)
 
+  # For all coordinates get nearest value
   nearest_cov <- get_ngbvalue(coords = predcoords,
                               env = cov,
                               field_space = c('x','y'))
-  # nearest_cov[,paste("int","pred",sep=".")] <- 1
-  nearest_cov[,paste("intercept")] <- 1
 
-  # --- #
-  # Prediction surface
+  # Get from supplied stack this information
+  nearest_cov[,'intercept'] <- 1
+
+  # Empty lists
   ll_pred <- list()
-  ll_pred[[ names(stk_resp$data$names)[1] ]] <- cbind( rep(NA, nrow(nearest_cov)) ) # Set to NA to predict for fitted area
-  ll_pred[['e']] <- rep(0, nrow(nearest_cov))
-
-  # Effect data
   ll_effects <- list()
-  # Note, order adding this is important apparently...
-  ll_effects[['predictors']] <- nearest_cov
-  ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
-  if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
 
-  # Set A
-  A = list(1, Apred)
-  # --- #
+  # Define INLA stack dependent on what should go in it
+  if(joint){
+    # Joint stack
+    # Set to NA to predict for fitted area
+    ll_pred[[ 'observed' ]] <- cbind( rep(NA, nrow(nearest_cov)), rep(NA, nrow(nearest_cov)) )
+    ll_pred[['e']] <- rep(0, nrow(nearest_cov))
+    ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
+
+    # Note, order adding this is important apparently...
+    ll_effects[['predictors']] <- nearest_cov
+    ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n))
+    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+
+    # Set A
+    A = list(1, Apred)
+
+  } else if("Ntrials" %in% stk_resp$data$names) {
+    # Single stack and binomial
+
+    # Set to NA to predict for fitted area
+    ll_pred[[ 'observed' ]] <- cbind( rep(NA, nrow(nearest_cov)) )
+    ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
+
+    # Note, order adding this is important apparently...
+    ll_effects[['predictors']] <- nearest_cov
+    ll_effects[['intercept']]  <- list(intercept = seq(1,mesh$n))
+    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+
+    # Set A
+    A = list(1, Apred)
+
+  } else {
+    # --- #
+    ll_pred[[ 'observed' ]] <- cbind( rep(NA, nrow(nearest_cov)) ) # Set to NA to predict for fitted area
+    ll_pred[['e']] <- rep(0, nrow(nearest_cov))
+
+    # Note, order adding this is important apparently...
+    ll_effects[['predictors']] <- nearest_cov
+    ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
+    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+
+    # Set A
+    A = list(1, Apred)
+
+  }
 
   # Build stack
   stk_proj <-
@@ -425,9 +388,10 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
       data =  ll_pred,              # Response
       A = A,                        # Predictor projection matrix
       effects = ll_effects,         # Effects matrix
-      tag = paste0('pred_',type) # New description tag
+      tag = paste0('stk_pred')      # New description tag
     )
 
+  # --- #
   # Return a list with the projection grid
   return(list(
               stk_proj = stk_proj,

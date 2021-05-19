@@ -208,6 +208,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
 
   # Pairwise distance function
   # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices. Thus making this dependency a suggestion
+  # disfun <- geosphere::distHaversine
   disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
 
   env_sub <- apply(coords, 1, function(xy1, xy2) {

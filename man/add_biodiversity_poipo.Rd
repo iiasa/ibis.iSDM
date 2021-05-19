@@ -10,6 +10,7 @@ add_biodiversity_poipo(
   name = NULL,
   field_occurrence = "Observed",
   formula = NULL,
+  family = "poisson",
   ...
 )
 
@@ -25,6 +26,8 @@ add_biodiversity_poipo(
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
 
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified)}
+
+\item{family}{A \code{\link{character}} stating the family to be used (Default: Poisson)}
 
 \item{...}{Other parameters passed down}
 }

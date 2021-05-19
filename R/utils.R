@@ -135,7 +135,7 @@ capitalize_text <- function(x) {
 #' @param x A [`numeric`] value
 #' @noRd
 logistic <- function(a){
-  assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
+  #assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
   exp(a)/(1 + exp(a))
 }
 #' Logit transformation function
@@ -212,7 +212,7 @@ formula_combinations <- function(varnames, response = 'Observed', InterceptOnly 
 
 #' Filter a set of correlated predictors to fewer ones
 #'
-#' Code mostly taken from the `caret` package
+#' Code inspired from the `caret` package
 #'
 #' @param env A [`data.frame`] with extracted environmental covariates for a given species
 #' @param keep A [`vector`] with variables to keep regardless
@@ -229,31 +229,87 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.9, method =
   )
   if(!is.null(keep)) x <- env %>% dplyr::select(-keep) else x <- env
 
+  # Removing non-numeric columns
+  non.numeric.columns <- colnames(x)[!sapply(x, is.numeric)]
+  x <- x[, !(colnames(x) %in% non.numeric.columns)]
+
   # Get all variables that are singular or unique in value
-  sing_var <- which(apply(x, 2, var)==0)
-  if(length(sing_var)>0) x <- x[,-sing_var]
+  singular_var <- which(round( apply(x, 2, var),4) == 0)
+  if(length(singular_var)>0) x <- x[,-singular_var]
 
   # Calculate correlation matrix
   cm <- cor(x, method = method)
 
-  # Copied from the \code{caret} package to avoide further dependencies
+  # Copied from the \code{caret} package to avoid further dependencies
   if (any(!complete.cases(cm))) stop("The correlation matrix has some missing values.")
   averageCorr <- colMeans(abs(cm))
   averageCorr <- as.numeric(as.factor(averageCorr))
   cm[lower.tri(cm, diag = TRUE)] <- NA
+
   # Determine combinations over cutoff
   combsAboveCutoff <- which(abs(cm) > cutoff)
   colsToCheck <- ceiling(combsAboveCutoff/nrow(cm))
   rowsToCheck <- combsAboveCutoff%%nrow(cm)
+
   # Exclude columns with variables over average correlation
   colsToDiscard <- averageCorr[colsToCheck] > averageCorr[rowsToCheck]
   rowsToDiscard <- !colsToDiscard
+
   # Get columns to discard
   deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
   deletecol <- unique(deletecol)
 
   # Which variables to discard
   o <- names(env)[deletecol]
-  if(length(sing_var)>0) o <- c(o,  names(sing_var) )
+  if(length(singular_var)>0) o <- unique( c(o,  names(singular_var) ) )
   o
+}
+
+#' Create pseudo absence points over a raster dataset
+#'
+#' @param env An environmental dataset either in [`data.frame`] or [`raster`] format
+#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records
+#' @param template If template is not null then env needs to be a [`raster`] dataset
+#' @param npoints A [`numeric`] number of pseudo-absence points to create
+#' @param replace Sample with replacement? (Default: False)
+#' @returns A [`data.frame`] containing the newly created pseudo absence points
+# TODO: Allow option to supply a bias raster for weighted sampling
+
+create_pseudoabsence <- function(env, presence, template = NULL, npoints = 1000, replace = FALSE){
+  assertthat::assert_that(
+    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),
+    is.data.frame(presence),
+    hasName(presence,'x') && hasName(presence,'y'),
+    is.numeric(npoints),
+    is.null(template) || inherits(template,'Raster')
+  )
+  if(is.null(template)) {
+    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file')
+  }
+
+  if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
+
+  # Rasterize the presence estimates
+  bg1 <- raster::rasterize(presence[,c('x','y')], template, fun = 'count', background = 0)
+  bg1 <- raster::mask(bg1, template)
+
+  assertthat::assert_that(
+    is.finite(raster::cellStats(bg1,'max',na.rm = T))
+  )
+  # Generate pseudo absence data
+  # Now sample from all cells not occupied
+  abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
+  # Now get absence environmental data
+  abs <- get_ngbvalue(
+    coords = raster::xyFromCell(bg1, abs),
+    env = env,
+    field_space = c('x','y'),
+    longlat = raster::isLonLat(template)
+  )
+
+  # Remove NA data in case points were sampled over non-valid regions
+  abs <- subset(abs, complete.cases(abs))
+  assertthat::assert_that( all( names(abs) %in% names(env) ) )
+
+  return(abs)
 }

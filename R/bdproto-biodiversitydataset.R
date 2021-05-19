@@ -17,7 +17,7 @@ NULL
 #' @export
 BiodiversityDatasetCollection <- bdproto(
   "BiodiversityDatasetCollection",
-  data = list(), # FIXME: Possibly replace this in the future by a UUID / object-variable sytem
+  data = list(),
   # Print the names of all Biodiversity datasets
   print = function(self) {
     message(self$show())
@@ -37,10 +37,10 @@ BiodiversityDatasetCollection <- bdproto(
     'Biodiversity data'
   },
   # Types of all biodiversity datasets
-  get_types = function(self){
+  get_types = function(self, short = FALSE){
     if (base::length(self$data) > 0)
     {
-      return(sapply(self$data, function(z) z$get_type() ))
+      return(sapply(self$data, function(z) z$get_type( short ) ))
     } else return(new_waiver())
   },
   # Add a new Biodiversity dataset to this collection
@@ -51,34 +51,34 @@ BiodiversityDatasetCollection <- bdproto(
     invisible()
   },
   # Get a specific Biodiversity dataset by name
-  get_data_object = function(self, x) {
-    assertthat::assert_that(assertthat::is.string(x))
-    if (!x %in% names(self$data))
+  get_data_object = function(self, id) {
+    assertthat::assert_that(is.Id(id) || is.character(id) )
+    if (!id %in% names(self$data))
       return(new_waiver())
-    return(self$data[[x]])
+    return(self$data[[id]])
   },
   # Get biodiversity observations
-  get_data = function(self, x){
-    assertthat::assert_that(assertthat::is.string(x))
-    o <- self$get_data_object(x)
+  get_data = function(self, id){
+    assertthat::assert_that(is.Id(id) || is.character(id))
+    o <- self$get_data_object(id)
     o$get_data()
   },
   # Get coordinates for a given biodiversity dataset. Else return a wkt object
-  get_coordinates = function(self, x){
-    assertthat::assert_that(assertthat::is.string(x))
-    if(x %in% c('poipo','poipa') ){
-      o <- self$get_data(x)
+  get_coordinates = function(self, id){
+    assertthat::assert_that(is.Id(id) || is.character(id))
+    # if(x %in% c('poipo','poipa') ){
+      o <- self$get_data(id)
       o[,c('X','Y')]
-    } else {
-      # TODO: WKT to be implemented
-      return(new_waiver())
-    }
+    # } else {
+    # TODO: WKT to be implemented
+    # return(new_waiver())
+    # }
   },
-  # Remove a specific biodiversity dataset by name
-  rm_data = function(self, x) {
-    assertthat::assert_that(assertthat::is.string(x),
-                            x %in% names(self$data) )
-    self$data[[x]] <- NULL
+  # Remove a specific biodiversity dataset by id
+  rm_data = function(self, id) {
+    assertthat::assert_that(is.Id(id) || is.character(id),
+                            id %in% names(self$data) )
+    self$data[[id]] <- NULL
     invisible()
   },
   # Number of Biodiversity Datasets in connection
@@ -95,6 +95,11 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$get_equation())
     x
   },
+  # Get family
+  get_families = function(self){
+    x <- lapply(self$data, function(z) z$get_family())
+    x
+  },
   # Get fields with observation columns
   get_columns_occ = function(self){
     x <- lapply(self$data, function(z) z$get_column_occ())
@@ -105,18 +110,44 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$id)
     x
   },
+  # Search for a specific biodiversity dataset with type
+  get_id_byType = function(self, type){
+    assertthat::assert_that(is.character(type), !missing(type))
+    # Check whether type is correctly set
+    if(type %notin% c("Point - Presence only","Point - Presence absence",'Polygon - Presence only','Polygon - Presence absence')){
+      type <- switch(type,
+                      'poipo' = "Point - Presence only",
+                      'poipa' = "Point - Presence absence",
+                      'polpo' = 'Polygon - Presence only',
+                      'polpa' = 'Polygon - Presence absence'
+      )
+    }
+    if(is.null(type)) stop('Dataset type not found!')
+    w <- which(self$get_types() %in% type)
+    self$get_types()[w]
+  },
+  # Get id by name
+  get_id_byName = function(self, name){
+    assertthat::assert_that(is.character(name), !missing(name))
+    # Get id(s) of dataset with given name
+    r <- lapply(self$data, function(z) z$name)
+    if(name %in% r){
+      r[which(r==name)]
+    } else character(0)
+  },
   # Show equations of all datasets
   show_equations = function(self, msg = TRUE) {
+    # Get equations
     x <- self$get_equations()
-    #if(length(x)== 0) return( new_waiver() )
+
     # new names
-    n <- c(
-        poipo = 'Point - Presence only',
-        poipa = 'Point - Presence absence',
-        polpo = 'Polygon - Presence only',
-        polpa = 'Polygon - Presence absence'
-      )
-    names(x) <- as.vector( n[match(names(x), names(n))] )
+    # n <- c(
+    #     poipo = 'Point - Presence only',
+    #     poipa = 'Point - Presence absence',
+    #     polpo = 'Polygon - Presence only',
+    #     polpa = 'Polygon - Presence absence'
+    #   )
+    # names(x) <- as.vector( n[match(names(x), names(n))] )
     # Prettify
     o <- paste0(names(x),":\n ",x,collapse = '\n')
     if(msg) message(o) else o
@@ -124,22 +155,23 @@ BiodiversityDatasetCollection <- bdproto(
   # Plot the whole collection
   plot = function(self){
     # FIXME: Can quite likely be beautified
-    # Get types
-    ty <- as.data.frame( self$get_columns_occ() )
+    # Get observed columns
+    cols <- self$get_columns_occ()
 
     par.ori <- par(no.readonly = TRUE)
     # Base plot
     g <- ggplot2::ggplot(x$background) + ggplot2::geom_sf() + ggplot2::labs( title = self$name())
     # Adding the other elements
-    if('polpo' %in% names(ty)) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data('polpo'))[ty$popol], fill = 'lightblue', alpha = .35 )
+    for(dataset in names(cols)){
 
-    if('poipo' %in% names(ty)) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data('poipo'))[ty$poipo], size = 1.5, shape = 19)
+      if('Point - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]], colour = 'grey20', alpha = .35 )
 
-    if('poipa' %in% names(ty)) {
-      dd <- st_as_sf(self$get_data('poipa'))[ty$poipa]
-      dd[[ty$poipa]] <- factor(dd[[ty$poipa]])
-      # FIXME: Tidy evaluation via {{}} does not seem to work.
-      g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = Observed) )
+      if('Point - Presence absence' == self$get_types()[dataset] ){
+        dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
+        dd[[cols[[dataset]]]] <- factor(dd[[cols[[dataset]]]])
+        # FIXME: Tidy evaluation via {{}} does not seem to work.
+        g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = Observed) )
+      }
     }
     g
   }
@@ -159,6 +191,7 @@ BiodiversityDataset <- bdproto(
   name             = character(0),
   id               = character(0),
   equation         = new_waiver(),
+  family           = character(0),
   type             = new_waiver(),
   field_occurrence = character(0),
   data             = new_waiver(),
@@ -194,17 +227,26 @@ BiodiversityDataset <- bdproto(
     self$id
   },
   # Get type
-  get_type = function(self){
-    switch (self$type,
-      poipo = 'Point - Presence only',
-      poipa = 'Point - Presence absence',
-      polpo = 'Polygon - Presence only',
-      polpa = 'Polygon - Presence absence'
-    )
+  get_type = function(self, short = FALSE){
+    if(short){
+      self$type
+    } else {
+      switch (self$type,
+              poipo = 'Point - Presence only',
+              poipa = 'Point - Presence absence',
+              polpo = 'Polygon - Presence only',
+              polpa = 'Polygon - Presence absence'
+      )
+    }
   },
   # Get field with occurrence information
   get_column_occ = function(self){
     self$field_occurrence
+  },
+  # Get family
+  get_family = function(self){
+    assertthat::assert_that(is.character(self$family))
+    self$family
   },
   # Get data
   get_data = function(self){

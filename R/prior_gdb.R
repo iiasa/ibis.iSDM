@@ -42,7 +42,7 @@ methods::setMethod(
     )
     assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use GDBPriors')
     # Match supplied constrain in case someone has been lazy
-    hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave', 'none'),several.ok = FALSE)
+    hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave','positive', 'negative', 'none'), several.ok = FALSE)
 
     # Create new prior object
     bdproto(
@@ -81,7 +81,7 @@ methods::setMethod(
     )
     assertthat::assert_that(length(variable)>1, msg = 'Only one prior variable supplied. Use GDBPrior')
     # Match supplied constrain in case someone has been lazy
-    hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave', 'none'),several.ok = FALSE)
+    hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave','positive', 'negative', 'none'),several.ok = FALSE)
 
     multiple_priors <- list()
     for(k in variable){

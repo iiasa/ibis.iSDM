@@ -46,7 +46,7 @@ BiodiversityDistribution <- bdproto(
                    "\n --------- ",
                    "\n  predictors:     ", pn,
                    "\n  priors:         ", pio,
-                   "\n  latent fields: ", paste(self$get_latent(),collapse = ', '),
+                   "\n  latent fields:  ", paste(self$get_latent(),collapse = ', '),
                    of,
                    "\n  log:            ", "Not yet implemented",
                    "\n  engine:         ", self$get_engine()
@@ -116,16 +116,15 @@ BiodiversityDistribution <- bdproto(
     }
   },
   # Set biodiversity function
-  set_biodiversity = function(self, type, p){
+  set_biodiversity = function(self, id, p){
     assertthat::assert_that(inherits(self$biodiversity,'BiodiversityDatasetCollection'),
-                            assertthat::is.string(type),
-                            type %in% c('poipo','poipa','polpo','polpa'),
+                            is.Id(id),
                             inherits(p, "BiodiversityDataset")
                             )
     # Get biodiversity dataset collection
     bdcol <- bdproto(NULL, self)
     # Set the object
-    bdcol$biodiversity$set_data(type, p)
+    bdcol$biodiversity$set_data(id, p)
     return(bdcol)
   },
   # Set predictors
@@ -178,5 +177,9 @@ BiodiversityDistribution <- bdproto(
   # Get equations of biodiversity records
   get_biodiversity_equations = function(self){
     self$biodiversity$get_equations()
+  },
+  # Get biodiversity types
+  get_biodiversity_types = function(self){
+    self$biodiversity$get_types()
   }
 )

@@ -152,7 +152,7 @@ methods::setMethod(
     )
     names(range) <- name
     # Add as a new offset
-    x$set_offset(range)
+    x <- x$set_offset(range)
     return(x)
   }
 )
@@ -171,7 +171,7 @@ methods::setMethod(
                             is.null(distance_max) || is.numeric(distance_max)
     )
     # Reproject if necessary
-    if(st_crs(range) != st_crs(x$background)) range <- st_transform(range, st_crs(x$background))
+    if(st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
 
     # Template raster for background
     if(!is.Waiver(x$predictors)){
@@ -185,9 +185,9 @@ methods::setMethod(
     # Rasterize the range
     range$id <- 1:nrow(range) # Assign an id if not already existing
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(range, temp, field = 'id')
+      ras_range <- fasterize::fasterize(range, temp, field = NULL)
     } else {
-      ras_range <- raster::rasterize(range, temp,field = 'id')
+      ras_range <- raster::rasterize(range, temp,field = NULL)
     }
 
     # -------------- #
@@ -216,7 +216,7 @@ methods::setMethod(
     }
 
     # Add as a new offset
-    x$set_offset(dis)
+    x <- x$set_offset(dis)
     return(x)
   }
 )

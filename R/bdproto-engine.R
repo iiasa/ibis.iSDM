@@ -36,6 +36,10 @@ Engine <- bdproto(
       return(new_waiver())
     return(self$data[[x]])
   },
+  # List all data
+  list_data = function(self){
+    return( names( self$data ) )
+  },
   # Set data for this engine
   set_data = function(self, x, value) {
     self$data[[x]] <- value

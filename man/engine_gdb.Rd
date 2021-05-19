@@ -6,7 +6,6 @@
 \usage{
 engine_gdb(
   x,
-  fam = "Poisson",
   boosting_iterations = 1000,
   learning_rate = 0.1,
   empirical_risk = "inbag",
@@ -16,8 +15,6 @@ engine_gdb(
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
-
-\item{fam}{Default is \code{\link{Poisson}}}
 
 \item{boosting_iterations}{An \code{\link{integer}} giving the number of boosting iterations}
 

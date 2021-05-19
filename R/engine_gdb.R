@@ -3,7 +3,6 @@ NULL
 #' Use of Gradient Descent Boosting for model estimation
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param fam Default is [`Poisson`]
 #' @param boosting_iterations An [`integer`] giving the number of boosting iterations
 #' @param learning_rate A bounded [`numeric`] value between 0 and 1 defining the shrinkage parameter.
 #' @param empirical_risk method for empirical risk calculation ('inbag','oobag','none')
@@ -17,7 +16,6 @@ NULL
 #' @rdname engine_gdb
 #' @export
 engine_gdb <- function(x,
-                       fam = 'Poisson',
                        boosting_iterations = 1000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
@@ -67,11 +65,6 @@ engine_gdb <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
 
-  # Detect and format the family
-  if( grep('pois',fam,ignore.case = TRUE) ) fam <- mboost::Poisson() else if( grep('bino',fam,ignore.case = TRUE) ) fam <- mboost::Binomial()
-
-  assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
-
   # Set engine in distribution object
   x$set_engine(
     bdproto(
@@ -80,8 +73,7 @@ engine_gdb <- function(x,
       name = "<GDB>",
       data = list(
         'template' = template,
-        'bc' = bc,
-        'fam' = fam
+        'bc' = bc
       ),
       # Function to respecify the control parameters
       set_control = function(self,
@@ -106,7 +98,7 @@ engine_gdb <- function(x,
       },
       # Get equation for spatial effect
       get_equation_latent_spatial = function(self, spatial_field = c('x','y'),
-                                             df = 6, knots = list('x' = 10, 'y' = 10),...){
+                                             df = 6, knots = 10,...){
         return(
           paste0(
             'bspatial(',spatial_field[1],',',spatial_field[2],', center = TRUE, df = ',df,', knots = ',knots,')'
@@ -118,26 +110,47 @@ engine_gdb <- function(x,
         # Simple security checks
         assertthat::assert_that(
          assertthat::has_name(model, 'background'),
-         assertthat::has_name(model, 'data'),
+         assertthat::has_name(model, 'biodiversity'),
          # Check that all predictors are present
-         all( all.vars(model[['equation']][['poipo']]) %in% names(  model$data$poipo_values ) ),
+         all(all.vars(model$biodiversity[[1]]$equation)[-1] %in% names(model$biodiversity[[1]]$predictors)),
          nrow(model$predictors) == ncell(self$get_data('template')),
-         all( sapply(model$equation, is.formula) )
+         length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
-      # Add in case anything needs to be further prepared here
+        # Add in case anything needs to be further prepared here
 
-      invisible()
+        # Detect and format the family
+        fam <- model$biodiversity[[1]]$family
+        if( fam == 'poisson' ) {fam <- mboost::Poisson()} else if( fam == 'binomial') fam <- mboost::Binomial(type = "glm", link = "cloglog")
+        self$data[['family']] <- fam
+        assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
+
+        invisible()
       },
       # Training function
       train = function(self, model, inference_only = FALSE, ...){
-
         # Get output raster
         prediction <- self$get_data('template')
         # Get boosting control and family data
         bc <- self$get_data('bc')
-        fam <- self$get_data('fam')
+        fam <- self$get_data('family')
 
-        full = model$predictors
+        # All other needed data for model fitting
+        equation <- model$biodiversity[[1]]$equation
+        data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
+        if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
+        w <- model$biodiversity[[1]]$expect
+        full <- model$predictors
+
+        # Select predictors
+        full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
+        full$cellid <- rownames(full) # Add rownames
+        full <- subset(full, complete.cases(full))
+
+        assertthat::assert_that(
+          is.null(w) || length(w) == nrow(data),
+          is.formula(equation),
+          all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+        )
 
         if('offset' %in% names(model)){
           # Add offset to full prediction and load vector
@@ -151,9 +164,9 @@ engine_gdb <- function(x,
         # --- #
         # Fit the base model
         fit_gdb <- mboost::gamboost(
-                          formula = model$equation$poipo,
-                          data = model$data$poipo_values,
-                          weights = model$data$poipo_expect,
+                          formula = equation,
+                          data = data,
+                          weights = w,
                           family = fam,
                           offset = off, # Offset added already
                           control = bc
@@ -163,7 +176,7 @@ engine_gdb <- function(x,
 
         # 5 fold Cross validation to prevent overfitting
         # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
-        grs <- seq(from = 10, to = max(boosting_iterations*5,1000), by = 10)
+        grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
         cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
         try({cvm <- mboost::cvrisk(fit_gdb,
                               folds = cvf, grid = grs,
@@ -171,7 +184,7 @@ engine_gdb <- function(x,
         },silent = TRUE)
 
         # Check whether crossvalidation has run through successfully
-        if(exists('cvm') && mstop(cvm)>0){
+        if(exists('cvm') && mstop(cvm) > 0){
           # Set the model to the optimal mstop to limit overfitting
           fit_gdb[mstop(cvm)]
         }
@@ -183,10 +196,21 @@ engine_gdb <- function(x,
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
                                                type = 'response', aggregate = 'sum')
           )
-
           # Fill output
-          prediction[] <- pred_gdb[,1]
+          prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
           names(prediction) <- 'mean'
+
+          # Idea to add standard variation of cumulative sum ?
+          # suppressWarnings(
+          #   pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
+          #                                      type = 'link', aggregate = 'cumsum')
+          # )
+          # prediction2 <- emptyraster(prediction)
+          # # FIXME: This won't work for other transformations
+          # prediction2[] <- apply(pred_gdb, 1, function(x) sd(exp(x)) )
+          # names(prediction2) <- 'sd'
+          # prediction <- raster::stack(prediction, prediction2)
+
         } else {
           prediction <- NULL
         }
@@ -198,13 +222,11 @@ engine_gdb <- function(x,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,
-            "fit_best_equation" = model$equation$poipo,
+            "fit_best_equation" = equation,
             "prediction" = prediction
           )
         )
         return(out)
-
-
       }
     )
   ) # End of bdproto object

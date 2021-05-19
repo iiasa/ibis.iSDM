@@ -10,6 +10,7 @@ add_biodiversity_polpo(
   name = NULL,
   field_occurrence = "Observed",
   formula = NULL,
+  family = "poisson",
   simulate = FALSE,
   simulate_points = 100,
   ...
@@ -27,6 +28,8 @@ add_biodiversity_polpo(
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
 
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified)}
+
+\item{family}{A \code{\link{character}} stating the family to be used (Default: Poisson)}
 
 \item{simulate}{Simulate poipa points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipa}} (Default: FALSE)}
 
