@@ -54,6 +54,11 @@ PriorList <- bdproto(
     if(is.Waiver(self$priors)) return( character(0) )
     vapply(self$priors, function(x) class(x)[1], character(1) )
   },
+  # Get types of all contained priors
+  types = function(self){
+    if(is.Waiver(self$priors)) return( character(0) )
+    vapply(self$priors, function(x) x$type, character(1) )
+  },
   # Exists a specific prior for a variable and type combination?
   exists = function(self, variable, type = NULL){
     assertthat::assert_that(!missing(variable),

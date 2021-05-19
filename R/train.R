@@ -216,49 +216,68 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw2 fits
           # MJ: Can lead to to convergence issues with rw2. Removed for now
-          # var_rw2 <- apply(poipo_env[model[['predictors_names']]], 2, function(x) length(unique(x)))
-          # var_rw2 <- names(which(var_rw2 > 100)) # Get only those greater than 100 unique values
-          var_lin <- model$biodiversity[[id]][['predictors_names']] #[which( model[['predictors_names']] %notin% var_rw2 )]
+          # var_rw2 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
+          # var_rw2 <- names(which(var_rw2 > 100)) # Get only those greater than 100 unique values (arbitrary)
+          # var_rw2 <- var_rw2[var_rw2 %in% model$biodiversity[[id]][['predictors_names']]]
+          var_rw2 <- c()
+          var_lin <- model$biodiversity[[id]][['predictors_names']]#[which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw2 )]
 
           # Construct formula with all variables
-          form <- paste('observed', '~', 0, '+ intercept + ',
+          form <- paste('observed', '~', 0, '+ intercept',
                         ifelse(length(types)==1, # Check whether a single intercept model is to be constructed
                                '',
-                               paste(paste0('intercept_',sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                               paste(' + ',paste0('intercept_',sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
                                )
                         )
           # Check whether priors have been specified and if yes, use those
           if(!is.Waiver(model$priors)){
             # Loop through all provided INLA priors
-            supplied_priors <- as.vector(model$priors$varnames())
+            supplied_priors <- model$priors$ids()
 
             for(v in supplied_priors){
+              # Prior variable name
+              vn <- as.character( model$priors$varnames()[v] )
+              # Prior variable type
+              vt <- as.character( model$priors$types()[v] )
               # FIXME: This currently only work with normal, e.g. the type of the prior is ignored
               # pobj <- model$priors$priors[[model$priors$exists(v)]]
-              # First add linear effects
-              form <- paste(form, paste0('f(', v, ', model = \'linear\', ',
-                                         'mean.linear = ', model$priors$get(v)[1],', ',
-                                         'prec.linear = ', model$priors$get(v)[2],')',
-                                         collapse = ' + ' ), ' + ' )
+              if(vt == 'clinear'){
+                # Constrained linear effect
+                form <- paste(form, '+', paste0('f(', vn, ', model = \'clinear\', ',
+                                                'range = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )',
+                                                collapse = ' + ' ), ' + ' )
+              } else {
+                # Add linear effects
+                form <- paste(form, '+', paste0('f(', vn, ', model = \'linear\', ',
+                                                'mean.linear = ', model$priors$get(vn)[1],', ',
+                                                'prec.linear = ', model$priors$get(vn)[2],')',
+                                                collapse = ' + ' ), ' + ' )
+              }
             }
             # Add linear for those missed ones
-            miss <- var_lin[var_lin %notin% supplied_priors]
+            miss <- c(var_lin, var_rw2)[c(var_lin, var_rw2) %notin% model$priors$varnames()]
             if(length(miss)>0){
               # Add linear predictors without priors
-              form <- paste(form,
+              form <- paste(form, ' + ',
                             paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
               )
+              if(length(var_rw2)>0){
+                # Random walk 2 (spline) where feasible with quantile bins
+                if(length(var_rw2)>0){
+                  form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+                }
+              }
             }
           } else {
             # No priors specified, simply add variables with default
             # Linear for those with few observations
             if(length(var_lin)>0){
               form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+              # Random walk 2 (spline) where feasible with quantile bins
             }
-            # Random walk 2 (spline) where feasible
-            # if(length(var_rw2)>0){
-            #   f <- paste(f, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
-            # }
+            if(length(var_rw2)>0){
+              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+            }
           }
           form <- to_formula(form) # Convert to formula
           # Add offset if specified
