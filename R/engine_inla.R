@@ -8,6 +8,7 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
+#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
@@ -24,6 +25,7 @@ NULL
 #' @export
 engine_inla <- function(x,
                         optional_mesh = NULL,
+                        optional_projstk = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
                         cutoff = 1,
@@ -45,6 +47,7 @@ engine_inla <- function(x,
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           inherits(optional_mesh,'inla.mesh') || is.null(optional_mesh),
+                          is.list(optional_projstk) || is.null(optional_projstk),
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
                           is.numeric(cutoff),
@@ -121,7 +124,8 @@ engine_inla <- function(x,
         'mesh' = mesh,
         'mesh.area' = ar,
         'mesh.bar' = mesh_bar,
-        'proj_stepsize' = proj_stepsize
+        'proj_stepsize' = proj_stepsize,
+        'stk_pred' = optional_projstk
       ),
       # Generic plotting function for the mesh
       plot = function(self, assess = FALSE){
@@ -362,31 +366,26 @@ engine_inla <- function(x,
           )
         stk_inference <- do.call(INLA::inla.stack, stk_inference)
 
-        # Make projection stack
-        stk_pred <- inla_make_projection_stack(
-          stk_resp   = stk_inference,
-          cov        = model$predictors,
-          pred.names = model$predictors_names,
-          offset     = offset,
-          mesh       = self$get_data('mesh'),
-          mesh.area  = self$get_data('mesh.area'),
-          background = model$background,
-          res        = self$get_data('proj_stepsize'),
-          type       = model$biodiversity[[id]]$type,
-          spde       = spde,
-          joint      = ifelse(nty > 1, TRUE, FALSE)
-        )
-        self$set_data('stk_pred', stk_pred)
-        # stk_pred_poipo <- inla_make_prediction_stack(
-        #   stk_resp = stk_poipo,
-        #   cov       = model$predictors,
-        #   pred.names= model$predictors_names,
-        #   offset    = offset,
-        #   mesh      = self$get_data('mesh'),
-        #   mesh.area = self$get_data('mesh.area'),
-        #   type = 'poipo',
-        #   spde = spde
-        # )
+        # Make projection stack if not directly supplied
+        if(is.null(self$data$stk_pred)){
+          stk_pred <- inla_make_projection_stack(
+            stk_resp   = stk_inference,
+            cov        = model$predictors,
+            pred.names = model$predictors_names,
+            offset     = offset,
+            mesh       = self$get_data('mesh'),
+            mesh.area  = self$get_data('mesh.area'),
+            background = model$background,
+            res        = self$get_data('proj_stepsize'),
+            type       = model$biodiversity[[id]]$type,
+            spde       = spde,
+            joint      = ifelse(nty > 1, TRUE, FALSE)
+          )
+          self$set_data('stk_pred', stk_pred)
+        } else {
+          # FIXME: Add some basic assertthat tests for when a prediction stack is directly supplied
+          stk_pred <- self$get_data('stk_pred')
+        }
 
         # Now join all stacks and save in full
         # Note: If integrated stack is included, E must be set to relative area (in mesh.area).

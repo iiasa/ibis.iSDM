@@ -7,6 +7,7 @@
 engine_inla(
   x,
   optional_mesh = NULL,
+  optional_projstk = NULL,
   max.edge = c(1, 5),
   offset = c(1, 1),
   cutoff = 1,
@@ -19,6 +20,8 @@ engine_inla(
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
 \item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: NULL)}
+
+\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)}
 
 \item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
 

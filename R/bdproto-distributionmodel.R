@@ -125,5 +125,33 @@ DistributionModel <- bdproto(
   set_data = function(self, x, value) {
     self$fits[[x]] <- value
     invisible()
+  },
+  # Save object
+  save = function(self, fname, type = 'gtif', dt = 'FLT4S'){
+    assertthat::assert_that(
+      is.character(fname),
+      type %in% c('gtif','gtiff','tif','nc','ncdf'),
+      'fits' %in% self$ls(),
+      dt %in% c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S')
+    )
+    type <- tolower(type)
+
+    # Get raster file in fitted object
+    cl <- sapply(self$fits, class)
+    ras <- self$fits[[grep('raster', cl,ignore.case = T)]]
+
+    # Check that no-data value is not present in ras
+    assertthat::assert_that(any(!cellStats(ras,min) <= -9999),msg = 'No data value -9999 is potentially in prediction!')
+
+    if(file.exists(fname)) warning('Overwritting existing file...')
+    if(type %in% c('gtif','gtiff','tif')){
+      # Save as geotiff
+      writeGeoTiff(ras, fname = fname, dt = dt)
+    } else if(type %in% c('nc','ncdf')) {
+      # Save as netcdf
+      # TODO: Potentially change the unit descriptions
+      writeNetCDF(ras, fname = fname, varName = 'iSDM prediction', varUnit = "",varLong = "")
+    }
+    invisible()
   }
 )

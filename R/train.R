@@ -51,6 +51,9 @@ methods::setMethod(
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
 
+    # Set up logging if specified
+    if(!is.Waiver(x$log)) x$log$open()
+
     # Check whether prior objects match the used engine, otherwise raise warning
     # if( unique(x$priors$classes()) == 'GDBPrior' && x$engine$name == '<INLA>' ) warning('Priors for wrong models specified, which will be ignored in the inference.')
 
@@ -617,6 +620,9 @@ methods::setMethod(
       out <- x$engine$train(model, inference_only, ...)
 
     } else { stop('Specified Engine not implemented yet.') }
+
+    # Stop logging if specified
+    if(!is.Waiver(x$log)) x$log$close()
 
     # return output object
     return(out)

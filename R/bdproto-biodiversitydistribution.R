@@ -48,7 +48,7 @@ BiodiversityDistribution <- bdproto(
                    "\n  priors:         ", pio,
                    "\n  latent fields:  ", paste(self$get_latent(),collapse = ', '),
                    of,
-                   "\n  log:            ", "Not yet implemented",
+                   "\n  log:            ", self$get_log(),
                    "\n  engine:         ", self$get_engine()
                    )
             )
@@ -154,6 +154,20 @@ BiodiversityDistribution <- bdproto(
   get_offset = function(self){
     if(is.Waiver(self$offset)) return('None')
     names( self$offset )
+  },
+  # Get log
+  get_log = function(self){
+    if(is.Waiver(self$log)){
+      return('<Console>')
+    } else {
+      # Print filename
+      self$log$get_filename()
+    }
+  },
+  # Set log
+  set_log = function(self, x){
+    assertthat::assert_that(inherits(x, "Log"))
+    bdproto(NULL, self, log = x)
   },
   # Remove predictors
   rm_predictors = function(self, names){

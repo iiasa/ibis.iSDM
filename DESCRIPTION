@@ -49,6 +49,8 @@ Collate:
     'bdproto-biodiversitydistribution.R'
     'add_biodiversity.R'
     'add_latent.R'
+    'bdproto-log.R'
+    'add_log.R'
     'bdproto-predictors.R'
     'add_predictors.R'
     'add_range.R'

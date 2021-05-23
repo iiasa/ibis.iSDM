@@ -455,3 +455,69 @@ clean_rasterfile <- function(x, verbose = FALSE)
   parent.var.name <- deparse(substitute(x))
   rm(list = parent.var.name, envir = sys.frame(-1))
 }
+
+#' Save a raster file in Geotiff format
+#'
+#' @param file A [`raster`] object to be saved
+#' @param fname A [`character`] stating the output destination
+#' @param dt The datatype to be written. Default is Float64
+#' @param varNA The nodata value to be used. Default: -9999
+#' @noRd
+writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
+  assertthat::assert_that(
+    inherits(file,'Raster') || inherits(file, 'stars'),
+    is.character(fname), is.character(dt),
+    is.numeric(varNA)
+  )
+  if(!assertthat::has_extension(fname,"tif")) fname <- paste0(fname,".tif")
+  # Save output
+  writeRaster(file, fname,
+              format='GTiff',
+              datatype = dt,
+              NAflag = varNA,
+              options=c("COMPRESS=DEFLATE","PREDICTOR=2","ZLEVEL=9"),
+              overwrite= TRUE )
+}
+
+#' Save a raster stack to a netcdf file
+#'
+#' @param file A [`raster`] object to be saved
+#' @param fname A [`character`] stating the output destination
+#' @param varName Name for the NetCDF export variable.
+#' @param varUnit Units for the NetCDF export variable.
+#' @param varLong Long name for the NetCDF export variable.
+#' @param dt The datatype to be written. Default is Float64
+#' @param varNA The nodata value to be used. Default: -9999
+#' @noRd
+writeNetCDF <- function(file, fname,
+                            varName, varUnit = NULL,
+                            varLong = NULL, dt = "FLT4S", varNA = -9999) {
+  assertthat::assert_that(
+    inherits(file,'Raster'),
+    is.character(fname), is.character(dt),
+    is.numeric(varNA)
+  )
+  check_package('ncdf4')
+  if(!isNamespaceLoaded("ncdf4")) { attachNamespace("ncdf4");requireNamespace('ncdf4') }
+  if(!assertthat::has_extension(fname,"nc")) fname <- paste0(fname,".nc")
+
+  # Output NetCDF file
+  raster::writeRaster(x = file,
+                      filename = fname,format =  "CDF", overwrite = TRUE,
+                      varname = ifelse(is.null(varName),'Prediction',varName),
+                      varunit = ifelse(is.null(varUnit),'',varUnit),
+                      longname = ifelse(is.null(varLong),'',varLong),
+                      xname = ifelse(isLonLat(ras), "Longitude","x"),
+                      yname = ifelse(isLonLat(ras), "Latitude","y"),
+                      zname = "Time",
+                      zunit = "Years since 2000-01-01", # FIXME: Load and format date if provided
+                      bylayer = FALSE, # Don't save separate layers
+                      datatype = dt, NAflag = varNA
+                      )
+
+  # FIXME: To be defined
+  # Set the time variable
+  # ncFile <- ncdf4::nc_open(outFile, write=TRUE)
+  # ncdf4::ncvar_put(ncFile, "Time", dtInts)
+  # ncdf4::nc_close(ncFile)
+}

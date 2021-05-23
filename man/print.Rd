@@ -13,6 +13,7 @@
 \alias{print.Prior}
 \alias{print.PriorList}
 \alias{print.Engine}
+\alias{print.Log}
 \alias{print.Id}
 \title{Print}
 \usage{
@@ -33,6 +34,8 @@
 \method{print}{PriorList}(x, ...)
 
 \method{print}{Engine}(x, ...)
+
+\method{print}{Log}(x, ...)
 
 \method{print}{Id}(x, ...)
 
