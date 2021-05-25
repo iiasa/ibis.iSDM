@@ -4,12 +4,17 @@
 \alias{point_in_polygon}
 \title{Extract polygon data from intersecting point data}
 \usage{
-point_in_polygon(poly, points)
+point_in_polygon(poly, points, coords = c("x", "y"))
 }
 \arguments{
 \item{poly}{A \code{\link{sf}} object}
 
 \item{points}{A \code{\link{Spatial}} or \code{\link{sf}} object}
+
+\item{coords}{A vector pointing to the coordinate columns}
+}
+\value{
+An object with the spatial intersection
 }
 \description{
 Extract polygon data from intersecting point data

@@ -4,19 +4,17 @@
 \alias{distribution}
 \title{Setup biodiversity distribution modelling procedure}
 \usage{
-distribution(background, ...)
+distribution(background, limits = NULL)
 
-\S4method{distribution}{raster}(background, ...)
+\S4method{distribution}{raster}(background)
 
-\S4method{distribution}{sf}(background, ...)
+\S4method{distribution}{sf}(background)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
 \code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object}
 
-\item{...}{not used.}
-
-\item{formula}{Model formula. Has to be \code{\link{character}} or \code{\link{formula}} object (optional)}
+\item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when intersected with input data (Default: NULL).}
 }
 \value{
 \code{\linkS4class{BiodiversityDistribution}} object containing
@@ -26,7 +24,9 @@ data for building a biodiversity distribution modelling problem.
 Setup biodiversity distribution modelling procedure
 }
 \details{
-TBD. Say something about PPMs, INLA and co
+TBD. Say something about PPMs, INLA and co.
+
+Option with constrain -> use reference
 }
 \examples{
 \dontrun{

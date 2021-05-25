@@ -19,6 +19,7 @@ NULL
 BiodiversityDistribution <- bdproto(
   "BiodiversityDistribution",
   background    = new_waiver(),
+  limits        = new_waiver(),
   biodiversity  = bdproto(NULL, BiodiversityDatasetCollection),
   predictors    = new_waiver(),
   priors        = new_waiver(),
@@ -37,7 +38,7 @@ BiodiversityDistribution <- bdproto(
     pio = ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
 
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
-                   "\nBackground extent: ",
+                   ifelse(is.Waiver(self$limits),"\nBackground extent: ","\nBackground extent (limited): "),
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
                    "\n     ymin: ", ex[['extent']][3], ", ymax: ", ex[['extent']][4],
                    "\n   projection: ", ex[['proj']],
@@ -69,6 +70,11 @@ BiodiversityDistribution <- bdproto(
     o[['extent']] <- round( sf::st_bbox(r), 3)
     o[['proj']] <-  raster::projection(r)
     return(o)
+  },
+  # Get provided limits
+  get_limits = function(self){
+    if(is.Waiver(limits)) return(NULL)
+    return(self$limits)
   },
   # Function for querying predictor names if existing
   get_predictor_names = function(self) {

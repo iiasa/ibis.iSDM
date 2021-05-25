@@ -46,21 +46,22 @@ intersecting_extents <- function(x, y) {
 #' Extract polygon data from intersecting point data
 #' @param poly A [`sf`] object
 #' @param points A [`Spatial`] or [`sf`] object
-point_in_polygon <- function(poly, points){
+#' @param coords A vector pointing to the coordinate columns
+#' @return An object with the spatial intersection
+point_in_polygon <- function(poly, points, coords = c('x','y')){
   assertthat::assert_that(
     inherits(poly,'sf'),
-    inherits(points,'sf') || inherits(points,'Spatial') || inherits(points,'data.frame')
+    inherits(points,'sf') || inherits(points,'Spatial') || inherits(points,'data.frame'),
+    length(coords)>0
   )
   # Convert to sf
-  points <- sf::st_as_sf(points) %>%
-    # Convert to be sure
-    st_transform(crs = st_crs(poly))
+  points <- sf::st_as_sf(points, coords = coords, crs = st_crs(poly))
   assertthat::assert_that(
     st_crs(poly) == st_crs(points)
   )
 
   # Within test
-  ov <- sf::st_join(points, poly, join = st_within)
+  ov <- suppressMessages( sf::st_join(points, poly, join = st_within) )
   return(ov)
 }
 

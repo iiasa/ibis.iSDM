@@ -20,6 +20,16 @@ myLog <- function(title = "[Processing]",...) {
   cat(paste0(title,' ', Sys.time(), " | ", ..., "\n"))
 }
 
+#' Colour helpers for message logs
+#' @param text A [`character`]
+#' @keywords internal
+#' @aliases text_red
+#' @noRd
+text_red <- function(text) { paste0('\033[31m',text,'\033[39m') }
+#' @inheritParams text_red
+#' @aliases text_yellow
+text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
+
 #' Calculate the mode
 #' @param A [`vector`] of values or characters
 #' @noRd

@@ -54,9 +54,6 @@ methods::setMethod(
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
 
-    # Check whether prior objects match the used engine, otherwise raise warning
-    # if( unique(x$priors$classes()) == 'GDBPrior' && x$engine$name == '<INLA>' ) warning('Priors for wrong models specified, which will be ignored in the inference.')
-
     # --- #
     #### Defining model objects ----
     # Set model object for fitting
@@ -117,7 +114,6 @@ methods::setMethod(
         longlat = raster::isLonLat(x$background)
       )
       # Remove missing values as several engines can't deal with those easily
-      # TODO: Possibly add a log entry for this
       miss <- complete.cases(env)
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       env <- subset(env, miss)
@@ -155,7 +151,7 @@ methods::setMethod(
 
         co <- find_correlated_predictors(env = test,
                                          keep = keep,
-                                         cutoff = 0.9,
+                                         cutoff = 0.9, # Probably keep default, but maybe sth. to vary in the future
                                          method = 'pear')
         if(length(co)>0){
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
@@ -171,6 +167,8 @@ methods::setMethod(
     # Get and assign Priors
     # FIXME: Type-specific priors?
     if(!is.Waiver(x$priors)){
+      # FIXME: Check whether prior objects match the used engine, otherwise raise warning
+      # if( unique(x$priors$classes()) == 'GDBPrior' && x$engine$name == '<INLA>' ) warning('Priors for wrong models specified, which will be ignored in the inference.')
       # First clean and remove all priors that are not relevant to the engine
       spec_priors <- switch(
         x$engine$name,
@@ -203,9 +201,34 @@ methods::setMethod(
       model[['offset']] <- as.data.frame(x$offset, xy = TRUE)
     }
 
+    # Applying prediction filter based on model input data if specified
+    # TODO: Potentially outsource to a function in the future
+    if(!is.Waiver(x$limits)){
+      # Get biodiversity data
+      # FIXME: Only working for point coordinates as of now
+      coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y')] ) )
+      # Get zones from the limiting area, e.g. those intersecting with input
+      suppressMessages(
+        suppressWarnings(
+          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = st_crs(model$background)),
+                                   x$limits)
+        )
+      )
+      # Limit zones
+      zones <- subset(x$limits, limit %in% unique(zones$limit) )
+      # Now clip all predictors and background to this
+      model$background <- suppressMessages(suppressWarnings( st_union(st_intersection(zones, model$background),by_feature = TRUE) ))
+
+      model$predictors[which( is.na(
+            ibis.iSDM::point_in_polygon(poly = zones,
+                                    points = model$predictors[,c('x','y')]
+                                       )[['limit']]
+          )),model$predictors_names] <- NA # Fill with NA
+    }
+
     # ----------------- #
     # Number of dataset types, families and ids
-    types <- as.character( sapply(model$biodiversity, function(x) x$type) )
+    types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
     fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
     ids <- names(model$biodiversity)
     # Engine specific preparations
@@ -406,11 +429,11 @@ methods::setMethod(
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
-          df <- rbind(model$biodiversity[[1]]$predictors, abs) %>% subset(., complete.cases(.) )
+          df <- rbind(model$biodiversity[[1]]$predictors,
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>% subset(., complete.cases(.) )
 
           # Preprocessing security checks
-          assertthat::assert_that( all( names(abs) %in% names(model$biodiversity[[1]]$predictors) ),
-                                   all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+          assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(rbind(obs, abs_observations)[['observed']] )),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
@@ -591,9 +614,10 @@ methods::setMethod(
                       model$biodiversity[[id]]$observations[,c('x','y')] )
         model$biodiversity[[id]]$observations <- rbind(obs, abs_observations)
 
-        assertthat::assert_that( all( names(abs) %in% names(model$biodiversity[[id]]$predictors) ) )
+        assertthat::assert_that( all( names(abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %in% names(model$biodiversity[[id]]$predictors) ) )
         # Format out
-        df <- rbind(model$biodiversity[[id]]$predictors, abs) %>% subset(., complete.cases(.) )
+        df <- rbind(model$biodiversity[[id]]$predictors,
+                    abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>% subset(., complete.cases(.) )
 
         # Add offset if existent
         if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
