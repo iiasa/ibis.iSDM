@@ -120,8 +120,9 @@ methods::setMethod(
       # Add intercept
       env$intercept <- 1
 
-      # Add offset if specified
-      if(!is.Waiver(x$offset)){
+      # Add offset if specified and model is of poisson type
+      # TODO: Ideally this can be further specified in the add_range_offset call
+      if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){
         # Extract offset for each observed point
         ofs <- get_ngbvalue(
           coords = x$biodiversity$get_coordinates(id),
@@ -220,10 +221,15 @@ methods::setMethod(
       model$background <- suppressMessages(suppressWarnings( st_union(st_intersection(zones, model$background),by_feature = TRUE) ))
 
       model$predictors[which( is.na(
-            ibis.iSDM::point_in_polygon(poly = zones,
-                                    points = model$predictors[,c('x','y')]
-                                       )[['limit']]
+            point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
           )),model$predictors_names] <- NA # Fill with NA
+
+      # The same with offset if specified
+      if(!is.Waiver(x$offset)){
+        model$offset[which( is.na(
+          point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
+        )),3] <- NA # Fill with NA
+      }
     }
 
     # ----------------- #
@@ -307,7 +313,7 @@ methods::setMethod(
           }
           form <- to_formula(form) # Convert to formula
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
@@ -387,7 +393,7 @@ methods::setMethod(
           # Convert to formula
           form <- to_formula(form)
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
@@ -493,9 +499,6 @@ methods::setMethod(
           }
           # Convert to formula
           form <- to_formula(form)
-          # Add offset if specified
-          # TODO: Think of whether the offset should be set here or rather below
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
@@ -581,7 +584,7 @@ methods::setMethod(
           # Convert to formula
           form <- to_formula(form)
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ) { form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",

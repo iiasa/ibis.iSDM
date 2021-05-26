@@ -212,9 +212,5 @@ methods::setMethod(
 
     # Remove all predictors listed
     if(length(varnames)>=1) x$rm_predictors(varnames)
-    # Check wether any predictors are not in names and raise warning otherwise
-    assertthat::validate_that(
-      all( names %in% x$get_predictor_names()),msg = 'Not all predictors were present in distribution object.'
-    )
   }
 )

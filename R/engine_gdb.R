@@ -152,13 +152,13 @@ engine_gdb <- function(x,
           all( model$biodiversity[[1]]$predictors_names %in% names(full) )
         )
 
-        if('offset' %in% names(model)){
+        if('offset' %in% names(model$biodiversity[[1]]) ){
           # Add offset to full prediction and load vector
-          n <- data.frame(model$offset[,3], log(model$offset[,3]) )
+          n <- data.frame(model$offset[as.numeric(full$cellid),3], log(model$offset[as.numeric(full$cellid),3]) )
           names(n) <- c( names(model$offset)[3], paste0('offset(log(',names(model$offset)[3],'))') )
 
           full <- cbind(full, n)
-          off <- model$data$poipo_values[, names(model$offset)[3] ]
+          off <- model$biodiversity[[1]]$offset[, names(model$offset)[3] ]
         } else { off = NULL }
 
         # --- #
@@ -168,7 +168,7 @@ engine_gdb <- function(x,
                           data = data,
                           weights = w,
                           family = fam,
-                          offset = off, # Offset added already
+                          # offset = off, # Offset added already
                           control = bc
                           )
         # Variables included
