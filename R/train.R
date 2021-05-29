@@ -148,11 +148,11 @@ methods::setMethod(
         test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
 
         # Ignore variables for which we have priors
-        if(!is.Waiver(x$priors)) keep <- as.character(x$priors$varnames()) else keep <- NULL
+        if(!is.Waiver(x$priors)) keep <- unique( as.character(x$priors$varnames()) ) else keep <- NULL
 
         co <- find_correlated_predictors(env = test,
                                          keep = keep,
-                                         cutoff = 0.9, # Probably keep default, but maybe sth. to vary in the future
+                                         cutoff = 0.7, # Probably keep default, but maybe sth. to vary in the future
                                          method = 'pear')
         if(length(co)>0){
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
@@ -269,6 +269,7 @@ methods::setMethod(
             for(v in supplied_priors){
               # Prior variable name
               vn <- as.character( model$priors$varnames()[v] )
+              if(vn == 'spde') next()
               # Prior variable type
               vt <- as.character( model$priors$types()[v] )
               # FIXME: This currently only work with normal, e.g. the type of the prior is ignored

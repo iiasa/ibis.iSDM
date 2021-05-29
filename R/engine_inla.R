@@ -174,29 +174,30 @@ engine_inla <- function(x,
           assertthat::assert_that(length( self$data$s.index ) == nrow(ns))
         }
         if(type=='spde'){
-          # Check that everyting is correctly specified
+          # Check that everything is correctly specified
           if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
-          # if(is.null( priors$get('spde','prior.range') ) || is.null( priors$get('spde','prior.sigma') ) ) priors <- NULL
+
+          if(is.null( priors$get('spde','prior.range') ) || is.null( priors$get('spde','prior.sigma') ) ) priors <- NULL
 
           # Get prior
           pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
           ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
           # Use default spde
-          # if(is.null(priors)){
-          #   # Define PC Matern SPDE model and save
-          #   self$data$latentspatial <- INLA::inla.spde2.matern(
-          #     mesh = self$data$mesh,
-          #     alpha = alpha
-          #   )
-          # } else {
-          # Define PC Matern SPDE model and save
-          self$data$latentspatial <- INLA::inla.spde2.pcmatern(
-            mesh = self$data$mesh,
-            alpha = alpha,
-            # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
-            prior.range = pr,prior.sigma = ps
-          )
-          # }
+          if(is.null(priors)){
+            # Define PC Matern SPDE model and save
+            self$data$latentspatial <- INLA::inla.spde2.matern(
+              mesh = self$data$mesh,
+              alpha = alpha
+            )
+          } else {
+            # Define PC Matern SPDE model and save
+            self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+              mesh = self$data$mesh,
+              alpha = alpha,
+              # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
+              prior.range = pr, prior.sigma = ps
+            )
+          }
           # Make index for spatial field
           self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
                                                           n.spde = self$data$latentspatial$n.spde)
@@ -418,7 +419,7 @@ engine_inla <- function(x,
         # Define control family
         cf <- list()
         for(i in 1:length(fam)) cf[[i]] <- list(link = ifelse(fam[i] == 'poisson','log','cloglog' ))
-        # if(length(fam)==1 && fam == 'binomial') cf[[1]]$link <- 'logit'
+        if(length(fam)==1 && fam == 'binomial') cf[[1]]$link <- 'logit'
 
         # Shared link?
         if(length(fam)==1) li <- 1 else li <- NULL
@@ -585,10 +586,12 @@ engine_inla <- function(x,
                 "fit_pred" = fit_pred,
                 "fit_best_equation" = master_form,
                 "mesh"     = self$get_data('mesh'),
+                "spde"     = self$get_data('latentspatial'),
                 "prediction" = prediction
                 ),
               # Function to plot SPDE if existing
-              plot_spde = function(self, dim = c(300,300), ...){
+              plot_spde = function(self, dim = c(300,300), dis = NULL,...){
+                assertthat::assert_that(is.vector(dim), is.numeric(dis) || is.null(dis))
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {
                   # Get spatial projections from model
@@ -615,14 +618,44 @@ engine_inla <- function(x,
                   )
 
                   spatial_field <- raster::stack(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
+                  # Mask with prediction
+                  spatial_field <- raster::resample(spatial_field, self$get_data('prediction')[[1]])
+                  spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
 
-                  # Plot
+                  # -- #
+                  # Also build correlation fun
+                  # Get SPDE results
+                  spde_results <- INLA::inla.spde2.result(
+                    inla = self$get_data('fit_pred'),
+                    name = 'spatial.field',
+                    spde = self$get_data('latentspatial'),
+                    do.transfer = TRUE)
+
+                  # Large kappa (inverse range) equals a quick parameter change in space.
+                  # Small kappa parameter have much longer, slower gradients.
+                  Kappa <- sapply(list(o),  function(j) inla.emarginal(function(x) x, j$marginals.kappa[[1]] ))
+
+                  # Distance vector. Maximum distance being defined by half of extent
+                  if(is.null(dis)) dis <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 4)  # Take a quarter of the max distance
+
+                  # Modified Bessel function to get coorelation strength
+                  dis.cor <- data.frame(distance = seq(0, dis, length = dim[1]))
+                  dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * besselK(Kappa * dis.cor$distance, 1))
+                  dis.cor$cor[1] <- 1
+
+                  # ---
+                  # Build plot
                   cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
-                  par(mfrow=c(1,2))
+
+                  layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+
+                  plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
+                       xlab = 'Distance', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
                   plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
                   plot(spatial_field[[2]], main = 'sd spatial effect')
+
                 } else {
-                  message('No spatial covariance in model specified.')
+                  message(text_red('No spatial covariance in model specified.'))
                 }
               },
               # Summarize SPDE

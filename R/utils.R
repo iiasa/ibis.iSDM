@@ -230,14 +230,15 @@ formula_combinations <- function(varnames, response = 'Observed', InterceptOnly 
 #' @param method Which method to use for constructing the correlation matrix (pearson|spearman|kendal)
 #' @returns vector of variable names to exclude
 
-find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.9, method = 'pearson' ){
+find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method = 'pearson'){
   # Security checks
   assertthat::assert_that(is.data.frame(env),
                           is.character(method),
                           is.numeric(cutoff),
                           is.null(keep) || is.vector(keep)
   )
-  if(!is.null(keep)) x <- env %>% dplyr::select(-keep) else x <- env
+  keep <- keep[keep %in% names(env)] # Remove those not in the data.frame. For instance if a spatial effect is selected
+  if(!is.null(keep) || length(keep) == 0) x <- env %>% dplyr::select(-keep) else x <- env
 
   # Removing non-numeric columns
   non.numeric.columns <- colnames(x)[!sapply(x, is.numeric)]

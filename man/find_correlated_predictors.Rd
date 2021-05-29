@@ -4,7 +4,7 @@
 \alias{find_correlated_predictors}
 \title{Filter a set of correlated predictors to fewer ones}
 \usage{
-find_correlated_predictors(env, keep = NULL, cutoff = 0.9, method = "pearson")
+find_correlated_predictors(env, keep = NULL, cutoff = 0.7, method = "pearson")
 }
 \arguments{
 \item{env}{A \code{\link{data.frame}} with extracted environmental covariates for a given species}

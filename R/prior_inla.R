@@ -50,7 +50,7 @@ methods::setMethod(
     #   msg = 'Potentially unrealistic priors specified.'
     # )
     # Match supplied type in case someone has been lazy
-    type <- match.arg(type, c('clinear',names(INLA::inla.models()$prior) ), several.ok = FALSE)
+    type <- match.arg(type, c('clinear','prior.range','prior.sigma',names(INLA::inla.models()$prior) ), several.ok = FALSE)
 
     # Check bounds for clinear being correct
     if(type=='clinear') assertthat::assert_that( hyper[1] < hyper[2])

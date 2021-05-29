@@ -72,8 +72,9 @@ DistributionModel <- bdproto(
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
       assertthat::assert_that(
-        inherits(pred,'Raster'), what %in% names(pred)
+        inherits(pred,'Raster')
       )
+      assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       # Custom colour column
       cols <- colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100)
 
