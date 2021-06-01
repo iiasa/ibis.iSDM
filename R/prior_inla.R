@@ -68,16 +68,18 @@ methods::setMethod(
       id = new_id(),
       type = type,
       variable = variable,
-      value = hyper
+      value = hyper,
       # FIXME:
       # https://stats.stackexchange.com/questions/350235/how-to-convert-estimated-precision-to-variance
       # distribution = function(mean, prec) stats::rnorm(n = 1000, mean = mean, sd = prec),
-      # Custom function for INLA priors
-      # format = function(self){
-      #   return(
-      #     list(prec = list(prior = self$type, param = self$value))
-      #   )
-      # }
+
+      # Custom function to format INLA priors to be used in hyper
+      format = function(self,type){
+        assertthat::assert_that(type %in% c('mean','prec','theta'))
+        ol <- list()
+        ol[[type]] <-  list(prior = self$type, param = self$value)
+        return(ol)
+      }
     )
   }
 )

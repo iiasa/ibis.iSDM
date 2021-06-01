@@ -250,7 +250,7 @@ methods::setMethod(
       poipa <- rbind(poipa_on,poipa_off)
 
       # Add simulated poipa object instead
-      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, ' - simulated'),
+      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, '_simulated'),
                              field_occurrence = field_occurrence, formula = formula, family = family, ... )
     } else {
       # Assess whether poipo data already exists in the distribution object

@@ -43,6 +43,12 @@ BiodiversityDatasetCollection <- bdproto(
       return(sapply(self$data, function(z) z$get_type( short ) ))
     } else return(new_waiver())
   },
+  # Get names. Format if necessary
+  get_names = function(self, format = FALSE){
+    x <- lapply(self$data, function(z) z$name)
+    if(format) x <- make.names( tolower(x) )
+    x
+  },
   # Add a new Biodiversity dataset to this collection
   set_data = function(self, x, value){
     assertthat::assert_that(assertthat::is.string(x),

@@ -237,7 +237,11 @@ engine_inla <- function(x,
         # Include intercept in here
         # TODO: Note that this sets intercepts by type and not by dataset id
         if(intercept) {
-          env[[paste0('intercept',ifelse(joint,paste0('_',model$type),''))]] <- 1 # Setting intercept to common type, thus sharing with similar types
+          env$intercept <- 1
+          env[[paste0('intercept',
+                      ifelse(joint,paste0('_',
+                                          make.names(tolower(model$name)),'_',
+                                          model$type),''))]] <- 1 # Setting intercept to common type, thus sharing with similar types
         }
         # Set up projection matrix for the data
         mat_proj <- INLA::inla.spde.make.A(
@@ -268,7 +272,7 @@ engine_inla <- function(x,
         ll_effects <- list()
         # Note, order adding this is important apparently...
         ll_effects[['predictors']] <- env[, model$predictors_names ]
-        ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
+        ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
         if('offset' %in% names(model)){
@@ -331,6 +335,10 @@ engine_inla <- function(x,
 
         # Number of types to determine if a joint model is necessary
         nty <- length( unique( as.character(sapply(model$biodiversity, function(z) z$type)) ) )
+
+        # Clean up previous data and integration stacks
+        chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa', self$list_data())
+        if(length(chk)>0) self$data[chk] <- NULL
 
         # Now for each dataset create a INLA stack
         for(id in 1:length(model$biodiversity) ){
@@ -473,7 +481,7 @@ engine_inla <- function(x,
                                    control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                                    INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
                                                 strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
-                                   num.threads = parallel::detectCores() - 1
+                                   num.threads = getOption('ibis.nthread')
             )
             # Add results
             results <- rbind(results,
@@ -517,7 +525,7 @@ engine_inla <- function(x,
                           #              strategy = 'simplified.laplace'
                           #              # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
                           # ), # To make it run faster...
-                          num.threads = parallel::detectCores()-1
+                          num.threads = getOption('ibis.nthread')
         )
 
         # Predict spatially
@@ -546,7 +554,7 @@ engine_inla <- function(x,
                                                     strategy = 'simplified.laplace'
                                                     # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
                                  ),
-                                 num.threads = parallel::detectCores() - 1
+                                 num.threads = getOption('ibis.nthread')
           )
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data

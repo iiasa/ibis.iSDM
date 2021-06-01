@@ -182,6 +182,7 @@ engine_gdb <- function(x,
                               folds = cvf, grid = grs,
                               papply = pbapply::pblapply )
         },silent = TRUE)
+        # TODO: parallize better? parallel::mclapply(mc.cores = getOption('ibis.nthread'))
 
         # Check whether crossvalidation has run through successfully
         if(exists('cvm') && mstop(cvm) > 0){

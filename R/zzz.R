@@ -1,4 +1,4 @@
-# Defining package environments
+# Create new package environment
 .pkgenv <- new.env(parent = emptyenv())
 
 # For unloading a package
@@ -13,4 +13,7 @@
   #   packageStartupMessage("Installing INLA...")
   #   utils::install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable")
   # }
+
+  # Set some default ibis options
+  options('ibis.nthread' = parallel::detectCores() - 1)
 }

@@ -56,7 +56,16 @@ DistributionModel <- bdproto(
           '\n  \033[2mStrongest effects:\033[22m',
           '\n     ', name_atomic(names(vi))
         ))
-      } else {
+    } else if( inherits(self, 'BART-Model') ) {
+      # Calculate variable importance from the posterior trees
+      vi <- varimp.bart(self$get_data('fit_best'))
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$model$name,')',
+        '\n  \033[2mStrongest effects:\033[22m',
+        '\n     ', name_atomic(vi$names)
+      ))
+    } else {
       message(paste0(
         'Trained distribution model (',self$model$name,')',
         '\n     No fitted model found!'
@@ -90,13 +99,15 @@ DistributionModel <- bdproto(
       )
     }
   },
-  # Get effect tables from model
+  # Get effects or importance tables from model
   summary = function(self, x = 'fit_best'){
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
-      mboost:::summary.mboost(mod1$get_data(x))
+      mboost:::summary.mboost(self$get_data(x))
     } else if(inherits(self, 'INLA-Model')){
       tidy_inla_summary(self$get_data(x))
+    } else if(inherits(self, 'BART-Model')){
+      varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
     }
   },
   # Generic plotting function for partial effects
@@ -114,6 +125,9 @@ DistributionModel <- bdproto(
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
+    } else if(inherits(self, 'BART-Model')){
+      message('Calculating partial dependence plots')
+      self$partial(self$get_data(x), xvars = what)
     }
   },
   # Get specific fit from this Model

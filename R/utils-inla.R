@@ -455,3 +455,28 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
   par(par.ori)
 }
 
+#' Additional INLA priors not already available
+#' @param prior Which prior to pick
+#' @noRd
+manual_inla_priors <- function(prior){
+
+  # Uniform prior on the standard deviation
+  UN.prior = "expression:
+  log_dens = 0 - log(2) - theta / 2;
+  return(log_dens);"
+
+  # Half-Cauchy prior
+  # Here, we have set the scale parameter γ to 25 following A Gelman (2006).
+  HC.prior = "expression:
+              sigma = exp(-theta/2);
+              gamma = 25;
+              log_dens = log(2) - log(pi) - log(gamma);
+              log_dens = log_dens - log(1 + (sigma / gamma)^2);
+              log_dens = log_dens - log(2) - theta / 2;
+              return(log_dens);"
+
+  switch (prior,
+    'halfcauchy' = return(HC.prior),
+    'uniform'  = return(UN.prior)
+  )
+}

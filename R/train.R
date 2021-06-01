@@ -258,7 +258,9 @@ methods::setMethod(
           form <- paste('observed', '~', 0, '+ intercept',
                         ifelse(length(types)==1, # Check whether a single intercept model is to be constructed
                                '',
-                               paste(' + ',paste0('intercept_',sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                               paste(' + ',paste0('intercept_',
+                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
                                )
                         )
           # Check whether priors have been specified and if yes, use those
@@ -647,8 +649,88 @@ methods::setMethod(
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, inference_only, ...)
 
-    } else { stop('Specified Engine not implemented yet.') }
+      # ----------------------------------------------------------- #
+      #### BART Engine ####
+    } else if( inherits(x$engine,"BART-Engine") ){
+      # Single model type specified. Define formula
+      if(length(types)==1){
 
+        # Default equation found
+        if(model$biodiversity[[1]]$equation=='<Default>'){
+          # Construct formula with all variables
+          form <- paste( 'observed ~ .')
+          # Convert to formula
+          form <- to_formula(form)
+          # Add offset if specified
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+        } else {
+          # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          form <- to_formula(model$biodiversity[[1]]$equation)
+          assertthat::assert_that(
+            all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+          )
+        }
+        model$biodiversity[[1]]$equation <- form
+        rm(form)
+
+        # Add pseudo-absence points if necessary
+        # Include nearest predictor values for each
+        if('poipo' %in% types) {
+
+          # Get background layer
+          bg <- x$engine$get_data('template')
+          assertthat::assert_that(!is.na(cellStats(bg,min)))
+
+          abs <- create_pseudoabsence(
+            env = model$predictors,
+            presence = model$biodiversity[[1]]$observations,
+            template = bg,
+            npoints = 1000,
+            replace = FALSE
+          )
+          abs$intercept <- 1 # Redundant for this engine
+          # Combine absence and presence and save
+          abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
+
+          # Rasterize observed presences
+          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
+                        model$biodiversity[[1]]$observations[,c('x','y')] )
+          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+
+          # Format out
+          df <- rbind(model$biodiversity[[1]]$predictors,
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>% subset(., complete.cases(.) )
+
+          # Preprocessing security checks
+          assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                   any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                   nrow(df) == nrow(model$biodiversity[[1]]$observations)
+          )
+          # Add offset if existent
+          if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
+
+          # Define expectation as very small vector following Renner et al.
+          w <- ppm_weights(df = df,
+                           pa = model$biodiversity[[1]]$observations[['observed']],
+                           bg = bg,
+                           weight = 1e-4
+          )
+          df$w <- w # Also add as column
+
+          model$biodiversity[[1]]$predictors <- df
+          model$biodiversity[[1]]$expect <- w
+        }
+
+      } else { stop('Not yet implemented')}
+
+      # Run the engine setup script
+      x$engine$setup(model)
+
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model, inference_only, ...)
+
+    } else { stop('Specified Engine not implemented yet.') }
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
 

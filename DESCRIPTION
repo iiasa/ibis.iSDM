@@ -34,6 +34,7 @@ Suggests:
     INLA,
     deldir,
     mboost,
+    dbarts,
     progress,
     rstan,
     rstantools
@@ -63,6 +64,7 @@ Collate:
     'data.R'
     'distribution.R'
     'effects.R'
+    'engine_bart.R'
     'engine_gdb.R'
     'engine_inla.R'
     'identifier.R'
@@ -75,6 +77,7 @@ Collate:
     'set_priors.R'
     'summary.R'
     'train.R'
+    'utils-bart.R'
     'utils-gdb.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
