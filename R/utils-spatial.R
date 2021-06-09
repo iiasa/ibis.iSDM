@@ -202,33 +202,69 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
     is.data.frame(env),assertthat::has_name(env, field_space),
     length(field_space) == 2, is.vector(field_space)
   )
-
   # Convert to matrices
   coords <- as.matrix(coords)
   coords_env <- as.matrix(env[,field_space])
 
+  # If either of the matrices are larger than 10000 records, process in parallel
+  process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 10000, TRUE, FALSE)
+
   # Pairwise distance function
-  # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices. Thus making this dependency a suggestion
+  # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
+  # Thus making this dependency suggested and optional
   # disfun <- geosphere::distHaversine
   disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
 
-  env_sub <- apply(coords, 1, function(xy1, xy2) {
-                    dists <- disfun(xy2, xy1)
-                    # In a few cases these can be multiple in equal distance
-                    d <- which(dists==min(dists))
-                    if(length(d)>=2){
-                      # Average them both
-                      o <- as.data.frame(
-                        t(
-                        apply(env[d, ,drop = FALSE], 2, function(x) mean(x, na.rm = TRUE) )
-                         )
-                      )
-                      return(o)
-                    } else return( env[d, ,drop = FALSE] )
-                  }, xy2 = coords_env)
-
-  out <- do.call(rbind,env_sub)
-  out[,field_space] <- as.data.frame(coords) # Ensure that coordinates are back in
+  if(process_in_parallel){
+    require(doParallel)
+    # Split coordinates into equal batches by modulo division
+    coords_split <- (1:nrow(coords) %/% 10)
+    cl <- doParallel::registerDoParallel()
+    env_sub <- foreach(z = iterators::iter(unique(coords_split)),
+                       .combine = 'rbind',
+                       .inorder = FALSE,
+                       .multicombine = TRUE,
+                       .errorhandling = 'stop',
+                       .export = c('coords','coords_env','coords_split', 'disfun'),
+                       .packages = c('geodist')
+    ) %dopar% {
+      o <-
+        apply(coords[which(coords_split==z),], 1, function(xy1, xy2){
+          dists <- disfun(xy2, xy1)
+          # In a few cases these can be multiple in equal distance
+          d <- which(dists==min(dists))
+          if(length(d)>=2){
+            # Average them both
+            o <- as.data.frame(
+              t(
+                apply(env[d, ,drop = FALSE], 2, function(x) mean(x, na.rm = TRUE) )
+              )
+            )
+            return(o)
+          } else return( env[d, ,drop = FALSE] )
+        }, xy2 = coords_env)
+      return(do.call(rbind, o))
+      }
+    doParallel::stopImplicitCluster()
+  } else {
+    env_sub <- apply(coords, 1, function(xy1, xy2) {
+      dists <- disfun(xy2, xy1)
+      # In a few cases these can be multiple in equal distance
+      d <- which(dists==min(dists))
+      if(length(d)>=2){
+        # Average them both
+        o <- as.data.frame(
+          t(
+            apply(env[d, ,drop = FALSE], 2, function(x) mean(x, na.rm = TRUE) )
+          )
+        )
+        return(o)
+      } else return( env[d, ,drop = FALSE] )
+    }, xy2 = coords_env)
+    # Combine
+    out <- do.call(rbind, env_sub)
+    out[,field_space] <- as.data.frame(coords) # Ensure that coordinates are back in
+  }
   return(out)
 }
 

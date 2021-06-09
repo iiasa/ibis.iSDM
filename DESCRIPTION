@@ -19,7 +19,7 @@ Imports:
     ggplot2,
     magrittr,
     uuid,
-    foreach,
+    doParallel,
     geodist,
     assertthat(>= 0.2.0),
     rgeos (>= 0.5-5),
