@@ -16,4 +16,5 @@
 
   # Set some default ibis options
   options('ibis.nthread' = parallel::detectCores() - 1)
+  options('ibis.runparallel' = FALSE)
 }

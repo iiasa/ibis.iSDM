@@ -132,6 +132,7 @@ methods::setMethod(
       # TODO:
       stop('Guessing conversion to be coded')
     }
+    poipa[[field_occurrence]] <- as.numeric(poipa[[field_occurrence]]) # Convert to numeric for ocassional factor formatting
 
     # Assess whether poipo data already exists in the distribution object
     # FIXME: Obsolete since we now add by id
@@ -170,6 +171,7 @@ methods::setMethod(
 #' @param family A [`character`] stating the family to be used (Default: Poisson)
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: FALSE)
 #' @param simulate_points A [`numeric`] number of points to be created by simulation
+#' @param simulate_weights A ['raster'] layer describing an eventual preference for simulation (Default: NULL)
 #' @param ... Other parameters passed down
 #'
 #' @details Say something about presence only biodiversity records in \pkg{ibis} and
@@ -192,7 +194,7 @@ methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
   function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',
-           simulate = FALSE, simulate_points = 100, ...) standardGeneric("add_biodiversity_polpo"))
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -203,13 +205,14 @@ methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
   function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',
-           simulate = FALSE, simulate_points = 100, ... ) {
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo,'Spatial') || inherits(polpo,'sf') || inherits(polpo,'data.frame') || inherits(polpo,'tibble'),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo,field_occurrence),
                             inherits(formula,'formula') || is.null(formula) || is.character(formula),
                             is.character(family),
-                            assertthat::is.flag(simulate), is.numeric(simulate_points)
+                            assertthat::is.flag(simulate), is.numeric(simulate_points),
+                            is.null(simulate_weights) || inherits(simulate_weights, 'Raster')
     )
     # Check type and ensure that is a polygon
     assertthat::assert_that(all( unique( st_geometry_type(polpo) ) %in% c('POLYGON','MULTIPOLYGON') ),
@@ -221,13 +224,30 @@ methods::setMethod(
     # Simulate presence absence points rather than using the range directly
     if(simulate){
       if(family == 'poisson') warning('Simulated points created. Binomial distribution is advised.')
-      # FIXME: Consider adding further options as parameter
-      # Sample presence points within
+
+      if(!is.null(simulate_weights)){
+        # Crop to target range
+        simulate_weights <- raster::crop(simulate_weights, polpo)
+        # Normalize the weight layer if is not a factorized, else set everything to 1
+        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights,'norm') else simulate_weights[simulate_weights>0] <- 1
+
+        # Weighted sampling on backgroudn raster, the greater the value, the more likely sampled points
+        ptscell <- sample(which(!is.na(simulate_weights[])),
+                          size = simulate_points,
+                          prob = simulate_weights[which(!is.na(simulate_weights[]))],
+                          replace = TRUE)
+        poipa_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
+        poipa_on <- sf::st_as_sf(poipa_on, coords = c('x','y'),crs = sf::st_crs(simulate_weights))
+
+      } else {
+      # Simply sample presence points within at random
       suppressMessages(
-        poipa_on <- sf::st_as_sf(
-          sf::st_sample(x = virtual_range, size = simulate_points, type = 'random')
+          poipa_on <- sf::st_as_sf(
+            sf::st_sample(x = polpo, size = simulate_points, type = 'random')
+          )
         )
-      )
+      }
+
       names(poipa_on) <- 'geometry'; st_geometry(poipa_on) <- 'geometry'
       poipa_on[[field_occurrence]] <- 1
       poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
@@ -241,7 +261,7 @@ methods::setMethod(
       names(poipa_off) <- 'geometry'; st_geometry(poipa_off) <- 'geometry'
       # Remove points on the range
       suppressMessages(
-        wi <- sf::st_within(poipa_off, virtual_range,sparse = FALSE)
+        wi <- sf::st_within(poipa_off, polpo, sparse = FALSE)
       )
       poipa_off <- poipa_off[!apply(wi, 1, any),]
       poipa_off[[field_occurrence]] <- 0

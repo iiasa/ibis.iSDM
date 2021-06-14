@@ -7,8 +7,6 @@ NULL
 #' @param nburn A [`numeric`] estimate of the burn in samples
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
 #' @param chains A number of the number of chains to be used (Default: 4)
-#' @param varsel Should variable selection be performed?
-#' @param verbose Should progress be printed?
 #' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @references  Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
 #' @name engine_bart
@@ -20,8 +18,6 @@ engine_bart <- function(x,
                         nburn = 250,
                         ntree = 1000,
                         chains = 4,
-                        varsel = FALSE,
-                        verbose = FALSE,
                        ...) {
 
   # Check whether dbarts package is available
@@ -35,10 +31,8 @@ engine_bart <- function(x,
                           inherits(x$background,'sf'),
                           is.numeric(nburn),
                           is.numeric(ntree),
-                          is.numeric(chains),
-                          is.logical(varsel),
-                          assertthat::is.flag(verbose)
-  )
+                          is.numeric(chains)
+                          )
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
@@ -59,8 +53,7 @@ engine_bart <- function(x,
   template <- raster::rasterize(x$background, template, field = 0)
 
   # Set up dbarts control with some parameters, rest default
-  dc <- dbarts::dbartsControl(verbose = verbose,
-                              keepTrees	= TRUE, # Keep trees
+  dc <- dbarts::dbartsControl(keepTrees	= TRUE, # Keep trees
                               n.burn = nburn,
                               n.trees = ntree,
                               n.chains = chains,
@@ -114,7 +107,7 @@ engine_bart <- function(x,
         invisible()
       },
       # Training function
-      train = function(self, model, varsel = varsel, inference_only = FALSE, ...){
+      train = function(self, model, varsel = varsel, inference_only = FALSE, verbose = TRUE, ...){
         # Get output raster
         prediction <- self$get_data('template')
 
@@ -155,16 +148,19 @@ engine_bart <- function(x,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
-                                   nskip = dc@n.burn
+                                   nskip = dc@n.burn,
+                                   verbose = verbose
           )
         } else {
           fit_bart <- dbarts::bart(equation,
                                    data,
                                    keeptrees = dc@keepTrees,
+                                   # weights = w,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
-                                   nskip = dc@n.burn
+                                   nskip = dc@n.burn,
+                                   verbose = verbose
           )
         }
 
@@ -209,6 +205,16 @@ engine_bart <- function(x,
             "fit_best" = fit_bart,
             "prediction" = prediction
           ),
+          # Partial effects
+          partial = function(self, x.vars = NULL, ...){
+
+            model <- self$get_data('fit_best')
+            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || NULL,
+                                    msg = 'Variable not in predicted model' )
+            # Check if family is binomial, if so alter
+            not_binomial = self$get_data('model')$biodiversity[[1]]$family != 'binomial'
+            partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
+          },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
             model <- self$get_data('fit_best')

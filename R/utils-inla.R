@@ -201,7 +201,6 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
     )
   )
   # Get only target variables
-  all_env <-  subset(all_env, select = pred_names)
   all_env$intercept <- 1
 
   # Add diagonal for integration points
@@ -218,7 +217,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
 
   # Add the expected estimate and observed note
   # FIXME: Currently only two likelihoods are supported (binomial/poisson) with the NA order being the determining factor
-  if(joint) ll_resp[[ 'observed' ]] <- cbind( rep(0, mesh$n), NA )
+  if(joint) ll_resp[[ 'observed' ]] <- cbind(rep(0, mesh$n), NA )
   if(!joint) ll_resp[[ 'observed' ]] <- cbind( rep(0, mesh$n) )
   ll_resp[[ 'e' ]] <- as.numeric( mesh.area )
 
@@ -226,7 +225,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
   ll_effects <- list()
   # Note, order adding this is important apparently...
   ll_effects[['predictors']] <- all_env
-  ll_effects[['intercept']] <- list(intercept = seq(1, mesh$n) )
+  ll_effects[['spatial.field']] <- list(spatial.field = seq(1, mesh$n) ) # Changed to spatial.field by default
 
   # Build integration stack of nearest predictors
   stk_int <- INLA::inla.stack(
@@ -289,26 +288,25 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
   # )
-  # #background.bdry <- background.g@polygons[[1]]@Polygons[[1]]@coords # use the original polygon boundaries to avoid discrepancies in the 'true' points
-  # TODO: Try and find an alternative to the splancs package to remove this dependent package
-  # cellsIn <- !is.na(over(SpatialPoints(projgrid$lattice$loc,
-  #                                     proj4string = as(background,'Spatial')@proj4string),
-  #                                     as(background,'Spatial')))
-  # cellsIn <- splancs::inout(projgrid$lattice$loc,cbind(background.bdry[,1], background.bdry[,2]))
+  # background.bdry <- background.g@polygons[[1]]@Polygons[[1]]@coords # use the original polygon boundaries to avoid discrepancies in the 'true' points
+  # cellsIn <- splancs::inout(projgrid$lattice$loc,
+  #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
   # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
 
+  # TODO: Try and find an alternative to the splancs package to remove this dependent package
   suppressWarnings(
-    cellsIn <- !is.na(sp::over(SpatialPoints(projgrid$lattice$loc,
+    cellsIn <- !is.na(sp::over(x = SpatialPoints(projgrid$lattice$loc,
                                        proj4string = as(background.g,'Spatial')@proj4string),
-                         as(background,'Spatial')))
+                               y = background.g))
   )
 
   # Check for multipolygon and align grid if necessary
   if(inherits(cellsIn,'matrix')){
     cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
   } else { cellsIn <- which(cellsIn) }
+  assertthat::assert_that(length(cellsIn)>0)
 
   # Get prediction coordinates
   predcoords <- projgrid$lattice$loc[cellsIn,]
@@ -332,6 +330,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # Get from supplied stack this information
   nearest_cov[,'intercept'] <- 1
 
+
   # Empty lists
   ll_pred <- list()
   ll_effects <- list()
@@ -340,14 +339,14 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   if(joint){
     # Joint stack
     # Set to NA to predict for fitted area
-    ll_pred[[ 'observed' ]] <- cbind( rep(NA, nrow(nearest_cov)), rep(NA, nrow(nearest_cov)) )
+    ll_pred[[ 'observed' ]] <- cbind(rep(NA, nrow(nearest_cov)), rep(NA, nrow(nearest_cov)) )
     ll_pred[['e']] <- rep(0, nrow(nearest_cov))
     ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n))
-    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+    ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n)) # Changed to spatial.field. intercept already included in neatest_cov
+    # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
     A = list(1, Apred)
@@ -361,8 +360,8 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 
     # Note, order adding this is important apparently...
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['intercept']]  <- list(intercept = seq(1,mesh$n))
-    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+    ll_effects[['spatial.field']]  <- list(spatial.field = seq(1,mesh$n))
+    # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
     A = list(1, Apred)
@@ -374,8 +373,8 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 
     # Note, order adding this is important apparently...
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['intercept']] <- list(intercept = seq(1,mesh$n) )
-    if(!is.null(spde)) ll_effects[['intercept']] <- c(ll_effects[['intercept']], spde)
+    ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n) )
+    # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
     A = list(1, Apred)

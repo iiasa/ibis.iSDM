@@ -13,6 +13,7 @@ add_biodiversity_polpo(
   family = "poisson",
   simulate = FALSE,
   simulate_points = 100,
+  simulate_weights = NULL,
   ...
 )
 
@@ -34,6 +35,8 @@ add_biodiversity_polpo(
 \item{simulate}{Simulate poipa points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipa}} (Default: FALSE)}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation}
+
+\item{simulate_weights}{A \link{'raster'} layer describing an eventual preference for simulation (Default: NULL)}
 
 \item{...}{Other parameters passed down}
 }

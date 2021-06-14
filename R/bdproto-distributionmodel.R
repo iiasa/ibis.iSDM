@@ -111,7 +111,7 @@ DistributionModel <- bdproto(
     }
   },
   # Generic plotting function for partial effects
-  effects = function(self, x = 'fit_best', what = 'fixed'){
+  effects = function(self, x = 'fit_best', what = 'fixed', ...){
     if(inherits(self, 'GDB-Model')){
       # How many effects
       n <- length( coef( self$get_data(x) ))
@@ -127,7 +127,7 @@ DistributionModel <- bdproto(
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
-      self$partial(self$get_data(x), xvars = what)
+      self$partial(self$get_data(x), xvars = what, ...)
     }
   },
   # Get specific fit from this Model

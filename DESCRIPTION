@@ -29,7 +29,7 @@ Imports:
     raster (>= 3.4-5),
     testthat (>= 3.0.0)
 Depends:
-    R(>= 3.5.0)
+    R(>= 4.0.0)
 Suggests:
     INLA,
     deldir,

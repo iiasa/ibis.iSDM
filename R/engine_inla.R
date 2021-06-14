@@ -61,6 +61,8 @@ engine_inla <- function(x,
   if(inherits(optional_mesh,'inla.mesh')) {
     # Load a provided on
     mesh <- optional_mesh
+    # Security check for projection and if not set, use the one from background
+    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
   } else {
     # Create a new mesh
     # Convert to boundary object for later
@@ -108,7 +110,7 @@ engine_inla <- function(x,
 
   # Calculate area in km²
   ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'ar')
+    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
   )
 
   # Print a message in case there is already an engine object
@@ -177,19 +179,18 @@ engine_inla <- function(x,
           # Check that everything is correctly specified
           if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
 
-          if(is.null( priors$get('spde','prior.range') ) || is.null( priors$get('spde','prior.sigma') ) ) priors <- NULL
-
-          # Get prior
-          pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
-          ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
           # Use default spde
-          if(is.null(priors)){
+          if(is.null(priors) || is.Waiver(priors)){
             # Define PC Matern SPDE model and save
             self$data$latentspatial <- INLA::inla.spde2.matern(
               mesh = self$data$mesh,
               alpha = alpha
             )
           } else {
+            # Get priors
+            pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
+            ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
+
             # Define PC Matern SPDE model and save
             self$data$latentspatial <- INLA::inla.spde2.pcmatern(
               mesh = self$data$mesh,
@@ -237,16 +238,18 @@ engine_inla <- function(x,
         # Include intercept in here
         # TODO: Note that this sets intercepts by type and not by dataset id
         if(intercept) {
-          env$intercept <- 1
+          env$intercept <- 1 # Overall intercept
           env[[paste0('intercept',
                       ifelse(joint,paste0('_',
                                           make.names(tolower(model$name)),'_',
                                           model$type),''))]] <- 1 # Setting intercept to common type, thus sharing with similar types
         }
         # Set up projection matrix for the data
-        mat_proj <- INLA::inla.spde.make.A(
-          mesh = self$get_data('mesh'),
-          loc = as.matrix(env[,c('x','y')])
+        suppressWarnings(
+          mat_proj <- INLA::inla.spde.make.A(
+            mesh = self$get_data('mesh'),
+            loc = as.matrix(env[,c('x','y')])
+          )
         )
         # Create INLA stack
         # The three main inla.stack() arguments are a vector list with the data (data),
@@ -258,21 +261,22 @@ engine_inla <- function(x,
         # Add the expected estimate and observed note
         # FIXME: Currently only two likelihoods are supported (binomial/poisson) with the NA order being the determining factor
         if(model$family == 'poisson') {
-          if(joint) ll_resp[[ 'observed' ]] <- cbind( rep(1, nrow(env)), NA )
-          if(!joint) ll_resp[[ 'observed' ]] <- cbind( rep(1, nrow(env)) )
+          if(joint) ll_resp[[ 'observed' ]] <- cbind(model$observations[['observed']], NA )
+          if(!joint) ll_resp[[ 'observed' ]] <- cbind(model$observations[['observed']] )
           ll_resp[[ 'e' ]] <- model$expect
         }
         if(model$family == 'binomial') {
-          if(joint) ll_resp[[ 'observed' ]] <- cbind( NA, rep(1, nrow(env)) )
-          if(!joint) ll_resp[[ 'observed' ]] <- cbind( rep(1, nrow(env)) )
+          if(joint) ll_resp[[ 'observed' ]] <- cbind(NA, model$observations[['observed']] )
+          if(!joint) ll_resp[[ 'observed' ]] <- cbind( model$observations[['observed']] )
           ll_resp[[ 'Ntrials' ]] <- model$expect
         }
 
         # Effects matrix
         ll_effects <- list()
         # Note, order adding this is important apparently...
-        ll_effects[['predictors']] <- env[, model$predictors_names ]
-        ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
+        ll_effects[['predictors']] <- env
+        ll_effects[['spatial.field']] <- seq(1, self$get_data('mesh')$n)
+        # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
         if('offset' %in% names(model)){
@@ -282,14 +286,15 @@ engine_inla <- function(x,
         }
 
         # Check whether equation has spatial field and otherwise add
-         if( 'spde' %in% all.vars(model$equation) ){
-           # Get Index Objects
-           iset <- self$get_data('s.index')
-           ll_effects[['intercept']] <- c(ll_effects[['intercept']], iset)
-         } else if ( 'adjmat' %in% all.vars(model$equation) ){
-           iset <- self$get_data('s.index')
-           ll_effects[['intercept']] <- c(ll_effects[['intercept']], data.frame(spatial.index = iset) )
-         }
+        # MJ 13/06: Spatial.field now set directly to effects
+         # if( 'spde' %in% all.vars(model$equation) ){
+         #   # Get Index Objects
+         #   iset <- self$get_data('s.index')
+         #   ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], iset)
+         # } else if ( 'adjmat' %in% all.vars(model$equation) ){
+         #   iset <- self$get_data('s.index')
+         #   ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], data.frame(spatial.index = iset) )
+         # }
         # Define A
         A <- list(1, mat_proj)
 
@@ -320,7 +325,7 @@ engine_inla <- function(x,
         if( 'spde' %in% all.vars(model$biodiversity[[1]]$equation) ){
           # Get spatial index
           spde <- self$get_data('s.index')
-        } else { spde <- NULL}
+        } else { spde <- NULL }
 
         # Check for existence of specified offset and use the full one in this case
         if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
@@ -337,7 +342,7 @@ engine_inla <- function(x,
         nty <- length( unique( as.character(sapply(model$biodiversity, function(z) z$type)) ) )
 
         # Clean up previous data and integration stacks
-        chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa', self$list_data())
+        chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa|stk_pred', self$list_data())
         if(length(chk)>0) self$data[chk] <- NULL
 
         # Now for each dataset create a INLA stack
@@ -352,18 +357,22 @@ engine_inla <- function(x,
 
           # Define mesh.area dependent on whether a single variable only is used or not
           if(model$biodiversity[[id]]$family == 'poisson'){
-            # Make integration stack for given poisson model
-            stk_int <- inla_make_integration_stack(
-              mesh      = self$get_data('mesh'),
-              mesh.area = self$get_data('mesh.area'),
-              cov       = model$predictors,
-              pred_names= model$predictors_names,
-              bdry      = model$background,
-              id        = names(model$biodiversity)[id],
-              joint     = ifelse(nty > 1, TRUE, FALSE)
-            )
-            # Save integration stack
-            self$set_data(paste0('stk_int_',names(model$biodiversity)[id]),stk_int)
+            # Only create on if not already existing
+            chk <- grep('stk_int', self$list_data())
+            if(length(chk)==0){
+              # Make integration stack for given poisson model
+              stk_int <- inla_make_integration_stack(
+                mesh      = self$get_data('mesh'),
+                mesh.area = self$get_data('mesh.area'),
+                cov       = model$predictors,
+                pred_names= model$predictors_names,
+                bdry      = model$background,
+                id        = names(model$biodiversity)[id],
+                joint     = ifelse(nty > 1, TRUE, FALSE)
+              )
+              # Save integration stack
+              self$set_data(paste0('stk_int_',names(model$biodiversity)[id]),stk_int)
+            }
           }
         }
 
@@ -404,7 +413,7 @@ engine_inla <- function(x,
         invisible()
       },
       # Main INLA training function ----
-      train = function(self, model, varsel = TRUE, inference_only = FALSE, verbose = FALSE,...) {
+      train = function(self, model, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
         # Check that all inputs are there
         assertthat::assert_that(
           is.logical(varsel), is.logical(inference_only), is.logical(verbose),
@@ -423,7 +432,7 @@ engine_inla <- function(x,
         predcoords <- self$get_data('stk_pred')$predcoords
 
         # Get families
-        fam <- as.character( sapply(model$biodiversity, function(x) x$family) )
+        fam <- unique( as.character( sapply(model$biodiversity, function(x) x$family) ) )
         # Define control family
         cf <- list()
         for(i in 1:length(fam)) cf[[i]] <- list(link = ifelse(fam[i] == 'poisson','log','cloglog' ))
@@ -565,6 +574,9 @@ engine_inla <- function(x,
           if(length(fam)==1){
             if(fam == 'poisson') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
             if(fam == 'binomial') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- logistic(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
+          } else{
+            # Joint likelihood of Poisson log and binomial cloglog following Simpson et al.
+            post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
           }
           post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
           names(post) <- make.names(names(post))
@@ -598,7 +610,7 @@ engine_inla <- function(x,
                 "prediction" = prediction
                 ),
               # Function to plot SPDE if existing
-              plot_spde = function(self, dim = c(300,300), dis = NULL,...){
+              plot_spde = function(self, dim = c(300,300), kappa_cor = FALSE, dis = NULL,...){
                 assertthat::assert_that(is.vector(dim), is.numeric(dis) || is.null(dis))
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {
@@ -631,26 +643,27 @@ engine_inla <- function(x,
                   spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
 
                   # -- #
-                  # Also build correlation fun
-                  # Get SPDE results
-                  spde_results <- INLA::inla.spde2.result(
-                    inla = self$get_data('fit_pred'),
-                    name = 'spatial.field',
-                    spde = self$get_data('latentspatial'),
-                    do.transfer = TRUE)
+                  if(kappa_cor){
+                    # Also build correlation fun
+                    # Get SPDE results
+                    spde_results <- INLA::inla.spde2.result(
+                      inla = self$get_data('fit_pred'),
+                      name = 'spatial.field',
+                      spde = self$get_data('spde'),
+                      do.transfer = TRUE)
 
-                  # Large kappa (inverse range) equals a quick parameter change in space.
-                  # Small kappa parameter have much longer, slower gradients.
-                  Kappa <- sapply(list(o),  function(j) inla.emarginal(function(x) x, j$marginals.kappa[[1]] ))
+                    # Large kappa (inverse range) equals a quick parameter change in space.
+                    # Small kappa parameter have much longer, slower gradients.
+                    Kappa <- lapply(spde_results,  function(j) INLA::inla.emarginal(function(x) x, j$marginals.kappa[[1]] ))
 
-                  # Distance vector. Maximum distance being defined by half of extent
-                  if(is.null(dis)) dis <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 4)  # Take a quarter of the max distance
+                    d.vec <- seq(0, MaxRange, length = Resolution)
+                    # Distance vector. Maximum distance being defined by half of extent
+                    if(is.null(dis)) dis <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 4)  # Take a quarter of the max distance
 
-                  # Modified Bessel function to get coorelation strength
-                  dis.cor <- data.frame(distance = seq(0, dis, length = dim[1]))
-                  dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * besselK(Kappa * dis.cor$distance, 1))
-                  dis.cor$cor[1] <- 1
-
+                    # Modified Bessel function to get coorelation strength
+                    dis.cor <- data.frame(distance = seq(0, dis, length = dim[1]))
+                    dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * besselK(Kappa * dis.cor$distance, 1))
+                    dis.cor$cor[1] <- 1
                   # ---
                   # Build plot
                   cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
@@ -661,32 +674,20 @@ engine_inla <- function(x,
                        xlab = 'Distance', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
                   plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
                   plot(spatial_field[[2]], main = 'sd spatial effect')
+                  } else {
+                  # Just plot the SPDE
+                    cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
+                    par(mfrow=c(1,2))
+                    plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
+                    plot(spatial_field[[2]], main = 'sd spatial effect')
+                    # And return
+                    return(spatial_field)
+                }
+
 
                 } else {
                   message(text_red('No spatial covariance in model specified.'))
                 }
-              },
-              # Summarize SPDE
-              summary_spde = function(self){
-                assertthat::assert_that(length( self$fits$fit_best$size.spde2.blc ) == 1)
-
-                # TODO: Print out some summary statistics from the SPDE if defined.
-                # Mod_p1.field <- inla.spde2.result(inla = Mod_Point1,
-                #                                   name = "spatial.field1", spde = spde1,
-                #                                   do.transf = T)     # This will transform the results back from the internal model scale
-                #
-                # # The two most important things we can extract here are the range parameter (kappa),
-                # # the nominal variance (sigma) and the range (r, radius where autocorrelation falls below 0.1)). These are important parameters of the spatial autocorrelation: the higher the Kappa,
-                # # the smoother the spatial autocorrelation structure (and the highest the range). Shorter range indicates a sharp increase of autocorrelation between closely located points and a stronger autocorrelation effect.
-                # inla.emarginal(function(x) x, Mod_p1.field$marginals.kappa[[1]])             #posterior mean for kappa
-                # inla.hpdmarginal(0.95, Mod_p1.field$marginals.kappa[[1]])                    # credible intervarls for Kappa
-                #
-                # inla.emarginal(function(x) x, Mod_p1.field$marginals.variance.nominal[[1]])  #posterior mean for variance
-                # inla.hpdmarginal(0.95, Mod_p1.field$marginals.variance.nominal[[1]])         # CI for variance
-                #
-                # inla.emarginal(function(x) x, Mod_p1.field$marginals.range.nominal[[1]])     #posterior mean for r (in coordinates units)
-                # inla.hpdmarginal(0.95, Mod_p1.field$marginals.range.nominal[[1]])            # CI for r
-
               }
         )
         return(out)

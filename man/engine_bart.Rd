@@ -4,15 +4,7 @@
 \alias{engine_bart}
 \title{Engine for use of Bayesian Additive Regression Trees (BART)}
 \usage{
-engine_bart(
-  x,
-  nburn = 250,
-  ntree = 1000,
-  chains = 4,
-  varsel = FALSE,
-  verbose = FALSE,
-  ...
-)
+engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -22,10 +14,6 @@ engine_bart(
 \item{ntree}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation.}
 
 \item{chains}{A number of the number of chains to be used (Default: 4)}
-
-\item{varsel}{Should variable selection be performed?}
-
-\item{verbose}{Should progress be printed?}
 }
 \description{
 Engine for use of Bayesian Additive Regression Trees (BART)
