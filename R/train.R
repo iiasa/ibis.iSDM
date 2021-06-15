@@ -246,13 +246,14 @@ methods::setMethod(
 
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
-          # Check potential for rw2 fits
-          # MJ: Can lead to to convergence issues with rw2. Removed for now
-          # var_rw2 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-          # var_rw2 <- names(which(var_rw2 > 100)) # Get only those greater than 100 unique values (arbitrary)
-          # var_rw2 <- var_rw2[var_rw2 %in% model$biodiversity[[id]][['predictors_names']]]
-          var_rw2 <- c()
-          var_lin <- model$biodiversity[[id]][['predictors_names']]#[which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw2 )]
+          # Check potential for rw1 fits
+          # MJ: Can lead to to convergence issues with rw1. Removed for now
+          # var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
+          # var_rw1 <- names(which(var_rw1 > 100)) # Get only those greater than 100 unique values (arbitrary)
+          # var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
+          var_rw1 <- c()
+          # Set remaining variables to linear
+          var_lin <- model$biodiversity[[id]][['predictors_names']]#[which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
 
           # Construct formula with all variables
           form <- paste('observed', '~', 0, '+ intercept',
@@ -290,16 +291,16 @@ methods::setMethod(
               }
             }
             # Add linear for those missed ones
-            miss <- c(var_lin, var_rw2)[c(var_lin, var_rw2) %notin% model$priors$varnames()]
+            miss <- c(var_lin, var_rw1)[c(var_lin, var_rw1) %notin% model$priors$varnames()]
             if(length(miss)>0){
               # Add linear predictors without priors
               form <- paste(form, ' + ',
                             paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
               )
-              if(length(var_rw2)>0){
+              if(length(var_rw1)>0){
                 # Random walk 2 (spline) where feasible with quantile bins
-                if(length(var_rw2)>0){
-                  form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+                if(length(var_rw1)>0){
+                  form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss,', n = 20, method = \'quantile\'), model = \'rw1\')', collapse = ' + ' ) )
                 }
               }
             }
@@ -310,8 +311,8 @@ methods::setMethod(
               form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
               # Random walk 2 (spline) where feasible with quantile bins
             }
-            if(length(var_rw2)>0){
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw2,', n = 10, method = \'quantile\'), model = \'rw2\')', collapse = ' + ' ) )
+            if(length(var_rw1)>0){
+              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw1,', n = 20, method = \'quantile\'), model = \'rw1\')', collapse = ' + ' ) )
             }
           }
           form <- to_formula(form) # Convert to formula

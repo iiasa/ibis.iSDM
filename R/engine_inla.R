@@ -459,14 +459,11 @@ engine_inla <- function(x,
         if(varsel){
           # FIXME: Currently removes all priors
           message('Performing variable selection...')
-          #
-          if('spde' %in% all.vars(master_form) ) speq <- self$get_equation_latent_spatial('spde') else speq <- NULL
+
           # Get formula list
-          lf <- formula_combinations(varnames = model$predictors_names,
-                               response = all.vars(master_form)[1],
-                               InterceptOnly = FALSE,
-                               spde_term = speq,
-                               type = 'forward'
+          lf <- formula_combinations(form = master_form,
+                                     response = NULL, # Construct from form
+                                     type = 'inla'
                                )
 
           # Set progress bar
@@ -478,20 +475,22 @@ engine_inla <- function(x,
             pb$tick()
 
             # Train the model on the response
-            fit <- INLA::inla(formula = as.formula(lf[k]), # The specified formula
-                                   data = stack_data_resp,  # The data stack
-                                   E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
-                                   Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
-                                   family = fam,   # Family the data comes from
-                                   control.family = cf, # Control options
-                                   control.predictor=list(A = INLA::inla.stack.A(stk_inference),
-                                                          link = li,
-                                                          compute = FALSE),  # Compute for marginals of the predictors
-                                   control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                                   INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                                strategy = 'simplified.laplace', huge = TRUE), # To make it run faster...
-                                   num.threads = getOption('ibis.nthread')
-            )
+            fit <- try({INLA::inla(formula = as.formula(lf[k]), # The specified formula
+                                data = stack_data_resp,  # The data stack
+                                E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
+                                Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
+                                family = fam,   # Family the data comes from
+                                control.family = cf, # Control options
+                                control.predictor=list(A = INLA::inla.stack.A(stk_inference),
+                                                       link = li,
+                                                       compute = FALSE),  # Compute for marginals of the predictors
+                                control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                                INLA::control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                                num.threads = getOption('ibis.nthread'),
+                                verbose = FALSE # Verbose for variable selection
+              )
+            },silent = TRUE)
+            if(class(fit)=='try-error') next() # Ideally add quadratic terms instead
             # Add results
             results <- rbind(results,
                              data.frame(form = lf[k],
@@ -509,7 +508,7 @@ engine_inla <- function(x,
           #   - sum(log(m$cpo$cpo), na.rm = na.rm)
           results <- results[order(results$dic,decreasing = FALSE),]
           results$diff_dic <- c(0, diff(results$dic) )
-          # Set new master form
+          # Set new master form from the best model
           master_form <- as.formula(
             as.character(results$form[results$diff_dic==0])
           )
@@ -528,7 +527,7 @@ engine_inla <- function(x,
                                                    link = li, # Link to NULL for multiple likelihoods!
                                                    compute = TRUE),  # Compute for marginals of the predictors.
                           control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                          # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
+                          # control.fixed = INLA::control.fixed(list(mean = 0)),# prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                           verbose = verbose, # To see the log of the model runs
                           # INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
                           #              strategy = 'simplified.laplace'
@@ -553,16 +552,17 @@ engine_inla <- function(x,
                                  control.predictor = list(A = INLA::inla.stack.A(stk_full),
                                                           link = li, # Link to NULL for multiple likelihoods!
                                                         compute = TRUE),  # Compute for marginals of the predictors.
-                                 control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ), #model diagnostics and config = TRUE gives you the GMRF
-                                 control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
-                                 # control.fixed = INLA::control.fixed(prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
+                                 control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
+                                 # control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
                                  verbose = verbose, # To see the log of the model runs
                                  control.results = list(return.marginals.random = FALSE,
                                                         return.marginals.predictor = FALSE), # Don't predict marginals to save speed
-                                 INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
-                                                    strategy = 'simplified.laplace'
-                                                    # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
-                                 ),
+                                 # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
+                                 # control.fixed = INLA::control.fixed(list(mean = 0)),#, prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
+                                 # INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
+                                 #                    strategy = 'simplified.laplace'
+                                 #                    # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
+                                 # ),
                                  num.threads = getOption('ibis.nthread')
           )
           # Create a spatial prediction

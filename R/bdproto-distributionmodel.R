@@ -37,7 +37,7 @@ DistributionModel <- bdproto(
         # model0.res$summary.log.range.nominal
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$model$name,')',
+          'Trained ',class(self)[1],' (',self$model$runname,')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
@@ -88,7 +88,7 @@ DistributionModel <- bdproto(
       cols <- colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100)
 
       raster::plot(pred[[what]],
-           main = paste0(self$model$name, ' prediction (',what,')'),
+           main = paste0(self$model$runname, ' prediction (',what,')'),
            box = FALSE,
            axes = TRUE,
            colNA = NA, col = cols,...)
