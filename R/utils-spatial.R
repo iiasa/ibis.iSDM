@@ -220,7 +220,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
     # Split coordinates into equal batches by modulo division
     coords_split <- (1:nrow(coords) %/% 10)
     cl <- doParallel::registerDoParallel()
-    env_sub <- foreach(z = iterators::iter(unique(coords_split)),
+    out <- foreach(z = iterators::iter(unique(coords_split)),
                        .combine = 'rbind',
                        .inorder = FALSE,
                        .multicombine = TRUE,
