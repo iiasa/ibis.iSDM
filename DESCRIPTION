@@ -21,11 +21,13 @@ Imports:
     uuid,
     doParallel,
     geodist,
+    ncdf4,
     assertthat(>= 0.2.0),
     rgeos (>= 0.5-5),
     tibble (>= 2.0.0),
     proto (>= 1.0.0),
     sf (>= 0.9),
+    stars (>= 0.5),
     raster (>= 3.4-5),
     testthat (>= 3.0.0)
 Depends:
@@ -52,28 +54,31 @@ Collate:
     'add_latent.R'
     'bdproto-log.R'
     'add_log.R'
+    'bdproto-biodiversityscenario.R'
     'bdproto-predictors.R'
     'add_predictors.R'
     'add_range.R'
-    'utils-inla.R'
+    'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-engine.R'
     'bdproto-priorlist.R'
     'bdproto-prior.R'
+    'bdproto-settings.R'
     'utils-spatial.R'
     'data.R'
     'distribution.R'
     'effects.R'
     'engine_bart.R'
     'engine_gdb.R'
+    'utils-inla.R'
     'engine_inla.R'
-    'identifier.R'
     'misc.R'
     'plot.R'
     'print.R'
     'prior_gdb.R'
     'prior_inla.R'
     'priors.R'
+    'scenario.R'
     'set_priors.R'
     'summary.R'
     'train.R'

@@ -9,7 +9,6 @@ engine_gdb(
   boosting_iterations = 1000,
   learning_rate = 0.1,
   empirical_risk = "inbag",
-  verbose = FALSE,
   ...
 )
 }
@@ -21,8 +20,6 @@ engine_gdb(
 \item{learning_rate}{A bounded \code{\link{numeric}} value between 0 and 1 defining the shrinkage parameter.}
 
 \item{empirical_risk}{method for empirical risk calculation ('inbag','oobag','none')}
-
-\item{verbose}{Should progress be printed?}
 
 \item{...}{Other variables or control parameters}
 }

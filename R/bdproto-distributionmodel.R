@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R utils-inla.R
+#' @include utils.R bdproto.R identifier.R
 NULL
 
 #' @export
@@ -17,6 +17,7 @@ NULL
 #' @export
 DistributionModel <- bdproto(
   "DistributionModel",
+  id = character(), # An id for any trained model
   model = list(),
   fits = list(), # List of fits with data
   # Print message with summary of model

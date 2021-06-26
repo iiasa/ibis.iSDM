@@ -6,7 +6,6 @@ NULL
 #' @param boosting_iterations An [`integer`] giving the number of boosting iterations
 #' @param learning_rate A bounded [`numeric`] value between 0 and 1 defining the shrinkage parameter.
 #' @param empirical_risk method for empirical risk calculation ('inbag','oobag','none')
-#' @param verbose Should progress be printed?
 #' @param ... Other variables or control parameters
 #' @references Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
 #' @references Hofner, B., Müller, J., Hothorn, T., 2011. Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
@@ -19,7 +18,6 @@ engine_gdb <- function(x,
                        boosting_iterations = 1000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
-                       verbose = FALSE,
                         ...) {
   # Check whether mboost package is available
   check_package('mboost')
@@ -33,7 +31,6 @@ engine_gdb <- function(x,
                           is.numeric(boosting_iterations),
                           is.numeric(learning_rate),
                           is.character(empirical_risk),
-                          assertthat::is.flag(verbose),
                           empirical_risk %in% c('inbag','oobag','none')
                           )
 
@@ -58,8 +55,7 @@ engine_gdb <- function(x,
   # Set up boosting control
   bc <- mboost::boost_control(mstop = boosting_iterations,
                               nu = learning_rate,
-                              risk = empirical_risk,
-                              trace = verbose
+                              risk = empirical_risk
                               )
 
   # Print a message in case there is already an engine object
@@ -127,11 +123,12 @@ engine_gdb <- function(x,
         invisible()
       },
       # Training function
-      train = function(self, model, inference_only = FALSE, ...){
+      train = function(self, model, settings, ...){
         # Get output raster
         prediction <- self$get_data('template')
         # Get boosting control and family data
         bc <- self$get_data('bc')
+        bc$trace <- settings$get('verbose') # Reset trace as specified
         fam <- self$get_data('family')
 
         # All other needed data for model fitting
@@ -191,7 +188,7 @@ engine_gdb <- function(x,
         }
 
         # Predict spatially
-        if(!inference_only){
+        if(!settings$get('inference_only')){
           # Make a prediction
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
@@ -201,25 +198,22 @@ engine_gdb <- function(x,
           prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
           names(prediction) <- 'mean'
 
-          # Idea to add standard variation of cumulative sum ?
-          # suppressWarnings(
-          #   pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-          #                                      type = 'link', aggregate = 'cumsum')
-          # )
-          # prediction2 <- emptyraster(prediction)
-          # # FIXME: This won't work for other transformations
-          # prediction2[] <- apply(pred_gdb, 1, function(x) sd(exp(x)) )
-          # names(prediction2) <- 'sd'
-          # prediction <- raster::stack(prediction, prediction2)
-
         } else {
           prediction <- NULL
         }
+
+        # Compute end of computation time
+        settings$set('end.time', Sys.time())
+        # Also append boosting control option to settings
+        for(entry in names(bc)) settings$set(entry, bc[[entry]])
+
         # Create output
         out <- bdproto(
           "GDB-Model",
           DistributionModel,
+          id = new_id(),
           model = model,
+          settings = settings,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,

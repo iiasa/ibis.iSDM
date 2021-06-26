@@ -1,12 +1,12 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R
+#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
 NULL
 
 #' Add predictors to a Biodiversity distribution object
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param env [`Raster`] A [`RasterStack-class`] or [`RasterLayer-class`] object.
-#' @param names [`vector`] A Vector of character names describing the environmental stack
-#' @param transform [`vector`] A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
+#' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
+#' @param names A [`vector`] of character names describing the environmental stack
+#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
 #' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
@@ -214,3 +214,66 @@ methods::setMethod(
     if(length(varnames)>=1) x$rm_predictors(varnames)
   }
 )
+
+# Add predictor actions for scenario objects ----
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "stars"),
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', ... ) {
+    # Try and match transform and derivatives arguments
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
+
+    assertthat::validate_that(inherits(env,'stars'),msg = 'Projection rasters need to be stars stack!')
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
+                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names)
+    )
+    # Some stars checks
+    assertthat::validate_that(length(env) >= 1)
+
+    # Rename attributes if names is specified
+    if(!is.null(names)){
+      assertthat::assert_that(length(names) == length(env))
+      names(env) <- names
+    }
+
+    # FIXME: Ensure that this works for stars cubes
+    # # Standardization and scaling
+    # if('none' %notin% transform){
+    #   for(tt in transform) env <- predictor_transform(env, option = tt)
+    # }
+    #
+    # # Calculate derivates if set
+    # if('none' %notin% derivates){
+    #   new_env <- raster::stack()
+    #   for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+    #
+    #   # Add to env
+    #   env <- addLayer(env, new_env)
+    # }
+
+    # Get and format Time period
+    env_dim <- stars::st_dimensions(env)
+    timeperiod <- as.POSIXct(env_dim$Time$values$start)
+
+    # Check whether predictors already exist, if so overwrite
+    # TODO: In the future one could think of supplying predictors of varying grain
+    if(!is.Waiver(x$predictors)) message('Overwriting existing predictors.')
+
+    # Finally set the data to the BiodiversityScenario object
+    x$set_predictors(
+      bdproto(NULL, PredictorDataset,
+              id = new_id(),
+              data = env,
+              timeperiod = timeperiod,
+              ...
+      )
+    )
+  }
+)
+

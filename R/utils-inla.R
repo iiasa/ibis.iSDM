@@ -320,7 +320,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   Apred <- projgrid$proj$A[cellsIn, ]
 
   # Extract covariates for points
-  if(!is.null(offset)) cov <- cbind(cov, offset)
+  if(!is.Waiver(offset)) cov <- cbind(cov, offset)
 
   # For all coordinates get nearest value
   nearest_cov <- get_ngbvalue(coords = predcoords,

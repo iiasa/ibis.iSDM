@@ -28,7 +28,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,...) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -36,13 +36,14 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, ...) {
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
       is.logical(rm_corPred),
-      is.logical(inference_only)
+      is.logical(inference_only),
+      is.logical(verbose)
     )
     # Now make checks on completeness of the object
     assertthat::assert_that(!is.Waiver(x$engine),
@@ -50,6 +51,16 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
+
+    # --- #
+    # Define settings object for any other information
+    settings <- bdproto(NULL, Settings)
+    settings$set('rm_corPred', rm_corPred)
+    settings$set('varsel', varsel)
+    settings$set('inference_only', inference_only)
+    settings$set('verbose', verbose)
+    # Start time
+    settings$set('start.time', Sys.time())
 
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
@@ -64,6 +75,7 @@ methods::setMethod(
 
     # Specify a unique id for the run
     model[['id']] <- new_id()
+    settings$modelid <- model[['id']]
 
     # Save the background
     model[['background']] <- x$background
@@ -200,7 +212,7 @@ methods::setMethod(
       }
       # Save overall offset
       model[['offset']] <- as.data.frame(x$offset, xy = TRUE)
-    }
+    } else { model[['offset']] <- new_waiver() }
 
     # Applying prediction filter based on model input data if specified
     # TODO: Potentially outsource to a function in the future
@@ -247,13 +259,12 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw1 fits
-          # MJ: Can lead to to convergence issues with rw1. Removed for now
-          # var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-          # var_rw1 <- names(which(var_rw1 > 100)) # Get only those greater than 100 unique values (arbitrary)
-          # var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
-          var_rw1 <- c()
+          var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
+          var_rw1 <- names(which(var_rw1 > 150)) # Get only those greater than 150 unique values (arbitrary)
+          var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
+          #var_rw1 <- c()
           # Set remaining variables to linear
-          var_lin <- model$biodiversity[[id]][['predictors_names']]#[which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
+          var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
 
           # Construct formula with all variables
           form <- paste('observed', '~', 0, '+ intercept',
@@ -276,32 +287,40 @@ methods::setMethod(
               # Prior variable type
               vt <- as.character( model$priors$types()[v] )
               # FIXME: This currently only work with normal, e.g. the type of the prior is ignored
-              # pobj <- model$priors$priors[[model$priors$exists(v)]]
               if(vt == 'clinear'){
                 # Constrained linear effect
                 form <- paste(form, '+', paste0('f(', vn, ', model = \'clinear\', ',
                                                 'range = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )',
-                                                collapse = ' + ' ), ' + ' )
-              } else {
+                                                collapse = ' + ' ) )
+              } else if(vt == 'normal') {
                 # Add linear effects
                 form <- paste(form, '+', paste0('f(', vn, ', model = \'linear\', ',
                                                 'mean.linear = ', model$priors$get(vn)[1],', ',
                                                 'prec.linear = ', model$priors$get(vn)[2],')',
-                                                collapse = ' + ' ), ' + ' )
+                                                collapse = ' + ' ) )
+              } else if(vt == 'pc.prec' || vt == 'loggamma'){
+                # Add RW effects with pc priors. Default is a loggamma prior with mu 1, 5e-05
+                form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
+                                                 # 'scale.model = TRUE,',
+                                                 'hyper = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )
+                                                 )',collapse = ' + ')
+                               )
               }
             }
             # Add linear for those missed ones
             miss <- c(var_lin, var_rw1)[c(var_lin, var_rw1) %notin% model$priors$varnames()]
             if(length(miss)>0){
-              # Add linear predictors without priors
-              form <- paste(form, ' + ',
-                            paste('f(', miss,', model = \'linear\')', collapse = ' + ' )
-              )
-              if(length(var_rw1)>0){
-                # Random walk 2 (spline) where feasible with quantile bins
-                if(length(var_rw1)>0){
-                  form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss,', n = 20, method = \'quantile\'), model = \'rw1\')', collapse = ' + ' ) )
-                }
+              if(any(miss %in% var_lin)){
+                # Add linear predictors without priors
+                form <- paste(form, ' + ',
+                              paste('f(', miss[which(miss%in%var_lin)],', model = \'linear\')', collapse = ' + ' )
+                )
+              }
+              if(length(var_rw1)>0 & (any(miss %in% var_rw1))){
+                # Random walk where feasible and not already included
+              form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
+                                               # 'scale.model = TRUE, ',
+                                               'model = \'rw1\')', collapse = ' + ' ) )
               }
             }
           } else {
@@ -309,10 +328,12 @@ methods::setMethod(
             # Linear for those with few observations
             if(length(var_lin)>0){
               form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
-              # Random walk 2 (spline) where feasible with quantile bins
             }
+            # Random walk where feasible
             if(length(var_rw1)>0){
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw1,', n = 20, method = \'quantile\'), model = \'rw1\')', collapse = ' + ' ) )
+              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw1,'),',
+                                               # 'scale.model = TRUE,',
+                                               'model = \'rw1\')', collapse = ' + ' ) )
             }
           }
           form <- to_formula(form) # Convert to formula
@@ -329,7 +350,7 @@ methods::setMethod(
         } else{
           # If custom supplied formula, check that variable names match supplied predictors
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed',
+            all( all.vars(form) %in% c('observed','intercept',
                                        paste0('intercept_',sapply( model$biodiversity, function(x) x$type )),
                                        model$biodiversity[[id]]$predictors_names) )
           )
@@ -350,7 +371,7 @@ methods::setMethod(
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model,varsel = varsel, inference_only, ...)
+      out <- x$engine$train(model, settings)
 
       # ----------------------------------------------------------- #
       #### GDB Engine ####
@@ -426,7 +447,7 @@ methods::setMethod(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
             template = bg,
-            npoints = 1000,
+            npoints = 1000, # FIXME: Ideally query this from settings
             replace = FALSE
           )
           abs$intercept <- 1 # Add dummy intercept
@@ -526,7 +547,8 @@ methods::setMethod(
         x$engine$setup(model2)
 
         # Now train the model and create a predicted distribution model using the first biodiversity dataset
-        out <- x$engine$train(model2, inference_only = FALSE)
+        settings2 <- settings; settings2$set('inference_only',FALSE)
+        out <- x$engine$train(model2, settings2)
         # Also create a class prediction of the binomial outcome
         new <- out$fits$prediction
         # Binary layer caused trouble (cholesky errors, thus removing)
@@ -648,7 +670,7 @@ methods::setMethod(
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model, inference_only, ...)
+      out <- x$engine$train(model, settings)
 
       # ----------------------------------------------------------- #
       #### BART Engine ####
@@ -718,7 +740,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-4
+                           weight = 1e-6
           )
           df$w <- w # Also add as column
 
@@ -758,7 +780,8 @@ methods::setMethod(
         x$engine$setup(model2)
 
         # Now train the model and create a predicted distribution model
-        out <- x$engine$train(model2)
+        settings2 <- settings; settings2$set('inference_only',FALSE)
+        out <- x$engine$train(model2, settings2)
 
         new <- out$fits$prediction[['mean']]
         names(new) <- 'poipa_mean'
@@ -824,7 +847,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[id]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-4
+                           weight = 1e-6
           )
           df$w <- w # Also add as column
 
@@ -838,7 +861,7 @@ methods::setMethod(
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
-      out <- x$engine$train(model, inference_only, ...)
+      out <- x$engine$train(model, settings)
 
     } else { stop('Specified Engine not implemented yet.') }
     # Stop logging if specified

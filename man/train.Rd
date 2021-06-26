@@ -12,7 +12,7 @@ train(
   rm_corPred = FALSE,
   varsel = FALSE,
   inference_only = FALSE,
-  ...
+  verbose = FALSE
 )
 
 \S4method{train}{BiodiversityDistribution}(x)

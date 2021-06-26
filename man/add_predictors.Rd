@@ -20,15 +20,17 @@ add_predictors(
 \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
+
+\S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{env}{\code{\link{Raster}} A \code{\linkS4class{RasterStack}} or \code{\linkS4class{RasterLayer}} object.}
+\item{env}{A \code{\linkS4class{RasterStack}}, \code{\linkS4class{RasterLayer}} or \code{\link{stars}} object.}
 
-\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack}
+\item{names}{A \code{\link{vector}} of character names describing the environmental stack}
 
-\item{transform}{\code{\link{vector}} A vector stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
 
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
 

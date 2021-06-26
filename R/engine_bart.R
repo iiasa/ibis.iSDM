@@ -73,6 +73,10 @@ engine_bart <- function(x,
         'template' = template,
         'dc' = dc
       ),
+      # Dummy function for spatial latent effects (not yet implemented)
+      calc_latent_spatial = function(self, type = NULL, priors = NULL){
+        new_waiver()
+      },
       # Function to respecify the control parameters
       set_control = function(self,
                              nburn = 250,
@@ -107,7 +111,13 @@ engine_bart <- function(x,
         invisible()
       },
       # Training function
-      train = function(self, model, varsel = varsel, inference_only = FALSE, verbose = TRUE, ...){
+      train = function(self, model, settings, ...){
+        assertthat::assert_that(
+          inherits(settings,'Settings'),
+          is.list(model),length(model)>1,
+          # Check that model id and setting id are identical
+          settings$modelid == model$id
+        )
         # Get output raster
         prediction <- self$get_data('template')
 
@@ -149,7 +159,7 @@ engine_bart <- function(x,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
                                    nskip = dc@n.burn,
-                                   verbose = verbose
+                                   verbose = settings$get('verbose')
           )
         } else {
           fit_bart <- dbarts::bart(equation,
@@ -160,12 +170,12 @@ engine_bart <- function(x,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
                                    nskip = dc@n.burn,
-                                   verbose = verbose
+                                   verbose = settings$get('verbose')
           )
         }
 
         # Predict spatially
-        if(!inference_only){
+        if(!settings$get('inference_only')){
           # Make a prediction
           suppressWarnings(
             pred_bart <- dbarts:::predict.bart(fit_bart,
@@ -196,11 +206,18 @@ engine_bart <- function(x,
           # No prediction done
           prediction <- NULL
         }
+        # Compute end of computation time
+        settings$set('end.time', Sys.time())
+        # Also append boosting control option to settings
+        for(entry in slotNames(dc)) settings$set(entry, slot(dc,entry))
+
         # Create output
         out <- bdproto(
           "BART-Model",
           DistributionModel,
+          id = new_id(),
           model = model,
+          settings = settings,
           fits = list(
             "fit_best" = fit_bart,
             "prediction" = prediction
@@ -230,6 +247,39 @@ engine_bart <- function(x,
             plot(p, col = cols, main = paste0(x.vars, collapse ='|'))
             # Also return spatial
             return(p)
+          },
+          # Engine-specific projection function
+          project = function(self, newdata, rowids){
+            assertthat::assert_that(!missing(newdata),
+                                    is.data.frame(newdata))
+
+            # Make a prediction
+            suppressWarnings(
+              pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
+                                                 newdata = newdata,
+                                                 type = 'response')
+              )
+            # Fill output with summaries of the posterior
+            prediction <- emptyraster(self$fits$prediction) # Background
+            prediction[] <- apply(pred_bart, 2, mean)
+            names(prediction) <- 'mean'
+            prediction <- raster::stack(prediction)
+
+            # Summarize quantiles and sd from posterior
+            ms <- as.data.frame(
+              cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                     matrixStats::colSds(pred_bart)
+              )
+            )
+            names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
+            # Add them
+            for(post in names(ms)){
+              prediction2 <- self$get_data('template')
+              prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
+              prediction <- raster::addLayer(prediction, prediction2)
+              rm(prediction2)
+            }
+
           }
         )
         return(out)

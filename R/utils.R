@@ -214,6 +214,9 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     val_ofs <- grep(pattern = 'offset',x = te,value = TRUE)
 
     # Construct formulas ---
+    # Original form
+    form_temp <- c(form_temp, as.character(form))
+
     # Intercept only
     form_temp <- c(form_temp,
                    paste0(response,' ~ 0 +', paste(val_int,collapse = ' + ') ))

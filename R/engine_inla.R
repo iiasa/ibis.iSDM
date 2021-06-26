@@ -279,7 +279,7 @@ engine_inla <- function(x,
         # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
-        if('offset' %in% names(model)){
+        if(!is.null(model$offset)){
          ll_effects[['predictors']] <- cbind( ll_effects[['predictors']],
                                               subset(model[['offset']],select = 3) # FIXME: If I want type-specific offsets, this would be the place
                                               )
@@ -328,7 +328,7 @@ engine_inla <- function(x,
         } else { spde <- NULL }
 
         # Check for existence of specified offset and use the full one in this case
-        if('offset' %in% names(model)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
+        if(!is.Waiver(model$offset)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
 
         # Projection stepsize
         if(is.null( self$get_data('proj_stepsize') )){
@@ -390,7 +390,7 @@ engine_inla <- function(x,
             stk_resp   = stk_inference,
             cov        = model$predictors,
             pred.names = model$predictors_names,
-            offset     = offset,
+            offset     = model$offset,
             mesh       = self$get_data('mesh'),
             mesh.area  = self$get_data('mesh.area'),
             background = model$background,
@@ -413,14 +413,17 @@ engine_inla <- function(x,
         invisible()
       },
       # Main INLA training function ----
-      train = function(self, model, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
+      train = function(self, model, settings) {
         # Check that all inputs are there
         assertthat::assert_that(
-          is.logical(varsel), is.logical(inference_only), is.logical(verbose),
+          inherits(settings,'Settings'),
           is.list(model),length(model)>1,
+          # Check that model id and setting id are identical
+          settings$modelid == model$id,
           any(  (c('stk_full','stk_pred') %in% names(self$data)) ),
           inherits(self$get_data('stk_full'),'inla.data.stack')
         )
+
         # Get all datasets with id. This includes the data stacks and integration stacks
         stk_inference <- lapply(
           self$list_data()[grep(paste(names(model$biodiversity),collapse = '|'), self$list_data())],
@@ -456,7 +459,7 @@ engine_inla <- function(x,
         master_form <- model$biodiversity[[1]]$equation
 
         # Perform variable selection
-        if(varsel){
+        if( settings$get(what='varsel') ){
           # FIXME: Currently removes all priors
           message('Performing variable selection...')
 
@@ -528,7 +531,7 @@ engine_inla <- function(x,
                                                    compute = TRUE),  # Compute for marginals of the predictors.
                           control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           # control.fixed = INLA::control.fixed(list(mean = 0)),# prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
-                          verbose = verbose, # To see the log of the model runs
+                          verbose = settings$get(what='verbose'), # To see the log of the model runs
                           # INLA::control.inla(int.strategy = "eb", # Empirical bayes for integration
                           #              strategy = 'simplified.laplace'
                           #              # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
@@ -537,7 +540,7 @@ engine_inla <- function(x,
         )
 
         # Predict spatially
-        if(!inference_only){
+        if(!settings$get(what='inference_only')){
           # Get thetas from initially fitted model as starting parameters
           thetas = fit_resp$mode$theta
 
@@ -554,7 +557,7 @@ engine_inla <- function(x,
                                                         compute = TRUE),  # Compute for marginals of the predictors.
                                  control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
                                  # control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
-                                 verbose = verbose, # To see the log of the model runs
+                                 verbose = settings$get(what='verbose'), # To see the log of the model runs
                                  control.results = list(return.marginals.random = FALSE,
                                                         return.marginals.predictor = FALSE), # Don't predict marginals to save speed
                                  # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
@@ -596,11 +599,16 @@ engine_inla <- function(x,
           prediction <- NULL
         }
 
+        # Compute end of computation time
+        settings$set('end.time', Sys.time())
+
         # Definition of INLA Model object ----
         out <- bdproto(
               "INLA-Model",
               DistributionModel,
+              id = new_id(),
               model = model,
+              settings = settings,
               fits = list(
                 "fit_best" = fit_resp,
                 "fit_pred" = fit_pred,

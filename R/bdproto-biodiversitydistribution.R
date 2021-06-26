@@ -149,6 +149,11 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$engine)) return('None')
     self$engine$show()
   },
+  # Get prior variables
+  get_prior_variables = function(self){
+    if(is.Waiver(self$priors)) return(NULL)
+    self$priors$varnames()
+  },
   # Set offset
   # FIXME: For logical consistency could define a new bdproto object
   set_offset = function(self, x){
@@ -185,6 +190,21 @@ BiodiversityDistribution <- bdproto(
     # Set the object
     prcol$predictors$rm_data(names)
     return(prcol)
+  },
+  # Remove priors
+  rm_priors = function(self, names = NULL){
+    assertthat::assert_that(is.null(names) || is.vector(names) || is.character(names))
+    if(is.Waiver(self$priors)) {return(NULL)}
+    # Delete selected priors
+    if(is.null(names)){
+      self$priors <- new_waiver()
+    } else {
+      priors <- self$priors
+      ids <- priors$ids()[which( priors$varnames() %in% names)]
+      for(id in ids) priors$rm(id)
+      self$priors <- priors
+    }
+    invisible()
   },
   # Show number of biodiversity records
   show_biodiversity_length = function(self){

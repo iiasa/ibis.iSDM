@@ -62,6 +62,13 @@ print.PredictorDataset <- function(x, ...) x$print()
 print.DistributionModel <- function(x, ...) x$print()
 
 #' @rdname print
+#' @method print BiodiversityScenario
+#'
+#' @export
+#'
+print.BiodiversityScenario <- function(x, ...) x$print()
+
+#' @rdname print
 #' @method print Prior
 #'
 #' @export
@@ -81,6 +88,14 @@ print.PriorList <- function(x, ...) x$print()
 #' @export
 #'
 print.Engine <- function(x, ...) x$print()
+
+#' @rdname print
+#' @method print Settings
+#'
+#' @export
+#'
+print.Settings <- function(x, ...) x$print()
+
 
 #' @rdname print
 #' @method print Log

@@ -10,9 +10,11 @@
 \alias{print.BiodiversityDataset}
 \alias{print.PredictorDataset}
 \alias{print.DistributionModel}
+\alias{print.BiodiversityScenario}
 \alias{print.Prior}
 \alias{print.PriorList}
 \alias{print.Engine}
+\alias{print.Settings}
 \alias{print.Log}
 \alias{print.Id}
 \title{Print}
@@ -29,11 +31,15 @@
 
 \method{print}{DistributionModel}(x, ...)
 
+\method{print}{BiodiversityScenario}(x, ...)
+
 \method{print}{Prior}(x, ...)
 
 \method{print}{PriorList}(x, ...)
 
 \method{print}{Engine}(x, ...)
+
+\method{print}{Settings}(x, ...)
 
 \method{print}{Log}(x, ...)
 

@@ -117,7 +117,7 @@ PriorList <- bdproto(
     assertthat::assert_that(is.Id(id) || is.character(id),
                             id %in% self$ids()
                             )
-    x$priors[[id]] <- NULL
+    self$priors[[id]] <- NULL
     invisible()
   },
   # Combining function to combine this PriorList with another

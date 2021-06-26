@@ -83,7 +83,7 @@ PredictorDataset <- bdproto(
     cols_civ <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
     # Plot the predictors
     par.ori <- par(no.readonly = TRUE)
-    plot( self$data, col = cols_civ )
+    raster::plot( self$data, col = cols_civ )
     par(par.ori)
   }
 )

@@ -4,7 +4,6 @@ NULL
 #' Set priors to an existing distribution object
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param prior A [`Prior-class`] object containing a single prior
 #' @param priors A [`PriorList-class`] object containing multiple priors
 #' @param ... Other parameters passed down
 
@@ -35,22 +34,63 @@ methods::setGeneric(
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, prior = NULL, priors = NULL, ... ) {
+  function(x, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.null(prior) || inherits(prior, c('INLAPrior', 'GDBPrior')),
-                            is.null(priors) || inherits(priors, "PriorList")
+                            is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
     )
 
     #FIXME: Ideally check whether provided prior is already in object. Either per id or per variable match
 
-    if(!is.null(prior)){
-      x <- x$set_priors(
-        priors(prior)
-      )
+    # Convert to prior list object
+    if(inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')){
+      priors <- priors(priors)
     }
     if(!is.null(priors)){
       x <- x$set_priors( priors )
     }
+    # Return x with newly added priors
+    x
+  }
+)
+
+#' Remove existing priors from an existing distribution object
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param names A [`vector`] or [`character`] object for priors to be removed
+#' @param ... Other parameters passed down
+
+#' @details TBD
+#' @section Notes:
+#' @aliases add_predictors
+#' @references
+#'
+#' @examples
+#' \dontrun{
+#'  TBD
+#' }
+#' @name rm_priors
+NULL
+
+#' @name rm_priors
+#' @rdname rm_priors
+#' @exportMethod rm_priors
+#' @export
+methods::setGeneric(
+  "rm_priors",
+  signature = methods::signature("x"),
+  function(x, names = NULL, ...) standardGeneric("rm_priors"))
+
+#' @name rm_priors
+#' @rdname rm_priors
+#' @usage \S4method{rm_priors}{BiodiversityDistribution}(x)
+methods::setMethod(
+  "rm_priors",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x, names = NULL ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.null(names) || is.vector(names) || is.character(names)
+    )
+    x <- x$rm_priors(names)
     # Return x with newly added priors
     x
   }
