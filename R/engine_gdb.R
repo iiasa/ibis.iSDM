@@ -219,7 +219,97 @@ engine_gdb <- function(x,
             "fit_cv" = cvm,
             "fit_best_equation" = equation,
             "prediction" = prediction
-          )
+          ),
+          # Project function
+          project = function(self, newdata){
+            assertthat::assert_that('fit_best' %in% names(self$fits),
+                                    is.data.frame(newdata) || is.matrix(newdata),
+                                    assertthat::has_name(newdata,c('x','y'))
+                                    )
+            # Get model
+            mod <- self$get_data('fit_best')
+            # Check that all variables are in provided data.frame
+            assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
+
+            # Make empty template
+            temp <- raster::rasterFromXYZ(newdata[,c('x','y')])
+            # Predict
+            y <- suppressWarnings(
+              mboost::predict.mboost(object = mod,newdata = newdata,
+                                     type = 'response', aggregate = 'sum')
+            )
+            assertthat::assert_that(raster::ncell(temp)==nrow(y))
+            temp[] <- y[,1]
+            return(temp)
+          },
+          # Spatial partial effect plots
+          spartial = function(self, what, plot = TRUE){
+            assertthat::assert_that('fit_best' %in% names(self$fits),
+                                    is.character(what))
+            # Get model and make empty template
+            mod <- self$get_data('fit_best')
+            # Also check that what is present in coefficients of model
+            assertthat::assert_that(what %in%  as.character( mboost::extract(mod,'variable.names') ))
+
+            # Make template of target variable(s)
+            temp <- raster::rasterFromXYZ(cbind(self$model$predictors$x,self$model$predictors$y))
+            # Get target variables and predict
+            target <- self$model$predictors[,c('x','y',what)]
+
+            y <- suppressWarnings(
+              mboost::predict.mboost(mod,newdata = target, which = what)
+            )
+            assertthat::assert_that(nrow(target)==nrow(y))
+            temp[] <- y[,2]
+            names(temp) <- paste0('partial__',what)
+
+            if(plot){
+              # Plot both partial spatial partial
+              par.ori <- par(no.readonly = TRUE)
+              par(mfrow = c(1,3))
+              raster::plot(temp,main = expression(f[partial]), col =
+                             c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01")
+              )
+              mboost::plot.mboost(mod,which = what)
+              par(par.ori)
+            }
+
+            return(temp)
+          },
+          # Spatial latent effect
+          plot_spatial = function(self, plot = TRUE){
+            assertthat::assert_that('fit_best' %in% names(self$fits) )
+            # Get model and make empty template
+            mod <- self$get_data('fit_best')
+            # Also check that what is present in coefficients of model
+            vars <- as.character( mboost::extract(mod,'bnames') )
+            assertthat::assert_that(length(grep('bspatial',vars))>0,
+                                    msg = 'No spatial effect found in model!')
+
+            # Make template of target variable(s)
+            temp <- raster::rasterFromXYZ(cbind(self$model$predictors$x,self$model$predictors$y))
+            # Get target variables and predict
+            target <- self$model$predictors[,c('x','y')]
+
+            y <- suppressWarnings(
+              mboost::predict.mboost(mod,newdata = target, which = c('x','y'))
+            )
+            assertthat::assert_that(nrow(target)==nrow(y))
+            temp[] <- y[,2]
+            names(temp) <- paste0('partial__','space')
+            # Mask with background
+            temp <- raster::mask(temp, self$model$background )
+
+            if(plot){
+              # Plot both partial spatial partial
+              raster::plot(temp, main = expression(f[partial]), col =
+                             c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01")
+              )
+            }
+
+            return(temp)
+
+          }
         )
         return(out)
       }

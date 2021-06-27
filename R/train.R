@@ -28,7 +28,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -36,7 +36,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE) {
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
@@ -53,12 +53,16 @@ methods::setMethod(
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
 
     # --- #
+    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = FALSE
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
     settings$set('varsel', varsel)
     settings$set('inference_only', inference_only)
     settings$set('verbose', verbose)
+    # Other settings
+    mc <- match.call(expand.dots = FALSE)
+    settings$data <- c( settings$data, mc$... )
     # Start time
     settings$set('start.time', Sys.time())
 
@@ -155,7 +159,7 @@ methods::setMethod(
       )
 
       # Check whether predictors should be refined and do so
-      if(rm_corPred && model[['predictors_names']] != 'dummy'){
+      if(settings$get('rm_corPred') && model[['predictors_names']] != 'dummy'){
         message('Removing highly correlated variables...')
         test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
 
@@ -259,12 +263,17 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw1 fits
-          var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-          var_rw1 <- names(which(var_rw1 > 150)) # Get only those greater than 150 unique values (arbitrary)
-          var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
-          #var_rw1 <- c()
-          # Set remaining variables to linear
-          var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
+          if(is.Waiver(settings$get('only_linear'))){
+            var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
+            var_rw1 <- names(which(var_rw1 > 150)) # Get only those greater than 150 unique values (arbitrary)
+            var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
+            # Set remaining variables to linear
+            var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
+          } else {
+            var_rw1 <- c()
+            # Set remaining variables to linear
+            var_lin <- model$biodiversity[[id]][['predictors_names']]
+          }
 
           # Construct formula with all variables
           form <- paste('observed', '~', 0, '+ intercept',
@@ -299,7 +308,8 @@ methods::setMethod(
                                                 'prec.linear = ', model$priors$get(vn)[2],')',
                                                 collapse = ' + ' ) )
               } else if(vt == 'pc.prec' || vt == 'loggamma'){
-                # Add RW effects with pc priors. Default is a loggamma prior with mu 1, 5e-05
+                # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                # Default is a loggamma prior with mu 1, 5e-05
                 form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
                                                  # 'scale.model = TRUE,',
                                                  'hyper = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )
@@ -400,20 +410,24 @@ methods::setMethod(
             miss <- model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %notin% supplied_priors]
             if(length(miss)>0){
               # Add linear predictors
-              form <- paste(form, paste0('bols(',miss,')',collapse = ' + '), ' + ')
-              # And smooth effects
-              form <- paste(form, paste0('bbs(', miss,', knots = 4)',
-                                         collapse = ' + '
-              ))
+              form <- paste(form, paste0('bols(',miss,')',collapse = ' + '))
+              if(is.Waiver(settings$get('only_linear'))){
+                # And smooth effects
+                form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
+                                           collapse = ' + '
+                ))
+              }
             }
           } else {
             # Add linear predictors
-            form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '), ' + ')
+            form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '))
+            if(is.Waiver(settings$get('only_linear'))){
             # And smooth effects
-            form <- paste(form, paste0('bbs(',
+            form <- paste(form, ' + ', paste0('bbs(',
                                        model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
                                        collapse = ' + '
             ))
+            }
           }
           # Convert to formula
           form <- to_formula(form)
@@ -507,20 +521,24 @@ methods::setMethod(
             miss <- model$biodiversity[[id]]$predictors_names[model$biodiversity[[id]]$predictors_names %notin% supplied_priors]
             if(length(miss)>0){
               # Add linear predictors
-              form <- paste(form, paste0('bols(',miss,')',collapse = ' + '), ' + ')
+              form <- paste(form, paste0('bols(',miss,')',collapse = ' + ') )
               # And smooth effects
-              form <- paste(form, paste0('bbs(', miss,', knots = 5)',
-                                         collapse = ' + '
-              ))
+              if(is.Waiver(settings$get('only_linear'))){
+                form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 5)',
+                                           collapse = ' + '
+                ))
+              }
             }
           } else {
             # Add linear predictors
-            form <- paste(form, paste0('bols(',model$biodiversity[[id]]$predictors_names,')',collapse = ' + '), ' + ')
-            # And smooth effects
-            form <- paste(form, paste0('bbs(',
-                                       model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
-                                       collapse = ' + '
-            ))
+            form <- paste(form, paste0('bols(',model$biodiversity[[id]]$predictors_names,')',collapse = ' + ') )
+            if(is.Waiver(settings$get('only_linear'))){
+              # And smooth effects
+              form <- paste(form, ' + ', paste0('bbs(',
+                                         model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
+                                         collapse = ' + '
+              ))
+            }
           }
           # Convert to formula
           form <- to_formula(form)
@@ -600,11 +618,13 @@ methods::setMethod(
             miss <- model$biodiversity[[id]]$predictors_names[model$biodiversity[[id]]$predictors_names %notin% supplied_priors]
             if(length(miss)>0){
               # Add linear predictors
-              form <- paste(form, paste0('bols(',miss,')',collapse = ' + '), ' + ')
-              # And smooth effects
-              form <- paste(form, paste0('bbs(', miss,', knots = 5)',
-                                         collapse = ' + '
-              ))
+              form <- paste(form, paste0('bols(',miss,')',collapse = ' + ') )
+              if(is.Waiver(settings$get('only_linear'))){
+                # And smooth effects
+                form <- paste(form,' + ', paste0('bbs(', miss,', knots = 5)',
+                                           collapse = ' + '
+                ))
+              }
             }
           }
           # Convert to formula

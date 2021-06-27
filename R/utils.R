@@ -195,7 +195,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
   te <- attr(stats::terms.formula(form),'term.label')
   # Varnames
   varnames <- all.vars(form)
-  varnames <- varnames[varnames %notin% c('spde','spatial.field','observed')] # Exclude things not necessarily needed in there
+  varnames <- varnames[varnames %notin% c('spde','spatial.field','observed','intercept')] # Exclude things not necessarily needed in there
   # Variable length
   fl <- length(varnames)
   # --- #
@@ -215,11 +215,16 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 
     # Construct formulas ---
     # Original form
-    form_temp <- c(form_temp, as.character(form))
+    form_temp <- c(form_temp, deparse1(form))
 
     # Intercept only
     form_temp <- c(form_temp,
                    paste0(response,' ~ 0 +', paste(val_int,collapse = ' + ') ))
+
+    # Add all linear variables as base
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 +', paste(val_int,collapse = ' + '),
+                          '+', paste0(varnames, collapse = ' + ') ))
 
     # Intercept + linear effect
     if(length(val_lin)>0){
@@ -258,6 +263,11 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                      '+',
                      paste(val_spde,collapse = ' + '),'+',paste(val_lin,collapse = ' + '))
       )
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 +', paste(val_int,collapse = ' + '),
+                            '+', paste0(varnames, collapse = ' + '),
+                            '+',paste(val_spde,collapse = ' + ')))
+
     }
     # intercept + rw1 + spde
     if(length(val_spde)>0 && length(val_rw1)>0){
@@ -317,7 +327,8 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     # Note this ignores unique combinations
     form_temp <- c()
     for(i in 1:fl) {
-      new <- paste0(response, '~ 0 + ', paste(varnames[1:i],collapse = ' + ') )
+      new <- paste0(response, '~ 0 + ',paste(val_int,collapse = '+'),'+',
+                    paste(varnames[1:i],collapse = ' + ') )
       form_temp <- c(form_temp, new)
     }
 
@@ -328,7 +339,9 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
       purrr::map(~ combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
       unlist(recursive = F)
 
-    form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ", paste(.x, collapse = " + ")) )
+    form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ",
+                                                      paste(val_int,collapse = '+'),'+',
+                                                      paste(.x, collapse = " + ")) )
   }
 
   return(form_temp)

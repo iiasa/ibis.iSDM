@@ -618,7 +618,7 @@ engine_inla <- function(x,
                 "prediction" = prediction
                 ),
               # Function to plot SPDE if existing
-              plot_spde = function(self, dim = c(300,300), kappa_cor = FALSE, dis = NULL,...){
+              plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, dis = NULL,...){
                 assertthat::assert_that(is.vector(dim), is.numeric(dis) || is.null(dis))
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {

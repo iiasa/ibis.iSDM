@@ -216,9 +216,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
 
   if(process_in_parallel){
-    require(doParallel)
+    suppressPackageStartupMessages(require(doParallel))
+
     # Split coordinates into equal batches by modulo division
     coords_split <- (1:nrow(coords) %/% 10)
+
     cl <- doParallel::registerDoParallel()
     out <- foreach(z = iterators::iter(unique(coords_split)),
                        .combine = 'rbind',

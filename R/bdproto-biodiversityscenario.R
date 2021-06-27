@@ -70,32 +70,28 @@ BiodiversityScenario <- bdproto(
     # convert time dimension to Posix
     new_preds$Time <- as.POSIXct( new_preds$Time )
     # Convert all units classes to numeric to avoid problems
-    new_preds[,pred_names] <- apply(new_preds[,pred_names], 2, function(x) as.numeric(x) )
+    new_preds <- units::drop_units(new_preds)
 
     # --- #
-    # Now for each unique element, loop and project in order
-    for(times in sort(unique(new_preds$Time))){
-      myLog('Projecting time stamp', times)
-      nd <- subset(new_preds, Time == times)
-      out <- fit$project(newdata = nd)
-    }
-
-    # Check whether projection function exists in model
-    if('project' %notin% names(fit) ){
-      warning('Model engine has no projection method yet implemented!')
-      return(NULL)
-    }
-
-    if(inherits(fit, 'GDB-Model')) {
+    if(inherits(fit, 'GDB-Model') || inherits(fit, 'BART-Model') ) {
+      # Now for each unique element, loop and project in order
+      proj <- raster::stack()
+      pb <- progress::progress_bar$new(total = length(unique(new_preds$Time)))
+      for(times in sort(unique(new_preds$Time))){
+        nd <- subset(new_preds, Time == times)
+        out <- fit$project(newdata = nd)
+        names(out) <- paste0('pred_',make.names(times))
+        proj <- raster::addLayer(proj, out)
+        pb$tick()
+      }
+      proj <- raster::setZ(proj, as.Date(sort(unique(new_preds$Time))) )
+      rm(pb)
     } else if(inherits(fit, 'INLA-Model')) {
-    } else if(inherits(fit, 'BART-Model')) {
-
+      # TODO: See how multiple stacks can be added to the prediction
     }
-
-    if(!is.Waiver(fit) && !is.Waiver(new_preds)){
-      proj <- predict(fit, newdata = new_preds)
-      return(proj)
-    } else { NULL }
+    # Should projections be saved in a list or only the lastest one?
+    self$scenarios <- proj
+    invisible()
   },
   # Get Model
   get_model = function(self){
@@ -122,7 +118,7 @@ BiodiversityScenario <- bdproto(
   },
   # Get constrains for model
   get_constrains = function(self){
-    # TODO:
+    # TODO: To be implemented
     return(new_waiver())
   },
   # Show the name of the Model

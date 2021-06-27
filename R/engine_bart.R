@@ -249,10 +249,13 @@ engine_bart <- function(x,
             return(p)
           },
           # Engine-specific projection function
-          project = function(self, newdata, rowids){
+          project = function(self, newdata, summary = 'mean'){
             assertthat::assert_that(!missing(newdata),
                                     is.data.frame(newdata))
 
+            # Define rowids as those with no missing data
+            newdata$rowid <- rownames(newdata)
+            newdata <- subset(newdata, complete.cases(newdata))
             # Make a prediction
             suppressWarnings(
               pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
@@ -261,25 +264,24 @@ engine_bart <- function(x,
               )
             # Fill output with summaries of the posterior
             prediction <- emptyraster(self$fits$prediction) # Background
-            prediction[] <- apply(pred_bart, 2, mean)
-            names(prediction) <- 'mean'
-            prediction <- raster::stack(prediction)
+            prediction[as.numeric(newdata$rowid)] <- apply(pred_bart, 2, mean)
 
-            # Summarize quantiles and sd from posterior
-            ms <- as.data.frame(
-              cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                     matrixStats::colSds(pred_bart)
-              )
-            )
-            names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
-            # Add them
-            for(post in names(ms)){
-              prediction2 <- self$get_data('template')
-              prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
-              prediction <- raster::addLayer(prediction, prediction2)
-              rm(prediction2)
-            }
-
+            # TODO: Generalize uncertainty prediction
+            # # Summarize quantiles and sd from posterior
+            # ms <- as.data.frame(
+            #   cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+            #          matrixStats::colSds(pred_bart)
+            #   )
+            # )
+            # names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
+            # # Add them
+            # for(post in names(ms)){
+            #   prediction2 <- self$get_data('template')
+            #   prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
+            #   prediction <- raster::addLayer(prediction, prediction2)
+            #   rm(prediction2)
+            # }
+            return(prediction)
           }
         )
         return(out)

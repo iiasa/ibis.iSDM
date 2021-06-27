@@ -75,7 +75,7 @@ DistributionModel <- bdproto(
   },
   # Show the name of the Model
   show = function(self) {
-    self$model$name
+    self$model$runname
   },
   # Plot the prediction
   plot = function(self, what = 'mean',...){

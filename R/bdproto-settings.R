@@ -41,9 +41,10 @@ Settings <- bdproto(
   },
   # Get setting
   get = function(self, what){
-    assertthat::assert_that(is.character(what),
-                            what %in% names(self$data))
-    return(self$data[[what]])
+    assertthat::assert_that(is.character(what))
+    if(what %in% names(self$data)){
+      return(self$data[[what]])
+    } else { return(new_waiver()) }
   },
   # Set setting
   set = function(self, what, x){
