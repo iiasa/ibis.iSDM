@@ -209,7 +209,9 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     val_lin <- grep(pattern = 'linear',x = te, value = T)
     val_rw1 <- grep(pattern = 'rw1',x = te,value = TRUE)
     # Alternative quadratic variables in case rw1 fails
-    if(length(val_rw1)>0) val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
+    if(length(val_rw1)>0){
+      val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
+    } else { val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
     val_spde <- grep(pattern = 'spde',x = te,value = TRUE)
     val_ofs <- grep(pattern = 'offset',x = te,value = TRUE)
 
@@ -241,13 +243,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                      '+',
                      paste(val_rw1,collapse = ' + '))
       )
-      # Alternative formulation using quadratic
-      form_temp <- c(form_temp,
-                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
-                            '+',
-                            paste0('I(',val_quad,'^2)',collapse = ' + '))
-      )
     }
+    # Alternative formulation using quadratic
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                          '+',
+                          paste0('I(',val_quad,'^2)',collapse = ' + '))
+    )
+
     # Intercept + spde
     if(length(val_spde)>0){
       form_temp <- c(form_temp,
@@ -276,6 +279,8 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                      '+',
                      paste(val_spde,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '))
       )
+    }
+    if(length(val_spde)>0){
       # Quad replacement
       form_temp <- c(form_temp,
                      paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
@@ -290,6 +295,9 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                             '+',
                             paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_spde,collapse = ' + '))
       )
+
+    }
+    if(length(val_spde)>0){
       # Quad replacement
       form_temp <- c(form_temp,
                      paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
@@ -312,12 +320,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                             '+',
                             paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
       )
-      # Quad replacement
-      form_temp <- c(form_temp,
-                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
-                            '+',
-                            paste(val_lin,collapse = ' + '),'+',
-                            paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
+    }
+    if(length(val_lin)>0 && length(val_ofs)>0){
+    # Quad replacement
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                          '+',
+                          paste(val_lin,collapse = ' + '),'+',
+                          paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
       )
     }
 
