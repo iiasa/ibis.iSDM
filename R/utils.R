@@ -241,13 +241,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                      '+',
                      paste(val_rw1,collapse = ' + '))
       )
-      # Alternative formulation using quadratic
-      form_temp <- c(form_temp,
-                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
-                            '+',
-                            paste0('I(',val_quad,'^2)',collapse = ' + '))
-      )
     }
+    # Alternative formulation using quadratic
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                          '+',
+                          paste0('I(',val_quad,'^2)',collapse = ' + '))
+    )
+
     # Intercept + spde
     if(length(val_spde)>0){
       form_temp <- c(form_temp,
@@ -276,6 +277,8 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                      '+',
                      paste(val_spde,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '))
       )
+    }
+    if(length(val_spde)>0){
       # Quad replacement
       form_temp <- c(form_temp,
                      paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
@@ -290,6 +293,9 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                             '+',
                             paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_spde,collapse = ' + '))
       )
+
+    }
+    if(length(val_spde)>0){
       # Quad replacement
       form_temp <- c(form_temp,
                      paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
@@ -312,12 +318,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
                             '+',
                             paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
       )
-      # Quad replacement
-      form_temp <- c(form_temp,
-                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
-                            '+',
-                            paste(val_lin,collapse = ' + '),'+',
-                            paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
+    }
+    if(length(val_lin)>0 && length(val_ofs)>0){
+    # Quad replacement
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                          '+',
+                          paste(val_lin,collapse = ' + '),'+',
+                          paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
       )
     }
 
