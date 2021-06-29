@@ -61,7 +61,6 @@ test_that('Create and add priors', {
   expect_equal(pg$get('bias'),'positive')
 })
 
-
 test_that('Add and modify priors to existing object', {
 
   skip_if_not_installed('INLA')
