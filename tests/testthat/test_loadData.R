@@ -3,19 +3,19 @@ context('Check if testing data can be loaded.')
 # Loading data that comes with the package
 test_that('Loading data',{
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   expect_s4_class(background,'Raster')
 
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'range',quiet = TRUE)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
   expect_s3_class(virtual_points,'sf')
   expect_s3_class(virtual_range,'sf')
   expect_true(unique(sf::st_geometry_type(virtual_points)) == 'POINT')
   expect_true(unique(sf::st_geometry_type(virtual_range)) == 'POLYGON')
 
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
   expect_gt(length(ll),0)
   expect_true(all( assertthat::has_extension(ll,'tif') ))
 

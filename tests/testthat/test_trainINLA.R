@@ -2,7 +2,8 @@ context('Train some model with INLA')
 
 # First check that INLA works
 test_that('Check that INLA works', {
-
+  skip_on_travis()
+  skip_on_cran()
   skip_if_not_installed('INLA')
 
   library(INLA)

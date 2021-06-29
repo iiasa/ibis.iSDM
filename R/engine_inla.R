@@ -139,7 +139,7 @@ engine_inla <- function(x,
                                       dims = c(300, 300))
           # Convert to raster stack
           out <- raster::stack(
-              SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
+              sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
                                       proj4string = self$data$mesh$crs )
             )
 

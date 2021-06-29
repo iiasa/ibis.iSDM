@@ -226,7 +226,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
                        .combine = 'rbind',
                        .inorder = FALSE,
                        .multicombine = TRUE,
-                       .errorhandling = 'stop',
+                       .errorhandling = 'pass',
                        .export = c('coords','coords_env','coords_split', 'disfun'),
                        .packages = c('geodist')
     ) %dopar% {
