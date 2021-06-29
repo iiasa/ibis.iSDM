@@ -64,17 +64,17 @@ PriorList <- bdproto(
     assertthat::assert_that(!missing(variable),
                             is.character(variable),
                             is.character(type) || is.null(type),
-                            msg = 'Specify a variable to query a prior.')
+                            msg = 'Specify a single variable to query a prior.')
     vn <- self$varnames()
     # If type is specified
     if(!is.null(type)){
       ty <- vapply(self$priors, function(x) x$type, character(1) )
       # Return the id of the combination
-      if((variable %in% vn) && (type %in% ty) ) return( names(vn)[which(variable %in% vn)] ) else return(NULL)
+      if((variable %in% vn) && (type %in% ty) ) return( names(vn)[which(variable == as.character(vn))] ) else return(NULL)
     } else {
-      # Simply match against variable names
+      # Simply match against variable names and return id
       if(!variable %in% vn) return(NULL)
-      return( names(vn)[which(variable %in% vn)] )
+      return( names(vn)[match(variable, vn,nomatch = 0)] )
     }
   },
   # Get specific prior values from the list if set
@@ -123,9 +123,12 @@ PriorList <- bdproto(
   # Combining function to combine this PriorList with another
   combine = function(self, x){
     assertthat::assert_that(inherits(x, 'PriorList'))
-    if(is.Waiver(self$priors)) self$priors <- x$priors
-    # Check whether priors on variable and type already exist. If yes, replace
-    for(p in x$priors) self$add(p)
+    if(is.Waiver(self$priors)){
+      self$priors <- x$priors
+    } else {
+      # Check whether priors on variable and type already exist. If yes, replace
+      for(p in x$priors) self$add(p)
+    }
   }
   # TODO: Plotting function. Plots the distribution of all priors
   # plot = function(self){

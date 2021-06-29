@@ -25,7 +25,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc'){
   } else if (variant == 'gpc2'){
     # Try to convert to spatial already
     if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
-    tiles <- SDraw::voronoi.polygons(SpatialPoints(mesh$loc[, 1:2]))
+    tiles <- SDraw::voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
     w <- sapply(1:length(tiles), function(p) {
       aux <- tiles[p, ]
 
@@ -79,7 +79,7 @@ mesh_as_sf <- function(mesh) {
              )
   }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
     # Convert the polygons to a SpatialPolygons object
-    SpatialPolygons(., proj4string = mesh$crs) %>%
+    sp::SpatialPolygons(., proj4string = mesh$crs) %>%
     # Convert to sf
     st_as_sf(.)
   # Calculate and add area to the polygon
@@ -297,7 +297,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 
   # TODO: Try and find an alternative to the splancs package to remove this dependent package
   suppressWarnings(
-    cellsIn <- !is.na(sp::over(x = SpatialPoints(projgrid$lattice$loc,
+    cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
                                        proj4string = as(background.g,'Spatial')@proj4string),
                                y = background.g))
   )

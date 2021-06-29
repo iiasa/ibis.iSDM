@@ -17,4 +17,7 @@
   # Set some default ibis options
   options('ibis.nthread' = parallel::detectCores() - 1)
   options('ibis.runparallel' = FALSE)
+  # Set S2 use for SF to false owing to the multiple bugs and errors with
+  # 29/06 To be changed later eventually
+  invisible( sf::sf_use_s2(FALSE) )
 }

@@ -1,3 +1,5 @@
+# Most of the testing code is obsolete. These tests were created to assess that
+# model objects are self-contained
 test_that('Check that objects are properly inherited', {
   # Load packages
   require(raster)
@@ -43,13 +45,13 @@ test_that('Check that objects are properly inherited', {
   expect_true(is.Waiver(x$engine))
 
   # Priors
-  x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'abc')))
+  x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal')))
   expect_true(is.Waiver(x$priors))
   x %>% add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
   # Two different priors
   x %>%
-    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'abc'))) %>%
+    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal'))) %>%
     add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
 
