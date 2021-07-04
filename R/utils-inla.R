@@ -479,3 +479,123 @@ manual_inla_priors <- function(prior){
     'uniform'  = return(UN.prior)
   )
 }
+
+#' Backward variable selection using INLA
+#'
+#' Ideally this procedure is replaced by a proper regularizing prior at some point...
+#' @param form A supplied [`formula`] object
+#' @param stack_data_resp A list containing inla stack data
+#' @param stk_inference An inla.data.stack object
+#' @param fam A [`character`] indicating the distribution to be fitted
+#' @param cf List of link functions to be used
+#' @param li Internal indication for the link function (Default: 1)
+#' @param response The response variable. If not specified, extract from formula (default: NULL)
+#' @param keep A [`vector`] of variables that are to be removed from model iterations (default: NULL)
+#' @noRd
+inla.backstep <- function(master_form,
+                          stack_data_resp, stk_inference,fam, cf, li = 1,
+                          response = NULL, keep = NULL
+                          ){
+  assertthat::assert_that(is.formula(master_form),
+                          is.list(stack_data_resp),inherits(stk_inference,'inla.data.stack'),
+                          is.character(fam), is.list(cf), !missing(li),
+                          is.null(response) || response %in% all.vars(master_form),
+                          is.null(keep) || is.character(keep) || is.vector(keep)
+                          )
+  # Get response term
+  if(is.null(response)) response <- all.vars(master_form)[1]
+  # Formula terms
+  te <- attr(stats::terms.formula(master_form),'term.label')
+  te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
+  # keep variables that are never removed
+  if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
+
+  assertthat::assert_that(length(te)>0, !is.null(response))
+  # --- #
+  # Iterate through unique combinations of variables backwards
+  pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
+  test_form <- master_form
+  not_found <- TRUE
+  results <- data.frame()
+  while(not_found) {
+    pb$tick()
+    # --- #
+    # Base Model #
+    fit <- try({INLA::inla(formula = test_form, # The specified formula
+                           data = stack_data_resp,  # The data stack
+                           E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
+                           Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
+                           family = fam,   # Family the data comes from
+                           control.family = cf, # Control options
+                           control.predictor=list(A = INLA::inla.stack.A(stk_inference),
+                                                  link = li,
+                                                  compute = FALSE),  # Compute for marginals of the predictors
+                           control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                           INLA::control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                           num.threads = getOption('ibis.nthread'),
+                           control.fixed = list(mean = 0),
+                           verbose = FALSE # Verbose for variable selection
+    )
+    },silent = TRUE)
+    if(class(fit)=='try-error') not_found <- FALSE
+
+    o <- data.frame(form = deparse1(test_form),
+                    converged = fit$ok,
+                    waic = fit$waic$waic,
+                    dic = fit$dic$dic,
+                    # conditional predictive ordinate values
+                    cpo = sum(log(fit$cpo$cpo)) * -2,
+                    mean.deviance = fit$dic$mean.deviance )
+
+    oo <- data.frame()
+
+    te <- attr(stats::terms.formula(test_form),'term.label')
+    te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
+    if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
+
+    # Now for each term in variable list
+    for(vars in te){
+      # New formula
+      new_form <- update(test_form,paste0('. ~ . - ',vars ))
+
+      fit <- try({INLA::inla(formula = new_form, # The specified formula
+                             data = stack_data_resp,  # The data stack
+                             E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
+                             Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
+                             family = fam,   # Family the data comes from
+                             control.family = cf, # Control options
+                             control.predictor=list(A = INLA::inla.stack.A(stk_inference),
+                                                    link = li,
+                                                    compute = FALSE),  # Compute for marginals of the predictors
+                             control.compute = list(cpo = TRUE,dic = TRUE, waic = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                             INLA::control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                             num.threads = getOption('ibis.nthread'),
+                             control.fixed = list(mean = 0),
+                             verbose = FALSE # Verbose for variable selection
+      )
+      },silent = TRUE)
+      if(class(fit)=='try-error') next()
+
+      oo <- rbind(oo, data.frame(form = deparse1(new_form),
+                                 converged = fit$ok,
+                                 waic = fit$waic$waic,
+                                 dic = fit$dic$dic,
+                                 # conditional predictive ordinate values
+                                 cpo = sum(log(fit$cpo$cpo)) * -2,
+                                 mean.deviance = fit$dic$mean.deviance )
+      )
+    } # End of loop
+
+    # Now check whether any of the new models are 'better' than the full model
+    # If yes, continue loop, if no stop
+    if(o$dic <= min(oo$dic)){
+      not_found <- FALSE
+      best_found <- o
+    } else {
+      # Get best model
+      test_form <- to_formula(oo$form[which.min(oo$dic)])
+    }
+    rm(o,oo)
+  } # End of While loop
+  return(best_found)
+}

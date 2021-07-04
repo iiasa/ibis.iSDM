@@ -39,8 +39,6 @@ methods::setMethod(
                             is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
     )
 
-    #FIXME: Ideally check whether provided prior is already in object. Either per id or per variable match
-
     # Convert to prior list object
     if(inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')){
       priors <- priors(priors)

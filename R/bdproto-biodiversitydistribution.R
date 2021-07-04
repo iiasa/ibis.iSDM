@@ -115,7 +115,7 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$priors)){
       bdproto(NULL, self, priors = x )
     } else {
-      # Get prior list
+      # Get old prior list and combine with the new one
       pl <- self$priors
       pl$combine( x )
       bdproto(NULL, self, priors = pl )

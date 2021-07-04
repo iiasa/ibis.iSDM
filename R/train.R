@@ -36,7 +36,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
+  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
@@ -53,7 +53,7 @@ methods::setMethod(
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
 
     # --- #
-    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = FALSE
+    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -63,6 +63,7 @@ methods::setMethod(
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
+    settings$set('only_linear',TRUE)
     # Start time
     settings$set('start.time', Sys.time())
 
@@ -184,8 +185,6 @@ methods::setMethod(
     # Get and assign Priors
     # FIXME: Type-specific priors?
     if(!is.Waiver(x$priors)){
-      # FIXME: Check whether prior objects match the used engine, otherwise raise warning
-      # if( unique(x$priors$classes()) == 'GDBPrior' && x$engine$name == '<INLA>' ) warning('Priors for wrong models specified, which will be ignored in the inference.')
       # First clean and remove all priors that are not relevant to the engine
       spec_priors <- switch(
         x$engine$name,
@@ -193,6 +192,8 @@ methods::setMethod(
         "<INLA>" = x$priors$classes() == 'INLAPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
+      # Check whether prior objects match the used engine, otherwise raise warning
+      if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 

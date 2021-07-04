@@ -43,11 +43,26 @@ methods::setMethod(
       msg = 'Only prior objects are supported.'
     )
 
-    if(is.list(x)){ ll <- x } else {
+    if(is.list(x)){
+        ll <- x
+        # Set names of list entries to their id
+        names(ll) <- sapply(ll, function(z) z$id )
+      } else {
       # Prior object list
       ll <- list()
       ll[[as.character(x$id)]] <- x
       for(var in dots) ll[[as.character(var$id)]] <- var
+      }
+    # Ensure that names of the list are identical to the prior ids
+    assertthat::assert_that(
+      all( sapply(ll, function(z) z$id ) %in% names(ll) )
+    )
+
+    # Assess duplicates of priors in order they appear in the list
+    vars <- vapply(ll, function(z) z$variable, character(1))
+    if(any(duplicated(vars))){
+      ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
+      warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
     }
 
     # Create new priorlist object and supply all objects here

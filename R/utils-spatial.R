@@ -207,7 +207,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   coords_env <- as.matrix(env[,field_space])
 
   # If either of the matrices are larger than 10000 records, process in parallel
-  process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 10000, TRUE, FALSE)
+  process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 100000, TRUE, FALSE)
 
   # Pairwise distance function
   # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
@@ -218,15 +218,15 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   if(process_in_parallel){
     suppressPackageStartupMessages(require(doParallel))
 
-    # Split coordinates into equal batches by modulo division
-    coords_split <- (1:nrow(coords) %/% 10)
+    # Split coordinates into equal size batches of 10
+    coords_split <- ggplot2::cut_width(1:nrow(coords),10,boundary=0)
 
-    cl <- doParallel::registerDoParallel()
+    cl <- doParallel::registerDoParallel(cores = getOption('ibis.nthread'))
     out <- foreach(z = iterators::iter(unique(coords_split)),
                        .combine = 'rbind',
                        .inorder = FALSE,
                        .multicombine = TRUE,
-                       .errorhandling = 'pass',
+                       .errorhandling = 'stop',
                        .export = c('coords','coords_env','coords_split', 'disfun'),
                        .packages = c('geodist')
     ) %dopar% {
@@ -246,8 +246,9 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
           } else return( env[d, ,drop = FALSE] )
         }, xy2 = coords_env)
       return(do.call(rbind, o))
-      }
+    }
     doParallel::stopImplicitCluster()
+    rm(cl)
   } else {
     env_sub <- apply(coords, 1, function(xy1, xy2) {
       dists <- disfun(xy2, xy1)

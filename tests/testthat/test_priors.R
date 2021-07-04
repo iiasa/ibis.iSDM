@@ -18,8 +18,9 @@ test_that('Create and add priors', {
 
   # Now add another prior
   new <- INLAPrior(variable = 'forest', type = 'normal', hyper = c(2, 0.5))
-  p1$add(new)
 
+  # Combine priors in list before adding
+  p1$add(new)
   expect_length(p1$varnames(),2)
   expect_vector(p1$varnames(),c('bias','forest'))
   expect_vector(p1$get('bias'), c(0,1e6))
@@ -39,19 +40,41 @@ test_that('Create and add priors', {
   expect_length(test2$varnames(), 2)
   expect_vector(test2$get('crops'), c(-2,200))
   expect_vector(test2$get('forest'), c(2,0.5))
+
   # Remove prior
   test2$rm( test2$exists('crops') )
   expect_equal(test2$length(),1)
   expect_null(test2$get('crops'))
 
-  # Combination
-  test3 <- priors(new1)
-  expect_error(test3$combine(new2))
-  test3$combine(priors(new2))
+  # Set as list
+  test3 <- priors(list(new1,new2))
+  expect_vector(test3$varnames(),c('forest','crops'))
+  expect_vector(test3$ids())
   expect_equal(test3$length(),2)
-
-  expect_vector(test3$get('crops'), c(-2,200))
   expect_vector(test3$get('forest'), c(2,0.5))
+
+  # Or differently set directly
+  test3b <- priors(new1,new2)
+  expect_vector(test3$varnames(),c('forest','crops'))
+  expect_vector(test3$get('crops'), c(-2,200))
+
+  # Combination
+  test4 <- priors(new1)
+  expect_error(test4$combine(new2))
+  test4$combine(priors(new2))
+  expect_equal(test4$length(),2)
+
+  expect_vector(test4$get('crops'), c(-2,200))
+  expect_vector(test4$get('forest'), c(2,0.5))
+
+  # Add two duplicate but different prior.
+  # Default behaviour is to take the last one and raise warning
+  new3 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(2, 0.5))
+  new4 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
+  expect_warning(priors(new3, new4))
+  suppressWarnings(pp <- priors(new3, new4))
+  expect_equal(pp$length(),1)
+  expect_equal(pp$get('crops'),c(-2,200))
 
   # ------- #
   # GDB priors just for reference

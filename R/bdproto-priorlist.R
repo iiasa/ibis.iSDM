@@ -57,6 +57,7 @@ PriorList <- bdproto(
   # Get types of all contained priors
   types = function(self){
     if(is.Waiver(self$priors)) return( character(0) )
+    if(!any(sapply(self$priors, function(x) length(x$type)>0))) return( character(0) ) # No types set
     vapply(self$priors, function(x) x$type, character(1) )
   },
   # Exists a specific prior for a variable and type combination?
