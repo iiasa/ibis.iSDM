@@ -163,6 +163,7 @@ engine_inla <- function(x,
 
         # For calculating iCAR process
         if(type == 'iCAR'){
+          stop('This is not implemented as of now.')
           # convert mesh to sf object
           ns <- mesh_as_sf(self$data$mesh)
           # Create adjacency matrix with queen's case

@@ -57,7 +57,7 @@ PriorList <- bdproto(
   # Get types of all contained priors
   types = function(self){
     if(is.Waiver(self$priors)) return( character(0) )
-    if(!any(sapply(self$priors, function(x) length(x$type)>0))) return( character(0) ) # No types set
+    if(!any(sapply(self$priors, function(x) base::length(x$type)>0))) return( character(0) ) # No types set
     vapply(self$priors, function(x) x$type, character(1) )
   },
   # Exists a specific prior for a variable and type combination?
@@ -67,11 +67,11 @@ PriorList <- bdproto(
                             is.character(type) || is.null(type),
                             msg = 'Specify a single variable to query a prior.')
     vn <- self$varnames()
+    vt <- self$types()
     # If type is specified
     if(!is.null(type)){
-      ty <- vapply(self$priors, function(x) x$type, character(1) )
       # Return the id of the combination
-      if((variable %in% vn) && (type %in% ty) ) return( names(vn)[which(variable == as.character(vn))] ) else return(NULL)
+      if((variable %in% vn) && (type %in% vt) ) return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] ) else return(NULL)
     } else {
       # Simply match against variable names and return id
       if(!variable %in% vn) return(NULL)
@@ -87,7 +87,11 @@ PriorList <- bdproto(
     # Check whether there is an id
     ex <- self$exists(variable, type)
     # Catch and return NULL in case if not set
-    if(is.null(ex)) ex else self$priors[[ex]]$get()
+    if(is.null(ex)) ex else {
+      # Get all values
+      vals <- lapply(self$priors, function(x) x$get() )
+      vals[[ex]]
+    }
   },
   # Collect priors from ids
   collect = function(self, id){

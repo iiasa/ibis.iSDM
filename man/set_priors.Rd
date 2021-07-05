@@ -5,7 +5,7 @@
 \alias{add_predictors}
 \title{Set priors to an existing distribution object}
 \usage{
-set_priors(x, prior = NULL, priors = NULL, ...)
+set_priors(x, priors = NULL, ...)
 
 \S4method{set_priors}{BiodiversityDistribution}(x)
 }

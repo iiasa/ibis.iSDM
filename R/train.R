@@ -53,7 +53,7 @@ methods::setMethod(
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
 
     # --- #
-    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE
+    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -63,7 +63,7 @@ methods::setMethod(
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
-    settings$set('only_linear',TRUE)
+    # settings$set('only_linear',TRUE)
     # Start time
     settings$set('start.time', Sys.time())
 

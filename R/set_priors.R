@@ -26,7 +26,7 @@ NULL
 methods::setGeneric(
   "set_priors",
   signature = methods::signature("x"),
-  function(x, prior = NULL, priors = NULL, ...) standardGeneric("set_priors"))
+  function(x, priors = NULL, ...) standardGeneric("set_priors"))
 
 #' @name set_priors
 #' @rdname set_priors
