@@ -1,5 +1,3 @@
-context('Prior settings')
-
 # First check that INLA works
 test_that('Create and add priors', {
 
@@ -75,6 +73,28 @@ test_that('Create and add priors', {
   suppressWarnings(pp <- priors(new3, new4))
   expect_equal(pp$length(),1)
   expect_equal(pp$get('crops'),c(-2,200))
+
+  # ------- #
+  # Testing spde priors and duplicates
+  spde1 <- INLAPrior(variable = 'spde', type = 'prior.range', hyper = c(1, 0.5))
+  spde2 <- INLAPrior(variable = 'spde', type = 'prior.sigma', hyper = c(1, 0.05))
+  ss <- priors(spde1,spde2)
+  expect_equal(ss$length(),2)
+  # Return hyper with defined variable
+  expect_vector(ss$get('spde','prior.range'), c(1, 0.5))
+
+  # Two duplicate INLA priors
+  new5 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(2, 0.5))
+  new6 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
+  expect_warning(nn <- priors(new5,new6))
+  expect_vector(nn$get('crops'), c(-2,200))
+
+  # Two gdb priors that are duplicate
+  gdb1 <- GDBPrior(variable = 'bias',hyper = 'positive')
+  gdb2 <- GDBPrior(variable = 'bias',hyper = 'negative')
+  expect_warning(gg <- priors(gdb1,gdb2))
+  expect_equal(gg$length(),1)
+  expect_equal(gg$get('bias'),'negative') # Should be last added one
 
   # ------- #
   # GDB priors just for reference

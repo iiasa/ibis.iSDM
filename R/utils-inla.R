@@ -537,7 +537,7 @@ inla.backstep <- function(master_form,
                            verbose = FALSE # Verbose for variable selection
     )
     },silent = TRUE)
-    if(class(fit)=='try-error') not_found <- FALSE
+    if(class(fit)=='try-error') {not_found <- FALSE;next()}
 
     o <- data.frame(form = deparse1(test_form),
                     converged = fit$ok,
@@ -588,7 +588,7 @@ inla.backstep <- function(master_form,
 
     # Now check whether any of the new models are 'better' than the full model
     # If yes, continue loop, if no stop
-    if(o$dic <= min(oo$dic)){
+    if(o$dic <= min(oo$dic,na.rm = TRUE)){
       not_found <- FALSE
       best_found <- o
     } else {

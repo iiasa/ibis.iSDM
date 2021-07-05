@@ -60,8 +60,10 @@ methods::setMethod(
 
     # Assess duplicates of priors in order they appear in the list
     vars <- vapply(ll, function(z) z$variable, character(1))
-    if(any(duplicated(vars))){
-      ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
+    types <- sapply(ll, function(z) z$type)
+    # Remove SPDE
+    if(any(duplicated(cbind(vars,types)))){
+      ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]
       warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
     }
 
