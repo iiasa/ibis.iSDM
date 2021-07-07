@@ -185,6 +185,8 @@ engine_gdb <- function(x,
         if(exists('cvm') && mstop(cvm) > 0){
           # Set the model to the optimal mstop to limit overfitting
           fit_gdb[mstop(cvm)]
+        } else {
+          cvm <- new_waiver()
         }
 
         # Predict spatially
