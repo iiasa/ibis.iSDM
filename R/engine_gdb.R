@@ -255,12 +255,13 @@ engine_gdb <- function(x,
             temp <- raster::rasterFromXYZ(cbind(self$model$predictors$x,self$model$predictors$y))
             # Get target variables and predict
             target <- self$model$predictors[,c('x','y',what)]
+            target$rowid <- as.numeric( rownames(target) )
+            assertthat::assert_that(nrow(target)==ncell(temp))
 
             y <- suppressWarnings(
               mboost::predict.mboost(mod,newdata = target, which = what)
             )
-            assertthat::assert_that(nrow(target)==nrow(y))
-            temp[] <- y[,2]
+            temp[target$rowid[which(!is.na(target[[what]]))]] <- y[,ncol(y)]
             names(temp) <- paste0('partial__',what)
 
             if(plot){
