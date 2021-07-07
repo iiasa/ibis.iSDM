@@ -14,6 +14,10 @@ Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
 LazyData: true
+Biarch: true
+SystemRequirements: GNU make
+Depends:
+    R(>= 4.0.0)
 Imports: 
     methods,
     ggplot2,
@@ -31,16 +35,23 @@ Imports:
     stars (>= 0.5),
     raster (>= 3.4-5),
     testthat (>= 3.0.0)
-Depends:
-    R(>= 4.0.0)
 Suggests:
-    INLA,
     deldir,
-    mboost,
+    INLA (>= 20.03.17),
+    mboost (>= 2.9-5),
     dbarts,
     progress,
-    rstan,
-    rstantools
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.1.1)
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.1
@@ -73,6 +84,7 @@ Collate:
     'engine_gdb.R'
     'utils-inla.R'
     'engine_inla.R'
+    'engine_stan.R'
     'misc.R'
     'plot.R'
     'print.R'
