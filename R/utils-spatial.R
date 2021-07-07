@@ -207,7 +207,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   coords_env <- as.matrix(env[,field_space])
 
   # If either of the matrices are larger than 10000 records, process in parallel
-  process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 100000, TRUE, FALSE)
+  if(is.null( getOption('ibis.runparallel') ) || getOption('ibis.runparallel') == TRUE ){
+    process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 100000, TRUE, FALSE)
+  } else {
+    process_in_parallel = FALSE
+  }
 
   # Pairwise distance function
   # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
@@ -275,16 +279,17 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
 #'
 #' @param env A [`Raster`] object
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','scale','norm','pca')
+#' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: c(.05,.95))
 #' @return Returns a adjusted [`Raster`] object of identical resolution
 #' @noRd
-predictor_transform <- function(env, option, ...){
+predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
    assertthat::assert_that(
      inherits(env,'Raster'),
      is.character(option),
-     option %in% c('none','pca', 'scale', 'norm')
+     base::length(option) == 1,   # TODO: incorporate possibility of doing multiple options at once and in the order they are supplied?
+     option %in% c('none','pca', 'scale', 'norm','windsor'),
+     is.numeric(windsor_props) & length(windsor_props)==2
    )
-  # TODO: Another option would be a windsoriation, e.g. cut of extremes
-  # TODO: incorporate possipibiltiy of doing multiple options at once
 
   # Nothing to be done
   if(option == 'none') return(env)
@@ -298,6 +303,17 @@ predictor_transform <- function(env, option, ...){
   # Scaling
   if(option == 'scale'){
     out <- raster::scale(env, center = TRUE, scale = TRUE)
+  }
+
+  # Windsorization
+  if(option == 'windsor'){
+    # FIXME: Possibly allow option to be suppilied for this one
+    xq <- stats::quantile(x = env[], probs = windsor_props, na.rm = TRUE)
+    min.value <- xq[1]
+    max.value <- xq[2]
+    out <- env
+    out[out < min.value] <- min.value
+    out[out > max.value] <- max.value
   }
 
   # Principle component separation of variables
