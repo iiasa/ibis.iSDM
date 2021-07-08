@@ -207,7 +207,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   coords_env <- as.matrix(env[,field_space])
 
   # If either of the matrices are larger than 10000 records, process in parallel
-  process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 100000, TRUE, FALSE)
+  if(is.null( getOption('ibis.runparallel') ) || getOption('ibis.runparallel') == TRUE ){
+    process_in_parallel = ifelse(nrow(coords) > 10000 || nrow(coords_env) > 100000, TRUE, FALSE)
+  } else {
+    process_in_parallel = FALSE
+  }
 
   # Pairwise distance function
   # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
