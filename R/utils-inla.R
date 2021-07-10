@@ -697,16 +697,19 @@ inla.backstep <- function(master_form,
       )
     } # End of loop
 
-    # Now check whether any of the new models are 'better' than the full model
-    # If yes, continue loop, if no stop
-    if(o$dic <= min(oo$dic,na.rm = TRUE)){
-      not_found <- FALSE
-      best_found <- o
-    } else {
-      # Get best model
-      test_form <- to_formula(oo$form[which.min(oo$dic)])
+    # Skip if DIC is NA
+    if(!is.na(o$dic) || nrow(oo) > 0) {
+      # Now check whether any of the new models are 'better' than the full model
+      # If yes, continue loop, if no stop
+      if(o$dic <= min(oo$dic,na.rm = TRUE)){
+        not_found <- FALSE
+        best_found <- o
+      } else {
+        # Get best model
+        test_form <- to_formula(oo$form[which.min(oo$dic)])
+      }
+      rm(o,oo)
     }
-    rm(o,oo)
   } # End of While loop
   return(best_found)
 }

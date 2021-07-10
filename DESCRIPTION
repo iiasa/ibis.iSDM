@@ -39,6 +39,7 @@ Suggests:
     mboost,
     dbarts,
     progress,
+    ellipsis,
     rstan,
     rstantools
 URL: https://github.com/iiasa/ibis.iSDM

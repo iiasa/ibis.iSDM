@@ -39,11 +39,12 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
-  function(x, env, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, priors, ...)
   }
 )
 
@@ -53,11 +54,12 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, priors, ...)
   }
 )
 
@@ -69,7 +71,7 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
-    # Try and match transform and derivatives arguements
+    # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
 
