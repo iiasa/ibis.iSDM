@@ -133,21 +133,23 @@ engine_inla <- function(x,
       plot = function(self, assess = FALSE){
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA::inla.mesh.assessment(self$data$mesh,
-                                      spatial.range = 3,
-                                      alpha = 2,
-                                      dims = c(300, 300))
+          out <- INLA::inla.mesh.assessment(
+              mesh = self$get_data('mesh'),
+              spatial.range = 3,
+              alpha = 2,
+              dims = c(300, 300)
+            )
           # Convert to raster stack
           out <- raster::stack(
               sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                      proj4string = self$data$mesh$crs )
+                                      proj4string = self$get_data('mesh')$crs )
             )
 
-          plot(out[[c('sd','sd.dev','edge.len')]],
+          raster::plot(out[[c('sd','sd.dev','edge.len')]],
                col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
                )
         } else {
-          plot( self$data$mesh )
+          INLA::plot.inla.mesh( self$get_data('mesh') )
         }
       },
       # Spatial latent function
@@ -555,7 +557,7 @@ engine_inla <- function(x,
             sp::SpatialPixelsDataFrame(
               points = predcoords,
               data = post,
-              proj4string = CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
           prediction <- raster::mask(prediction, model$background) # Mask with background

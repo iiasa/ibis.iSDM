@@ -72,13 +72,10 @@ BiodiversityDatasetCollection <- bdproto(
   # Get coordinates for a given biodiversity dataset. Else return a wkt object
   get_coordinates = function(self, id){
     assertthat::assert_that(is.Id(id) || is.character(id))
-    # if(x %in% c('poipo','poipa') ){
-      o <- self$get_data(id)
-      o[,c('X','Y')]
-    # } else {
-    # TODO: WKT to be implemented
-    # return(new_waiver())
-    # }
+    # Get data
+    o <- self$get_data(id)
+    # Return coordinates
+    if(hasName(o,'geom')) sf::st_coordinates(o$geom) else o[,c('X','Y')]
   },
   # Remove a specific biodiversity dataset by id
   rm_data = function(self, id) {
@@ -170,7 +167,9 @@ BiodiversityDatasetCollection <- bdproto(
     # Adding the other elements
     for(dataset in names(cols)){
 
-      if('Point - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]], colour = 'grey20', alpha = .35 )
+      if('Polygon - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]], fill = 'lightblue', alpha = .35 )
+
+      if('Point - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]], colour = 'grey20', alpha = .5 )
 
       if('Point - Presence absence' == self$get_types()[dataset] ){
         dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
