@@ -33,4 +33,4 @@ plot.PredictorDataset <- function(x, ...) x$plot(...)
 #' @rdname plot
 #' @method plot Engine
 #' @export
-plot.Engine <- function(x) x$plot()
+plot.Engine <- function(x,...) x$plot(...)

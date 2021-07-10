@@ -133,21 +133,23 @@ engine_inla <- function(x,
       plot = function(self, assess = FALSE){
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA::inla.mesh.assessment(self$data$mesh,
-                                      spatial.range = 3,
-                                      alpha = 2,
-                                      dims = c(300, 300))
+          out <- INLA::inla.mesh.assessment(
+              mesh = self$get_data('mesh'),
+              spatial.range = 3,
+              alpha = 2,
+              dims = c(300, 300)
+            )
           # Convert to raster stack
           out <- raster::stack(
               sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                      proj4string = self$data$mesh$crs )
+                                      proj4string = self$get_data('mesh')$crs )
             )
 
-          plot(out[[c('sd','sd.dev','edge.len')]],
+          raster::plot(out[[c('sd','sd.dev','edge.len')]],
                col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
                )
         } else {
-          plot( self$data$mesh )
+          INLA::plot.inla.mesh( self$get_data('mesh') )
         }
       },
       # Spatial latent function
@@ -555,7 +557,7 @@ engine_inla <- function(x,
             sp::SpatialPixelsDataFrame(
               points = predcoords,
               data = post,
-              proj4string = CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
           prediction <- raster::mask(prediction, model$background) # Mask with background
@@ -592,8 +594,8 @@ engine_inla <- function(x,
                   # FIXME: Potentially make the plotting of this more flexible
                   gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
                   g.mean <- INLA::inla.mesh.project(gproj,
-                                                    self$get_data('fit_pred')$summary.random$spatial.field$mean)
-                  g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_pred')$summary.random$spatial.field$sd)
+                                                    self$get_data('fit_best')$summary.random$spatial.field$mean)
+                  g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random$spatial.field$sd)
 
                   # Convert to rasters
                   g.mean <- t(g.mean)
@@ -612,9 +614,11 @@ engine_inla <- function(x,
                   )
 
                   spatial_field <- raster::stack(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
-                  # Mask with prediction
-                  spatial_field <- raster::resample(spatial_field, self$get_data('prediction')[[1]])
-                  spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
+                  # Mask with prediction if exists
+                  if(!is.null(self$get_data('prediction'))){
+                    spatial_field <- raster::resample(spatial_field, self$get_data('prediction')[[1]])
+                    spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
+                  }
 
                   # -- #
                   if(kappa_cor){

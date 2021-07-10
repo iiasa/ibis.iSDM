@@ -121,7 +121,7 @@ methods::setMethod(
       model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations %>% dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
       # FIXME: For polygons this won't work. Ideally switch to WKT as default in future
-      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations[,c('observed','x','y')] # Get only observed column and coordinates
+      model$biodiversity[[id]]$observations <- as.data.frame(model$biodiversity[[id]]$observations) # Get only observed column and coordinates
 
       # Now extract coordinates and extract estimates
       env <- get_ngbvalue(
@@ -194,6 +194,12 @@ methods::setMethod(
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
       if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
+      # Check whether all priors variables do exist as predictors, otherwise remove
+      if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
+       vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+       spec_priors$rm( spec_priors$exists(vv) )
+       warning('Variable for set prior not found. Removed prior!')
+      }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
@@ -402,6 +408,7 @@ methods::setMethod(
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
+              if(v %notin% model$biodiversity[[1]]$predictors_names) next() # In case the variable has been removed
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
                                          ', constraint = \'', model$priors$get(v) ,'\'',
@@ -513,6 +520,7 @@ methods::setMethod(
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
+              if(v %notin% model$biodiversity[[id]]$predictors_names) next() # In case the variable has been removed
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
                                          ', constraint = \'', model$priors$get(v) ,'\'',

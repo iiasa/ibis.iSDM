@@ -14,7 +14,7 @@
 
 \method{plot}{PredictorDataset}(x, ...)
 
-\method{plot}{Engine}(x)
+\method{plot}{Engine}(x, ...)
 }
 \arguments{
 \item{x}{Any object.}
