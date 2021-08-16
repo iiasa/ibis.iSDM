@@ -57,6 +57,8 @@ methods::setMethod(
     assertthat::assert_that(
       all( sapply(ll, function(z) z$id ) %in% names(ll) )
     )
+    assertthat::assert_that(all( sapply(ll, function(z) nchar(z$variable)) > 0 ),
+                            msg = 'Empty variable name. Possible error?')
 
     # Assess duplicates of priors in order they appear in the list
     vars <- vapply(ll, function(z) z$variable, character(1))

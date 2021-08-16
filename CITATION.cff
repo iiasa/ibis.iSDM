@@ -1,0 +1,10 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Jung
+given-names: Martin
+orcid: https://orcid.org/0000-0002-7569-1390
+title: "The ibis framework - An Integrated model for BiodIversity distribution projectionS"
+version: 0.1
+doi: NA
+date-released: 2021-01-08

@@ -66,5 +66,15 @@ is.Waiver <- function(x) inherits(x, "Waiver")
 #' @return Boolean evaluation
 #' @rdname is
 #' @export
-
 is.formula <- function(x) inherits(x, "formula")
+
+#' Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
+#'
+#' @param x an R Object.
+#' @return A boolean vector
+#' @rdname is
+#' @export
+is.raster <- function(x)
+{
+  return((class(x)[1]=="RasterLayer" || class(x)[1]=="RasterBrick" || class(x)[1]=="RasterStack"))
+}

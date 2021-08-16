@@ -14,6 +14,9 @@ test_that('Create and add priors', {
   expect_vector(p1$get('bias'), c(0,1e6))
   expect_equal(p1$priors[[1]]$get(), p1$get('bias'))
 
+  # Check empty priors
+  expect_error(priors( INLAPrior(variable = '', type = 'normal') ))
+
   # Now add another prior
   new <- INLAPrior(variable = 'forest', type = 'normal', hyper = c(2, 0.5))
 

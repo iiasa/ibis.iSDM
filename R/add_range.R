@@ -31,6 +31,10 @@ methods::setMethod(
                             inherits(range, 'Raster')
     )
     names(range) <- method
+
+    # Check that background and range align, otherwise raise error
+    assertthat::assert_that(compareRaster(range, x$background,stopiffalse = FALSE),msg = 'Supplied range does not align with background!')
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
       x <- add_predictors(x, env = range,transform = 'none',derivates = 'none', priors)
@@ -73,16 +77,19 @@ methods::setMethod(
     }
 
     # Rasterize the range
-    range$id <- 1:nrow(range) # Assign an id if not already existing
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(range, temp, field = 'id')
+      ras_range <- fasterize::fasterize(range, temp, field = NULL)
     } else {
-      ras_range <- raster::rasterize(range, temp,field = 'id')
+      ras_range <- raster::rasterize(range, temp,field = NULL)
     }
 
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
+      # Probability for which the species is not in the expert range map
+      dis <- dis + 0.001
+      # Transform to log-scale
+      dis <- log(dis)
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # TODO: The below can be much more sophisticated.
@@ -98,6 +105,10 @@ methods::setMethod(
       if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
       # Convert to relative for better scaling
       dis <- 1 - (dis / cellStats(dis,'max'))
+      # Probability for which the species is not in the expert range map
+      dis <- dis + 0.001
+      # Transform to log-scale
+      dis <- log(dis)
       names(dis) <- 'range_distance'
     }
 
@@ -151,6 +162,8 @@ methods::setMethod(
                             inherits(range, 'Raster')
     )
     names(range) <- name
+    assertthat::assert_that(compareRaster(range, x$background,stopiffalse = FALSE),msg = 'Supplied range does not align with background!')
+
     # Add as a new offset
     x <- x$set_offset(range)
     return(x)

@@ -181,11 +181,14 @@ coords_in_mesh <- function(mesh, coords) {
 #' Assuming that model coefficients are fixed and linear, it is possible
 #' to obtain comparable predictions simply by matrix multiplication.
 #'
+#' TODO: Switch to posterior sampling
+#' https://groups.google.com/g/r-inla-discussion-group/c/y-rQlDVtzmM
+#'
 #' @param mesh x A distribution object used for fitting an INLA model
 #' @param mod A trained distribution model
 #' @param type The summary statistic to use
 #' @param backtransf Either NULL or a function
-#' @param coords A matrix with coordinates or NULL. If NULL coordiantes are recreated from predictors
+#' @param coords A matrix with coordinates or NULL. If NULL coordinates are recreated from predictors
 #' @noRd
 
 coef_prediction <- function(mesh, mod, type = 'mean',
@@ -282,6 +285,102 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   # plot(temp, col = cols)
   return( temp )
 }
+
+#' Manual prediction by posterior simulation
+#'
+#' @param mod A trained distribution model
+#' @param backtransf Either NULL or a function
+#' @noRd
+post_prediction <- function(mod,
+                            backtransf = NULL){
+  assertthat::assert_that(!missing(mod),
+                          inherits(mod,'INLA-Model'),
+                          msg = 'This function only works for INLA models')
+  # Check whether data is all there
+  assertthat::assert_that(
+    utils::hasName(mod,'model'),
+    # length( grep('stk',x$engine$list_data()) )>0,
+    is.function(backtransf) || is.null(backtransf),
+    msg = 'Not all data and parameters needed for prediction are present!'
+  )
+
+  # Get formula
+  form <- mod$get_data('fit_best_equation')
+  if(length(grep(pattern = '\\*',deparse(form)))) stop('Interactions are not supported!')
+  # Check whether any rw1 effects are in the formula. If so return error
+  te <- attr(stats::terms.formula(form),'term.label')
+  if(length(grep(pattern = '\"rw',x = te))>0) stop('This function does not work with INLA rw effects!')
+
+  # Manual prediction
+  model <- mod$get_data('fit_best')
+  mesh <- mod$get_data('mesh')
+  # Covariates for prediction points
+  preds <- mod$model$predictors
+  ofs <- mod$model$offset
+  # Set intercept variables
+  preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
+
+  # Some checks between models and data
+  assertthat::assert_that(type %in% names(model$summary.fixed),
+                          all( rownames(model$summary.fixed) %in% names(preds) )
+  )
+
+  # Output raster
+  if(is.null(coords)) coords <- preds[,c('x','y')]
+  if(nrow(coords)!= nrow(preds)){
+    # Recalculate average predictors for new coordinates
+    preds <- get_ngbvalue(coords = coords,
+                          env = preds,
+                          longlat = isLonLat(mesh$crs),
+                          field_space = c('x','y'))
+  }
+  temp = rasterFromXYZ(coords)
+
+  # remake the A matrix for prediction
+  Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
+                                        loc = as.matrix( coords ))
+
+  # make empty matrix to fill predictions
+  out <- matrix(0, nrow = dim(Aprediction)[1], ncol = 1)
+  assertthat::assert_that(nrow(out)==nrow(preds))
+  for( n in rownames(model$summary.fixed) ) {
+    # If nrow(out) differ with preds, calculate nearest neighbours
+    out[,1] <- out[,1] + (model$summary.fixed[n, type] %*% preds[,n])
+  }
+
+  # create the spatial structure if existing
+  if( length(model$summary.random) >0){
+    assertthat::assert_that(length(model$summary.random) == 1, # FIXME: If multiple spatial latent effects this needs adapting
+                            'spatial.field' %in% names(model$summary.random),
+                            msg = 'Spatial random effect wrongly specified!')
+    # Check that type is present, otherwise use 'mean'
+    sfield_nodes <- model$summary.random[[1]][,type]
+    field <- (Aprediction %*% as.data.frame(sfield_nodes)[, 1] )
+    out <- out + field
+  }
+
+  # Add offset if specified
+  if(length(grep('offset\\(', deparse1(form)))>0 && !is.Waiver(ofs)){
+    if(nrow(coords)!= nrow(ofs)){
+      # Recalculate average predictors for new coordinates
+      ofs <- get_ngbvalue(coords = coords,
+                          env = ofs,
+                          longlat = isLonLat(mesh$crs),
+                          field_space = c('x','y'))
+    }
+    # ofs[is.na(ofs[,3]),3] <- 0
+    out <- out + ofs[,3]
+  }
+
+  # Fill output raster
+  temp[] <- out[, 1]
+  if(!is.null(backtransf)){
+    temp <- raster::calc(temp, backtransf)
+  }
+  # plot(temp, col = cols)
+  return( temp )
+}
+
 
 #' Make Integration stack
 #' @param mesh The background projection mesh
@@ -667,7 +766,7 @@ inla.backstep <- function(master_form,
     # Now for each term in variable list
     for(vars in te){
       # New formula
-      new_form <- update(test_form,paste0('. ~ . - ',vars ))
+      new_form <- update(test_form, paste0('. ~ . - ',vars ))
 
       fit <- try({INLA::inla(formula = new_form, # The specified formula
                              data = stack_data_resp,  # The data stack
@@ -696,6 +795,9 @@ inla.backstep <- function(master_form,
                                  mean.deviance = fit$dic$mean.deviance )
       )
     } # End of loop
+    # Remove all possible NA in DIC from the fitted models
+    oo <- base::subset.data.frame(oo,select = c('form','dic'))
+    oo <- base::subset.data.frame(oo, complete.cases(oo))
 
     # Skip if DIC is NA
     if(!is.na(o$dic) || nrow(oo) > 0) {
@@ -709,7 +811,15 @@ inla.backstep <- function(master_form,
         test_form <- to_formula(oo$form[which.min(oo$dic)])
       }
       rm(o,oo)
+    } else {
+      # Check whether formula is empty, if yes, set to not_found to FALSE
+      te <- attr(stats::terms.formula(test_form),'term.label')
+      if(length(te)==1){
+        not_found <- FALSE
+        best_found <- test_form
+      }
     }
+
   } # End of While loop
   return(best_found)
 }

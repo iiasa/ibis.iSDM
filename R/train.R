@@ -372,6 +372,7 @@ methods::setMethod(
                                        model$biodiversity[[id]]$predictors_names) )
           )
           # FIXME: check that
+          # TODO: Remove elements from predictors that are not used in the formula
           form <- to_formula( model$biodiversity[[id]]$equation )
         }
         # Update model formula in the model container
