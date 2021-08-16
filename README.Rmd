@@ -73,19 +73,19 @@ Note that the package in constant development and individual functions might cha
 ### Load package and make a basic model
 
 ```{r message=FALSE}
-library(ibis)
+library(ibis.iSDM)
 library(raster)
 library(sf)
 
 # Background area for prediction
-background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis'))
+background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
 
 # Get test species
-virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'points',quiet = TRUE)
-virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis'),'range',quiet = TRUE)
+virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
+virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
 
 # Get list of test predictors
-ll <- list.files(system.file('extdata/predictors/',package = 'ibis'),full.names = T)
+ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
 predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
 # --- #
@@ -94,7 +94,7 @@ x <- distribution(background) %>%
   # Add the presence only points (poipo) as dataset
   add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points') %>%
   # Add the environmental predictors and also scale them
-  add_predictors(predictors,transform = 'scale') %>% 
+  add_predictors(predictors,transform = 'scale',derivates = 'quadratic') %>% 
   # Use INLA with default parameters as fitting engine
   engine_inla()
 
@@ -108,7 +108,7 @@ Now train a model using INLA
 ```{r message = FALSE}
 
 # Train a Model with the chosen engine
-mod <- train(x, runname = 'INLA test run')
+mod <- train(x %>% set_priors(priors = INLAPrior('bio01_mean_50km','normal',c(2,100))), runname = 'INLA test run')
 
 # Shows the strongest effect by direction
 mod

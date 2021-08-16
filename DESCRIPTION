@@ -19,22 +19,26 @@ SystemRequirements: GNU make
 Depends:
     R(>= 4.0.0)
 Imports: 
-    methods,
-    ggplot2,
-    magrittr,
-    uuid,
+    assertthat (>= 0.2.0),
     doParallel,
     geodist,
+    ggplot2,
+    magrittr,
+    methods,
     ncdf4,
-    SDraw,
-    assertthat(>= 0.2.0),
-    rgeos (>= 0.5-5),
-    tibble (>= 2.0.0),
     proto (>= 1.0.0),
+    raster (>= 3.4-5),
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    rgeos (>= 0.5-5),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.1.1),
+    SDraw,
     sf (>= 0.9),
     stars (>= 0.5),
-    raster (>= 3.4-5),
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tibble (>= 2.0.0),
+    uuid
 Suggests:
     deldir,
     INLA (>= 20.03.17),
@@ -93,9 +97,11 @@ Collate:
     'priors.R'
     'scenario.R'
     'set_priors.R'
+    'stanmodels.R'
     'summary.R'
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
+    'utils-stan.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
