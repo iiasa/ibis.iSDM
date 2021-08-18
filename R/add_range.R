@@ -33,7 +33,10 @@ methods::setMethod(
     names(range) <- method
 
     # Check that background and range align, otherwise raise error
-    assertthat::assert_that(compareRaster(range, x$background,stopiffalse = FALSE),msg = 'Supplied range does not align with background!')
+    if(compareRaster(range, x$background,stopiffalse = FALSE)){
+      warning('Supplied range does not align with background! Aligning them now...')
+      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
+    }
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -162,7 +165,11 @@ methods::setMethod(
                             inherits(range, 'Raster')
     )
     names(range) <- name
-    assertthat::assert_that(compareRaster(range, x$background,stopiffalse = FALSE),msg = 'Supplied range does not align with background!')
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(range, x$background,stopiffalse = FALSE)){
+      warning('Supplied range does not align with background! Aligning them now...')
+      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
+    }
 
     # Add as a new offset
     x <- x$set_offset(range)
