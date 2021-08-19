@@ -10,7 +10,7 @@ test_that('Setting up a distribution model',{
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM'),full.names = T)
   # Load them as rasters
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -68,5 +68,11 @@ test_that('Setting up a distribution model',{
 
   expect_type(x$engine$get_data('mesh.area'),'double')
   expect_gt(sum(x$engine$get_data('mesh.area')),800)
+
+  # Add latent effect and see whether the attributes is changed
+  y <- x %>% add_latent_spatial()
+  expect_vector( attr(y$get_latent(),'spatial_model'),'spde')
+  expect_warning(y <- y %>% add_latent_spatial()) # Replacing the previous one
+  expect_vector( attr(y$get_latent(),'spatial_model'),'spde')
 
 })

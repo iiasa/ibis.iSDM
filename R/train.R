@@ -165,7 +165,10 @@ methods::setMethod(
         test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
 
         # Ignore variables for which we have priors
-        if(!is.Waiver(x$priors)) keep <- unique( as.character(x$priors$varnames()) ) else keep <- NULL
+        if(!is.Waiver(x$priors)){
+          keep <- unique( as.character(x$priors$varnames()) )
+          if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
+        } else keep <- NULL
 
         co <- find_correlated_predictors(env = test,
                                          keep = keep,

@@ -4,7 +4,7 @@
 \alias{is.Id}
 \alias{is.Waiver}
 \alias{is.formula}
-\alias{is.raster}
+\alias{is.Raster}
 \title{Is Id}
 \usage{
 is.Id(x)
@@ -13,7 +13,7 @@ is.Waiver(x)
 
 is.formula(x)
 
-is.raster(x)
+is.Raster(x)
 }
 \arguments{
 \item{x}{an R Object.}

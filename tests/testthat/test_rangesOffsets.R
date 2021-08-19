@@ -19,7 +19,9 @@ test_that('Load ranges and add them to distribution object', {
   # Now set them one up step by step
   x <- distribution(background)
   # This won't work since not aligned
-  expect_error(  x %>% add_range_predictor(virtual_range,method = 'distance') )
+  expect_warning(
+    expect_error(  x %>% add_range_predictor(virtual_range,method = 'distance') )
+  )
 
   # Try and add a range as raster
   virtual_range_ras <- raster::rasterize(virtual_range, background)
@@ -32,8 +34,6 @@ test_that('Load ranges and add them to distribution object', {
 
   # Artificially aggregate the range
   virtual_range_ras <- raster::aggregate(virtual_range_ras, 5)
-  expect_error( x %>% add_range_predictor(virtual_range_ras) )
-
-  expect_error( x %>% add_range_offset(virtual_range_ras) )
+  expect_s3_class( x %>% add_range_predictor(virtual_range_ras),class = "BiodiversityDistribution" )
 
 })

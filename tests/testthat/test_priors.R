@@ -111,8 +111,9 @@ test_that('Add and modify priors to existing object', {
 
   skip_if_not_installed('INLA')
   skip_on_cran()
+  library(raster)
 
-  background <- st_read('../EuropeBdry.gpkg')
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
   ll <- list.files('inst/extdata/predictors/',full.names = T)

@@ -74,7 +74,7 @@ is.formula <- function(x) inherits(x, "formula")
 #' @return A boolean vector
 #' @rdname is
 #' @export
-is.raster <- function(x)
+is.Raster <- function(x)
 {
   return((class(x)[1]=="RasterLayer" || class(x)[1]=="RasterBrick" || class(x)[1]=="RasterStack"))
 }

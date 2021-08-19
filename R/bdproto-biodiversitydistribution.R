@@ -96,8 +96,12 @@ BiodiversityDistribution <- bdproto(
       attr(type, 'spatial_model') <- spatial_model
     }
     if(!is.Waiver(self$latentfactors)){
-      bdproto(NULL, self, latentfactors = unique(c(self$latentfactors,type)) )
-    } else { bdproto(NULL, self, latentfactors = type ) }
+      warning('Overwritting existing latent effect')
+      bdproto(NULL, self, latentfactors = type )
+      # bdproto(NULL, self, latentfactors = unique(c(self$latentfactors,type)) )
+    } else {
+      bdproto(NULL, self, latentfactors = type )
+    }
   },
   # Get latent factors
   get_latent = function(self){

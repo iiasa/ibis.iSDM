@@ -693,6 +693,7 @@ manual_inla_priors <- function(prior){
 #' Backward variable selection using INLA
 #'
 #' Ideally this procedure is replaced by a proper regularizing prior at some point...
+#' Best model is assessed through their within-sample predictive accuracy via conditional predictive ordinate (CPO)
 #' @param form A supplied [`formula`] object
 #' @param stack_data_resp A list containing inla stack data
 #' @param stk_inference An inla.data.stack object
@@ -754,6 +755,8 @@ inla.backstep <- function(master_form,
                     waic = fit$waic$waic,
                     dic = fit$dic$dic,
                     # conditional predictive ordinate values
+                    # The sum of the log CPO’s and is an estimator for the log marginal likelihood.
+                    # The factor -2 is included as that places the measure on the same scale as other commonly used information criteria such as the DIC or WAIC.
                     cpo = sum(log(fit$cpo$cpo)) * -2,
                     mean.deviance = fit$dic$mean.deviance )
 
@@ -795,20 +798,20 @@ inla.backstep <- function(master_form,
                                  mean.deviance = fit$dic$mean.deviance )
       )
     } # End of loop
-    # Remove all possible NA in DIC from the fitted models
-    oo <- base::subset.data.frame(oo,select = c('form','dic'))
-    oo <- base::subset.data.frame(oo, complete.cases(oo))
+
+    # Best model among competing models has the largest CPO. Ratio of CPO (LPML really, e.g. the transformation above)
+    # is a surrogate for a Bayes Factor
 
     # Skip if DIC is NA
-    if(!is.na(o$dic) || nrow(oo) > 0) {
+    if(!is.na(o$cpo) || nrow(oo) > 0) {
       # Now check whether any of the new models are 'better' than the full model
       # If yes, continue loop, if no stop
-      if(o$dic <= min(oo$dic,na.rm = TRUE)){
+      if(o$cpo <= min(oo$cpo,na.rm = TRUE)){
         not_found <- FALSE
         best_found <- o
       } else {
         # Get best model
-        test_form <- to_formula(oo$form[which.min(oo$dic)])
+        test_form <- as.formula(oo$form[which.min(oo$cpo)])
       }
       rm(o,oo)
     } else {

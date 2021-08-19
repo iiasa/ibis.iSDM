@@ -76,7 +76,7 @@ methods::setMethod(
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(env, 'Raster'),
+                            is.Raster(env),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),

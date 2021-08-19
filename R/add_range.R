@@ -28,15 +28,16 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
   function(x, range, method = 'precomputed_range', priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(range, 'Raster')
+                            is.Raster(range),
+                            is.character(method)
     )
-    names(range) <- method
 
     # Check that background and range align, otherwise raise error
     if(compareRaster(range, x$background,stopiffalse = FALSE)){
       warning('Supplied range does not align with background! Aligning them now...')
       range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
+    names(range) <- method
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -140,6 +141,7 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param range A [`sf`] object with the range for the target feature
 #' @param method [`character`] describing how the range should be included (binary | distance)
+#' @param name [`character`] A name of the species if the offset is not specified
 #' @param distance_max Numeric threshold on the maximum distance (Default: 150000 [m])
 #' @name add_range_offset
 NULL
@@ -160,16 +162,17 @@ methods::setGeneric(
 methods::setMethod(
   "add_range_offset",
   methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
-  function(x, range, name = 'range_distance') {
+  function(x, range, method = 'range_distance') {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(range, 'Raster')
+                            is.Raster(range),
+                            is.character(method)
     )
-    names(range) <- name
     # Check that background and range align, otherwise raise error
     if(compareRaster(range, x$background,stopiffalse = FALSE)){
       warning('Supplied range does not align with background! Aligning them now...')
       range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
+    names(range) <- method
 
     # Add as a new offset
     x <- x$set_offset(range)
