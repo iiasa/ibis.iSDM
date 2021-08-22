@@ -83,6 +83,7 @@ Collate:
     'scenario.R'
     'set_priors.R'
     'summary.R'
+    'threshold.R'
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
