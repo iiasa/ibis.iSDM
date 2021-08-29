@@ -1,0 +1,66 @@
+url: https://iiasa.github.io/ibis.iSDM/
+
+template:
+  params:
+    bootswatch: flatly
+  opengraph:
+    twitter:
+      creator: "@Martin_Ecology"
+      site: "@IIASAVienna"
+      card: summary_large_image
+
+reference:
+  - title: Setting up and training models
+    desc: >
+      Key functions for setting up models and training them. Start with
+      distribution and see examples how to build a model
+    contents:
+        - distribution
+        - priors
+        - prior_gdb
+        - prior_inla
+        - train
+        - scenario
+
+  - title: Add data and parameters
+    desc: Function to add data and parameters to existing objects
+    contents:
+      - starts_with("add_")
+      - set_priors
+
+  - title: Engines
+    desc: Statistical models used for estimation of species distributions
+    contents:
+      - starts_with("engine_")
+
+  - title: Modifications and summaries
+    desc: Key functions to modify existing trained models
+    contents:
+      - similarity
+      - threshold
+
+  - title: Utility functions
+    desc: Functions used by engines or spatial processing
+    contents:
+      - starts_with("utils")
+
+  - title: Class definitions and methods
+    desc: >
+     These pages document the package's internal data structures and functions
+     for manipulating them---they contain information that is really only
+     useful when adding new functionality to the package.
+    contents:
+      - starts_with("bdproto-")
+
+  - title: Miscellaneous functions
+    desc: Other functions only relevant for development
+    contents:
+      - data
+      - print
+      - plot
+      - identifier
+      - misc
+      - summary
+      - effects
+      - waiver
+      - zzz
