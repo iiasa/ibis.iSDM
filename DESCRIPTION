@@ -82,6 +82,7 @@ Collate:
     'priors.R'
     'scenario.R'
     'set_priors.R'
+    'similarity.R'
     'summary.R'
     'threshold.R'
     'train.R'

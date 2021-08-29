@@ -510,6 +510,15 @@ engine_inla <- function(x,
           # Get thetas from initially fitted model as starting parameters
           thetas = fit_resp$mode$theta
 
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(stack_data_full)) next()
+              ind <- which(is.na(stack_data_full[['observed']])) # Get rows with non-observed values
+              stack_data_full[[settings$get('bias_variable')[i]]][ind] <- settings$get('bias_value')[i]
+            }
+          }
+
           # Predict on full
           fit_pred <- try({INLA::inla(formula = master_form, # The specified formula
                                  data  = stack_data_full,  # The data stack
@@ -644,19 +653,16 @@ engine_inla <- function(x,
                     dis.cor$cor[1] <- 1
                   # ---
                   # Build plot
-                  cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
-
                   layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
 
                   plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
                        xlab = 'Distance', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
-                  plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
+                  plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
                   plot(spatial_field[[2]], main = 'sd spatial effect')
                   } else {
                   # Just plot the SPDE
-                    cols <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
                     par(mfrow=c(1,2))
-                    plot(spatial_field[[1]],col = cols, main = 'mean spatial effect')
+                    plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
                     plot(spatial_field[[2]], main = 'sd spatial effect')
                     # And return
                     return(spatial_field)

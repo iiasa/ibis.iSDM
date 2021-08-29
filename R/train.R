@@ -10,6 +10,8 @@ NULL
 #' @param rm_corPred Remove highly correlated predictors. Default is True
 #' @param varsel Perform a variable selection on the set of predictors
 #' @param inference_only Fit model only without spatial prediction (Default: FALSE)
+#' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
+#' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: NULL)
 #' @param ... further arguments passed on.
 #'
 #' @details
@@ -28,7 +30,8 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -36,13 +39,16 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
+  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
       is.logical(rm_corPred),
       is.logical(inference_only),
+      is.null(bias_variable) || is.character(bias_variable),
+      is.null(bias_value) || is.numeric(bias_value),
       is.logical(verbose)
     )
     # Now make checks on completeness of the object
@@ -51,15 +57,19 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
-
+    if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
+      bias_variable <- new_waiver(); bias_value <- new_waiver()
+    }
     # --- #
-    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE
+    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
     settings$set('varsel', varsel)
     settings$set('inference_only', inference_only)
     settings$set('verbose', verbose)
+    settings$set('bias_variable', bias_variable)
+    settings$set('bias_value',bias_value)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -473,8 +483,8 @@ methods::setMethod(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
             template = bg,
-            npoints = 1000, # FIXME: Ideally query this from settings
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+            replace = TRUE
           )
           abs$intercept <- 1 # Add dummy intercept
           # Combine absence and presence and save
@@ -664,8 +674,8 @@ methods::setMethod(
           env = model$predictors,
           presence = model$biodiversity[[id]]$observations,
           template = x$engine$get_data('template'),
-          npoints = 1000,
-          replace = FALSE
+          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+          replace = TRUE
         )
         abs$intercept <- 1 # Add dummy intercept
         # Combine absence and presence and save
@@ -744,8 +754,8 @@ methods::setMethod(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
             template = bg,
-            npoints = 1000,
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
           # Combine absence and presence and save
@@ -851,8 +861,8 @@ methods::setMethod(
             env = model$predictors,
             presence = model$biodiversity[[id]]$observations,
             template = bg,
-            npoints = 1000,
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
           # Combine absence and presence and save

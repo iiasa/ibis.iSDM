@@ -6,7 +6,7 @@
 \usage{
 threshold(obj, method = "fixed", value = NULL, ...)
 
-\S4method{threshold}{DistributionModel, character}(obj, method)
+\S4method{threshold}{ANY, character}(obj, method)
 
 \S4method{threshold}{RasterBrick, character}(obj, method)
 
@@ -17,7 +17,7 @@ threshold(obj, method = "fixed", value = NULL, ...)
 
 \item{method}{A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'}
 
-\item{value}{A numeric value for thresholding or NULL}
+\item{value}{A numeric value for thresholding if method is fixed (Default: NULL)}
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training}
 }
@@ -29,7 +29,7 @@ Threshold with supplied DistributionModel object
 \details{
 'fixed' applies a single determined threshold
 'mtp' minimum training presence find and sets the lowest predicted suitability for any occurrence point
-'percentile'
+'percentile' For a percentile threshold
 }
 \examples{
 \dontrun{

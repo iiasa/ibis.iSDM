@@ -131,6 +131,7 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
+        if(is.numeric(data[['observed']])) data[['observed']] <- data[['observed']] / w
         full <- model$predictors # All predictors
 
         # Select predictors
@@ -176,6 +177,13 @@ engine_bart <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(full)) next()
+              full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            }
+          }
           # Make a prediction
           suppressWarnings(
             pred_bart <- dbarts:::predict.bart(fit_bart,
