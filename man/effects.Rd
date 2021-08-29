@@ -3,7 +3,7 @@
 \name{effects}
 \alias{effects}
 \alias{effects.DistributionModel}
-\title{effects}
+\title{Plot effects of trained model}
 \usage{
 \method{effects}{DistributionModel}(x, ...)
 }

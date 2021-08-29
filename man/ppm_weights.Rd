@@ -19,5 +19,8 @@ ppm_weights(df, pa, bg, weight = 1e-04)
 A vector with the weights
 }
 \description{
-Following Renner et al. 2015 (Point process models for presence-only analysis; GEB)
+Calculate weights for Point Process models
+}
+\references{
+Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 }

@@ -5,7 +5,7 @@
 \alias{pipe}
 \title{Pipe operator}
 \arguments{
-\item{lhs, rhs}{An object and a function.}
+\item{lhs, }{rhs An object and a function.}
 }
 \value{
 An object.

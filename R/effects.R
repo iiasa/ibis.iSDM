@@ -1,7 +1,7 @@
 #' @include utils.R
 NULL
 
-#' effects
+#' Plot effects of trained model
 #'
 #' Create a partial response or effect plot of a trained model
 #'

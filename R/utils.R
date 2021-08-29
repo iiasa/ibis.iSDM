@@ -5,7 +5,6 @@
 #' @param b Second [`vector`] object
 #' @keywords internal
 #' @noRd
-
 `%notin%` = function(a, b){!(a %in% b)}
 
 #' Custom logging function for scripts
@@ -15,7 +14,6 @@
 #' @param ... Any additional outputs or words for display
 #' @keywords internal
 #' @noRd
-
 myLog <- function(title = "[Processing]",...) {
   cat(paste0(title,' ', Sys.time(), " | ", ..., "\n"))
 }
@@ -40,11 +38,8 @@ mode <- function(x) {
 #' Check whether function exist in name space
 #'
 #' @param x The name of a package from which a function is needed
-#' @examples
-#'
 #' @keywords internal
 #' @noRd
-
 # You need the suggested package for this function
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
@@ -92,15 +87,14 @@ name_atomic <- function(x, description = "") {
   paste0(paste(x, collapse = ", "), " (", n, description, ")")
 }
 
-#' Align text
+#' Aligns text with new characters
 #'
 #' Format text by adding a certain number of spaces after new line characters.
-#'
-#' Helpful function taken from `prioritizr` package
 #'
 #' @param x [`character`] text.
 #' @param n [`integer`] number of spaces.
 #' @return [`character`].
+#' @concept function taken from `prioritizr` package
 #'
 #' @examples
 #' # make some text
@@ -133,7 +127,6 @@ align_text <- function(x, n) {
 #' capitalize_text('ducks are the best birds')
 #'
 #' @noRd
-
 capitalize_text <- function(x) {
   assertthat::assert_that(is.character(x))
   s <- strsplit(x, " ")[[1]]
@@ -148,6 +141,7 @@ logistic <- function(a){
   #assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
   exp(a)/(1 + exp(a))
 }
+
 #' Logit transformation function
 #' @param x A [`numeric`] value
 #' @noRd
@@ -159,9 +153,7 @@ logit <- function(a){
 #' Convert character to formula object
 #'
 #' @param x [`character`] text.
-#'
 #' @noRd
-
 to_formula <- function(formula){
   # Convert to formula object
   if(!is.null(formula)) {
@@ -183,7 +175,6 @@ to_formula <- function(formula){
 #' formula_combinations(form)
 #' }
 #' @noRd
-
 formula_combinations <- function(form, response = NULL, type= 'forward'){
   assertthat::assert_that(is.formula(form),
                           is.character(response) || is.null(response),
@@ -359,14 +350,12 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 
 #' Filter a set of correlated predictors to fewer ones
 #'
-#' Code inspired from the `caret` package
-#'
 #' @param env A [`data.frame`] with extracted environmental covariates for a given species
 #' @param keep A [`vector`] with variables to keep regardless
 #' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff
 #' @param method Which method to use for constructing the correlation matrix (pearson|spearman|kendal)
+#' @concept Code inspired from the [`caret`] package
 #' @returns vector of variable names to exclude
-
 find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method = 'pearson'){
   # Security checks
   assertthat::assert_that(is.data.frame(env),
@@ -422,7 +411,6 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
 #' @param replace Sample with replacement? (Default: False)
 #' @returns A [`data.frame`] containing the newly created pseudo absence points
 # TODO: Allow option to supply a bias raster for weighted sampling
-
 create_pseudoabsence <- function(env, presence, template = NULL, npoints = 1000, replace = FALSE){
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),

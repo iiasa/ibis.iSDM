@@ -17,11 +17,11 @@ is_comparable_raster <- function(x, y) {
                           stopiffalse = FALSE)
 }
 
-assertthat::on_failure(is_comparable_raster) <- function(call, env) {
-  paste0(deparse(call$x), " and ", deparse(call$y),  " are not comparable: ",
-         "they have different spatial resolutions, extents, ",
-         "coordinate reference systems, or dimensionality (rows / columns)")
-}
+# assertthat::on_failure(is_comparable_raster) <- function(call, env) {
+#   paste0(deparse(call$x), " and ", deparse(call$y),  " are not comparable: ",
+#          "they have different spatial resolutions, extents, ",
+#          "coordinate reference systems, or dimensionality (rows / columns)")
+# }
 
 #' Do extents intersect?
 #'
@@ -65,7 +65,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
   return(ov)
 }
 
-#' Converts a bounding box to a Well Known Text polygon
+#' Converts a bounding box to a Well Known Text (WKT) polygon
 #'
 #' @param minx Minimum x value, or the most western longitude
 #' @param miny Minimum y value, or the most southern latitude
@@ -76,7 +76,6 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
 #' @keywords internal
 #' @noRd
-
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
   assertthat::assert_that(length(bbox)==4) #check for 4 digits
@@ -95,7 +94,6 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #' @param f value to increase the extent (Default = 0.1)
 #' @return Returns the unified total extent object
 #' @noRd
-
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'Extent'))
   xi <- (e@xmax-e@xmin)*(f/2)
@@ -126,7 +124,6 @@ extent_expand <- function(e,f=0.1){
 #' @param cl Boolean value if multicore computation should be used (Default: TRUE)
 #' @return New [`Raster`] object aligned to the supplied template layer
 #' @noRd
-
 alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TRUE){
   # Security checks
   assertthat::assert_that(
@@ -160,8 +157,6 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 
 #' @title Create an empty \code{rasterLayer} based on a template
 #'
-#' @description .
-#'
 #' @param x a \code{raster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{raster}}
 #' @return an empty raster, i.e. all cells are \code{NA}.
@@ -172,17 +167,14 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 #' r <- raster(matrix(1:100, 5, 20))
 #' emptyraster(r)
 #' @noRd
-
 emptyraster <- function(x, ...) { # add name, filename,
-  assertthat::assert_that(inherits(x,'Raster'))
+  assertthat::assert_that(is.Raster(x))
   raster::raster(nrows=nrow(x), ncols=ncol(x),
                         crs=x@crs,
                         ext=extent(x), ...)
 }
 
-
 #' Function to extract nearest neighbour predictor values of provided points
-#'
 #'
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
@@ -192,9 +184,7 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @return Extracted data from each point
 #' @note If multiple values are of equal distance, average them
 #' @noRd
-
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
-
   # Security checks
   assertthat::assert_that(
     is.data.frame(coords) || inherits(coords,'sf') || inherits(coords,'matrix'),
@@ -444,7 +434,6 @@ predictor_derivate <- function(env, option, ...){
 #' @keywords internal
 #' @return A [`Raster-class`] object with number of columns equal to ncol(post)
 #' @noRd
-
 fill_rasters <- function(post, background){
   assertthat::assert_that(
     is.data.frame(post),ncol(post)>1,

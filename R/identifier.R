@@ -11,7 +11,7 @@ NULL
 #'
 #' @details Identifiers are made using the [uuid::UUIDgenerate()].
 #'
-#' @return `Id` object.
+#' @return [`Id`] object.
 #'
 #' @seealso [uuid::UUIDgenerate()].
 #'
@@ -29,7 +29,7 @@ NULL
 #' is.Id(i)
 #'
 #' @aliases Id
-#'
+#' @name new_id
 #' @export
 new_id <- function() {
   x <- uuid::UUIDgenerate()

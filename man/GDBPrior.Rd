@@ -21,10 +21,6 @@ Function to include prior information as monotonic constrain to a gradient desce
 \details{
 TBD
 }
-\section{Notes}{
-
-}
-
 \references{
 
 }

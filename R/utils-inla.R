@@ -6,7 +6,6 @@
 #' @param relative Should the total amount of area converted to relatives (Default: FALSE)
 #' @returns A [`vector`] with the area of each polygon
 #' @noRd
-
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE){
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
@@ -63,7 +62,6 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 #' @param mesh [`inla.mesh`] mesh object
 #' @returns A [`sf`] object
 #' @noRd
-
 mesh_as_sf <- function(mesh) {
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           mesh$manifold == 'R2' # Two-dimensional mesh
@@ -184,13 +182,12 @@ coords_in_mesh <- function(mesh, coords) {
 #' TODO: Switch to posterior sampling
 #' https://groups.google.com/g/r-inla-discussion-group/c/y-rQlDVtzmM
 #'
-#' @param mesh x A distribution object used for fitting an INLA model
-#' @param mod A trained distribution model
+#' @param mesh x A [`distribution`] object used for fitting an [INLA] model
+#' @param mod A trained [`distribution`] model
 #' @param type The summary statistic to use
 #' @param backtransf Either NULL or a function
-#' @param coords A matrix with coordinates or NULL. If NULL coordinates are recreated from predictors
+#' @param coords A [matrix] with coordinates or NULL. If NULL coordinates are recreated from predictors
 #' @noRd
-
 coef_prediction <- function(mesh, mod, type = 'mean',
                             backtransf = NULL,
                             coords = NULL){
@@ -380,7 +377,6 @@ post_prediction <- function(mod,
   # plot(temp, col = cols)
   return( temp )
 }
-
 
 #' Make Integration stack
 #' @param mesh The background projection mesh
@@ -616,7 +612,6 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 #' @param what A [`character`]
 #' @param ... Other options to based on
 #' @noRd
-
 #TODO: Lot more to add here, including options on what to extract
 tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(
@@ -692,8 +687,8 @@ manual_inla_priors <- function(prior){
 
 #' Backward variable selection using INLA
 #'
-#' Ideally this procedure is replaced by a proper regularizing prior at some point...
 #' Best model is assessed through their within-sample predictive accuracy via conditional predictive ordinate (CPO)
+#' Ideally this procedure is replaced by a proper regularizing prior at some point...
 #' @param form A supplied [`formula`] object
 #' @param stack_data_resp A list containing inla stack data
 #' @param stk_inference An inla.data.stack object

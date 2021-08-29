@@ -5,7 +5,7 @@
 \alias{summary.distribution}
 \alias{summary.DistributionModel}
 \alias{summary.PredictorDataset}
-\title{summary}
+\title{Summarises a trained model or predictor object}
 \usage{
 \method{summary}{distribution}(x)
 
