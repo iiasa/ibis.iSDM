@@ -60,4 +60,3 @@ logo.svg
 src/*.o
 src/*.so
 src/*.dll
-docs
