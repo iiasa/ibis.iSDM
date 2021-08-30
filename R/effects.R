@@ -9,10 +9,12 @@ NULL
 #' @param ... not used.
 #'
 #' @return None.
+#' @keywords misc
 #' @name effects
 NULL
 
 #' @rdname effects
 #' @method effects DistributionModel
+#' @keywords misc
 #' @export
 effects.DistributionModel <- function(x, ...) x$effects()

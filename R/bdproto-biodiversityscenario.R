@@ -8,8 +8,8 @@ NULL
 #' Prototype for a biodiversity scenario from a trained model
 #'
 #' @name BiodiversityScenario-class
-#'
 #' @aliases BiodiversityScenario
+#' @keywords bdproto
 NULL
 
 #' @export

@@ -30,6 +30,7 @@ NULL
 #'
 #' @aliases Id
 #' @name new_id
+#' @keywords misc
 #' @export
 new_id <- function() {
   x <- uuid::UUIDgenerate()
@@ -39,11 +40,13 @@ new_id <- function() {
 
 #' As Id
 #' @rdname as
+#' @keywords misc
 #' @export
 as.Id <- function(x, ...) UseMethod("as.Id")
 
 #' As Id character
 #' @rdname as
+#' @keywords misc
 #' @export
 as.Id.character <- function(x, ...) {
   class(x) <- c("Id", class(x))
@@ -52,11 +55,13 @@ as.Id.character <- function(x, ...) {
 
 #' Is Id
 #' @rdname is
+#' @keywords misc
 #' @export
 is.Id <- function(x) inherits(x, "Id")
 
 #' Is waiver
 #' @rdname is
+#' @keywords misc
 #' @export
 is.Waiver <- function(x) inherits(x, "Waiver")
 
@@ -65,6 +70,7 @@ is.Waiver <- function(x) inherits(x, "Waiver")
 #' @param x A [`character`] object
 #' @return Boolean evaluation
 #' @rdname is
+#' @keywords misc
 #' @export
 is.formula <- function(x) inherits(x, "formula")
 
@@ -73,6 +79,7 @@ is.formula <- function(x) inherits(x, "formula")
 #' @param x an R Object.
 #' @return A boolean vector
 #' @rdname is
+#' @keywords misc
 #' @export
 is.Raster <- function(x)
 {

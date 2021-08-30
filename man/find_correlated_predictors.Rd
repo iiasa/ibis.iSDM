@@ -22,3 +22,4 @@ vector of variable names to exclude
 Filter a set of correlated predictors to fewer ones
 }
 \concept{Code inspired from the [`caret`] package}
+\keyword{utils}

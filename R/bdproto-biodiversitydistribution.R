@@ -13,6 +13,7 @@ NULL
 #'
 #' @name BiodiversityDistribution-class
 #' @aliases BiodiversityDistribution
+#' @keywords bdproto
 NULL
 
 #' @export

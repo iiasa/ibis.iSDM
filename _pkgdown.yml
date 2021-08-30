@@ -1,8 +1,11 @@
 url: https://iiasa.github.io/ibis.iSDM/
 
+development:
+  mode: auto
+
 template:
   params:
-    bootswatch: flatly
+    bootswatch: yeti
   opengraph:
     twitter:
       creator: "@Martin_Ecology"
@@ -42,7 +45,21 @@ reference:
   - title: Utility functions
     desc: Functions used by engines or spatial processing
     contents:
-      - starts_with("utils")
+      - coords_in_mesh
+      - is_comparable_raster
+      - intersecting_extents
+      - point_in_polygon
+      - bbox2wkt
+      - extent_expand
+      - alignRasters
+      - emptyraster
+      - get_ngbvalue
+      - predictor_transform
+      - predictor_derivate
+      - clean_rasterfile
+      - writeGeoTiff
+      - writeNetCDF
+      - has_keyword("utils")
 
   - title: Class definitions and methods
     desc: >
@@ -50,17 +67,20 @@ reference:
      for manipulating them---they contain information that is really only
      useful when adding new functionality to the package.
     contents:
-      - starts_with("bdproto-")
+      - BiodiversityDataset
+      - BiodiversityDatasetCollection
+      - BiodiversityDistribution
+      - BiodiversityScenario
+      - DistributionModel
+      - Engine
+      - Prior
+      - PriorList
+      - Settings
+      - PredictorDataset
+      - Log
+      - has_keyword("bdproto")
 
   - title: Miscellaneous functions
     desc: Other functions only relevant for development
     contents:
-      - data
-      - print
-      - plot
-      - identifier
-      - misc
-      - summary
-      - effects
-      - waiver
-      - zzz
+      - has_keyword("misc")

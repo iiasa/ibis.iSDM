@@ -33,3 +33,4 @@ is.Id(i)
 \seealso{
 \code{\link[uuid:UUIDgenerate]{uuid::UUIDgenerate()}}.
 }
+\keyword{misc}

@@ -53,6 +53,9 @@ log_*
 .RData
 .Ruserdata
 
+# Ignore Ibis logo
+logo.svg
+
 # Ignore compiled RCPP data
 src/*.o
 src/*.so

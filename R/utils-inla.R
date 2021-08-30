@@ -5,6 +5,7 @@
 #' @param variant A character to which type of area calculation (Default: 'gpc')
 #' @param relative Should the total amount of area converted to relatives (Default: FALSE)
 #' @returns A [`vector`] with the area of each polygon
+#' @keywords utils
 #' @noRd
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE){
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
@@ -61,6 +62,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 #' Mesh to polygon script
 #' @param mesh [`inla.mesh`] mesh object
 #' @returns A [`sf`] object
+#' @keywords utils
 #' @noRd
 mesh_as_sf <- function(mesh) {
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
@@ -92,6 +94,7 @@ mesh_as_sf <- function(mesh) {
 
 #' Extract boundary points from mesh
 #' @param mesh A [`inla.mesh`] object
+#' @keywords utils
 #' @noRd
 mesh_boundary <- function(mesh){
   assertthat::assert_that(inherits(mesh,'inla.mesh'))
@@ -106,6 +109,7 @@ mesh_boundary <- function(mesh){
 #' https://www.sciencedirect.com/science/article/pii/S221167531830099X
 #' @param mesh A [`inla.mesh`] object
 #' @param region.poly A [`SpatialPolygons`] object
+#' @keywords utils
 #' @noRd
 mesh_barrier <- function(mesh, region.poly){
   assertthat::assert_that(
@@ -145,8 +149,8 @@ mesh_barrier <- function(mesh, region.poly){
 #'
 #' @param mesh A [`inla.mesh`] object
 #' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
+#' @keywords utils
 #' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
-#' @noRd
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
@@ -187,6 +191,7 @@ coords_in_mesh <- function(mesh, coords) {
 #' @param type The summary statistic to use
 #' @param backtransf Either NULL or a function
 #' @param coords A [matrix] with coordinates or NULL. If NULL coordinates are recreated from predictors
+#' @keywords utils
 #' @noRd
 coef_prediction <- function(mesh, mod, type = 'mean',
                             backtransf = NULL,
@@ -287,6 +292,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 #'
 #' @param mod A trained distribution model
 #' @param backtransf Either NULL or a function
+#' @keywords utils
 #' @noRd
 post_prediction <- function(mod,
                             backtransf = NULL){
@@ -386,6 +392,7 @@ post_prediction <- function(mod,
 #' @param bdry The boundary used to create the mesh
 #' @param id An id tag for this integration stack
 #' @param joint Whether a model with multiple likelihood functions is to be specified
+#' @keywords utils
 #' @noRd
 inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
                                         id,
@@ -455,6 +462,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
 #' @param spde An spde field if specified
 #' @param background A supplied background
 #' @param res Approximate resolution to the projection grid (default: null)
+#' @keywords utils
 #' @noRd
 inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area,
                                        background, type,
@@ -611,6 +619,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
 #' @param m A trained INLA model object
 #' @param what A [`character`]
 #' @param ... Other options to based on
+#' @keywords utils
 #' @noRd
 #TODO: Lot more to add here, including options on what to extract
 tidy_inla_summary <- function(m, what = 'fixed',...){
@@ -633,6 +642,7 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
 #' Plot marginal distributions of effects or hyperparameters from INLA model
 #' @param A INLA model
 #' @param what Either 'fixed' or 'hyper'
+#' @keywords utils
 #' @noRd
 plot_inla_marginals = function(inla.model, what = 'fixed'){
   assertthat::assert_that(inherits(inla.model,'inla'),
@@ -661,6 +671,7 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
 
 #' Additional INLA priors not already available
 #' @param prior Which prior to pick
+#' @keywords utils
 #' @noRd
 manual_inla_priors <- function(prior){
 
@@ -697,6 +708,7 @@ manual_inla_priors <- function(prior){
 #' @param li Internal indication for the link function (Default: 1)
 #' @param response The response variable. If not specified, extract from formula (default: NULL)
 #' @param keep A [`vector`] of variables that are to be removed from model iterations (default: NULL)
+#' @keywords utils
 #' @noRd
 inla.backstep <- function(master_form,
                           stack_data_resp, stk_inference,fam, cf, li = 1,

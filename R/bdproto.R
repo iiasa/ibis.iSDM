@@ -35,6 +35,7 @@ NULL
 #' Abacus$add(10)
 #' Abacus$subtract(10)
 #'
+#' @keywords bdproto
 #' @export
 #' @noRd
 bdproto <- function(`_class` = NULL, `_inherit` = NULL, ...) {

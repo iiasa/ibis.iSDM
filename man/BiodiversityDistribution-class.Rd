@@ -9,3 +9,4 @@ Base \code{\link{proto}} class for any biodiversity distribution objects.
 Serves as container that supplies data and functions to
 other \code{\link{proto}} classes.
 }
+\keyword{bdproto}

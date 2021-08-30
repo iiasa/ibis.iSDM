@@ -18,6 +18,7 @@ NULL
 #'    )
 #' }
 #' @aliases PriorList
+#' @keywords bdproto
 NULL
 
 #' @export
