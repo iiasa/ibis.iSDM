@@ -9,6 +9,7 @@ NULL
 #'
 #' @name PredictorDataset-class
 #' @aliases PredictorDataset
+#' @keywords bdproto
 NULL
 
 #' @export

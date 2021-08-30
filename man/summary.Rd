@@ -5,7 +5,7 @@
 \alias{summary.distribution}
 \alias{summary.DistributionModel}
 \alias{summary.PredictorDataset}
-\title{summary}
+\title{Summarises a trained model or predictor object}
 \usage{
 \method{summary}{distribution}(x)
 
@@ -27,3 +27,4 @@ Summarises a trained model or predictor object
 \seealso{
 \code{\link[base:summary]{base::summary()}}.
 }
+\keyword{misc}

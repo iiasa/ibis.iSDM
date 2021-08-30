@@ -10,8 +10,8 @@ NULL
 #' Basic object for engine, all other engines inherit from here
 #'
 #' @name Engine-class
-#'
 #' @aliases Engine
+#' @keywords bdproto
 NULL
 
 #' @export

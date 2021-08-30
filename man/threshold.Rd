@@ -17,7 +17,7 @@ threshold(obj, method = "fixed", value = NULL, ...)
 
 \item{method}{A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'}
 
-\item{value}{A numeric value for thresholding if method is fixed (Default: NULL)}
+\item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: NULL)}
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training}
 }

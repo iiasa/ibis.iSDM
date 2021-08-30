@@ -19,3 +19,4 @@ An object with the spatial intersection
 \description{
 Extract polygon data from intersecting point data
 }
+\keyword{utils}

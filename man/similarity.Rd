@@ -48,7 +48,7 @@ with respect to a reference dataset. Currently supported is Multivariate Environ
 and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
 }
 \details{
-\code{similarity} implements the MESS algorithm described in Appendix S3
+\code{\link{similarity}} implements the MESS algorithm described in Appendix S3
 of Elith et al. 2010 as well as the Mahalanobis dissimilarity described in Mesgaran et al. 2014
 }
 \examples{

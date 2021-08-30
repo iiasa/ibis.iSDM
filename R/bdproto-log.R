@@ -10,8 +10,8 @@ NULL
 #' Basic proto object for Log, any Log inherit from here
 #'
 #' @name Log-class
-#'
 #' @aliases Log
+#' @keywords bdproto
 NULL
 
 #' @export
