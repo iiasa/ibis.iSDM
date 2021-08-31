@@ -12,6 +12,7 @@ engine_inla(
   offset = c(1, 1),
   cutoff = 1,
   proj_stepsize = NULL,
+  timeout = NULL,
   barrier = FALSE,
   ...
 )
@@ -30,6 +31,8 @@ engine_inla(
 \item{cutoff}{The minimum allowed distance between points on the mesh}
 
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
+
+\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
 \item{barrier}{Should a barrier model be added to the model?}
 

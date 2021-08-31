@@ -9,7 +9,8 @@ NULL
 #' @param runname A [`character`] name of the trained run
 #' @param rm_corPred Remove highly correlated predictors. Default is True
 #' @param varsel Perform a variable selection on the set of predictors
-#' @param inference_only Fit model only without spatial prediction (Default: FALSE)
+#' @param inference_only Fit model only without spatial projection (Default: FALSE)
+#' @param only_linear Fit model only on linear covariate baselearners (DEFAULT: FALSE)
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
 #' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: NULL)
 #' @param ... further arguments passed on.
@@ -31,6 +32,7 @@ methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
   function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+           only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
@@ -40,6 +42,7 @@ methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
   function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+           only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
