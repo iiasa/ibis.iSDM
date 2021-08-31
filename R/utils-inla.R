@@ -804,6 +804,7 @@ inla.backstep <- function(master_form,
                                  cpo = sum(log(fit$cpo$cpo)) * -2,
                                  mean.deviance = fit$dic$mean.deviance )
       )
+      rm(fit)
     } # End of loop
 
     # Best model among competing models has the largest CPO. Ratio of CPO (LPML really, e.g. the transformation above)
@@ -824,7 +825,7 @@ inla.backstep <- function(master_form,
     } else {
       # Check whether formula is empty, if yes, set to not_found to FALSE
       te <- attr(stats::terms.formula(test_form),'term.label')
-      if(length(te)==1){
+      if(length(te)<=2){
         not_found <- FALSE
         best_found <- test_form
       }
