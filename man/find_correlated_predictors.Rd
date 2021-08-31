@@ -19,5 +19,7 @@ find_correlated_predictors(env, keep = NULL, cutoff = 0.7, method = "pearson")
 vector of variable names to exclude
 }
 \description{
-Code inspired from the \code{caret} package
+Filter a set of correlated predictors to fewer ones
 }
+\concept{Code inspired from the [`caret`] package}
+\keyword{utils}

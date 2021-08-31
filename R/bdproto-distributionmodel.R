@@ -10,8 +10,8 @@ NULL
 #' All trained Models should inherit the options here
 #'
 #' @name DistributionModel-class
-#'
 #' @aliases DistributionModel
+#' @keywords bdproto
 NULL
 
 #' @export

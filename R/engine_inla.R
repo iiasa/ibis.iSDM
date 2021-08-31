@@ -16,7 +16,7 @@ NULL
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: FALSE) TBD
-#' @param nonconvex.convex Non-convex mimal extension radius for convex curvature TBD
+#' @param nonconvex.convex Non-convex minimal extension radius for convex curvature TBD
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
 #' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
 #' @param ... Other variables

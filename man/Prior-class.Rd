@@ -8,3 +8,4 @@
 This class sets up the base class for priors and is the base class that is
 inherited by any specific prior.
 }
+\keyword{bdproto}

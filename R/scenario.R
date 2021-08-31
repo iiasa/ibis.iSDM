@@ -19,7 +19,7 @@ methods::setGeneric("scenario",
                     function(fit) standardGeneric("scenario"))
 
 #' @name scenario
-#' @usage \S4method{scenario}{DistributionModel}(fit)
+#' @usage \S4method{scenario}{ANY}(fit)
 #' @rdname scenario
 methods::setMethod(
   "scenario",

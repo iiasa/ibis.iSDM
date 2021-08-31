@@ -40,7 +40,7 @@ engine_inla(
 
 \item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: FALSE) TBD}
 
-\item{nonconvex.convex}{Non-convex mimal extension radius for convex curvature TBD}
+\item{nonconvex.convex}{Non-convex minimal extension radius for convex curvature TBD}
 
 \item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature TBD}
 

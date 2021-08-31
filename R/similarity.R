@@ -27,7 +27,7 @@ NULL
 #'   - `mos`: a factor `Raster` layer indicating which variable was most
 #'   similar to its reference range.
 #'
-#' @details `similarity` implements the MESS algorithm described in Appendix S3
+#' @details [`similarity`] implements the MESS algorithm described in Appendix S3
 #'   of Elith et al. 2010 as well as the Mahalanobis dissimilarity described in Mesgaran et al. 2014
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references

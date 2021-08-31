@@ -30,3 +30,4 @@ print(w)
 is.Waiver(w)
 
 }
+\keyword{misc}

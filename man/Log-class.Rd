@@ -7,3 +7,4 @@
 \description{
 Basic proto object for Log, any Log inherit from here
 }
+\keyword{bdproto}

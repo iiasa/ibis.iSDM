@@ -29,3 +29,4 @@ A \code{\link{data.frame}} containing the newly created pseudo absence points
 \description{
 Create pseudo absence points over a raster dataset
 }
+\keyword{utils}

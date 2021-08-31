@@ -27,3 +27,4 @@ None.
 \description{
 Plots information from a given object where a plotting object is available
 }
+\keyword{misc}
