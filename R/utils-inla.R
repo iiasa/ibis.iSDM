@@ -718,10 +718,14 @@ inla.backstep <- function(master_form,
   # Formula terms
   te <- attr(stats::terms.formula(master_form),'term.label')
   te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
-  # keep variables that are never removed
-  if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
+  # Remove variables that are never removed
+  if(!is.null(keep)){
+    te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
+    # Also remove keep from master_form as we won't use them below
+    master_form <- as.formula(paste0(response,' ~ ', paste0(te,collapse = " + ")," - 1"))
+  }
 
-  assertthat::assert_that(length(te)>0, !is.null(response))
+  assertthat::assert_that(length(te)>0, !is.null(response), all(keep %notin% te ))
   # --- #
   # Iterate through unique combinations of variables backwards
   pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
@@ -764,7 +768,6 @@ inla.backstep <- function(master_form,
 
     te <- attr(stats::terms.formula(test_form),'term.label')
     te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
-    if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
 
     # Now for each term in variable list
     for(vars in te){
@@ -824,5 +827,9 @@ inla.backstep <- function(master_form,
     }
 
   } # End of While loop
+  # Make sure to add kept variables back
+  if(!is.null(keep)){
+    best_found$form <- paste0(best_found$form," + ", paste0(keep,collapse = " + "))
+  }
   return(best_found)
 }
