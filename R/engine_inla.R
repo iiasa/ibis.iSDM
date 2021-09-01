@@ -13,9 +13,10 @@ NULL
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
+#' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: FALSE) TBD
-#' @param nonconvex.convex Non-convex mimal extension radius for convex curvature TBD
+#' @param nonconvex.convex Non-convex minimal extension radius for convex curvature TBD
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
 #' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
 #' @param ... Other variables
@@ -30,6 +31,7 @@ engine_inla <- function(x,
                         offset = c(1,1),
                         cutoff = 1,
                         proj_stepsize = NULL,
+                        timeout = NULL,
                         barrier = FALSE,
                         # nonconvex.bdry = FALSE,
                         # nonconvex.convex = -0.15,
@@ -50,6 +52,7 @@ engine_inla <- function(x,
                           is.list(optional_projstk) || is.null(optional_projstk),
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
+                          is.null(timeout) || is.numeric(timeout),
                           is.numeric(cutoff),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
@@ -101,6 +104,9 @@ engine_inla <- function(x,
       )
     )
   }
+
+  # If time out is specified
+  if(!is.null(timeout)) INLA::inla.setOption(fmesher.timeout = timeout)
 
   # Get barrier from the region polygon
   # TODO: Add this in addition to spatial field below, possibly specify an option to calculate this
@@ -322,6 +328,10 @@ engine_inla <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
+
+        # Set number of threads via set.Options
+        INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
+                             blas.num.threads = getOption('ibis.nthread'))
 
         # --- Prepare general inputs ---
         # Check whether spatial latent effects were added

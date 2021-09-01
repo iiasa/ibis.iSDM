@@ -32,3 +32,4 @@ Check whether a formula is valid
 
 Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
 }
+\keyword{misc}

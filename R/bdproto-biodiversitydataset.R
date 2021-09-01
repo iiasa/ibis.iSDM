@@ -11,6 +11,7 @@ NULL
 #' Acts a container for BiodiversityDataset within
 #'
 #' @name BiodiversityDatasetCollection-class
+#' @keywords bdproto
 #' @aliases BiodiversityDatasetCollection
 NULL
 
@@ -188,6 +189,7 @@ BiodiversityDatasetCollection <- bdproto(
 #'
 #' @name BiodiversityDataset-class
 #' @aliases BiodiversityDataset
+#' @keywords bdproto
 NULL
 
 #' @export

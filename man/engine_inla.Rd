@@ -12,6 +12,7 @@ engine_inla(
   offset = c(1, 1),
   cutoff = 1,
   proj_stepsize = NULL,
+  timeout = NULL,
   barrier = FALSE,
   ...
 )
@@ -31,13 +32,15 @@ engine_inla(
 
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
 
+\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
+
 \item{barrier}{Should a barrier model be added to the model?}
 
 \item{...}{Other variables}
 
 \item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: FALSE) TBD}
 
-\item{nonconvex.convex}{Non-convex mimal extension radius for convex curvature TBD}
+\item{nonconvex.convex}{Non-convex minimal extension radius for convex curvature TBD}
 
 \item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature TBD}
 

@@ -12,6 +12,7 @@ train(
   rm_corPred = FALSE,
   varsel = FALSE,
   inference_only = FALSE,
+  only_linear = FALSE,
   bias_variable = NULL,
   bias_value = NULL,
   verbose = FALSE,
@@ -29,7 +30,9 @@ train(
 
 \item{varsel}{Perform a variable selection on the set of predictors}
 
-\item{inference_only}{Fit model only without spatial prediction (Default: FALSE)}
+\item{inference_only}{Fit model only without spatial projection (Default: FALSE)}
+
+\item{only_linear}{Fit model only on linear covariate baselearners (DEFAULT: FALSE)}
 
 \item{bias_variable}{A \code{\link{vector}} with names of variables to be set to \emph{bias_value} (Default: NULL)}
 

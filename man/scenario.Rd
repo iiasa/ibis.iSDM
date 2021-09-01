@@ -6,7 +6,7 @@
 \usage{
 scenario(fit)
 
-\S4method{scenario}{DistributionModel}(fit)
+\S4method{scenario}{ANY}(fit)
 }
 \arguments{
 \item{fit}{A trained \code{\link{BiodiversityDistribution}} model}

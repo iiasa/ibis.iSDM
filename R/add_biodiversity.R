@@ -29,7 +29,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson', ...) standardGeneric("add_biodiversity_poipo"))
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", ...) standardGeneric("add_biodiversity_poipo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -39,9 +39,9 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',  ... ) {
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(poipo,'Spatial') || inherits(poipo,'sf') || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
+                            inherits(poipo, "Spatial") || inherits(poipo,"sf") || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo,field_occurrence),
                             inherits(formula,'formula') || is.null(formula) || is.character(formula),
                             is.character(family)

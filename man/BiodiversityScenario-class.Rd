@@ -7,3 +7,4 @@
 \description{
 Prototype for a biodiversity scenario from a trained model
 }
+\keyword{bdproto}

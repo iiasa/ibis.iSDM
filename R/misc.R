@@ -6,9 +6,10 @@ NULL
 #' This package uses the pipe operator (`\%>\%`) to express nested code
 #' as a series of imperative procedures.
 #'
-#' @param lhs,rhs An object and a function.
+#' @param lhs, rhs An object and a function.
 #' @seealso [magrittr::%>%()], [tee()].
 #' @return An object.
+#' @keywords misc
 #' @examples
 #' # set seed for reproducibility
 #' set.seed(500)

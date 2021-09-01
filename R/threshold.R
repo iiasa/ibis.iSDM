@@ -5,7 +5,7 @@ NULL
 #'
 #' @param obj A trained [`DistributionModel`] or alternatively a [`Raster`] object
 #' @param method A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'
-#' @param value A numeric value for thresholding if method is fixed (Default: NULL)
+#' @param value A [`numeric`] value for thresholding if method is fixed (Default: NULL)
 #' @param poi A [`sf`] object containing observational data used for model training
 #' @details
 #' 'fixed' applies a single determined threshold

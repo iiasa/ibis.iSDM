@@ -1,11 +1,11 @@
 #' Variable importance for dbarts models
 #'
 #' Variable importance measured in the proportion of total branches used for a given variable. Explicitly dropped variables are included as 0
-#' @param model A fitted dbarts model
+#' @param model A fitted [dbarts] model
 #' @concept Taken from embarcadero package
 #' @return A [`data.frame`] with the variable importance information
+#' @keywords utils
 #' @noRd
-
 varimp.bart <- function(model){
   assertthat::assert_that(class(model) == 'bart',
                           ("fit" %in% names(model)),
@@ -33,20 +33,20 @@ varimp.bart <- function(model){
 
 #' Partial effects for bart models adapted from embarcadero package
 #'
-#' @param model A fitted dbarts::bart model
+#' @param model A fitted [dbarts::bart] model
 #' @param envs A [`raster`] stack of predictors used in the model
 #' @param x.vars The predictor variables to be mapped (Default: All)
-#' @param equal Whehter equal spacing on x breaks or quantiles is applied (Default: FALSE)
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: FALSE)
 #' @param smooth Smoothing factor for the x breaks (works like partials). (Default: 1)
 #' @param trace Add traces to plot (Default: TRUE)
 #' @param ci Should credible intervals be shown (Default: TRUE)
 #' @param ciwidth Width of credible intervals (numeric)
 #' @param transform Backtransform using pnorm or not. Set to FALSE if response was not binomial
-#' @concept Taken and adapted from embarcadero package
+#' @concept Taken and adapted from [embarcadero] package
 #' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @return A [`raster`] layer containing the partial effect
+#' @keywords utils
 #' @noRd
-
 partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci = TRUE,
                      ciwidth = 0.95, trace = TRUE, transform = TRUE) {
 
@@ -201,17 +201,17 @@ partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci =
 
 #' Spatial partial effects for bart models adapted from embarcadero package
 #'
-#' @param model A fitted dbarts::bart model
-#' @param envs A [`raster`] stack of predictors used in the model
+#' @param model A fitted [dbarts::bart] model
+#' @param envs A [`raster`] stack of predictors used in the mode]l
 #' @param x.vars The predictor variables to be mapped (Default: All)
-#' @param equal Whehter equal spacing on x breaks or quantiles is applied (Default: FALSE)
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: FALSE)
 #' @param smooth Smoothing factor for the x breaks (works like partials). (Default: 1)
 #' @param transform Backtransform using pnorm or not. Set to FALSE if response was not binomial
-#' @concept Taken and adapted from embarcadero package
+#' @concept Taken and adapted from embarcadero package]
 #' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @return A [`raster`] layer containing the partial effect
+#' @keywords utils
 #' @noRd
-
 partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(

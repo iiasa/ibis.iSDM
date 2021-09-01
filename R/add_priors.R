@@ -6,33 +6,32 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param priors A [`PriorList-class`] object containing multiple priors
 #' @param ... Other parameters passed down
-
 #' @details TBD
 #' @section Notes:
-#' @aliases add_predictors
+#' @aliases add_priors
 #' @references
 #'
 #' @examples
 #' \dontrun{
 #'  TBD
 #' }
-#' @name set_priors
+#' @name add_priors
 NULL
 
-#' @name set_priors
-#' @rdname set_priors
-#' @exportMethod set_priors
+#' @name add_priors
+#' @rdname add_priors
+#' @exportMethod add_priors
 #' @export
 methods::setGeneric(
-  "set_priors",
+  "add_priors",
   signature = methods::signature("x"),
-  function(x, priors = NULL, ...) standardGeneric("set_priors"))
+  function(x, priors = NULL, ...) standardGeneric("add_priors"))
 
-#' @name set_priors
-#' @rdname set_priors
-#' @usage \S4method{set_priors}{BiodiversityDistribution}(x)
+#' @name add_priors
+#' @rdname add_priors
+#' @usage \S4method{add_priors}{BiodiversityDistribution}(x)
 methods::setMethod(
-  "set_priors",
+  "add_priors",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -48,6 +47,32 @@ methods::setMethod(
     }
     # Return x with newly added priors
     x
+  }
+)
+
+#' @name set_priors
+#' @inherit add_priors
+#' @inheritParams add_priors
+#' @keywords deprecated
+methods::setGeneric(
+  "set_priors",
+  signature = methods::signature("x"),
+  function(x, priors = NULL, ...) standardGeneric("set_priors"))
+
+#' @name set_priors
+#' @inherit add_priors
+#' @inheritParams add_priors
+#' @keywords deprecated
+#' @usage \S4method{set_priors}{BiodiversityDistribution}(x)
+methods::setMethod(
+  "set_priors",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x, priors = NULL ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
+    )
+    message('Deprecated. Use add_priors ')
+    add_priors(x, priors)
   }
 )
 

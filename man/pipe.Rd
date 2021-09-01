@@ -5,7 +5,7 @@
 \alias{pipe}
 \title{Pipe operator}
 \arguments{
-\item{lhs, rhs}{An object and a function.}
+\item{lhs, }{rhs An object and a function.}
 }
 \value{
 An object.
@@ -32,3 +32,4 @@ runif(100) \%>\% mean()
 \seealso{
 \code{\link[magrittr:pipe]{magrittr::\%>\%()}}, \code{\link[=tee]{tee()}}.
 }
+\keyword{misc}

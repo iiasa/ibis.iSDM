@@ -5,11 +5,9 @@
 #'
 #' @param x [`Raster-class`] object.
 #' @param y [`Raster-class`] object.
-#' @keywords internal
+#' @keywords internal, utils
 #' @return [`logical`] indicating if the two [`Raster-class`] objects have the same
 #'   resolution, extent, dimensionality, and coordinate system.
-#'
-#' @noRd
 is_comparable_raster <- function(x, y) {
   assertthat::assert_that(inherits(x, "Raster"), inherits(y, "Raster")) &&
     sf::st_crs(x@crs) == sf::st_crs(y@crs) &&
@@ -17,11 +15,11 @@ is_comparable_raster <- function(x, y) {
                           stopiffalse = FALSE)
 }
 
-assertthat::on_failure(is_comparable_raster) <- function(call, env) {
-  paste0(deparse(call$x), " and ", deparse(call$y),  " are not comparable: ",
-         "they have different spatial resolutions, extents, ",
-         "coordinate reference systems, or dimensionality (rows / columns)")
-}
+# assertthat::on_failure(is_comparable_raster) <- function(call, env) {
+#   paste0(deparse(call$x), " and ", deparse(call$y),  " are not comparable: ",
+#          "they have different spatial resolutions, extents, ",
+#          "coordinate reference systems, or dimensionality (rows / columns)")
+# }
 
 #' Do extents intersect?
 #'
@@ -29,9 +27,8 @@ assertthat::on_failure(is_comparable_raster) <- function(call, env) {
 #'
 #' @param x [`Raster-class`], [`Spatial-class`] or [`sf::sf()`] object.
 #' @param y [`Raster-class`], [`Spatial-class`] or [`sf::sf()`] object.
-#' @keywords internal
+#' @keywords internal, utils
 #' @return [`logical`].
-#' @noRd
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
     inherits(x, c("Raster", "Spatial", "sf")),
@@ -47,6 +44,7 @@ intersecting_extents <- function(x, y) {
 #' @param poly A [`sf`] object
 #' @param points A [`Spatial`] or [`sf`] object
 #' @param coords A vector pointing to the coordinate columns
+#' @keywords utils
 #' @return An object with the spatial intersection
 point_in_polygon <- function(poly, points, coords = c('x','y')){
   assertthat::assert_that(
@@ -65,7 +63,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
   return(ov)
 }
 
-#' Converts a bounding box to a Well Known Text polygon
+#' Converts a bounding box to a Well Known Text (WKT) polygon
 #'
 #' @param minx Minimum x value, or the most western longitude
 #' @param miny Minimum y value, or the most southern latitude
@@ -74,9 +72,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' @param all A [`vector`] of length 4, with the elements: minx, miny, maxx, maxy
 #' @return An object of class [`character`], a Well Known Text (WKT) string of the form
 #' 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
-#' @keywords internal
-#' @noRd
-
+#' @keywords internal, utils
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
   assertthat::assert_that(length(bbox)==4) #check for 4 digits
@@ -93,9 +89,8 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #' Expand an extent by a certain number
 #' @param e an [`extent`] object
 #' @param f value to increase the extent (Default = 0.1)
+#' @keywords utils
 #' @return Returns the unified total extent object
-#' @noRd
-
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'Extent'))
   xi <- (e@xmax-e@xmin)*(f/2)
@@ -124,9 +119,8 @@ extent_expand <- function(e,f=0.1){
 #' @param method method for resampling ("ngb" or "bilinear")
 #' @param func function for resampling (Default: mean)
 #' @param cl Boolean value if multicore computation should be used (Default: TRUE)
+#' @keywords utils
 #' @return New [`Raster`] object aligned to the supplied template layer
-#' @noRd
-
 alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TRUE){
   # Security checks
   assertthat::assert_that(
@@ -160,29 +154,24 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 
 #' @title Create an empty \code{rasterLayer} based on a template
 #'
-#' @description .
-#'
 #' @param x a \code{raster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{raster}}
 #' @return an empty raster, i.e. all cells are \code{NA}.
 #' @import raster
-#' @keywords raster
+#' @keywords raster, utils
 #' @examples
 #' require(raster)
 #' r <- raster(matrix(1:100, 5, 20))
 #' emptyraster(r)
-#' @noRd
-
+#' @export
 emptyraster <- function(x, ...) { # add name, filename,
-  assertthat::assert_that(inherits(x,'Raster'))
+  assertthat::assert_that(is.Raster(x))
   raster::raster(nrows=nrow(x), ncols=ncol(x),
                         crs=x@crs,
                         ext=extent(x), ...)
 }
 
-
 #' Function to extract nearest neighbour predictor values of provided points
-#'
 #'
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
@@ -191,10 +180,9 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @param cheap A boolean variable whether the dataset is considered to be large and faster computation could help
 #' @return Extracted data from each point
 #' @note If multiple values are of equal distance, average them
-#' @noRd
-
+#' @keywords utils
+#' @export
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
-
   # Security checks
   assertthat::assert_that(
     is.data.frame(coords) || inherits(coords,'sf') || inherits(coords,'matrix'),
@@ -281,7 +269,8 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','scale','norm','pca')
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: c(.05,.95))
 #' @return Returns a adjusted [`Raster`] object of identical resolution
-#' @noRd
+#' @keywords utils
+#' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
    assertthat::assert_that(
      inherits(env,'Raster'),
@@ -356,7 +345,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
 #' @param env A [`Raster`] object
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','quadratic', 'hinge', 'thresh')
 #' @return Returns the derived adjusted [`Raster`] objects of identical resolution
-#' @noRd
+#' @keywords utils
+#' @export
 predictor_derivate <- function(env, option, ...){
   assertthat::assert_that(
     inherits(env,'Raster'),
@@ -441,10 +431,9 @@ predictor_derivate <- function(env, option, ...){
 #'
 #' @param post A data.frame
 #' @param background A [`Raster-class`] object for the background raster
-#' @keywords internal
+#' @keywords internal, utils
 #' @return A [`Raster-class`] object with number of columns equal to ncol(post)
 #' @noRd
-
 fill_rasters <- function(post, background){
   assertthat::assert_that(
     is.data.frame(post),ncol(post)>1,
@@ -482,8 +471,10 @@ fill_rasters <- function(post, background){
 
 #' Clean up raster layer from disk
 #'
+#' Completely deletes for instance a temporary created raster file
 #' @param A [`raster`] object
-#' @noRd
+#' @param verbose Print progress (Default: FALSE)
+#' @keywords utils
 clean_rasterfile <- function(x, verbose = FALSE)
 {
   stopifnot(grepl("Raster", class(x)))
@@ -519,7 +510,7 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #' @param fname A [`character`] stating the output destination
 #' @param dt The datatype to be written. Default is Float64
 #' @param varNA The nodata value to be used. Default: -9999
-#' @noRd
+#' @keywords utils
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
   assertthat::assert_that(
     inherits(file,'Raster') || inherits(file, 'stars'),
@@ -545,7 +536,7 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
 #' @param varLong Long name for the NetCDF export variable.
 #' @param dt The datatype to be written. Default is Float64
 #' @param varNA The nodata value to be used. Default: -9999
-#' @noRd
+#' @keywords utils
 writeNetCDF <- function(file, fname,
                             varName, varUnit = NULL,
                             varLong = NULL, dt = "FLT4S", varNA = -9999) {

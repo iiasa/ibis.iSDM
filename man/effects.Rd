@@ -3,7 +3,7 @@
 \name{effects}
 \alias{effects}
 \alias{effects.DistributionModel}
-\title{effects}
+\title{Plot effects of trained model}
 \usage{
 \method{effects}{DistributionModel}(x, ...)
 }
@@ -18,3 +18,4 @@ None.
 \description{
 Create a partial response or effect plot of a trained model
 }
+\keyword{misc}

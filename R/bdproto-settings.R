@@ -10,8 +10,8 @@ NULL
 #' Basic proto object for Settings object, a List that stores settings used related to model training
 #'
 #' @name Settings-class
-#'
 #' @aliases Settings
+#' @keywords bdproto
 NULL
 
 #' @export

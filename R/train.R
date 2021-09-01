@@ -9,7 +9,8 @@ NULL
 #' @param runname A [`character`] name of the trained run
 #' @param rm_corPred Remove highly correlated predictors. Default is True
 #' @param varsel Perform a variable selection on the set of predictors
-#' @param inference_only Fit model only without spatial prediction (Default: FALSE)
+#' @param inference_only Fit model only without spatial projection (Default: FALSE)
+#' @param only_linear Fit model only on linear covariate baselearners (DEFAULT: FALSE)
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
 #' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: NULL)
 #' @param ... further arguments passed on.
@@ -31,6 +32,7 @@ methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
   function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+           only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
@@ -40,6 +42,7 @@ methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
   function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+           only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
@@ -49,6 +52,7 @@ methods::setMethod(
       is.logical(inference_only),
       is.null(bias_variable) || is.character(bias_variable),
       is.null(bias_value) || is.numeric(bias_value),
+      is.logical(only_linear),
       is.logical(verbose)
     )
     # Now make checks on completeness of the object
@@ -61,7 +65,7 @@ methods::setMethod(
       bias_variable <- new_waiver(); bias_value <- new_waiver()
     }
     # --- #
-    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -70,10 +74,10 @@ methods::setMethod(
     settings$set('verbose', verbose)
     settings$set('bias_variable', bias_variable)
     settings$set('bias_value',bias_value)
+    settings$set('only_linear',only_linear)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
-    # settings$set('only_linear',TRUE)
     # Start time
     settings$set('start.time', Sys.time())
 
@@ -283,10 +287,10 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw1 fits
-          if(is.Waiver(settings$get('only_linear'))){
+          if(settings$get('only_linear') == FALSE){
             var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-            var_rw1 <- names(which(var_rw1 > 150)) # Get only those greater than 150 unique values (arbitrary)
-            var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
+            # var_rw1 <- names(which(var_rw1 > 100)) # Get only those greater than 150 unique values (arbitrary)
+            var_rw1 <- names(var_rw1)[names(var_rw1) %in% model$biodiversity[[id]][['predictors_names']]]
             # Set remaining variables to linear
             var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
           } else {
@@ -443,7 +447,7 @@ methods::setMethod(
           } else {
             # Add linear predictors
             form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '))
-            if(is.Waiver(settings$get('only_linear'))){
+            if(settings$get('only_linear') == FALSE){
             # And smooth effects
             form <- paste(form, ' + ', paste0('bbs(',
                                        model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
