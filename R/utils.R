@@ -414,24 +414,30 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
 #'
 #' @param env An environmental dataset either in [`data.frame`] or [`raster`] format
 #' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records
+#' @param bias An optional weights raster to control placement of pseudo-absences further
 #' @param template If template is not null then env needs to be a [`raster`] dataset
 #' @param npoints A [`numeric`] number of pseudo-absence points to create
 #' @param replace Sample with replacement? (Default: False)
 #' @keywords utils
 #' @returns A [`data.frame`] containing the newly created pseudo absence points
-# TODO: Allow option to supply a bias raster for weighted sampling
-create_pseudoabsence <- function(env, presence, template = NULL, npoints = 1000, replace = FALSE){
+create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
+                                 npoints = 1000, replace = FALSE){
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),
     is.data.frame(presence),
     hasName(presence,'x') && hasName(presence,'y'),
+    is.null(bias) || is.Waiver(bias) || is.character(bias),
     is.numeric(npoints),
     is.null(template) || inherits(template,'Raster')
   )
   if(is.null(template)) {
     assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file')
   }
-
+  # If bias is set, check that it is in env
+  if(is.character(bias)){
+    assertthat::assert_that(bias %in% names(env))
+    nb <- (env[[bias]] - min(env[[bias]],na.rm = TRUE)) / ( max(env[[bias]],na.rm = TRUE) - min(env[[bias]],na.rm = TRUE) )
+  } else { nb = NULL }
   if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
 
   # Rasterize the presence estimates
@@ -443,7 +449,14 @@ create_pseudoabsence <- function(env, presence, template = NULL, npoints = 1000,
   )
   # Generate pseudo absence data
   # Now sample from all cells not occupied
-  abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
+  if(is.null(nb)){
+    prob_bias <- nb[which(bg1[]==0)]
+    if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
+    abs <- sample(which(bg1[]==0), size = npoints, replace = replace, prob = prob_bias)
+  } else {
+    abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
+  }
+
   # Now get absence environmental data
   abs <- get_ngbvalue(
     coords = raster::xyFromCell(bg1, abs),

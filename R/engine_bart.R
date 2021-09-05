@@ -234,11 +234,11 @@ engine_bart <- function(x,
           partial = function(self, x.vars = NULL, ...){
 
             model <- self$get_data('fit_best')
-            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || NULL,
+            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || is.null(x.vars),
                                     msg = 'Variable not in predicted model' )
             # Check if family is binomial, if so alter
             not_binomial = self$get_data('model')$biodiversity[[1]]$family != 'binomial'
-            partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
+            bart_partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
@@ -246,10 +246,10 @@ engine_bart <- function(x,
             assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 
-            if( self$model$biodiversity[[1]]$family != 'binomial') warning('Check whether transform should not be set to False!')
+            if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
 
             # Calculate
-            p <- partial_space(model, predictors, x.vars, equal, smooth, transform)
+            p <- bart_partial_space(model, predictors, x.vars, equal, smooth, transform)
 
             cols <- c("#000004FF","#1B0C42FF","#4B0C6BFF","#781C6DFF","#A52C60FF","#CF4446FF","#ED6925FF","#FB9A06FF","#F7D03CFF","#FCFFA4FF")
             plot(p, col = cols, main = paste0(x.vars, collapse ='|'))

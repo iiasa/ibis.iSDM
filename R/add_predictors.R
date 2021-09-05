@@ -99,6 +99,14 @@ methods::setMethod(
       x <- x$set_priors(priors)
     }
 
+    # Don't transform or create derivatives of factor variables
+    if(any(is.factor(env))){
+      # Make subset to join back later
+      env_f <- raster::subset(env,which(is.factor(env)))
+      env <- raster::subset(env, which(!is.factor(env)))
+    }
+
+
     # Standardization and scaling
     if('none' %notin% transform){
       for(tt in transform) env <- predictor_transform(env, option = tt)
@@ -115,6 +123,9 @@ methods::setMethod(
 
     # Assign an attribute to this object to keep track of it
     attr(env,'transform') <- transform
+
+    # Add back any factor variables that might have been set
+    if(exists('env_f')) env <- addLayer(env, env_f)
 
     # Mask predictors with existing background layer
     if(bgmask){

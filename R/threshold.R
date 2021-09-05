@@ -59,7 +59,8 @@ methods::setMethod(
 
     # Get all point data in distribution model
     # FIXME: Adapt to more/ combined datasets
-    poi <- sf::st_as_sf( obj$model$biodiversity[[1]]$observations)
+    poi <- sf::st_as_sf( obj$model$biodiversity[[1]]$observations, coords = c('x','y') )
+    poi <- subset(poi, observed > 0) # Remove any eventual absence data
 
     # Now self call threshold
     out <- threshold(ras, method = method, value = value, poi = poi, ...)
@@ -116,9 +117,12 @@ methods::setMethod(
                             is.null(poi) || inherits(poi,'sf'),
                             is.null(value) || is.numeric(value)
     )
+    # Match to correct spelling mistakes
+    method <- match.arg(tolower(method), c('fixed','mtp','percentile'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(poi)) assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
+    poi <- subset(poi, observed > 0) # Remove any eventual absence data
 
     # Get the raster layer
     raster_thresh <- obj

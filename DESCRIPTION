@@ -34,7 +34,6 @@ Imports:
 Depends:
     R(>= 4.0.0)
 Suggests:
-    INLA,
     deldir,
     mboost,
     dbarts,
@@ -76,6 +75,7 @@ Collate:
     'utils-inla.R'
     'engine_inla.R'
     'misc.R'
+    'partial.R'
     'plot.R'
     'print.R'
     'prior_gdb.R'

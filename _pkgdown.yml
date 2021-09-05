@@ -25,11 +25,13 @@ reference:
         - train
         - scenario
 
-  - title: Add data and parameters
-    desc: Function to add data and parameters to existing objects
+  - title: Add or modify data and parameters
+    desc: Functions to add or modify data and parameters in existing objects
     contents:
       - starts_with("add_")
-      - set_priors
+      - starts_with("set_")
+      - starts_with("sel_")
+      - starts_with("rm_")
 
   - title: Engines
     desc: Statistical models used for estimation of species distributions

@@ -112,8 +112,17 @@ DistributionModel <- bdproto(
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
     }
   },
-  # Generic plotting function for partial effects
+  # Dummy partial response calculation. To be overwritten per engine
+  partial = function(self){
+    new_waiver()
+  },
+  # Dummy spartial response calculation. To be overwritten per engine
+  spartial = function(self){
+    new_waiver()
+  },
+  # Generic plotting function for effect plots
   effects = function(self, x = 'fit_best', what = 'fixed', ...){
+    assertthat::assert_that(is.character(what))
     if(inherits(self, 'GDB-Model')){
       # How many effects
       n <- length( coef( self$get_data(x) ))
@@ -129,7 +138,7 @@ DistributionModel <- bdproto(
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
-      self$partial(self$get_data(x), xvars = what, ...)
+      self$partial(self$get_data(x), x.vars = what, ...)
     }
   },
   # Get specific fit from this Model
