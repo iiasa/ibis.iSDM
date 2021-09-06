@@ -34,7 +34,6 @@ Imports:
 Depends:
     R(>= 4.0.0)
 Suggests:
-    INLA,
     deldir,
     mboost,
     dbarts,
@@ -59,12 +58,13 @@ Collate:
     'bdproto-biodiversityscenario.R'
     'bdproto-predictors.R'
     'add_predictors.R'
+    'bdproto-priorlist.R'
+    'bdproto-prior.R'
+    'add_priors.R'
     'add_range.R'
     'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-engine.R'
-    'bdproto-priorlist.R'
-    'bdproto-prior.R'
     'bdproto-settings.R'
     'utils-spatial.R'
     'data.R'
@@ -75,13 +75,13 @@ Collate:
     'utils-inla.R'
     'engine_inla.R'
     'misc.R'
+    'partial.R'
     'plot.R'
     'print.R'
     'prior_gdb.R'
     'prior_inla.R'
     'priors.R'
     'scenario.R'
-    'set_priors.R'
     'similarity.R'
     'summary.R'
     'threshold.R'

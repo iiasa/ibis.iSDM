@@ -13,6 +13,7 @@ NULL
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
+#' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: FALSE) TBD
 #' @param nonconvex.convex Non-convex minimal extension radius for convex curvature TBD
@@ -30,6 +31,7 @@ engine_inla <- function(x,
                         offset = c(1,1),
                         cutoff = 1,
                         proj_stepsize = NULL,
+                        timeout = NULL,
                         barrier = FALSE,
                         # nonconvex.bdry = FALSE,
                         # nonconvex.convex = -0.15,
@@ -50,6 +52,7 @@ engine_inla <- function(x,
                           is.list(optional_projstk) || is.null(optional_projstk),
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
+                          is.null(timeout) || is.numeric(timeout),
                           is.numeric(cutoff),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
@@ -76,7 +79,6 @@ engine_inla <- function(x,
     bdry$loc <- INLA::inla.mesh.map(bdry$loc)
 
     # --- #
-    # FIXME: Move this to the manual description above
     # Create the mesh
     # A good mesh needs to have triangles as regular as possible in size and shape: equilateral
     suppressWarnings(
@@ -101,6 +103,9 @@ engine_inla <- function(x,
       )
     )
   }
+
+  # If time out is specified
+  if(!is.null(timeout)) INLA::inla.setOption(fmesher.timeout = timeout)
 
   # Get barrier from the region polygon
   # TODO: Add this in addition to spatial field below, possibly specify an option to calculate this
@@ -204,7 +209,9 @@ engine_inla <- function(x,
           }
           # Make index for spatial field
           self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
-                                                          n.spde = self$data$latentspatial$n.spde)
+                                                          n.spde = self$data$latentspatial$n.spde,
+                                                          n.group = 1,
+                                                          n.repl = 1)
           # Security checks
           assertthat::assert_that(
             inherits(self$data$latentspatial,'inla.spde'),
@@ -276,10 +283,11 @@ engine_inla <- function(x,
 
         # Effects matrix
         ll_effects <- list()
-        # Note, order adding this is important apparently...
+        # Note, order adding this is important and matches the A matrix below
+        # ll_effects[['intercept']] <- rep(1, nrow(model$observations))
+        # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n) # Old code
         ll_effects[['predictors']] <- env
         ll_effects[['spatial.field']] <- seq(1, self$get_data('mesh')$n)
-        # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
         if(!is.null(model$offset)){
@@ -322,6 +330,10 @@ engine_inla <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
+
+        # Set number of threads via set.Options
+        INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
+                             blas.num.threads = getOption('ibis.nthread'))
 
         # --- Prepare general inputs ---
         # Check whether spatial latent effects were added
@@ -594,9 +606,78 @@ engine_inla <- function(x,
                 "spde"     = self$get_data('latentspatial'),
                 "prediction" = prediction
                 ),
+              # Partial response
+              # FIXME: Create external function
+              partial = function(self, x, variable, constant = NULL, variable_length = 100, plot = FALSE){
+                # Goal is to create a sequence of value and constant and append to existing stack
+                # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
+                # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
+                # provide via lincomb = M to an INLA call.
+                # Both should be identical
+
+                # Check that provided model exists and variable exist in model
+                mod <- self$get_data('fit_best')
+                assertthat::assert_that(inherits(mod,'inla'),
+                                        'model' %in% names(self),
+                                        inherits(x,'BiodiversityDistribution'),
+                                        length(variable)==1, is.character(variable),
+                                        is.null(constant) || is.numeric(constant)
+                                        )
+                varn <- mod$names.fixed
+                variable <- match.arg(variable, varn, several.ok = FALSE)
+                assertthat::assert_that(variable %in% varn, length(variable)==1,!is.null(variable))
+
+                # ------------------ #
+                # Get all datasets with id in model. This includes the data stacks and integration stacks
+                stk_inference <- lapply(
+                  x$engine$list_data()[grep(paste(names(model$biodiversity),collapse = '|'), x$engine$list_data())],
+                  function(z) x$engine$get_data(z))
+                stk_inference <- do.call(INLA::inla.stack, stk_inference)
+                # FIXME: Test that this works with SPDE present
+                stack_data_resp <- INLA::inla.stack.data(stk_inference)
+                # ------------------ #
+
+                # If constant is null, calculate average across other values
+                if(is.null(constant)){
+                  constant <- lapply(stack_data_resp, function(x) mean(x,na.rm = T))[varn[varn %notin% variable]]
+                }
+                # For target variable calculate range
+                variable_range <- range(stack_data_resp[[variable]],na.rm = TRUE)
+
+                stop('Not yet done!')
+                # Create dummy data.frame
+                dummy <- data.frame(observed = rep(NA, variable_length))
+                dummy
+
+                seq(variable_range[1],variable_range[2],length.out = variable_length)
+
+                # # add sequence of data and na to data.frame. predict those
+                # control.predictor = list(A = INLA::inla.stack.A(stk_full),
+                #                          link = li, # Link to NULL for multiple likelihoods!
+                #                          compute = TRUE),  # Compute for marginals of the predictors.
+
+                print('Refitting model for partial effect')
+                ufit <- INLA::inla(formula = as.formula(mod$.args$formula), # The specified formula
+                                       data  = stk_inference,  # The data stack
+                                       quantiles = c(0.05, 0.5, 0.95),
+                                       E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
+                                       Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
+                                       family = mod$.args$family,   # Family the data comes from
+                                       control.family = mod$.args$control.family, # Control options
+                                       control.predictor = mod$.args$control.predictor,  # Compute for marginals of the predictors.
+                                       control.compute = mod$.args$control.compute,
+                                       control.fixed = mod$.args$control.fixed,
+                                       verbose = FALSE, # To see the log of the model runs
+                                       control.inla = mod$.args$control.inla,
+                                       num.threads = getOption('ibis.nthread')
+                )
+                control.predictor = list(A = INLA::inla.stack.A(stk_inference))
+
+                # Plot and return result
+              },
               # Function to plot SPDE if existing
-              plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, dis = NULL,...){
-                assertthat::assert_that(is.vector(dim), is.numeric(dis) || is.null(dis))
+              plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, ...){
+                assertthat::assert_that(is.vector(dim))
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {
                   # Get spatial projections from model
@@ -634,29 +715,35 @@ engine_inla <- function(x,
                     # Also build correlation fun
                     # Get SPDE results
                     spde_results <- INLA::inla.spde2.result(
-                      inla = self$get_data('fit_pred'),
+                      inla = self$get_data('fit_best'),
                       name = 'spatial.field',
                       spde = self$get_data('spde'),
                       do.transfer = TRUE)
 
                     # Large kappa (inverse range) equals a quick parameter change in space.
                     # Small kappa parameter have much longer, slower gradients.
-                    Kappa <- lapply(spde_results,  function(j) INLA::inla.emarginal(function(x) x, j$marginals.kappa[[1]] ))
+                    Kappa <- INLA::inla.emarginal(function(x) x, spde_results$marginals.kappa[[1]])
+                    sigmau <- INLA::inla.emarginal(function(x) sqrt(x), spde_results$marginals.variance.nominal[[1]])
+                    r <- INLA::inla.emarginal(function(x) x, spde_results$marginals.range.nominal[[1]])
 
-                    d.vec <- seq(0, MaxRange, length = Resolution)
-                    # Distance vector. Maximum distance being defined by half of extent
-                    if(is.null(dis)) dis <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 4)  # Take a quarter of the max distance
+                    # Get Mesh and distance between points
+                    mesh <- self$get_data('mesh')
+                    D <- as.matrix( dist(mesh$loc[, 1:2]) )
 
-                    # Modified Bessel function to get coorelation strength
-                    dis.cor <- data.frame(distance = seq(0, dis, length = dim[1]))
-                    dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * besselK(Kappa * dis.cor$distance, 1))
+                    # Distance vector.
+                    dis.cor <- data.frame(distance = seq(0, max(D), length = 100))
+                    # Maximum distance by quarter of extent
+                    dis.max <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 2)  # Take a quarter of the max distance
+
+                    # Modified Bessel function to get correlation strength
+                    dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * base::besselK(Kappa * dis.cor$distance, 1))
                     dis.cor$cor[1] <- 1
                   # ---
                   # Build plot
                   layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
-
                   plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
-                       xlab = 'Distance', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
+                       xlab = 'Distance (proj. unit)', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
+                  abline(v = dis.max,lty = 'dotted')
                   plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
                   plot(spatial_field[[2]], main = 'sd spatial effect')
                   } else {

@@ -288,15 +288,19 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   return( temp )
 }
 
-#' Manual prediction by posterior simulation
+#' Direct prediction by posterior simulation
 #'
 #' @param mod A trained distribution model
+#' @param nsamples The number of samples to be taken from the posterior
 #' @param backtransf Either NULL or a function
+#' @param seed A random seed that can be specified
 #' @keywords utils
 #' @noRd
-post_prediction <- function(mod,
-                            backtransf = NULL){
+post_prediction <- function(mod, nsamples = 100,
+                            backtransf = NULL,
+                            seed = 0){
   assertthat::assert_that(!missing(mod),
+                          inherits(mod,'DistributionModel'),
                           inherits(mod,'INLA-Model'),
                           msg = 'This function only works for INLA models')
   # Check whether data is all there
@@ -304,29 +308,107 @@ post_prediction <- function(mod,
     utils::hasName(mod,'model'),
     # length( grep('stk',x$engine$list_data()) )>0,
     is.function(backtransf) || is.null(backtransf),
+    is.numeric(seed) || is.null(seed),
     msg = 'Not all data and parameters needed for prediction are present!'
   )
-
+  # Get data from object #
+  model <- mod$get_data('fit_best')
+  mesh <- mod$get_data('mesh')
   # Get formula
   form <- mod$get_data('fit_best_equation')
-  if(length(grep(pattern = '\\*',deparse(form)))) stop('Interactions are not supported!')
+  # Some checks on the form
+  if(length(grep(pattern = '\\*',deparse(form)))) stop('Interactions are not (yet) supported!')
   # Check whether any rw1 effects are in the formula. If so return error
   te <- attr(stats::terms.formula(form),'term.label')
   if(length(grep(pattern = '\"rw',x = te))>0) stop('This function does not work with INLA rw effects!')
 
-  # Manual prediction
-  model <- mod$get_data('fit_best')
-  mesh <- mod$get_data('mesh')
   # Covariates for prediction points
   preds <- mod$model$predictors
+  preds_names <- mod$model$predictors_names
+  preds_types <- mod$model$predictors_types
   ofs <- mod$model$offset
-  # Set intercept variables
+  # Set any other existing intercept variables
   preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
 
-  # Some checks between models and data
-  assertthat::assert_that(type %in% names(model$summary.fixed),
-                          all( rownames(model$summary.fixed) %in% names(preds) )
+  # --- #
+  # Simulate from approximated posterior
+  samples <- INLA::inla.posterior.sample(n = nsamples,
+                                     result = model,
+                                     # seed = seed,
+                                     use.improved.mean = TRUE, # marginal means?
+                                     num.threads = ifelse(getOption("ibis.nthread")>1, getOption("ibis.nthread"),NULL),
+                                     parallel.configs = TRUE,
+                                     verbose = TRUE
   )
+
+  # inlabru extract entries function and names standardization functions
+  extract.entries <- function (name, smpl) {
+    ename <- gsub("\\.", "\\\\.", name)
+    ename <- gsub("\\(", "\\\\(", ename)
+    ename <- gsub("\\)", "\\\\)", ename)
+    ptn <- paste("^", ename, "[\\:]*[\\.]*[0-9]*[\\.]*[0-9]*$",
+                 sep = "")
+    return(smpl[grep(ptn, rownames(smpl))])
+  }
+  standardise.names <- function (x) {
+    new_names <- vapply(x, function(x) {
+      gsub("[-() ]", "_", x = x, fixed = FALSE)
+    }, "name")
+    not_ok <- grepl("__", x = new_names)
+    while (any(not_ok)) {
+      new_names[not_ok] <- vapply(new_names[not_ok], function(x) {
+        gsub("__", "_", x = x, fixed = FALSE)
+      }, "name")
+      not_ok <- grepl("__", x = new_names)
+    }
+    new_names
+  }
+
+  # Format the prior outputs to get the predictor values
+  ssmpl <- list()
+  for (i in seq_along(samples)) {
+    smpl.latent <- samples[[i]]$latent
+    smpl.hyperpar <- samples[[i]]$hyperpar
+    vals <- list()
+
+    # Extract simulated predictor and fixed effects
+    for (name in unique(c("Predictor", preds_names))) {
+      vals[[name]] <- extract.entries(name, smpl.latent)
+    }
+
+    # For fixed effects that were modelled via factors we attach an extra vector holding the samples
+    fac.names <- subset(preds_types, type == 'factor')
+    if(nrow(fac.names)>0){
+      for (name in fac.names) {
+        vals[[name]] <- smpl.latent[startsWith(rownames(smpl.latent), name), ]
+        names(vals[[name]]) <- lapply(names(vals[[name]]), function(nm) {
+          substring(nm, nchar(name) + 1)
+        })
+      }
+    }
+
+    # Extract simulated latent variables.
+    # If the model is "clinear", however, we might extract the realisations
+    # from the hyperpar field. TODO: check if all the special models now have
+    # their results available as latent random effects, and avoid special code,
+    # since the hyperpar name definition has changed
+    if (length(model$summary.random) > 0) {
+      for (k in seq_along(model$summary.random)) {
+        name <- unlist(names(model$summary.random[k]))
+        vals[[name]] <- extract.entries(name, smpl.latent)
+      }
+    }
+    if (length(smpl.hyperpar) > 0) {
+      ## Sanitize the variable names; replace problems with "_".
+      ## Needs to handle whatever INLA uses to describe the hyperparameters.
+      ## Known to include " " and "-" and potentially "(" and ")".
+      names(smpl.hyperpar) <- standardise.names(names(smpl.hyperpar))
+    }
+    ssmpl[[i]] <- c(vals, smpl.hyperpar)
+  }
+  vals <- ssmpl;rm(ssmpl)
+  # Equivalent of inlabru:::inla.posterior.sample.structured
+  message(paste('Formatted', length(vals), 'posterior samples'))
 
   # Output raster
   if(is.null(coords)) coords <- preds[,c('x','y')]
@@ -437,6 +519,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
   # Effects list
   ll_effects <- list()
   # Note, order adding this is important apparently...
+  # ll_effects[['intercept']] <- rep(1, nrow(all_env)) # Added 05/09
   ll_effects[['predictors']] <- all_env
   ll_effects[['spatial.field']] <- list(spatial.field = seq(1, mesh$n) ) # Changed to spatial.field by default
 
@@ -558,6 +641,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
+    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n)) # Changed to spatial.field. intercept already included in neatest_cov
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
@@ -573,26 +657,26 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
+    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field']]  <- list(spatial.field = seq(1,mesh$n))
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
     A = list(1, Apred)
-
   } else {
     # --- #
     ll_pred[[ 'observed' ]] <- cbind( rep(NA, nrow(nearest_cov)) ) # Set to NA to predict for fitted area
     ll_pred[['e']] <- rep(0, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
+    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n) )
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
     A = list(1, Apred)
-
   }
 
   # Build stack
@@ -725,10 +809,14 @@ inla.backstep <- function(master_form,
   # Formula terms
   te <- attr(stats::terms.formula(master_form),'term.label')
   te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
-  # keep variables that are never removed
-  if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
+  # Remove variables that are never removed
+  if(!is.null(keep)){
+    te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
+    # Also remove keep from master_form as we won't use them below
+    master_form <- as.formula(paste0(response,' ~ ', paste0(te,collapse = " + ")," - 1"))
+  }
 
-  assertthat::assert_that(length(te)>0, !is.null(response))
+  assertthat::assert_that(length(te)>0, !is.null(response), all(keep %notin% te ))
   # --- #
   # Iterate through unique combinations of variables backwards
   pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
@@ -771,7 +859,6 @@ inla.backstep <- function(master_form,
 
     te <- attr(stats::terms.formula(test_form),'term.label')
     te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
-    if(!is.null(keep)) te <- te[grep(paste0(keep,collapse = '|'), te,ignore.case = T, invert = T )]
 
     # Now for each term in variable list
     for(vars in te){
@@ -804,6 +891,7 @@ inla.backstep <- function(master_form,
                                  cpo = sum(log(fit$cpo$cpo)) * -2,
                                  mean.deviance = fit$dic$mean.deviance )
       )
+      rm(fit)
     } # End of loop
 
     # Best model among competing models has the largest CPO. Ratio of CPO (LPML really, e.g. the transformation above)
@@ -824,12 +912,16 @@ inla.backstep <- function(master_form,
     } else {
       # Check whether formula is empty, if yes, set to not_found to FALSE
       te <- attr(stats::terms.formula(test_form),'term.label')
-      if(length(te)==1){
+      if(length(te)<=2){
         not_found <- FALSE
         best_found <- test_form
       }
     }
 
   } # End of While loop
+  # Make sure to add kept variables back
+  if(!is.null(keep)){
+    best_found$form <- paste0(best_found$form," + ", paste0(keep,collapse = " + "))
+  }
   return(best_found)
 }

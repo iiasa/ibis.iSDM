@@ -47,7 +47,7 @@ varimp.bart <- function(model){
 #' @return A [`raster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
-partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci = TRUE,
+bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci = TRUE,
                      ciwidth = 0.95, trace = TRUE, transform = TRUE) {
 
   assertthat::assert_that(
@@ -90,7 +90,7 @@ partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci =
         }
       }
     }
-    pd <- pdbart(model, xind = x.vars, levs = lev, pl = FALSE)
+    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, pl = FALSE)
 
   } else {
     levq = c(0.5 - ciwidth/2, seq(0.1, 0.9, 0.1/smooth),
@@ -175,7 +175,7 @@ partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci =
           }
         }
       }
-      # Add crediböe interval
+      # Add credible interval
       if (ci == TRUE) {
         g <- g + geom_ribbon(aes(ymin = q05, ymax = q95),
                              fill = "deepskyblue1", alpha = 0.3)
@@ -212,7 +212,7 @@ partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci =
 #' @return A [`raster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
-partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
+bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(
     inherits(model,'bart'),
