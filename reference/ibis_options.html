@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Identifier — new_id • ibis.iSDM</title>
+<title>Print ibis options — ibis_options • ibis.iSDM</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,12 @@
 
 
 
-<meta property="og:title" content="Identifier — new_id" />
-<meta property="og:description" content="Generate a new unique identifier." />
+<meta property="og:title" content="Print ibis options — ibis_options" />
+<meta property="og:description" content="There are a number of hidden options that can be specified for ibis.iSDM.
+Currently supported are
+'ibis.runparallel' : logical value on whether processing should be run in parallel
+'ibis.nthread' : numeric value on how many cores should be used by default
+'ibis.setupmessages' : logical value indicating whether message during object creation should be shown" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:creator" content="@Martin_Ecology" />
 <meta name="twitter:site" content="@IIASAVienna" />
@@ -135,42 +139,26 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Identifier</h1>
-    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/identifier.R'><code>R/identifier.R</code></a></small>
-    <div class="hidden name"><code>new_id.Rd</code></div>
+    <h1>Print ibis options</h1>
+    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/misc.R'><code>R/misc.R</code></a></small>
+    <div class="hidden name"><code>ibis_options.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generate a new unique identifier.</p>
+    <p>There are a number of hidden options that can be specified for ibis.iSDM.
+Currently supported are
+'ibis.runparallel' : <code><a href='https://rdrr.io/r/base/logical.html'>logical</a></code> value on whether processing should be run in parallel
+'ibis.nthread' : <code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> value on how many cores should be used by default
+'ibis.setupmessages' : <code><a href='https://rdrr.io/r/base/logical.html'>logical</a></code> value indicating whether message during object creation should be shown</p>
     </div>
 
-    <pre class="usage"><span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>ibis_options</span><span class='op'>(</span><span class='op'>)</span></pre>
 
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>Id</code> object.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <p>The output of <code>getOptions</code> for all ibis related variables</p>
 
-    <p>Identifiers are made using the <code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p></div>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># create new id</span>
-<span class='va'>i</span> <span class='op'>&lt;-</span> <span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='co'># print id</span>
-<span class='fu'><a href='print.html'>print</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>id: 03b54f19-1bec-4156-8c4e-8fea74728960</span></div><div class='input'>
-<span class='co'># convert to character</span>
-<span class='fu'><a href='https://rdrr.io/pkg/raster/man/as.character.html'>as.character</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "03b54f19-1bec-4156-8c4e-8fea74728960"</div><div class='input'>
-<span class='co'># check if it is an Id object</span>
-<span class='fu'><a href='is.Id.html'>is.Id</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

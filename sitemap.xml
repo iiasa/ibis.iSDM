@@ -112,6 +112,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_inla.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/explode_factorized_raster.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/extent_expand.html</loc>
   </url>
   <url>
@@ -122,6 +125,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/get_ngbvalue.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/ibis_options.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/intersecting_extents.html</loc>
