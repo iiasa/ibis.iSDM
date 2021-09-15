@@ -113,6 +113,8 @@ engine_gdb <- function(x,
          length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Add in case anything needs to be further prepared here
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Detect and format the family
         fam <- model$biodiversity[[1]]$family
@@ -124,6 +126,9 @@ engine_gdb <- function(x,
       },
       # Training function
       train = function(self, model, settings, ...){
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
         # Get boosting control and family data
@@ -191,6 +196,9 @@ engine_gdb <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
             for(i in 1:length(settings$get('bias_variable'))){

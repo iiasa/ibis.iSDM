@@ -57,3 +57,19 @@ ibis_colours <- list(
                 "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
                 "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C")
 )
+
+#' Print ibis options
+#'
+#' @description There are a number of hidden options that can be specified for ibis.iSDM.
+#' Currently supported are
+#'   'ibis.runparallel' : [`logical`] value on whether processing should be run in parallel
+#'   'ibis.nthread' : [`numeric`] value on how many cores should be used by default
+#'   'ibis.setupmessages' : [`logical`] value indicating whether message during object creation should be shown
+#' @return The output of \code{getOptions} for all ibis related variables
+#' @keywords misc
+#' @export
+ibis_options <- function(){
+  what <- grep('ibis',names(options()),value = TRUE)
+  items <- options()[what]
+  print(items)
+}

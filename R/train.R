@@ -64,6 +64,9 @@ methods::setMethod(
     if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
       bias_variable <- new_waiver(); bias_value <- new_waiver()
     }
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
+
     # --- #
     #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
@@ -112,10 +115,11 @@ methods::setMethod(
       # Also set predictor names
       model[['predictors_names']] <- x$get_predictor_names()
       # Try to guess predictor types
-      # FIXME: Allow option to determine this directly during add_predictors
+      # Since [add_predictors] splits all factorized raster layers into individual layer
+      # we can say with certainty that layers with only two unique values are factor
       lu <- apply(model[['predictors']][model[['predictors_names']]],
-                  2, function(x) length(unique(x[])))
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu < 50,'factor','numeric') )
+                  2, function(x) length(unique(na.omit( x[] ) )))
+      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu >2 ,'numeric','factor') )
       rm(lu)
     }
 
@@ -188,6 +192,11 @@ methods::setMethod(
                                          keep = keep,
                                          cutoff = 0.7, # Probably keep default, but maybe sth. to vary in the future
                                          method = 'pear')
+
+        # For all factor variables, remove those with only the minimal value (e.g. 0)
+        fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
+        fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
+        co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         if(length(co)>0){
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
         }
@@ -271,6 +280,8 @@ methods::setMethod(
         )),3] <- NA # Fill with NA
       }
     }
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # ----------------- #
     # Number of dataset types, families and ids

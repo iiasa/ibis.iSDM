@@ -119,7 +119,7 @@ engine_inla <- function(x,
   )
 
   # Print a message in case there is already an engine object
-  if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+  if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
   # Set engine in distribution object
   x$set_engine(
@@ -330,6 +330,8 @@ engine_inla <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Set number of threads via set.Options
         INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
@@ -438,6 +440,8 @@ engine_inla <- function(x,
           any(  (c('stk_full','stk_pred') %in% names(self$data)) ),
           inherits(self$get_data('stk_full'),'inla.data.stack')
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Get all datasets with id. This includes the data stacks and integration stacks
         stk_inference <- lapply(
@@ -519,6 +523,9 @@ engine_inla <- function(x,
 
         # Predict spatially
         if(!settings$get(what='inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
           # Get thetas from initially fitted model as starting parameters
           thetas = fit_resp$mode$theta
 

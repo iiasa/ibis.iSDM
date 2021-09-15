@@ -7,15 +7,25 @@
 #' @noRd
 `%notin%` = function(a, b){!(a %in% b)}
 
-#' Custom logging function for scripts
+#' Custom messaging function for scripts
 #'
 #' \code{myLog} prints a log with a custom header
 #' @param title The title in the log output
+#' @param col A [`character`] indicating the text colour to be used. Supported are green / yellow / red
 #' @param ... Any additional outputs or words for display
 #' @keywords internal, utils
 #' @noRd
-myLog <- function(title = "[Processing]",...) {
-  cat(paste0(title,' ', Sys.time(), " | ", ..., "\n"))
+myLog <- function(title = "[Processing]", col = 'green', ...) {
+  assertthat::assert_that(col %in% c('green','yellow','red'))
+  textwrap <- switch (col,
+    'green' = text_green,
+    'yellow' = text_yellow,
+    'red' = text_red
+  )
+  message(textwrap(
+    paste0(title,' ', Sys.time(), " | ", ...)
+      )
+    )
 }
 
 #' Colour helpers for message logs
@@ -27,6 +37,9 @@ text_red <- function(text) { paste0('\033[31m',text,'\033[39m') }
 #' @inheritParams text_red
 #' @aliases text_yellow
 text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
+#' @inheritParams text_red
+#' @aliases text_green
+text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 
 #' Calculate the mode
 #' @param A [`vector`] of values or characters

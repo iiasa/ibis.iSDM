@@ -9,6 +9,7 @@ NULL
 #' @param ... Other parameters passed down
 #'
 #' @details Different for INLA. Otherwise a CAR object
+#'
 #' @section Notes:
 #' @references
 #'
@@ -41,7 +42,10 @@ methods::setMethod(
                             )
     if(spatial_model=='iCAR') stop('Needs to be debugged. ID of mesh not linked.')
 
-        # If priors have been set, save them in distribution object
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding latent spatial effects...')
+
+    # If priors have been set, save them in distribution object
     if(!is.null(priors)) {
       assertthat::assert_that(priors$varnames() == 'spde' && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
                               msg = 'Priors for spatial latent effect misspeficied (required spde | prior.range/prior.sigma)'  )

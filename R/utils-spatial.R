@@ -504,6 +504,40 @@ clean_rasterfile <- function(x, verbose = FALSE)
   rm(list = parent.var.name, envir = sys.frame(-1))
 }
 
+#' Split raster factor levels to stack
+#'
+#'  @description Takes a single raster that is a factor and creates
+#'  a new [`RasterStack`] that contains the individual levels
+#'  @param ras A [`RasterLayer`] object that is a factor
+#'  @param name An optional [`character`] name for the raster
+#'  @param ... Other parameters (dummy)
+#'  @returns A [`RasterStack`] object
+#'  @keywords utils
+explode_factorized_raster <- function(ras, name = NULL, ...){
+  assertthat::assert_that(inherits(ras, 'RasterLayer'),
+                          is.factor(ras),
+                          is.null(name) || is.character(name))
+
+  # Get name
+  # Create output template
+  temp <- emptyraster(ras)
+  if(is.null(name)) name <- names(ras)
+
+  # Extract data
+  o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
+
+  # Make function that converts all factors to split rasters
+  f <- as.data.frame(
+    outer(o[[name]], levels(o[[name]]), function(w, f) ifelse(w == f, 1, 0))
+  )
+
+  # Fill template rasters
+  out <- fill_rasters(f,temp)
+  names(out) <- paste(name, levels(o[[name]]), sep = ".")
+
+  return(out) # Return the result
+}
+
 #' Save a raster file in Geotiff format
 #'
 #' @param file A [`raster`] object to be saved

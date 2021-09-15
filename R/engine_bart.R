@@ -61,7 +61,7 @@ engine_bart <- function(x,
   )
 
   # Print a message in case there is already an engine object
-  if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+  if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
   # Set engine in distribution object
   x$set_engine(
@@ -106,6 +106,9 @@ engine_bart <- function(x,
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+
         # In case anything else needs to be specified, do it here
         if(model$biodiversity[[1]]$family=='binomial') assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
         invisible()
@@ -118,6 +121,9 @@ engine_bart <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
 
@@ -177,6 +183,9 @@ engine_bart <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
             for(i in 1:length(settings$get('bias_variable'))){

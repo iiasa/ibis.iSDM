@@ -31,6 +31,8 @@ methods::setMethod(
                             is.Raster(range),
                             is.character(method)
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
     if(compareRaster(range, x$background,stopiffalse = FALSE)){
@@ -68,6 +70,9 @@ methods::setMethod(
                             is.null(distance_max) || is.numeric(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+
     # Reproject if necessary
     if(st_crs(range) != st_crs(x$background)) range <- st_transform(range, st_crs(x$background))
 
@@ -76,7 +81,7 @@ methods::setMethod(
       temp <- emptyraster(x$predictors$get_data())
     } else {
       # TODO: Eventually make this work better
-      message('CAREFUL - This might not work without predictors already in the model.')
+      myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
       temp <- raster::raster(extent(x$background),resolution = 1)
     }
 
@@ -167,6 +172,9 @@ methods::setMethod(
                             is.Raster(range),
                             is.character(method)
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+
     # Check that background and range align, otherwise raise error
     if(compareRaster(range, x$background,stopiffalse = FALSE)){
       warning('Supplied range does not align with background! Aligning them now...')
@@ -193,6 +201,9 @@ methods::setMethod(
                             method %in% c('binary','distance'),
                             is.null(distance_max) || is.numeric(distance_max)
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+
     # Reproject if necessary
     if(st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
 
@@ -201,7 +212,7 @@ methods::setMethod(
       temp <- emptyraster(x$predictors$get_data())
     } else {
       # TODO: Eventually make this work better
-      message('CAREFUL - This might not work without predictors already in the model.')
+      myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
       temp <- raster::raster(extent(x$background),resolution = 1)
     }
 
