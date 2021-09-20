@@ -7,6 +7,7 @@
 create_pseudoabsence(
   env,
   presence,
+  bias = NULL,
   template = NULL,
   npoints = 1000,
   replace = FALSE
@@ -16,6 +17,8 @@ create_pseudoabsence(
 \item{env}{An environmental dataset either in \code{\link{data.frame}} or \code{\link{raster}} format}
 
 \item{presence}{Presence records. Necessary to avoid sampling pseudo-absences over existing presence records}
+
+\item{bias}{An optional weights raster to control placement of pseudo-absences further}
 
 \item{template}{If template is not null then env needs to be a \code{\link{raster}} dataset}
 
@@ -29,3 +32,4 @@ A \code{\link{data.frame}} containing the newly created pseudo absence points
 \description{
 Create pseudo absence points over a raster dataset
 }
+\keyword{utils}

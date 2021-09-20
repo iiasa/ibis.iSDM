@@ -7,3 +7,4 @@
 \description{
 Basic proto object for Settings object, a List that stores settings used related to model training
 }
+\keyword{bdproto}

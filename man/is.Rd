@@ -4,6 +4,7 @@
 \alias{is.Id}
 \alias{is.Waiver}
 \alias{is.formula}
+\alias{is.Raster}
 \title{Is Id}
 \usage{
 is.Id(x)
@@ -11,12 +12,16 @@ is.Id(x)
 is.Waiver(x)
 
 is.formula(x)
+
+is.Raster(x)
 }
 \arguments{
-\item{x}{A \code{\link{character}} object}
+\item{x}{an R Object.}
 }
 \value{
 Boolean evaluation
+
+A boolean vector
 }
 \description{
 Is Id
@@ -24,4 +29,7 @@ Is Id
 Is waiver
 
 Check whether a formula is valid
+
+Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
 }
+\keyword{misc}

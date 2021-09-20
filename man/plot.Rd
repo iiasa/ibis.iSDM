@@ -14,7 +14,7 @@
 
 \method{plot}{PredictorDataset}(x, ...)
 
-\method{plot}{Engine}(x)
+\method{plot}{Engine}(x, ...)
 }
 \arguments{
 \item{x}{Any object.}
@@ -27,3 +27,4 @@ None.
 \description{
 Plots information from a given object where a plotting object is available
 }
+\keyword{misc}

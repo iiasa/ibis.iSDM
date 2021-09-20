@@ -9,7 +9,6 @@ NULL
 #' @param hyper A [`character`] object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'
 #' @param ... Variables passed on to prior object
 #' @details TBD
-#' @section Notes:
 #' @references
 #'
 #' @seealso [`Prior-class`].

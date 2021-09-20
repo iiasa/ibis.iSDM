@@ -67,3 +67,4 @@ print(a)
 \seealso{
 \code{\link[base:print]{base::print()}}.
 }
+\keyword{misc}

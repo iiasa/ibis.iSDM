@@ -11,8 +11,8 @@ NULL
 #' inherited by any specific prior.
 #'
 #' @name Prior-class
-#'
 #' @aliases Prior
+#' @keywords bdproto
 NULL
 
 #' @export

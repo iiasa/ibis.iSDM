@@ -1,7 +1,3 @@
-^.*\.Rproj$
-^\.Rproj\.user$
-^LICENSE\.md$
-
 ^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
@@ -20,3 +16,5 @@ configure.ac
 ^inst/doc/[A-Za-z0-9\-_]+[.]txt$
 ^inst/doc/[A-Za-z0-9\-_]+[.]csv
 ^inst/doc/\.install_extras$
+^_pkgdown\.yml$
+^docs$

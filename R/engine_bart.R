@@ -61,7 +61,7 @@ engine_bart <- function(x,
   )
 
   # Print a message in case there is already an engine object
-  if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+  if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
   # Set engine in distribution object
   x$set_engine(
@@ -106,6 +106,9 @@ engine_bart <- function(x,
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+
         # In case anything else needs to be specified, do it here
         if(model$biodiversity[[1]]$family=='binomial') assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
         invisible()
@@ -118,6 +121,9 @@ engine_bart <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
 
@@ -131,6 +137,7 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
+        if(is.numeric(data[['observed']])) data[['observed']] <- data[['observed']] / w
         full <- model$predictors # All predictors
 
         # Select predictors
@@ -176,6 +183,16 @@ engine_bart <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(full)) next()
+              full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            }
+          }
           # Make a prediction
           suppressWarnings(
             pred_bart <- dbarts:::predict.bart(fit_bart,
@@ -226,11 +243,11 @@ engine_bart <- function(x,
           partial = function(self, x.vars = NULL, ...){
 
             model <- self$get_data('fit_best')
-            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || NULL,
+            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || is.null(x.vars),
                                     msg = 'Variable not in predicted model' )
             # Check if family is binomial, if so alter
             not_binomial = self$get_data('model')$biodiversity[[1]]$family != 'binomial'
-            partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
+            bart_partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
@@ -238,10 +255,10 @@ engine_bart <- function(x,
             assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 
-            if( self$model$biodiversity[[1]]$family != 'binomial') warning('Check whether transform should not be set to False!')
+            if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
 
             # Calculate
-            p <- partial_space(model, predictors, x.vars, equal, smooth, transform)
+            p <- bart_partial_space(model, predictors, x.vars, equal, smooth, transform)
 
             cols <- c("#000004FF","#1B0C42FF","#4B0C6BFF","#781C6DFF","#A52C60FF","#CF4446FF","#ED6925FF","#FB9A06FF","#F7D03CFF","#FCFFA4FF")
             plot(p, col = cols, main = paste0(x.vars, collapse ='|'))

@@ -5,7 +5,8 @@ NULL
 #'
 #' @param background Specification of the modelling background. Must be a
 #' [`raster`], [`sf`] or [`extent`] object
-#' @param limits A [`raster`] or [`sf`] object that limits the prediction surface when intersected with input data (Default: NULL).
+#' @param limits A [`raster`] or [`sf`] object that limits the prediction surface when
+#' intersected with input data (Default: NULL).
 #'
 #' @details TBD. Say something about PPMs, INLA and co.
 #'
@@ -68,6 +69,9 @@ methods::setMethod(
       inherits(background,'sf'),
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
+
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating distribution object...')
 
     # Convert limits if provided
     if(!is.null(limits)){

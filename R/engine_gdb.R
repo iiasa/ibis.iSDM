@@ -113,6 +113,8 @@ engine_gdb <- function(x,
          length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Add in case anything needs to be further prepared here
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Detect and format the family
         fam <- model$biodiversity[[1]]$family
@@ -124,6 +126,9 @@ engine_gdb <- function(x,
       },
       # Training function
       train = function(self, model, settings, ...){
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
         # Get boosting control and family data
@@ -191,6 +196,16 @@ engine_gdb <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(full)) next()
+              full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            }
+          }
           # Make a prediction
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
@@ -244,38 +259,86 @@ engine_gdb <- function(x,
             temp[] <- y[,1]
             return(temp)
           },
+          # Partial effect
+          partial = function(self, x.vars, constant = NULL, variable_length = 100, plot = FALSE){
+            # Assert that variable(s) are in fitted model
+            assertthat::assert_that( is.character(x.vars),inherits(self$fits$fit_best, 'mboost') )
+            # Unlike the effects function, build specific predictor for target variable(s) only
+            variables <- mboost::extract(self$fits$fit_best,'variable.names')
+            assertthat::assert_that( all( x.vars %in% variables), msg = 'x.vars variable not found in model!' )
+            variable_range <- range(self$model$predictors[[x.vars]],na.rm = TRUE)
+
+            # Create dummy data.frame
+            dummy <- as.data.frame(matrix(nrow = variable_length))
+            dummy[,x.vars] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+            # For the others
+            if(is.null(constant)){
+              # Calculate mean
+              constant <- apply(self$model$predictors,2, function(x) mean(x, na.rm=T))
+              dummy <- cbind(dummy,t(constant))
+            } else {
+              dummy[,variables] <- constant
+            }
+
+            # Now predict with model
+            pp <- mboost::predict.mboost(object = self$fits$fit_best, newdata = dummy,
+                                               type = 'link', aggregate = 'sum')
+            # Combine with
+            out <- data.frame(observed = pp[,1]); out[[x.vars]] <- dummy[[x.vars]]
+
+            # If plot, make plot, otherwise
+            if(plot){
+              mboost::plot.mboost(self$fits$fit_best, which = x.vars,newdata = dummy)
+            }
+            return(out)
+          },
           # Spatial partial effect plots
-          spartial = function(self, what, plot = TRUE){
+          spartial = function(self, x.vars, constant = NULL, plot = TRUE,...){
             assertthat::assert_that('fit_best' %in% names(self$fits),
-                                    is.character(what))
+                                    is.character(x.vars), length(x.vars) == 1)
             # Get model and make empty template
             mod <- self$get_data('fit_best')
             # Also check that what is present in coefficients of model
-            assertthat::assert_that(what %in%  as.character( mboost::extract(mod,'variable.names') ))
+            variables <- as.character( mboost::extract(mod,'variable.names') )
+            assertthat::assert_that(x.vars %in% variables )
 
             # Make template of target variable(s)
             temp <- raster::rasterFromXYZ(cbind(self$model$predictors$x,self$model$predictors$y))
             # Get target variables and predict
-            target <- self$model$predictors[,c('x','y',what)]
+            target <- self$model$predictors
+            # Set all variables other the target variable to constant
+            if(is.null(constant)){
+              # Calculate mean
+              # FIXME: for factor use mode!
+              constant <- apply(target, 2, function(x) mean(x, na.rm=T))
+              for(v in variables[ variables %notin% x.vars]){
+                if(v %notin% names(target) ) next()
+                target[!is.na(target[v]),v] <- constant[v]
+              }
+            } else {
+              target[!is.na(target[,x.vars]), variables] <- constant
+            }
+            target$rowid <- as.numeric( rownames(target) )
+            assertthat::assert_that(nrow(target)==ncell(temp))
 
-            y <- suppressWarnings(
-              mboost::predict.mboost(mod,newdata = target, which = what)
+            pp <- suppressWarnings(
+              mboost::predict.mboost(mod, newdata = target, which = x.vars,
+                                     type = 'link', aggregate = 'sum')
             )
-            assertthat::assert_that(nrow(target)==nrow(y))
-            temp[] <- y[,2]
-            names(temp) <- paste0('partial__',what)
+            # If both linear and smooth effects are in model
+            if(length(target$rowid[which(!is.na(target[[x.vars]]))] ) == length(pp[,ncol(pp)])){
+              temp[ target$rowid[which(!is.na(target[[x.vars]]))] ] <- pp[,ncol(pp)]
+            } else { temp[] <- pp[, ncol(pp) ]}
+            names(temp) <- paste0('partial__',x.vars)
 
             if(plot){
               # Plot both partial spatial partial
               par.ori <- par(no.readonly = TRUE)
               par(mfrow = c(1,3))
-              raster::plot(temp,main = expression(f[partial]), col =
-                             c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01")
-              )
-              mboost::plot.mboost(mod,which = what)
+              raster::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen)
+              mboost::plot.mboost(mod,which = x.vars)
               par(par.ori)
             }
-
             return(temp)
           },
           # Spatial latent effect
@@ -304,9 +367,7 @@ engine_gdb <- function(x,
 
             if(plot){
               # Plot both partial spatial partial
-              raster::plot(temp, main = expression(f[partial]), col =
-                             c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01")
-              )
+              raster::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen )
             }
 
             return(temp)

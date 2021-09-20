@@ -1,0 +1,88 @@
+url: https://iiasa.github.io/ibis.iSDM/
+
+development:
+  mode: auto
+
+template:
+  params:
+    bootswatch: yeti
+  opengraph:
+    twitter:
+      creator: "@Martin_Ecology"
+      site: "@IIASAVienna"
+      card: summary_large_image
+
+reference:
+  - title: Setting up and training models
+    desc: >
+      Key functions for setting up models and training them. Start with
+      distribution and see examples how to build a model
+    contents:
+        - distribution
+        - priors
+        - prior_gdb
+        - prior_inla
+        - train
+        - scenario
+
+  - title: Add or modify data and parameters
+    desc: Functions to add or modify data and parameters in existing objects
+    contents:
+      - starts_with("add_")
+      - starts_with("set_")
+      - starts_with("sel_")
+      - starts_with("rm_")
+
+  - title: Engines
+    desc: Statistical models used for estimation of species distributions
+    contents:
+      - starts_with("engine_")
+
+  - title: Modifications and summaries
+    desc: Key functions to modify existing trained models
+    contents:
+      - similarity
+      - threshold
+
+  - title: Utility functions
+    desc: Functions used by engines or spatial processing
+    contents:
+      - coords_in_mesh
+      - is_comparable_raster
+      - intersecting_extents
+      - point_in_polygon
+      - bbox2wkt
+      - extent_expand
+      - alignRasters
+      - emptyraster
+      - get_ngbvalue
+      - predictor_transform
+      - predictor_derivate
+      - clean_rasterfile
+      - writeGeoTiff
+      - writeNetCDF
+      - has_keyword("utils")
+
+  - title: Class definitions and methods
+    desc: >
+     These pages document the package's internal data structures and functions
+     for manipulating them---they contain information that is really only
+     useful when adding new functionality to the package.
+    contents:
+      - BiodiversityDataset
+      - BiodiversityDatasetCollection
+      - BiodiversityDistribution
+      - BiodiversityScenario
+      - DistributionModel
+      - Engine
+      - Prior
+      - PriorList
+      - Settings
+      - PredictorDataset
+      - Log
+      - has_keyword("bdproto")
+
+  - title: Miscellaneous functions
+    desc: Other functions only relevant for development
+    contents:
+      - has_keyword("misc")

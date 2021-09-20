@@ -23,6 +23,8 @@ add_range_offset(
 
 \item{method}{\code{\link{character}} describing how the range should be included (binary | distance)}
 
+\item{name}{\code{\link{character}} A name of the species if the offset is not specified}
+
 \item{distance_max}{Numeric threshold on the maximum distance (Default: 150000 \link{m})}
 }
 \description{

@@ -14,6 +14,9 @@ test_that('Create and add priors', {
   expect_vector(p1$get('bias'), c(0,1e6))
   expect_equal(p1$priors[[1]]$get(), p1$get('bias'))
 
+  # Check empty priors
+  expect_error(priors( INLAPrior(variable = '', type = 'normal') ))
+
   # Now add another prior
   new <- INLAPrior(variable = 'forest', type = 'normal', hyper = c(2, 0.5))
 
@@ -108,8 +111,9 @@ test_that('Add and modify priors to existing object', {
 
   skip_if_not_installed('INLA')
   skip_on_cran()
+  library(raster)
 
-  background <- st_read('../EuropeBdry.gpkg')
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
   ll <- list.files('inst/extdata/predictors/',full.names = T)

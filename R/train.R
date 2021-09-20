@@ -9,7 +9,10 @@ NULL
 #' @param runname A [`character`] name of the trained run
 #' @param rm_corPred Remove highly correlated predictors. Default is True
 #' @param varsel Perform a variable selection on the set of predictors
-#' @param inference_only Fit model only without spatial prediction (Default: FALSE)
+#' @param inference_only Fit model only without spatial projection (Default: FALSE)
+#' @param only_linear Fit model only on linear covariate baselearners (DEFAULT: TRUE)
+#' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
+#' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: NULL)
 #' @param ... further arguments passed on.
 #'
 #' @details
@@ -28,7 +31,9 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) standardGeneric("train"))
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+           only_linear = TRUE,
+           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -36,13 +41,18 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE, verbose = FALSE,...) {
+  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+           only_linear = FALSE,
+           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
       is.logical(rm_corPred),
       is.logical(inference_only),
+      is.null(bias_variable) || is.character(bias_variable),
+      is.null(bias_value) || is.numeric(bias_value),
+      is.logical(only_linear),
       is.logical(verbose)
     )
     # Now make checks on completeness of the object
@@ -51,19 +61,26 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
+    if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
+      bias_variable <- new_waiver(); bias_value <- new_waiver()
+    }
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
 
     # --- #
-    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE
+    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
     settings$set('varsel', varsel)
     settings$set('inference_only', inference_only)
     settings$set('verbose', verbose)
+    settings$set('bias_variable', bias_variable)
+    settings$set('bias_value',bias_value)
+    settings$set('only_linear',only_linear)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
-    # settings$set('only_linear',TRUE)
     # Start time
     settings$set('start.time', Sys.time())
 
@@ -98,10 +115,11 @@ methods::setMethod(
       # Also set predictor names
       model[['predictors_names']] <- x$get_predictor_names()
       # Try to guess predictor types
-      # FIXME: Allow option to determine this directly during add_predictors
+      # Since [add_predictors] splits all factorized raster layers into individual layer
+      # we can say with certainty that layers with only two unique values are factor
       lu <- apply(model[['predictors']][model[['predictors_names']]],
-                  2, function(x) length(unique(x[])))
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu < 50,'factor','numeric') )
+                  2, function(x) length(unique(na.omit( x[] ) )))
+      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu >2 ,'numeric','factor') )
       rm(lu)
     }
 
@@ -121,7 +139,7 @@ methods::setMethod(
       model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations %>% dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
       # FIXME: For polygons this won't work. Ideally switch to WKT as default in future
-      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations[,c('observed','x','y')] # Get only observed column and coordinates
+      model$biodiversity[[id]]$observations <- as.data.frame(model$biodiversity[[id]]$observations) # Get only observed column and coordinates
 
       # Now extract coordinates and extract estimates
       env <- get_ngbvalue(
@@ -165,12 +183,20 @@ methods::setMethod(
         test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
 
         # Ignore variables for which we have priors
-        if(!is.Waiver(x$priors)) keep <- unique( as.character(x$priors$varnames()) ) else keep <- NULL
+        if(!is.Waiver(x$priors)){
+          keep <- unique( as.character(x$priors$varnames()) )
+          if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
+        } else keep <- NULL
 
         co <- find_correlated_predictors(env = test,
                                          keep = keep,
                                          cutoff = 0.7, # Probably keep default, but maybe sth. to vary in the future
                                          method = 'pear')
+
+        # For all factor variables, remove those with only the minimal value (e.g. 0)
+        fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
+        fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
+        co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         if(length(co)>0){
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
         }
@@ -194,6 +220,12 @@ methods::setMethod(
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
       if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
+      # Check whether all priors variables do exist as predictors, otherwise remove
+      if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
+       vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+       spec_priors$rm( spec_priors$exists(vv) )
+       warning('Variable for set prior not found. Removed prior!')
+      }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
@@ -248,6 +280,8 @@ methods::setMethod(
         )),3] <- NA # Fill with NA
       }
     }
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # ----------------- #
     # Number of dataset types, families and ids
@@ -264,10 +298,10 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw1 fits
-          if(is.Waiver(settings$get('only_linear'))){
+          if(settings$get('only_linear') == FALSE){
             var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-            var_rw1 <- names(which(var_rw1 > 150)) # Get only those greater than 150 unique values (arbitrary)
-            var_rw1 <- var_rw1[var_rw1 %in% model$biodiversity[[id]][['predictors_names']]]
+            # var_rw1 <- names(which(var_rw1 > 100)) # Get only those greater than 150 unique values (arbitrary)
+            var_rw1 <- names(var_rw1)[names(var_rw1) %in% model$biodiversity[[id]][['predictors_names']]]
             # Set remaining variables to linear
             var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
           } else {
@@ -310,7 +344,7 @@ methods::setMethod(
                                                 collapse = ' + ' ) )
               } else if(vt == 'pc.prec' || vt == 'loggamma'){
                 # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
-                # Default is a loggamma prior with mu 1, 5e-05
+                # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
                 form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
                                                  # 'scale.model = TRUE,',
                                                  'hyper = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )
@@ -366,6 +400,7 @@ methods::setMethod(
                                        model$biodiversity[[id]]$predictors_names) )
           )
           # FIXME: check that
+          # TODO: Remove elements from predictors that are not used in the formula
           form <- to_formula( model$biodiversity[[id]]$equation )
         }
         # Update model formula in the model container
@@ -379,6 +414,7 @@ methods::setMethod(
       }
 
       # Run the engine setup script
+      # FIXME: Do some checks on whether an observation falls into the mesh?
       x$engine$setup(model)
 
       # Now train the model and create a predicted distribution model
@@ -402,6 +438,7 @@ methods::setMethod(
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
+              if(v %notin% model$biodiversity[[1]]$predictors_names) next() # In case the variable has been removed
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
                                          ', constraint = \'', model$priors$get(v) ,'\'',
@@ -422,7 +459,7 @@ methods::setMethod(
           } else {
             # Add linear predictors
             form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '))
-            if(is.Waiver(settings$get('only_linear'))){
+            if(settings$get('only_linear') == FALSE){
             # And smooth effects
             form <- paste(form, ' + ', paste0('bbs(',
                                        model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
@@ -461,9 +498,10 @@ methods::setMethod(
           abs <- create_pseudoabsence(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
+            bias = settings$get('bias_variable'),
             template = bg,
-            npoints = 1000, # FIXME: Ideally query this from settings
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+            replace = TRUE
           )
           abs$intercept <- 1 # Add dummy intercept
           # Combine absence and presence and save
@@ -513,6 +551,7 @@ methods::setMethod(
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
+              if(v %notin% model$biodiversity[[id]]$predictors_names) next() # In case the variable has been removed
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
                                          ', constraint = \'', model$priors$get(v) ,'\'',
@@ -651,9 +690,10 @@ methods::setMethod(
         abs <- create_pseudoabsence(
           env = model$predictors,
           presence = model$biodiversity[[id]]$observations,
+          bias = settings$get('bias_variable'),
           template = x$engine$get_data('template'),
-          npoints = 1000,
-          replace = FALSE
+          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+          replace = TRUE
         )
         abs$intercept <- 1 # Add dummy intercept
         # Combine absence and presence and save
@@ -731,9 +771,10 @@ methods::setMethod(
           abs <- create_pseudoabsence(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
+            bias = settings$get('bias_variable'),
             template = bg,
-            npoints = 1000,
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
           # Combine absence and presence and save
@@ -838,9 +879,10 @@ methods::setMethod(
           abs <- create_pseudoabsence(
             env = model$predictors,
             presence = model$biodiversity[[id]]$observations,
+            bias = settings$get('bias_variable'),
             template = bg,
-            npoints = 1000,
-            replace = FALSE
+            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
           # Combine absence and presence and save

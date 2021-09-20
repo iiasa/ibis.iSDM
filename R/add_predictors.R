@@ -39,11 +39,12 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
-  function(x, env, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, priors, ...)
   }
 )
 
@@ -53,11 +54,12 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, priors, ...)
   }
 )
 
@@ -69,12 +71,12 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, priors = NULL, ... ) {
-    # Try and match transform and derivatives arguements
+    # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(env, 'Raster'),
+                            is.Raster(env),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
@@ -82,6 +84,9 @@ methods::setMethod(
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
                             msg = 'Supplied environmental data not aligned with background.')
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
+
     if(!is.null(names)) {
       assertthat::assert_that(nlayers(env)==length(names),
                               all(is.character(names)),
@@ -95,6 +100,26 @@ methods::setMethod(
       # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
       x <- x$set_priors(priors)
+    }
+
+    # Don't transform or create derivatives of factor variables
+    if(any(is.factor(env))){
+      # Make subsets to join back later
+      env_f <- raster::subset(env,which(is.factor(env)))
+      env <- raster::subset(env, which(!is.factor(env)))
+
+      # Refactor categorical variables
+      if(inherits(env_f,'RasterLayer')){
+        env_f <- explode_factorized_raster(env_f)
+      } else {
+        o <- raster::stack()
+        for(layer in env_f){
+          o <- raster::addLayer(o, explode_factorized_raster(layer))
+        }
+        env_f <- o;rm(o)
+      }
+      # Joing back to full raster stack
+      env <- raster::stack(env, env_f);rm(env_f)
     }
 
     # Standardization and scaling
@@ -116,12 +141,18 @@ methods::setMethod(
 
     # Mask predictors with existing background layer
     if(bgmask){
-      env <- raster::mask(env,mask = x$background)
+      env <- raster::mask(env, mask = x$background)
+      # Reratify, work somehow only on stacks
+      if(any(is.factor(env))){
+        new_env <- raster::stack(env)
+        new_env[[which(is.factor(env))]] <- ratify(env[[which(is.factor(env))]])
+        new_env <- env;rm(new_env)
+      } else env <- raster::stack(env)
     }
 
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain
-    if(!is.Waiver(x$predictors)) message('Overwriting existing predictors.')
+    if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
@@ -236,6 +267,9 @@ methods::setMethod(
     # Some stars checks
     assertthat::validate_that(length(env) >= 1)
 
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding scenario predictors...')
+
     # Rename attributes if names is specified
     if(!is.null(names)){
       assertthat::assert_that(length(names) == length(env))
@@ -263,7 +297,7 @@ methods::setMethod(
 
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain
-    if(!is.Waiver(x$predictors)) message('Overwriting existing predictors.')
+    if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Finally set the data to the BiodiversityScenario object
     x$set_predictors(

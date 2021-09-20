@@ -16,3 +16,4 @@ It provides methods for accessing, adding and removing priors from the list
    )
 }
 }
+\keyword{bdproto}

@@ -29,7 +29,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson', ...) standardGeneric("add_biodiversity_poipo"))
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", ...) standardGeneric("add_biodiversity_poipo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -39,15 +39,18 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',  ... ) {
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(poipo,'Spatial') || inherits(poipo,'sf') || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
+                            inherits(poipo, "Spatial") || inherits(poipo,"sf") || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo,field_occurrence),
                             inherits(formula,'formula') || is.null(formula) || is.character(formula),
                             is.character(family)
                             )
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
+
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding poipo dataset...')
 
     # Get only those records that fall onto the background data
     suppressMessages( poipo <- point_in_polygon(poly = x$background,points = poipo) )
@@ -123,6 +126,9 @@ methods::setMethod(
     )
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
                             msg = "Presence-Absence requires at exactly 2 unique values.")
+
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding poipa dataset...')
 
     # Get only those records that fall onto the background data
     suppressMessages( poipa <- point_in_polygon(poly = x$background,points = poipa) )
@@ -221,6 +227,9 @@ methods::setMethod(
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding polpo dataset...')
+
     # Simulate presence absence points rather than using the range directly
     if(simulate){
       if(family == 'poisson') warning('Simulated points created. Binomial distribution is advised.')
@@ -231,7 +240,7 @@ methods::setMethod(
         # Normalize the weight layer if is not a factorized, else set everything to 1
         if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights,'norm') else simulate_weights[simulate_weights>0] <- 1
 
-        # Weighted sampling on backgroudn raster, the greater the value, the more likely sampled points
+        # Weighted sampling on background raster, the greater the value, the more likely sampled points
         ptscell <- sample(which(!is.na(simulate_weights[])),
                           size = simulate_points,
                           prob = simulate_weights[which(!is.na(simulate_weights[]))],

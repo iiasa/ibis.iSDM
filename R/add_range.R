@@ -28,9 +28,19 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
   function(x, range, method = 'precomputed_range', priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(range, 'Raster')
+                            is.Raster(range),
+                            is.character(method)
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(range, x$background,stopiffalse = FALSE)){
+      warning('Supplied range does not align with background! Aligning them now...')
+      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
+    }
     names(range) <- method
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
       x <- add_predictors(x, env = range,transform = 'none',derivates = 'none', priors)
@@ -60,6 +70,9 @@ methods::setMethod(
                             is.null(distance_max) || is.numeric(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+
     # Reproject if necessary
     if(st_crs(range) != st_crs(x$background)) range <- st_transform(range, st_crs(x$background))
 
@@ -68,21 +81,24 @@ methods::setMethod(
       temp <- emptyraster(x$predictors$get_data())
     } else {
       # TODO: Eventually make this work better
-      message('CAREFUL - This might not work without predictors already in the model.')
+      myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
       temp <- raster::raster(extent(x$background),resolution = 1)
     }
 
     # Rasterize the range
-    range$id <- 1:nrow(range) # Assign an id if not already existing
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(range, temp, field = 'id')
+      ras_range <- fasterize::fasterize(range, temp, field = NULL)
     } else {
-      ras_range <- raster::rasterize(range, temp,field = 'id')
+      ras_range <- raster::rasterize(range, temp,field = NULL)
     }
 
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
+      # Probability for which the species is not in the expert range map
+      dis <- dis + 0.001
+      # Transform to log-scale
+      dis <- log(dis)
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # TODO: The below can be much more sophisticated.
@@ -98,6 +114,10 @@ methods::setMethod(
       if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
       # Convert to relative for better scaling
       dis <- 1 - (dis / cellStats(dis,'max'))
+      # Probability for which the species is not in the expert range map
+      dis <- dis + 0.001
+      # Transform to log-scale
+      dis <- log(dis)
       names(dis) <- 'range_distance'
     }
 
@@ -126,6 +146,7 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param range A [`sf`] object with the range for the target feature
 #' @param method [`character`] describing how the range should be included (binary | distance)
+#' @param name [`character`] A name of the species if the offset is not specified
 #' @param distance_max Numeric threshold on the maximum distance (Default: 150000 [m])
 #' @name add_range_offset
 NULL
@@ -146,11 +167,21 @@ methods::setGeneric(
 methods::setMethod(
   "add_range_offset",
   methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
-  function(x, range, name = 'range_distance') {
+  function(x, range, method = 'range_distance') {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(range, 'Raster')
+                            is.Raster(range),
+                            is.character(method)
     )
-    names(range) <- name
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(range, x$background,stopiffalse = FALSE)){
+      warning('Supplied range does not align with background! Aligning them now...')
+      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
+    }
+    names(range) <- method
+
     # Add as a new offset
     x <- x$set_offset(range)
     return(x)
@@ -170,6 +201,9 @@ methods::setMethod(
                             method %in% c('binary','distance'),
                             is.null(distance_max) || is.numeric(distance_max)
     )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+
     # Reproject if necessary
     if(st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
 
@@ -178,7 +212,7 @@ methods::setMethod(
       temp <- emptyraster(x$predictors$get_data())
     } else {
       # TODO: Eventually make this work better
-      message('CAREFUL - This might not work without predictors already in the model.')
+      myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
       temp <- raster::raster(extent(x$background),resolution = 1)
     }
 

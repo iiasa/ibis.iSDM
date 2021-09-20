@@ -14,10 +14,6 @@ Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
 LazyData: true
-Biarch: true
-SystemRequirements: GNU make
-Depends:
-    R(>= 4.0.0)
 Imports: 
     assertthat (>= 0.2.0),
     doParallel,
@@ -37,25 +33,17 @@ Imports:
     sf (>= 0.9),
     stars (>= 0.5),
     testthat (>= 3.0.0),
-    tibble (>= 2.0.0),
-    uuid
+    tibble (>= 2.0.0)
+Depends:
+    R(>= 4.0.0)
 Suggests:
     deldir,
-    INLA (>= 20.03.17),
-    mboost (>= 2.9-5),
+    mboost,
     dbarts,
     progress,
-    Rcpp (>= 0.12.0),
-    RcppParallel (>= 5.0.1),
-    rstan (>= 2.18.1),
-    rstantools (>= 2.1.1)
-LinkingTo: 
-    BH (>= 1.66.0),
-    Rcpp (>= 0.12.0),
-    RcppEigen (>= 0.3.3.3.0),
-    RcppParallel (>= 5.0.1),
-    rstan (>= 2.18.1),
-    StanHeaders (>= 2.18.0)
+    ellipsis,
+    rstan,
+    rstantools
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.1
@@ -73,12 +61,13 @@ Collate:
     'bdproto-biodiversityscenario.R'
     'bdproto-predictors.R'
     'add_predictors.R'
+    'bdproto-priorlist.R'
+    'bdproto-prior.R'
+    'add_priors.R'
     'add_range.R'
     'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-engine.R'
-    'bdproto-priorlist.R'
-    'bdproto-prior.R'
     'bdproto-settings.R'
     'utils-spatial.R'
     'data.R'
@@ -88,8 +77,8 @@ Collate:
     'engine_gdb.R'
     'utils-inla.R'
     'engine_inla.R'
-    'engine_stan.R'
     'misc.R'
+    'partial.R'
     'plot.R'
     'print.R'
     'prior_gdb.R'
@@ -98,7 +87,9 @@ Collate:
     'scenario.R'
     'set_priors.R'
     'stanmodels.R'
+    'similarity.R'
     'summary.R'
+    'threshold.R'
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'

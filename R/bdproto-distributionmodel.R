@@ -10,8 +10,8 @@ NULL
 #' All trained Models should inherit the options here
 #'
 #' @name DistributionModel-class
-#'
 #' @aliases DistributionModel
+#' @keywords bdproto
 NULL
 
 #' @export
@@ -85,20 +85,21 @@ DistributionModel <- bdproto(
         inherits(pred,'Raster')
       )
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
-      # Custom colour column
-      cols <- colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100)
-
       raster::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
            box = FALSE,
            axes = TRUE,
-           colNA = NA, col = cols,...)
+           colNA = NA, col = ibis_colours[['sdm_colour']],...)
 
     } else {
       message(
         paste0('No model predictions found.')
       )
     }
+  },
+  # Show model run time if settings exist
+  show_duration = function(self){
+    if(!is.Waiver(self$settings)) self$settings$duration()
   },
   # Get effects or importance tables from model
   summary = function(self, x = 'fit_best'){
@@ -111,8 +112,17 @@ DistributionModel <- bdproto(
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
     }
   },
-  # Generic plotting function for partial effects
+  # Dummy partial response calculation. To be overwritten per engine
+  partial = function(self){
+    new_waiver()
+  },
+  # Dummy spartial response calculation. To be overwritten per engine
+  spartial = function(self){
+    new_waiver()
+  },
+  # Generic plotting function for effect plots
   effects = function(self, x = 'fit_best', what = 'fixed', ...){
+    assertthat::assert_that(is.character(what))
     if(inherits(self, 'GDB-Model')){
       # How many effects
       n <- length( coef( self$get_data(x) ))
@@ -128,7 +138,7 @@ DistributionModel <- bdproto(
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
-      self$partial(self$get_data(x), xvars = what, ...)
+      self$partial(self$get_data(x), x.vars = what, ...)
     }
   },
   # Get specific fit from this Model
@@ -139,8 +149,17 @@ DistributionModel <- bdproto(
   },
   # Set fit for this Model
   set_data = function(self, x, value) {
-    self$fits[[x]] <- value
-    invisible()
+    # Get biodiversity dataset collection
+    ff <- self$fits
+    # Set the object
+    ff[[x]] <- value
+    bdproto(NULL, self, fits = ff )
+  },
+  # List all rasters in object
+  show_rasters = function(self){
+    rn <- names(self$fits)
+    rn <- rn[ which( sapply(rn, function(x) is.Raster(self$get_data(x)) ) ) ]
+    return(rn)
   },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){

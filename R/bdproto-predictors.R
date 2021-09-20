@@ -9,6 +9,7 @@ NULL
 #'
 #' @name PredictorDataset-class
 #' @aliases PredictorDataset
+#' @keywords bdproto
 NULL
 
 #' @export
@@ -80,10 +81,9 @@ PredictorDataset <- bdproto(
   },
   # Basic Plotting function
   plot = function(self){
-    cols_civ <- c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF")
     # Plot the predictors
     par.ori <- par(no.readonly = TRUE)
-    raster::plot( self$data, col = cols_civ )
+    raster::plot( self$data, col = ibis_colours[['viridis_cividis']] )
     par(par.ori)
   }
 )

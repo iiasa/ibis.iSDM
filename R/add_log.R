@@ -37,8 +37,11 @@ methods::setMethod(
                             is.character(filename),
                             assertthat::has_extension(filename,'txt') )
 
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding log file...')
+
     # Check whether a log is already present in the distribution file
-    if(!is.Waiver(x$log)) message('Overwriting previous set log file.')
+    if(!is.Waiver(x$log)) myLog('[Setup]','yellow','Overwriting previous set log file.')
 
     # Finally set the data to the BiodiversityDistribution object
     x$set_log(

@@ -14,7 +14,8 @@ distribution(background, limits = NULL)
 \item{background}{Specification of the modelling background. Must be a
 \code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object}
 
-\item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when intersected with input data (Default: NULL).}
+\item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when
+intersected with input data (Default: NULL).}
 }
 \value{
 \code{\linkS4class{BiodiversityDistribution}} object containing
