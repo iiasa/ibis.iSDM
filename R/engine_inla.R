@@ -549,7 +549,7 @@ engine_inla <- function(x,
                                  control.predictor = list(A = INLA::inla.stack.A(stk_full),
                                                           link = li, # Link to NULL for multiple likelihoods!
                                                         compute = TRUE),  # Compute for marginals of the predictors.
-                                 control.compute = list(cpo = TRUE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
+                                 control.compute = list(cpo = FALSE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
                                  # control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
                                  verbose = settings$get(what='verbose'), # To see the log of the model runs
                                  control.results = list(return.marginals.random = FALSE,

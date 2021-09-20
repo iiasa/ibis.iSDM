@@ -251,7 +251,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   out <- matrix(0, nrow = dim(Aprediction)[1], ncol = 1)
   assertthat::assert_that(nrow(out)==nrow(preds))
   for( n in rownames(model$summary.fixed) ) {
-    # If nrow(out) differ with preds, calculate nearest neighbours
+    #TODO: If nrow(out) differ with preds, calculate nearest neighbours
     out[,1] <- out[,1] + (model$summary.fixed[n, type] %*% preds[,n])
   }
 
@@ -324,11 +324,12 @@ post_prediction <- function(mod, nsamples = 100,
 
   # Covariates for prediction points
   preds <- mod$model$predictors
+  # Set any other existing intercept variables
+  preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
+  preds <- SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
   preds_names <- mod$model$predictors_names
   preds_types <- mod$model$predictors_types
   ofs <- mod$model$offset
-  # Set any other existing intercept variables
-  preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
 
   # --- #
   # Simulate from approximated posterior
@@ -375,15 +376,15 @@ post_prediction <- function(mod, nsamples = 100,
     for (name in unique(c("Predictor", preds_names))) {
       vals[[name]] <- extract.entries(name, smpl.latent)
     }
+    # Remove any variables with no values (removed during model fit)
+    vals <- vals[which(lapply(vals, length)>0)]
 
     # For fixed effects that were modelled via factors we attach an extra vector holding the samples
     fac.names <- subset(preds_types, type == 'factor')
     if(nrow(fac.names)>0){
-      for (name in fac.names) {
+      for (name in fac.names$predictors) {
         vals[[name]] <- smpl.latent[startsWith(rownames(smpl.latent), name), ]
-        names(vals[[name]]) <- lapply(names(vals[[name]]), function(nm) {
-          substring(nm, nchar(name) + 1)
-        })
+        names(vals[[name]]) <- lapply(names(vals[[name]]), function(nm) {substring(nm, nchar(name) + 1)})
       }
     }
 
@@ -408,7 +409,164 @@ post_prediction <- function(mod, nsamples = 100,
   }
   vals <- ssmpl;rm(ssmpl)
   # Equivalent of inlabru:::inla.posterior.sample.structured
-  message(paste('Formatted', length(vals), 'posterior samples'))
+  myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
+
+  # evaluate_model Function
+  A <- inlabru::amatrix_eval(model, data = preds)
+  A <- x$engine$data$stk_pred$stk_proj$A
+
+  effects <- evaluate_effect_multi(
+    model$effects[included],
+    state = vals,
+    data = preds,
+    A = A
+  )
+
+
+  if (is.null(predictor)) {
+    return(effects)
+  }
+
+  values <- evaluate_predictor(
+    model,
+    state = state,
+    data = data,
+    effects = effects,
+    predictor = predictor,
+    format = format
+  )
+
+
+  # --- #
+  # Summarise Functions
+  expand_to_dataframe <- function (x, data = NULL) {
+    if (is.null(data)) {
+      data <- data.frame(matrix(nrow = NROW(x), ncol = 0))
+    }
+    only_x <- setdiff(names(x), names(data))
+    if (length(only_x) < length(names(x))) {
+      x <- x[!(names(x) %in% names(data))]
+    }
+    if (inherits(x, "SpatialPixels") && !inherits(x, "SpatialPixelsDataFrame")) {
+      result <- sp::SpatialPixelsDataFrame(x, data = data)
+    }
+    else if (inherits(x, "SpatialGrid") && !inherits(x,
+                                                     "SpatialGridDataFrame")) {
+      result <- sp::SpatialGridDataFrame(x, data = data)
+    }
+    else if (inherits(x, "SpatialLines") && !inherits(x,
+                                                      "SpatialLinesDataFrame")) {
+      result <- sp::SpatialLinesDataFrame(x, data = data)
+    }
+    else if (inherits(x, "SpatialPolygons") && !inherits(x,
+                                                         "SpatialPolygonsDataFrame")) {
+      result <- sp::SpatialPolygonsDataFrame(x, data = data)
+    }
+    else if (inherits(x, "SpatialPoints") && !inherits(x,
+                                                       "SpatialPointsDataFrame")) {
+      result <- sp::SpatialPointsDataFrame(x, data = data)
+    }
+    else if (inherits(x, "Spatial")) {
+      result <- sp::cbind.Spatial(x, data)
+    }
+    else {
+      result <- cbind(x, data)
+    }
+    result
+  }
+  post_summarize <- function(data, x = NULL, cbind.only = FALSE) {
+    if (is.list(data)) {
+      data <- do.call(cbind, data)
+    }
+    if (cbind.only) {
+      smy <- data.frame(data)
+      colnames(smy) <- paste0("sample.", 1:ncol(smy))
+    }
+    else {
+      smy <- data.frame(apply(data, MARGIN = 1, mean, na.rm = TRUE),
+                        apply(data, MARGIN = 1, sd, na.rm = TRUE),
+                        t(apply(data,MARGIN = 1, quantile, prob = c(0.025, 0.5, 0.975),na.rm = TRUE)),
+                        apply(data, MARGIN = 1, min, na.rm = TRUE),
+                        apply(data, MARGIN = 1, max, na.rm = TRUE))
+      colnames(smy) <- c("mean", "sd", "q0.025",
+                         "median", "q0.975", "smin", "smax")
+      smy$cv <- smy$sd/smy$mean
+      smy$var <- smy$sd^2
+    }
+    if (!is.null(x)) {
+      smy <- expand_to_dataframe(x, smy)
+    }
+    return(smy)
+  }
+
+  drop <- FALSE # FIXME: Make parameter after finding out what this does
+
+  if(is.data.frame(vals[[1]])){
+    vals.names <- names(vals[[1]])
+    covar <- intersect(vals.names, names(preds))
+    estim <- setdiff(vals.names, covar)
+    smy <- list()
+
+    for (nm in estim) {
+      smy[[nm]] <- post_summarize(
+          lapply(
+            vals,
+            function(v) v[[nm]]
+          ),
+          x = vals[[1]][, covar, drop = FALSE]
+        )
+    }
+    is.annot <- vapply(names(smy), function(v) all(smy[[v]]$sd == 0), TRUE)
+    annot <- do.call(cbind, lapply(smy[is.annot], function(v) v[, 1]))
+    smy <- smy[!is.annot]
+    if (!is.null(annot)) {
+      smy <- lapply(smy, function(v) cbind(data.frame(annot), v))
+    }
+
+    if (!drop) {
+      smy <- lapply(
+        smy,
+        function(tmp) {
+          if (NROW(preds) == NROW(tmp)) {
+            expand_to_dataframe(preds, tmp)
+          } else {
+            tmp
+          }
+        }
+      )
+    }
+
+    if (length(smy) == 1) smy <- smy[[1]]
+  } else if(is.list(vals[[1]])) {
+    vals.names <- names(vals[[1]])
+    if (any(vals.names == "")) {
+      warning("Some generated list elements are unnamed")
+    }
+    smy <- list()
+    for(nm in vals.names) {
+      tmp <- post_summarize(
+          lapply(
+            vals,
+            function(v) v[[nm]]
+          )
+        )
+      if(!drop &&
+          (NROW(preds) == NROW(tmp))) {
+        smy[[nm]] <- expand_to_dataframe(preds, tmp)
+      } else {
+        smy[[nm]] <- tmp
+      }
+    }
+  } else {
+    tmp <- post_summarize(vals)
+    if (!drop &&
+        (NROW(preds) == NROW(tmp))) {
+      smy <- expand_to_dataframe(preds, tmp)
+    } else {
+      smy <- tmp
+    }
+  }
+  # Multiply ?
 
   # Output raster
   if(is.null(coords)) coords <- preds[,c('x','y')]
@@ -896,8 +1054,8 @@ inla.backstep <- function(master_form,
 
     # Best model among competing models has the largest CPO. Ratio of CPO (LPML really, e.g. the transformation above)
     # is a surrogate for a Bayes Factor
+    # In the code below we take the minimum since the CPO has been multiplied with -2 to emulate comparison with AIC-like statistics
 
-    # Skip if DIC is NA
     if(!is.na(o$cpo) || nrow(oo) > 0) {
       # Now check whether any of the new models are 'better' than the full model
       # If yes, continue loop, if no stop

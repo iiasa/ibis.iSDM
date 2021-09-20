@@ -74,6 +74,7 @@ Collate:
     'engine_gdb.R'
     'utils-inla.R'
     'engine_inla.R'
+    'engine_stan.R'
     'misc.R'
     'partial.R'
     'plot.R'
