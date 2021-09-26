@@ -38,7 +38,7 @@ DistributionModel <- bdproto(
         # model0.res$summary.log.range.nominal
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$model$runname,')',
+          'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
@@ -53,7 +53,7 @@ DistributionModel <- bdproto(
         vi <- sort( vi[which(vi>0)],decreasing = TRUE )
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$model$name,')',
+          'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
           '\n     ', name_atomic(names(vi))
         ))
@@ -62,13 +62,13 @@ DistributionModel <- bdproto(
       vi <- varimp.bart(self$get_data('fit_best'))
 
       message(paste0(
-        'Trained ',class(self)[1],' (',self$model$name,')',
+        'Trained ',class(self)[1],' (',self$show(),')',
         '\n  \033[2mStrongest effects:\033[22m',
         '\n     ', name_atomic(vi$names)
       ))
     } else {
       message(paste0(
-        'Trained distribution model (',self$model$name,')',
+        'Trained distribution model (',self$show(),')',
         '\n     No fitted model found!'
       ))
     }

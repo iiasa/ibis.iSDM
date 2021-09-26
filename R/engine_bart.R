@@ -137,7 +137,6 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
-        if(is.numeric(data[['observed']])) data[['observed']] <- data[['observed']] / w
         full <- model$predictors # All predictors
 
         # Select predictors

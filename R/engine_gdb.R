@@ -141,6 +141,7 @@ engine_gdb <- function(x,
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect
+        if(model$biodiversity[[1]]$family=='binomial') w <- NULL # Set weights to 0 when binomial
         full <- model$predictors
 
         # Select predictors

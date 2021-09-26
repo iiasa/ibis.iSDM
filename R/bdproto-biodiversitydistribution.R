@@ -185,6 +185,16 @@ BiodiversityDistribution <- bdproto(
     assertthat::assert_that(inherits(x, "Log"))
     bdproto(NULL, self, log = x)
   },
+  # Get extent
+  get_extent = function(self){
+    # Calculate the extent from the background
+    if(!is.Waiver(self$background)) raster::extent(self$background) else NULL
+  },
+  # Get dimensions of extent
+  get_extent_dimensions = function(self){
+    # Calculate the dimensions of the background
+    if(!is.Waiver(self$background)) extent_dimensions(self$background) else NULL
+  },
   # Remove predictors
   rm_predictors = function(self, names){
     assertthat::assert_that(

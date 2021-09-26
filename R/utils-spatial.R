@@ -104,6 +104,69 @@ extent_expand <- function(e,f=0.1){
   return(extent(c(xmin,xmax,ymin,ymax)))
 }
 
+#' Calculate the dimensions from a provided extent object
+#'
+#' @description Calculate the dimensions of an extent
+#' (either an extent object orfour-element vector in the right order), either in projected or spherical space
+#' @param ex Either a [`vector`], a [`extent`] or alternatively a [`Raster`],[`Spatial*`] or [`sf`] object
+#' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: TRUE)
+#' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: 'km')
+#' @keywords utils
+#' @noRd
+extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
+  assertthat::assert_that(inherits(ex, 'Extent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'Raster') || inherits(ex, 'Spatial'),
+                          is.logical(lonlat),
+                          is.character(output_unit) && output_unit %in% c('m','km'))
+  # Coerce to vector if necessary
+  if(is.Raster(ex)) ex <- raster::extent(ex)
+  if(is.vector(ex)) assertthat::assert_that(length(ex)==4, is.numeric(ex),msg = 'No valid extent object supplied!')
+
+  # Convert to vector
+  ex <- switch(class(ex)[1],
+               Extent = as.vector(ex),
+               Raster = as.vector( raster::extent(ex) ),
+               sf = as.vector( raster::extent(ex) ),
+               numeric = ex
+               )
+  # Rename the vector
+  names(ex) <- c("xmin", "xmax", "ymin", "ymax")
+
+  # Procedures for longlat raster
+  if(lonlat) {
+    # Dimensions in degrees
+    height <- as.numeric( abs(diff(ex[1:2])) )
+    width <-  as.numeric( abs(diff(cos(ex[3:4]))) )
+    # Scaling to get spherical surface area in km2
+    scaling <- (6371 ^ 2 * pi) / 180
+    surface_area <- width * height * scaling
+
+    # Ratio between GCD height and width
+    # Get ratio between height and width in great circle distance, given an extent vector in lat/long
+    lonLatRatio <- function(extent) {
+      # lower left point
+      p1 <- matrix(extent[c(1, 3)], nrow = 1)
+      # upper left and lower right points
+      p2 <- rbind(extent[c(1, 4)], extent[c(2, 3)])
+      # get ratio between distances
+      dists <- raster::pointDistance(p1,p2,lonlat = TRUE)
+      ratio <- dists[1] / dists[2]
+      return (ratio)
+    }
+    ratio <- lonLatRatio( as.vector(ex) )
+    # calculate equivalent dimensions in km
+    w <- sqrt(surface_area / ratio)
+    dim <- c(w, w * ratio)
+    if(output_unit == 'm') dim * 1000
+  } else {
+    # else assume a rectangle in m and convert to km
+    dim <- abs(diff(extent)[c(1, 3)])
+    if(output_unit=='km'){
+      dim <- dim * 0.1 ^ 3
+    }
+  }
+  return(dim)
+}
+
 #' Align a [`Raster-class`] object to another by harmonizing geometry and extend.
 #'
 #' If the data is not in the same projection as the template, the alignment
