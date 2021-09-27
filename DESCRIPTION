@@ -86,14 +86,13 @@ Collate:
     'prior_inla.R'
     'priors.R'
     'scenario.R'
-    'set_priors.R'
-    'stanmodels.R'
     'similarity.R'
     'summary.R'
     'threshold.R'
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
-    'utils-stan.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
+Biarch: true
+SystemRequirements: GNU make
