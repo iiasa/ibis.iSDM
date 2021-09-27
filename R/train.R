@@ -479,9 +479,12 @@ methods::setMethod(
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
           form <- to_formula(model$biodiversity[[1]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
           )
         }
         model$biodiversity[[1]]$equation <- form
@@ -489,12 +492,13 @@ methods::setMethod(
 
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[1]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
           assertthat::assert_that(!is.na(cellStats(bg,min)))
 
+          # Sample pseudo absences
           abs <- create_pseudoabsence(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
@@ -507,14 +511,19 @@ methods::setMethod(
           # Combine absence and presence and save
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
           # Furthermore rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
+                                    fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
                         model$biodiversity[[1]]$observations[,c('x','y')] )
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
           df <- rbind(model$biodiversity[[1]]$predictors,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>% subset(., complete.cases(.) )
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+            subset(., complete.cases(.) )
 
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
@@ -590,9 +599,12 @@ methods::setMethod(
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
           form <- to_formula(model$biodiversity[[id]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
           )
         }
         model$biodiversity[[id]]$equation <- form
@@ -609,11 +621,6 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         # Also create a class prediction of the binomial outcome
         new <- out$fits$prediction
-        # Binary layer caused trouble (cholesky errors, thus removing)
-                     # predict_gdbclass(fit = out$fits$fit_best,
-                     #                  nd = model2$predictors,
-                     #                  template = out$fits$prediction)
-                     # )
         names(new) <- 'poipa_mean'
         rm(model2) # Clean
         # ---- #
@@ -677,6 +684,14 @@ methods::setMethod(
                                                 x$engine$get_equation_latent_spatial() )
             )
           }
+        } else {
+          # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+          form <- to_formula(model$biodiversity[[id]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
+          # Add poipa mean to equation if not already in
+          if( length( grep('poipa_mean',attr(terms.formula(form), 'term.labels')) )==0 ) form <- update.formula(form, '. ~ . + bmono(poipa_mean, constraint = \'increasing\') ')
         }
         model$biodiversity[[id]]$equation <- form
         rm(form)
@@ -700,6 +715,9 @@ methods::setMethod(
         abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
         # Furthermore rasterize observed presences
         pres <- raster::rasterize(model$biodiversity[[id]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+        # If family is not poisson, assume factor distribution
+        # FIXME: Ideally this is better organized through family
+        if(model$biodiversity[[id]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
         obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[id]]$observations[,c('x','y')])),
                       model$biodiversity[[id]]$observations[,c('x','y')] )
         model$biodiversity[[id]]$observations <- rbind(obs, abs_observations)
@@ -732,6 +750,8 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+      # Add previous prediction if existing
+      if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
 
       # ----------------------------------------------------------- #
       #### BART Engine ####
@@ -762,7 +782,7 @@ methods::setMethod(
 
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[1]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
@@ -782,6 +802,9 @@ methods::setMethod(
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
                         model$biodiversity[[1]]$observations[,c('x','y')] )
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
@@ -826,9 +849,8 @@ methods::setMethod(
           } else {
             # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
             form <- to_formula(model$biodiversity[[i]]$equation)
-            assertthat::assert_that(
-              all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
-            )
+            # Add poipa mean to equation if not already in. Works since we fit poisson last
+            if( length( grep('poipa_mean',attr(terms.formula(form), 'term.labels')) )==0 ) form <- update.formula(form, '. ~ . + poipa_mean')
           }
           model$biodiversity[[i]]$equation <- form
           rm(form)
@@ -867,9 +889,11 @@ methods::setMethod(
         model$predictors_names <- c(model$predictors_names, names(new))
         model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = names(new), type = c('numeric')))
 
+        # Add full prediction from fit to save for later
+        new <- out$fits$prediction
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[id]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
@@ -890,6 +914,9 @@ methods::setMethod(
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[id]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[id]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[id]]$observations[,c('x','y')])),
                         model$biodiversity[[id]]$observations[,c('x','y')] )
           model$biodiversity[[id]]$observations <- rbind(obs, abs_observations)
@@ -925,8 +952,12 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+      # Add previous prediction if existing
+      if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
 
     } else { stop('Specified Engine not implemented yet.') }
+    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
 
