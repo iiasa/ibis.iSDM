@@ -490,6 +490,63 @@ predictor_derivate <- function(env, option, ...){
 
   return(new_env)
 }
+
+#' Homogenize NA values across a set of predictors.
+#'
+#' @description This method allows the homogenization of missing data across a set of environmental predictors.
+#' It is by default called when predictors are added to [´BiodiversityDistribution´] object. Only grid cells with NAs that contain
+#' values at some raster layers are homogenized.
+#' Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
+#' @param env A [`Raster`] object with the predictors
+#' @param fill A [`logical`] value indicating whether missing data are to be filled (Default: FALSE).
+#' @param fill_method A [`character`] of the method for filling gaps to be used (Default: 'ngb')
+#' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: FALSE)
+#' @returns A [`Raster`] object with the same number of layers as the input.
+#' @keywords utils
+#' @noRd
+predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
+  assertthat::assert_that(
+    is.Raster(env),
+    is.logical(fill),
+    is.character(fill_method), fill_method %in% c('ngb'),
+    is.logical(return_na_cells)
+  )
+  # If the number of layers is 1, no need for homogenization
+  if(raster::nlayers(env)>1){
+    # Calculate number of NA grid cells per stack
+    mask_na <- sum( is.na(env) )
+    # Remove grid cells that are equal to the number of layers (all values NA)
+    none_area <- mask_na == raster::nlayers(env)
+    none_area[none_area == 0 ] <- NA
+    mask_na <- raster::mask(mask_na,
+                            mask = none_area,inverse = TRUE)
+
+    # Should any fill be conducted?
+    if(fill){
+      stop('TBD')
+    } else {
+      # Otherwise just homogenize NA values across predictors
+      if(cellStats(mask_na,'max')>0){
+        mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
+        env <- raster::mask(env, mask = mask_all)
+      }
+    }
+    # Should NA coordinates of cells where 1 or more predictor is NA be returned?
+    # FIXME: One could directly return a data.frame with the predictor names to allow easier lookup.
+    if(return_na_cells){
+      vals <- which((mask_na>0)[])
+      env <- list(cells_na = vals, env = env)
+    }
+    rm(mask_na, none_area) # Cleanup
+  }
+  # Security checks
+  assertthat::assert_that(
+    is.Raster(env) || is.list(env)
+  )
+  # Return the result
+  return(env)
+}
+
 #' Create new raster stack from a given data.frame
 #'
 #' @param post A data.frame

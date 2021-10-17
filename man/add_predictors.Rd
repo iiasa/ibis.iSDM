@@ -11,6 +11,7 @@ add_predictors(
   transform = "scale",
   derivates = "none",
   bgmask = TRUE,
+  harmonize_na = FALSE,
   priors = NULL,
   ...
 )
@@ -35,6 +36,8 @@ add_predictors(
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
 
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
+
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: FALSE)}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
 

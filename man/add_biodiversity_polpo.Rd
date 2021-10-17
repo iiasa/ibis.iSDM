@@ -36,7 +36,7 @@ add_biodiversity_polpo(
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation}
 
-\item{simulate_weights}{A \link{'raster'} layer describing an eventual preference for simulation (Default: NULL)}
+\item{simulate_weights}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: NULL)}
 
 \item{...}{Other parameters passed down}
 }
