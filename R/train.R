@@ -955,7 +955,102 @@ methods::setMethod(
       # Add previous prediction if existing
       if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
 
+    } else if( inherits(x$engine,"STAN-Engine") ){
+      # ----------------------------------------------------------- #
+      #### STAN Engine ####
+
+      # Single model type specified. Define formula
+      # Default equation found
+      # TODO: Update equation object
+      if(model$biodiversity[[1]]$equation=='<Default>'){
+        # Construct formula with all variables
+        form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/w',''), ' ~ .')
+        # Convert to formula
+        form <- to_formula(form)
+        # Add offset if specified
+        if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+        if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+          # Update with spatial term
+          form <- update.formula(form, paste0(" ~ . + ",
+                                              x$engine$get_equation_latent_spatial() )
+          )
+        }
+      } else{
+        # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+        form <- to_formula(model$biodiversity[[1]]$equation)
+        # Update formula to weights if forgotten
+        if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')
+        assertthat::assert_that(
+          all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+        )
+      }
+      model$biodiversity[[1]]$equation <- form
+      rm(form)
+
+      # Add pseudo-absence points if necessary
+      # Include nearest predictor values for each
+      if('poipo' == model$biodiversity[[1]]$type) {
+
+        # Get background layer
+        bg <- x$engine$get_data('template')
+        assertthat::assert_that(!is.na(cellStats(bg,min)))
+
+        # Sample pseudo absences
+        abs <- create_pseudoabsence(
+          env = model$predictors,
+          presence = model$biodiversity[[1]]$observations,
+          bias = settings$get('bias_variable'),
+          template = bg,
+          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+          replace = TRUE
+        )
+        abs$intercept <- 1 # Add dummy intercept
+        # Combine absence and presence and save
+        abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
+        # Furthermore rasterize observed presences
+        pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
+                                  fun = 'count', background = 0)
+        # If family is not poisson, assume factor distribution
+        # FIXME: Ideally this is better organized through family
+        if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
+        obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
+                      model$biodiversity[[1]]$observations[,c('x','y')] )
+        model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+
+        # Format out
+        df <- rbind(model$biodiversity[[1]]$predictors,
+                    abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+          subset(., complete.cases(.) )
+
+        # Preprocessing security checks
+        assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                 any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                 nrow(df) == nrow(model$biodiversity[[1]]$observations)
+        )
+        # Add offset if existent
+        if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
+
+        # Define expectation as very small vector following Renner et al.
+        w <- ppm_weights(df = df,
+                         pa = model$biodiversity[[1]]$observations[['observed']],
+                         bg = bg,
+                         weight = 1e-4
+        )
+        df$w <- w # Also add as column
+
+        model$biodiversity[[1]]$predictors <- df
+        model$biodiversity[[1]]$expect <- w
+      }
+
+      # Run the engine setup script
+      x$engine$setup(model)
+
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model, settings)
+
     } else { stop('Specified Engine not implemented yet.') }
+
     if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
     # Stop logging if specified

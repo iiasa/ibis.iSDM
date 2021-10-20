@@ -8,7 +8,7 @@ engine_stan(
   x,
   chains = 4,
   iter = 2000,
-  warmup = 500,
+  warmup = floor(iter/2),
   init = "random",
   cores = NULL,
   control = NULL,
