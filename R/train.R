@@ -964,20 +964,27 @@ methods::setMethod(
       # TODO: Update equation object
       if(model$biodiversity[[1]]$equation=='<Default>'){
         # Construct formula with all variables
-        form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/w',''), ' ~ .')
+        form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/ w',''), ' ~ 1')
+
+        # Load variables and add them
+        for(v in model$biodiversity[[1]]$predictors_names){
+          # Add
+          form <- paste0(form, ' + ', v)
+        }
         # Convert to formula
         form <- to_formula(form)
+
         # Add offset if specified
         if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
-        if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-          # Update with spatial term
-          form <- update.formula(form, paste0(" ~ . + ",
-                                              x$engine$get_equation_latent_spatial() )
-          )
-        }
+        # if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        #   # Update with spatial term
+        #   form <- update.formula(form, paste0(" ~ . + ",
+        #                                       x$engine$get_equation_latent_spatial() )
+        #   )
+        # }
       } else{
         # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
         form <- to_formula(model$biodiversity[[1]]$equation)
         # Update formula to weights if forgotten
         if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')

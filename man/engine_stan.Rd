@@ -10,7 +10,8 @@ engine_stan(
   iter = 2000,
   warmup = floor(iter/2),
   init = "random",
-  cores = NULL,
+  cores = getOption("ibis.nthread"),
+  algorithm = "sampling",
   control = NULL,
   ...
 )
@@ -27,6 +28,8 @@ engine_stan(
 \item{init}{Initial values for parameters. Default: 'random'. Can also be specified as list (see: rstan::stan)}
 
 \item{cores}{If set to NULL take values from specified ibis option getOption('ibis.nthread')}
+
+\item{algorithm}{Mode used to sample from the posterior. See \code{\link[rstanarm:stan_glm]{rstanarm::stan_glm}}}
 
 \item{control}{See rstan::stan for more details on specifying the controls}
 
