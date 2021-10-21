@@ -66,6 +66,15 @@ DistributionModel <- bdproto(
         '\n  \033[2mStrongest effects:\033[22m',
         '\n     ', name_atomic(vi$names)
       ))
+    } else if( inherits(self, 'STAN-Model') ) {
+      # Calculate variable importance from the posterior trees
+      summary(self$get_data('fit_best'))
+
+      # message(paste0(
+      #   'Trained ',class(self)[1],' (',self$show(),')',
+      #   '\n  \033[2mStrongest effects:\033[22m',
+      #   '\n     ', name_atomic(vi$names)
+      # ))
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -110,6 +119,8 @@ DistributionModel <- bdproto(
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
+    } else if(inherits(self, 'INLA-Model')){
+      summary(self$get_data(x))
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -136,6 +147,8 @@ DistributionModel <- bdproto(
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
+    } else if(inherits(self, 'STAN-Model')) {
+      plot( self$get_data(x) )
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)

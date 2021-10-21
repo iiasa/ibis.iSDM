@@ -193,11 +193,12 @@ engine_stan <- function(x,
           family = fam, # The family
           offset = off, # any set offset
           # Priors
-          prior = rstanarm::lasso(1, 0), # Lasso prior
+          prior = rstanarm::hs(), # Horshoe priors
           prior_intercept = rstanarm::normal(0, 2.5),
-          prior_aux = rstanarm::cauchy(0, 3), # Half-cauchy prior
+          prior_aux = rstanarm::exponential(1), # Half-cauchy prior
           # Sampling options
           algorithm = settings$get('algorithm'),
+          adapt_delta = 0.95,
           seed = settings$get('seed'),
           chains = self$stan_param$chains,
           iter = self$stan_param$iter,
