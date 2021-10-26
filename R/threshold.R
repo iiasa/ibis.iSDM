@@ -7,6 +7,7 @@ NULL
 #' @param method A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: NULL)
 #' @param poi A [`sf`] object containing observational data used for model training
+#' @param return_threshold Should threshold value be returned instead (Default: FALSE)
 #' @details
 #' 'fixed' applies a single determined threshold
 #' 'mtp' minimum training presence find and sets the lowest predicted suitability for any occurrence point
@@ -26,17 +27,17 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'fixed', value = NULL,...) standardGeneric("threshold"))
+  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, ...) standardGeneric("threshold"))
 
-#' Threshold with supplied DistributionModel object
+#' Generic threshold with supplied DistributionModel object
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{ANY, character}(obj, method)
+#' @usage \S4method{threshold}{ANY}(obj)
 methods::setMethod(
   "threshold",
-  methods::signature(obj = "ANY", method = "character"),
-  function(obj, method = 'mtp', value = NULL,...) {
-    assertthat::assert_that("DistributionModel" %in% class(obj),
+  methods::signature(obj = "ANY"),
+  function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, ...) {
+    assertthat::assert_that(inherits(obj,c('GDB-Model','BART-Model','INLA-Model','STAN-Model')),
                             is.character(method),
                             is.null(value) || is.numeric(value)
     )
@@ -81,36 +82,43 @@ methods::setMethod(
 #' @noRd
 #' @keywords noexport
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            layers = 'mean', poi = NULL) {
+                            poi = NULL, return_threshold = FALSE) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
-                          is.character(layers),
-                          is.null(poi) || inherits(poi,'sf'),
+                          inherits(poi,'sf'),
                           is.null(value) || is.numeric(value)
   )
-  # Get specified layers in obj
-  wl <- which(names(obj) %in% layers)
-  assertthat::assert_that(length(wl)>0,msg = 'Specified layers not found in object.')
-  obj <- obj[[wl]]
-  # Now apply threshold on each entry
-  out <- raster::stack()
-  for(i in names(obj)[wl]) out <- raster::addLayer(out, threshold(obj[[i]], method = method, value = value, poi = poi) )
+  # Apply threshold on each entry
+  if(return_threshold){
+    # Return the threshold directly
+    out <- vector()
+    for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
+                                                                value = value, poi = poi, return_threshold = return_threshold) )
+    names(out) <- names(obj)
+  } else {
+    # Return the raster instead
+    out <- raster::stack()
+    for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
+                                                                value = value, poi = poi, return_threshold = return_threshold) )
+  }
   return(out)
 }
-#' @name threshold
-#' @rdname threshold
-#' @usage \S4method{threshold}{RasterBrick, character}(obj, method)
-methods::setMethod("threshold",methods::signature(obj = "RasterBrick", method = "character"),.stackthreshold)
-#' @usage \S4method{threshold}{RasterStack, character}(obj, method)
-methods::setMethod("threshold",methods::signature(obj = "RasterStack", method = "character"),.stackthreshold)
 
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{RasterLayer, character}(obj, method)
+#' @inheritParams threshold
+#' @usage \S4method{threshold}{RasterBrick}(obj)
+methods::setMethod("threshold",methods::signature(obj = "RasterBrick"),.stackthreshold)
+#' @usage \S4method{threshold}{RasterStack}(obj)
+methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthreshold)
+
+#' @name threshold
+#' @rdname threshold
+#' @usage \S4method{threshold}{RasterLayer}(obj)
 methods::setMethod(
   "threshold",
-  methods::signature(obj = "RasterLayer", method = "character"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL) {
+  methods::signature(obj = "RasterLayer"),
+  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'RasterLayer'),
                             is.character(method),
@@ -122,24 +130,20 @@ methods::setMethod(
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(poi)) assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
-    poi <- subset(poi, observed > 0) # Remove any eventual absence data
+    assertthat::assert_that(hasName(poi, 'observed'))
+    poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data
 
     # Get the raster layer
     raster_thresh <- obj
 
-    # dismo::evaluate
-    # dismo::threshold
-    # out <- ras$mean >= quantile(ras$mean)[4]
-    # out <- raster::cut(ras$mean, quantile(ras$mean))
-
     # If defined by type
     if(method != 'fixed'){
-      if (!is.null(poi)) {
-        pointVals <- raster::extract(raster_thresh, poi)
+      if (!is.null(poi_pres)) {
+        pointVals <- raster::extract(raster_thresh, poi_pres)
         # minimum training presence
         if (method == "mtp") {
           tr <- min( na.omit(pointVals) )
-        }
+        } else
         # percentile training threshold
         if (method == "percentile") {
           if(is.null(value)) value <- 0.1 # If value is not set, use 10%
@@ -149,7 +153,15 @@ methods::setMethod(
             perc <- ceiling(length(pointVals) * (1-value))
           }
           tr <- rev(sort(pointVals))[perc]
-        }
+        } else
+          # Optimized True Skill Statistic
+          if(method == 'optiTSS'){
+            # TODO: Implement optimal TSS selection
+            # Make sure that poi includes [0,1]
+            # https://github.com/r-forge/modeva/blob/master/pkg/R/optiThresh.R
+            opt <- optiThresh(obs = dat[, myspecies], pred = dat[, "BART_P"], measures = "TSS",
+                              optimize = "each", interval = 1e-04)
+          }
       } else {
        # No point data defined. Raise error
        stop('Training points needed for this function to work.')
@@ -162,13 +174,42 @@ methods::setMethod(
     # -- Threshold -- #
     # Security check
     assertthat::assert_that(is.numeric(tr))
-    # Finally threshold the raster
-    raster_thresh[raster_thresh < tr] <- 0
-    raster_thresh[raster_thresh >= tr] <- 1
-    names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
-    raster_thresh <- raster::asFactor(raster_thresh)
-
+    if(return_threshold){
+      return(tr)
+    } else {
+      # Finally threshold the raster
+      raster_thresh[raster_thresh < tr] <- 0
+      raster_thresh[raster_thresh >= tr] <- 1
+      names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
+      raster_thresh <- raster::asFactor(raster_thresh)
+    }
     # Return result
     return(raster_thresh)
+  }
+)
+
+#### For scenarios ####
+
+#' Thresholds in scenario estimation
+#'
+#' @description For [`BiodiversityScenario`] objects store a threshold attribute in
+#' the scenario object
+#' @name threshold
+#' @inheritParams threshold
+#' @rdname threshold
+#' @usage \S4method{threshold}{BiodiversityScenario}(obj)
+methods::setMethod(
+  "threshold",
+  methods::signature(obj = "BiodiversityScenario"),
+  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = TRUE) {
+    # Assert that predicted raster is present
+    assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction'))  )
+    tr <- threshold(  obj = obj$get_model()$get_data('prediction'),
+                      method = method,
+                      value = value,
+                      poi = poi,
+                      return_threshold = return_threshold
+                    )
+    bdproto(NULL, obj, threshold = tr)
   }
 )

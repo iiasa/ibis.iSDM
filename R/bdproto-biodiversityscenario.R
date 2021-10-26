@@ -34,15 +34,20 @@ BiodiversityScenario <- bdproto(
                 )
     )
     # Constrains
-    cs = self$get_constrains()
+    cs <- self$get_constrains()
+    # Thresholds
+    tr <- self$get_threshold()
 
     message(paste0('Spatial-temporal scenario:',
-                   '\n  Used model: ',ifelse(is.Waiver(fit), text_red('None'), class(fit)[1] ),
+                   '\n  Used model: ',ifelse(is.Waiver(fit) || isFALSE(fit), text_red('None'), class(fit)[1] ),
                    "\n --------- ",
                    "\n  Predictors:     ", pn,
                    "\n  Time period:    ", tp,
+                   ifelse(!is.Waiver(cs)||!is.Waiver(tr), "\n --------- ", ""),
+                   ifelse(is.Waiver(cs),"", paste0("\n  Constraints:      ", cs) ),
+                   ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3)) ),
                    "\n --------- ",
-                   "\n  Scenarios fitted: ", ifelse(is.Waiver(self$scenarios),text_yellow('None'),'Yes')
+                   "\n  Scenarios fitted: ", ifelse(is.Waiver(self$scenarios),text_yellow('None'), text_green('Yes'))
       )
     )
   },
@@ -56,47 +61,12 @@ BiodiversityScenario <- bdproto(
     assertthat::validate_that(x$id == self$modelid)
     invisible()
   },
-  # Generic projection function | Model type specific (based on model type)
-  # Intended to do the basic data preparation and aggregations of predictions
-  project = function(self){
-    # Get Model object
-    fit <- self$get_model()
-    # Get predictors
-    new_preds <- self$get_predictors()
-    pred_names <- self$get_predictor_names()
-
-    # Now convert to data.frame
-    new_preds <- new_preds$get_data(df = TRUE)
-    # convert time dimension to Posix
-    new_preds$Time <- as.POSIXct( new_preds$Time )
-    # Convert all units classes to numeric to avoid problems
-    new_preds <- units::drop_units(new_preds)
-
-    # --- #
-    if(inherits(fit, 'GDB-Model') || inherits(fit, 'BART-Model') ) {
-      # Now for each unique element, loop and project in order
-      proj <- raster::stack()
-      pb <- progress::progress_bar$new(total = length(unique(new_preds$Time)))
-      for(times in sort(unique(new_preds$Time))){
-        nd <- subset(new_preds, Time == times)
-        out <- fit$project(newdata = nd)
-        names(out) <- paste0('pred_',make.names(times))
-        proj <- raster::addLayer(proj, out)
-        pb$tick()
-      }
-      proj <- raster::setZ(proj, as.Date(sort(unique(new_preds$Time))) )
-      rm(pb)
-    } else if(inherits(fit, 'INLA-Model')) {
-      # TODO: See how multiple stacks can be added to the prediction
-    }
-    # Should projections be saved in a list or only the lastest one?
-    self$scenarios <- proj
-    invisible()
-  },
   # Get Model
   get_model = function(self){
     if(is.Waiver(self$modelobject)) return( new_waiver() )
-      else return( get(self$modelobject) )
+      else
+        if(!exists(self$modelobject)) return( FALSE )
+          else return( get(self$modelobject) )
   },
   # Get Model predictors
   get_predictor_names = function(self) {
@@ -121,6 +91,24 @@ BiodiversityScenario <- bdproto(
     # TODO: To be implemented
     return(new_waiver())
   },
+  # Get thresholds if specified
+  get_threshold = function(self){
+    if('threshold' %notin% names(self)) return( new_waiver() )
+    return( self$threshold )
+  },
+  # Apply specific threshold
+  apply_threshold = function(self){
+    # Assertions
+    assertthat::assert_that( is.numeric(self$threshold), msg = 'No threshold value found.')
+    assertthat::assert_that( !is.Waiver(self$scenarios), msg = 'No scenarios found.')
+    # Get prediction and threshold
+    sc <- self$get_scenarios()
+    tr <- self$threshold
+    # reclassify to binary
+    sc[sc < tr] <- 0; sc[sc >= tr] <- 1
+    names(sc) <- 'presence'
+    return(sc)
+  },
   # Show the name of the Model
   show = function(self) {
     self$modelobject
@@ -135,26 +123,118 @@ BiodiversityScenario <- bdproto(
     return(self$predictors)
   },
   # Get scenario predictions
-  get_scenarios = function(self, what = NULL){
-    if(is.null(self$scenarios)) {
-      return(self$scenarios)
-    } else {
-      if(what %in% names(self$scenarios)) return( self$scenarios[[what]] )
-    }
+  get_scenarios = function(self){
+    return(self$scenarios)
+  },
+  # Calculate slopes
+  calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
+    if(is.Waiver(self$get_scenarios())) return( new_waiver() )
+    assertthat::assert_that(what %in% attributes(self$get_scenarios())$names )
+
+    oo <- self$get_scenarios()[what]
+    tt <- as.numeric( stars::st_get_dimension_values(self$scenarios, 3) )
+    # Calc pixel-wise linear slope
+    out <- stars::st_apply(
+      oo,
+      1:2,
+      function(x) {
+        if (anyNA(x))
+          NA_real_
+        else
+          lm.fit(cbind(1, tt), x)$coefficients[2]
+      }
+    )
+    names(out) <- 'linear_coefficient'
+    if(plot) plot(out, breaks = "equal", col = ibis_colours$divg_bluered)
+    return(out)
   },
   # Plot the prediction
-  plot = function(self, what = 'mean',...){
-    raster::plot( self$scenarios[[what]] )
+  plot = function(self, what = "suitability",...){
+    # FIXME: More plotting options would be good
+    if(is.Waiver(self$get_scenarios())){
+      if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
+      invisible()
+    } else {
+      # Get unique number of data values. Surely there must be an easier val
+      vals <- self$get_scenarios()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique() %>% length()
+      if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
+      stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
+    }
+  },
+  #Plot relative change between baseline and projected thresholds
+  plot_relative_change = function(self, position = NULL, variable = 'mean'){
+    # Default position is the last one
+    assertthat::assert_that(is.null(position) || is.numeric(position) || is.character(position),
+                            is.character(variable))
+    # Threshold
+    thresh_reference <- grep('threshold',modf$show_rasters(),value = T)
+    # If there is more than one threshold only use the one from variable
+    if(length(thresh_reference)>1) thresh_reference <- grep(variable, thresh_reference,value = T)
+    # Check that baseline and scenarios are all there
+    assertthat::assert_that(
+      !is.Waiver(self$get_scenarios()),
+      'threshold' %in% attributes(self$get_scenarios())$names,
+      length(thresh_reference) >0 & is.character(thresh_reference),
+      is.Raster( self$get_model()$get_data('prediction') )
+    )
+
+    # Not get the baseline raster
+    baseline <- self$get_model()$get_data(thresh_reference)
+    # And the last scenario prediction
+    scenario <- self$get_scenarios()['threshold']
+    time <- stars::st_get_dimension_values(scenario,which = 'band')
+    if(is.numeric(position)) position <- time[position]
+    if(is.null(position)) position <- time[length(time)]
+    final <- scenario %>%
+      stars:::filter.stars(band == position) %>%
+      as('Raster')
+    raster::projection(final) <- raster::projection(baseline)
+    # -- #
+    if(!inherits(final, 'RasterLayer')) final <- final[[1]]
+    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE)
+    final[final > 0 & !is.na(final)] <- 2
+    # Sum up the layers. 1 == Presence earlier | 2 == Presence in future | 3 == Presence in bot
+    diff_f <- as.factor( (baseline + final)+1 )
+    rat <- levels(diff_f)[[1]]
+    rat <- merge.data.frame(rat, data.frame(ID = seq(1,4), diff = c("Absent", "Extinction", "Colonisation", "Stable")))
+    levels(diff_f) <- rat
+    diff_f <- raster::mask(diff_f, baseline)
+
+    # Plot
+    if('rasterVis' %in% installed.packages()[,1]){
+      rasterVis::levelplot(diff_f,
+                           margin = F,
+                           scales = list(draw=TRUE),
+                           col.regions = c("grey75","coral","cyan3","grey25"),
+                           main = paste0('Change between baseline and ', position)
+                           )
+    } else {
+      # Convert to stars for plotting otherwise
+      # FIXME: Stars plotting bugs out if there are fewer than 4 classes
+      diff_f <- stars::st_as_stars(diff_f, att = 'diff');names(diff_f) <- 'Change'
+      cols <- c("grey75","coral","cyan3","grey25")
+      stars:::plot.stars(diff_f, axes = TRUE,key.pos = 1, border = NA, extent = sf::st_bbox(baseline),
+                         main = paste0('Change between baseline and ', position),
+                         col = cols)
+    }
+    # Return the result finally
+    diff_f <- stars::st_as_stars(diff_f, att = 'diff');names(diff_f) <- 'Change'
+    return(diff_f)
+
   },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){
     assertthat::assert_that(
+      !missing(fname),
       is.character(fname),
-      type %in% c('gtif','gtiff','tif','nc','ncdf'),
+      type %in% c('gtif','gtiff','tif','nc','ncdf', 'feather'),
       'fits' %in% self$ls(),
       dt %in% c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S')
     )
     type <- tolower(type)
+
+    # Respecify type if output filename has already been set
+    if(gsub('\\.','',raster::extension(fname)) != type) type <- gsub('\\.','',raster::extension(fname))
 
     # Get raster file in fitted object
     cl <- sapply(self$scenarios, class)
@@ -171,6 +251,10 @@ BiodiversityScenario <- bdproto(
       # Save as netcdf
       # TODO: Potentially change the unit descriptions
       writeNetCDF(ras, fname = fname, varName = 'iSDM prediction', varUnit = "",varLong = "")
+    } else if(type %in% 'feather'){
+      assertthat::assert_that('feather' %in% installed.packages()[,1],
+                              msg = 'Feather package not installed!')
+      feather::write_feather(ras, path = fname)
     }
     invisible()
   }

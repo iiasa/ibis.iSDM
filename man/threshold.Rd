@@ -4,13 +4,22 @@
 \alias{threshold}
 \title{Threshold a continuous prediction to a categorical layer}
 \usage{
-threshold(obj, method = "fixed", value = NULL, ...)
+threshold(
+  obj,
+  method = "fixed",
+  value = NULL,
+  poi = NULL,
+  return_threshold = FALSE,
+  ...
+)
 
-\S4method{threshold}{ANY, character}(obj, method)
+\S4method{threshold}{ANY}(obj)
 
-\S4method{threshold}{RasterBrick, character}(obj, method)
+\S4method{threshold}{RasterBrick}(obj)
 
-\S4method{threshold}{RasterLayer, character}(obj, method)
+\S4method{threshold}{RasterLayer}(obj)
+
+\S4method{threshold}{BiodiversityScenario}(obj)
 }
 \arguments{
 \item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object}
@@ -20,11 +29,12 @@ threshold(obj, method = "fixed", value = NULL, ...)
 \item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: NULL)}
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training}
+
+\item{return_threshold}{Should threshold value be returned instead (Default: FALSE)}
 }
 \description{
-Threshold a continuous prediction to a categorical layer
-
-Threshold with supplied DistributionModel object
+For \code{\link{BiodiversityScenario}} objects store a threshold attribute in
+the scenario object
 }
 \details{
 'fixed' applies a single determined threshold

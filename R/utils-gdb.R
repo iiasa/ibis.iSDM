@@ -42,7 +42,7 @@ predict_gdbclass <- function(fit, nd, template){
 #' @return A vector with the weights
 #' @keywords utils
 #' @noRd
-ppm_weights <- function(df, pa, bg, weight = 1e-4){
+ppm_weights <- function(df, pa, bg, weight = 1e-6){
   assertthat::assert_that(
     is.data.frame(df),
     nrow(df) == length(pa),
@@ -52,7 +52,7 @@ ppm_weights <- function(df, pa, bg, weight = 1e-4){
   nc = cellStats(!is.na(bg), sum)
 
   # Set output weight as default
-  w <- rep( weight, nrow(df) )
+  w <- rep( weight, nrow(df) ) #^ (1 - ifelse(pa == 0,0,1))
   w[which(pa == 0)] = nc / sum(pa == 0)
 
   assertthat::assert_that(

@@ -82,6 +82,7 @@ Collate:
     'prior_gdb.R'
     'prior_inla.R'
     'priors.R'
+    'project.R'
     'scenario.R'
     'similarity.R'
     'summary.R'

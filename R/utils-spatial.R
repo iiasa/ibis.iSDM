@@ -506,42 +506,48 @@ predictor_derivate <- function(env, option, ...){
 #' @noRd
 predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
   assertthat::assert_that(
-    is.Raster(env),
+    is.Raster(env) || inherits(env, 'stars'),
     is.logical(fill),
     is.character(fill_method), fill_method %in% c('ngb'),
     is.logical(return_na_cells)
   )
-  # If the number of layers is 1, no need for homogenization
-  if(raster::nlayers(env)>1){
-    # Calculate number of NA grid cells per stack
-    mask_na <- sum( is.na(env) )
-    # Remove grid cells that are equal to the number of layers (all values NA)
-    none_area <- mask_na == raster::nlayers(env)
-    none_area[none_area == 0 ] <- NA
-    mask_na <- raster::mask(mask_na,
-                            mask = none_area,inverse = TRUE)
+  # Workflow for raster layers
+  if(is.Raster(env)){
+    nl <- raster::nlayers(env)
+    # If the number of layers is 1, no need for homogenization
+    if(nl > 1){
+      # Calculate number of NA grid cells per stack
+      mask_na <- sum( is.na(env) )
+      # Remove grid cells that are equal to the number of layers (all values NA)
+      none_area <- mask_na == nl
+      none_area[none_area == 0 ] <- NA
+      mask_na <- raster::mask(mask_na,
+                              mask = none_area,inverse = TRUE)
 
-    # Should any fill be conducted?
-    if(fill){
-      stop('TBD')
-    } else {
-      # Otherwise just homogenize NA values across predictors
-      if(cellStats(mask_na,'max')>0){
-        mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
-        env <- raster::mask(env, mask = mask_all)
+      # Should any fill be conducted?
+      if(fill){
+        stop('TBD')
+      } else {
+        # Otherwise just homogenize NA values across predictors
+        if(cellStats(mask_na,'max')>0){
+          mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
+          env <- raster::mask(env, mask = mask_all)
+        }
       }
+      # Should NA coordinates of cells where 1 or more predictor is NA be returned?
+      # FIXME: One could directly return a data.frame with the predictor names to allow easier lookup.
+      if(return_na_cells){
+        vals <- which((mask_na>0)[])
+        env <- list(cells_na = vals, env = env)
+      }
+      rm(mask_na, none_area) # Cleanup
     }
-    # Should NA coordinates of cells where 1 or more predictor is NA be returned?
-    # FIXME: One could directly return a data.frame with the predictor names to allow easier lookup.
-    if(return_na_cells){
-      vals <- which((mask_na>0)[])
-      env <- list(cells_na = vals, env = env)
-    }
-    rm(mask_na, none_area) # Cleanup
+  } else if(inherits(env, 'stars')){
+    stop('Not implemented yet.')
   }
   # Security checks
   assertthat::assert_that(
-    is.Raster(env) || is.list(env)
+    is.Raster(env) || is.list(env) || inherits(env, 'stars')
   )
   # Return the result
   return(env)

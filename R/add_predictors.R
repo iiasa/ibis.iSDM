@@ -401,7 +401,7 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', ... ) {
+  function(x, env, names = NULL, transform = 'none', derivates = 'none', harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
@@ -410,7 +410,8 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
-                            is.null(names) || assertthat::is.scalar(names) || is.vector(names)
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.logical(harmonize_na)
     )
     # Some stars checks
     assertthat::validate_that(length(env) >= 1)
@@ -424,24 +425,35 @@ methods::setMethod(
       names(env) <- names
     }
 
-    # FIXME: Ensure that this works for stars cubes
-    # # Standardization and scaling
-    # if('none' %notin% transform){
-    #   for(tt in transform) env <- predictor_transform(env, option = tt)
-    # }
-    #
+    # Harmonize NA values
+    if(harmonize_na){
+      stop('Harmonization for stars not yet implemented!') #TODO
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      env <- predictor_homogenize_na(env, fill = FALSE)
+    }
+
+    # Standardization and scaling
+    if('none' %notin% transform){
+      stop('Transformation for stars not yet implemented!') #TODO
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      for(tt in transform) env <- predictor_transform(env, option = tt)
+    }
+
     # # Calculate derivates if set
-    # if('none' %notin% derivates){
-    #   new_env <- raster::stack()
-    #   for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
-    #
-    #   # Add to env
-    #   env <- addLayer(env, new_env)
-    # }
+    if('none' %notin% derivates){
+      stop('Derivate creation for stars not yet implemented!') #TODO
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      new_env <- raster::stack()
+      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+
+      # Add to env
+      env <- addLayer(env, new_env)
+    }
 
     # Get and format Time period
     env_dim <- stars::st_dimensions(env)
-    timeperiod <- as.POSIXct(env_dim$Time$values$start)
+    timeperiod <- as.POSIXct(env_dim[[3]]$values$start) # Assumes the third dimension is time
+    if(anyNA(timeperiod)) stop('Third dimension is not a time value!')
 
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain

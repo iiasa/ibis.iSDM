@@ -246,9 +246,14 @@ engine_gdb <- function(x,
                                     )
             # Get model
             mod <- self$get_data('fit_best')
+            assertthat::assert_that(inherits(mod,'mboost'),msg = 'No model found!')
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
 
+            # Add rowid
+            newdata$rowid <- 1:nrow(newdata)
+            # Subset to non-missing data
+            newdata <- subset(newdata, complete.cases(newdata)) # FIXME: Potentially limit to relevant variables only
             # Make empty template
             temp <- raster::rasterFromXYZ(newdata[,c('x','y')])
             # Predict
@@ -256,8 +261,7 @@ engine_gdb <- function(x,
               mboost::predict.mboost(object = mod,newdata = newdata,
                                      type = 'response', aggregate = 'sum')
             )
-            assertthat::assert_that(raster::ncell(temp)==nrow(y))
-            temp[] <- y[,1]
+            temp[as.numeric(newdata$rowid)] <- y[,1]
             return(temp)
           },
           # Partial effect

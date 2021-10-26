@@ -16,7 +16,13 @@ engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
 \item{chains}{A number of the number of chains to be used (Default: 4)}
 }
 \description{
-Engine for use of Bayesian Additive Regression Trees (BART)
+Bayesian regression approach to a sum of complementary trees.
+Prior distributions can be set for
+\itemize{
+\item probability that a tree stops at a node of a given depth
+probability that a given variable is chosen for a splitting rule
+probability of splitting that variable at a particular value
+}
 }
 \references{
 Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389

@@ -3,6 +3,11 @@ NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
+#' @description Bayesian regression approach to a sum of complementary trees.
+#' Prior distributions can be set for
+#' - probability that a tree stops at a node of a given depth
+#' probability that a given variable is chosen for a splitting rule
+#' probability of splitting that variable at a particular value
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param nburn A [`numeric`] estimate of the burn in samples
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.

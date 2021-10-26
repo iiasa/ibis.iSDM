@@ -109,6 +109,8 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLA-Model')){
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){
+      # Number of times each variable is used by a tree split
+      # Tends to become less informative with higher numbers of splits
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
     }
   },

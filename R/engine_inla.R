@@ -613,6 +613,35 @@ engine_inla <- function(x,
                 "spde"     = self$get_data('latentspatial'),
                 "prediction" = prediction
                 ),
+              # Projection function
+              project = function(self, newdata, mode = 'coef', backtransf = NULL){
+                assertthat::assert_that('fit_best' %in% names(self$fits),
+                                        is.data.frame(newdata) || is.matrix(newdata),
+                                        mode %in% c('coef','sim','full'),
+                                        assertthat::has_name(newdata,c('x','y'))
+                )
+                # Try and guess backtransformation
+                if(is.null(backtransf)){
+                  fam <- self$get_data('fit_best')$.args$family
+                  backtransf <- ifelse(fam == 'poisson', exp, logistic)
+                }
+
+                if(mode == 'coef'){
+                  # We use the coefficient prediction
+                  out <- coef_prediction(mesh = self$get_data('mesh'),
+                                  mod = self,
+                                  type = 'mean',
+                                  backtransf = backtransf
+                                  )
+                } else if(mode == 'sim'){
+                  # Simulate from posterior. Not yet coded
+                  stop('Simulation from posterior not yet there.')
+                } else {
+                  stop('Full prediction not yet added.')
+                }
+                # Return result
+                return(out)
+              },
               # Partial response
               # FIXME: Create external function
               partial = function(self, x, variable, constant = NULL, variable_length = 100, plot = FALSE){
