@@ -3,9 +3,6 @@ NULL
 
 #' Use INLA as engine
 #'
-#' References
-#' https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
-#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
@@ -20,6 +17,7 @@ NULL
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
 #' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
 #' @param ... Other variables
+#' @references https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
 #' @name engine_inla
 NULL
 #' @rdname engine_inla

@@ -9,9 +9,15 @@ NULL
 #' @param poi A [`sf`] object containing observational data used for model training
 #' @param return_threshold Should threshold value be returned instead (Default: FALSE)
 #' @details
-#' 'fixed' applies a single determined threshold
-#' 'mtp' minimum training presence find and sets the lowest predicted suitability for any occurrence point
-#' 'percentile' For a percentile threshold
+#' 'fixed' = applies a single pre-determined threshold
+#' 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
+#' 'percentile' = For a percentile threshold
+#' 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the 'modEvA' package
+#' 'kappa' = Determines the optimal kappa value (Kappa). Requires the 'modEvA' package
+#' 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the 'modEvA' package
+#' 'F1score' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
+#' 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
+#' 'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
 #' @name threshold
 #' @examples
 #' \dontrun{
@@ -50,18 +56,31 @@ methods::setMethod(
       !is.Waiver(ras),
       msg = 'No fitted prediction in object!'
     )
-    # Match to correct spelling mistakes
-    method <- match.arg(tolower(method), c('fixed','mtp','percentile'), several.ok = FALSE)
-    # Check that provided method is supported
-    assertthat::assert_that(
-      method %in% c('fixed','mtp','percentile'),
-      msg = 'Method not yet supported.'
-    )
+    # Matching for correct method
+    method <- match.arg(method, c('fixed','mtp','percentile',
+                                           'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Get all point data in distribution model
     # FIXME: Adapt to more/ combined datasets
     poi <- sf::st_as_sf( obj$model$biodiversity[[1]]$observations, coords = c('x','y') )
-    poi <- subset(poi, observed > 0) # Remove any eventual absence data
+
+    # If TSS or kappa is chosen, check whether there is poipa data among the sources
+    if(!any( sapply(obj$model$biodiversity, function(x) x$type) == 'poipa') & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')){
+      if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
+      bg <- raster::rasterize(obj$model$background, obj$fits$prediction)
+      abs <- create_pseudoabsence(
+        env = obj$model$predictors,
+        presence = poi,
+        bias = obj$settings$get('bias_variable'),
+        template = bg,
+        npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
+        replace = TRUE
+      )
+      abs <- subset(abs, select = c('x','y'));abs$observed <- 0
+      poi <- rbind(poi, st_as_sf(abs, coords = c('x','y')))
+    }
+
+    modf$model$biodiversity[[1]]$type
 
     # Now self call threshold
     out <- threshold(ras, method = method, value = value, poi = poi, ...)
@@ -118,15 +137,19 @@ methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthr
 methods::setMethod(
   "threshold",
   methods::signature(obj = "RasterLayer"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE) {
+  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, plot = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'RasterLayer'),
                             is.character(method),
-                            is.null(poi) || inherits(poi,'sf'),
                             is.null(value) || is.numeric(value)
     )
+    # If poi is set, try to convert sf
+    if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)})
+    assertthat::assert_that(is.null(poi) || inherits(poi,'sf'))
+
     # Match to correct spelling mistakes
-    method <- match.arg(tolower(method), c('fixed','mtp','percentile'), several.ok = FALSE)
+    method <- match.arg(method, c('fixed','mtp','percentile',
+                                           'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(poi)) assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
@@ -154,34 +177,50 @@ methods::setMethod(
           }
           tr <- rev(sort(pointVals))[perc]
         } else
-          # Optimized True Skill Statistic
-          if(method == 'optiTSS'){
-            # TODO: Implement optimal TSS selection
-            # Make sure that poi includes [0,1]
-            # https://github.com/r-forge/modeva/blob/master/pkg/R/optiThresh.R
-            opt <- optiThresh(obs = dat[, myspecies], pred = dat[, "BART_P"], measures = "TSS",
-                              optimize = "each", interval = 1e-04)
+          # Optimized threshold statistics using the modEvA package
+          # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
+          check_package("modEvA")
+          assertthat::assert_that('modEvA' %in% installed.packages()[,1])
+          # Assure that point data is correctly specified
+          assertthat::assert_that(inherits(poi,'sf'), hasName(poi,'observed'))
+
+          # Reextract pointvals but with the full dataset
+          pointVals <- raster::extract(raster_thresh, poi)
+          assertthat::assert_that(length(pointVals)>2)
+          # Calculate the optimal thresholds
+          suppressWarnings(
+            opt <- modEvA::optiThresh(obs = poi$observed, pred = pointVals,
+                                      measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
+                                                   "Sensitivity","Specificity"),
+                                      optimize = "each", plot = FALSE)
+          )
+          if(method %in% opt$optimals.each$measure){
+            tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
+          } else {
+            # Returning a collection of them as vector
+            tr <- opt$optimals.each$threshold; names(tr) <- opt$optimals.each$measure
           }
-      } else {
-       # No point data defined. Raise error
-       stop('Training points needed for this function to work.')
       }
     } else {
       # Fixed threshold. Confirm to be set
-      assertthat::assert_that(is.numeric(value))
+      assertthat::assert_that(is.numeric(value),msg = 'Fixed value is missing!')
       tr <- value
     }
     # -- Threshold -- #
     # Security check
     assertthat::assert_that(is.numeric(tr))
     if(return_threshold){
+      names(tr) <- method
       return(tr)
     } else {
       # Finally threshold the raster
-      raster_thresh[raster_thresh < tr] <- 0
-      raster_thresh[raster_thresh >= tr] <- 1
+      raster_thresh[raster_thresh < tr[1]] <- 0
+      raster_thresh[raster_thresh >= tr[1]] <- 1
       names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
       raster_thresh <- raster::asFactor(raster_thresh)
+      # Assign attributes
+      base::attr(raster_thresh, 'method') <- method
+      base::attr(raster_thresh, 'threshold') <- tr
     }
     # Return result
     return(raster_thresh)
@@ -201,15 +240,23 @@ methods::setMethod(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = TRUE) {
+  function(obj, ...) {
     # Assert that predicted raster is present
-    assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction'))  )
-    tr <- threshold(  obj = obj$get_model()$get_data('prediction'),
-                      method = method,
-                      value = value,
-                      poi = poi,
-                      return_threshold = return_threshold
-                    )
+    assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
+    # Check that a threshold layer is available and get the methods and data from it
+    assertthat::assert_that( grep('threshold', obj$get_model()$show_rasters())>0 ,
+                             msg = 'Call \' threshold \' for prediction first!')
+    # Get threshold layer
+    ras_tr <- obj$get_model()$get_data( grep('threshold', obj$get_model()$show_rasters(),value = TRUE) )
+    tr <- attr(ras_tr, 'threshold')
+    names(tr) <- attr(ras_tr, 'method')
+    # Otherwise sample?
+    # tr <- threshold(  obj = obj$get_model()$get_data('prediction'),
+    #                   method = method,
+    #                   value = value,
+    #                   poi = poi,
+    #                   return_threshold = return_threshold
+    #                 )
     bdproto(NULL, obj, threshold = tr)
   }
 )

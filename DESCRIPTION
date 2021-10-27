@@ -37,6 +37,7 @@ Suggests:
     deldir,
     mboost,
     dbarts,
+    modEvA,
     progress,
     ellipsis,
     rstan,

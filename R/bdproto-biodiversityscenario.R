@@ -45,7 +45,7 @@ BiodiversityScenario <- bdproto(
                    "\n  Time period:    ", tp,
                    ifelse(!is.Waiver(cs)||!is.Waiver(tr), "\n --------- ", ""),
                    ifelse(is.Waiver(cs),"", paste0("\n  Constraints:      ", cs) ),
-                   ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3)) ),
+                   ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3),' (',names(tr[1]),')') ),
                    "\n --------- ",
                    "\n  Scenarios fitted: ", ifelse(is.Waiver(self$scenarios),text_yellow('None'), text_green('Yes'))
       )
@@ -145,7 +145,7 @@ BiodiversityScenario <- bdproto(
       }
     )
     names(out) <- 'linear_coefficient'
-    if(plot) plot(out, breaks = "equal", col = ibis_colours$divg_bluered)
+    if(plot) stars:::plot.stars(out, breaks = "equal", col = ibis_colours$divg_bluered)
     return(out)
   },
   # Plot the prediction
@@ -160,6 +160,30 @@ BiodiversityScenario <- bdproto(
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
     }
+  },
+  # Plot animation of scenarios
+  plot_animation = function(self, what = "suitability", fname = NULL){
+    assertthat::assert_that(!is.Waiver(self$get_scenarios()) )
+    check_package('gganimate')
+    # Get scenarios
+    obj <- self$get_scenarios()[what]
+
+    # Make the animation plot
+    g <- ggplot2::ggplot() +
+      stars::geom_stars(data = obj, downsample = c(1,1,0)) +
+      ggplot2::coord_equal() +
+      ggplot2::theme_bw() +
+      ggplot2::scale_x_discrete(expand=c(0,0)) +
+      ggplot2::scale_y_discrete(expand=c(0,0)) +
+      ggplot2::scale_fill_gradientn(colours = ibis_colours$sdm_colour, na.value = NA) +
+      # Animation options
+      gganimate::transition_time(band) +
+      gganimate::ease_aes() +
+      ggplot2::labs(x = '', y ='', title = "{frame_time}")
+
+    if(is.null(fname)){
+      gganimate::anim_save(animation = g, fname)
+    } else { g }
   },
   #Plot relative change between baseline and projected thresholds
   plot_relative_change = function(self, position = NULL, variable = 'mean'){
@@ -190,8 +214,8 @@ BiodiversityScenario <- bdproto(
       as('Raster')
     raster::projection(final) <- raster::projection(baseline)
     # -- #
-    if(!inherits(final, 'RasterLayer')) final <- final[[1]]
-    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE)
+    if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
+    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
     final[final > 0 & !is.na(final)] <- 2
     # Sum up the layers. 1 == Presence earlier | 2 == Presence in future | 3 == Presence in bot
     diff_f <- as.factor( (baseline + final)+1 )
@@ -217,8 +241,6 @@ BiodiversityScenario <- bdproto(
                          main = paste0('Change between baseline and ', position),
                          col = cols)
     }
-    # Return the result finally
-    diff_f <- stars::st_as_stars(diff_f, att = 'diff');names(diff_f) <- 'Change'
     return(diff_f)
 
   },

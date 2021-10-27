@@ -282,10 +282,6 @@ methods::setMethod(
       add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
                              field_occurrence = field_occurrence, formula = formula, family = family, ... )
     } else {
-      # Assess whether poipo data already exists in the distribution object
-      # FIXME: Obsolete since we now add by id
-      # if(!is.Waiver( x$biodiversity$get_data_object("polpo") )) message("Overwriting existing polpo data.")
-
       # Convert formula if necessary
       formula = to_formula(formula)
 
