@@ -159,56 +159,57 @@ methods::setMethod(
     # Get the raster layer
     raster_thresh <- obj
 
-    # If defined by type
-    if(method != 'fixed'){
-      if (!is.null(poi_pres)) {
-        pointVals <- raster::extract(raster_thresh, poi_pres)
-        # minimum training presence
-        if (method == "mtp") {
-          tr <- min( na.omit(pointVals) )
-        } else
-        # percentile training threshold
-        if (method == "percentile") {
-          if(is.null(value)) value <- 0.1 # If value is not set, use 10%
-          if(length(pointVals) < 10) {
-            perc <- floor(length(pointVals) * (1-value))
-          } else {
-            perc <- ceiling(length(pointVals) * (1-value))
-          }
-          tr <- rev(sort(pointVals))[perc]
-        } else
-          # Optimized threshold statistics using the modEvA package
-          # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
-          check_package("modEvA")
-          assertthat::assert_that('modEvA' %in% installed.packages()[,1])
-          # Assure that point data is correctly specified
-          assertthat::assert_that(inherits(poi,'sf'), hasName(poi,'observed'))
-
-          # Reextract pointvals but with the full dataset
-          pointVals <- raster::extract(raster_thresh, poi)
-          assertthat::assert_that(length(pointVals)>2)
-          # Calculate the optimal thresholds
-          suppressWarnings(
-            opt <- modEvA::optiThresh(obs = poi$observed, pred = pointVals,
-                                      measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
-                                                   "Sensitivity","Specificity"),
-                                      optimize = "each", plot = FALSE)
-          )
-          if(method %in% opt$optimals.each$measure){
-            tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
-          } else {
-            # Returning a collection of them as vector
-            tr <- opt$optimals.each$threshold; names(tr) <- opt$optimals.each$measure
-          }
-      }
-    } else {
+    # Specify by type:
+    if(method == "fixed"){
       # Fixed threshold. Confirm to be set
       assertthat::assert_that(is.numeric(value),msg = 'Fixed value is missing!')
       tr <- value
+    } else if(method == "mtp"){
+      # minimum training presence
+      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      # Minimum threshold
+      tr <- min( na.omit(pointVals) )
+
+    } else if(method == "percentile"){
+      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      # percentile training threshold
+      if(is.null(value)) value <- 0.1 # If value is not set, use 10%
+      if(length(pointVals) < 10) {
+        perc <- floor(length(pointVals) * (1-value))
+      } else {
+        perc <- ceiling(length(pointVals) * (1-value))
+      }
+      tr <- rev(sort(pointVals))[perc] # Percentile threshold
+
+    } else {
+      # Optimized threshold statistics using the modEvA package
+      # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
+      check_package("modEvA")
+      assertthat::assert_that('modEvA' %in% installed.packages()[,1])
+      # Assure that point data is correctly specified
+      assertthat::assert_that(inherits(poi, 'sf'), hasName(poi, 'observed'))
+
+      # Re-extract point vals but with the full dataset
+      pointVals <- raster::extract(raster_thresh, poi)
+      assertthat::assert_that(length(pointVals)>2)
+      # Calculate the optimal thresholds
+      suppressWarnings(
+        opt <- modEvA::optiThresh(obs = poi$observed, pred = pointVals,
+                                  measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
+                                               "Sensitivity","Specificity"),
+                                  optimize = "each", plot = plot)
+      )
+      if(method %in% opt$optimals.each$measure){
+        tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
+      } else {
+        # Returning a collection of them as vector
+        tr <- opt$optimals.each$threshold; names(tr) <- opt$optimals.each$measure
+      }
     }
-    # -- Threshold -- #
     # Security check
-    assertthat::assert_that(is.numeric(tr))
+    assertthat::assert_that(is.numeric(tr) || is.vector(tr))
+
+    # -- Threshold -- #
     if(return_threshold){
       names(tr) <- method
       return(tr)
