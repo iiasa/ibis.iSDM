@@ -40,8 +40,7 @@ Suggests:
     modEvA,
     progress,
     ellipsis,
-    rstan,
-    rstantools
+    rstan
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.1
