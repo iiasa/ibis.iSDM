@@ -188,6 +188,7 @@ methods::setMethod(
       assertthat::assert_that(inherits(poi, 'sf'), hasName(poi, 'observed'))
       poi$observed <- ifelse(poi$observed>1,1,poi$observed) # Ensure that observed is <=1
       assertthat::assert_that(all( unique(poi$observed) %in% c(0,1) ))
+
       # Re-extract point vals but with the full dataset
       pointVals <- raster::extract(raster_thresh, poi)
       assertthat::assert_that(length(pointVals)>2)
