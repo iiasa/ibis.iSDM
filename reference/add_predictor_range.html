@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Threshold a continuous prediction to a categorical layer — threshold • ibis.iSDM</title>
+<title>Add a range of a species as predictor to a distribution object — add_predictor_range • ibis.iSDM</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Threshold a continuous prediction to a categorical layer — threshold" />
-<meta property="og:description" content="For BiodiversityScenario objects store a threshold attribute in
-the scenario object" />
+<meta property="og:title" content="Add a range of a species as predictor to a distribution object — add_predictor_range" />
+<meta property="og:description" content="As options allow specifying including the range either as binary or distance" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:creator" content="@Martin_Ecology" />
 <meta name="twitter:site" content="@IIASAVienna" />
@@ -136,79 +135,55 @@ the scenario object" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Threshold a continuous prediction to a categorical layer</h1>
-    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/threshold.R'><code>R/threshold.R</code></a></small>
-    <div class="hidden name"><code>threshold.Rd</code></div>
+    <h1>Add a range of a species as predictor to a distribution object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/add_predictors.R'><code>R/add_predictors.R</code></a></small>
+    <div class="hidden name"><code>add_predictor_range.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>For <code><a href='BiodiversityScenario-class.html'>BiodiversityScenario</a></code> objects store a threshold attribute in
-the scenario object</p>
+    <p>As options allow specifying including the range either as binary or distance</p>
     </div>
 
-    <pre class="usage"><span class='fu'>threshold</span><span class='op'>(</span>
-  <span class='va'>obj</span>,
-  method <span class='op'>=</span> <span class='st'>"fixed"</span>,
-  value <span class='op'>=</span> <span class='cn'>NULL</span>,
-  poi <span class='op'>=</span> <span class='cn'>NULL</span>,
-  return_threshold <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  <span class='va'>...</span>
+    <pre class="usage"><span class='fu'>add_predictor_range</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>range</span>,
+  method <span class='op'>=</span> <span class='st'>"distance"</span>,
+  distance_max <span class='op'>=</span> <span class='cn'>NULL</span>,
+  priors <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span>
 
-<span class='co'># S4 method for ANY</span>
-<span class='fu'>threshold</span><span class='op'>(</span><span class='va'>obj</span><span class='op'>)</span>
+<span class='co'># S4 method for BiodiversityDistribution, raster</span>
+<span class='fu'>add_predictor_range</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>range</span><span class='op'>)</span>
 
-<span class='co'># S4 method for RasterBrick</span>
-<span class='fu'>threshold</span><span class='op'>(</span><span class='va'>obj</span><span class='op'>)</span>
-
-<span class='co'># S4 method for RasterLayer</span>
-<span class='fu'>threshold</span><span class='op'>(</span><span class='va'>obj</span><span class='op'>)</span>
-
-<span class='co'># S4 method for BiodiversityScenario</span>
-<span class='fu'>threshold</span><span class='op'>(</span><span class='va'>obj</span><span class='op'>)</span></pre>
+<span class='co'># S4 method for BiodiversityDistribution,sf, vector</span>
+<span class='fu'>add_predictor_range</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>range</span>, <span class='va'>method</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>obj</th>
-      <td><p>A trained <code><a href='DistributionModel-class.html'>DistributionModel</a></code> or alternatively a <code>Raster</code> object</p></td>
+      <th>x</th>
+      <td><p><code><a href='distribution.html'>distribution()</a></code> (i.e. <code><a href='BiodiversityDistribution-class.html'>BiodiversityDistribution</a></code>) object.</p></td>
+    </tr>
+    <tr>
+      <th>range</th>
+      <td><p>A <code>sf</code> object with the range for the target feature</p></td>
     </tr>
     <tr>
       <th>method</th>
-      <td><p>A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'</p></td>
+      <td><p><code><a href='https://rdrr.io/r/base/character.html'>character</a></code> describing how the range should be included (binary | distance)</p></td>
     </tr>
     <tr>
-      <th>value</th>
-      <td><p>A <code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> value for thresholding if method is fixed (Default: NULL)</p></td>
+      <th>distance_max</th>
+      <td><p>Numeric threshold on the maximum distance (Default: NULL)</p></td>
     </tr>
     <tr>
-      <th>poi</th>
-      <td><p>A <code>sf</code> object containing observational data used for model training</p></td>
-    </tr>
-    <tr>
-      <th>return_threshold</th>
-      <td><p>Should threshold value be returned instead (Default: FALSE)</p></td>
+      <th>priors</th>
+      <td><p>A <code><a href='PriorList-class.html'>PriorList</a></code> object. Default is set to NULL which uses default prior assumptions</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>'fixed' = applies a single pre-determined threshold
-'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
-'percentile' = For a percentile threshold
-'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the 'modEvA' package
-'kappa' = Determines the optimal kappa value (Kappa). Requires the 'modEvA' package
-'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the 'modEvA' package
-'F1score' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='fu'><a href='print.html'>print</a></span><span class='op'>(</span><span class='st'>'test'</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

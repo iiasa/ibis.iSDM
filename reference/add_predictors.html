@@ -151,6 +151,7 @@
   transform <span class='op'>=</span> <span class='st'>"scale"</span>,
   derivates <span class='op'>=</span> <span class='st'>"none"</span>,
   bgmask <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  harmonize_na <span class='op'>=</span> <span class='cn'>FALSE</span>,
   priors <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>...</span>
 <span class='op'>)</span>
@@ -193,6 +194,10 @@
     <tr>
       <th>bgmask</th>
       <td><p>Check whether the environmental data should be masked with the background layer (Default: TRUE)</p></td>
+    </tr>
+    <tr>
+      <th>harmonize_na</th>
+      <td><p>A <code><a href='https://rdrr.io/r/base/logical.html'>logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: FALSE)</p></td>
     </tr>
     <tr>
       <th>priors</th>
