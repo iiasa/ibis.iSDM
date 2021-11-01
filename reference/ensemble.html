@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Identifier — new_id • ibis.iSDM</title>
+<title>Function to create an ensemble of multiple fitted models — ensemble • ibis.iSDM</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Identifier — new_id" />
-<meta property="og:description" content="Generate a new unique identifier." />
+<meta property="og:title" content="Function to create an ensemble of multiple fitted models — ensemble" />
+<meta property="og:description" content="This function creates an ensemble of multiple provided distribution models
+fitted with the ibis.iSDM-package. Each model has to have a predictions with a mean layer and
+optional uncertainty in form of the standard deviation or similar." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:creator" content="@Martin_Ecology" />
 <meta name="twitter:site" content="@IIASAVienna" />
@@ -135,42 +137,55 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Identifier</h1>
-    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/identifier.R'><code>R/identifier.R</code></a></small>
-    <div class="hidden name"><code>new_id.Rd</code></div>
+    <h1>Function to create an ensemble of multiple fitted models</h1>
+    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/ensemble.R'><code>R/ensemble.R</code></a></small>
+    <div class="hidden name"><code>ensemble.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generate a new unique identifier.</p>
+    <p>This function creates an ensemble of multiple provided distribution models
+fitted with the <code>ibis.iSDM-package</code>. Each model has to have a predictions with a mean layer and
+optional uncertainty in form of the standard deviation or similar.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='co'># S4 method for ANY</span>
+<span class='fu'>ensemble</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>...</th>
+      <td><p>Provided <code><a href='DistributionModel-class.html'>DistributionModel</a></code> objects</p></td>
+    </tr>
+    <tr>
+      <th>method</th>
+      <td><p>Approach on how the ensemble is to be created. See details for options (Default: 'mean')</p></td>
+    </tr>
+    <tr>
+      <th>weights</th>
+      <td><p>(Optional) weights provided to the ensemble function if weighted means are to be constructed. (Default: NULL)</p></td>
+    </tr>
+    <tr>
+      <th>layername</th>
+      <td><p>A <code><a href='https://rdrr.io/r/base/character.html'>character</a></code> of the layername to be taken from each prediction</p></td>
+    </tr>
+    </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>Id</code> object.</p>
+    <p>A <code>RasterStack</code> containing the ensemble of the provided predictions.
+Containing both the set 'method' and a coefficient of variation across predictions.
+Critically this should not be interpreted as measure of uncertainty as it cannot
+capture parameter uncertainty of individual model; Rather it reflects prediction variation.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Identifiers are made using the <code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <p>Possible options for creating an ensemble includes:
+'mean' - Calculates the mean of several predictions
+'weighted.mean' - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
+'min.sd' - Ensemble created by minimizing the uncertainty among predictions
+'threshold.frequency' - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed</p>
 
-    <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p></div>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># create new id</span>
-<span class='va'>i</span> <span class='op'>&lt;-</span> <span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='co'># print id</span>
-<span class='fu'><a href='print.html'>print</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>id: 9b9d7384-d007-446d-8b9c-f18a515ec45d</span></div><div class='input'>
-<span class='co'># convert to character</span>
-<span class='fu'><a href='https://rdrr.io/pkg/raster/man/as.character.html'>as.character</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "9b9d7384-d007-446d-8b9c-f18a515ec45d"</div><div class='input'>
-<span class='co'># check if it is an Id object</span>
-<span class='fu'><a href='is.Id.html'>is.Id</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

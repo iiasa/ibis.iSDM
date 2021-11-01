@@ -115,6 +115,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_stan.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/ensemble.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/explode_factorized_raster.html</loc>
   </url>
   <url>
@@ -158,6 +161,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/point_in_polygon.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/polynominal_transform.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/predictor_derivate.html</loc>
