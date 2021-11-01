@@ -25,9 +25,11 @@ to a model can account for spatial dependence in response or covariates
 There are several different options which depend on the engine used. In case a
 unsupported method for an engine is chosen this is modified to the next similar method
 Available are:
-"spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}}
-"car" - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}
-"poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
+\itemize{
+\item "spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}}
+\item "car" - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}
+\item "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
+}
 }
 \examples{
 \dontrun{

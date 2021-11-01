@@ -43,6 +43,8 @@ reference:
     contents:
       - similarity
       - threshold
+      - partial
+      - spartial
 
   - title: Utility functions
     desc: Functions used by engines or spatial processing

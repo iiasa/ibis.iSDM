@@ -9,15 +9,16 @@ NULL
 #' @param poi A [`sf`] object containing observational data used for model training
 #' @param return_threshold Should threshold value be returned instead (Default: FALSE)
 #' @details
-#' 'fixed' = applies a single pre-determined threshold
-#' 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
-#' 'percentile' = For a percentile threshold
-#' 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the 'modEvA' package
-#' 'kappa' = Determines the optimal kappa value (Kappa). Requires the 'modEvA' package
-#' 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the 'modEvA' package
-#' 'F1score' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-#' 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-#' 'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
+#' The following options are currently implemented:
+#' * 'fixed' = applies a single pre-determined threshold
+#' * 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
+#' * 'percentile' = For a percentile threshold
+#' * 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the ['modEvA'] package
+#' * 'kappa' = Determines the optimal kappa value (Kappa). Requires the ['modEvA'] package
+#' * 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the ['modEvA'] package
+#' * 'F1score' = Determines the optimal sensitivity of presence records. Requires the ['modEvA'] package
+#' * 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the ['modEvA'] package
+#' * 'Specificity' = Determines the optimal sensitivity of presence records. Requires the ['modEvA'] package
 #' @name threshold
 #' @examples
 #' \dontrun{

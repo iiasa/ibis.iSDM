@@ -8,9 +8,9 @@ NULL
 #' @details There are several different options which depend on the engine used. In case a
 #' unsupported method for an engine is chosen this is modified to the next similar method
 #' Available are:
-#' "spde" - stochastic partial differential equation (SPDE) for [`INLA-engine`]
-#' "car" - conditional autocorrelative errors (CAR) for [`INLA-engine`]
-#' "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
+#' * "spde" - stochastic partial differential equation (SPDE) for [`INLA-engine`]
+#' * "car" - conditional autocorrelative errors (CAR) for [`INLA-engine`]
+#' * "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model.
 #' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors

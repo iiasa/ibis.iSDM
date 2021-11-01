@@ -37,15 +37,18 @@ For \code{\link{BiodiversityScenario}} objects store a threshold attribute in
 the scenario object
 }
 \details{
-'fixed' = applies a single pre-determined threshold
-'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
-'percentile' = For a percentile threshold
-'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the 'modEvA' package
-'kappa' = Determines the optimal kappa value (Kappa). Requires the 'modEvA' package
-'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the 'modEvA' package
-'F1score' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
+The following options are currently implemented:
+\itemize{
+\item 'fixed' = applies a single pre-determined threshold
+\item 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
+\item 'percentile' = For a percentile threshold
+\item 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the \link{'modEvA'} package
+\item 'kappa' = Determines the optimal kappa value (Kappa). Requires the \link{'modEvA'} package
+\item 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the \link{'modEvA'} package
+\item 'F1score' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
+\item 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
+\item 'Specificity' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
+}
 }
 \examples{
 \dontrun{
