@@ -118,7 +118,13 @@ engine_gdb <- function(x,
 
         # Detect and format the family
         fam <- model$biodiversity[[1]]$family
-        if( fam == 'poisson' ) {fam <- mboost::Poisson()} else if( fam == 'binomial') fam <- mboost::Binomial(type = "glm", link = "cloglog")
+        fam <- switch (fam,
+          "poisson" = mboost::Poisson(),
+          "binomial" = mboost::Binomial(type = "glm", link = "cloglog"),
+          "gaussian" = Gaussian(),
+          "hurdle" = Hurdle(nuirange = c(0,100))
+        )
+
         self$data[['family']] <- fam
         assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
 
@@ -141,7 +147,7 @@ engine_gdb <- function(x,
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect
-        if(model$biodiversity[[1]]$family=='binomial') w <- NULL # Set weights to 0 when binomial
+        if(model$biodiversity[[1]]$family!='poisson') w <- NULL # Set weights to 0 when binomial
         full <- model$predictors
 
         # Select predictors

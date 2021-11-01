@@ -659,6 +659,43 @@ fill_rasters <- function(post, background){
   return(out)
 }
 
+#' Create a polynomial transformation from coordinates
+#'
+#' @description This function transforms the coordinates of a supplied file through a polynomial transform.
+#' By default it applies weights and a QR decomposition for numerical stability.
+#' @param coords A [`data.frame`], [`matrix`] or [`sf`] object with coordinates (2 columns named x-y)
+#' @param degree The number of degrees used for polynominal transformation (Default: 2)
+#' @param weights Set by default to the inverse of the number of coordinates.
+#' @returns A data.frame with transformed coordinates.
+#' @keywords utils
+#' @references Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
+polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
+  assertthat::assert_that(
+    inherits(coords, 'data.frame') || inherits(coords, 'matrix') || inherits(coords, 'sf'),
+    is.numeric(degree),
+    !is.null(weights) && length(weights) == nrow(coords)
+  )
+  # If spatial get coordinates
+  if(inherits(coords, 'sf')){
+    coords <- sf::st_coordinates(coords)
+  }
+  # Polynomial transform
+  a0 <- poly(x = as.matrix( coords ), degree = degree, simple = TRUE)
+  # Standardize colnames
+  poly.names <- colnames(a0) # Column names for later
+  poly.names <- paste0("spatialtrend_", gsub("\\.","_",poly.names) )
+
+  # Standardize the weights
+  weights <- weights/sum(weights)
+  a0 <- cbind(weights, a0) # Add to polynominal transform
+  a0 <- base::qr.Q(base::qr(a0)) # QR decomposition for better numerical stability
+  a0 <- as.data.frame(a0[, -1])/sqrt(weights) # Weighting
+
+  # Rename
+  colnames(a0) <- poly.names
+  return(a0)
+}
+
 #' Clean up raster layer from disk
 #'
 #' Completely deletes for instance a temporary created raster file

@@ -3,11 +3,14 @@ NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
-#' @description Bayesian regression approach to a sum of complementary trees.
-#' Prior distributions can be set for
+#' @description Bayesian regression approach to a sum of complementary trees by shrinking
+#' the fit of each tree using a regularization prior.
+#' BART models have been shown to compare favourable among machine learning algorithms (Dorie et al. 2019)
+#' Default prior preference is for trees to be small (few terminal nodes) and shrinkage towards 0.
+#' Prior distributions can furthermore be set for:
 #' - probability that a tree stops at a node of a given depth
-#' probability that a given variable is chosen for a splitting rule
-#' probability of splitting that variable at a particular value
+#' - probability that a given variable is chosen for a splitting rule
+#' - probability of splitting that variable at a particular value
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param nburn A [`numeric`] estimate of the burn in samples
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
@@ -78,8 +81,12 @@ engine_bart <- function(x,
         'template' = template,
         'dc' = dc
       ),
-      # Dummy function for spatial latent effects (not yet implemented)
+      # Dummy function for spatial latent effects
       calc_latent_spatial = function(self, type = NULL, priors = NULL){
+        new_waiver()
+      },
+      # Dummy function for getting the equation of latent effects
+      get_equation_latent_spatial = function(self, method){
         new_waiver()
       },
       # Function to respecify the control parameters
@@ -142,6 +149,7 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
+        data$w <- w # Also add as predictor
         full <- model$predictors # All predictors
 
         # Select predictors
@@ -176,7 +184,7 @@ engine_bart <- function(x,
           fit_bart <- dbarts::bart(equation,
                                    data,
                                    keeptrees = dc@keepTrees,
-                                   # weights = w,
+                                   weights = w,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,

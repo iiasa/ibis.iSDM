@@ -75,6 +75,7 @@ Collate:
     'utils-inla.R'
     'engine_inla.R'
     'engine_stan.R'
+    'ensemble.R'
     'misc.R'
     'partial.R'
     'plot.R'

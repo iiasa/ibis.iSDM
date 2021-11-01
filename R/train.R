@@ -123,6 +123,40 @@ methods::setMethod(
       rm(lu)
     }
 
+    # Calculate latent variables if set
+    if(!is.Waiver(x$latentfactors)){
+      # Get the method and check whether it is supported by the engine
+      m <- attr(x$get_latent(),'method')
+      if(x$get_engine()!="<INLA>" & m == 'spde'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      if(x$get_engine()=="<GDB>" & m == 'poly'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+      }
+      if(x$get_engine()=="<BART>" & m == 'car'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      # Calculate latent spatial terms (saved in engine data)
+      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        # If model is polynominal, get coordinates of first entry for names of transformation
+        if(m == 'poly' & x$get_engine()!="<GDB>"){
+          # And the full predictor container
+          coords_poly <- polynominal_transform(model$predictors[,c('x','y')], degree = 2)
+          model$predictors <- cbind(model$predictors, coords_poly)
+          model$predictors_names <- c(model$predictors_names, names(coords_poly))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = names(coords_poly), type = "numeric"))
+          # Overwrite since we include this now as predictor in all models
+          x$latentfactors <- new_waiver()
+        } else {
+          # Calculate the spatial model
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']] )
+        }
+      }
+    }
+
     # Get biodiversity data
     model[['biodiversity']] <- list()
     # Specify list of ids
@@ -229,15 +263,6 @@ methods::setMethod(
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
-    # Calculate latent variables
-    if(!is.Waiver(x$latentfactors)){
-      # Calculate latent spatial factor (saved in engine data)
-      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-        # Calculate the spatial model
-        x$engine$calc_latent_spatial(type = attr(x$get_latent(),'spatial_model'), priors = model[['priors']] )
-      }
-    }
-
     # Set offset if existing
     # FIXME: Type-specific offset?
     if(!is.Waiver(x$offset)){
@@ -280,7 +305,7 @@ methods::setMethod(
         )),3] <- NA # Fill with NA
       }
     }
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # ----------------- #
@@ -394,7 +419,7 @@ methods::setMethod(
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
                                                 x$engine$get_equation_latent_spatial(
-                                                  spatial_model = attr(x$get_latent(),'spatial_model'))
+                                                  method = attr(x$get_latent(),'method'))
             )
             )
           }
@@ -765,7 +790,6 @@ methods::setMethod(
       # Output some warnings on things ignored
       if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
       if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
-      if(length( grep('Spatial',x$get_latent() ) ) > 0 ) warning('Option to provide spatial latent effects not yet implemented. Ignored...')
 
       # Single model type specified. Define formula
       if(length(types)==1){
@@ -773,7 +797,8 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[1]]$equation=='<Default>'){
           # Construct formula with all variables
-          form <- paste( 'observed ~ .')
+          form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/w',''), '~ ',
+                         paste(model$predictors_names,collapse = " + "))
           # Convert to formula
           form <- to_formula(form)
         } else {
@@ -849,7 +874,8 @@ methods::setMethod(
           # Make a loop over each each dataset that is not
           if(model$biodiversity[[i]]$equation=='<Default>'){
             # Construct formula with all variables
-            form <- paste( 'observed ~ .')
+            form <- paste( 'observed' ,ifelse(model$biodiversity[[i]]$family=='poisson', '/w',''), '~ ',
+                           paste(model$predictors_names,collapse = " + "))
             # Convert to formula
             form <- to_formula(form)
           } else {

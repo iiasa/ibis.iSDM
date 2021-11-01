@@ -65,9 +65,9 @@ methods::setMethod(
     poi <- sf::st_as_sf( obj$model$biodiversity[[1]]$observations, coords = c('x','y') )
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if(!any( sapply(obj$model$biodiversity, function(x) x$type) == 'poipa') & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')){
+    if(!any(sapply(mod1$model$biodiversity, function(x) 0 %in% x$observations[,'observed'])) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
-      bg <- raster::rasterize(obj$model$background, obj$fits$prediction)
+      bg <- raster::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       abs <- create_pseudoabsence(
         env = obj$model$predictors,
         presence = poi,

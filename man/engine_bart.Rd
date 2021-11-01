@@ -16,12 +16,15 @@ engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
 \item{chains}{A number of the number of chains to be used (Default: 4)}
 }
 \description{
-Bayesian regression approach to a sum of complementary trees.
-Prior distributions can be set for
+Bayesian regression approach to a sum of complementary trees by shrinking
+the fit of each tree using a regularization prior.
+BART models have been shown to compare favourable among machine learning algorithms (Dorie et al. 2019)
+Default prior preference is for trees to be small (few terminal nodes) and shrinkage towards 0.
+Prior distributions can furthermore be set for:
 \itemize{
 \item probability that a tree stops at a node of a given depth
-probability that a given variable is chosen for a splitting rule
-probability of splitting that variable at a particular value
+\item probability that a given variable is chosen for a splitting rule
+\item probability of splitting that variable at a particular value
 }
 }
 \references{
