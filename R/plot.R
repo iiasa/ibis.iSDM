@@ -36,3 +36,9 @@ plot.PredictorDataset <- function(x, ...) x$plot(...)
 #' @keywords misc
 #' @export
 plot.Engine <- function(x,...) x$plot(...)
+
+#' @rdname plot
+#' @method plot BiodiversityScenario
+#' @keywords misc
+#' @export
+plot.BiodiversityScenario <- function(x,...) x$plot(...)

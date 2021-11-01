@@ -47,6 +47,8 @@ engine_inla(
 \item{nonconvex.res}{Computation resolution for nonconvex.hulls TBD}
 }
 \description{
-References
+Use INLA as engine
+}
+\references{
 https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
 }

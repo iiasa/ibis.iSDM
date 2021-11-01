@@ -70,6 +70,9 @@ methods::setMethod(
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
 
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating distribution object...')
+
     # Convert limits if provided
     if(!is.null(limits)){
       # Convert to polygon if raster

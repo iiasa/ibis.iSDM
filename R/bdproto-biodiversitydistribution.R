@@ -87,17 +87,18 @@ BiodiversityDistribution <- bdproto(
     }
   },
   # Adding latent factors
-  set_latent = function(self, type, spatial_model = NULL, priors = NULL ){
+  set_latent = function(self, type, method = NULL, priors = NULL ){
     assertthat::assert_that(is.character(type),
+                            is.character(method),
                             type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'),
                             is.null(priors) || inherits(priors, 'PriorList'))
     # Assign argument if existing
-    if(!is.null(spatial_model)){
-      type <- paste0('<Spatial | ',spatial_model,'>')
-      attr(type, 'spatial_model') <- spatial_model
+    if(!is.null(method)){
+      type <- paste0('<Spatial | ',method,'>')
+      attr(type, 'method') <- method
     }
     if(!is.Waiver(self$latentfactors)){
-      warning('Overwritting existing latent effect')
+      warning('Overwritting existing latent effect...')
       bdproto(NULL, self, latentfactors = type )
       # bdproto(NULL, self, latentfactors = unique(c(self$latentfactors,type)) )
     } else {
@@ -184,6 +185,16 @@ BiodiversityDistribution <- bdproto(
   set_log = function(self, x){
     assertthat::assert_that(inherits(x, "Log"))
     bdproto(NULL, self, log = x)
+  },
+  # Get extent
+  get_extent = function(self){
+    # Calculate the extent from the background
+    if(!is.Waiver(self$background)) raster::extent(self$background) else NULL
+  },
+  # Get dimensions of extent
+  get_extent_dimensions = function(self){
+    # Calculate the dimensions of the background
+    if(!is.Waiver(self$background)) extent_dimensions(self$background) else NULL
   },
   # Remove predictors
   rm_predictors = function(self, names){

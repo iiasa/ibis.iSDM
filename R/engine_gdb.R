@@ -113,10 +113,18 @@ engine_gdb <- function(x,
          length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Add in case anything needs to be further prepared here
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Detect and format the family
         fam <- model$biodiversity[[1]]$family
-        if( fam == 'poisson' ) {fam <- mboost::Poisson()} else if( fam == 'binomial') fam <- mboost::Binomial(type = "glm", link = "cloglog")
+        fam <- switch (fam,
+          "poisson" = mboost::Poisson(),
+          "binomial" = mboost::Binomial(type = "glm", link = "cloglog"),
+          "gaussian" = Gaussian(),
+          "hurdle" = Hurdle(nuirange = c(0,100))
+        )
+
         self$data[['family']] <- fam
         assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
 
@@ -124,6 +132,9 @@ engine_gdb <- function(x,
       },
       # Training function
       train = function(self, model, settings, ...){
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
         # Get boosting control and family data
@@ -136,6 +147,7 @@ engine_gdb <- function(x,
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect
+        if(model$biodiversity[[1]]$family!='poisson') w <- NULL # Set weights to 0 when binomial
         full <- model$predictors
 
         # Select predictors
@@ -191,6 +203,9 @@ engine_gdb <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
             for(i in 1:length(settings$get('bias_variable'))){
@@ -237,9 +252,14 @@ engine_gdb <- function(x,
                                     )
             # Get model
             mod <- self$get_data('fit_best')
+            assertthat::assert_that(inherits(mod,'mboost'),msg = 'No model found!')
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
 
+            # Add rowid
+            newdata$rowid <- 1:nrow(newdata)
+            # Subset to non-missing data
+            newdata <- subset(newdata, complete.cases(newdata)) # FIXME: Potentially limit to relevant variables only
             # Make empty template
             temp <- raster::rasterFromXYZ(newdata[,c('x','y')])
             # Predict
@@ -247,8 +267,7 @@ engine_gdb <- function(x,
               mboost::predict.mboost(object = mod,newdata = newdata,
                                      type = 'response', aggregate = 'sum')
             )
-            assertthat::assert_that(raster::ncell(temp)==nrow(y))
-            temp[] <- y[,1]
+            temp[as.numeric(newdata$rowid)] <- y[,1]
             return(temp)
           },
           # Partial effect

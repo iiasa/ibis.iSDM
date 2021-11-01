@@ -64,6 +64,9 @@ methods::setMethod(
     if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
       bias_variable <- new_waiver(); bias_value <- new_waiver()
     }
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
+
     # --- #
     #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
@@ -112,11 +115,46 @@ methods::setMethod(
       # Also set predictor names
       model[['predictors_names']] <- x$get_predictor_names()
       # Try to guess predictor types
-      # FIXME: Allow option to determine this directly during add_predictors
+      # Since [add_predictors] splits all factorized raster layers into individual layer
+      # we can say with certainty that layers with only two unique values are factor
       lu <- apply(model[['predictors']][model[['predictors_names']]],
-                  2, function(x) length(unique(x[])))
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu < 50,'factor','numeric') )
+                  2, function(x) length(unique(na.omit( x[] ) )))
+      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu >2 ,'numeric','factor') )
       rm(lu)
+    }
+
+    # Calculate latent variables if set
+    if(!is.Waiver(x$latentfactors)){
+      # Get the method and check whether it is supported by the engine
+      m <- attr(x$get_latent(),'method')
+      if(x$get_engine()!="<INLA>" & m == 'spde'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      if(x$get_engine()=="<GDB>" & m == 'poly'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+      }
+      if(x$get_engine()=="<BART>" & m == 'car'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      # Calculate latent spatial terms (saved in engine data)
+      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        # If model is polynominal, get coordinates of first entry for names of transformation
+        if(m == 'poly' & x$get_engine()!="<GDB>"){
+          # And the full predictor container
+          coords_poly <- polynominal_transform(model$predictors[,c('x','y')], degree = 2)
+          model$predictors <- cbind(model$predictors, coords_poly)
+          model$predictors_names <- c(model$predictors_names, names(coords_poly))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = names(coords_poly), type = "numeric"))
+          # Overwrite since we include this now as predictor in all models
+          x$latentfactors <- new_waiver()
+        } else {
+          # Calculate the spatial model
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']] )
+        }
+      }
     }
 
     # Get biodiversity data
@@ -188,6 +226,11 @@ methods::setMethod(
                                          keep = keep,
                                          cutoff = 0.7, # Probably keep default, but maybe sth. to vary in the future
                                          method = 'pear')
+
+        # For all factor variables, remove those with only the minimal value (e.g. 0)
+        fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
+        fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
+        co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         if(length(co)>0){
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
         }
@@ -213,21 +256,12 @@ methods::setMethod(
       if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
-       vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
-       spec_priors$rm( spec_priors$exists(vv) )
-       warning('Variable for set prior not found. Removed prior!')
+        vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+        spec_priors$rm( spec_priors$exists(vv) )
+        warning('Variable for set prior not found. Removed prior!')
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
-
-    # Calculate latent variables
-    if(!is.Waiver(x$latentfactors)){
-      # Calculate latent spatial factor (saved in engine data)
-      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-        # Calculate the spatial model
-        x$engine$calc_latent_spatial(type = attr(x$get_latent(),'spatial_model'), priors = model[['priors']] )
-      }
-    }
 
     # Set offset if existing
     # FIXME: Type-specific offset?
@@ -261,8 +295,8 @@ methods::setMethod(
       model$background <- suppressMessages(suppressWarnings( st_union(st_intersection(zones, model$background),by_feature = TRUE) ))
 
       model$predictors[which( is.na(
-            point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
-          )),model$predictors_names] <- NA # Fill with NA
+        point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
+      )),model$predictors_names] <- NA # Fill with NA
 
       # The same with offset if specified
       if(!is.Waiver(x$offset)){
@@ -271,6 +305,8 @@ methods::setMethod(
         )),3] <- NA # Fill with NA
       }
     }
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # ----------------- #
     # Number of dataset types, families and ids
@@ -306,8 +342,8 @@ methods::setMethod(
                                paste(' + ',paste0('intercept_',
                                                   make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                   sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
-                               )
                         )
+          )
           # Check whether priors have been specified and if yes, use those
           if(!is.Waiver(model$priors)){
             # Loop through all provided INLA priors
@@ -336,9 +372,9 @@ methods::setMethod(
                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
                 form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
                                                  # 'scale.model = TRUE,',
-                                                 'hyper = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )
+                                                 'hyper = list(theta = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],')) )
                                                  )',collapse = ' + ')
-                               )
+                )
               }
             }
             # Add linear for those missed ones
@@ -347,14 +383,17 @@ methods::setMethod(
               if(any(miss %in% var_lin)){
                 # Add linear predictors without priors
                 form <- paste(form, ' + ',
-                              paste('f(', miss[which(miss%in%var_lin)],', model = \'linear\')', collapse = ' + ' )
+                              paste('f(', miss[which(miss%in%var_lin)],', model = \'linear\')', collapse = ' + ')
                 )
               }
               if(length(var_rw1)>0 & (any(miss %in% var_rw1))){
                 # Random walk where feasible and not already included
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
-                                               # 'scale.model = TRUE, ',
-                                               'model = \'rw1\')', collapse = ' + ' ) )
+                form <- paste(form, ifelse(length(var_lin) == 0,'',' + '), paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
+                                                                                 # 'scale.model = TRUE, ',
+                                                                                 # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                                                                                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                                 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                                 'model = \'rw1\')', collapse = ' + ' ) )
               }
             }
           } else {
@@ -365,9 +404,12 @@ methods::setMethod(
             }
             # Random walk where feasible
             if(length(var_rw1)>0){
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw1,'),',
-                                               # 'scale.model = TRUE,',
-                                               'model = \'rw1\')', collapse = ' + ' ) )
+              form <- paste(form, ifelse(length(var_lin) == 0,'',' + '), paste('f(INLA::inla.group(', var_rw1,'),',
+                                                                               # 'scale.model = TRUE,',
+                                                                               # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                                                                               # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                               'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                               'model = \'rw1\')', collapse = ' + ' ) )
             }
           }
           form <- to_formula(form) # Convert to formula
@@ -376,9 +418,9 @@ methods::setMethod(
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
-                                          x$engine$get_equation_latent_spatial(
-                                            spatial_model = attr(x$get_latent(),'spatial_model'))
-                                          )
+                                                x$engine$get_equation_latent_spatial(
+                                                  method = attr(x$get_latent(),'method'))
+            )
             )
           }
         } else{
@@ -441,7 +483,7 @@ methods::setMethod(
               if(is.Waiver(settings$get('only_linear'))){
                 # And smooth effects
                 form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
-                                           collapse = ' + '
+                                                  collapse = ' + '
                 ))
               }
             }
@@ -449,11 +491,11 @@ methods::setMethod(
             # Add linear predictors
             form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '))
             if(settings$get('only_linear') == FALSE){
-            # And smooth effects
-            form <- paste(form, ' + ', paste0('bbs(',
-                                       model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
-                                       collapse = ' + '
-            ))
+              # And smooth effects
+              form <- paste(form, ' + ', paste0('bbs(',
+                                                model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
+                                                collapse = ' + '
+              ))
             }
           }
           # Convert to formula
@@ -468,9 +510,12 @@ methods::setMethod(
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
           form <- to_formula(model$biodiversity[[1]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
           )
         }
         model$biodiversity[[1]]$equation <- form
@@ -478,32 +523,38 @@ methods::setMethod(
 
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[1]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
           assertthat::assert_that(!is.na(cellStats(bg,min)))
 
+          # Sample pseudo absences
           abs <- create_pseudoabsence(
             env = model$predictors,
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
             replace = TRUE
           )
           abs$intercept <- 1 # Add dummy intercept
           # Combine absence and presence and save
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
           # Furthermore rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
+                                    fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
                         model$biodiversity[[1]]$observations[,c('x','y')] )
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
           df <- rbind(model$biodiversity[[1]]$predictors,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>% subset(., complete.cases(.) )
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+            subset(., complete.cases(.) )
 
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
@@ -517,8 +568,8 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-4
-                           )
+                           weight = 1e-6
+          )
           df$w <- w # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
@@ -554,7 +605,7 @@ methods::setMethod(
               # And smooth effects
               if(is.Waiver(settings$get('only_linear'))){
                 form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 5)',
-                                           collapse = ' + '
+                                                  collapse = ' + '
                 ))
               }
             }
@@ -564,8 +615,8 @@ methods::setMethod(
             if(is.Waiver(settings$get('only_linear'))){
               # And smooth effects
               form <- paste(form, ' + ', paste0('bbs(',
-                                         model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
-                                         collapse = ' + '
+                                                model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
+                                                collapse = ' + '
               ))
             }
           }
@@ -579,9 +630,12 @@ methods::setMethod(
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
           form <- to_formula(model$biodiversity[[id]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
           )
         }
         model$biodiversity[[id]]$equation <- form
@@ -598,11 +652,6 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         # Also create a class prediction of the binomial outcome
         new <- out$fits$prediction
-        # Binary layer caused trouble (cholesky errors, thus removing)
-                     # predict_gdbclass(fit = out$fits$fit_best,
-                     #                  nd = model2$predictors,
-                     #                  template = out$fits$prediction)
-                     # )
         names(new) <- 'poipa_mean'
         rm(model2) # Clean
         # ---- #
@@ -651,7 +700,7 @@ methods::setMethod(
               if(is.Waiver(settings$get('only_linear'))){
                 # And smooth effects
                 form <- paste(form,' + ', paste0('bbs(', miss,', knots = 5)',
-                                           collapse = ' + '
+                                                 collapse = ' + '
                 ))
               }
             }
@@ -666,6 +715,14 @@ methods::setMethod(
                                                 x$engine$get_equation_latent_spatial() )
             )
           }
+        } else {
+          # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+          form <- to_formula(model$biodiversity[[id]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
+          # Add poipa mean to equation if not already in
+          if( length( grep('poipa_mean',attr(terms.formula(form), 'term.labels')) )==0 ) form <- update.formula(form, '. ~ . + bmono(poipa_mean, constraint = \'increasing\') ')
         }
         model$biodiversity[[id]]$equation <- form
         rm(form)
@@ -681,7 +738,7 @@ methods::setMethod(
           presence = model$biodiversity[[id]]$observations,
           bias = settings$get('bias_variable'),
           template = x$engine$get_data('template'),
-          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+          npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
           replace = TRUE
         )
         abs$intercept <- 1 # Add dummy intercept
@@ -689,6 +746,9 @@ methods::setMethod(
         abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
         # Furthermore rasterize observed presences
         pres <- raster::rasterize(model$biodiversity[[id]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+        # If family is not poisson, assume factor distribution
+        # FIXME: Ideally this is better organized through family
+        if(model$biodiversity[[id]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
         obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[id]]$observations[,c('x','y')])),
                       model$biodiversity[[id]]$observations[,c('x','y')] )
         model$biodiversity[[id]]$observations <- rbind(obs, abs_observations)
@@ -721,6 +781,8 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+      # Add previous prediction if existing
+      if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
 
       # ----------------------------------------------------------- #
       #### BART Engine ####
@@ -728,7 +790,6 @@ methods::setMethod(
       # Output some warnings on things ignored
       if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
       if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
-      if(length( grep('Spatial',x$get_latent() ) ) > 0 ) warning('Option to provide spatial latent effects not yet implemented. Ignored...')
 
       # Single model type specified. Define formula
       if(length(types)==1){
@@ -736,7 +797,8 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[1]]$equation=='<Default>'){
           # Construct formula with all variables
-          form <- paste( 'observed ~ .')
+          form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/w',''), '~ ',
+                         paste(model$predictors_names,collapse = " + "))
           # Convert to formula
           form <- to_formula(form)
         } else {
@@ -751,7 +813,7 @@ methods::setMethod(
 
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[1]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
@@ -762,7 +824,7 @@ methods::setMethod(
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
             replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
@@ -771,6 +833,9 @@ methods::setMethod(
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
                         model$biodiversity[[1]]$observations[,c('x','y')] )
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
@@ -791,7 +856,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-6
+                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
           df$w <- w # Also add as column
 
@@ -809,15 +874,15 @@ methods::setMethod(
           # Make a loop over each each dataset that is not
           if(model$biodiversity[[i]]$equation=='<Default>'){
             # Construct formula with all variables
-            form <- paste( 'observed ~ .')
+            form <- paste( 'observed' ,ifelse(model$biodiversity[[i]]$family=='poisson', '/w',''), '~ ',
+                           paste(model$predictors_names,collapse = " + "))
             # Convert to formula
             form <- to_formula(form)
           } else {
             # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
             form <- to_formula(model$biodiversity[[i]]$equation)
-            assertthat::assert_that(
-              all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
-            )
+            # Add poipa mean to equation if not already in. Works since we fit poisson last
+            if( length( grep('poipa_mean',attr(terms.formula(form), 'term.labels')) )==0 ) form <- update.formula(form, '. ~ . + poipa_mean')
           }
           model$biodiversity[[i]]$equation <- form
           rm(form)
@@ -856,9 +921,11 @@ methods::setMethod(
         model$predictors_names <- c(model$predictors_names, names(new))
         model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = names(new), type = c('numeric')))
 
+        # Add full prediction from fit to save for later
+        new <- out$fits$prediction
         # Add pseudo-absence points if necessary
         # Include nearest predictor values for each
-        if('poipo' %in% types) {
+        if('poipo' == model$biodiversity[[id]]$type) {
 
           # Get background layer
           bg <- x$engine$get_data('template')
@@ -870,7 +937,7 @@ methods::setMethod(
             presence = model$biodiversity[[id]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
             replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
@@ -879,6 +946,9 @@ methods::setMethod(
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[id]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[id]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
           obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[id]]$observations[,c('x','y')])),
                         model$biodiversity[[id]]$observations[,c('x','y')] )
           model$biodiversity[[id]]$observations <- rbind(obs, abs_observations)
@@ -899,7 +969,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[id]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-6
+                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
           df$w <- w # Also add as column
 
@@ -914,8 +984,114 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+      # Add previous prediction if existing
+      if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
+
+    } else if( inherits(x$engine,"STAN-Engine") ){
+      # ----------------------------------------------------------- #
+      #### STAN Engine ####
+
+      # Single model type specified. Define formula
+      # Default equation found
+      # TODO: Update equation object
+      if(model$biodiversity[[1]]$equation=='<Default>'){
+        # Construct formula with all variables
+        form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/ w',''), ' ~ 1')
+
+        # Load variables and add them
+        for(v in model$biodiversity[[1]]$predictors_names){
+          # Add
+          form <- paste0(form, ' + ', v)
+        }
+        # Convert to formula
+        form <- to_formula(form)
+
+        # Add offset if specified
+        if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+        # if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        #   # Update with spatial term
+        #   form <- update.formula(form, paste0(" ~ . + ",
+        #                                       x$engine$get_equation_latent_spatial() )
+        #   )
+        # }
+      } else{
+        # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
+        form <- to_formula(model$biodiversity[[1]]$equation)
+        # Update formula to weights if forgotten
+        if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')
+        assertthat::assert_that(
+          all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+        )
+      }
+      model$biodiversity[[1]]$equation <- form
+      rm(form)
+
+      # Add pseudo-absence points if necessary
+      # Include nearest predictor values for each
+      if('poipo' == model$biodiversity[[1]]$type) {
+
+        # Get background layer
+        bg <- x$engine$get_data('template')
+        assertthat::assert_that(!is.na(cellStats(bg,min)))
+
+        # Sample pseudo absences
+        abs <- create_pseudoabsence(
+          env = model$predictors,
+          presence = model$biodiversity[[1]]$observations,
+          bias = settings$get('bias_variable'),
+          template = bg,
+          npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
+          replace = TRUE
+        )
+        abs$intercept <- 1 # Add dummy intercept
+        # Combine absence and presence and save
+        abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
+        # Furthermore rasterize observed presences
+        pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
+                                  fun = 'count', background = 0)
+        # If family is not poisson, assume factor distribution
+        # FIXME: Ideally this is better organized through family
+        if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
+        obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
+                      model$biodiversity[[1]]$observations[,c('x','y')] )
+        model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+
+        # Format out
+        df <- rbind(model$biodiversity[[1]]$predictors,
+                    abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+          subset(., complete.cases(.) )
+
+        # Preprocessing security checks
+        assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                 any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                 nrow(df) == nrow(model$biodiversity[[1]]$observations)
+        )
+        # Add offset if existent
+        if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
+
+        # Define expectation as very small vector following Renner et al.
+        w <- ppm_weights(df = df,
+                         pa = model$biodiversity[[1]]$observations[['observed']],
+                         bg = bg,
+                         weight = 1e-6
+        )
+        df$w <- w # Also add as column
+
+        model$biodiversity[[1]]$predictors <- df
+        model$biodiversity[[1]]$expect <- w
+      }
+
+      # Run the engine setup script
+      x$engine$setup(model)
+
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model, settings)
 
     } else { stop('Specified Engine not implemented yet.') }
+
+    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
 

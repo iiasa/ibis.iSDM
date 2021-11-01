@@ -42,10 +42,15 @@ PredictorDataset <- bdproto(
       raster::as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
     } else self$data
   },
+  # Get Projection
+  get_projection = function(self){
+    assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
+    sf::st_crs(self$data)
+  },
   # Add a new Predictor dataset to this collection
   set_data = function(self, x, value){
     assertthat::assert_that(assertthat::is.string(x),
-                            inherits(value, "Raster"),
+                            is.Raster(value),
                             is_comparable_raster(self$get_data(), value))
     self$data <- addLayer(self$get_data(),value)
     invisible()

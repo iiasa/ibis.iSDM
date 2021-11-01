@@ -2,36 +2,38 @@
 % Please edit documentation in R/add_latent.R
 \name{add_latent_spatial}
 \alias{add_latent_spatial}
-\title{Add latent spatial factor to the model}
+\title{Add latent spatial effect to the model equation}
 \usage{
-add_latent_spatial(x, spatial_model = "spde", priors = NULL, ...)
+add_latent_spatial(x, method = "spde", priors = NULL, ...)
 
 \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{spatial_model}{A \code{\link{character}} describing what kind of spatial to be fitted (Option: 'spde' | 'iCAR')}
+\item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model.}
 
 \item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. NULL equating default priors}
 
 \item{...}{Other parameters passed down}
 }
 \description{
-Add latent spatial factor to the model
+Adding latent spatial error terms, spatial trends or other autocovariates
+to a model can account for spatial dependence in response or covariates
 }
 \details{
-Different for INLA. Otherwise a CAR object
+There are several different options which depend on the engine used. In case a
+unsupported method for an engine is chosen this is modified to the next similar method
+Available are:
+"spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}}
+"car" - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}
+"poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
 }
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
- TBD
+ distribution(background) \%>\% add_latent_spatial()
 }
 }
 \references{
-
+Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
 }

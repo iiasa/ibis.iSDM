@@ -7,15 +7,25 @@
 #' @noRd
 `%notin%` = function(a, b){!(a %in% b)}
 
-#' Custom logging function for scripts
+#' Custom messaging function for scripts
 #'
 #' \code{myLog} prints a log with a custom header
 #' @param title The title in the log output
+#' @param col A [`character`] indicating the text colour to be used. Supported are green / yellow / red
 #' @param ... Any additional outputs or words for display
 #' @keywords internal, utils
 #' @noRd
-myLog <- function(title = "[Processing]",...) {
-  cat(paste0(title,' ', Sys.time(), " | ", ..., "\n"))
+myLog <- function(title = "[Processing]", col = 'green', ...) {
+  assertthat::assert_that(col %in% c('green','yellow','red'))
+  textwrap <- switch (col,
+    'green' = text_green,
+    'yellow' = text_yellow,
+    'red' = text_red
+  )
+  message(textwrap(
+    paste0(title,' ', Sys.time(), " | ", ...)
+      )
+    )
 }
 
 #' Colour helpers for message logs
@@ -27,6 +37,9 @@ text_red <- function(text) { paste0('\033[31m',text,'\033[39m') }
 #' @inheritParams text_red
 #' @aliases text_yellow
 text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
+#' @inheritParams text_red
+#' @aliases text_green
+text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 
 #' Calculate the mode
 #' @param A [`vector`] of values or characters
@@ -408,66 +421,4 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
   o <- names(env)[deletecol]
   if(length(singular_var)>0) o <- unique( c(o,  names(singular_var) ) )
   o
-}
-
-#' Create pseudo absence points over a raster dataset
-#'
-#' @param env An environmental dataset either in [`data.frame`] or [`raster`] format
-#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records
-#' @param bias An optional weights raster to control placement of pseudo-absences further
-#' @param template If template is not null then env needs to be a [`raster`] dataset
-#' @param npoints A [`numeric`] number of pseudo-absence points to create
-#' @param replace Sample with replacement? (Default: False)
-#' @keywords utils
-#' @returns A [`data.frame`] containing the newly created pseudo absence points
-create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
-                                 npoints = 1000, replace = FALSE){
-  assertthat::assert_that(
-    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),
-    is.data.frame(presence),
-    hasName(presence,'x') && hasName(presence,'y'),
-    is.null(bias) || is.Waiver(bias) || is.character(bias),
-    is.numeric(npoints),
-    is.null(template) || inherits(template,'Raster')
-  )
-  if(is.null(template)) {
-    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file')
-  }
-  # If bias is set, check that it is in env
-  if(is.character(bias)){
-    assertthat::assert_that(bias %in% names(env))
-    nb <- (env[[bias]] - min(env[[bias]],na.rm = TRUE)) / ( max(env[[bias]],na.rm = TRUE) - min(env[[bias]],na.rm = TRUE) )
-  } else { nb = NULL }
-  if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
-
-  # Rasterize the presence estimates
-  bg1 <- raster::rasterize(presence[,c('x','y')], template, fun = 'count', background = 0)
-  bg1 <- raster::mask(bg1, template)
-
-  assertthat::assert_that(
-    is.finite(raster::cellStats(bg1,'max',na.rm = T))
-  )
-  # Generate pseudo absence data
-  # Now sample from all cells not occupied
-  if(is.null(nb)){
-    prob_bias <- nb[which(bg1[]==0)]
-    if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-    abs <- sample(which(bg1[]==0), size = npoints, replace = replace, prob = prob_bias)
-  } else {
-    abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
-  }
-
-  # Now get absence environmental data
-  abs <- get_ngbvalue(
-    coords = raster::xyFromCell(bg1, abs),
-    env = env,
-    field_space = c('x','y'),
-    longlat = raster::isLonLat(template)
-  )
-
-  # Remove NA data in case points were sampled over non-valid regions
-  abs <- subset(abs, complete.cases(abs))
-  assertthat::assert_that( all( names(abs) %in% names(env) ) )
-
-  return(abs)
 }

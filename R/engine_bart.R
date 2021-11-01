@@ -3,6 +3,14 @@ NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
+#' @description Bayesian regression approach to a sum of complementary trees by shrinking
+#' the fit of each tree using a regularization prior.
+#' BART models have been shown to compare favourable among machine learning algorithms (Dorie et al. 2019)
+#' Default prior preference is for trees to be small (few terminal nodes) and shrinkage towards 0.
+#' Prior distributions can furthermore be set for:
+#' - probability that a tree stops at a node of a given depth
+#' - probability that a given variable is chosen for a splitting rule
+#' - probability of splitting that variable at a particular value
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param nburn A [`numeric`] estimate of the burn in samples
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
@@ -61,7 +69,7 @@ engine_bart <- function(x,
   )
 
   # Print a message in case there is already an engine object
-  if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
+  if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
   # Set engine in distribution object
   x$set_engine(
@@ -73,8 +81,12 @@ engine_bart <- function(x,
         'template' = template,
         'dc' = dc
       ),
-      # Dummy function for spatial latent effects (not yet implemented)
+      # Dummy function for spatial latent effects
       calc_latent_spatial = function(self, type = NULL, priors = NULL){
+        new_waiver()
+      },
+      # Dummy function for getting the equation of latent effects
+      get_equation_latent_spatial = function(self, method){
         new_waiver()
       },
       # Function to respecify the control parameters
@@ -106,6 +118,9 @@ engine_bart <- function(x,
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+
         # In case anything else needs to be specified, do it here
         if(model$biodiversity[[1]]$family=='binomial') assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
         invisible()
@@ -118,6 +133,9 @@ engine_bart <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Messager
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+
         # Get output raster
         prediction <- self$get_data('template')
 
@@ -131,7 +149,7 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
-        if(is.numeric(data[['observed']])) data[['observed']] <- data[['observed']] / w
+        data$w <- w # Also add as predictor
         full <- model$predictors # All predictors
 
         # Select predictors
@@ -166,7 +184,7 @@ engine_bart <- function(x,
           fit_bart <- dbarts::bart(equation,
                                    data,
                                    keeptrees = dc@keepTrees,
-                                   # weights = w,
+                                   weights = w,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
@@ -177,6 +195,9 @@ engine_bart <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
             for(i in 1:length(settings$get('bias_variable'))){

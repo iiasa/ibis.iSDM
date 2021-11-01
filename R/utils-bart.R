@@ -4,7 +4,7 @@
 #' @param model A fitted [dbarts] model
 #' @concept Taken from embarcadero package
 #' @return A [`data.frame`] with the variable importance information
-#' @keywords utils
+#' @keywords utils, internals
 #' @noRd
 varimp.bart <- function(model){
   assertthat::assert_that(class(model) == 'bart',
@@ -44,7 +44,7 @@ varimp.bart <- function(model){
 #' @param transform Backtransform using pnorm or not. Set to FALSE if response was not binomial
 #' @concept Taken and adapted from [embarcadero] package
 #' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-#' @return A [`raster`] layer containing the partial effect
+#' @return A [`Raster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
 bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci = TRUE,
@@ -53,7 +53,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
   assertthat::assert_that(
     inherits(model,'bart'),
     is.null(x.vars) || is.character(x.vars),
-    is.logical(equal), is.numeric(smooth),
+    # is.logical(equal), is.numeric(smooth),
     is.logical(ci) && is.numeric(ciwidth),
     is.logical(transform)
   )

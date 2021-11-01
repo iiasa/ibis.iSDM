@@ -40,6 +40,8 @@ NULL
 ibis_colours <- list(
   sdm_colour = colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100),
   divg_bluegreen = c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01"),
+  divg_bluered = c("#4E193D","#44234E","#3B3264","#34487B","#376091","#4B7BA5","#6996B6","#8DADC3","#B1BEC7","#CCC1BE","#D8B7A7",
+  "#D8A589","#CE8C6A","#BF724C","#A95432","#8E3821","#77231D","#661723","#5A152D","#50193B"),
   viridis_orig = c("#440154FF","#482878FF","#3E4A89FF","#31688EFF","#26828EFF","#1F9E89FF","#35B779FF","#6DCD59FF","#B4DE2CFF","#FDE725FF"),
   viridis_cividis = c("#00204DFF","#00336FFF","#39486BFF","#575C6DFF","#707173FF","#8A8779FF","#A69D75FF","#C4B56CFF","#E4CF5BFF","#FFEA46FF"),
   viridis_plasma = c("#0D0887FF","#47039FFF","#7301A8FF","#9C179EFF","#BD3786FF","#D8576BFF","#ED7953FF","#FA9E3BFF","#FDC926FF","#F0F921FF"),
@@ -57,3 +59,19 @@ ibis_colours <- list(
                 "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
                 "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C")
 )
+
+#' Print ibis options
+#'
+#' @description There are a number of hidden options that can be specified for ibis.iSDM.
+#' Currently supported are
+#'   'ibis.runparallel' : [`logical`] value on whether processing should be run in parallel
+#'   'ibis.nthread' : [`numeric`] value on how many cores should be used by default
+#'   'ibis.setupmessages' : [`logical`] value indicating whether message during object creation should be shown
+#' @return The output of \code{getOptions} for all ibis related variables
+#' @keywords misc
+#' @export
+ibis_options <- function(){
+  what <- grep('ibis',names(options()),value = TRUE)
+  items <- options()[what]
+  print(items)
+}
