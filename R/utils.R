@@ -14,7 +14,7 @@
 #' @param col A [`character`] indicating the text colour to be used. Supported are green / yellow / red
 #' @param ... Any additional outputs or words for display
 #' @keywords internal, utils
-#' @noRd
+#' @export
 myLog <- function(title = "[Processing]", col = 'green', ...) {
   assertthat::assert_that(col %in% c('green','yellow','red'))
   textwrap <- switch (col,

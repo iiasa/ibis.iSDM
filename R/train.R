@@ -388,7 +388,7 @@ methods::setMethod(
               }
               if(length(var_rw1)>0 & (any(miss %in% var_rw1))){
                 # Random walk where feasible and not already included
-                form <- paste(form, ifelse(length(var_lin) == 0,'',' + '), paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
+                form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
                                                                                  # 'scale.model = TRUE, ',
                                                                                  # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
                                                                                  # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
@@ -404,7 +404,7 @@ methods::setMethod(
             }
             # Random walk where feasible
             if(length(var_rw1)>0){
-              form <- paste(form, ifelse(length(var_lin) == 0,'',' + '), paste('f(INLA::inla.group(', var_rw1,'),',
+              form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', var_rw1,'),',
                                                                                # 'scale.model = TRUE,',
                                                                                # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
                                                                                # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
