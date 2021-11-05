@@ -3,9 +3,6 @@ NULL
 
 #' Use INLA as engine
 #'
-#' References
-#' https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
-#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
@@ -20,6 +17,7 @@ NULL
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
 #' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
 #' @param ... Other variables
+#' @references https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
 #' @name engine_inla
 NULL
 #' @rdname engine_inla
@@ -164,26 +162,25 @@ engine_inla <- function(x,
       # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
       calc_latent_spatial = function(self,type = 'spde', alpha = 2,
                                      priors = NULL,
+                                     polynames = NULL,
                                      ...){
         # Catch prior objects
         if(is.null(priors) || is.Waiver(priors)) priors <- NULL
 
         # For calculating iCAR process
-        if(type == 'iCAR'){
-          stop('This is not implemented as of now.')
+        if(type == 'car'){
           # convert mesh to sf object
           ns <- mesh_as_sf(self$data$mesh)
           # Create adjacency matrix with queen's case
-          nc.nb <- spdep::poly2nb(ns,queen = TRUE)
+          nc.nb <- spdep::poly2nb(ns, queen = TRUE)
           #Convert the adjacency matrix into a file in the INLA format
-          adjmat <- INLA::inla.graph2matrix(nc.nb)
+          adjmat <- spdep::nb2mat(nc.nb,style = "B")
+          adjmat <- as(adjmat, "dgTMatrix")
+          # adjmat <- INLA::inla.graph2matrix(nc.nb)
           # Save the adjaceny matrix as output
           self$data$latentspatial <- adjmat
-          self$data$s.index <- as.numeric(attr(nc.nb,'region.id'))
-          # Security checks
-          assertthat::assert_that(length( self$data$s.index ) == nrow(ns))
-        }
-        if(type=='spde'){
+          self$data$s.index <- as.numeric(attr(nc.nb,'spatial.field'))
+        } else if(type=='spde'){
           # Check that everything is correctly specified
           if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
 
@@ -217,22 +214,28 @@ engine_inla <- function(x,
             inherits(self$data$latentspatial,'inla.spde'),
             length(self$data$s.index$spatial.field) == self$data$mesh$n
           )
+        } else if(type == 'poly'){
+          # Save column names of polynomial transformed coordinates
+          assertthat::assert_that(!is.null(polynames))
+          self$data$latentspatial <- polynames
         }
         invisible()
       },
       # Get latent spatial equation bit
-      get_equation_latent_spatial = function(self,spatial_model){
-        if(spatial_model=='spde'){
+      get_equation_latent_spatial = function(self, method){
+        if(method == 'spde'){
           assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
                                   msg = 'Latent spatial has not been calculated.')
           return(
-            paste0('f(spatial.field, model = ',spatial_model,')')
+            paste0('f(spatial.field, model = ',method,')')
           )
-        } else if(spatial_model == 'iCAR'){
+        } else if(method == 'car'){
           assertthat::assert_that(inherits(self$data$latentspatial,'dgTMatrix'),
                                   msg = 'Neighborhood matrix has not been calculated.')
           return(
-            paste0('f(','spatial.index',', model = "besag", graph = ','adjmat',')')
+            # BESAG model or BYM model to specify
+            # BYM found to be largely similar to SPDE https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.3081
+            paste0('f(','spatial.field',', model = "bym", graph = ','adjmat',')')
           )
         }
       },
@@ -320,6 +323,7 @@ engine_inla <- function(x,
         self$set_data(paste0('stk_',as.character(model$type),'_',id), stk)
         invisible()
       },
+      # Main INLA training function ----
       # Setup computation function
       setup = function(self, model, ...){
         assertthat::assert_that(
@@ -429,7 +433,6 @@ engine_inla <- function(x,
                       )
         invisible()
       },
-      # Main INLA training function ----
       train = function(self, model, settings) {
         # Check that all inputs are there
         assertthat::assert_that(
@@ -468,8 +471,7 @@ engine_inla <- function(x,
             stack_data_resp <- INLA::inla.stack.data(stk_inference, spde = self$get_data('latentspatial'))
             stack_data_full <- INLA::inla.stack.data(stk_full, spde = self$get_data('latentspatial'))
         } else {
-            # FIXME: Make sure this work for other types in the future
-            spde <- self$get_data('latentspatial')
+            adjmat <- spde <- self$get_data('latentspatial')
             stack_data_resp <- INLA::inla.stack.data(stk_inference)
             stack_data_full <- INLA::inla.stack.data(stk_full)
         }
@@ -589,6 +591,16 @@ engine_inla <- function(x,
             )
           )
           prediction <- raster::mask(prediction, model$background) # Mask with background
+          # Align with background
+          temp <- raster::raster(
+            sp::SpatialPixelsDataFrame(
+              points = model$predictors[,c('x','y')],
+              data = model$predictors[,c('x','y')],
+              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+            )
+          )
+          prediction <- alignRasters(prediction,template = temp,method = 'bilinear',func = mean,cl = FALSE)
+
         } else {
           # No prediction to be conducted
           fit_pred <- NULL
@@ -613,6 +625,35 @@ engine_inla <- function(x,
                 "spde"     = self$get_data('latentspatial'),
                 "prediction" = prediction
                 ),
+              # Projection function
+              project = function(self, newdata, mode = 'coef', backtransf = NULL){
+                assertthat::assert_that('fit_best' %in% names(self$fits),
+                                        is.data.frame(newdata) || is.matrix(newdata),
+                                        mode %in% c('coef','sim','full'),
+                                        assertthat::has_name(newdata,c('x','y'))
+                )
+                # Try and guess backtransformation
+                if(is.null(backtransf)){
+                  fam <- self$get_data('fit_best')$.args$family
+                  backtransf <- ifelse(fam == 'poisson', exp, logistic)
+                }
+
+                if(mode == 'coef'){
+                  # We use the coefficient prediction
+                  out <- coef_prediction(mesh = self$get_data('mesh'),
+                                  mod = self,
+                                  type = 'mean',
+                                  backtransf = backtransf
+                                  )
+                } else if(mode == 'sim'){
+                  # Simulate from posterior. Not yet coded
+                  stop('Simulation from posterior not yet there.')
+                } else {
+                  stop('Full prediction not yet added.')
+                }
+                # Return result
+                return(out)
+              },
               # Partial response
               # FIXME: Create external function
               partial = function(self, x, variable, constant = NULL, variable_length = 100, plot = FALSE){

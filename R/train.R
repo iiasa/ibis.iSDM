@@ -123,6 +123,40 @@ methods::setMethod(
       rm(lu)
     }
 
+    # Calculate latent variables if set
+    if(!is.Waiver(x$latentfactors)){
+      # Get the method and check whether it is supported by the engine
+      m <- attr(x$get_latent(),'method')
+      if(x$get_engine()!="<INLA>" & m == 'spde'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      if(x$get_engine()=="<GDB>" & m == 'poly'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+      }
+      if(x$get_engine()=="<BART>" & m == 'car'){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        x$set_latent(type = '<Spatial>', 'poly')
+      }
+      # Calculate latent spatial terms (saved in engine data)
+      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        # If model is polynominal, get coordinates of first entry for names of transformation
+        if(m == 'poly' & x$get_engine()!="<GDB>"){
+          # And the full predictor container
+          coords_poly <- polynominal_transform(model$predictors[,c('x','y')], degree = 2)
+          model$predictors <- cbind(model$predictors, coords_poly)
+          model$predictors_names <- c(model$predictors_names, names(coords_poly))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = names(coords_poly), type = "numeric"))
+          # Overwrite since we include this now as predictor in all models
+          x$latentfactors <- new_waiver()
+        } else {
+          # Calculate the spatial model
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']] )
+        }
+      }
+    }
+
     # Get biodiversity data
     model[['biodiversity']] <- list()
     # Specify list of ids
@@ -222,21 +256,12 @@ methods::setMethod(
       if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
-       vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
-       spec_priors$rm( spec_priors$exists(vv) )
-       warning('Variable for set prior not found. Removed prior!')
+        vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+        spec_priors$rm( spec_priors$exists(vv) )
+        warning('Variable for set prior not found. Removed prior!')
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
-
-    # Calculate latent variables
-    if(!is.Waiver(x$latentfactors)){
-      # Calculate latent spatial factor (saved in engine data)
-      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-        # Calculate the spatial model
-        x$engine$calc_latent_spatial(type = attr(x$get_latent(),'spatial_model'), priors = model[['priors']] )
-      }
-    }
 
     # Set offset if existing
     # FIXME: Type-specific offset?
@@ -270,8 +295,8 @@ methods::setMethod(
       model$background <- suppressMessages(suppressWarnings( st_union(st_intersection(zones, model$background),by_feature = TRUE) ))
 
       model$predictors[which( is.na(
-            point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
-          )),model$predictors_names] <- NA # Fill with NA
+        point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
+      )),model$predictors_names] <- NA # Fill with NA
 
       # The same with offset if specified
       if(!is.Waiver(x$offset)){
@@ -280,7 +305,7 @@ methods::setMethod(
         )),3] <- NA # Fill with NA
       }
     }
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # ----------------- #
@@ -317,8 +342,8 @@ methods::setMethod(
                                paste(' + ',paste0('intercept_',
                                                   make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                   sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
-                               )
                         )
+          )
           # Check whether priors have been specified and if yes, use those
           if(!is.Waiver(model$priors)){
             # Loop through all provided INLA priors
@@ -347,9 +372,9 @@ methods::setMethod(
                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
                 form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
                                                  # 'scale.model = TRUE,',
-                                                 'hyper = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],') )
+                                                 'hyper = list(theta = list(prior = ',vt,', param = c(',model$priors$get(vn)[1],',',model$priors$get(vn)[2],')) )
                                                  )',collapse = ' + ')
-                               )
+                )
               }
             }
             # Add linear for those missed ones
@@ -358,14 +383,17 @@ methods::setMethod(
               if(any(miss %in% var_lin)){
                 # Add linear predictors without priors
                 form <- paste(form, ' + ',
-                              paste('f(', miss[which(miss%in%var_lin)],', model = \'linear\')', collapse = ' + ' )
+                              paste('f(', miss[which(miss%in%var_lin)],', model = \'linear\')', collapse = ' + ')
                 )
               }
               if(length(var_rw1)>0 & (any(miss %in% var_rw1))){
                 # Random walk where feasible and not already included
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
-                                               # 'scale.model = TRUE, ',
-                                               'model = \'rw1\')', collapse = ' + ' ) )
+                form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', miss[which(miss%in%var_rw1)],'),',
+                                                                                 # 'scale.model = TRUE, ',
+                                                                                 # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                                                                                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                                 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                                 'model = \'rw1\')', collapse = ' + ' ) )
               }
             }
           } else {
@@ -376,9 +404,12 @@ methods::setMethod(
             }
             # Random walk where feasible
             if(length(var_rw1)>0){
-              form <- paste(form, ' + ', paste('f(INLA::inla.group(', var_rw1,'),',
-                                               # 'scale.model = TRUE,',
-                                               'model = \'rw1\')', collapse = ' + ' ) )
+              form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', var_rw1,'),',
+                                                                               # 'scale.model = TRUE,',
+                                                                               # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                                                                               # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                               'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                               'model = \'rw1\')', collapse = ' + ' ) )
             }
           }
           form <- to_formula(form) # Convert to formula
@@ -387,9 +418,9 @@ methods::setMethod(
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
-                                          x$engine$get_equation_latent_spatial(
-                                            spatial_model = attr(x$get_latent(),'spatial_model'))
-                                          )
+                                                x$engine$get_equation_latent_spatial(
+                                                  method = attr(x$get_latent(),'method'))
+            )
             )
           }
         } else{
@@ -452,7 +483,7 @@ methods::setMethod(
               if(is.Waiver(settings$get('only_linear'))){
                 # And smooth effects
                 form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
-                                           collapse = ' + '
+                                                  collapse = ' + '
                 ))
               }
             }
@@ -460,11 +491,11 @@ methods::setMethod(
             # Add linear predictors
             form <- paste(form, paste0('bols(',model$biodiversity[[1]]$predictors_names,')',collapse = ' + '))
             if(settings$get('only_linear') == FALSE){
-            # And smooth effects
-            form <- paste(form, ' + ', paste0('bbs(',
-                                       model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
-                                       collapse = ' + '
-            ))
+              # And smooth effects
+              form <- paste(form, ' + ', paste0('bbs(',
+                                                model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == 'numeric')],', knots = 4)',
+                                                collapse = ' + '
+              ))
             }
           }
           # Convert to formula
@@ -504,7 +535,7 @@ methods::setMethod(
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
             replace = TRUE
           )
           abs$intercept <- 1 # Add dummy intercept
@@ -537,8 +568,8 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-4
-                           )
+                           weight = 1e-6
+          )
           df$w <- w # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
@@ -574,7 +605,7 @@ methods::setMethod(
               # And smooth effects
               if(is.Waiver(settings$get('only_linear'))){
                 form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 5)',
-                                           collapse = ' + '
+                                                  collapse = ' + '
                 ))
               }
             }
@@ -584,8 +615,8 @@ methods::setMethod(
             if(is.Waiver(settings$get('only_linear'))){
               # And smooth effects
               form <- paste(form, ' + ', paste0('bbs(',
-                                         model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
-                                         collapse = ' + '
+                                                model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 5)',
+                                                collapse = ' + '
               ))
             }
           }
@@ -669,7 +700,7 @@ methods::setMethod(
               if(is.Waiver(settings$get('only_linear'))){
                 # And smooth effects
                 form <- paste(form,' + ', paste0('bbs(', miss,', knots = 5)',
-                                           collapse = ' + '
+                                                 collapse = ' + '
                 ))
               }
             }
@@ -707,7 +738,7 @@ methods::setMethod(
           presence = model$biodiversity[[id]]$observations,
           bias = settings$get('bias_variable'),
           template = x$engine$get_data('template'),
-          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+          npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
           replace = TRUE
         )
         abs$intercept <- 1 # Add dummy intercept
@@ -759,7 +790,6 @@ methods::setMethod(
       # Output some warnings on things ignored
       if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
       if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
-      if(length( grep('Spatial',x$get_latent() ) ) > 0 ) warning('Option to provide spatial latent effects not yet implemented. Ignored...')
 
       # Single model type specified. Define formula
       if(length(types)==1){
@@ -767,7 +797,8 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[1]]$equation=='<Default>'){
           # Construct formula with all variables
-          form <- paste( 'observed ~ .')
+          form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/w',''), '~ ',
+                         paste(model$predictors_names,collapse = " + "))
           # Convert to formula
           form <- to_formula(form)
         } else {
@@ -793,7 +824,7 @@ methods::setMethod(
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
             replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
@@ -825,7 +856,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-6
+                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
           df$w <- w # Also add as column
 
@@ -843,7 +874,8 @@ methods::setMethod(
           # Make a loop over each each dataset that is not
           if(model$biodiversity[[i]]$equation=='<Default>'){
             # Construct formula with all variables
-            form <- paste( 'observed ~ .')
+            form <- paste( 'observed' ,ifelse(model$biodiversity[[i]]$family=='poisson', '/w',''), '~ ',
+                           paste(model$predictors_names,collapse = " + "))
             # Convert to formula
             form <- to_formula(form)
           } else {
@@ -905,7 +937,7 @@ methods::setMethod(
             presence = model$biodiversity[[id]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
-            npoints = ifelse(ncell(bg)<1000,ncell(bg),1000),
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
             replace = TRUE
           )
           abs$intercept <- 1 # Redundant for this engine
@@ -937,7 +969,7 @@ methods::setMethod(
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[id]]$observations[['observed']],
                            bg = bg,
-                           weight = 1e-6
+                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
           df$w <- w # Also add as column
 
@@ -1009,7 +1041,7 @@ methods::setMethod(
           presence = model$biodiversity[[1]]$observations,
           bias = settings$get('bias_variable'),
           template = bg,
-          npoints = ifelse(ncell(bg)<1000,ncell(bg),1000), # FIXME: Ideally query this from settings
+          npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
           replace = TRUE
         )
         abs$intercept <- 1 # Add dummy intercept
@@ -1042,7 +1074,7 @@ methods::setMethod(
         w <- ppm_weights(df = df,
                          pa = model$biodiversity[[1]]$observations[['observed']],
                          bg = bg,
-                         weight = 1e-4
+                         weight = 1e-6
         )
         df$w <- w # Also add as column
 

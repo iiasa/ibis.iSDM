@@ -490,6 +490,133 @@ predictor_derivate <- function(env, option, ...){
 
   return(new_env)
 }
+
+#' Homogenize NA values across a set of predictors.
+#'
+#' @description This method allows the homogenization of missing data across a set of environmental predictors.
+#' It is by default called when predictors are added to [´BiodiversityDistribution´] object. Only grid cells with NAs that contain
+#' values at some raster layers are homogenized.
+#' Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
+#' @param env A [`Raster`] object with the predictors
+#' @param fill A [`logical`] value indicating whether missing data are to be filled (Default: FALSE).
+#' @param fill_method A [`character`] of the method for filling gaps to be used (Default: 'ngb')
+#' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: FALSE)
+#' @returns A [`Raster`] object with the same number of layers as the input.
+#' @keywords utils
+#' @noRd
+predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
+  assertthat::assert_that(
+    is.Raster(env) || inherits(env, 'stars'),
+    is.logical(fill),
+    is.character(fill_method), fill_method %in% c('ngb'),
+    is.logical(return_na_cells)
+  )
+  # Workflow for raster layers
+  if(is.Raster(env)){
+    nl <- raster::nlayers(env)
+    # If the number of layers is 1, no need for homogenization
+    if(nl > 1){
+      # Calculate number of NA grid cells per stack
+      mask_na <- sum( is.na(env) )
+      # Remove grid cells that are equal to the number of layers (all values NA)
+      none_area <- mask_na == nl
+      none_area[none_area == 0 ] <- NA
+      mask_na <- raster::mask(mask_na,
+                              mask = none_area,inverse = TRUE)
+
+      # Should any fill be conducted?
+      if(fill){
+        stop('TBD')
+      } else {
+        # Otherwise just homogenize NA values across predictors
+        if(cellStats(mask_na,'max')>0){
+          mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
+          env <- raster::mask(env, mask = mask_all)
+        }
+      }
+      # Should NA coordinates of cells where 1 or more predictor is NA be returned?
+      # FIXME: One could directly return a data.frame with the predictor names to allow easier lookup.
+      if(return_na_cells){
+        vals <- which((mask_na>0)[])
+        env <- list(cells_na = vals, env = env)
+      }
+      rm(mask_na, none_area) # Cleanup
+    }
+  } else if(inherits(env, 'stars')){
+    stop('Not implemented yet.')
+  }
+  # Security checks
+  assertthat::assert_that(
+    is.Raster(env) || is.list(env) || inherits(env, 'stars')
+  )
+  # Return the result
+  return(env)
+}
+
+#' Create pseudo absence points over a raster dataset
+#'
+#' @param env An environmental dataset either in [`data.frame`] or [`raster`] format
+#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records
+#' @param bias An optional weights raster to control placement of pseudo-absences further
+#' @param template If template is not null then env needs to be a [`raster`] dataset
+#' @param npoints A [`numeric`] number of pseudo-absence points to create
+#' @param replace Sample with replacement? (Default: False)
+#' @keywords utils
+#' @returns A [`data.frame`] containing the newly created pseudo absence points
+create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
+                                 npoints = 1000, replace = FALSE){
+  assertthat::assert_that(
+    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),
+    is.data.frame(presence),
+    (hasName(presence,'x') && hasName(presence,'y')) || inherits(presence, 'sf'),
+    is.null(bias) || is.Waiver(bias) || is.character(bias),
+    is.numeric(npoints),
+    is.null(template) || inherits(template,'Raster')
+  )
+  if(is.null(template)) {
+    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file')
+  }
+  # If bias is set, check that it is in env
+  if(is.character(bias)){
+    assertthat::assert_that(bias %in% names(env))
+    nb <- (env[[bias]] - min(env[[bias]],na.rm = TRUE)) / ( max(env[[bias]],na.rm = TRUE) - min(env[[bias]],na.rm = TRUE) )
+  } else { nb = NULL }
+  if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
+
+  # Add coordinates if still sf object
+  if(inherits(presence,'sf')) { presence$x <- st_coordinates(presence$geometry)[,1];presence$y <- st_coordinates(presence$geometry)[,2] }
+  # Rasterize the presence estimates
+  bg1 <- raster::rasterize(presence[,c('x','y')], template, fun = 'count', background = 0)
+  bg1 <- raster::mask(bg1, template)
+
+  assertthat::assert_that(
+    is.finite(raster::cellStats(bg1,'max',na.rm = T)[1])
+  )
+  # Generate pseudo absence data
+  # Now sample from all cells not occupied
+  if(is.null(nb)){
+    prob_bias <- nb[which(bg1[]==0)]
+    if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
+    abs <- sample(which(bg1[]==0), size = npoints, replace = replace, prob = prob_bias)
+  } else {
+    abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
+  }
+
+  # Now get absence environmental data
+  abs <- get_ngbvalue(
+    coords = raster::xyFromCell(bg1, abs),
+    env = env,
+    field_space = c('x','y'),
+    longlat = raster::isLonLat(template)
+  )
+
+  # Remove NA data in case points were sampled over non-valid regions
+  abs <- subset(abs, complete.cases(abs))
+  assertthat::assert_that( all( names(abs) %in% names(env) ) )
+
+  return(abs)
+}
+
 #' Create new raster stack from a given data.frame
 #'
 #' @param post A data.frame
@@ -530,6 +657,43 @@ fill_rasters <- function(post, background){
     nlayers(out) == ncol(post)
   )
   return(out)
+}
+
+#' Create a polynomial transformation from coordinates
+#'
+#' @description This function transforms the coordinates of a supplied file through a polynomial transform.
+#' By default it applies weights and a QR decomposition for numerical stability.
+#' @param coords A [`data.frame`], [`matrix`] or [`sf`] object with coordinates (2 columns named x-y)
+#' @param degree The number of degrees used for polynominal transformation (Default: 2)
+#' @param weights Set by default to the inverse of the number of coordinates.
+#' @returns A data.frame with transformed coordinates.
+#' @keywords utils
+#' @references Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
+polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
+  assertthat::assert_that(
+    inherits(coords, 'data.frame') || inherits(coords, 'matrix') || inherits(coords, 'sf'),
+    is.numeric(degree),
+    !is.null(weights) && length(weights) == nrow(coords)
+  )
+  # If spatial get coordinates
+  if(inherits(coords, 'sf')){
+    coords <- sf::st_coordinates(coords)
+  }
+  # Polynomial transform
+  a0 <- poly(x = as.matrix( coords ), degree = degree, simple = TRUE)
+  # Standardize colnames
+  poly.names <- colnames(a0) # Column names for later
+  poly.names <- paste0("spatialtrend_", gsub("\\.","_",poly.names) )
+
+  # Standardize the weights
+  weights <- weights/sum(weights)
+  a0 <- cbind(weights, a0) # Add to polynominal transform
+  a0 <- base::qr.Q(base::qr(a0)) # QR decomposition for better numerical stability
+  a0 <- as.data.frame(a0[, -1])/sqrt(weights) # Weighting
+
+  # Rename
+  colnames(a0) <- poly.names
+  return(a0)
 }
 
 #' Clean up raster layer from disk

@@ -175,12 +175,13 @@ engine_stan <- function(x,
         # Priors
 
         # Offsets
+        off <- NULL
         if('offset' %in% names(model$biodiversity[[1]]) ){
           # Add offset to full prediction and load vector
           stop("Needs work")
           off <- model$biodiversity[[1]]$offset[, names(model$offset)[3] ]
           # Also add to full
-        } else { off <- NULL }
+        }
 
         # FIXME: Pass parameters to function as appropriate
         # https://stackoverflow.com/questions/9129673/passing-list-of-named-parameters-to-function
@@ -191,9 +192,9 @@ engine_stan <- function(x,
           data = data,  # The data for estimation
           weights = w,  # The weights
           family = fam, # The family
-          offset = off, # any set offset
+          # offset = off, # any set offset
           # Priors
-          prior = rstanarm::hs(), # Horshoe priors
+          prior = rstanarm::hs(), # Horseshoe priors
           prior_intercept = rstanarm::normal(0, 2.5),
           prior_aux = rstanarm::exponential(1), # Half-cauchy prior
           # Sampling options

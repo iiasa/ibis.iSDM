@@ -6,6 +6,7 @@
 \alias{plot.BiodiversityDatasetCollection}
 \alias{plot.PredictorDataset}
 \alias{plot.Engine}
+\alias{plot.BiodiversityScenario}
 \title{Plot wrappers}
 \usage{
 \method{plot}{DistributionModel}(x, ...)
@@ -15,6 +16,8 @@
 \method{plot}{PredictorDataset}(x, ...)
 
 \method{plot}{Engine}(x, ...)
+
+\method{plot}{BiodiversityScenario}(x, ...)
 }
 \arguments{
 \item{x}{Any object.}

@@ -41,39 +41,39 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
   function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(poipo, "Spatial") || inherits(poipo,"sf") || inherits(poipo,'data.frame') || inherits(poipo,'tibble'),
-                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo,field_occurrence),
-                            inherits(formula,'formula') || is.null(formula) || is.character(formula),
+                            inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo, field_occurrence),
+                            inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family)
                             )
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
-                            msg = "More 2 unique values. Specify a column ")
+                            msg = "More 2 unique values. Specify a column.")
 
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding poipo dataset...')
+    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipo dataset...")
 
     # Get only those records that fall onto the background data
-    suppressMessages( poipo <- point_in_polygon(poly = x$background,points = poipo) )
+    suppressMessages( poipo <- point_in_polygon(poly = x$background, points = poipo) )
 
     # Assess whether poipo data already exists in the distribution object
     # FIXME: Obsolete since we now add by id
-    # if(!is.Waiver( x$biodiversity$get_data_object('poipo') )) message('Overwriting existing poipo data.')
+    # if(!is.Waiver( x$biodiversity$get_data_object("poipo") )) message("Overwriting existing poipo data.")
 
     # Convert formula if necessary
-    formula = to_formula(formula)
+    formula <- to_formula(formula)
 
     # Create a new id for this dataset
-    id = new_id()
+    id <- new_id()
 
     # Finally set the data to the BiodiversityDistribution object
     x$set_biodiversity(
       id,
       bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), 'Species: ',name),
+              name = ifelse(is.null(name), "Species: ",name),
               id = id,
               equation = formula,
               family = family,
-              type = 'poipo',
+              type = "poipo",
               field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipo,field_occurrence)
       )
@@ -109,7 +109,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipa",
   signature = methods::signature("x", "poipa"),
-  function(x, poipa, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'binomial', ...) standardGeneric("add_biodiversity_poipa"))
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", ...) standardGeneric("add_biodiversity_poipa"))
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
@@ -117,18 +117,18 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
-  function(x, poipa, name = NULL, field_occurrence = 'Observed', formula = NULL,family = 'binomial',  ... ) {
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",  ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(poipa,'Spatial') || inherits(poipa,'sf') || inherits(poipa,'data.frame') || inherits(poipa,'tibble'),
-                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa,field_occurrence),
-                            inherits(formula,'formula') || is.null(formula) || is.character(formula),
+                            inherits(poipa, "Spatial") || inherits(poipa, "sf") || inherits(poipa, "data.frame") || inherits(poipa, "tibble"),
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa, field_occurrence),
+                            inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family)
     )
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
                             msg = "Presence-Absence requires at exactly 2 unique values.")
 
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding poipa dataset...')
+    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipa dataset...")
 
     # Get only those records that fall onto the background data
     suppressMessages( poipa <- point_in_polygon(poly = x$background,points = poipa) )
@@ -136,13 +136,13 @@ methods::setMethod(
     # Record presence absence to 0 and 1
     if(is.character(poipa[[field_occurrence]]) ){
       # TODO:
-      stop('Guessing conversion to be coded')
+      stop("Guessing conversion to be coded")
     }
     poipa[[field_occurrence]] <- as.numeric(poipa[[field_occurrence]]) # Convert to numeric for ocassional factor formatting
 
     # Assess whether poipo data already exists in the distribution object
     # FIXME: Obsolete since we now add by id
-    # if(!is.Waiver( x$biodiversity$get_data_object('poipa') )) message('Overwriting existing poipa data.')
+    # if(!is.Waiver( x$biodiversity$get_data_object("poipa") )) message("Overwriting existing poipa data.")
 
     # Convert formula if necessary
     formula = to_formula(formula)
@@ -154,11 +154,11 @@ methods::setMethod(
     x$set_biodiversity(
       id,
       bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), 'Species: ',name),
+              name = ifelse(is.null(name), "Species: ",name),
               id = id,
               equation = formula,
               family = family,
-              type = 'poipa',
+              type = "poipa",
               field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipa,field_occurrence)
       )
@@ -177,7 +177,7 @@ methods::setMethod(
 #' @param family A [`character`] stating the family to be used (Default: Poisson)
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: FALSE)
 #' @param simulate_points A [`numeric`] number of points to be created by simulation
-#' @param simulate_weights A ['raster'] layer describing an eventual preference for simulation (Default: NULL)
+#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: NULL)
 #' @param ... Other parameters passed down
 #'
 #' @details Say something about presence only biodiversity records in \pkg{ibis} and
@@ -199,7 +199,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',
+  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
@@ -210,35 +210,35 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = 'Observed', formula = NULL, family = 'poisson',
+  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            inherits(polpo,'Spatial') || inherits(polpo,'sf') || inherits(polpo,'data.frame') || inherits(polpo,'tibble'),
-                            assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo,field_occurrence),
-                            inherits(formula,'formula') || is.null(formula) || is.character(formula),
+                            inherits(polpo, "Spatial") || inherits(polpo, "sf") || inherits(polpo, "data.frame") || inherits(polpo, "tibble"),
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo, field_occurrence),
+                            inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
-                            is.null(simulate_weights) || inherits(simulate_weights, 'Raster')
+                            is.null(simulate_weights) || inherits(simulate_weights, "Raster")
     )
     # Check type and ensure that is a polygon
-    assertthat::assert_that(all( unique( st_geometry_type(polpo) ) %in% c('POLYGON','MULTIPOLYGON') ),
-                            msg = 'This method works for spatial data of type polygon only.')
+    assertthat::assert_that(all( unique( st_geometry_type(polpo) ) %in% c("POLYGON","MULTIPOLYGON") ),
+                            msg = "This method works for spatial data of type polygon only.")
 
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding polpo dataset...')
+    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpo dataset...")
 
     # Simulate presence absence points rather than using the range directly
     if(simulate){
-      if(family == 'poisson') warning('Simulated points created. Binomial distribution is advised.')
+      if(family == "poisson") warning("Simulated points created. Binomial distribution is advised.")
 
       if(!is.null(simulate_weights)){
         # Crop to target range
         simulate_weights <- raster::crop(simulate_weights, polpo)
         # Normalize the weight layer if is not a factorized, else set everything to 1
-        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights,'norm') else simulate_weights[simulate_weights>0] <- 1
+        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights, "norm") else simulate_weights[simulate_weights>0] <- 1
 
         # Weighted sampling on background raster, the greater the value, the more likely sampled points
         ptscell <- sample(which(!is.na(simulate_weights[])),
@@ -246,28 +246,28 @@ methods::setMethod(
                           prob = simulate_weights[which(!is.na(simulate_weights[]))],
                           replace = TRUE)
         poipa_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
-        poipa_on <- sf::st_as_sf(poipa_on, coords = c('x','y'),crs = sf::st_crs(simulate_weights))
+        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
 
       } else {
       # Simply sample presence points within at random
       suppressMessages(
           poipa_on <- sf::st_as_sf(
-            sf::st_sample(x = polpo, size = simulate_points, type = 'random')
+            sf::st_sample(x = polpo, size = simulate_points, type = "random")
           )
         )
       }
 
-      names(poipa_on) <- 'geometry'; st_geometry(poipa_on) <- 'geometry'
+      names(poipa_on) <- "geometry"; st_geometry(poipa_on) <- "geometry"
       poipa_on[[field_occurrence]] <- 1
       poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
       # Get absence data
       # FIXME: Quick fix. Ideally cookie cut the range out instead.
       suppressMessages(
         poipa_off <- sf::st_as_sf(
-          sf::st_sample(x = x$background, size = simulate_points*2,type = 'random')
+          sf::st_sample(x = x$background, size = simulate_points*2, type = "random")
         )
       )
-      names(poipa_off) <- 'geometry'; st_geometry(poipa_off) <- 'geometry'
+      names(poipa_off) <- "geometry"; st_geometry(poipa_off) <- "geometry"
       # Remove points on the range
       suppressMessages(
         wi <- sf::st_within(poipa_off, polpo, sparse = FALSE)
@@ -279,13 +279,9 @@ methods::setMethod(
       poipa <- rbind(poipa_on,poipa_off)
 
       # Add simulated poipa object instead
-      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, '_simulated'),
+      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
                              field_occurrence = field_occurrence, formula = formula, family = family, ... )
     } else {
-      # Assess whether poipo data already exists in the distribution object
-      # FIXME: Obsolete since we now add by id
-      # if(!is.Waiver( x$biodiversity$get_data_object('polpo') )) message('Overwriting existing polpo data.')
-
       # Convert formula if necessary
       formula = to_formula(formula)
 
@@ -296,11 +292,11 @@ methods::setMethod(
       x$set_biodiversity(
         id,
         bdproto(NULL, BiodiversityDataset,
-                name = ifelse(is.null(name), 'Species: ',name),
+                name = ifelse(is.null(name), "Species: ", name),
                 id = id,
                 equation = formula,
                 family = family,
-                type = 'polpo',
+                type = "polpo",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo,field_occurrence)
         )

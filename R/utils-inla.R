@@ -241,7 +241,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
                  longlat = isLonLat(mesh$crs),
                  field_space = c('x','y'))
   }
-  temp = rasterFromXYZ(coords)
+  temp = rasterFromXYZ(coords,crs = projection(mesh$crs))
 
   # remake the A matrix for prediction
   Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
