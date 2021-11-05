@@ -48,8 +48,11 @@ engine_stan <- function(x,
     is.null(cores) || is.numeric(cores),
     is.character(init) || is.list(init),
     is.null(control) || is.list(control),
+    is.character(algorithm),
     msg = 'Input parameters wrongly specified!'
   )
+  # Match algorithm
+  algorithm <- match.arg(algorithm, c("sampling", "optimizing", "meanfield", "fullrank"),several.ok = FALSE)
 
   if(is.null(cores)) cores <- getOption('ibis.nthread')
 
@@ -168,44 +171,44 @@ engine_stan <- function(x,
         full[is.na(full)] <- 0 # For Prediction set all NA to 0. Mask later
         # full <- subset(full, complete.cases(full))
 
+        # Make parameter list
+        params <- list()
+
         # Weights
-        w <- model$biodiversity[[1]]$expect
-        if(model$biodiversity[[1]]$family=='binomial') w <- NULL # Set weights to 0 when binomial
+        if(model$biodiversity[[1]]$family=='poisson'){
+          params$w <- model$biodiversity[[1]]$expect
+        }
 
         # Priors
+        params$prior <- rstanarm::hs() # Horseshoe priors
+        params$prior_intercept <- rstanarm::normal(0, 2.5)
+        params$prior_aux <- rstanarm::exponential(1) # Half-cauchy prior
+
+        params$adapt_delta <- 0.95
+        params$seed <- settings$get('seed')
 
         # Offsets
-        off <- NULL
         if('offset' %in% names(model$biodiversity[[1]]) ){
           # Add offset to full prediction and load vector
-          stop("Needs work")
-          off <- model$biodiversity[[1]]$offset[, names(model$offset)[3] ]
+          params$off <- model$biodiversity[[1]]$offset[, names(model$offset)[3] ]
           # Also add to full
         }
 
-        # FIXME: Pass parameters to function as appropriate
-        # https://stackoverflow.com/questions/9129673/passing-list-of-named-parameters-to-function
-
         # Model estimation
-        fit_stan <- rstanarm::stan_glm(
-          equation, # The equation
-          data = data,  # The data for estimation
-          weights = w,  # The weights
-          family = fam, # The family
-          # offset = off, # any set offset
-          # Priors
-          prior = rstanarm::hs(), # Horseshoe priors
-          prior_intercept = rstanarm::normal(0, 2.5),
-          prior_aux = rstanarm::exponential(1), # Half-cauchy prior
-          # Sampling options
-          algorithm = settings$get('algorithm'),
-          adapt_delta = 0.95,
-          seed = settings$get('seed'),
-          chains = self$stan_param$chains,
-          iter = self$stan_param$iter,
-          cores = self$stan_param$cores,
-          warmup = self$stan_param$warmup
+        params$algorithm <- settings$get('algorithm')
+        if(settings$get('algorithm')=="sampling"){
+           params$chains = self$stan_param$chains
+           params$iter = self$stan_param$iter
+           params$cores = self$stan_param$cores
+           params$warmup = self$stan_param$warmup
+
+        }
+        # ---- #
+        # Fitting
+        fit_stan <- do.call( rstanarm::stan_glm, c(
+          list(formula = equation, data = data, family = fam), params )
         )
+
         # Prediction
         if(!settings$get('inference_only')){
           # Messager
@@ -218,14 +221,16 @@ engine_stan <- function(x,
               full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
           }
-
+          params <- list()
           # Do the prediction by sampling from the posterior
+          if('offset' %in% names(model$biodiversity[[1]]) ){
+            params$off <- model$offset[, 3]
+          }
+
           suppressWarnings(
-            post_stan <- rstanarm::posterior_predict(
-              object = fit_stan,
-              newdata = full,
-              offset = off, # FIXME: Needs adapting
-              draws = 1000
+            post_stan <- do.call( rstanarm::posterior_predict, c(
+              list(object = fit_stan, newdata = full,
+                   draws = ifelse(self$stan_param$iter >1000,1000,self$stan_param$iter)), params )
             )
           )
           # Summarize the posterior
