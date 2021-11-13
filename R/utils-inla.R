@@ -331,6 +331,9 @@ post_prediction <- function(mod, nsamples = 100,
   preds_types <- mod$model$predictors_types
   ofs <- mod$model$offset
 
+  # See:
+  # https://groups.google.com/g/r-inla-discussion-group/c/TjRwP6tB0nk/m/FSD39whVBgAJ
+  # https://groups.google.com/g/r-inla-discussion-group/c/Lw2fI-u-EvU/m/rB_-gwWAAgAJ
   # --- #
   # Simulate from approximated posterior
   samples <- INLA::inla.posterior.sample(n = nsamples,

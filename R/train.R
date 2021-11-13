@@ -213,7 +213,7 @@ methods::setMethod(
 
       # Check whether predictors should be refined and do so
       if(settings$get('rm_corPred') && model[['predictors_names']] != 'dummy'){
-        message('Removing highly correlated variables...')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Removing highly correlated variables...')
         test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
 
         # Ignore variables for which we have priors

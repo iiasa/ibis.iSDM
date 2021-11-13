@@ -434,7 +434,6 @@ methods::setMethod(
 
     # Standardization and scaling
     if('none' %notin% transform){
-      stop('Transformation for stars not yet implemented!') #TODO
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }

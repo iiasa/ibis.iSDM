@@ -43,7 +43,7 @@ Suggests:
     rstan
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Config/testthat/edition: 3
 Collate: 
     'utils.R'
@@ -52,11 +52,12 @@ Collate:
     'bdproto-biodiversitydataset.R'
     'bdproto-biodiversitydistribution.R'
     'add_biodiversity.R'
+    'bdproto-biodiversityscenario.R'
+    'add_constraint.R'
     'add_latent.R'
     'bdproto-log.R'
     'add_log.R'
     'add_offset.R'
-    'bdproto-biodiversityscenario.R'
     'bdproto-predictors.R'
     'add_predictors.R'
     'bdproto-priorlist.R'
@@ -91,5 +92,6 @@ Collate:
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
+    'validate.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

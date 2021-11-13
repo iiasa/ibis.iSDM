@@ -4,7 +4,7 @@
 \alias{project}
 \title{Project a fitted model to new covariates}
 \usage{
-\S4method{mod}{BiodiversityScenario}(mod)
+\S4method{project}{BiodiversityScenario}(mod)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors}
