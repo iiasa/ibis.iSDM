@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set priors to an existing distribution object — add_priors • ibis.iSDM</title>
+<title>Validation of distribution object — validate • ibis.iSDM</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Set priors to an existing distribution object — add_priors" />
-<meta property="og:description" content="Set priors to an existing distribution object" />
+<meta property="og:title" content="Validation of distribution object — validate" />
+<meta property="og:description" content="This function conducts a comprehensive model evaluation based on
+either on the fitted point data or any supplied independent.
+Currently only supporting point. For validation of integrated models more work is needed." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:creator" content="@Martin_Ecology" />
 <meta name="twitter:site" content="@IIASAVienna" />
@@ -135,56 +137,60 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set priors to an existing distribution object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/add_priors.R'><code>R/add_priors.R</code></a></small>
-    <div class="hidden name"><code>add_priors.Rd</code></div>
+    <h1>Validation of distribution object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/validate.R'><code>R/validate.R</code></a></small>
+    <div class="hidden name"><code>validate.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Set priors to an existing distribution object</p>
+    <p>This function conducts a comprehensive model evaluation based on
+either on the fitted point data or any supplied independent.
+<strong>Currently only supporting point. For validation of integrated models more work is needed.</strong></p>
     </div>
 
-    <pre class="usage"><span class='fu'>add_priors</span><span class='op'>(</span><span class='va'>x</span>, priors <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
-
-<span class='co'># S4 method for BiodiversityDistribution</span>
-<span class='fu'>add_priors</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='co'># S4 method for ANY, character, sf, character, character</span>
+<span class='fu'>validate</span><span class='op'>(</span><span class='va'>mod</span>, <span class='va'>method</span>, <span class='va'>point</span>, <span class='va'>layer</span>, <span class='va'>point_column</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p><code><a href='distribution.html'>distribution()</a></code> (i.e. <code><a href='BiodiversityDistribution-class.html'>BiodiversityDistribution</a></code>) object.</p></td>
+      <th>mod</th>
+      <td><p>A fitted <code><a href='BiodiversityScenario-class.html'>BiodiversityScenario</a></code> object with set predictors</p></td>
     </tr>
     <tr>
-      <th>priors</th>
-      <td><p>A <code><a href='PriorList-class.html'>PriorList</a></code> object containing multiple priors</p></td>
+      <th>method</th>
+      <td><p>Should the validation be conducted on continuous metrics or thresholded? See Details.</p></td>
+    </tr>
+    <tr>
+      <th>layer</th>
+      <td><p>In case multiple layers exist, which one to use? Default is 'mean'</p></td>
+    </tr>
+    <tr>
+      <th>point</th>
+      <td><p>A <code>sf</code> object with type POINT or MULTIPOINT</p></td>
+    </tr>
+    <tr>
+      <th>point_column</th>
+      <td><p>A <code><a href='https://rdrr.io/r/base/character.html'>character</a></code> vector with the name of the column containing the independent observations.
+Default set to 'observed'</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Other parameters passed down</p></td>
+      <td><p>passed on parameters</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Return a tidy <code>tibble</code> with validation results. See details for further information.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>TBD</p>
-    <h2 class="hasAnchor" id="notes"><a class="anchor" href="#notes"></a>Notes</h2>
-
-    
-
-
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    
+    <p>Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058</p>
 
-
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
-<span class='r-in'> <span class='va'>TBD</span></span>
-<span class='r-in'><span class='op'>}</span></span>
-</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

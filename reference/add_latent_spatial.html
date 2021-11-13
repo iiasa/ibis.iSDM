@@ -177,18 +177,23 @@ to a model can account for spatial dependence in response or covariates</p>
     <p>There are several different options which depend on the engine used. In case a
 unsupported method for an engine is chosen this is modified to the next similar method
 Available are:
-"spde" - stochastic partial differential equation (SPDE) for <code>INLA-engine</code>
-"car" - conditional autocorrelative errors (CAR) for <code>INLA-engine</code>
-"poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.</p>
+"spde" - stochastic partial differential equation (SPDE) for <code>INLA-engine</code>. SPDE effects aim at
+capturing the variation of the response variable in space, once all of the covariates are accounted for.
+Examining the spatial distribution of the spatial error can reveal which covariates might be missing.
+For example, if elevation is positively correlated with the response variable, but is not included in the model,
+we could see a higher posterior mean in areas with higher elevation.</p>
+<p>"car" - conditional autocorrelative errors (CAR) for <code>INLA-engine</code>
+"poly"- spatial trend correction by adding spatial coordinates as polynominals in the model. Available for all Engines.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Fletcher, R., &amp; Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.</p>
+<p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
- <span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>background</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>add_latent_spatial</span><span class='op'>(</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'> <span class='fu'><a href='distribution.html'>distribution</a></span><span class='op'>(</span><span class='va'>background</span><span class='op'>)</span> <span class='op'><a href='%>%.html'>%&gt;%</a></span> <span class='fu'>add_latent_spatial</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

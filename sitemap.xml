@@ -58,6 +58,15 @@
     <loc>https://iiasa.github.io/ibis.iSDM//reference/add_biodiversity_polpo.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_constrain.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_constrain_connectivity.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_constrain_dispersal.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/add_latent_spatial.html</loc>
   </url>
   <url>
@@ -212,6 +221,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/train.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/validate.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/writeGeoTiff.html</loc>
