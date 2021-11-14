@@ -452,6 +452,93 @@ methods::setMethod(
       out <- x$engine$train(model, settings)
 
       # ----------------------------------------------------------- #
+      #### INLABRU Engine ####
+    } else if( inherits(x$engine,'INLABRU-Engine') ){
+
+      # Process per supplied dataset
+      for(id in ids) {
+
+        # Default equation found (e.g. no separate specification of effects)
+        if(model$biodiversity[[id]]$equation=='<Default>'){
+
+          # Go through each variable and build formula for likelihood
+          form <- formula(paste("observed ~ ", "Intercept +",
+                               ifelse(length(ids)>1,"","-1"), collapse = " "))
+          for(i in 1:nrow(model$predictors_types)){
+            # For numeric
+            if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
+              # Built component
+              if(settings$get('only_linear') == FALSE){
+                var_rw1 <- length( unique( model$biodiversity[[id]]$predictors[,i] ))
+                if(var_rw1 > 2) m <- 'rw1' else m <- 'linear'
+              } else { m <- 'linear' }
+
+              # Specify priors if set
+              if(!is.Waiver(model$priors)){
+                # Loop through all provided INLA priors
+                supplied_priors <- model$priors$ids()
+                # TODO:
+                p <- ""
+              } else {
+                if(m == "rw1"){
+                  # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                  # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                  p <- 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
+                }
+              }
+              form <- update.formula(form,
+                            paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
+                                                     ', model = "',m,'")'), collapse = " ")
+                            )
+            } else if( model$predictors_types$type[i] == "factor"){
+              # factor_full uses the full factor. fact_contrast uses the first level as reference
+              # Built component
+              form <- update(form,
+                            paste(c(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
+              )
+            }
+          }
+
+          # Add offset if specified
+          # if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          # if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+          #   # Update with spatial term
+          #   form <- update.formula(form, paste0(" ~ . + ",
+          #                                       x$engine$get_equation_latent_spatial(
+          #                                         method = attr(x$get_latent(),'method'))
+          #   )
+          #   )
+          # }
+        } else{
+          # If custom supplied formula, check that variable names match supplied predictors
+          # TODO: This needs to be formatted to allow custom families
+          assertthat::assert_that(
+            all( all.vars(form) %in% c('observed','intercept',
+                                       paste0('intercept_',sapply( model$biodiversity, function(x) x$type )),
+                                       model$biodiversity[[id]]$predictors_names) )
+          )
+          # FIXME: check that
+          # TODO: Remove elements from predictors that are not used in the formula
+          form <- to_formula( model$biodiversity[[id]]$equation )
+        }
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- form
+        rm(form)
+
+        # For each type include expected data
+        # expectation vector (area for integration points/nodes and 0 for presences)
+        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
+        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
+      }
+
+      # Run the engine setup script
+      # FIXME: Do some checks on whether an observation falls into the mesh?
+      x$engine$setup(model)
+
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model, settings)
+
+      # ----------------------------------------------------------- #
       #### GDB Engine ####
     } else if( inherits(x$engine,"GDB-Engine") ){
       # GDB does not support joint likelihood models
