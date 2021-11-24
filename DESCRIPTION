@@ -38,6 +38,7 @@ Suggests:
     mboost,
     dbarts,
     modEvA,
+    xgboost,
     progress,
     ellipsis,
     rstan
@@ -76,6 +77,7 @@ Collate:
     'utils-inla.R'
     'engine_inla.R'
     'engine_stan.R'
+    'engine_xgboost.R'
     'ensemble.R'
     'misc.R'
     'partial.R'

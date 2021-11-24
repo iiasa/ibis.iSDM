@@ -66,6 +66,15 @@ DistributionModel <- bdproto(
         '\n  \033[2mStrongest effects:\033[22m',
         '\n     ', name_atomic(vi$names)
       ))
+    } else if( inherits(self, 'XGBOOST-Model') ) {
+      vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest effects:\033[22m',
+        '\n     ', name_atomic(vi$Feature)
+      ))
+
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -112,6 +121,9 @@ DistributionModel <- bdproto(
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
+    } else if(inherits(self, "XGBOOST-Model")){
+      xgboost::xgb.importance(model = self$get_data('fit_best'))
+      # xgboost::xgb.ggplot.importance(o)
     }
   },
   # Dummy partial response calculation. To be overwritten per engine

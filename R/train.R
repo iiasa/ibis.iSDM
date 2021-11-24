@@ -785,6 +785,72 @@ methods::setMethod(
       if(length(ids)==2 && exists('new')) out <- out$set_data('prediction_first', new)
 
       # ----------------------------------------------------------- #
+      #### XGBoost Engine ####
+    } else if( inherits(x$engine,"XGBOOST-Engine") ){
+      # Create XGBboost regression and classification
+
+      # Process per supplied dataset and in order of supplied data
+      for(id in ids) {
+
+        # Default equation found
+        if(model$biodiversity[[id]]$equation=='<Default>'){
+          # XGboost does not explicitly work formulas, thus all supplied objects are assumed to be part
+          form <- new_waiver()
+          # Priors are added in the fitted distribution object through the model object
+          # Add offset as attributes to variables if specified
+          # FIXME: To be implemented
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+
+        } else{
+          # If custom supplied formula, check that variable names match supplied predictors
+          stop("Custom formulas not yet implemented")
+          # TODO: Remove elements from predictors that are not used in the formula
+          form <- new_waiver()
+        }
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- form
+        rm(form)
+
+        # Remove those not part of the modelling
+        model2 <- model
+        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
+
+        # Now train the model and create a predicted distribution model
+        out <- x$engine$train(model2, settings)
+        # Add Prediction of model to next object if multiple are supplied
+        if(length(ids)>1 && id != ids[length(ids)]){
+          # Add to predictors frame
+          new <- out$get_data("prediction")
+          names(new) <- paste0(model$biodiversity[[id]]$type, "_", "mean")
+
+          # Now for each biodiversity dataset and the overall predictors
+          # extract and add as variable
+          for(k in names(model$biodiversity)){
+            env <- as.data.frame(
+              raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+            names(env) <- paste0(model$biodiversity[[k]]$type, "_", "mean")
+            # Add
+            model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
+            model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
+                                                          names(env) )
+            model$biodiversity[[k]]$predictors_types <- rbind(
+              model$biodiversity[[k]]$predictors_types,
+              data.frame(predictors = names(env), type = c('numeric')))
+          }
+          # Add to overall predictors
+          model$predictors <- cbind(model$predictors, as.data.frame(new) )
+          model$predictors_names <- c(model$predictors_names, names(new))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = names(new), type = c('numeric')))
+        }
+
+      }
+
+
+      # ----------------------------------------------------------- #
       #### BART Engine ####
     } else if( inherits(x$engine,"BART-Engine") ){
       # Output some warnings on things ignored
