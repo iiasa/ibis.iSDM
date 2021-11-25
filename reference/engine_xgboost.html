@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Identifier — new_id • ibis.iSDM</title>
+<title>Engine for use of extreme gradient boosting (XGBoost) — engine_xgboost • ibis.iSDM</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,12 @@
 
 
 
-<meta property="og:title" content="Identifier — new_id" />
-<meta property="og:description" content="Generate a new unique identifier." />
+<meta property="og:title" content="Engine for use of extreme gradient boosting (XGBoost) — engine_xgboost" />
+<meta property="og:description" content="eXtreme gradient descent boosting for tree-based or linear boosting.
+Flexible, yet powerful engine with many customization options.
+The XGBoost engine supports multiple options to perform single and multiclass regression
+and classification tasks. For a full list of options users are advised to have a look at the
+xgboost::xgb.train help file and https://xgboost.readthedocs.io" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:creator" content="@Martin_Ecology" />
 <meta name="twitter:site" content="@IIASAVienna" />
@@ -135,45 +139,88 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Identifier</h1>
-    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/identifier.R'><code>R/identifier.R</code></a></small>
-    <div class="hidden name"><code>new_id.Rd</code></div>
+    <h1>Engine for use of extreme gradient boosting (XGBoost)</h1>
+    <small class="dont-index">Source: <a href='https://github.com/iiasa/ibis.iSDM/blob/master/R/engine_xgboost.R'><code>R/engine_xgboost.R</code></a></small>
+    <div class="hidden name"><code>engine_xgboost.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generate a new unique identifier.</p>
+    <p>eXtreme gradient descent boosting for tree-based or linear boosting.
+Flexible, yet powerful engine with many customization options.
+The XGBoost engine supports multiple options to perform single and multiclass regression
+and classification tasks. For a full list of options users are advised to have a look at the
+<a href='https://rdrr.io/pkg/xgboost/man/xgb.train.html'>xgboost::xgb.train</a> help file and <a href='https://xgboost.readthedocs.io'>https://xgboost.readthedocs.io</a></p>
     </div>
 
-    <pre class="usage"><span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>engine_xgboost</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  booster <span class='op'>=</span> <span class='st'>"gbtree"</span>,
+  learning_rate <span class='op'>=</span> <span class='fl'>0.01</span>,
+  nrounds <span class='op'>=</span> <span class='fl'>10000</span>,
+  gamma <span class='op'>=</span> <span class='fl'>3</span>,
+  reg_lambda <span class='op'>=</span> <span class='fl'>0</span>,
+  reg_alpha <span class='op'>=</span> <span class='fl'>0</span>,
+  max_depth <span class='op'>=</span> <span class='fl'>2</span>,
+  subsample <span class='op'>=</span> <span class='fl'>0.8</span>,
+  colsample_bytree <span class='op'>=</span> <span class='fl'>0.4</span>,
+  nthread <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/options.html'>getOption</a></span><span class='op'>(</span><span class='st'>"ibis.nthread"</span><span class='op'>)</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p><code><a href='distribution.html'>distribution()</a></code> (i.e. <code><a href='BiodiversityDistribution-class.html'>BiodiversityDistribution</a></code>) object.</p></td>
+    </tr>
+    <tr>
+      <th>booster</th>
+      <td><p>A <code><a href='https://rdrr.io/r/base/character.html'>character</a></code> of the booster to use. Either "gbtree" or "gblinear" (Default: gblinear)</p></td>
+    </tr>
+    <tr>
+      <th>learning_rate</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> value indicating the learning rate (eta).
+Lower values generally being better but more costly</p></td>
+    </tr>
+    <tr>
+      <th>nrounds</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> value giving the the maximum number of boosting iterations for cross-validation</p></td>
+    </tr>
+    <tr>
+      <th>gamma</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> A regularization parameter in the model. Lower values for better estimates (Default: 3)
+Also see reg_lambda parameter for the L2 regularization on the weights</p></td>
+    </tr>
+    <tr>
+      <th>reg_lambda</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> L2 regularization term on weights (Default: 0)</p></td>
+    </tr>
+    <tr>
+      <th>reg_alpha</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> L1 regularization term on weights (Default: 0)</p></td>
+    </tr>
+    <tr>
+      <th>max_depth</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> The Maximum depth of a tree. (Default: 3)</p></td>
+    </tr>
+    <tr>
+      <th>subsample</th>
+      <td><p><code><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></code> The ratio used for subsampling to prevent overfitting. (Default: 0.8)</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Other none specificed parameters. For constraints see <code><a href='XGBPrior.html'>XGBPrior</a></code></p></td>
+    </tr>
+    </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><code>Id</code> object.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>Identifiers are made using the <code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p>
+    <p>Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/uuid/man/UUIDgenerate.html'>uuid::UUIDgenerate()</a></code>.</p></div>
+    <div class='dont-index'><p><a href='https://rdrr.io/pkg/xgboost/man/xgb.train.html'>xgboost::xgb.train</a></p></div>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='r-in'><span class='co'># create new id</span></span>
-<span class='r-in'><span class='va'>i</span> <span class='op'>&lt;-</span> <span class='fu'>new_id</span><span class='op'>(</span><span class='op'>)</span></span>
-<span class='r-in'></span>
-<span class='r-in'><span class='co'># print id</span></span>
-<span class='r-in'><span class='fu'><a href='print.html'>print</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span></span>
-<span class='r-msg co'><span class='r-pr'>#&gt;</span> id: 4ed96394-de06-4412-9ec0-c07b42a660c5</span>
-<span class='r-in'></span>
-<span class='r-in'><span class='co'># convert to character</span></span>
-<span class='r-in'><span class='fu'><a href='https://rdrr.io/pkg/raster/man/as.character.html'>as.character</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "4ed96394-de06-4412-9ec0-c07b42a660c5"</span>
-<span class='r-in'></span>
-<span class='r-in'><span class='co'># check if it is an Id object</span></span>
-<span class='r-in'><span class='fu'><a href='is.Id.html'>is.Id</a></span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] TRUE</span>
-<span class='r-in'></span>
-</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

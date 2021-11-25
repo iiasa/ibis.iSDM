@@ -49,6 +49,12 @@
     <loc>https://iiasa.github.io/ibis.iSDM//reference/Settings-class.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/XGBPrior.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/XGBPriors.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/add_biodiversity_poipa.html</loc>
   </url>
   <url>
@@ -122,6 +128,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_stan.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_xgboost.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM//reference/ensemble.html</loc>
