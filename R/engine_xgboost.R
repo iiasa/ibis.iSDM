@@ -20,7 +20,7 @@ NULL
 #' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: 0)
 #' @param max_depth [`numeric`] The Maximum depth of a tree. (Default: 3)
 #' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting. (Default: 0.8)
-#' @param ... Other none specificed parameters. For constraints see [`XGBoostPrior`]
+#' @param ... Other none specificed parameters. For constraints see [`XGBPrior`]
 #' @seealso [xgboost::xgb.train]
 #' @references  Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @name engine_xgboost
@@ -160,6 +160,7 @@ engine_xgboost <- function(x,
             replace = TRUE
           )
           # Combine absence and presence and save
+          abs$intercept <- 1
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
 
           # Rasterize observed presences
@@ -172,7 +173,7 @@ engine_xgboost <- function(x,
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format and add predictors
-          abs <- subset(abs, select = c('x','y', model$biodiversity[[1]]$predictors_names) )
+          abs <- subset(abs, select = c('x','y','intercept', model$biodiversity[[1]]$predictors_names) )
           df <- rbind(model$biodiversity[[1]]$predictors, abs) %>%
             subset(., complete.cases(.) )
 
@@ -200,11 +201,10 @@ engine_xgboost <- function(x,
                                 weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
 
-        } else
-          if(fam == "binary:logistic"){
+        } else if(fam == "binary:logistic"){
             # Convert to numeric
             model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
-          }
+        }
 
         # Get Preds and convert to sparse matrix with set labels
         # FIXME: Support manual provision of data via xgb.DMatrix.save to save preprocessing time?
@@ -217,10 +217,16 @@ engine_xgboost <- function(x,
         df_train <- xgboost::xgb.DMatrix(data = train_cov,
                                          label = labels)
         # Prediction container
-        pred_cov <- as.matrix(
-          model$predictors[,model$biodiversity[[1]]$predictors_names]
-        )
-        df_pred <- xgboost::xgb.DMatrix(data = pred_cov)
+        pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
+        # Set target variables to bias_value for prediction if specified
+        if(!is.Waiver(settings$get('bias_variable'))){
+          for(i in 1:length(settings$get('bias_variable'))){
+            if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)) next()
+
+            pred_cov[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+          }
+        }
+        df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
 
         if(fam == "count:poisson"){
           # Specifically for count poisson data we will set the areas
@@ -231,6 +237,26 @@ engine_xgboost <- function(x,
         } else if(fam == 'binary:logistic'){
           params$eval_metric <- "logloss"
         }
+
+        # Process and add priors if set
+        if(!is.Waiver(model$priors)){
+          assertthat::assert_that(
+            all( model$priors$varnames() %in% model$biodiversity[[1]]$predictors_names )
+          )
+          # Match position of variables with monotonic constrains
+          mc <- rep(0, ncol(train_cov))
+          names(mc) <- colnames(train_cov)
+          for(v in model$priors$varnames()){
+            mc[v] <- switch (model$priors$get(v),
+              'increasing' = 1, 'positive' = 1,
+              'decreasing' = -1, 'negative' = -1,
+              0
+            )
+          }
+          # Save the monotonic constrain
+          params$monotone_constraints <- mc
+        }
+
         # --- #
         # Save both training and predicting data in the engine data
         self$set_data("df_train", df_train)
@@ -285,25 +311,90 @@ engine_xgboost <- function(x,
         nrounds <- params$nrounds;params$nrounds <- NULL
 
         # --- #
-        # Find the optimal number of rounds using 5-fold cross validation
-        # TODO: Implement proper parameter tuning
-        # https://stats.stackexchange.com/questions/171043/how-to-tune-hyperparameters-of-xgboost-trees
-        fit_cv <- xgboost::xgb.cv(
-          params = params,
-          data = df_train,
-          verbose = 0,
-          nrounds = nrounds, nfold = 5,
-          showsd = TRUE,      # standard deviation of loss across folds
-          stratified = TRUE,  # sample is unbalanced; use stratified samplin
-          maximize = FALSE,
-          early_stopping_rounds = 10
-        )
+        # Pass this parameter possibly on from upper level
+        # This implements a simple grid search for optimal parameter values
+        # Using the training data only (!)
+        if(settings$get('varsel')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
+
+          # Create combinations of random hyper parameters
+          set.seed(20)
+          if(params$booster == 'gblinear'){
+            parameters_df <- expand.grid(
+              lambda = seq(0,7,0.25), alpha = seq(0,1, 0.1),
+              eval = NA
+            )
+          } else {
+            parameters_df <- expand.grid(
+              # overfitting
+              max_depth = 1:6,
+              gamma = 0:5,
+              min_child_weight = 0:6,
+              # Randomness
+              subsample = runif(1, .7, 1),
+              colsample_bytree = runif(1, .6, 1),
+              eval = NA
+            )
+          }
+
+          # Progressbar
+          pb <- progress::progress_bar$new(total = nrow(parameters_df))
+          # TODO: Could be parallized
+          for (row in 1:nrow(parameters_df)){
+            test_params <- list(
+              booster = params$booster,
+              objective = params$objective
+            )
+            if(test_params$booster=='gblinear'){
+              test_params$lambda <- parameters_df$lambda[row]
+              test_params$alpha <- parameters_df$alpha[row]
+            } else {
+              test_params$gamma <- parameters_df$gamma[row]
+              test_params$max_depth <- parameters_df$max_depth[row]
+              test_params$min_child_weight <- parameters_df$min_child_weight[row]
+              test_params$subsample <- parameters_df$subsample[row]
+              test_params$colsample_bytree <- parameters_df$colsample_bytree[row]
+            }
+
+            suppressMessages(
+              test_xgb <- xgboost::xgboost(
+                params = test_params,
+                data = df_train,
+                nrounds = 100,
+                verbose = 0
+              )
+            )
+            if(verbose) pb$tick()
+            parameters_df$eval[row] <- min(test_xgb$evaluation_log[,2])
+          }
+          # Get the one with minimum error and replace params values
+          p <- parameters_df[which.min(parameters_df$eval),]
+          p$eval <- NULL
+          for(i in names(p)){ params[[i]] <- as.numeric(p[i]) }
+
+          # Find the optimal number of rounds using 5-fold cross validation
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Crossvalidation for determining early stopping rule.')
+
+          fit_cv <- xgboost::xgb.cv(
+            params = params,
+            data = df_train,
+            verbose = verbose,
+            print_every_n = 100,
+            nrounds = nrounds, nfold = 5,
+            showsd = TRUE,      # standard deviation of loss across folds
+            stratified = TRUE,  # sample is unbalanced; use stratified samplin
+            maximize = FALSE,
+            early_stopping_rounds = 10
+          )
+          # Set new number of rounds
+          nround <- fit_cv$best_iteration
+        }
 
         # Fit the model.
         fit_xgb <- xgboost::xgboost(
           params = params,
           data = df_train,
-          nrounds = fit_cv$best_iteration,
+          nrounds = nrounds,
           verbose = verbose,
           print_every_n = 100
         )
@@ -314,14 +405,6 @@ engine_xgboost <- function(x,
           # Messager
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
-          # Set target variables to bias_value for prediction if specified
-          if(!is.Waiver(settings$get('bias_variable'))){
-            for(i in 1:length(settings$get('bias_variable'))){
-              if(settings$get('bias_variable')[i] %notin% names(full)) next()
-
-              full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
-            }
-          }
           # Make a prediction
           suppressWarnings(
             pred_xgb <- xgboost:::predict.xgb.Booster(
@@ -352,35 +435,50 @@ engine_xgboost <- function(x,
           settings = settings,
           fits = list(
             "fit_best" = fit_xgb,
-            "fit_cv" = fit_cv,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.vars, doplot = TRUE, ...){
-            assertthat::assert_that(is.character(x.vars),
+          partial = function(self, x.vars = NULL, plot = TRUE, ...){
+            assertthat::assert_that(is.character(x.vars) || is.null(x.vars),
                                     !missing(x.vars))
             check_package("pdp")
             mod <- self$get_data('fit_best')
             df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
 
+            # Match x.vars to argument
+            if(is.null(x.vars)){
+              x.vars <- colnames(df)
+            } else {
+              x.vars <- match.arg(x.vars, colnames(df), several.ok = FALSE)
+            }
+
             # Check that variables are in
-            assertthat::assert_that(x.vars %in% colnames(df),
-                                    msg = 'Variable not in predicted model' )
+            assertthat::assert_that(all( x.vars %in% colnames(df) ),
+                                    msg = 'Variable not in predicted model.')
 
-            p1 <- pdp::partial(mod, pred.var = x.vars, ice = FALSE, center = TRUE,
-                          plot = FALSE, rug = TRUE, train = df)
-            names(p1) <- c("partial", "yhat")
+            pp <- data.frame()
+            pb <- progress::progress_bar$new(total = length(x.vars))
+            for(v in x.vars){
+              p1 <- pdp::partial(mod, pred.var = v, ice = FALSE, center = TRUE,
+                                 plot = FALSE, rug = TRUE, train = df)
+              names(p1) <- c("partial", "yhat")
+              p1$variable <- v
+              pp <- rbind(pp, p1)
+              if(length(x.vars) > 1) pb$tick()
+            }
 
-            if(doplot){
+            if(plot){
               # Make a plot
-              ggplot2::ggplot(data = p1, ggplot2::aes(x = partial, y = yhat)) +
-                ggplot2::geom_line()+
-                ggplot2::labs(x = x.vars, y = expression(hat(y)))
+              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial, y = yhat)) +
+                ggplot2::theme_classic(base_size = 18) +
+                ggplot2::geom_line() +
+                ggplot2::labs(x = "", y = expression(hat(y))) +
+                ggplot2::facet_wrap(~variable,scales = 'free')
             }
 
             # Return the data
-            return(p1)
+            return(pp)
 
           },
           # Spatial partial dependence plot option from embercardo
@@ -401,38 +499,32 @@ engine_xgboost <- function(x,
             return(p)
           },
           # Engine-specific projection function
-          project = function(self, newdata, summary = 'mean'){
+          project = function(self, newdata){
             assertthat::assert_that(!missing(newdata),
-                                    is.data.frame(newdata))
+                                    is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
-            # Define rowids as those with no missing data
-            newdata$rowid <- rownames(newdata)
-            newdata <- subset(newdata, complete.cases(newdata))
+            mod <- self$get_data('fit_best')
+            if(!inherits(newdata, "xgb.DMatrix")){
+              assertthat::assert_that(
+                all( mod$feature_names %in% colnames(newdata) )
+              )
+              newdata <- subset(newdata, select = mod$feature_names)
+              newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
+            }
+
             # Make a prediction
             suppressWarnings(
-              pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
-                                                 newdata = newdata,
-                                                 type = 'response')
+              pred_xgb <- xgboost:::predict.xgb.Booster(
+                object = mod,
+                newdata = newdata
+              )
             )
-            # Fill output with summaries of the posterior
-            prediction <- emptyraster(self$fits$prediction) # Background
-            prediction[as.numeric(newdata$rowid)] <- apply(pred_bart, 2, mean)
 
-            # TODO: Generalize uncertainty prediction
-            # # Summarize quantiles and sd from posterior
-            # ms <- as.data.frame(
-            #   cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-            #          matrixStats::colSds(pred_bart)
-            #   )
-            # )
-            # names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
-            # # Add them
-            # for(post in names(ms)){
-            #   prediction2 <- self$get_data('template')
-            #   prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
-            #   prediction <- raster::addLayer(prediction, prediction2)
-            #   rm(prediction2)
-            # }
+            # Fill output with summaries of the posterior
+            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction[] <- pred_xgb
+            prediction <- raster::mask(prediction, self$get_data('prediction') )
+
             return(prediction)
           }
         )

@@ -22,7 +22,6 @@ Imports:
     doParallel,
     geodist,
     ncdf4,
-    SDraw,
     assertthat(>= 0.2.0),
     rgeos (>= 0.5-5),
     tibble (>= 2.0.0),
@@ -85,6 +84,7 @@ Collate:
     'print.R'
     'prior_gdb.R'
     'prior_inla.R'
+    'prior_xgb.R'
     'priors.R'
     'project.R'
     'scenario.R'

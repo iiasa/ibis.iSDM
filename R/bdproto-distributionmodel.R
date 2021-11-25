@@ -153,6 +153,8 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)
+    } else {
+      self$partial(self$get_data(x), x.vars = NULL)
     }
   },
   # Get specific fit from this Model

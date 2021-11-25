@@ -9,10 +9,10 @@ engine_xgboost(
   booster = "gbtree",
   learning_rate = 0.01,
   nrounds = 10000,
-  gamma = 1,
-  reg_lambda = 1,
-  reg_alpha = 0.3,
-  max_depth = 3,
+  gamma = 3,
+  reg_lambda = 0,
+  reg_alpha = 0,
+  max_depth = 2,
   subsample = 0.8,
   colsample_bytree = 0.4,
   nthread = getOption("ibis.nthread"),
@@ -29,18 +29,18 @@ Lower values generally being better but more costly}
 
 \item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation}
 
-\item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: 1)
+\item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: 3)
 Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
 
-\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: 1)}
+\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: 0)}
 
-\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default: 0.3)}
+\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default: 0)}
 
 \item{max_depth}{\code{\link{numeric}} The Maximum depth of a tree. (Default: 3)}
 
 \item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting. (Default: 0.8)}
 
-\item{...}{Other none specificed parameters. For constraints see \code{\link{XGBoostPrior}}}
+\item{...}{Other none specificed parameters. For constraints see \code{\link{XGBPrior}}}
 }
 \description{
 eXtreme gradient descent boosting for tree-based or linear boosting.

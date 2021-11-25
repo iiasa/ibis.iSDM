@@ -249,6 +249,7 @@ methods::setMethod(
       spec_priors <- switch(
         x$engine$name,
         "<GDB>" = x$priors$classes() == 'GDBPrior',
+        "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
@@ -788,6 +789,7 @@ methods::setMethod(
       #### XGBoost Engine ####
     } else if( inherits(x$engine,"XGBOOST-Engine") ){
       # Create XGBboost regression and classification
+      if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
 
       # Process per supplied dataset and in order of supplied data
       for(id in ids) {
@@ -824,21 +826,23 @@ methods::setMethod(
         if(length(ids)>1 && id != ids[length(ids)]){
           # Add to predictors frame
           new <- out$get_data("prediction")
-          names(new) <- paste0(model$biodiversity[[id]]$type, "_", "mean")
+          names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"mean")
 
           # Now for each biodiversity dataset and the overall predictors
           # extract and add as variable
           for(k in names(model$biodiversity)){
             env <- as.data.frame(
               raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
-            names(env) <- paste0(model$biodiversity[[k]]$type, "_", "mean")
+            # Rename to current id dataset
+            names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"mean")
             # Add
             model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
             model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
                                                           names(env) )
             model$biodiversity[[k]]$predictors_types <- rbind(
-              model$biodiversity[[k]]$predictors_types,
-              data.frame(predictors = names(env), type = c('numeric')))
+                model$biodiversity[[k]]$predictors_types,
+                data.frame(predictors = names(env), type = c('numeric'))
+              )
           }
           # Add to overall predictors
           model$predictors <- cbind(model$predictors, as.data.frame(new) )
@@ -846,9 +850,7 @@ methods::setMethod(
           model$predictors_types <- rbind(model$predictors_types,
                                           data.frame(predictors = names(new), type = c('numeric')))
         }
-
       }
-
 
       # ----------------------------------------------------------- #
       #### BART Engine ####

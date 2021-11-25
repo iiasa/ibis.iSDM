@@ -136,8 +136,11 @@ methods::setMethod(
     rm(pb)
     proj <- raster::setZ(proj, as.Date(sort(unique(df$time))) )
     if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, as.Date(sort(unique(df$time))) )
-    raster::projection(proj) <- new_crs
     # ---- #
+    assertthat::assert_that(
+      is.Raster(proj), is.Raster(proj_thresh),
+      compareRaster(proj, proj_thresh),msg = "Something went wrong with the projection."
+    )
 
     # Finally convert to stars and rename
     proj <- stars::st_as_stars(proj,
@@ -149,10 +152,10 @@ methods::setMethod(
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)
       ); names(proj_thresh) <- 'threshold'
-      proj <- c(proj, proj_thresh)
+      proj <- stars:::c.stars(proj, proj_thresh)
     }
 
     # Return output by adding it to the scenario object
-    bdproto(NULL, mod, scenarios = proj )
+    bdproto(NULL, mod, scenarios = proj)
   }
 )
