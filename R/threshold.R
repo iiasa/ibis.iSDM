@@ -45,7 +45,7 @@ methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
   function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, ...) {
-    assertthat::assert_that(inherits(obj,c('GDB-Model','BART-Model','INLA-Model','STAN-Model')),
+    assertthat::assert_that(inherits(obj,c('GDB-Model','BART-Model','INLA-Model','STAN-Model','XGBOOST-Model')),
                             is.character(method),
                             is.null(value) || is.numeric(value)
     )

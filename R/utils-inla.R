@@ -12,6 +12,54 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
                           is.character(variant)
                           )
+  # Function from SDraw
+  voronoi.polygons <- function (x, bounding.polygon = NULL, range.expand = 0.1)
+  {
+    if (!inherits(x, "SpatialPoints")) {
+      stop("Must pass a SpatialPoints* object to voronoi.polygons.")
+    }
+    crds = sp::coordinates(x)
+    if (is.null(bounding.polygon)) {
+      if (length(range.expand) == 1) {
+        range.expand <- rep(range.expand, 2)
+      }
+      else if (length(range.expand) > 2) {
+        warning("Only first two elements of range.expand used in voronoi.polygons")
+        range.expand <- range.expand[1:2]
+      }
+      dxy <- diff(c(t(sp::bbox(x))))[c(1, 3)]
+      bb <- sp::bbox(x) + (matrix(dxy, nrow = 2, ncol = 1) %*%
+                             matrix(c(-1, 1), nrow = 1, ncol = 2)) * abs(range.expand)
+      bb <- c(t(bb))
+    }
+    else {
+      bb = c(t(sp::bbox(bounding.polygon)))
+    }
+    z = deldir::deldir(crds[, 1], crds[, 2], rw = bb)
+    w = deldir::tile.list(z)
+    polys = vector(mode = "list", length = length(w))
+    for (i in seq(along = polys)) {
+      pcrds = cbind(w[[i]]$x, w[[i]]$y)
+      pcrds = rbind(pcrds, pcrds[1, ])
+      polys[[i]] = sp::Polygons(list(sp::Polygon(pcrds)), ID = as.character(i))
+    }
+    SP = sp::SpatialPolygons(polys, proj4string = CRS(proj4string(x)))
+    voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,
+                                                                      1], y = crds[, 2], area = sapply(slot(SP, "polygons"),
+                                                                                                       slot, "area"), row.names = sapply(slot(SP, "polygons"),
+                                                                                                                                         slot, "ID")))
+    if (!is.null(bounding.polygon)) {
+      bounding.polygon <- rgeos::gUnion(bounding.polygon, bounding.polygon)
+      voronoi.clipped <- rgeos::gIntersection(voronoi, bounding.polygon,
+                                       byid = TRUE, id = row.names(voronoi))
+      df <- data.frame(voronoi)
+      df$area <- sapply(slot(voronoi.clipped, "polygons"),
+                        slot, "area")
+      voronoi <- sp::SpatialPolygonsDataFrame(voronoi.clipped,
+                                          df)
+    }
+    voronoi
+  }
   # Precalculate the area of each
   # Get areas for Voronoi tiles around each integration point
   dd <- deldir::deldir(mesh$loc[,1], mesh$loc[,2])
@@ -27,7 +75,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
   } else if (variant == 'gpc2'){
     # Try to convert to spatial already
     if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
-    tiles <- SDraw::voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
+    tiles <- voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
     w <- sapply(1:length(tiles), function(p) {
       aux <- tiles[p, ]
 
