@@ -3,6 +3,12 @@ NULL
 
 #' Use inlabru as engine
 #'
+#' @description Model components are specified with general inputs and mapping methods to the
+#' latent variables, and the predictors are specified via general R expressions,
+#' with separate expressions for each observation likelihood model in multi-likelihood models.
+#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for [INLA::inla]
+#' albeit inlabru has a number of convenience functions implemented that make particular predictions
+#' more straight forward (e.g. via posterior sampling).
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
@@ -12,7 +18,9 @@ NULL
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param ... Other variables
+#' @references Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
 #' @references https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
+#' @source https://inlabru-org.github.io/inlabru/articles/
 #' @name engine_inlabru
 NULL
 #' @rdname engine_inlabru
@@ -235,9 +243,9 @@ engine_inlabru <- function(x,
           )
         }
       },
-      # Main INLA training function ----
+      # Main inlabru setup ----
       # Setup computation function
-      setup = function(self, model, ...){
+      setup = function(self, model, settings, ...){
         assertthat::assert_that(
           'background' %in% names(model),
           'biodiversity' %in% names(model),
@@ -249,39 +257,104 @@ engine_inlabru <- function(x,
         # Messager
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
-        # Construct likelihoods
+        # Set up integration points
+        suppressWarnings(
+          ips <- inlabru::ipoints(
+            as(model$background,"Spatial"),
+            self$get_data('mesh')
+          )
+        )
+
+        # Construct likelihoods for each entry in the dataset
         lhl <- list()
         for(j in 1:length(model$biodiversity)){
           # Combine observed and predictors for the
           df <- cbind(
-            data.frame(observed = model$biodiversity[[i]]$observations[['observed']]),
-            model$biodiversity[[i]]$predictors
+            data.frame(observed = model$biodiversity[[j]]$observations[['observed']]),
+            model$biodiversity[[j]]$predictors
           )
           # Convert to Spatial points
           df <- sp::SpatialPointsDataFrame(coords = df[,c('x', 'y')],
                                               data = df[, names(df) %notin% c('x','y')],
-                                              proj4string = self$data$mesh$crs
+                                              proj4string = self$get_data('mesh')$crs
           )
 
           # Options for specifying link function of likelihood
           o <- inlabru::bru_options_get()
-          o[['control.family']] <- list(link = ifelse(model$biodiversity[[i]]$family=='binomial', 'cloglog', 'default'))
+          o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
 
-          lh <- inlabru::like(formula = model$biodiversity[[i]]$equation,
-                              family = model$biodiversity[[i]]$family,
-                              data = df,
-                              mesh = self$data$mesh,
-                              # E = 1e6,
-                              # ips = data@ips,
-                              # Ntrials = attributes(data_points[[i]])$Ntrials,
-                              # include = include[[i]]
-                              options = o
-                              )
+          # For poipo simply use point process
+          # if(model$biodiversity[[j]]$type == "poipo"){
+          #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+          #                       family = "cp",
+          #                       data = df,
+          #                       mesh = self$get_data('mesh'),
+          #                       ips = ips,
+          #                       E = model$biodiversity[[j]]$expect,
+          #                       Ntrials = model$biodiversity[[j]]$expect,
+          #                       options = o
+          #   )
+          # } else {
+            lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
+                                family = model$biodiversity[[j]]$family,
+                                data = df,
+                                mesh = self$get_data('mesh'),
+                                ips = ips,
+                                E = model$biodiversity[[j]]$expect,
+                                Ntrials = model$biodiversity[[j]]$expect,
+                                # include = include[[i]]
+                                options = o
+            )
+          # }
           lhl[[j]] <- lh
         }
 
         # List of likelihoods
         self$set_data("likelihoods", inlabru::like_list(lhl) )
+
+        # --- #
+        # Defining the component function
+        comp <- as.formula(paste0("~ Intercept(1) ",
+                           ifelse(length(model$biodiversity)>1, "-1","")
+                           )
+                          )
+
+        for(i in 1:nrow(model$predictors_types)){
+          # For numeric
+          if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
+            # Built component
+            if(settings$get('only_linear') == FALSE){
+              var_rw1 <- length( unique( model$biodiversity[[id]]$predictors[,i] ))
+              if(var_rw1 > 2) m <- 'rw1' else m <- 'linear'
+            } else { m <- 'linear' }
+
+            # Specify priors if set
+            if(!is.Waiver(model$priors)){
+              # Loop through all provided INLA priors
+              supplied_priors <- model$priors$ids()
+              # TODO:
+              p <- ""
+            } else {
+              if(m == "rw1"){
+                # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                p <- 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
+              }
+            }
+            comp <- update.formula(comp,
+                                   paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
+                                                          ', model = "',m,'")'), collapse = " ")
+            )
+          } else if( model$predictors_types$type[i] == "factor"){
+            # factor_full uses the full factor. fact_contrast uses the first level as reference
+            # Built component
+            comp <- update(comp,
+                           paste(c(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
+            )
+          }
+        }
+
+        self$set_data("components", comp)
 
         # Set number of threads via set.Options
         inlabru::bru_safe_inla(quietly = TRUE)
@@ -301,21 +374,24 @@ engine_inlabru <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id,
           any(  (c('stk_full','stk_pred') %in% names(self$data)) ),
-          inherits(self$get_data('stk_full'),'inla.data.stack')
+          inherits(self$get_data("likelihoods"), 'list')
         )
-
 
         # Convert predictors to SpatialPixelsDataFrame as required for
         if(class(model$predictors) == 'data.frame') {
           preds <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
                                                           data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                          proj4string = self$data$mesh$crs
+                                                          proj4string = self$get_data('mesh')$crs
                                           )
+          preds <- subset(preds, complete.cases(preds@data)) # Remove missing data
           preds <- as(preds, 'SpatialPixelsDataFrame')
         } else stop('Predictors not in right format.')
 
         # Get likelihood
         likelihoods <- self$get_data("likelihoods")
+
+        # Get components
+        comp <- self$get_data("components")
 
         # Get options
         options <- inlabru::bru_options_get()
@@ -325,11 +401,43 @@ engine_inlabru <- function(x,
         # Compute end of computation time
         settings$set('end.time', Sys.time())
 
-        comp <- as.formula("~ Intercept(1) ")
-        # Fit
-        mod_bru <- inlabru::bru(components = comp,
-                                likelihoods, options = options)
+        # Fitting bru model
+        fit_bru <- inlabru::bru(components = comp,
+                                likelihoods,
+                                options = options)
 
+
+        if(!settings$get('inference_only')){
+          # Messager
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(preds)) next()
+              preds[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            }
+          }
+          # Define prediction formula for inlabru
+          pfo <- as.formula(
+            paste0("~exp( Intercept + ", paste0(model$predictors_names,collapse = " + "),")")
+          )
+
+          # Make a prediction
+          pred_bru <- inlabru:::predict.bru(
+            object = fit_bru,
+            data = preds,
+            formula = pfo,
+            n.samples = 1000
+          )
+          # Get only the predicted variables of interest
+          prediction <- raster::stack(
+            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+          )
+
+        } else {
+          prediction <- NULL
+        }
 
         # Definition of INLA Model object ----
         out <- bdproto(
@@ -339,9 +447,8 @@ engine_inlabru <- function(x,
           model = model,
           settings = settings,
           fits = list(
-            "fit_best" = fit_resp,
-            "fit_pred" = fit_pred,
-            "fit_best_equation" = master_form,
+            "fit_best" = fit_bru,
+            "fit_best_equation" = self$get_data("components"),
             "mesh"     = self$get_data('mesh'),
             "spde"     = self$get_data('latentspatial'),
             "prediction" = prediction
@@ -353,6 +460,7 @@ engine_inlabru <- function(x,
                                     mode %in% c('coef','sim','full'),
                                     assertthat::has_name(newdata,c('x','y'))
             )
+            stop("TBD")
             # Try and guess backtransformation
             if(is.null(backtransf)){
               fam <- self$get_data('fit_best')$.args$family
@@ -376,73 +484,53 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          # FIXME: Create external function
-          partial = function(self, x, variable, constant = NULL, variable_length = 100, plot = FALSE){
-            # Goal is to create a sequence of value and constant and append to existing stack
-            # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
-            # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
-            # provide via lincomb = M to an INLA call.
-            # Both should be identical
-
+          partial = function(self, x.var, constant = NULL, length.out = 100, plot = TRUE){
+            # We use inlabru's functionalities to sample from the posterior
+            # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
             mod <- self$get_data('fit_best')
-            assertthat::assert_that(inherits(mod,'inla'),
+            assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
-                                    inherits(x,'BiodiversityDistribution'),
-                                    length(variable)==1, is.character(variable),
+                                    is.character(x.var),
+                                    is.numeric(length.out),
                                     is.null(constant) || is.numeric(constant)
             )
-            varn <- mod$names.fixed
-            variable <- match.arg(variable, varn, several.ok = FALSE)
-            assertthat::assert_that(variable %in% varn, length(variable)==1,!is.null(variable))
 
-            # ------------------ #
-            # Get all datasets with id in model. This includes the data stacks and integration stacks
-            stk_inference <- lapply(
-              x$engine$list_data()[grep(paste(names(model$biodiversity),collapse = '|'), x$engine$list_data())],
-              function(z) x$engine$get_data(z))
-            stk_inference <- do.call(INLA::inla.stack, stk_inference)
-            # FIXME: Test that this works with SPDE present
-            stack_data_resp <- INLA::inla.stack.data(stk_inference)
-            # ------------------ #
+            # Match variable name
+            x.var <- match.arg(x.var, mod$names.fixed, several.ok = FALSE)
 
-            # If constant is null, calculate average across other values
+            # Make a prediction via inlabru
+            rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) %>% as.data.frame()
+            df_partial <- list()
+            # Add all others as constant
             if(is.null(constant)){
-              constant <- lapply(stack_data_resp, function(x) mean(x,na.rm = T))[varn[varn %notin% variable]]
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), length.out )
+            } else {
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
             }
-            # For target variable calculate range
-            variable_range <- range(stack_data_resp[[variable]],na.rm = TRUE)
+            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            df_partial <- df_partial %>% as.data.frame()
 
-            stop('Not yet done!')
-            # Create dummy data.frame
-            dummy <- data.frame(observed = rep(NA, variable_length))
-            dummy
+            ## plot the unique effect of the covariate
+            pred_cov <- inlabru:::predict.bru(mod,
+                                df_partial,
+                                as.formula( paste("~ exp(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+                                n.samples = 100
+                                )
 
-            seq(variable_range[1],variable_range[2],length.out = variable_length)
-
-            # # add sequence of data and na to data.frame. predict those
-            # control.predictor = list(A = INLA::inla.stack.A(stk_full),
-            #                          link = li, # Link to NULL for multiple likelihoods!
-            #                          compute = TRUE),  # Compute for marginals of the predictors.
-
-            print('Refitting model for partial effect')
-            ufit <- INLA::inla(formula = as.formula(mod$.args$formula), # The specified formula
-                               data  = stk_inference,  # The data stack
-                               quantiles = c(0.05, 0.5, 0.95),
-                               E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
-                               Ntrials = INLA::inla.stack.data(stk_inference)$Ntrials,
-                               family = mod$.args$family,   # Family the data comes from
-                               control.family = mod$.args$control.family, # Control options
-                               control.predictor = mod$.args$control.predictor,  # Compute for marginals of the predictors.
-                               control.compute = mod$.args$control.compute,
-                               control.fixed = mod$.args$control.fixed,
-                               verbose = FALSE, # To see the log of the model runs
-                               control.inla = mod$.args$control.inla,
-                               num.threads = getOption('ibis.nthread')
-            )
-            control.predictor = list(A = INLA::inla.stack.A(stk_inference))
-
-            # Plot and return result
+            # Do plot and return result
+            if(plot){
+              o <- pred_cov
+              names(o)[grep(x.var, names(o))] <- "partial_effect"
+              ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
+                                                     ymin = q0.025,
+                                                     ymax = q0.975) ) +
+                ggplot2::theme_classic() +
+                ggplot2::geom_ribbon(fill = "grey90") +
+                ggplot2::geom_line() +
+                ggplot2::labs(x = x.var, y = "Partial effect")
+            }
+            return(pred_cov)
           },
           # Function to plot SPDE if existing
           plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, ...){

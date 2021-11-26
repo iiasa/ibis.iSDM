@@ -24,7 +24,7 @@ DistributionModel <- bdproto(
   print = function(self) {
     # TODO: Have a lot more information in here and to be prettified
     # FIXME: Have engine-specific code moved to engine
-    if(inherits(self, 'INLA-Model')){
+    if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
       if( length( self$fits ) != 0 ){
         # Get strongest effects
         ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
@@ -93,6 +93,8 @@ DistributionModel <- bdproto(
       assertthat::assert_that(
         inherits(pred,'Raster')
       )
+      # Match arguement
+      what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       raster::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
@@ -115,7 +117,7 @@ DistributionModel <- bdproto(
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
       mboost:::summary.mboost(self$get_data(x))
-    } else if(inherits(self, 'INLA-Model')){
+    } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
@@ -150,6 +152,8 @@ DistributionModel <- bdproto(
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
+    } else if(inherits(self, 'INLABRU-Model')) {
+      self$partial(self$get_data(x), x.vars = what, ...)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)

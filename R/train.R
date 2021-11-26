@@ -286,7 +286,7 @@ methods::setMethod(
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
-          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = st_crs(model$background)),
+          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = sf::st_crs(model$background)),
                                    x$limits)
         )
       )
@@ -464,41 +464,8 @@ methods::setMethod(
 
           # Go through each variable and build formula for likelihood
           form <- formula(paste("observed ~ ", "Intercept +",
+                               paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                ifelse(length(ids)>1,"","-1"), collapse = " "))
-          for(i in 1:nrow(model$predictors_types)){
-            # For numeric
-            if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
-              # Built component
-              if(settings$get('only_linear') == FALSE){
-                var_rw1 <- length( unique( model$biodiversity[[id]]$predictors[,i] ))
-                if(var_rw1 > 2) m <- 'rw1' else m <- 'linear'
-              } else { m <- 'linear' }
-
-              # Specify priors if set
-              if(!is.Waiver(model$priors)){
-                # Loop through all provided INLA priors
-                supplied_priors <- model$priors$ids()
-                # TODO:
-                p <- ""
-              } else {
-                if(m == "rw1"){
-                  # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
-                  # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
-                  p <- 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
-                }
-              }
-              form <- update.formula(form,
-                            paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
-                                                     ', model = "',m,'")'), collapse = " ")
-                            )
-            } else if( model$predictors_types$type[i] == "factor"){
-              # factor_full uses the full factor. fact_contrast uses the first level as reference
-              # Built component
-              form <- update(form,
-                            paste(c(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
-              )
-            }
-          }
 
           # Add offset if specified
           # if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
@@ -510,7 +477,7 @@ methods::setMethod(
           #   )
           #   )
           # }
-        } else{
+        } else {
           # If custom supplied formula, check that variable names match supplied predictors
           # TODO: This needs to be formatted to allow custom families
           assertthat::assert_that(
@@ -534,7 +501,7 @@ methods::setMethod(
 
       # Run the engine setup script
       # FIXME: Do some checks on whether an observation falls into the mesh?
-      x$engine$setup(model)
+      x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)

@@ -3,6 +3,9 @@
 \name{engine_inlabru}
 \alias{engine_inlabru}
 \title{Use inlabru as engine}
+\source{
+https://inlabru-org.github.io/inlabru/articles/
+}
 \usage{
 engine_inlabru(
   x,
@@ -36,8 +39,15 @@ engine_inlabru(
 \item{...}{Other variables}
 }
 \description{
-Use inlabru as engine
+Model components are specified with general inputs and mapping methods to the
+latent variables, and the predictors are specified via general R expressions,
+with separate expressions for each observation likelihood model in multi-likelihood models.
+The inlabru engine - similar as the \code{\link{engine_inla}} function acts a wrapper for \link[INLA:inla]{INLA::inla}
+albeit inlabru has a number of convenience functions implemented that make particular predictions
+more straight forward (e.g. via posterior sampling).
 }
 \references{
+Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
+
 https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
 }

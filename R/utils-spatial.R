@@ -53,9 +53,9 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
     length(coords)>0
   )
   # Convert to sf
-  points <- sf::st_as_sf(points, coords = coords, crs = st_crs(poly))
+  points <- sf::st_as_sf(points, coords = coords, crs = sf::st_crs(poly))
   assertthat::assert_that(
-    st_crs(poly) == st_crs(points)
+    sf::st_crs(poly) == sf::st_crs(points)
   )
 
   # Within test
@@ -272,9 +272,9 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x))
-  raster::raster(nrows=nrow(x), ncols=ncol(x),
-                        crs=x@crs,
-                        ext=extent(x), ...)
+  raster::raster(nrows = nrow(x), ncols = ncol(x),
+                        crs = x@crs,
+                        ext = raster::extent(x), ...)
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
