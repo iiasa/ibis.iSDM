@@ -45,7 +45,7 @@ methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
   function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, ...) {
-    assertthat::assert_that(inherits(obj,c('GDB-Model','BART-Model','INLA-Model','STAN-Model','XGBOOST-Model')),
+    assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value)
     )
@@ -65,7 +65,7 @@ methods::setMethod(
     # Get all point data in distribution model
     poi <- do.call(sf:::rbind.sf,
                      lapply(obj$model$biodiversity, function(y){
-                       o <-  guess_sf(y$observations)
+                       o <- guess_sf(y$observations)
                        o$name <- y$name; o$type <- y$type
                        subset(o, select = c('observed', "name", "type", "geometry"))
                      } )

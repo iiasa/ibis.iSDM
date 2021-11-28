@@ -121,7 +121,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
  # If there is an attribute, but for some reason the file is not sf, use that one
  if(!is.null(attr(df, "sf_column"))) {
    df <-  sf::st_as_sf(df)
-   if(attr(df, "sf_column") != geom_name) df <- sf:::rename.sf(df, geom_name = "geom")
+   if(attr(df, "sf_column") != geom_name){
+     names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+     sf::st_geometry(df) <- geom_name
+   }
    return(df)
  }
  # Commonly used column names
@@ -143,7 +146,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
  # If at this point df is still not a sf object, then it is unlikely to be converted
  assertthat::assert_that(inherits(df, 'sf'),
                          msg = "Point object could not be converted to an sf object.")
- if(attr(df, "sf_column") != geom_name) df <- sf:::rename.sf(df, geom_name = "geom")
+ if(attr(df, "sf_column") != geom_name){
+   names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+   sf::st_geometry(df) <- geom_name
+ }
  return(df)
 }
 

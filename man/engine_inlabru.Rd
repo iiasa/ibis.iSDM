@@ -16,6 +16,8 @@ engine_inlabru(
   cutoff = 1,
   proj_stepsize = NULL,
   timeout = NULL,
+  strategy = "auto",
+  int.strategy = "auto",
   ...
 )
 }
@@ -35,6 +37,10 @@ engine_inlabru(
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
 
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
+
+\item{strategy}{Which aproximation to use for the joint posterior. Options are "auto","adaptative", "gaussian", "simplified.laplace" & "laplace".}
+
+\item{int.strategy}{Integration strategy. Options are "auto","grid", "eb" & "ccd".}
 
 \item{...}{Other variables}
 }

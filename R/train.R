@@ -127,7 +127,7 @@ methods::setMethod(
     if(!is.Waiver(x$latentfactors)){
       # Get the method and check whether it is supported by the engine
       m <- attr(x$get_latent(),'method')
-      if(x$get_engine()!="<INLA>" & m == 'spde'){
+      if(x$get_engine() %notin% c("<INLA>", "<INLABRU>") & m == 'spde'){
         if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
@@ -250,7 +250,8 @@ methods::setMethod(
         x$engine$name,
         "<GDB>" = x$priors$classes() == 'GDBPrior',
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
-        "<INLA>" = x$priors$classes() == 'INLAPrior'
+        "<INLA>" = x$priors$classes() == 'INLAPrior',
+        "<INLABRU>" = x$priors$classes() == 'INLAPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
@@ -463,21 +464,35 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
 
           # Go through each variable and build formula for likelihood
-          form <- formula(paste("observed ~ ", "Intercept +",
+          form <- to_formula(paste("observed ~ ", "Intercept +",
                                paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
-                               ifelse(length(ids)>1,"","-1"), collapse = " "))
+                               # If multiple datasets, don't use intercept
+                               ifelse(length(ids)>1,"","-1"),
+                               # Check whether a single dataset is provided, otherwise add other intercepts
+                               ifelse(length(types)==1,
+                                      '',
+                                      paste(' + ',paste0('intercept_',
+                                                         make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                               ),
+                               collapse = " ")
+                          )
 
           # Add offset if specified
           # if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
-          # if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-          #   # Update with spatial term
-          #   form <- update.formula(form, paste0(" ~ . + ",
-          #                                       x$engine$get_equation_latent_spatial(
-          #                                         method = attr(x$get_latent(),'method'))
-          #   )
-          #   )
-          # }
+          if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+            # Update with spatial term
+            form <- update.formula(form, paste0(" ~ . + ",
+                                                # For SPDE components, simply add spatial.field
+                                                ifelse(which(id%in%ids)==1,
+                                                       "spatial.field",
+                                                       paste0("spatial.field",which(id%in%ids))
+                                                       )
+                                       )
+            )
+          }
         } else {
+          stop("Parser for INLAbru custom formulas yet to be implemented.")
           # If custom supplied formula, check that variable names match supplied predictors
           # TODO: This needs to be formatted to allow custom families
           assertthat::assert_that(

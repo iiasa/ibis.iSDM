@@ -98,7 +98,6 @@ BiodiversityDistribution <- bdproto(
       attr(type, 'method') <- method
     }
     if(!is.Waiver(self$latentfactors)){
-      warning('Overwritting existing latent effect...')
       bdproto(NULL, self, latentfactors = type )
       # bdproto(NULL, self, latentfactors = unique(c(self$latentfactors,type)) )
     } else {

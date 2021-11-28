@@ -16,6 +16,8 @@ NULL
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter;
 #' @param cutoff The minimum allowed distance between points on the mesh
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
+#' @param strategy Which aproximation to use for the joint posterior. Options are "auto","adaptative", "gaussian", "simplified.laplace" & "laplace".
+#' @param int.strategy Integration strategy. Options are "auto","grid", "eb" & "ccd".
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param ... Other variables
 #' @references Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
@@ -33,6 +35,8 @@ engine_inlabru <- function(x,
                         cutoff = 1,
                         proj_stepsize = NULL,
                         timeout = NULL,
+                        strategy = "auto",
+                        int.strategy = "auto",
                         ...) {
 
   # Check whether INLA package is available
@@ -52,8 +56,18 @@ engine_inlabru <- function(x,
                           is.vector(offset) || is.numeric(offset),
                           is.null(timeout) || is.numeric(timeout),
                           is.numeric(cutoff),
+                          is.character(strategy),
+                          is.character(int.strategy),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
   )
+
+  # Match strategy
+  strategy <- match.arg(strategy, c('auto', 'gaussian', 'simplified.laplace', 'laplace', 'adaptive'), several.ok = FALSE)
+  int.strategy <- match.arg(int.strategy, c('auto', 'ccd', 'grid', 'eb'), several.ok = FALSE)
+
+  # Set inlabru options for strategies. These are set globally
+  inlabru::bru_options_set(control.inla = list(strategy = strategy,
+                                               int.strategy = int.strategy))
 
   # Convert the study region
   region.poly <- as(sf::st_geometry(x$background), "Spatial")
@@ -104,9 +118,6 @@ engine_inlabru <- function(x,
 
   # If time out is specified
   if(!is.null(timeout)) INLA::inla.setOption(fmesher.timeout = timeout)
-
-  # Get barrier from the region polygon
-  # TODO: Add this in addition to spatial field below, possibly specify an option to calculate this
 
   # Calculate area in km²
   ar <- suppressWarnings(
@@ -258,6 +269,7 @@ engine_inlabru <- function(x,
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Set up integration points
+        # Check https://github.com/PhilipMostert/inlabruSDMs/blob/main/R/model_matrix_maker.R
         suppressWarnings(
           ips <- inlabru::ipoints(
             as(model$background,"Spatial"),
@@ -314,8 +326,9 @@ engine_inlabru <- function(x,
 
         # --- #
         # Defining the component function
-        comp <- as.formula(paste0("~ Intercept(1) ",
-                           ifelse(length(model$biodiversity)>1, "-1","")
+        # FIXME: Need to add each individual intercept here as well
+        comp <- to_formula(paste0("~ Intercept(1) "
+                           # ifelse(length(model$biodiversity)>1, "-1","")
                            )
                           )
 
@@ -353,7 +366,26 @@ engine_inlabru <- function(x,
             )
           }
         }
-
+        # Add spatial effect if set
+        if("latentspatial" %in% self$list_data() ){
+          spde <- self$get_data("latentspatial")
+          if(inherits(spde, "inla.spde") ){
+            for(i in 1:length(model$biodiversity)){
+              # Add spatial component term
+              comp <- update(comp,
+                             paste0(c("~ . + "),
+                                    paste0("spatial.field",ifelse(i>1,i,""),
+                                           "(main = coordinates, model = spde)"
+                                    )
+                             )
+              )
+            }
+          } else {
+            # FIXME: Make this more generic so that other latent effects are supported
+            stop("Non-SPDE effects not yet implemented")
+          }
+        }
+        # Set component
         self$set_data("components", comp)
 
         # Set number of threads via set.Options
@@ -362,8 +394,7 @@ engine_inlabru <- function(x,
                              blas.num.threads = getOption('ibis.nthread'))
 
         # Set any bru options via verbosity of fitting
-        inlabru::bru_options_set(bru_verbose = getOption('ibis.setupmessages'))
-        inlabru::bru_options_set(control.inla = list(int.strategy = "eb"))
+        inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
         invisible()
       },
       train = function(self, model, settings) {
@@ -393,19 +424,19 @@ engine_inlabru <- function(x,
         # Get components
         comp <- self$get_data("components")
 
+        # Get spatial effect if existant
+        if("latentspatial" %in% self$list_data() ){
+          spde <- self$get_data("latentspatial")
+        }
         # Get options
         options <- inlabru::bru_options_get()
         # -------- #
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
-        # Compute end of computation time
-        settings$set('end.time', Sys.time())
-
         # Fitting bru model
         fit_bru <- inlabru::bru(components = comp,
                                 likelihoods,
                                 options = options)
-
 
         if(!settings$get('inference_only')){
           # Messager
@@ -420,15 +451,19 @@ engine_inlabru <- function(x,
           }
           # Define prediction formula for inlabru
           pfo <- as.formula(
-            paste0("~exp( Intercept + ", paste0(model$predictors_names,collapse = " + "),")")
+            paste0("~exp( Intercept + ", paste0(model$predictors_names,collapse = " + "),
+                   ifelse("latentspatial" %in% self$list_data(), "+ spatial.field", ""),
+                   ")")
           )
 
           # Make a prediction
-          pred_bru <- inlabru:::predict.bru(
-            object = fit_bru,
-            data = preds,
-            formula = pfo,
-            n.samples = 1000
+          suppressWarnings(
+            pred_bru <- inlabru:::predict.bru(
+              object = fit_bru,
+              data = preds,
+              formula = pfo,
+              n.samples = 1000
+            )
           )
           # Get only the predicted variables of interest
           prediction <- raster::stack(
@@ -438,6 +473,9 @@ engine_inlabru <- function(x,
         } else {
           prediction <- NULL
         }
+
+        # Compute end of computation time
+        settings$set('end.time', Sys.time())
 
         # Definition of INLA Model object ----
         out <- bdproto(
@@ -533,92 +571,47 @@ engine_inlabru <- function(x,
             return(pred_cov)
           },
           # Function to plot SPDE if existing
-          plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, ...){
-            assertthat::assert_that(is.vector(dim))
-            if( length( self$fits$fit_best$size.spde2.blc ) == 1)
-            {
-              # Get spatial projections from model
-              # FIXME: Potentially make the plotting of this more flexible
-              gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
-              g.mean <- INLA::inla.mesh.project(gproj,
-                                                self$get_data('fit_best')$summary.random$spatial.field$mean)
-              g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random$spatial.field$sd)
+          plot_spatial = function(self, spat = NULL, what = "spatial.field", ...){
+            # Get mesh, domain and model
+            mesh <- self$get_data("mesh")
+            domain <- as(self$model$background, "Spatial")
+            mod <- self$get_data('fit_best')
 
-              # Convert to rasters
-              g.mean <- t(g.mean)
-              g.mean <- g.mean[rev(1:length(g.mean[,1])),]
-              r.m <- raster::raster(g.mean,
-                                    xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
-                                    ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
-                                    crs = self$get_data('mesh')$crs
-              )
-              g.sd  <- t(g.sd)
-              g.sd <- g.sd[rev(1:length(g.sd[,1])),]
-              r.sd <- raster::raster(g.sd,
-                                     xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
-                                     ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
-                                     crs = self$get_data('mesh')$crs
+            if(mod$model.random == "SPDE2 model") {
+              assertthat::assert_that(inherits(mod,'bru'),
+                                      inherits(mesh, 'inla.mesh'),
+                                      is.null(spat) || inherits("SpatialPixelsDataFrame"),
+                                      'model' %in% names(self),
+                                      is.character(what)
               )
 
-              spatial_field <- raster::stack(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
-              # Mask with prediction if exists
-              if(!is.null(self$get_data('prediction'))){
-                spatial_field <- raster::resample(spatial_field, self$get_data('prediction')[[1]])
-                spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
+              # Predict the spatial intensity surface ####
+              if(is.null(spat)){
+                spat <- inlabru::pixels(mesh, mask = domain)
               }
+              suppressWarnings(
+                lambda <- inlabru:::predict.bru(mod,
+                                                spat,
+                                                to_formula(paste0("~ exp(",what," + Intercept)"))
+                                                )
+              )
 
-              # -- #
-              if(kappa_cor){
-                # Also build correlation fun
-                # Get SPDE results
-                spde_results <- INLA::inla.spde2.result(
-                  inla = self$get_data('fit_best'),
-                  name = 'spatial.field',
-                  spde = self$get_data('spde'),
-                  do.transfer = TRUE)
+              # Convert to raster stack
+              lambda <- raster::stack(lambda)
 
-                # Large kappa (inverse range) equals a quick parameter change in space.
-                # Small kappa parameter have much longer, slower gradients.
-                Kappa <- INLA::inla.emarginal(function(x) x, spde_results$marginals.kappa[[1]])
-                sigmau <- INLA::inla.emarginal(function(x) sqrt(x), spde_results$marginals.variance.nominal[[1]])
-                r <- INLA::inla.emarginal(function(x) x, spde_results$marginals.range.nominal[[1]])
+              # Also get SPDE posteriors of the matern correlation and coveriance function
+              corplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +
+                ggplot2::ggtitle("Matern correlation")
+              covplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.covariance")) +
+                ggplot2::ggtitle("Matern covariance")
+              inlabru::multiplot(covplot, corplot)
 
-                # Get Mesh and distance between points
-                mesh <- self$get_data('mesh')
-                D <- as.matrix( dist(mesh$loc[, 1:2]) )
-
-                # Distance vector.
-                dis.cor <- data.frame(distance = seq(0, max(D), length = 100))
-                # Maximum distance by quarter of extent
-                dis.max <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 2)  # Take a quarter of the max distance
-
-                # Modified Bessel function to get correlation strength
-                dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * base::besselK(Kappa * dis.cor$distance, 1))
-                dis.cor$cor[1] <- 1
-                # ---
-                # Build plot
-                layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
-                plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
-                     xlab = 'Distance (proj. unit)', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
-                abline(v = dis.max,lty = 'dotted')
-                plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
-                plot(spatial_field[[2]], main = 'sd spatial effect')
-              } else {
-                # Just plot the SPDE
-                par(mfrow=c(1,2))
-                plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
-                plot(spatial_field[[2]], main = 'sd spatial effect')
-                # And return
-                return(spatial_field)
-              }
-
-
+              return(lambda)
             } else {
-              message(text_red('No spatial covariance in model specified.'))
+              message("No SPDE effect found.")
             }
           }
         )
-        return(out)
       }
     ))
 }

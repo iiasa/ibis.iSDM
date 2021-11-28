@@ -90,9 +90,7 @@ DistributionModel <- bdproto(
   plot = function(self, what = 'mean',...){
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
-      assertthat::assert_that(
-        inherits(pred,'Raster')
-      )
+      assertthat::assert_that(is.Raster(pred))
       # Match arguement
       what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
