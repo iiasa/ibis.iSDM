@@ -471,7 +471,7 @@ methods::setMethod(
                                # Check whether a single dataset is provided, otherwise add other intercepts
                                ifelse(length(types)==1,
                                       '',
-                                      paste(' + ',paste0('intercept_',
+                                      paste(' + ',paste0('Intercept_',
                                                          make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                          sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
                                ),
@@ -496,7 +496,7 @@ methods::setMethod(
           # If custom supplied formula, check that variable names match supplied predictors
           # TODO: This needs to be formatted to allow custom families
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed','intercept',
+            all( all.vars(form) %in% c('observed','Intercept',
                                        paste0('intercept_',sapply( model$biodiversity, function(x) x$type )),
                                        model$biodiversity[[id]]$predictors_names) )
           )
@@ -623,7 +623,7 @@ methods::setMethod(
 
           # Format out
           df <- rbind(model$biodiversity[[1]]$predictors,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)]) %>%
             subset(., complete.cases(.) )
 
           # Preprocessing security checks

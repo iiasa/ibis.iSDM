@@ -433,7 +433,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
       xq <- stats::quantile(x = x[], probs = windsor_props, na.rm = TRUE)
       min.value <- xq[1]
       max.value <- xq[2]
-      out <- units::drop_units(env)
+      if(is.vector(env)) out <- units::drop_units(env) else out <- env
       out[out < min.value] <- min.value
       out[out > max.value] <- max.value
       out

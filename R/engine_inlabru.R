@@ -254,6 +254,25 @@ engine_inlabru <- function(x,
           )
         }
       },
+      calc_integration_points = function(self, model){
+        # Setup integration points
+        # Check https://github.com/PhilipMostert/inlabruSDMs/blob/main/R/model_matrix_maker.R
+        suppressWarnings(
+          ips <- inlabru::ipoints(
+            as(model$background,"Spatial"),
+            self$get_data('mesh')
+          )
+        )
+        # Extract predictors add to integration point data
+        d <- get_ngbvalue(coords = ips@coords,
+                          env = model$predictors,
+                          longlat = raster::isLonLat(ips),
+                          field_space = c("x","y"))
+        for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
+        ips@data$Intercept <- 1
+        ips <- subset(ips, complete.cases(ips@data))
+        return(ips)
+      },
       # Main inlabru setup ----
       # Setup computation function
       setup = function(self, model, settings, ...){
@@ -268,14 +287,9 @@ engine_inlabru <- function(x,
         # Messager
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
-        # Set up integration points
-        # Check https://github.com/PhilipMostert/inlabruSDMs/blob/main/R/model_matrix_maker.R
-        suppressWarnings(
-          ips <- inlabru::ipoints(
-            as(model$background,"Spatial"),
-            self$get_data('mesh')
-          )
-        )
+        # --- #
+        ips <- self$calc_integration_points(model)
+        # --- #
 
         # Construct likelihoods for each entry in the dataset
         lhl <- list()
@@ -295,18 +309,18 @@ engine_inlabru <- function(x,
           o <- inlabru::bru_options_get()
           o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
 
-          # For poipo simply use point process
-          # if(model$biodiversity[[j]]$type == "poipo"){
-          #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-          #                       family = "cp",
-          #                       data = df,
-          #                       mesh = self$get_data('mesh'),
-          #                       ips = ips,
-          #                       E = model$biodiversity[[j]]$expect,
-          #                       Ntrials = model$biodiversity[[j]]$expect,
-          #                       options = o
-          #   )
-          # } else {
+          # For poipo simply use the log gaussian cox function
+          if(model$biodiversity[[j]]$type == "poipo"){
+            lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+                                family = "cp",
+                                data = df,
+                                mesh = self$get_data('mesh'),
+                                ips = ips,
+                                # E = model$biodiversity[[j]]$expect,
+                                # Ntrials = model$biodiversity[[j]]$expect,
+                                options = o
+            )
+          } else {
             lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
                                 family = model$biodiversity[[j]]$family,
                                 data = df,
@@ -314,10 +328,10 @@ engine_inlabru <- function(x,
                                 ips = ips,
                                 E = model$biodiversity[[j]]$expect,
                                 Ntrials = model$biodiversity[[j]]$expect,
-                                # include = include[[i]]
+                                # include = include[[i]],
                                 options = o
             )
-          # }
+          }
           lhl[[j]] <- lh
         }
 
@@ -326,11 +340,19 @@ engine_inlabru <- function(x,
 
         # --- #
         # Defining the component function
-        # FIXME: Need to add each individual intercept here as well
-        comp <- to_formula(paste0("~ Intercept(1) "
-                           # ifelse(length(model$biodiversity)>1, "-1","")
-                           )
-                          )
+        if(length(model$biodiversity)>1){
+          # FIXME: Indiv. Likelihoods currently still have a full intercept in there
+          comp <- to_formula(
+            paste(' ~ 0 + ',paste0('Intercept_',
+                             make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                             sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                  )
+          )
+        } else {
+          comp <- to_formula(
+            paste0( "~ 0 + Intercept(1)")
+          )
+        }
 
         for(i in 1:nrow(model$predictors_types)){
           # For numeric
@@ -374,7 +396,7 @@ engine_inlabru <- function(x,
               # Add spatial component term
               comp <- update(comp,
                              paste0(c("~ . + "),
-                                    paste0("spatial.field",ifelse(i>1,i,""),
+                                    paste0("spatial.field", ifelse(i > 1, i, ""),
                                            "(main = coordinates, model = spde)"
                                     )
                              )
@@ -391,7 +413,8 @@ engine_inlabru <- function(x,
         # Set number of threads via set.Options
         inlabru::bru_safe_inla(quietly = TRUE)
         INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
-                             blas.num.threads = getOption('ibis.nthread'))
+                             blas.num.threads = getOption('ibis.nthread')
+                             )
 
         # Set any bru options via verbosity of fitting
         inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
@@ -427,6 +450,7 @@ engine_inlabru <- function(x,
         # Get spatial effect if existant
         if("latentspatial" %in% self$list_data() ){
           spde <- self$get_data("latentspatial")
+          assertthat::assert_that(exists("spde"))
         }
         # Get options
         options <- inlabru::bru_options_get()
@@ -450,8 +474,9 @@ engine_inlabru <- function(x,
             }
           }
           # Define prediction formula for inlabru
+          fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
           pfo <- as.formula(
-            paste0("~exp( Intercept + ", paste0(model$predictors_names,collapse = " + "),
+            paste0("~",fun,"( Intercept + ", paste0(model$predictors_names,collapse = " + "),
                    ifelse("latentspatial" %in% self$list_data(), "+ spatial.field", ""),
                    ")")
           )
@@ -462,7 +487,7 @@ engine_inlabru <- function(x,
               object = fit_bru,
               data = preds,
               formula = pfo,
-              n.samples = 1000
+              n.samples = 1000 # Pass as parameter?
             )
           )
           # Get only the predicted variables of interest
@@ -527,6 +552,7 @@ engine_inlabru <- function(x,
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
             mod <- self$get_data('fit_best')
+            model <- self$model
             assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
                                     is.character(x.var),
@@ -550,9 +576,10 @@ engine_inlabru <- function(x,
             df_partial <- df_partial %>% as.data.frame()
 
             ## plot the unique effect of the covariate
+            fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
             pred_cov <- inlabru:::predict.bru(mod,
                                 df_partial,
-                                as.formula( paste("~ exp(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+                                as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
                                 n.samples = 100
                                 )
 
