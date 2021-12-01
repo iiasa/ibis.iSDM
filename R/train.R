@@ -31,7 +31,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
            only_linear = TRUE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
@@ -41,7 +41,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
            only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
@@ -68,7 +68,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
 
     # --- #
-    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -259,8 +259,8 @@ methods::setMethod(
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         spec_priors$rm( spec_priors$exists(vv) )
-        warning('Variable for set prior not found. Removed prior!')
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
@@ -464,17 +464,18 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
 
           # Go through each variable and build formula for likelihood
-          form <- to_formula(paste("observed ~ ", "Intercept +",
+          form <- to_formula(paste("observed ~ ", "0 + Intercept +",
                                paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
-                               # If multiple datasets, don't use intercept
-                               ifelse(length(ids)>1,"","-1"),
                                # Check whether a single dataset is provided, otherwise add other intercepts
                                ifelse(length(types)==1,
                                       '',
-                                      paste(' + ',paste0('Intercept_',
+                                      paste('+',paste0('Intercept_',
                                                          make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                                            )
                                ),
+                               # # If multiple datasets, don't use intercept
+                               # ifelse(length(ids)>1,"-1", ""),
                                collapse = " ")
                           )
 

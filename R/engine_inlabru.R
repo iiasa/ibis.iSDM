@@ -257,21 +257,32 @@ engine_inlabru <- function(x,
       calc_integration_points = function(self, model){
         # Setup integration points
         # Check https://github.com/PhilipMostert/inlabruSDMs/blob/main/R/model_matrix_maker.R
-        suppressWarnings(
-          ips <- inlabru::ipoints(
-            as(model$background,"Spatial"),
-            self$get_data('mesh')
-          )
+        # suppressWarnings(
+        #   ips <- inlabru::ipoints(
+        #     as(model$background,"Spatial"),
+        #     self$get_data('mesh')
+        #   )
+        # )
+        istk <- inla_make_integration_stack(mesh = self$get_data('mesh'),
+                                            mesh.area = self$get_data("mesh.area"),
+                                            cov = model$predictors,
+                                            pred_names =  model$predictors_names,
+                                            bdry = model$background,
+                                            id = "istack",
+                                            joint = FALSE)
+        ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
+        ips <- subset(ips, complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
+        # Convert to sp
+        ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
+                                         data = ips[, names(ips) %notin% c('x','y')],
+                                         proj4string = self$get_data('mesh')$crs
         )
-        # Extract predictors add to integration point data
-        d <- get_ngbvalue(coords = ips@coords,
-                          env = model$predictors,
-                          longlat = raster::isLonLat(ips),
-                          field_space = c("x","y"))
-        for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
-        ips@data$Intercept <- 1
+        # Select only the predictor names
+        ips <- subset(ips, select = c("observed", "intercept", "e", model$predictors_names))
         ips <- subset(ips, complete.cases(ips@data))
-        return(ips)
+        abs_E <- ips$e; ips$e <- NULL
+        # Return list of result
+        return(list(ips = ips, E = abs_E))
       },
       # Main inlabru setup ----
       # Setup computation function
@@ -286,10 +297,6 @@ engine_inlabru <- function(x,
         )
         # Messager
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
-
-        # --- #
-        ips <- self$calc_integration_points(model)
-        # --- #
 
         # Construct likelihoods for each entry in the dataset
         lhl <- list()
@@ -307,31 +314,49 @@ engine_inlabru <- function(x,
 
           # Options for specifying link function of likelihood
           o <- inlabru::bru_options_get()
-          o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
-
-          # For poipo simply use the log gaussian cox function
-          if(model$biodiversity[[j]]$type == "poipo"){
-            lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-                                family = "cp",
-                                data = df,
-                                mesh = self$get_data('mesh'),
-                                ips = ips,
-                                # E = model$biodiversity[[j]]$expect,
-                                # Ntrials = model$biodiversity[[j]]$expect,
-                                options = o
-            )
-          } else {
+          # Data type specific. Currently only binomial and poisson supported
+          if(model$biodiversity[[j]]$family == "poisson"){
+            # Calculate integration points for PPMs and to estimation data.frame
+            ips <- self$calc_integration_points(model)
+            abs_E = ips$E; ips <- ips$ips
+            assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
+            new <- sp:::rbind.SpatialPointsDataFrame(
+              df[,c('observed', 'intercept', model$biodiversity[[j]]$predictors_names)],
+              ips[,c('observed', 'intercept', model$biodiversity[[j]]$predictors_names)])
+            # Formulate the likelihood
             lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
                                 family = model$biodiversity[[j]]$family,
-                                data = df,
+                                data = new, # Combine presence and absence information
                                 mesh = self$get_data('mesh'),
-                                ips = ips,
-                                E = model$biodiversity[[j]]$expect,
+                                E = c(model$biodiversity[[j]]$expect, abs_E), # Combine Exposure variants
+                                # include = include[[i]], # Don't need this as all variables
+                                options = o
+            )
+            # Other way via cp and log gaussian cox family in inlabru
+            #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+            #                       family = "cp",
+            #                       data = df,
+            #                       mesh = self$get_data('mesh'),
+            #                       ips = ips,
+            #                       # E = model$biodiversity[[j]]$expect,
+            #                       # Ntrials = model$biodiversity[[j]]$expect,
+            #                       options = o
+            #   )
+          } else if(model$biodiversity[[j]]$family == "binomial"){
+            # Set likelihood to cloglog for binomial following Simpson 2016
+            o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
+
+            # Formulate the likelihood
+            lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
+                                family = model$biodiversity[[j]]$family,
+                                data = df, # Combine presence and absence information
+                                mesh = self$get_data('mesh'),
                                 Ntrials = model$biodiversity[[j]]$expect,
-                                # include = include[[i]],
+                                # include = include[[i]], # Don't need this as all variables
                                 options = o
             )
           }
+          # Add to list
           lhl[[j]] <- lh
         }
 
@@ -343,14 +368,14 @@ engine_inlabru <- function(x,
         if(length(model$biodiversity)>1){
           # FIXME: Indiv. Likelihoods currently still have a full intercept in there
           comp <- to_formula(
-            paste(' ~ 0 + ',paste0('Intercept_',
+            paste(' ~ 0 + Intercept(1) + ',paste0('Intercept_',
                              make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                              sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
                   )
           )
         } else {
           comp <- to_formula(
-            paste0( "~ 0 + Intercept(1)")
+            paste0( "~ Intercept(1)")
           )
         }
 
@@ -365,20 +390,24 @@ engine_inlabru <- function(x,
 
             # Specify priors if set
             if(!is.Waiver(model$priors)){
-              # Loop through all provided INLA priors
-              supplied_priors <- model$priors$ids()
-              # TODO:
-              p <- ""
-            } else {
-              if(m == "rw1"){
+              # If a prior has been specified
+              if(model$priors$varnames() == model$predictors_types$predictors[i]){
+                vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
+                pp <- paste0(c(
+                  ', mean.linear = ', model$priors$get(vn)[1],', ',
+                  'prec.linear = ', model$priors$get(vn)[2],''
+                ),collapse = "" )
+              } else {pp <- "" }
+            } else { pp <- "" }
+            if(m == "rw1"){
+              stop("TODO")
                 # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
                 p <- 'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
               }
-            }
             comp <- update.formula(comp,
                                    paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
-                                                          ', model = "',m,'")'), collapse = " ")
+                                                          pp,', model = "',m,'")'), collapse = " ")
             )
           } else if( model$predictors_types$type[i] == "factor"){
             # factor_full uses the full factor. fact_contrast uses the first level as reference
@@ -391,6 +420,7 @@ engine_inlabru <- function(x,
         # Add spatial effect if set
         if("latentspatial" %in% self$list_data() ){
           spde <- self$get_data("latentspatial")
+          assertthat::assert_that(inherits(spde, "inla.spde2"))
           if(inherits(spde, "inla.spde") ){
             for(i in 1:length(model$biodiversity)){
               # Add spatial component term
@@ -416,8 +446,9 @@ engine_inlabru <- function(x,
                              blas.num.threads = getOption('ibis.nthread')
                              )
 
-        # Set any bru options via verbosity of fitting
+        # Set any other bru options via verbosity of fitting
         inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
+        # inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95)) # FIXME: Works. But inlabru quantiles functions do not. Set quantiles to be computed
         invisible()
       },
       train = function(self, model, settings) {
@@ -450,7 +481,9 @@ engine_inlabru <- function(x,
         # Get spatial effect if existant
         if("latentspatial" %in% self$list_data() ){
           spde <- self$get_data("latentspatial")
-          assertthat::assert_that(exists("spde"))
+          assertthat::assert_that(exists("spde"),
+                                  inherits(spde, "inla.spde2")
+          )
         }
         # Get options
         options <- inlabru::bru_options_get()
@@ -458,13 +491,18 @@ engine_inlabru <- function(x,
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
         # Fitting bru model
-        fit_bru <- inlabru::bru(components = comp,
-                                likelihoods,
-                                options = options)
+        try({
+          fit_bru <- inlabru::bru(components = comp,
+                                  likelihoods,
+                                  options = options)
+        }, silent = TRUE)
+        if(!exists("fit_bru")){
+          stop('Model did not converge. Try to simplify structure and check priors!')
+        }
 
         if(!settings$get('inference_only')){
           # Messager
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -473,14 +511,33 @@ engine_inlabru <- function(x,
               preds[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
           }
-          # Define prediction formula for inlabru
+          # --- #
+          # Define formula
+          # Transformation to use
           fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+
+          # Get variables for inlabru
+          if(length(model$biodiversity)>1){
+            vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
+            ii <- paste("Intercept + ",paste0('Intercept_',
+                                              make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                              sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+            )
+            # Assert that variables are used in the likelihoods
+            assertthat::assert_that(
+              all( vn %in% (sapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
+            )
+          } else {
+            vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% unique()
+            ii <- "Intercept"
+          }
+
           pfo <- as.formula(
-            paste0("~",fun,"( Intercept + ", paste0(model$predictors_names,collapse = " + "),
+            paste0("~",fun,"( ",ii, " + ", paste0(vn,collapse = " + "),
                    ifelse("latentspatial" %in% self$list_data(), "+ spatial.field", ""),
                    ")")
           )
-
+          # --- #
           # Make a prediction
           suppressWarnings(
             pred_bru <- inlabru:::predict.bru(
@@ -492,7 +549,7 @@ engine_inlabru <- function(x,
           )
           # Get only the predicted variables of interest
           prediction <- raster::stack(
-            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
           )
 
         } else {
