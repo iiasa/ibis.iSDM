@@ -88,8 +88,9 @@ methods::setMethod(
     for(times in sort(unique(df$time))){
       nd <- subset(df, time == times)
       # Project suitability
-      out <- fit$project(newdata = nd)
-      names(out) <- paste0('suitability_', times)
+      # FIXME: Adapt for uncertainty projections as well!
+      out <- fit$project(newdata = nd)[["mean"]]
+      names(out) <- paste0("suitability", "_", times)
 
       # If constrains are set, apply them
       if(!is.Waiver(scenario_constraints)){

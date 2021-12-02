@@ -151,7 +151,9 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'INLABRU-Model')) {
-      self$partial(self$get_data(x), x.vars = what, ...)
+      # Use inlabru effect plot
+      ggplot2::ggplot() +
+        inlabru:::gg(mod$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)

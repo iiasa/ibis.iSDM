@@ -41,6 +41,8 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
+  myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
+
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid

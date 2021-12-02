@@ -333,15 +333,15 @@ engine_inlabru <- function(x,
                                 options = o
             )
             # Other way via cp and log gaussian cox family in inlabru
-            #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-            #                       family = "cp",
-            #                       data = df,
-            #                       mesh = self$get_data('mesh'),
-            #                       ips = ips,
-            #                       # E = model$biodiversity[[j]]$expect,
-            #                       # Ntrials = model$biodiversity[[j]]$expect,
-            #                       options = o
-            #   )
+            # lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+            #                     family = "cp",
+            #                     data = df,
+            #                     mesh = self$get_data('mesh'),
+            #                     ips = ips,
+            #                     # E = model$biodiversity[[j]]$expect,
+            #                     # Ntrials = model$biodiversity[[j]]$expect,
+            #                     options = o
+            # )
           } else if(model$biodiversity[[j]]$family == "binomial"){
             # Set likelihood to cloglog for binomial following Simpson 2016
             o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
@@ -367,15 +367,23 @@ engine_inlabru <- function(x,
         # Defining the component function
         if(length(model$biodiversity)>1){
           # FIXME: Indiv. Likelihoods currently still have a full intercept in there
-          comp <- to_formula(
+          comp <- as.formula(
             paste(' ~ 0 + Intercept(1) + ',paste0('Intercept_',
                              make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                              sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
                   )
           )
         } else {
-          comp <- to_formula(
+          comp <- as.formula(
             paste0( "~ Intercept(1)")
+          )
+        }
+
+        # Offset if set
+        if(!is.Waiver(model$offset)){
+          ovn <- colnames(model$offset)[3]
+          comp <- update.formula(comp,
+                                 paste(c(' ~ . +', paste0(ovn,'(main = ', ovn, ', model = "offset")')), collapse = " ")
           )
         }
 
@@ -424,7 +432,7 @@ engine_inlabru <- function(x,
           if(inherits(spde, "inla.spde") ){
             for(i in 1:length(model$biodiversity)){
               # Add spatial component term
-              comp <- update(comp,
+              comp <- update.formula(comp,
                              paste0(c("~ . + "),
                                     paste0("spatial.field", ifelse(i > 1, i, ""),
                                            "(main = coordinates, model = spde)"
@@ -462,16 +470,6 @@ engine_inlabru <- function(x,
           inherits(self$get_data("likelihoods"), 'list')
         )
 
-        # Convert predictors to SpatialPixelsDataFrame as required for
-        if(class(model$predictors) == 'data.frame') {
-          preds <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                                          data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                          proj4string = self$get_data('mesh')$crs
-                                          )
-          preds <- subset(preds, complete.cases(preds@data)) # Remove missing data
-          preds <- as(preds, 'SpatialPixelsDataFrame')
-        } else stop('Predictors not in right format.')
-
         # Get likelihood
         likelihoods <- self$get_data("likelihoods")
 
@@ -490,19 +488,121 @@ engine_inlabru <- function(x,
         # -------- #
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
+        if( settings$get(what='varsel') ){
+          message('Performing variable selection...')
+
+          # FIXME: Catch all variables with set priors and keep them!
+          keep <- NULL
+
+          # Remove variables that are never removed
+          # if(!is.null(keep)){
+          #   te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
+          #   # Also remove keep from master_form as we won't use them below
+          #   master_form <- as.formula(paste0(response,' ~ ', paste0(te,collapse = " + ")," - 1"))
+          # }
+          # --- #
+          # Iterate through unique combinations of variables backwards
+          te <- attr(stats::terms.formula(comp),'term.label')
+          te <- te[grep('Intercept',te,ignore.case = T,invert = T)]
+          pb <- progress::progress_bar$new(total = length(te),format = "Backwards eliminating variables... :spin [:elapsedfull]")
+          test_form <- comp
+          o <- options; o$bru_verbose <- FALSE
+          not_found <- TRUE
+          while(not_found) {
+            pb$tick()
+            # --- #
+            # Base Model #
+            fit <- try({
+              inlabru::bru(components = test_form,
+                                      likelihoods,
+                                      options = o)
+            },silent = TRUE)
+            if(class(fit)[1]=='try-error') {not_found <- FALSE;next()}
+
+            results_base <- data.frame(form = deparse1(test_form),
+                            converged = fit$ok,
+                            waic = fit$waic$waic,
+                            dic = fit$dic$dic,
+                            mean.deviance = fit$dic$mean.deviance )
+            results <- data.frame()
+
+            # Formula terms
+            te <- attr(stats::terms.formula(test_form), 'term.label')
+            te_int <- te[grep('Intercept',te,ignore.case = T, invert = F)] # capture intercept(s)
+            te <- te[grep('Intercept',te,ignore.case = T, invert = T)]
+            assertthat::assert_that(length(te) > 0, length(te_int) > 0)
+
+            # Now for each term in variable list
+            for(vars in te){
+              # New formula
+              new_form <- update(test_form, paste0('~ . - ',vars ))
+
+              fit <- try({
+                inlabru::bru(components = new_form,
+                             likelihoods,
+                             options = o)
+              },silent = TRUE)
+              if(class(fit)[1]=='try-error') next()
+
+              results <- rbind(results, data.frame(form = deparse1(new_form),
+                                         converged = fit$ok,
+                                         waic = fit$waic$waic,
+                                         dic = fit$dic$dic,
+                                         mean.deviance = fit$dic$mean.deviance )
+              )
+              rm(fit)
+            } # End of loop
+
+            if(!is.na(results_base$dic) || nrow(results) > 0) {
+              # Now check whether any of the new models are 'better' than the full model
+              # If yes, continue loop, if no stop
+              if(results_base$dic <= min(results$dic, na.rm = TRUE)){
+                not_found <- FALSE
+                best_found <- results_base$form
+              } else {
+                # Get best model
+                test_form <- as.formula(results$form[which.min(results$dic)])
+              }
+              rm(results_base, results)
+            } else {
+              # Check whether formula is empty, if yes, set to not_found to FALSE
+              te <- attr(stats::terms.formula(test_form),'term.label')
+              if(length(te)<=4){
+                not_found <- FALSE
+                best_found <- test_form
+              }
+            }
+
+          } # End of While loop
+          # Make sure to add kept variables back
+          if(!is.null(keep)){
+            best_found <- paste0(best_found," + ", paste0(keep,collapse = " + "))
+          }
+          # Replace component to be tested with best found
+          comp <- as.formula(best_found)
+        }
+
         # Fitting bru model
         try({
           fit_bru <- inlabru::bru(components = comp,
                                   likelihoods,
                                   options = options)
-        }, silent = TRUE)
+        }, silent = FALSE)
         if(!exists("fit_bru")){
           stop('Model did not converge. Try to simplify structure and check priors!')
         }
 
         if(!settings$get('inference_only')){
-          # Messager
+          # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
+
+          # Convert predictors to SpatialPixelsDataFrame as required for inlabru
+          preds <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+                                              data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+                                              proj4string = self$get_data('mesh')$crs
+          )
+          preds <- subset(preds, complete.cases(preds@data)) # Remove missing data
+          preds <- as(preds, 'SpatialPixelsDataFrame')
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -518,22 +618,30 @@ engine_inlabru <- function(x,
 
           # Get variables for inlabru
           if(length(model$biodiversity)>1){
-            vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
+            vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
             ii <- paste("Intercept + ",paste0('Intercept_',
                                               make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                               sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
             )
             # Assert that variables are used in the likelihoods
             assertthat::assert_that(
-              all( vn %in% (sapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
+              all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
             )
           } else {
             vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% unique()
+            # vn <- fit_bru$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
+            # assertthat::assert_that(all(vn %in% all.vars(comp)),
+            #                         all(vn %in% fit_bru$names.fixed))
             ii <- "Intercept"
           }
+          # Add offset if set
+          if(!is.Waiver(model$offset)){
+            ovn <- colnames(model$offset)[3]
+            ofs <- paste0("log(", ovn,') + ')
+          } else { ofs <- ""}
 
           pfo <- as.formula(
-            paste0("~",fun,"( ",ii, " + ", paste0(vn,collapse = " + "),
+            paste0("~",fun,"( ",ii, " + ", ofs, paste0(vn, collapse = " + "),
                    ifelse("latentspatial" %in% self$list_data(), "+ spatial.field", ""),
                    ")")
           )
@@ -574,32 +682,76 @@ engine_inlabru <- function(x,
             "prediction" = prediction
           ),
           # Projection function
-          project = function(self, newdata, mode = 'coef', backtransf = NULL){
+          project = function(self, newdata, form = NULL, n.samples = 1000){
             assertthat::assert_that('fit_best' %in% names(self$fits),
-                                    is.data.frame(newdata) || is.matrix(newdata),
-                                    mode %in% c('coef','sim','full'),
-                                    assertthat::has_name(newdata,c('x','y'))
+                                    is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
+                                    is.null(form) || is.character(form) || is.formula(form)
             )
-            stop("TBD")
-            # Try and guess backtransformation
-            if(is.null(backtransf)){
-              fam <- self$get_data('fit_best')$.args$family
-              backtransf <- ifelse(fam == 'poisson', exp, logistic)
+            # Get model
+            mod <- self$get_data('fit_best')
+            model <- self$model
+
+            # If newdata is not yet a SpatialPixel object, transform
+            if(!inherits(newdata,'SpatialPixelsDataFrame')){
+              assertthat::assert_that(
+                assertthat::has_name(newdata,c('x','y'))
+              )
+              # Convert predictors to SpatialPixelsDataFrame as required for inlabru
+              newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
+                                                  data = newdata[, names(newdata) %notin% c('x','y')],
+                                                  proj4string = self$get_data('mesh')$crs
+              )
+              newdata <- subset(newdata, complete.cases(newdata@data)) # Remove missing data
+              newdata <- as(newdata, 'SpatialPixelsDataFrame')
+            }
+            # Check that model variables are in prediction dataset
+            assertthat::assert_that(
+              all(mod$names.fixed[grep('Intercept', mod$names.fixed,invert = TRUE)] %in% names(newdata))
+                  )
+
+            if(is.null(form)){
+              # Try and guess backtransformation
+              backtransf <- ifelse(mod$bru_info$lhoods[[1]]$family == 'poisson','exp','logistic')
+
+              # Build the formula
+              if(length(model$biodiversity)>1){
+                vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
+                ii <- paste("Intercept + ",paste0('Intercept_',
+                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                )
+                # Assert that variables are used in the likelihoods
+                assertthat::assert_that(
+                  all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
+                )
+              } else {
+                vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% unique()
+                # vn <- mod$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
+                assertthat::assert_that(all(vn %in% mod$names.fixed))
+                ii <- "Intercept"
+              }
+
+              form <- as.formula(
+                paste0("~",backtransf,"( ",ii, " + ", paste0(vn, collapse = " + "),
+                       ifelse(length(mod$summary.spde2.blc)>0, "+ spatial.field", ""),
+                       ")")
+              )
             }
 
-            if(mode == 'coef'){
-              # We use the coefficient prediction
-              out <- coef_prediction(mesh = self$get_data('mesh'),
-                                     mod = self,
-                                     type = 'mean',
-                                     backtransf = backtransf
+            # Perform the projection
+            suppressWarnings(
+              out <- inlabru:::predict.bru(
+                object = mod,
+                data = newdata,
+                formula = form,
+                n.samples = n.samples
               )
-            } else if(mode == 'sim'){
-              # Simulate from posterior. Not yet coded
-              stop('Simulation from posterior not yet there.')
-            } else {
-              stop('Full prediction not yet added.')
-            }
+            )
+            # Get only the predicted variables of interest
+            out <- raster::stack(
+              out[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+            )
+
             # Return result
             return(out)
           },
@@ -652,7 +804,10 @@ engine_inlabru <- function(x,
                 ggplot2::geom_line() +
                 ggplot2::labs(x = x.var, y = "Partial effect")
             }
-            return(pred_cov)
+            return(
+              pred_cov[,c(x.var,'mean','sd','q0.025','median','q0.975',
+                          'smin','smax','cv','var')]
+              )
           },
           # Function to plot SPDE if existing
           plot_spatial = function(self, spat = NULL, what = "spatial.field", ...){
@@ -676,7 +831,7 @@ engine_inlabru <- function(x,
               suppressWarnings(
                 lambda <- inlabru:::predict.bru(mod,
                                                 spat,
-                                                to_formula(paste0("~ exp(",what," + Intercept)"))
+                                                as.formula(paste0("~ exp(",what," + Intercept)"))
                                                 )
               )
 

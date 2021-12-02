@@ -68,7 +68,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
 
     # --- #
-    #rm_corPred = TRUE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    #rm_corPred = FALSE; varsel = TRUE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -480,7 +480,8 @@ methods::setMethod(
                           )
 
           # Add offset if specified
-          # if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          # TODO: Not quite sure if this formulation works for inlabru predictor expressions
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
