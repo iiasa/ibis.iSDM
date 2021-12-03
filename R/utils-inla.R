@@ -1031,7 +1031,7 @@ inla.backstep <- function(master_form,
   pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
   test_form <- master_form
   not_found <- TRUE
-  results <- data.frame()
+  best_found <- NULL
   while(not_found) {
     pb$tick()
     # --- #
@@ -1121,9 +1121,9 @@ inla.backstep <- function(master_form,
     } else {
       # Check whether formula is empty, if yes, set to not_found to FALSE
       te <- attr(stats::terms.formula(test_form),'term.label')
-      if(length(te)<=2){
+      if(length(te)<=3){
         not_found <- FALSE
-        best_found <- test_form
+        best_found <- o
       }
     }
 
