@@ -611,7 +611,7 @@ engine_inla <- function(x,
               proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
-          prediction <- alignRasters(prediction,template = temp,method = 'bilinear',func = mean,cl = FALSE)
+          prediction <- raster::resample(prediction,template = temp, method = 'bilinear')
 
         } else {
           # No prediction to be conducted
