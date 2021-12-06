@@ -68,16 +68,16 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
 
     # --- #
-    #rm_corPred = FALSE; varsel = TRUE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
     settings$set('varsel', varsel)
+    settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('verbose', verbose)
     settings$set('bias_variable', bias_variable)
     settings$set('bias_value',bias_value)
-    settings$set('only_linear',only_linear)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -494,17 +494,43 @@ methods::setMethod(
             )
           }
         } else {
-          stop("Parser for INLAbru custom formulas yet to be implemented.")
-          # If custom supplied formula, check that variable names match supplied predictors
-          # TODO: This needs to be formatted to allow custom families
+          # If custom likelihood formula is provided, check that variable names match supplied predictors
+          form <- model$biodiversity[[id]]$equation
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed','Intercept',
-                                       paste0('intercept_',sapply( model$biodiversity, function(x) x$type )),
+            all( all.vars(form) %in% c('observed',
                                        model$biodiversity[[id]]$predictors_names) )
           )
-          # FIXME: check that
-          # TODO: Remove elements from predictors that are not used in the formula
+          # Remove non-covered predictors from the predictor names objects
+          model$biodiversity[[id]]$predictors_names <- model$biodiversity[[id]]$predictors_names[which(model$biodiversity[[id]]$predictors_names %in% all.vars(form))]
+          model$biodiversity[[id]]$predictors_types <- model$biodiversity[[id]]$predictors_types[
+            which( model$biodiversity[[id]]$predictors_types$predictors %in% model$biodiversity[[id]]$predictors_names )
+          ,]
+
+          # Convert to formula to be safe
           form <- to_formula( model$biodiversity[[id]]$equation )
+          # Add generic Intercept if not set in formula
+          if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
+          # If length of ids is larger than 1, add dataset specific intercept too
+          if(length(ids)>1){
+            form <- update.formula(form,
+                                   paste0(". ~ . + ",
+                                          paste0('Intercept_',
+                                                 make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                 sapply( model$biodiversity, function(x) x$type ),collapse = ' + '))
+                                   )
+          }
+          if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+            # Update with spatial term
+            form <- update.formula(form, paste0(" ~ . + ",
+                                                # For SPDE components, simply add spatial.field
+                                                ifelse(which(id%in%ids)==1,
+                                                       "spatial.field",
+                                                       paste0("spatial.field",which(id%in%ids))
+                                                      )
+                                                )
+            )
+          }
+
         }
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- form
