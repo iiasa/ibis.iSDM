@@ -249,7 +249,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
-    if(st_crs(range) != st_crs(x$background)) range <- st_transform(range, st_crs(x$background))
+    if(sf::st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
 
     # Template raster for background
     if(!is.Waiver(x$predictors)){

@@ -41,6 +41,8 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
+  myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
+
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
@@ -609,7 +611,7 @@ engine_inla <- function(x,
               proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
-          prediction <- alignRasters(prediction,template = temp,method = 'bilinear',func = mean,cl = FALSE)
+          prediction <- raster::resample(prediction,template = temp, method = 'bilinear')
 
         } else {
           # No prediction to be conducted

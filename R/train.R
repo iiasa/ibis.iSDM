@@ -31,7 +31,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
            only_linear = TRUE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
@@ -41,7 +41,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
            only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
@@ -73,11 +73,11 @@ methods::setMethod(
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
     settings$set('varsel', varsel)
+    settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('verbose', verbose)
     settings$set('bias_variable', bias_variable)
     settings$set('bias_value',bias_value)
-    settings$set('only_linear',only_linear)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -127,7 +127,7 @@ methods::setMethod(
     if(!is.Waiver(x$latentfactors)){
       # Get the method and check whether it is supported by the engine
       m <- attr(x$get_latent(),'method')
-      if(x$get_engine()!="<INLA>" & m == 'spde'){
+      if(x$get_engine() %notin% c("<INLA>", "<INLABRU>") & m == 'spde'){
         if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
@@ -250,7 +250,8 @@ methods::setMethod(
         x$engine$name,
         "<GDB>" = x$priors$classes() == 'GDBPrior',
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
-        "<INLA>" = x$priors$classes() == 'INLAPrior'
+        "<INLA>" = x$priors$classes() == 'INLAPrior',
+        "<INLABRU>" = x$priors$classes() == 'INLAPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
@@ -258,8 +259,8 @@ methods::setMethod(
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         spec_priors$rm( spec_priors$exists(vv) )
-        warning('Variable for set prior not found. Removed prior!')
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
@@ -286,7 +287,7 @@ methods::setMethod(
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
-          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = st_crs(model$background)),
+          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = sf::st_crs(model$background)),
                                    x$limits)
         )
       )
@@ -453,6 +454,102 @@ methods::setMethod(
       out <- x$engine$train(model, settings)
 
       # ----------------------------------------------------------- #
+      #### INLABRU Engine ####
+    } else if( inherits(x$engine,'INLABRU-Engine') ){
+
+      # Process per supplied dataset
+      for(id in ids) {
+
+        # Default equation found (e.g. no separate specification of effects)
+        if(model$biodiversity[[id]]$equation=='<Default>'){
+
+          # Go through each variable and build formula for likelihood
+          form <- to_formula(paste("observed ~ ", "0 + Intercept +",
+                               paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
+                               # Check whether a single dataset is provided, otherwise add other intercepts
+                               ifelse(length(types)==1,
+                                      '',
+                                      paste('+',paste0('Intercept_',
+                                                         make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                                            )
+                               ),
+                               # # If multiple datasets, don't use intercept
+                               # ifelse(length(ids)>1,"-1", ""),
+                               collapse = " ")
+                          )
+
+          # Add offset if specified
+          # TODO: Not quite sure if this formulation works for inlabru predictor expressions
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+            # Update with spatial term
+            form <- update.formula(form, paste0(" ~ . + ",
+                                                # For SPDE components, simply add spatial.field
+                                                ifelse(which(id%in%ids)==1,
+                                                       "spatial.field",
+                                                       paste0("spatial.field",which(id%in%ids))
+                                                       )
+                                       )
+            )
+          }
+        } else {
+          # If custom likelihood formula is provided, check that variable names match supplied predictors
+          form <- model$biodiversity[[id]]$equation
+          assertthat::assert_that(
+            all( all.vars(form) %in% c('observed',
+                                       model$biodiversity[[id]]$predictors_names) )
+          )
+          # Remove non-covered predictors from the predictor names objects
+          model$biodiversity[[id]]$predictors_names <- model$biodiversity[[id]]$predictors_names[which(model$biodiversity[[id]]$predictors_names %in% all.vars(form))]
+          model$biodiversity[[id]]$predictors_types <- model$biodiversity[[id]]$predictors_types[
+            which( model$biodiversity[[id]]$predictors_types$predictors %in% model$biodiversity[[id]]$predictors_names )
+          ,]
+
+          # Convert to formula to be safe
+          form <- to_formula( model$biodiversity[[id]]$equation )
+          # Add generic Intercept if not set in formula
+          if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
+          # If length of ids is larger than 1, add dataset specific intercept too
+          if(length(ids)>1){
+            form <- update.formula(form,
+                                   paste0(". ~ . + ",
+                                          paste0('Intercept_',
+                                                 make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                 sapply( model$biodiversity, function(x) x$type ),collapse = ' + '))
+                                   )
+          }
+          if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+            # Update with spatial term
+            form <- update.formula(form, paste0(" ~ . + ",
+                                                # For SPDE components, simply add spatial.field
+                                                ifelse(which(id%in%ids)==1,
+                                                       "spatial.field",
+                                                       paste0("spatial.field",which(id%in%ids))
+                                                      )
+                                                )
+            )
+          }
+
+        }
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- form
+        rm(form)
+
+        # For each type include expected data
+        # expectation vector (area for integration points/nodes and 0 for presences)
+        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
+        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
+      }
+
+      # Run the engine setup script
+      # FIXME: Do some checks on whether an observation falls into the mesh?
+      x$engine$setup(model, settings)
+
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model, settings)
+
+      # ----------------------------------------------------------- #
       #### GDB Engine ####
     } else if( inherits(x$engine,"GDB-Engine") ){
       # GDB does not support joint likelihood models
@@ -554,7 +651,7 @@ methods::setMethod(
 
           # Format out
           df <- rbind(model$biodiversity[[1]]$predictors,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)]) %>%
             subset(., complete.cases(.) )
 
           # Preprocessing security checks

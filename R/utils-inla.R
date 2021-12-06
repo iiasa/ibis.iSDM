@@ -43,7 +43,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
       pcrds = rbind(pcrds, pcrds[1, ])
       polys[[i]] = sp::Polygons(list(sp::Polygon(pcrds)), ID = as.character(i))
     }
-    SP = sp::SpatialPolygons(polys, proj4string = CRS(proj4string(x)))
+    SP = sp::SpatialPolygons(polys, proj4string = sp::CRS(sp::proj4string(x)))
     voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,
                                                                       1], y = crds[, 2], area = sapply(slot(SP, "polygons"),
                                                                                                        slot, "area"), row.names = sapply(slot(SP, "polygons"),
@@ -96,8 +96,8 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     }),proj4string = mesh$crs)
 
     # Calculate area of each polygon in km2
-    w <- st_area(
-       st_as_sf(polys)
+    w <- sf::st_area(
+       sf::st_as_sf(polys)
     ) %>% units::set_units("km²") %>% as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
@@ -126,16 +126,16 @@ mesh_as_sf <- function(mesh) {
     cur <- pointindex[index, ]
     # Construct a Polygons object to contain the triangle
     Polygons(list(
-             Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
+             sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
              ID = index
              )
   }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
     # Convert the polygons to a SpatialPolygons object
     sp::SpatialPolygons(., proj4string = mesh$crs) %>%
     # Convert to sf
-    st_as_sf(.)
+    sf::st_as_sf(.)
   # Calculate and add area to the polygon
-  dp$areakm2 <- st_area(dp) %>% units::set_units("km²") %>% as.numeric()
+  dp$areakm2 <- sf::st_area(dp) %>% units::set_units("km²") %>% as.numeric()
   dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
   return(dp)
 }
@@ -176,7 +176,7 @@ mesh_barrier <- function(mesh, region.poly){
   }
 
   posTri <- sp::SpatialPoints(posTri)
-  proj4string(posTri) <- proj4string(mesh$crs)
+  sp::proj4string(posTri) <- sp::proj4string(mesh$crs)
 
   # Overlay with background
   ovl <- sp::over(region.poly, posTri, returnList=T)
@@ -209,7 +209,7 @@ coords_in_mesh <- function(mesh, coords) {
   if (inherits(coords, "Spatial")) {
     loc <- sp::coordinates(coords)
   } else if(inherits(coords, 'sf')){
-    loc <- st_coordinates(coords)
+    loc <- sf::st_coordinates(coords)
   } else if(inherits(coords, 'matrix') || inherits(coords, 'data.frame') ){
     assertthat::assert_that(ncol(coords)==2,msg = 'Supplied coordinate matrix is larger than 2 columns.')
     loc <- coords[,c(1,2)]
@@ -1031,7 +1031,7 @@ inla.backstep <- function(master_form,
   pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
   test_form <- master_form
   not_found <- TRUE
-  results <- data.frame()
+  best_found <- NULL
   while(not_found) {
     pb$tick()
     # --- #
@@ -1121,9 +1121,9 @@ inla.backstep <- function(master_form,
     } else {
       # Check whether formula is empty, if yes, set to not_found to FALSE
       te <- attr(stats::terms.formula(test_form),'term.label')
-      if(length(te)<=2){
+      if(length(te)<=3){
         not_found <- FALSE
-        best_found <- test_form
+        best_found <- o
       }
     }
 

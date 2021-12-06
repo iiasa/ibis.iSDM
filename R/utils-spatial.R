@@ -53,9 +53,9 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
     length(coords)>0
   )
   # Convert to sf
-  points <- sf::st_as_sf(points, coords = coords, crs = st_crs(poly))
+  points <- sf::st_as_sf(points, coords = coords, crs = sf::st_crs(poly))
   assertthat::assert_that(
-    st_crs(poly) == st_crs(points)
+    sf::st_crs(poly) == sf::st_crs(points)
   )
 
   # Within test
@@ -121,7 +121,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
  # If there is an attribute, but for some reason the file is not sf, use that one
  if(!is.null(attr(df, "sf_column"))) {
    df <-  sf::st_as_sf(df)
-   if(attr(df, "sf_column") != geom_name) df <- sf:::rename.sf(df, geom_name = "geom")
+   if(attr(df, "sf_column") != geom_name){
+     names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+     sf::st_geometry(df) <- geom_name
+   }
    return(df)
  }
  # Commonly used column names
@@ -143,7 +146,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
  # If at this point df is still not a sf object, then it is unlikely to be converted
  assertthat::assert_that(inherits(df, 'sf'),
                          msg = "Point object could not be converted to an sf object.")
- if(attr(df, "sf_column") != geom_name) df <- sf:::rename.sf(df, geom_name = "geom")
+ if(attr(df, "sf_column") != geom_name){
+   names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+   sf::st_geometry(df) <- geom_name
+ }
  return(df)
 }
 
@@ -272,9 +278,9 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x))
-  raster::raster(nrows=nrow(x), ncols=ncol(x),
-                        crs=x@crs,
-                        ext=extent(x), ...)
+  raster::raster(nrows = nrow(x), ncols = ncol(x),
+                        crs = x@crs,
+                        ext = raster::extent(x), ...)
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
@@ -427,7 +433,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
       xq <- stats::quantile(x = x[], probs = windsor_props, na.rm = TRUE)
       min.value <- xq[1]
       max.value <- xq[2]
-      out <- units::drop_units(env)
+      if(is.vector(env)) out <- units::drop_units(env) else out <- env
       out[out < min.value] <- min.value
       out[out > max.value] <- max.value
       out

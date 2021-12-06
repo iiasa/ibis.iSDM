@@ -181,6 +181,7 @@ to_formula <- function(formula){
     # Asign a new waiver object
     formula = new_waiver()
   }
+  return(formula)
 }
 
 #' Create formula matrix
