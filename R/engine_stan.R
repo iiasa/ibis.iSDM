@@ -136,6 +136,61 @@ engine_stan <- function(x,
         # Set cores
         options(mc.cores = self$stan_param$cores)
 
+        # Add pseudo-absence points if necessary
+        # Include nearest predictor values for each
+        if('poipo' == model$biodiversity[[1]]$type) {
+
+          # Get background layer
+          bg <- x$engine$get_data('template')
+          assertthat::assert_that(!is.na(cellStats(bg,min)))
+
+          # Sample pseudo absences
+          abs <- create_pseudoabsence(
+            env = model$predictors,
+            presence = model$biodiversity[[1]]$observations,
+            bias = settings$get('bias_variable'),
+            template = bg,
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
+            replace = TRUE
+          )
+          abs$intercept <- 1 # Add dummy intercept
+          # Combine absence and presence and save
+          abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
+          # Furthermore rasterize observed presences
+          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
+                                    fun = 'count', background = 0)
+          # If family is not poisson, assume factor distribution
+          # FIXME: Ideally this is better organized through family
+          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
+          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
+                        model$biodiversity[[1]]$observations[,c('x','y')] )
+          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+
+          # Format out
+          df <- rbind(model$biodiversity[[1]]$predictors,
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+            subset(., complete.cases(.) )
+
+          # Preprocessing security checks
+          assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                   any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                   nrow(df) == nrow(model$biodiversity[[1]]$observations)
+          )
+          # Add offset if existent
+          if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
+
+          # Define expectation as very small vector following Renner et al.
+          w <- ppm_weights(df = df,
+                           pa = model$biodiversity[[1]]$observations[['observed']],
+                           bg = bg,
+                           weight = 1e-6
+          )
+          df$w <- w # Also add as column
+
+          model$biodiversity[[1]]$predictors <- df
+          model$biodiversity[[1]]$expect <- w
+        }
+
         # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 

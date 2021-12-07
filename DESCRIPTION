@@ -99,6 +99,7 @@ Collate:
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
+    'utils-stan.R'
     'validate.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
