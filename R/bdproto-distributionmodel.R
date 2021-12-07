@@ -24,7 +24,7 @@ DistributionModel <- bdproto(
   print = function(self) {
     # TODO: Have a lot more information in here and to be prettified
     # FIXME: Have engine-specific code moved to engine
-    if(inherits(self, 'INLA-Model')){
+    if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
       if( length( self$fits ) != 0 ){
         # Get strongest effects
         ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
@@ -75,6 +75,14 @@ DistributionModel <- bdproto(
       #   '\n  \033[2mStrongest effects:\033[22m',
       #   '\n     ', name_atomic(vi$names)
       # ))
+    } else if( inherits(self, 'XGBOOST-Model') ) {
+      vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest effects:\033[22m',
+        '\n     ', name_atomic(vi$Feature)
+      ))
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -90,9 +98,9 @@ DistributionModel <- bdproto(
   plot = function(self, what = 'mean',...){
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
-      assertthat::assert_that(
-        inherits(pred,'Raster')
-      )
+      assertthat::assert_that(is.Raster(pred))
+      # Match arguement
+      what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       raster::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
@@ -115,14 +123,17 @@ DistributionModel <- bdproto(
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
       mboost:::summary.mboost(self$get_data(x))
-    } else if(inherits(self, 'INLA-Model')){
+    } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
-    } else if(inherits(self, 'INLA-Model')){
+    } else if(inherits(self, 'STAN-Model')){
       summary(self$get_data(x))
+    } else if(inherits(self, "XGBOOST-Model")){
+      xgboost::xgb.importance(model = self$get_data('fit_best'))
+      # xgboost::xgb.ggplot.importance(o)
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -151,9 +162,15 @@ DistributionModel <- bdproto(
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'STAN-Model')) {
       plot( self$get_data(x) )
+    } else if(inherits(self, 'INLABRU-Model')) {
+      # Use inlabru effect plot
+      ggplot2::ggplot() +
+        inlabru:::gg(self$get_data(x)$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)
+    } else {
+      self$partial(self$get_data(x), x.vars = NULL)
     }
   },
   # Get specific fit from this Model

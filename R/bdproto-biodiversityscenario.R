@@ -34,7 +34,8 @@ BiodiversityScenario <- bdproto(
                 )
     )
     # Constrains
-    cs <- self$get_constrains()
+    cs <- self$get_constraints()
+    if(!is.Waiver(cs)) cs <- vapply(cs, function(x) x$method, character(1))
     # Thresholds
     tr <- self$get_threshold()
 
@@ -44,7 +45,7 @@ BiodiversityScenario <- bdproto(
                    "\n  Predictors:     ", pn,
                    "\n  Time period:    ", tp,
                    ifelse(!is.Waiver(cs)||!is.Waiver(tr), "\n --------- ", ""),
-                   ifelse(is.Waiver(cs),"", paste0("\n  Constraints:      ", cs) ),
+                   ifelse(is.Waiver(cs),"", paste0("\n  Constraints:    ", text_green(paste(paste0(names(cs),' (',cs,')'),collapse = ', ')) ) ),
                    ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3),' (',names(tr[1]),')') ),
                    "\n --------- ",
                    "\n  Scenarios fitted: ", ifelse(is.Waiver(self$scenarios),text_yellow('None'), text_green('Yes'))
@@ -60,6 +61,10 @@ BiodiversityScenario <- bdproto(
     x <- get(self$modelobject)
     assertthat::validate_that(x$id == self$modelid)
     invisible()
+  },
+  # Show the name of the Model
+  show = function(self) {
+    self$modelobject
   },
   # Get Model
   get_model = function(self){
@@ -87,9 +92,8 @@ BiodiversityScenario <- bdproto(
     }
   },
   # Get constrains for model
-  get_constrains = function(self){
-    # TODO: To be implemented
-    return(new_waiver())
+  get_constraints = function(self){
+    return( self$constraints )
   },
   # Get thresholds if specified
   get_threshold = function(self){
@@ -109,14 +113,20 @@ BiodiversityScenario <- bdproto(
     names(sc) <- 'presence'
     return(sc)
   },
-  # Show the name of the Model
-  show = function(self) {
-    self$modelobject
-  },
   # Set Predictors
   set_predictors = function(self, x){
     assertthat::assert_that(inherits(x, "PredictorDataset"))
     bdproto(NULL, self, predictors = x)
+  },
+  # Set constrains
+  set_constraints = function(self, x){
+    if(!is.Waiver(self$get_constraints())){
+      cr <- self$get_constraints()
+      # FIXME: Remove duplicates
+      bdproto(NULL, self, constraints = c(cr, x))
+    } else {
+      bdproto(NULL, self, constraints = x)
+    }
   },
   # Get Predictors
   get_predictors = function(self){
@@ -172,7 +182,7 @@ BiodiversityScenario <- bdproto(
     g <- ggplot2::ggplot() +
       stars::geom_stars(data = obj, downsample = c(1,1,0)) +
       ggplot2::coord_equal() +
-      ggplot2::theme_bw() +
+      ggplot2::theme_bw(base_size = 20) +
       ggplot2::scale_x_discrete(expand=c(0,0)) +
       ggplot2::scale_y_discrete(expand=c(0,0)) +
       ggplot2::scale_fill_gradientn(colours = ibis_colours$sdm_colour, na.value = NA) +
@@ -191,9 +201,13 @@ BiodiversityScenario <- bdproto(
     assertthat::assert_that(is.null(position) || is.numeric(position) || is.character(position),
                             is.character(variable))
     # Threshold
-    thresh_reference <- grep('threshold',modf$show_rasters(),value = T)
+    obj <- self$get_model()
+    thresh_reference <- grep('threshold',obj$show_rasters(),value = T)
     # If there is more than one threshold only use the one from variable
-    if(length(thresh_reference)>1) thresh_reference <- grep(variable, thresh_reference,value = T)
+    if(length(thresh_reference)>1) {
+      warning('More than one baseline threshold. Using the first one.')
+      thresh_reference <- grep(variable, thresh_reference,value = T)[1]
+    }
     # Check that baseline and scenarios are all there
     assertthat::assert_that(
       !is.Waiver(self$get_scenarios()),
@@ -224,25 +238,57 @@ BiodiversityScenario <- bdproto(
     levels(diff_f) <- rat
     diff_f <- raster::mask(diff_f, baseline)
 
-    # Plot
-    if('rasterVis' %in% installed.packages()[,1]){
-      rasterVis::levelplot(diff_f,
-                           margin = F,
-                           scales = list(draw=TRUE),
-                           col.regions = c("grey75","coral","cyan3","grey25"),
-                           main = paste0('Change between baseline and ', position)
-                           )
-    } else {
-      # Convert to stars for plotting otherwise
-      # FIXME: Stars plotting bugs out if there are fewer than 4 classes
-      diff_f <- stars::st_as_stars(diff_f, att = 'diff');names(diff_f) <- 'Change'
-      cols <- c("grey75","coral","cyan3","grey25")
-      stars:::plot.stars(diff_f, axes = TRUE,key.pos = 1, border = NA, extent = sf::st_bbox(baseline),
-                         main = paste0('Change between baseline and ', position),
-                         col = cols)
-    }
-    return(diff_f)
+    cols <- c("grey75","coral","cyan3","grey25")
 
+    # Plot
+    # Convert to stars for plotting otherwise
+    diff_ff <- stars::st_as_stars(diff_f, att = 'diff');names(diff_ff) <- 'Change'
+    # Use ggplot
+    ggplot2::ggplot() +
+      stars::geom_stars(data = diff_ff) +
+      ggplot2::coord_equal() +
+      ggplot2::theme_light(base_size = 18) +
+      ggplot2::scale_x_discrete(expand=c(0,0)) +
+      ggplot2::scale_y_discrete(expand=c(0,0)) +
+      ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
+      ggplot2::theme(legend.position = "bottom") +
+      ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
+    # Return
+    return(diff_f)
+  },
+  # Summarize the change in thresholded layer between timesteps
+  summarize_relative_change = function(self, plot = TRUE){
+    # Check that baseline and scenario thresholds are all there
+    assertthat::assert_that(
+      !is.Waiver(self$get_scenarios()),
+      'threshold' %in% attributes(self$get_scenarios())$names,
+      msg = "This function summarizes thresholds which need to be calculated first."
+    )
+    # Get the scenario predictions and from there the thresholds
+    scenario <- self$get_scenarios()['threshold']
+    st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
+    time <- stars::st_get_dimension_values(scenario,which = 'band')
+    # Add area to stars (hacky) # FIXME?
+    ar <- stars:::st_area.stars(scenario)
+    ar_unit <- units::deparse_unit(ar$area)
+    new <- as(scenario,"Raster") * as(ar, "Raster")
+    new <- raster::setZ(new, time)
+    # Convert to scenarios to data.frame
+    df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., complete.cases(.))
+    names(df)[4] <- "area"
+    # Aggregate
+    df <- tapply(df$area, df$band, function(x) sum(x, na.rm = TRUE))
+    df <- units::as_units(df,units::as_units(ar_unit))  # Set Units
+    out <- data.frame(time = time, area = units::set_units(df,'km^2'))
+
+    if(plot){
+      ggplot2::ggplot(out,
+                      ggplot2::aes(x = time, y = as.numeric(area))) +
+        ggplot2::theme_classic(base_size = 18) +
+        ggplot2::geom_line(size = 2) +
+        ggplot2::labs(x = "Time", y = expression(Area(km^2)))
+    }
+    return(out)
   },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){

@@ -53,9 +53,9 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
     length(coords)>0
   )
   # Convert to sf
-  points <- sf::st_as_sf(points, coords = coords, crs = st_crs(poly))
+  points <- sf::st_as_sf(points, coords = coords, crs = sf::st_crs(poly))
   assertthat::assert_that(
-    st_crs(poly) == st_crs(points)
+    sf::st_crs(poly) == sf::st_crs(points)
   )
 
   # Within test
@@ -102,6 +102,55 @@ extent_expand <- function(e,f=0.1){
   ymax <- e@ymax+yi
 
   return(extent(c(xmin,xmax,ymin,ymax)))
+}
+
+#' Convert a data.frame or tibble to simple features
+#'
+#' @description This function tries to guess the coordinate field and converts a data.frame
+#' to a simpel feature
+#' @param df A [`data.frame`], [`tibble`] or [`sf`] object
+#' @param geom_name A [`character`] indicating the name of the geometry column. Default: 'geometry'
+#' @keywords internal, utils
+#' @noRd
+guess_sf <- function(df, geom_name = 'geometry'){
+ assertthat::assert_that(
+   inherits(df,'data.frame') || inherits(df, 'sf') || inherits(df, 'tibble')
+ )
+ # If sf, return immediately
+ if(inherits(df, 'sf')) return(df)
+ # If there is an attribute, but for some reason the file is not sf, use that one
+ if(!is.null(attr(df, "sf_column"))) {
+   df <-  sf::st_as_sf(df)
+   if(attr(df, "sf_column") != geom_name){
+     names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+     sf::st_geometry(df) <- geom_name
+   }
+   return(df)
+ }
+ # Commonly used column names
+ nx = c("x","X","lon","longitude")
+ ny = c("y", "Y", "lat", "latitude")
+ ng = c("geom", "geometry", "geometry")
+
+ # Check if geom is present
+ if(any( ng %in% names(df) )){
+   attr(df, "sf_column") <- ng[which(ng %in% names(df))]
+   df <- sf::st_as_sf(df)
+ }
+ # Finally check if any commonly used coordinate name exist
+ if(any( nx %in% names(df))){
+   df <- sf::st_as_sf(df, coords = c(nx[which(nx %in% names(df))],
+                                     ny[which(ny %in% names(df))])
+                      )
+ }
+ # If at this point df is still not a sf object, then it is unlikely to be converted
+ assertthat::assert_that(inherits(df, 'sf'),
+                         msg = "Point object could not be converted to an sf object.")
+ if(attr(df, "sf_column") != geom_name){
+   names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+   sf::st_geometry(df) <- geom_name
+ }
+ return(df)
 }
 
 #' Calculate the dimensions from a provided extent object
@@ -229,9 +278,9 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x))
-  raster::raster(nrows=nrow(x), ncols=ncol(x),
-                        crs=x@crs,
-                        ext=extent(x), ...)
+  raster::raster(nrows = nrow(x), ncols = ncol(x),
+                        crs = x@crs,
+                        ext = raster::extent(x), ...)
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
@@ -336,7 +385,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
    assertthat::assert_that(
-     inherits(env,'Raster'),
+     inherits(env,'Raster') || inherits(env, 'stars'),
      is.character(option),
      base::length(option) == 1,   # TODO: incorporate possibility of doing multiple options at once and in the order they are supplied?
      option %in% c('none','pca', 'scale', 'norm','windsor'),
@@ -346,61 +395,105 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
   # Nothing to be done
   if(option == 'none') return(env)
 
+  # If stars see if we can convert it to a stack
+  if(inherits(env, 'stars')){
+    lyrs <- names(env) # Names of predictors
+    times <- stars::st_get_dimension_values(env, which = 3) # Time attribute
+    # Convert to list
+    env_list <- list()
+    for(name in lyrs) env_list[[name]] <- as(env[name], 'Raster')
+  }
+
   # Normalization
   if(option == 'norm'){
-    out <- (env - raster::cellStats(env, stat="min")) /
-      (raster::cellStats(env, stat="max") -
-         raster::cellStats(env, stat="min"))
+    if(is.Raster(env)){
+      out <- (env - raster::cellStats(env, stat="min")) /
+        (raster::cellStats(env, stat="max") -
+           raster::cellStats(env, stat="min"))
+    } else {
+      out <- lapply(env_list, function(x) {
+        (x - raster::cellStats(x, stat="min")) /
+          (raster::cellStats(x, stat="max") -
+             raster::cellStats(x, stat="min"))
+      })
+    }
   }
   # Scaling
   if(option == 'scale'){
-    out <- raster::scale(env, center = TRUE, scale = TRUE)
+    if(is.Raster(env)){
+      out <- raster::scale(env, center = TRUE, scale = TRUE)
+    } else {
+      out <- lapply(env_list, function(x) raster::scale(x, center = TRUE, scale = TRUE))
+    }
   }
 
   # Windsorization
   if(option == 'windsor'){
-    # FIXME: Possibly allow option to be suppilied for this one
-    xq <- stats::quantile(x = env[], probs = windsor_props, na.rm = TRUE)
-    min.value <- xq[1]
-    max.value <- xq[2]
-    out <- env
-    out[out < min.value] <- min.value
-    out[out > max.value] <- max.value
+    win <- function(x, windsor_props){
+      xq <- stats::quantile(x = x[], probs = windsor_props, na.rm = TRUE)
+      min.value <- xq[1]
+      max.value <- xq[2]
+      if(is.vector(env)) out <- units::drop_units(env) else out <- env
+      out[out < min.value] <- min.value
+      out[out > max.value] <- max.value
+      out
+    }
+    if(is.Raster(env)){
+      out <- win(env, windsor_props )
+    } else {
+      out <- lapply(env_list, function(x) win(x, windsor_props))
+    }
   }
 
   # Principle component separation of variables
   # Inspiration taken from RSToolbox package
   if(option == 'pca'){
-    assertthat::assert_that(raster::nlayers(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
+    if(is.Raster(env)){
+      assertthat::assert_that(raster::nlayers(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
 
-    # FIXME: Allow a reduction to few components than nr of layers?
-    nComp <- nlayers(env)
-    # Construct mask of all cells
-    envMask <- !sum(raster::calc(env, is.na))
-    assertthat::assert_that(cellStats(envMask,sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
-    env <- raster::mask(env, envMask, maskvalue = 0)
+      # FIXME: Allow a reduction to few components than nr of layers?
+      nComp <- nlayers(env)
+      # Construct mask of all cells
+      envMask <- !sum(raster::calc(env, is.na))
+      assertthat::assert_that(cellStats(envMask,sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
+      env <- raster::mask(env, envMask, maskvalue = 0)
 
-    # Sample covariance from stack and fit PCA
-    covMat <- raster::layerStats(env, stat = "cov", na.rm = TRUE)
-    pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
-    # Add means and grid cells
-    pca$center <- covMat$mean
-    pca$n.obs <- raster::ncell(env)
+      # Sample covariance from stack and fit PCA
+      covMat <- raster::layerStats(env, stat = "cov", na.rm = TRUE)
+      pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
+      # Add means and grid cells
+      pca$center <- covMat$mean
+      pca$n.obs <- raster::ncell(env)
 
-    # FIXME: Allow parallel processing for rather large files and check how many nodes are available
-    # Predict principle components
-    out <- raster::predict(env, pca,na.rm = TRUE, index = 1:nComp)
+      # FIXME: Allow parallel processing for rather large files and check how many nodes are available
+      # Predict principle components
+      out <- raster::predict(env, pca,na.rm = TRUE, index = 1:nComp)
 
-    names(out) <- paste0("PC", 1:nComp)
+      names(out) <- paste0("PC", 1:nComp)
+      return(out)
+    } else {
+      # TODO:
+      stop("Principal component transformation for stars objects is not yet implemented. Pre-process externally!")
+    }
+  }
+  # If stars convert back to stars object
+  if(inherits(env, 'stars')){
+    # Convert list back to stars
+    out <- do.call(
+      stars:::c.stars,
+      lapply(out, function(x) stars::st_as_stars(x))
+    )
+    # Reset names of attributes
+    names(out) <- lyrs
+    out <- stars::st_set_dimensions(out, which = 3, values = times, names = "time")
+  } else {
+    # Final security checks
+    assertthat::assert_that(
+      raster::nlayers(env) == raster::nlayers(out),
+      is_comparable_raster(out,env)
+    )
     return(out)
   }
-
-  # Final security checks
-  assertthat::assert_that(
-    raster::nlayers(env) == raster::nlayers(out),
-    is_comparable_raster(out,env)
-  )
-  return(out)
 }
 
 #' Create spatial derivate of raster stacks
@@ -584,7 +677,7 @@ create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
   if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
 
   # Add coordinates if still sf object
-  if(inherits(presence,'sf')) { presence$x <- st_coordinates(presence$geometry)[,1];presence$y <- st_coordinates(presence$geometry)[,2] }
+  if(inherits(presence,'sf')) { presence$x <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,1];presence$y <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,2] }
   # Rasterize the presence estimates
   bg1 <- raster::rasterize(presence[,c('x','y')], template, fun = 'count', background = 0)
   bg1 <- raster::mask(bg1, template)

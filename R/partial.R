@@ -76,7 +76,6 @@ methods::setMethod(
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             is.character(x.vars),
                             is.null(constant) || is.numeric(constant),
-                            is.numeric(variable_length),
                             is.logical(plot)
     )
     # Work around to call partial response directly

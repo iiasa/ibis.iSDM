@@ -41,6 +41,8 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
+  myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
+
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
@@ -136,7 +138,7 @@ engine_inla <- function(x,
       plot = function(self, assess = FALSE){
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA::inla.mesh.assessment(
+          out <- INLA:::inla.mesh.assessment(
               mesh = self$get_data('mesh'),
               spatial.range = 3,
               alpha = 2,
@@ -152,7 +154,7 @@ engine_inla <- function(x,
                col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
                )
         } else {
-          INLA::plot.inla.mesh( self$get_data('mesh') )
+          INLA:::plot.inla.mesh( self$get_data('mesh') )
         }
       },
       # Spatial latent function
@@ -163,6 +165,7 @@ engine_inla <- function(x,
       calc_latent_spatial = function(self,type = 'spde', alpha = 2,
                                      priors = NULL,
                                      polynames = NULL,
+                                     varname = "spatial.field",
                                      ...){
         # Catch prior objects
         if(is.null(priors) || is.Waiver(priors)) priors <- NULL
@@ -179,7 +182,7 @@ engine_inla <- function(x,
           # adjmat <- INLA::inla.graph2matrix(nc.nb)
           # Save the adjaceny matrix as output
           self$data$latentspatial <- adjmat
-          self$data$s.index <- as.numeric(attr(nc.nb,'spatial.field'))
+          self$data$s.index <- as.numeric(attr(nc.nb,varname))
         } else if(type=='spde'){
           # Check that everything is correctly specified
           if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
@@ -205,7 +208,7 @@ engine_inla <- function(x,
             )
           }
           # Make index for spatial field
-          self$data$s.index <- INLA::inla.spde.make.index(name = "spatial.field",
+          self$data$s.index <- INLA::inla.spde.make.index(name = varname,
                                                           n.spde = self$data$latentspatial$n.spde,
                                                           n.group = 1,
                                                           n.repl = 1)
@@ -222,13 +225,20 @@ engine_inla <- function(x,
         invisible()
       },
       # Get latent spatial equation bit
-      get_equation_latent_spatial = function(self, method){
+      # Set vars to 2 or larger to get copied spde's
+      get_equation_latent_spatial = function(self, method, vars = 1){
+        assertthat::assert_that(is.numeric(vars))
         if(method == 'spde'){
           assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
                                   msg = 'Latent spatial has not been calculated.')
-          return(
-            paste0('f(spatial.field, model = ',method,')')
-          )
+          # SPDE string
+          if(vars == 1){
+            ss <- paste0('f(spatial.field, model = ',method,')')
+          } else {
+            ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field\', model = ",method,", fixed = TRUE)")
+          }
+          return(ss)
+
         } else if(method == 'car'){
           assertthat::assert_that(inherits(self$data$latentspatial,'dgTMatrix'),
                                   msg = 'Neighborhood matrix has not been calculated.')
@@ -463,8 +473,8 @@ engine_inla <- function(x,
         for(i in 1:length(fam)) cf[[i]] <- list(link = ifelse(fam[i] == 'poisson','log','cloglog' ))
         if(length(fam)==1 && fam == 'binomial') cf[[1]]$link <- 'logit'
 
-        # Shared link?
-        if(length(fam)==1) li <- 1 else li <- NULL
+        # Shared link? Set to
+        if(length(fam)==1) {li <- 1} else { li <- NULL} # FIXME: Check whether links have to be set individually per observation
 
         if('spde' %in% all.vars(model$biodiversity[[1]]$equation) ){
             spde <- self$get_data('latentspatial')
@@ -513,10 +523,10 @@ engine_inla <- function(x,
                           control.predictor = list(A = INLA::inla.stack.A(stk_inference),
                                                    link = li, # Link to NULL for multiple likelihoods!
                                                    compute = TRUE),  # Compute for marginals of the predictors.
-                          control.compute = list(cpo = FALSE, waic = FALSE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
-                          control.fixed = list(mean = 0),# prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
+                          control.compute = list(cpo = FALSE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
+                          # control.fixed = list(mean = 0),# prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                           verbose = settings$get(what='verbose'), # To see the log of the model runs
-                          INLA::control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                          control.inla = INLA::control.inla(int.strategy = "auto"), # Empirical bayes runs faster
                           #              strategy = 'simplified.laplace'
                           #              # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
                           # ), # To make it run faster...
@@ -558,7 +568,7 @@ engine_inla <- function(x,
                                                         return.marginals.predictor = FALSE), # Don't predict marginals to save speed
                                  # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
                                  # control.fixed = INLA::control.fixed(mean = 0),#, prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
-                                 INLA::control.inla(int.strategy = "eb"), # Empirical bayes for integration
+                                 INLA::control.inla(int.strategy = "eb"), # Empirical bayes is generally faster
                                  #                    strategy = 'simplified.laplace'
                                  #                    # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
                                  # ),
@@ -568,10 +578,12 @@ engine_inla <- function(x,
           if(class(fit_pred)=='try-error') stop('Model did not converge. Try to simplify structure and check priors!')
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
-          post <- fit_pred$summary.linear.predictor[index.pred, ]
+          # Only difference between linear.predictor and fitted.values is that
+          # fitted.values applies the (inverse of the) link function,
+          # so it doesn't include the observation distribution part of posterior predictions.
+          post <- fit_pred$summary.linear.predictor[index.pred, ] # Changed to fitted values
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection
-          # TODO: Wrap Backtransform into a distribution dependent function
           if(length(fam)==1){
             if(fam == 'poisson') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
             if(fam == 'binomial') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- logistic(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
@@ -579,7 +591,7 @@ engine_inla <- function(x,
             # Joint likelihood of Poisson log and binomial cloglog following Simpson et al.
             post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
           }
-          post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode','kld') )
+          post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
           names(post) <- make.names(names(post))
 
           # Fill prediction
@@ -599,7 +611,7 @@ engine_inla <- function(x,
               proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
-          prediction <- alignRasters(prediction,template = temp,method = 'bilinear',func = mean,cl = FALSE)
+          prediction <- raster::resample(prediction,template = temp, method = 'bilinear')
 
         } else {
           # No prediction to be conducted

@@ -12,6 +12,54 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
                           is.character(variant)
                           )
+  # Function from SDraw
+  voronoi.polygons <- function (x, bounding.polygon = NULL, range.expand = 0.1)
+  {
+    if (!inherits(x, "SpatialPoints")) {
+      stop("Must pass a SpatialPoints* object to voronoi.polygons.")
+    }
+    crds = sp::coordinates(x)
+    if (is.null(bounding.polygon)) {
+      if (length(range.expand) == 1) {
+        range.expand <- rep(range.expand, 2)
+      }
+      else if (length(range.expand) > 2) {
+        warning("Only first two elements of range.expand used in voronoi.polygons")
+        range.expand <- range.expand[1:2]
+      }
+      dxy <- diff(c(t(sp::bbox(x))))[c(1, 3)]
+      bb <- sp::bbox(x) + (matrix(dxy, nrow = 2, ncol = 1) %*%
+                             matrix(c(-1, 1), nrow = 1, ncol = 2)) * abs(range.expand)
+      bb <- c(t(bb))
+    }
+    else {
+      bb = c(t(sp::bbox(bounding.polygon)))
+    }
+    z = deldir::deldir(crds[, 1], crds[, 2], rw = bb)
+    w = deldir::tile.list(z)
+    polys = vector(mode = "list", length = length(w))
+    for (i in seq(along = polys)) {
+      pcrds = cbind(w[[i]]$x, w[[i]]$y)
+      pcrds = rbind(pcrds, pcrds[1, ])
+      polys[[i]] = sp::Polygons(list(sp::Polygon(pcrds)), ID = as.character(i))
+    }
+    SP = sp::SpatialPolygons(polys, proj4string = sp::CRS(sp::proj4string(x)))
+    voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,
+                                                                      1], y = crds[, 2], area = sapply(slot(SP, "polygons"),
+                                                                                                       slot, "area"), row.names = sapply(slot(SP, "polygons"),
+                                                                                                                                         slot, "ID")))
+    if (!is.null(bounding.polygon)) {
+      bounding.polygon <- rgeos::gUnion(bounding.polygon, bounding.polygon)
+      voronoi.clipped <- rgeos::gIntersection(voronoi, bounding.polygon,
+                                       byid = TRUE, id = row.names(voronoi))
+      df <- data.frame(voronoi)
+      df$area <- sapply(slot(voronoi.clipped, "polygons"),
+                        slot, "area")
+      voronoi <- sp::SpatialPolygonsDataFrame(voronoi.clipped,
+                                          df)
+    }
+    voronoi
+  }
   # Precalculate the area of each
   # Get areas for Voronoi tiles around each integration point
   dd <- deldir::deldir(mesh$loc[,1], mesh$loc[,2])
@@ -27,7 +75,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
   } else if (variant == 'gpc2'){
     # Try to convert to spatial already
     if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
-    tiles <- SDraw::voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
+    tiles <- voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
     w <- sapply(1:length(tiles), function(p) {
       aux <- tiles[p, ]
 
@@ -48,8 +96,8 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     }),proj4string = mesh$crs)
 
     # Calculate area of each polygon in km2
-    w <- st_area(
-       st_as_sf(polys)
+    w <- sf::st_area(
+       sf::st_as_sf(polys)
     ) %>% units::set_units("km²") %>% as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
@@ -78,16 +126,16 @@ mesh_as_sf <- function(mesh) {
     cur <- pointindex[index, ]
     # Construct a Polygons object to contain the triangle
     Polygons(list(
-             Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
+             sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
              ID = index
              )
   }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
     # Convert the polygons to a SpatialPolygons object
     sp::SpatialPolygons(., proj4string = mesh$crs) %>%
     # Convert to sf
-    st_as_sf(.)
+    sf::st_as_sf(.)
   # Calculate and add area to the polygon
-  dp$areakm2 <- st_area(dp) %>% units::set_units("km²") %>% as.numeric()
+  dp$areakm2 <- sf::st_area(dp) %>% units::set_units("km²") %>% as.numeric()
   dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
   return(dp)
 }
@@ -128,7 +176,7 @@ mesh_barrier <- function(mesh, region.poly){
   }
 
   posTri <- sp::SpatialPoints(posTri)
-  proj4string(posTri) <- proj4string(mesh$crs)
+  sp::proj4string(posTri) <- sp::proj4string(mesh$crs)
 
   # Overlay with background
   ovl <- sp::over(region.poly, posTri, returnList=T)
@@ -161,7 +209,7 @@ coords_in_mesh <- function(mesh, coords) {
   if (inherits(coords, "Spatial")) {
     loc <- sp::coordinates(coords)
   } else if(inherits(coords, 'sf')){
-    loc <- st_coordinates(coords)
+    loc <- sf::st_coordinates(coords)
   } else if(inherits(coords, 'matrix') || inherits(coords, 'data.frame') ){
     assertthat::assert_that(ncol(coords)==2,msg = 'Supplied coordinate matrix is larger than 2 columns.')
     loc <- coords[,c(1,2)]
@@ -331,6 +379,9 @@ post_prediction <- function(mod, nsamples = 100,
   preds_types <- mod$model$predictors_types
   ofs <- mod$model$offset
 
+  # See:
+  # https://groups.google.com/g/r-inla-discussion-group/c/TjRwP6tB0nk/m/FSD39whVBgAJ
+  # https://groups.google.com/g/r-inla-discussion-group/c/Lw2fI-u-EvU/m/rB_-gwWAAgAJ
   # --- #
   # Simulate from approximated posterior
   samples <- INLA::inla.posterior.sample(n = nsamples,
@@ -980,7 +1031,7 @@ inla.backstep <- function(master_form,
   pb <- progress::progress_bar$new(total = length(te),format = "Backward eliminating variables... :spin [:elapsedfull]")
   test_form <- master_form
   not_found <- TRUE
-  results <- data.frame()
+  best_found <- NULL
   while(not_found) {
     pb$tick()
     # --- #
@@ -1070,9 +1121,9 @@ inla.backstep <- function(master_form,
     } else {
       # Check whether formula is empty, if yes, set to not_found to FALSE
       te <- attr(stats::terms.formula(test_form),'term.label')
-      if(length(te)<=2){
+      if(length(te)<=3){
         not_found <- FALSE
-        best_found <- test_form
+        best_found <- o
       }
     }
 
