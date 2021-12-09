@@ -426,6 +426,7 @@ engine_xgboost <- function(x,
         # Also append boosting control option to settings
         for(entry in names(params)) settings$set(entry, params[entry])
 
+        # Definition of XGBOOST Model object ----
         # Create output
         out <- bdproto(
           "XGBOOST-Model",
@@ -438,34 +439,33 @@ engine_xgboost <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.vars = NULL, plot = TRUE, ...){
-            assertthat::assert_that(is.character(x.vars) || is.null(x.vars),
-                                    !missing(x.vars))
+          partial = function(self, x.var = NULL, plot = TRUE, ...){
+            assertthat::assert_that(is.character(x.var) || is.null(x.var))
             check_package("pdp")
             mod <- self$get_data('fit_best')
             df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
 
-            # Match x.vars to argument
-            if(is.null(x.vars)){
-              x.vars <- colnames(df)
+            # Match x.var to argument
+            if(is.null(x.var)){
+              x.var <- colnames(df)
             } else {
-              x.vars <- match.arg(x.vars, colnames(df), several.ok = FALSE)
+              x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
             }
 
             # Check that variables are in
-            assertthat::assert_that(all( x.vars %in% colnames(df) ),
+            assertthat::assert_that(all( x.var %in% colnames(df) ),
                                     msg = 'Variable not in predicted model.')
 
             pp <- data.frame()
-            pb <- progress::progress_bar$new(total = length(x.vars))
-            for(v in x.vars){
+            pb <- progress::progress_bar$new(total = length(x.var))
+            for(v in x.var){
               p1 <- pdp::partial(mod, pred.var = v, ice = FALSE, center = TRUE,
                                  plot = FALSE, rug = TRUE, train = df)
               names(p1) <- c("partial", "yhat")
               p1$variable <- v
               pp <- rbind(pp, p1)
-              if(length(x.vars) > 1) pb$tick()
+              if(length(x.var) > 1) pb$tick()
             }
 
             if(plot){
@@ -476,27 +476,56 @@ engine_xgboost <- function(x,
                 ggplot2::labs(x = "", y = expression(hat(y))) +
                 ggplot2::facet_wrap(~variable,scales = 'free')
             }
-
             # Return the data
             return(pp)
-
           },
-          # Spatial partial dependence plot option from embercardo
-          spartial = function(self, predictors, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
-            stop("TBD")
-            model <- self$get_data('fit_best')
-            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels'),
-                                    msg = 'Variable not in predicted model' )
+          # Spatial partial dependence plot
+          spartial = function(self, x.var, constant = NULL){
+            assertthat::assert_that(is.character(x.var) || is.null(x.var),
+                                    "model" %in% names(self))
 
-            if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+            # Get data
+            mod <- self$get_data('fit_best')
+            model <- self$model
+            x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
 
-            # Calculate
-            p <- bart_partial_space(model, predictors, x.vars, equal, smooth, transform)
+            # Get predictor
+            df <- subset(model$predictors, select = mod$feature_names)
+            # Convert all non x.vars to the mean
+            # Make template of target variable(s)
+            template <- raster::rasterFromXYZ(cbind(model$predictors$x,model$predictors$y),
+                                          crs = raster::projection(model$background))
 
-            cols <- c("#000004FF","#1B0C42FF","#4B0C6BFF","#781C6DFF","#A52C60FF","#CF4446FF","#ED6925FF","#FB9A06FF","#F7D03CFF","#FCFFA4FF")
-            plot(p, col = cols, main = paste0(x.vars, collapse ='|'))
+            # Set all variables other the target variable to constant
+            if(is.null(constant)){
+              # Calculate mean
+              # FIXME: for factor use mode!
+              constant <- apply(df, 2, function(x) mean(x, na.rm=T))
+              for(v in mod$feature_names[ mod$feature_names %notin% x.var]){
+                if(v %notin% names(df) ) next()
+                df[!is.na(df[v]),v] <- as.numeric( constant[v] )
+              }
+            } else {
+              df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
+            }
+            df <- xgboost::xgb.DMatrix(data = as.matrix(df))
+
+            # Spartial prediction
+            suppressWarnings(
+              pp <- xgboost:::predict.xgb.Booster(
+                object = mod,
+                newdata = df
+              )
+            )
+            # Fill output with summaries of the posterior
+            template[] <- pp
+            names(template) <- 'mean'
+            template <- raster::mask(template, model$background)
+
+            # Quick plot
+            raster::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
             # Also return spatial
-            return(p)
+            return(template)
           },
           # Engine-specific projection function
           project = function(self, newdata){
