@@ -66,8 +66,8 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
   if (is.null(x.vars)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.vars]
 
   # Define binning in equal area width or not
-  if (equal == TRUE) {
-    if (!is.null(x.vars) && length(x.vars) == 1) {
+  if(equal) {
+    if(!is.null(x.vars) && length(x.vars) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
     }
     else {
@@ -134,7 +134,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
       q50 <- apply(pd$fd[[i]], 2, median)
       if (transform == TRUE) q50 <- pnorm(q50)
       df <- data.frame(x = pd$levs[[i]], med = q50)
-      if (ci == TRUE) {
+      if(ci) {
         # Lower bound
         q05 <- apply(pd$fd[[i]], 2, quantile, probs = 0.5 -
                        ciwidth/2)
@@ -142,12 +142,12 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
         # Upper bound
         q95 <- apply(pd$fd[[i]], 2, quantile, probs = 0.5 +
                        ciwidth/2)
-        if (transform == TRUE) q95 <- pnorm(q95)
+        if(transform) q95 <- pnorm(q95)
 
         df$q05 <- q05;df$q95 <- q95
 
       }
-      if (trace == TRUE) {
+      if(trace) {
         f <- data.frame(t(pd$fd[[i]]))
         df <- cbind(df, f)
       }
@@ -155,15 +155,15 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
                                                   y = "Response", x = "") + theme_light(base_size = 20) +
         theme(plot.title = element_text(hjust = 0.5),
               axis.title.y = element_text(vjust = 1.7))
-      if (ci == TRUE) {
+      if(ci) {
         alpha2 <- 0.05
         k <- 4
       } else {
         alpha2 <- 0.025 * (fitobj$control@n.trees/200)
         k <- 2
       }
-      if (trace == TRUE) {
-        if (transform == TRUE) {
+      if(trace) {
+        if(transform) {
           for (j in 1:nrow(pd$fd[[i]])) {
             g <- g + geom_line(aes_string(y = pnorm(df[,
                                                        j + k])), alpha = alpha2)
@@ -176,12 +176,12 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
         }
       }
       # Add credible interval
-      if (ci == TRUE) {
+      if(ci) {
         g <- g + geom_ribbon(aes(ymin = q05, ymax = q95),
                              fill = "deepskyblue1", alpha = 0.3)
       }
       g <- g + geom_line(size = 1.25)
-      if (panels == FALSE) {
+      if(panels == FALSE) {
         g <- g + theme(plot.margin = unit(c(0.5, 0.5,
                                             0.5, 0.5), "cm"))
       }

@@ -5,23 +5,16 @@
 \alias{spartial.DistributionModel}
 \title{Obtain spatial partial effects of trained model}
 \usage{
-spartial(
-  mod,
-  x.vars,
-  constant = NULL,
-  variable_length = 100,
-  plot = FALSE,
-  ...
-)
+spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
-\S4method{spartial}{ANY,character}(mod, x.vars)
+\S4method{spartial}{ANY,character}(mod, x.var)
 
 \method{spartial}{DistributionModel}(x, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} model}
 
-\item{x.vars}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
+\item{x.var}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
 
 \item{constant}{A \code{\link{numeric}} constant to be inserted for all other variables. Default calculates a mean per variable}
 

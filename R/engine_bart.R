@@ -110,26 +110,80 @@ engine_bart <- function(x,
         self$data$dc <- dc
       },
       # Setup function
-      setup = function(self, model, ...){
+      setup = function(self, model, settings = NULL, ...){
         # Simple security checks
         assertthat::assert_that(
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
+          inherits(settings,'Settings') || is.null(settings),
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Messager
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
-        # In case anything else needs to be specified, do it here
-        if(model$biodiversity[[1]]$family=='binomial') assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
-        invisible()
+        # Add pseudo-absence points if necessary
+        if('poipo' == model$biodiversity[[1]]$type && model$biodiversity[[1]]$family == 'poisson') {
+
+          # Get background layer
+          bg <- self$get_data('template')
+          assertthat::assert_that(!is.na(cellStats(bg,min)))
+
+          abs <- create_pseudoabsence(
+            env = model$predictors,
+            presence = model$biodiversity[[1]]$observations,
+            bias = settings$get('bias_variable'),
+            template = bg,
+            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
+            replace = TRUE
+          )
+          abs$intercept <- 1 # Redundant for this engine
+          # Combine absence and presence and save
+          abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
+
+          # Rasterize observed presences
+          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
+                                    bg, fun = 'count', background = 0)
+          # Combine with observations
+          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
+                        model$biodiversity[[1]]$observations[,c('x','y')] )
+          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+
+          # Format out
+          df <- rbind(model$biodiversity[[1]]$predictors,
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
+            subset(., complete.cases(.) )
+
+          # Preprocessing security checks
+          assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                   any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                   nrow(df) == nrow(model$biodiversity[[1]]$observations)
+          )
+
+          # Define expectation as very small vector following Renner et al.
+          w <- ppm_weights(df = df,
+                           pa = model$biodiversity[[1]]$observations[['observed']],
+                           bg = bg,
+                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
+          )
+          df$w <- w # Also add as column
+
+          model$biodiversity[[1]]$predictors <- df
+          model$biodiversity[[1]]$expect <- w
+        } else {
+          # If family is not poisson, assume factor distribution for response
+          assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
+          model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
+        }
+
+        # Instead of invisible return the model object
+        return( model )
       },
       # Training function
       train = function(self, model, settings, ...){
         assertthat::assert_that(
           inherits(settings,'Settings'),
-          is.list(model),length(model)>1,
+          is.list(model),length(model) > 1,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
@@ -169,11 +223,50 @@ engine_bart <- function(x,
         } else { off = NULL }
 
         # --- #
+        # Parameter tuning #
+        if(settings$get('varsel')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
+
+          cv_bart <- dbarts::xbart(
+            formula = equation, data = data,
+            n.samples = round( nrow(data) * 0.1 ), # Draw posterior samples (10% of dataset)
+            n.test = 5, # Number of folds
+            method = "k-fold",
+            n.reps = 4L, # For replications
+            control = dc,
+            loss = ifelse(is.factor(data$observed), "log", "rmse"),
+            n.trees = dc@n.trees,
+            k = c(1, 2, 4), # Prior for node-mean SD
+            power = c(1.5, 2), # Prior growth probability
+            base = c(0.75, 0.8, 0.95), # Tree growth probability
+            drop = TRUE, # Drop those with only one record
+            n.threads = dc@n.threads,
+            verbose = settings$get('verbose')
+          )
+          # An array of dimensions n.reps * length(n.trees) * length(k) * length(power) * length(base)
+          # Convert to data.frame
+          cv_bart <- as.data.frame.table(cv_bart)
+          best <- which.min(cv_bart$Freq) # Get the setting with lowest loss/error
+          k <- as.numeric( as.character(cv_bart$k[best]) )
+          power <- as.numeric( as.character(cv_bart$power[best]) )
+          base <- as.numeric( as.character(cv_bart$base[best]) )
+
+        } else {
+          # Pick default hyperparameters for bart
+          # k = 2 implies that the maximum and minimum are each approximately
+          # 2 standard deviations from the mean, or ≈ 95 percent prior probability
+          # in the interval (ymin, ymax) when Y is continuous and symmetrically distributed.
+          # Source: https://journals.sagepub.com/doi/10.1177/2378023119825886
+          k <- 2.0; power = 2.0 ; base = 0.95
+        }
+        # --- #
         # Fit the model. Little hack to work correctly with binomials...
         if(is.factor(data$observed)){
           fit_bart <- dbarts::bart(y.train = data[,'observed'],
                                    x.train = data[,model$biodiversity[[1]]$predictors_names],
                                    keeptrees = dc@keepTrees,
+                                   # Hyper parameters
+                                   k = k, power = power, base =  base,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
@@ -186,6 +279,8 @@ engine_bart <- function(x,
                                    keeptrees = dc@keepTrees,
                                    weights = w,
                                    ntree = dc@n.trees,
+                                   # Hyper parameters
+                                   k = k, power = power, base =  base,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
                                    nskip = dc@n.burn,
@@ -207,7 +302,7 @@ engine_bart <- function(x,
           }
           # Make a prediction
           suppressWarnings(
-            pred_bart <- dbarts:::predict.bart(fit_bart,
+            pred_bart <- dbarts:::predict.bart(object = fit_bart,
                                         newdata = full,
                                         type = 'response')
           )
@@ -230,6 +325,8 @@ engine_bart <- function(x,
             prediction <- raster::addLayer(prediction, prediction2)
             rm(prediction2)
           }
+          # Clamp the raster at 0
+          # prediction <- raster::clamp(prediction, lower = 0)
 
         } else {
           # No prediction done
@@ -252,28 +349,26 @@ engine_bart <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.vars = NULL, ...){
-
+          partial = function(self, x.var = NULL, ...){
             model <- self$get_data('fit_best')
-            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels') || is.null(x.vars),
+            assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
             # Check if family is binomial, if so alter
             not_binomial = self$get_data('model')$biodiversity[[1]]$family != 'binomial'
-            bart_partial_effect(model, x.vars = NULL, transform = not_binomial, ... )
+            bart_partial_effect(model, x.var = x.var, transform = not_binomial, ... )
           },
           # Spatial partial dependence plot option from embercardo
-          spartial = function(self, predictors, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
+          spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){
             model <- self$get_data('fit_best')
-            assertthat::assert_that(x.vars %in% attr(model$fit$data@x,'term.labels'),
+            assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 
             if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
 
             # Calculate
-            p <- bart_partial_space(model, predictors, x.vars, equal, smooth, transform)
+            p <- bart_partial_space(model, predictors, x.var, equal, smooth, transform)
 
-            cols <- c("#000004FF","#1B0C42FF","#4B0C6BFF","#781C6DFF","#A52C60FF","#CF4446FF","#ED6925FF","#FB9A06FF","#F7D03CFF","#FCFFA4FF")
-            plot(p, col = cols, main = paste0(x.vars, collapse ='|'))
+            raster::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
             # Also return spatial
             return(p)
           },

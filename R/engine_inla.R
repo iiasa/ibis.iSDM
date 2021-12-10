@@ -668,7 +668,7 @@ engine_inla <- function(x,
               },
               # Partial response
               # FIXME: Create external function
-              partial = function(self, x, variable, constant = NULL, variable_length = 100, plot = FALSE){
+              partial = function(self, x, x.var, constant = NULL, variable_length = 100, plot = FALSE){
                 # Goal is to create a sequence of value and constant and append to existing stack
                 # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
                 # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
@@ -680,11 +680,11 @@ engine_inla <- function(x,
                 assertthat::assert_that(inherits(mod,'inla'),
                                         'model' %in% names(self),
                                         inherits(x,'BiodiversityDistribution'),
-                                        length(variable)==1, is.character(variable),
+                                        length(x.var) == 1, is.character(x.var),
                                         is.null(constant) || is.numeric(constant)
                                         )
                 varn <- mod$names.fixed
-                variable <- match.arg(variable, varn, several.ok = FALSE)
+                variable <- match.arg(x.var, varn, several.ok = FALSE)
                 assertthat::assert_that(variable %in% varn, length(variable)==1,!is.null(variable))
 
                 # ------------------ #
@@ -707,7 +707,6 @@ engine_inla <- function(x,
                 stop('Not yet done!')
                 # Create dummy data.frame
                 dummy <- data.frame(observed = rep(NA, variable_length))
-                dummy
 
                 seq(variable_range[1],variable_range[2],length.out = variable_length)
 
