@@ -3,7 +3,6 @@
 #' @param install A [`logical`] factor to indicate whether [cmdstanr] should be directly installed (Default: TRUE)
 #' @param ask [`logical`] whether the cmdstanr package is to be installed (Default: FALSE)
 #' @keywords stan, utils
-#' @export
 stan_check_cmd <- function(install = TRUE, ask = FALSE){
   assertthat::assert_that(
     is.logical(install), is.logical(ask)
@@ -25,24 +24,46 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
   }
 }
 
-
-# functions for working with cmdstan and cmdstanr
-
-# write model code as character vector to file, so cmdstan_model can read it
-cmdstanr_model_write <- function( the_model ) {
-  # make temp name from model code md5 hash
-  require( digest , quietly=TRUE )
-  file_patt <- file.path( tempdir() , concat("rt_cmdstanr_",digest(the_model,"md5")) )
-  #file <- tempfile("ulam_cmdstanr",fileext=".stan")
-  file_stan <- concat( file_patt , ".stan" )
+#' Write a cmdstanr model output to a specific file
+#'
+#' @description Write a [cmdstanr] model output to a specific destination
+#' @param mod A supplied [cmdstanr] model
+#' @param dir The model directory where the model chould be written. Should be a character / existing dir.
+#' @keywords stan, utils
+write_stanmodel <- function( mod, dir = tempdir() ) {
+  assertthat::assert_that(
+    dir.exists(dir)
+  )
+  fname <- file.path( dir , concat("rt_cmdstanr_", digest::digest(mod,"md5")) )
+  file_stan <- concat( fname, ".stan" )
   fileConn <- file( file_stan )
-  writeLines( the_model , fileConn )
+  writeLines( mod , fileConn )
   close(fileConn)
   return(file_stan)
 }
 
-# wrapper to fit stan model using cmdstanr and return rstan stanfit object
-cstan <- function( file , model_code , data=list() , chains=1 , cores=1 , iter=1000 , warmup , threads=1 , control=list(adapt_delta=0.95) , cpp_options=list() , save_warmup=TRUE , ... ) {
+#' Fit cmdstanr model and convert to rstan
+#'
+#' @param file
+#' @seealso [rethinking] R package
+#' @returns A [rstan] object
+#' @keywords misc, stan
+fit_stan <- function( file , model_code , data=list(),
+                      chains = 1, cores = 1,
+                      iter = 1000, warmup,
+                      threads = 1,
+                      control = list(adapt_delta=0.95),
+                      cpp_options = list(),
+                      save_warmup = TRUE, ... ) {
+  assertthat::assert_that(
+    is.numeric(chains), is.numeric(cores),
+    is.numeric(iter), is.numeric(warmup),
+    is.numeric(threads),
+    is.list(control), is.list(cpp_options),
+    is.logical(save_warmup)
+  )
+  # Check that cmdstanr is available
+  check_package("cmdstanr")
 
   if ( threads>1 ) cpp_options[['stan_threads']] <- TRUE
 
@@ -50,7 +71,8 @@ cstan <- function( file , model_code , data=list() , chains=1 , cores=1 , iter=1
     file <- cmdstanr_model_write( model_code )
   }
 
-  require(cmdstanr,quietly=TRUE)
+
+
   mod <- cmdstan_model( file , compile=TRUE , cpp_options=cpp_options )
 
   if ( missing(warmup) ) {

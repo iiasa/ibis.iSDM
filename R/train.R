@@ -828,12 +828,12 @@ methods::setMethod(
           # Go through each variable and build formula for likelihood
           form <- to_formula(paste("observed",
                                    ifelse(model$biodiversity[[id]]$family=='poisson', '/ w',''), # Use E as weight for poisson
-                                          " ~ ", "Intercept +",
+                                          " ~ ", "intercept +",
                                    paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                    # Check whether a single dataset is provided, otherwise add other intercepts
                                    ifelse(length(types)==1,
                                           '',
-                                          paste('+',paste0('Intercept_',
+                                          paste('+',paste0('intercept_',
                                                            make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                            sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
                                           )

@@ -4,13 +4,15 @@
 \alias{stan_check_cmd}
 \title{Checks whether cmdstanr is available and otherwise tries to install it}
 \usage{
-stan_check_cmd(install = TRUE, ask = TRUE)
+stan_check_cmd(install = TRUE, ask = FALSE)
 }
 \arguments{
-\item{install}{A \code{\link{logical}} factor to indicate whether \link{cmdstanr} should be directly installed}
+\item{install}{A \code{\link{logical}} factor to indicate whether \link{cmdstanr} should be directly installed (Default: TRUE)}
 
-\item{ask}{\code{\link{logical}} whether}
+\item{ask}{\code{\link{logical}} whether the cmdstanr package is to be installed (Default: FALSE)}
 }
 \description{
 Checks whether cmdstanr is available and otherwise tries to install it
 }
+\keyword{stan,}
+\keyword{utils}

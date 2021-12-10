@@ -112,14 +112,12 @@ engine_stan <- function(x,
         return( NULL )
       },
       # Setup a model
-      setup = function(self, model, ...){
-        # Parallel processing
+      setup = function(self, model, settings = NULL, ...){
         # Simple security checks
         assertthat::assert_that(
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
-          # Check that all predictors are present
-          all(all.vars(model$biodiversity[[1]]$equation)[-1] %in% names(model$biodiversity[[1]]$predictors)),
+          inherits(settings,'Settings') || is.null(settings),
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -194,7 +192,8 @@ engine_stan <- function(x,
         # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
-        invisible()
+        # Return modified model object
+        return(model)
       },
       train = function(self, model, settings, ...){
         # Messenger
