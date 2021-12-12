@@ -41,7 +41,7 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
-  myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
+  # myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
 
   # TODO:
   # Find a better way to pass on parameters such as those related to the mesh size...
@@ -165,7 +165,7 @@ engine_inla <- function(x,
       calc_latent_spatial = function(self,type = 'spde', alpha = 2,
                                      priors = NULL,
                                      polynames = NULL,
-                                     varname = "spatial.field",
+                                     varname = "spatial.field1",
                                      ...){
         # Catch prior objects
         if(is.null(priors) || is.Waiver(priors)) priors <- NULL
@@ -215,7 +215,7 @@ engine_inla <- function(x,
           # Security checks
           assertthat::assert_that(
             inherits(self$data$latentspatial,'inla.spde'),
-            length(self$data$s.index$spatial.field) == self$data$mesh$n
+            length(self$data$s.index[[1]]) == self$data$mesh$n
           )
         } else if(type == 'poly'){
           # Save column names of polynomial transformed coordinates
@@ -226,16 +226,20 @@ engine_inla <- function(x,
       },
       # Get latent spatial equation bit
       # Set vars to 2 or larger to get copied spde's
-      get_equation_latent_spatial = function(self, method, vars = 1){
+      get_equation_latent_spatial = function(self, method, vars = 1, separate_spde = FALSE){
         assertthat::assert_that(is.numeric(vars))
         if(method == 'spde'){
           assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
                                   msg = 'Latent spatial has not been calculated.')
           # SPDE string
-          if(vars == 1){
-            ss <- paste0('f(spatial.field, model = ',method,')')
+          if(separate_spde){
+            ss <- paste0("f(spatial.field",vars,", model = ",method,")")
           } else {
-            ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field\', model = ",method,", fixed = TRUE)")
+            if(vars >1){
+              ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field1\', model = ",method,", fixed = TRUE)")
+            } else {
+              ss <- paste0("f(spatial.field",vars,", model = ",method,")")
+            }
           }
           return(ss)
 
@@ -300,7 +304,7 @@ engine_inla <- function(x,
         # ll_effects[['intercept']] <- rep(1, nrow(model$observations))
         # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n) # Old code
         ll_effects[['predictors']] <- env
-        ll_effects[['spatial.field']] <- seq(1, self$get_data('mesh')$n)
+        ll_effects[['spatial.field1']] <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
         if(!is.null(model$offset)){
@@ -611,7 +615,7 @@ engine_inla <- function(x,
               proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
             )
           )
-          prediction <- raster::resample(prediction,template = temp, method = 'bilinear')
+          prediction <- raster::resample(prediction, temp, method = 'bilinear')
 
         } else {
           # No prediction to be conducted

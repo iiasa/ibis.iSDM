@@ -41,6 +41,30 @@ methods::setMethod(
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
+    # Get limits if present
+    if(!is.null( mod$get_limits() )){
+
+      # Get prediction
+      n <- fit$show_rasters()[grep("threshold",fit$show_rasters())]
+      tr <- fit$get_data(n)[[1]]
+      tr <- cbind( raster::coordinates(tr), data.frame(thresh = values(tr)))
+      tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
+      tr <- tr %>% subset(., complete.cases(thresh))
+
+      # Get zones from the limiting area, e.g. those intersecting with input
+      suppressMessages(
+        suppressWarnings(
+          zones <- st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
+                                   mod$get_limits()
+          )
+        )
+      )
+      # Limit zones
+      zones <- subset(mod$get_limits(), limit %in% unique(zones$limit) )
+      # Now clip all provided new predictors and background to this
+      new_preds$crop_data(zones)
+    }
+
     # Check that predictor names are all present
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
@@ -89,7 +113,7 @@ methods::setMethod(
       nd <- subset(df, time == times)
       # Project suitability
       # FIXME: Adapt for uncertainty projections as well!
-      out <- fit$project(newdata = nd)[["mean"]]
+      out <- fit$project(newdata = nd)[[1]] # First prediction being the mean
       names(out) <- paste0("suitability", "_", times)
 
       # If constrains are set, apply them

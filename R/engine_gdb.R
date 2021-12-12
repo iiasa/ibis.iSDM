@@ -343,6 +343,7 @@ engine_gdb <- function(x,
                                      type = 'response', aggregate = 'sum')
             )
             temp[as.numeric(newdata$rowid)] <- y[,1]
+            names(temp) <- "mean" # Rename to mean
             return(temp)
           },
           # Partial effect

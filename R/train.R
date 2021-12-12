@@ -42,7 +42,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = TRUE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
            only_linear = TRUE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
@@ -163,7 +163,7 @@ methods::setMethod(
           x$latentfactors <- new_waiver()
         } else {
           # Calculate the spatial model
-          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']] )
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
         }
       }
     }
@@ -432,8 +432,11 @@ methods::setMethod(
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
                                                 x$engine$get_equation_latent_spatial(
-                                                  method = attr(x$get_latent(),'method'))
-            )
+                                                  method = attr(x$get_latent(),'method'),
+                                                  vars = which(ids == id),
+                                                  separate_spde = attr(x$get_latent(),'separate_spde')
+                                                )
+                                               )
             )
           }
         } else{
@@ -497,10 +500,7 @@ methods::setMethod(
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
                                                 # For SPDE components, simply add spatial.field
-                                                ifelse(which(id%in%ids)==1,
-                                                       "spatial.field",
-                                                       paste0("spatial.field",which(id%in%ids))
-                                                       )
+                                                paste0("spatial.field",which(ids == id))
                                        )
             )
           }
@@ -534,11 +534,8 @@ methods::setMethod(
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
                                                 # For SPDE components, simply add spatial.field
-                                                ifelse(which(id%in%ids)==1,
-                                                       "spatial.field",
-                                                       paste0("spatial.field",which(id%in%ids))
-                                                      )
-                                                )
+                                                paste0("spatial.field",which(ids == id))
+                                               )
             )
           }
 

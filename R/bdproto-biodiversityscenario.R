@@ -17,6 +17,7 @@ BiodiversityScenario <- bdproto(
   "BiodiversityScenario",
   modelobject = new_waiver(), # The id of the model
   modelid = new_waiver(),
+  limits = new_waiver(),
   predictors = new_waiver(),
   constraints = new_waiver(),
   scenarios = new_waiver(),
@@ -39,7 +40,8 @@ BiodiversityScenario <- bdproto(
     # Thresholds
     tr <- self$get_threshold()
 
-    message(paste0('Spatial-temporal scenario:',
+    message(paste0(
+      ifelse(is.Waiver(self$limits),"Spatial-temporal scenario:","Spatial-temporal scenario (limited):"),
                    '\n  Used model: ',ifelse(is.Waiver(fit) || isFALSE(fit), text_red('None'), class(fit)[1] ),
                    "\n --------- ",
                    "\n  Predictors:     ", pn,
@@ -72,6 +74,11 @@ BiodiversityScenario <- bdproto(
       else
         if(!exists(self$modelobject)) return( FALSE )
           else return( get(self$modelobject) )
+  },
+  # Get provided limits
+  get_limits = function(self){
+    if(is.Waiver(self$limits)) return(NULL)
+    return(self$limits)
   },
   # Get Model predictors
   get_predictor_names = function(self) {

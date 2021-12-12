@@ -9,7 +9,7 @@
 train(
   x,
   runname,
-  rm_corPred = TRUE,
+  rm_corPred = FALSE,
   varsel = FALSE,
   inference_only = FALSE,
   only_linear = TRUE,

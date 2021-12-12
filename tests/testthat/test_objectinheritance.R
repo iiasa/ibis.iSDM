@@ -5,6 +5,8 @@ test_that('Check that objects are properly inherited', {
   require(raster)
   require(sf)
 
+  options("ibis.setupmessages" = FALSE)
+
   # Get background
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
 
@@ -26,8 +28,7 @@ test_that('Check that objects are properly inherited', {
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
   x %>% add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points',simulate = TRUE)
+    add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
 
   # Call predictors

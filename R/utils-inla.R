@@ -306,7 +306,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   # create the spatial structure if existing
   if( length(model$summary.random) >0){
     assertthat::assert_that(length(model$summary.random) == 1, # FIXME: If multiple spatial latent effects this needs adapting
-                            'spatial.field' %in% names(model$summary.random),
+                            'spatial.field1' %in% names(model$summary.random),
                             msg = 'Spatial random effect wrongly specified!')
     # Check that type is present, otherwise use 'mean'
     sfield_nodes <- model$summary.random[[1]][,type]
@@ -645,7 +645,7 @@ post_prediction <- function(mod, nsamples = 100,
   # create the spatial structure if existing
   if( length(model$summary.random) >0){
     assertthat::assert_that(length(model$summary.random) == 1, # FIXME: If multiple spatial latent effects this needs adapting
-                            'spatial.field' %in% names(model$summary.random),
+                            'spatial.field1' %in% names(model$summary.random),
                             msg = 'Spatial random effect wrongly specified!')
     # Check that type is present, otherwise use 'mean'
     sfield_nodes <- model$summary.random[[1]][,type]
@@ -730,7 +730,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
   # Note, order adding this is important apparently...
   # ll_effects[['intercept']] <- rep(1, nrow(all_env)) # Added 05/09
   ll_effects[['predictors']] <- all_env
-  ll_effects[['spatial.field']] <- list(spatial.field = seq(1, mesh$n) ) # Changed to spatial.field by default
+  ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1, mesh$n) ) # Changed to spatial.field by default
 
   # Build integration stack of nearest predictors
   stk_int <- INLA::inla.stack(
@@ -765,7 +765,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     inherits(mesh,'inla.mesh'),
     is.character(type),
     is.data.frame(cov),
-    is.null(spde)  || 'spatial.field' %in% names(spde),
+    is.null(spde)  || 'spatial.field1' %in% names(spde),
     is.logical(joint)
   )
 
@@ -852,7 +852,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     # Note, order adding this is important apparently...
     # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n)) # Changed to spatial.field. intercept already included in neatest_cov
+    ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1,mesh$n)) # Changed to spatial.field. intercept already included in neatest_cov
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
@@ -868,7 +868,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     # Note, order adding this is important apparently...
     # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['spatial.field']]  <- list(spatial.field = seq(1,mesh$n))
+    ll_effects[['spatial.field1']]  <- list(spatial.field1 = seq(1,mesh$n))
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
@@ -881,7 +881,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     # Note, order adding this is important apparently...
     # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['spatial.field']] <- list(spatial.field = seq(1,mesh$n) )
+    ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1,mesh$n) )
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
@@ -905,6 +905,85 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
               cellsIn = cellsIn
               )
     )
+}
+
+#' Prediction coordinates for INLA
+#'
+#' @param mesh A [INLA::inla.mesh] object.
+#' @param background A [sf] object containing the background region
+#' @param cov A [data.frame] or [matrix] with the covariates for the modelling
+#' @param proj_stepsize A numeric indication on the prediction stepsize to be used
+#' @param spatial A [logical] flag whether a spatialpoints dataframe should be returned
+#' @keywords utils
+#' @noRd
+inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatial = TRUE){
+  assertthat::assert_that(
+    inherits(mesh,'inla.mesh'),
+    inherits(background, 'sf'),
+    is.data.frame(cov) || is.matrix(cov),
+    is.null(proj_stepsize) || is.numeric(proj_stepsize),
+    is.logical(spatial)
+  )
+
+  # Get the boundary region size
+  bdry <- mesh$loc[mesh$segm$int$idx[,2],]
+
+  # Approximate dimension of the projector matrix
+  if(is.null(proj_stepsize)){
+    proj_stepsize <- (diff(range(bdry[,1])) / 100)
+  }
+  # Calculate the approximate cell size
+  Nxy <- round( c(diff(range(bdry[,1])),
+                  diff(range(bdry[,2]))) / proj_stepsize )
+
+  # Make a INLA projection grid
+  projgrid <- INLA::inla.mesh.projector(mesh,
+                                        xlim = range(bdry[,1]),
+                                        ylim = range(bdry[,2]),
+                                        dims = Nxy)
+  # Convert background to buffered land
+  suppressWarnings(
+    background.g <- rgeos::gBuffer(as(background,'Spatial'),
+                                   width = 0)
+    )
+  suppressWarnings(
+    cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
+                                                     proj4string = as(background.g,'Spatial')@proj4string),
+                               y = background.g))
+  )
+  # Get the cells that are in
+  if(inherits(cellsIn,'matrix')){
+    cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
+  } else { cellsIn <- which(cellsIn) }
+  assertthat::assert_that(length(cellsIn)>0)
+
+  # Get prediction coordinates
+  predcoords <- projgrid$lattice$loc[cellsIn,]
+  colnames(predcoords) <- c('x','y')
+  # Get covariates
+  preds <- get_ngbvalue(coords = predcoords,
+                        env = cov,
+                        longlat = raster::isLonLat(background),
+                        field_space = c('x','y'))
+
+  if(spatial){
+    # Convert predictors to SpatialPixelsDataFrame as required for inlabru
+    # preds <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+    #                                     data = model$predictors[, which(names(model$predictors) %in% fit_bru$names.fixed)],
+    #                                     proj4string = self$get_data('mesh')$crs
+    # )
+    preds <- sp::SpatialPointsDataFrame(coords = predcoords,
+                                        data = preds,
+                                        proj4string = mesh$crs
+    )
+    # Remove missing data
+    preds <- subset(preds, complete.cases(preds@data))
+    preds <- as(preds, 'SpatialPixelsDataFrame')
+  } else {
+    preds <- subset(preds, complete.cases(preds))
+  }
+
+  return(preds)
 }
 
 #' Tidy up summary information from a INLA model

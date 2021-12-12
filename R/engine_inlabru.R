@@ -170,7 +170,7 @@ engine_inlabru <- function(x,
       calc_latent_spatial = function(self,type = 'spde', alpha = 2,
                                      priors = NULL,
                                      polynames = NULL,
-                                     varname = "spatial.field",
+                                     varname = "spatial.field1",
                                      ...){
         # Catch prior objects
         if(is.null(priors) || is.Waiver(priors)) priors <- NULL
@@ -220,7 +220,7 @@ engine_inlabru <- function(x,
           # Security checks
           assertthat::assert_that(
             inherits(self$data$latentspatial,'inla.spde'),
-            length(self$data$s.index$spatial.field) == self$data$mesh$n
+            length(self$data$s.index[[1]]) == self$data$mesh$n
           )
         } else if(type == 'poly'){
           # Save column names of polynomial transformed coordinates
@@ -231,16 +231,20 @@ engine_inlabru <- function(x,
       },
       # Get latent spatial equation bit
       # Set vars to 2 or larger to get copied spde's
-      get_equation_latent_spatial = function(self, method, vars = 1){
+      get_equation_latent_spatial = function(self, method, vars = 1, separate_spde = FALSE){
         assertthat::assert_that(is.numeric(vars))
         if(method == 'spde'){
           assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
                                   msg = 'Latent spatial has not been calculated.')
           # SPDE string
-          if(vars == 1){
-            ss <- paste0('f(spatial.field, model = ',method,')')
+          if(separate_spde){
+            ss <- paste0("f(spatial.field",vars,", model = ",method,")")
           } else {
-            ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field\', model = ",method,", fixed = TRUE)")
+            if(vars >1){
+              ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field1\', model = ",method,", fixed = TRUE)")
+            } else {
+              ss <- paste0("f(spatial.field",vars,", model = ",method,")")
+            }
           }
           return(ss)
 
@@ -250,7 +254,7 @@ engine_inlabru <- function(x,
           return(
             # BESAG model or BYM model to specify
             # BYM found to be largely similar to SPDE https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.3081
-            paste0('f(','spatial.field',', model = "bym", graph = ','adjmat',')')
+            paste0('f(','spatial.field1',', model = "bym", graph = ','adjmat',')')
           )
         }
       },
@@ -383,6 +387,7 @@ engine_inlabru <- function(x,
         # Defining the component function
         if(length(model$biodiversity)>1){
           # FIXME: Indiv. Likelihoods currently still have a full intercept in there
+          # Check that intercept formulation works correctly for INLABRU
           comp <- as.formula(
             paste(' ~ 0 + Intercept(1) + ',paste0('Intercept_',
                              make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
@@ -406,6 +411,7 @@ engine_inlabru <- function(x,
         # --- #
         # Get unified predictors from likelihoods
         pn <- lapply(lhl, function(x) all.vars(x$formula) ) %>% do.call(c,.) %>% unique()
+        pn <- pn[grep("Intercept|coordinates", pn, invert = TRUE)]
         model$predictors_types <- model$predictors_types[which(model$predictors_types$predictors %in% pn),]
 
         # Add Predictors to component
@@ -456,8 +462,12 @@ engine_inlabru <- function(x,
               # Add spatial component term
               comp <- update.formula(comp,
                              paste0(c("~ . + "),
-                                    paste0("spatial.field", ifelse(i > 1, i, ""),
-                                           "(main = coordinates, model = spde)"
+                                    paste0("spatial.field", i,
+                                           "(main = coordinates,",
+                                           ifelse( grep('copy', self$get_equation_latent_spatial('spde', vars = i))==1,
+                                                     " copy = \'spatial.field1\', fixed = TRUE,",
+                                                     ""),
+                                           "model = spde)"
                                     )
                              )
               )
@@ -516,7 +526,7 @@ engine_inlabru <- function(x,
           # Catch all variables with set priors and keep them!
           if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
 
-          te <- attr(stats::terms.formula(comp),'term.label')
+          te <- attr(stats::terms.formula(comp), 'term.label')
           test_form <- comp
           # Remove variables that are never removed
           if(!is.null(keep)){
@@ -634,13 +644,13 @@ engine_inlabru <- function(x,
           # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
 
-          # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-          preds <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                              data = model$predictors[, which(names(model$predictors) %in% fit_bru$names.fixed)],
-                                              proj4string = self$get_data('mesh')$crs
-          )
-          preds <- subset(preds, complete.cases(preds@data)) # Remove missing data
-          preds <- as(preds, 'SpatialPixelsDataFrame')
+          # Build coordinates
+          preds <- inla_predpoints(mesh = self$get_data('mesh'),
+                                   background = model$background,
+                                   cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
+                                   proj_stepsize = self$get_data('proj_stepsize'),
+                                   spatial = TRUE
+                                   )
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -678,7 +688,10 @@ engine_inlabru <- function(x,
 
           pfo <- as.formula(
             paste0("~",fun,"( ",ii, " + ", ofs, paste0(vn, collapse = " + "),
-                   ifelse("latentspatial" %in% self$list_data(), "+ spatial.field", ""),
+                   # Add spatial latent effects
+                   ifelse("latentspatial" %in% self$list_data(),
+                          paste("+",paste0("spatial.field",1:length(model$biodiversity),collapse = " + ")),
+                          ""),
                    ")")
           )
           # --- #

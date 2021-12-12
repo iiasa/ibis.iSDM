@@ -23,6 +23,12 @@ DistributionModel <- bdproto(
   # Print message with summary of model
   print = function(self) {
     # TODO: Have a lot more information in here and to be prettified
+
+    # Check whether prediction exists and number of layers
+    has_prediction <- "prediction" %in% self$show_rasters()
+    # Check whether threshold has been calculated
+    has_threshold <- grep('threshold',self$show_rasters(),value = TRUE)[1]
+
     # FIXME: Have engine-specific code moved to engine
     if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
       if( length( self$fits ) != 0 ){
@@ -31,17 +37,17 @@ DistributionModel <- bdproto(
                      select = c('variable', 'mean'))
         ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
 
-        # TODO: See if this can be plotted and extracted and shown here
-        # Provides the distance value (in the unit of the point coordinates) above
-        # which spatial dependencies become negligible
-        # model0.res<-inla.spde2.result(model0, 'spatial.field', spde, do.transf=TRUE)
-        # model0.res$summary.log.range.nominal
-
         message(paste0(
           'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
-          '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
+          '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+          ifelse(has_prediction,
+                 paste0("\n  Prediction fitted: ",text_green("yes")),
+                 ""),
+          ifelse(!is.na(has_threshold),
+                 paste0("\n  Threshold created: ",text_green("yes")),
+                 "")
         ))
       }
     } else if( inherits(self, 'GDB-Model') ) {
@@ -55,7 +61,13 @@ DistributionModel <- bdproto(
         message(paste0(
           'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
-          '\n     ', name_atomic(names(vi))
+          '\n     ', name_atomic(names(vi)),
+          ifelse(has_prediction,
+                 paste0("\n  Prediction fitted: ",text_green("yes")),
+                 ""),
+          ifelse(!is.na(has_threshold),
+                 paste0("\n  Threshold created: ",text_green("yes")),
+                 "")
         ))
     } else if( inherits(self, 'BART-Model') ) {
       # Calculate variable importance from the posterior trees
@@ -64,7 +76,13 @@ DistributionModel <- bdproto(
       message(paste0(
         'Trained ',class(self)[1],' (',self$show(),')',
         '\n  \033[2mStrongest effects:\033[22m',
-        '\n     ', name_atomic(vi$names)
+        '\n     ', name_atomic(vi$names),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
       ))
     } else if( inherits(self, 'XGBOOST-Model') ) {
       vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
@@ -72,13 +90,25 @@ DistributionModel <- bdproto(
       message(paste0(
         'Trained ',class(self)[1],' (',self$show(),')',
         '\n  \033[2mStrongest effects:\033[22m',
-        '\n     ', name_atomic(vi$Feature)
+        '\n     ', name_atomic(vi$Feature),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
       ))
 
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
-        '\n     No fitted model found!'
+        text_red('\n     No fitted model found!'),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
       ))
     }
   },

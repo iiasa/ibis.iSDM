@@ -4,7 +4,13 @@
 \alias{add_latent_spatial}
 \title{Add latent spatial effect to the model equation}
 \usage{
-add_latent_spatial(x, method = "spde", priors = NULL, ...)
+add_latent_spatial(
+  x,
+  method = "spde",
+  priors = NULL,
+  separate_spde = FALSE,
+  ...
+)
 
 \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
 }
@@ -14,6 +20,9 @@ add_latent_spatial(x, method = "spde", priors = NULL, ...)
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model.}
 
 \item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. NULL equating default priors}
+
+\item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
+for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 }

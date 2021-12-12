@@ -19,6 +19,8 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model.
 #' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors
+#' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
+#' for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
 #'
 #' @references Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
@@ -38,7 +40,7 @@ NULL
 methods::setGeneric(
   "add_latent_spatial",
   signature = methods::signature("x"),
-  function(x, method = 'spde', priors = NULL, ...) standardGeneric("add_latent_spatial"))
+  function(x, method = 'spde', priors = NULL, separate_spde = FALSE, ...) standardGeneric("add_latent_spatial"))
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
@@ -46,10 +48,11 @@ methods::setGeneric(
 methods::setMethod(
   "add_latent_spatial",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, method = 'spde', priors = NULL) {
+  function(x, method = 'spde', priors = NULL, separate_spde = FALSE, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method) && !missing(method),
-                            is.null(priors) || inherits(priors, 'PriorList')
+                            is.null(priors) || inherits(priors, 'PriorList'),
+                            is.logical(separate_spde)
                             )
 
     # Match the spatial method
@@ -66,6 +69,6 @@ methods::setMethod(
       x <- x$set_priors(priors)
     }
     # Add to data to the BiodiversityDistribution object
-    x$set_latent(type = '<Spatial>', method)
+    x$set_latent(type = '<Spatial>', method, separate_spde)
   }
 )
