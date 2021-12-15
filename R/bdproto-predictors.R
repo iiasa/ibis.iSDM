@@ -47,6 +47,13 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
     sf::st_crs(self$data)
   },
+  # Clip the predictor dataset by another dataset
+  crop_data = function(self, pol){
+    assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
+                            inherits(pol, 'sf'))
+    self$data <- self$data %>% sf::st_crop(pol)
+    invisible()
+  },
   # Add a new Predictor dataset to this collection
   set_data = function(self, x, value){
     assertthat::assert_that(assertthat::is.string(x),

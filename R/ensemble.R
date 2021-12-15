@@ -11,7 +11,7 @@
 #' @param ... Provided [`DistributionModel`] objects
 #' @param method Approach on how the ensemble is to be created. See details for options (Default: 'mean')
 #' @param weights (Optional) weights provided to the ensemble function if weighted means are to be constructed. (Default: NULL)
-#' @param layername A [`character`] of the layername to be taken from each prediction
+#' @param layer A [`character`] of the layer to be taken from each prediction
 #' @returns A [`RasterStack`] containing the ensemble of the provided predictions.
 #' Containing both the set 'method' and a coefficient of variation across predictions.
 #' Critically this should not be interpreted as measure of uncertainty as it cannot
@@ -26,7 +26,7 @@
 NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
-                    function(..., method = "mean", weights = NULL, layername = "mean") standardGeneric("ensemble"))
+                    function(..., method = "mean", weights = NULL, layer = "mean") standardGeneric("ensemble"))
 
 #' @name ensemble
 #' @rdname ensemble
@@ -34,7 +34,7 @@ methods::setGeneric("ensemble",
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
-  function(..., method = "mean", weights = NULL, layername = "mean"){
+  function(..., method = "mean", weights = NULL, layer = "mean"){
     # Collate provided models
     mc <- list(...)
     # Get all those that are DistributionModels
@@ -44,7 +44,7 @@ methods::setMethod(
     assertthat::assert_that(
       length(mods)>=2, # Need at least 2 otherwise this does not make sense
       is.character(method),
-      is.character(layername),
+      is.character(layer),
       is.null(weights) || is.vector(weights)
     )
 
@@ -62,7 +62,7 @@ methods::setMethod(
     if(is.numeric(weights)) weights <- weights / sum(weights)
 
     # Get mean prediction from all mods
-    ras <- raster::stack( sapply(mods, function(x) x$get_data('prediction')[[layername]]))
+    ras <- raster::stack( sapply(mods, function(x) x$get_data('prediction')[[layer]]))
 
     # Now create the ensemble depending on the option
     if(method == 'mean'){
@@ -78,9 +78,13 @@ methods::setMethod(
         msg = "This function requires thresholds to be computed!"
       )
       n_tr <- sapply(mods, function(x) grep("threshold", x$show_rasters(),value = TRUE) )
-      n_tr <- grep("mean", n_tr, value = TRUE) # Get the means
+      # Get layer of each threshold if there are multiple
       ras_tr <- raster::stack()
-      for(l in 1:length(n_tr)){ ras_tr <- raster::addLayer(ras_tr, mods[[l]]$get_data(n_tr[l])) }
+      for(i in 1:length(n_tr)){
+        o <- mods[[i]]$get_data(n_tr[i])
+        # Grep layer name from the stack
+        ras_tr <- raster::addLayer(ras_tr, o[[grep(layer, names(o))]] )
+      }
       # Calculate frequency
       out <- sum(ras_tr, na.rm = TRUE)
       out <- raster::mask(out, ras_tr[[1]])

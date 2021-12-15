@@ -4,12 +4,15 @@
 \alias{scenario}
 \title{Create a new scenario based on trained model parameters}
 \usage{
-scenario(fit)
+scenario(fit, limits = NULL)
 
 \S4method{scenario}{ANY}(fit)
 }
 \arguments{
 \item{fit}{A trained \code{\link{BiodiversityDistribution}} model}
+
+\item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the projection surface when
+intersected with the prediction data (Default: NULL).}
 }
 \description{
 Create a new scenario based on trained model parameters

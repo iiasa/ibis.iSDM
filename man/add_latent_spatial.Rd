@@ -4,7 +4,13 @@
 \alias{add_latent_spatial}
 \title{Add latent spatial effect to the model equation}
 \usage{
-add_latent_spatial(x, method = "spde", priors = NULL, ...)
+add_latent_spatial(
+  x,
+  method = "spde",
+  priors = NULL,
+  separate_spde = FALSE,
+  ...
+)
 
 \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
 }
@@ -14,6 +20,9 @@ add_latent_spatial(x, method = "spde", priors = NULL, ...)
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model.}
 
 \item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. NULL equating default priors}
+
+\item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
+for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 }
@@ -26,10 +35,19 @@ There are several different options which depend on the engine used. In case a
 unsupported method for an engine is chosen this is modified to the next similar method
 Available are:
 \itemize{
-\item "spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}}
+\item "spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}} and \code{\link{INLABRU-engine}}
 \item "car" - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}
 \item "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
 }
+
+"spde" - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}}. SPDE effects aim at
+capturing the variation of the response variable in space, once all of the covariates are accounted for.
+Examining the spatial distribution of the spatial error can reveal which covariates might be missing.
+For example, if elevation is positively correlated with the response variable, but is not included in the model,
+we could see a higher posterior mean in areas with higher elevation.
+
+"car" - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}
+"poly"- spatial trend correction by adding spatial coordinates as polynominals in the model. Available for all Engines.
 }
 \examples{
 \dontrun{
@@ -38,4 +56,6 @@ Available are:
 }
 \references{
 Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+
+Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 }

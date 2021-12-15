@@ -23,25 +23,31 @@ DistributionModel <- bdproto(
   # Print message with summary of model
   print = function(self) {
     # TODO: Have a lot more information in here and to be prettified
+
+    # Check whether prediction exists and number of layers
+    has_prediction <- "prediction" %in% self$show_rasters()
+    # Check whether threshold has been calculated
+    has_threshold <- grep('threshold',self$show_rasters(),value = TRUE)[1]
+
     # FIXME: Have engine-specific code moved to engine
-    if(inherits(self, 'INLA-Model')){
+    if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
       if( length( self$fits ) != 0 ){
         # Get strongest effects
         ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
                      select = c('variable', 'mean'))
         ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
 
-        # TODO: See if this can be plotted and extracted and shown here
-        # Provides the distance value (in the unit of the point coordinates) above
-        # which spatial dependencies become negligible
-        # model0.res<-inla.spde2.result(model0, 'spatial.field', spde, do.transf=TRUE)
-        # model0.res$summary.log.range.nominal
-
         message(paste0(
           'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
-          '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0])
+          '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+          ifelse(has_prediction,
+                 paste0("\n  Prediction fitted: ",text_green("yes")),
+                 ""),
+          ifelse(!is.na(has_threshold),
+                 paste0("\n  Threshold created: ",text_green("yes")),
+                 "")
         ))
       }
     } else if( inherits(self, 'GDB-Model') ) {
@@ -55,7 +61,13 @@ DistributionModel <- bdproto(
         message(paste0(
           'Trained ',class(self)[1],' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
-          '\n     ', name_atomic(names(vi))
+          '\n     ', name_atomic(names(vi)),
+          ifelse(has_prediction,
+                 paste0("\n  Prediction fitted: ",text_green("yes")),
+                 ""),
+          ifelse(!is.na(has_threshold),
+                 paste0("\n  Threshold created: ",text_green("yes")),
+                 "")
         ))
     } else if( inherits(self, 'BART-Model') ) {
       # Calculate variable importance from the posterior trees
@@ -64,12 +76,39 @@ DistributionModel <- bdproto(
       message(paste0(
         'Trained ',class(self)[1],' (',self$show(),')',
         '\n  \033[2mStrongest effects:\033[22m',
-        '\n     ', name_atomic(vi$names)
+        '\n     ', name_atomic(vi$names),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
       ))
+    } else if( inherits(self, 'XGBOOST-Model') ) {
+      vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest effects:\033[22m',
+        '\n     ', name_atomic(vi$Feature),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
+      ))
+
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
-        '\n     No fitted model found!'
+        text_red('\n     No fitted model found!'),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
       ))
     }
   },
@@ -81,9 +120,9 @@ DistributionModel <- bdproto(
   plot = function(self, what = 'mean',...){
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
-      assertthat::assert_that(
-        inherits(pred,'Raster')
-      )
+      assertthat::assert_that(is.Raster(pred))
+      # Match arguement
+      what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       raster::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
@@ -106,12 +145,15 @@ DistributionModel <- bdproto(
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
       mboost:::summary.mboost(self$get_data(x))
-    } else if(inherits(self, 'INLA-Model')){
+    } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
+    } else if(inherits(self, "XGBOOST-Model")){
+      xgboost::xgb.importance(model = self$get_data('fit_best'))
+      # xgboost::xgb.ggplot.importance(o)
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -138,9 +180,15 @@ DistributionModel <- bdproto(
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
+    } else if(inherits(self, 'INLABRU-Model')) {
+      # Use inlabru effect plot
+      ggplot2::ggplot() +
+        inlabru:::gg(self$get_data(x)$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)
+    } else {
+      self$partial(self$get_data(x), x.vars = NULL)
     }
   },
   # Get specific fit from this Model

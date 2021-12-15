@@ -6,7 +6,7 @@
 \usage{
 threshold(
   obj,
-  method = "fixed",
+  method = "mtp",
   value = NULL,
   poi = NULL,
   return_threshold = FALSE,
@@ -54,4 +54,9 @@ The following options are currently implemented:
 \dontrun{
 print('test')
 }
+}
+\references{
+Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+
+Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
 }

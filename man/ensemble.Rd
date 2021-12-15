@@ -13,7 +13,7 @@
 
 \item{weights}{(Optional) weights provided to the ensemble function if weighted means are to be constructed. (Default: NULL)}
 
-\item{layername}{A \code{\link{character}} of the layername to be taken from each prediction}
+\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction}
 }
 \value{
 A \code{\link{RasterStack}} containing the ensemble of the provided predictions.

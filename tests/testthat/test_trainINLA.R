@@ -1,5 +1,3 @@
-context('Train some model with INLA')
-
 # First check that INLA works
 test_that('Check that INLA works', {
   skip_on_travis()
@@ -7,6 +5,7 @@ test_that('Check that INLA works', {
   skip_if_not_installed('INLA')
 
   library(INLA)
+  options("ibis.setupmessages" = FALSE)
 
   # Use test data that comes with INLA
   data(Epil)
@@ -25,7 +24,6 @@ test_that('Check that INLA works', {
   expect_equal(nrow(result$summary.random$rand), 236)
 
 })
-
 
 # Train a full distribution model with INLA
 test_that('Train a distribution model with INLA', {

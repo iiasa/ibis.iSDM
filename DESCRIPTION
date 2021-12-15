@@ -22,7 +22,6 @@ Imports:
     doParallel,
     geodist,
     ncdf4,
-    SDraw,
     assertthat(>= 0.2.0),
     rgeos (>= 0.5-5),
     tibble (>= 2.0.0),
@@ -38,12 +37,13 @@ Suggests:
     mboost,
     dbarts,
     modEvA,
+    xgboost,
     progress,
     ellipsis,
     rstan
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Config/testthat/edition: 3
 Collate: 
     'utils.R'
@@ -52,11 +52,13 @@ Collate:
     'bdproto-biodiversitydataset.R'
     'bdproto-biodiversitydistribution.R'
     'add_biodiversity.R'
+    'bdproto-biodiversityscenario.R'
+    'add_constraint.R'
+    'add_constraint_MigClim.R'
     'add_latent.R'
     'bdproto-log.R'
     'add_log.R'
     'add_offset.R'
-    'bdproto-biodiversityscenario.R'
     'bdproto-predictors.R'
     'add_predictors.R'
     'bdproto-priorlist.R'
@@ -74,7 +76,9 @@ Collate:
     'engine_gdb.R'
     'utils-inla.R'
     'engine_inla.R'
+    'engine_inlabru.R'
     'engine_stan.R'
+    'engine_xgboost.R'
     'ensemble.R'
     'misc.R'
     'partial.R'
@@ -82,6 +86,7 @@ Collate:
     'print.R'
     'prior_gdb.R'
     'prior_inla.R'
+    'prior_xgb.R'
     'priors.R'
     'project.R'
     'scenario.R'
@@ -91,5 +96,6 @@ Collate:
     'train.R'
     'utils-bart.R'
     'utils-gdb.R'
+    'validate.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

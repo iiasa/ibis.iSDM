@@ -1,9 +1,8 @@
-context('Set up a distribution model')
-
 # Setting up a distribution model
 test_that('Setting up a distribution model',{
   testthat::skip_on_cran()
 
+  options("ibis.setupmessages" = FALSE)
   # Background Raster
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   # Get test species
@@ -33,7 +32,7 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  x <- x %>% add_range_offset(virtual_range, method = 'binary')
+  x <- x %>% add_offset_range(virtual_range, method = 'binary')
   expect_equal(x$get_offset(),'binary_range')
   expect_s4_class(x$offset,'Raster')
 
@@ -71,8 +70,6 @@ test_that('Setting up a distribution model',{
 
   # Add latent effect and see whether the attributes is changed
   y <- x %>% add_latent_spatial()
-  expect_vector( attr(y$get_latent(),'spatial_model'),'spde')
-  expect_warning(y <- y %>% add_latent_spatial()) # Replacing the previous one
-  expect_vector( attr(y$get_latent(),'spatial_model'),'spde')
+  expect_vector( attr(y$get_latent(),'method'),'spde')
 
 })

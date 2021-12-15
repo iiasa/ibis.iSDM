@@ -8,15 +8,23 @@ NULL
 #' @details There are several different options which depend on the engine used. In case a
 #' unsupported method for an engine is chosen this is modified to the next similar method
 #' Available are:
-#' * "spde" - stochastic partial differential equation (SPDE) for [`INLA-engine`]
+#' * "spde" - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
+#' SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
+#' Examining the spatial distribution of the spatial error can reveal which covariates might be missing.
+#' For example, if elevation is positively correlated with the response variable, but is not included in the model,
+#' we could see a higher posterior mean in areas with higher elevation.
 #' * "car" - conditional autocorrelative errors (CAR) for [`INLA-engine`]
 #' * "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model.
 #' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors
+#' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
+#' for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
 #'
 #' @references Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+#' @references Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
 #' @examples
 #' \dontrun{
@@ -32,7 +40,7 @@ NULL
 methods::setGeneric(
   "add_latent_spatial",
   signature = methods::signature("x"),
-  function(x, method = 'spde', priors = NULL, ...) standardGeneric("add_latent_spatial"))
+  function(x, method = 'spde', priors = NULL, separate_spde = FALSE, ...) standardGeneric("add_latent_spatial"))
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
@@ -40,10 +48,11 @@ methods::setGeneric(
 methods::setMethod(
   "add_latent_spatial",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, method = 'spde', priors = NULL) {
+  function(x, method = 'spde', priors = NULL, separate_spde = FALSE, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method) && !missing(method),
-                            is.null(priors) || inherits(priors, 'PriorList')
+                            is.null(priors) || inherits(priors, 'PriorList'),
+                            is.logical(separate_spde)
                             )
 
     # Match the spatial method
@@ -60,6 +69,6 @@ methods::setMethod(
       x <- x$set_priors(priors)
     }
     # Add to data to the BiodiversityDistribution object
-    x$set_latent(type = '<Spatial>', method)
+    x$set_latent(type = '<Spatial>', method, separate_spde)
   }
 )

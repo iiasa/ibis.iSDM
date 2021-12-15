@@ -44,8 +44,23 @@ train(
 A distribution prediction object
 }
 \description{
-Train a \code{\link[=distribution]{distribution()}} model with the specified engine.
+TODO: Add explanation
+See \link{#details} for particularities on how parameters are handled by the individual engines
+
+Note several engines do not support joint likelihood models
+Therefore the strategy is to either run the model in sequence and
+informing the model as highlighted in Miller et al. 2019.
+In this case, when multiple datasets are supplied, the model is run in sequence where
+the nth' dataset is provided as input to the nth'+1 dataset.
 }
 \details{
+Train a \code{\link[=distribution]{distribution()}} model with the specified engine.
 
+TBD: Further details
+}
+\references{
+Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
+}
+\seealso{
+\link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla}, \link{engine_inlabru}
 }

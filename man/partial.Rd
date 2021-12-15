@@ -5,16 +5,16 @@
 \alias{partial.DistributionModel}
 \title{Obtain partial effects of trained model}
 \usage{
-partial(mod, x.vars, constant = NULL, variable_length = 100, plot = FALSE, ...)
+partial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
-\S4method{partial}{ANY,character}(mod, x.vars)
+\S4method{partial}{ANY,character}(mod, x.var)
 
 \method{partial}{DistributionModel}(x, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} model}
 
-\item{x.vars}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
+\item{x.var}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
 
 \item{constant}{A \code{\link{numeric}} constant to be inserted for all other variables. Default calculates a mean per variable}
 

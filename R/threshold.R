@@ -20,6 +20,8 @@ NULL
 #' * 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the ['modEvA'] package
 #' * 'Specificity' = Determines the optimal sensitivity of presence records. Requires the ['modEvA'] package
 #' @name threshold
+#' @references Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+#' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
 #' @examples
 #' \dontrun{
 #' print('test')
@@ -34,7 +36,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -44,7 +46,7 @@ methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
   function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, ...) {
-    assertthat::assert_that(inherits(obj,c('GDB-Model','BART-Model','INLA-Model','STAN-Model')),
+    assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value)
     )
@@ -62,11 +64,17 @@ methods::setMethod(
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Get all point data in distribution model
-    # FIXME: Adapt to more/ combined datasets
-    poi <- sf::st_as_sf( obj$model$biodiversity[[1]]$observations, coords = c('x','y') )
+    poi <- do.call(sf:::rbind.sf,
+                     lapply(obj$model$biodiversity, function(y){
+                       o <- guess_sf(y$observations)
+                       o$name <- y$name; o$type <- y$type
+                       subset(o, select = c('observed', "name", "type", "geometry"))
+                     } )
+    ) %>% tibble::remove_rownames()
+    poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if(!any(sapply(mod1$model$biodiversity, function(x) 0 %in% x$observations[,'observed'])) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')){
+    if((!any(poi$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(poi$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- raster::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       abs <- create_pseudoabsence(
@@ -78,8 +86,13 @@ methods::setMethod(
         replace = TRUE
       )
       abs <- subset(abs, select = c('x','y'));abs$observed <- 0
-      poi <- rbind(poi, st_as_sf(abs, coords = c('x','y')))
+      abs <- guess_sf(abs)
+      abs$name <- 'Background point'; abs$type <- "generated"
+      abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
+      poi <- rbind(poi, abs);rm(abs)
     }
+    # Convert to sf
+    poi <- sf::st_as_sf( poi, coords = c('x','y'), crs = sf::st_crs(obj$get_data('prediction')))
 
     # Now self call threshold
     out <- threshold(ras, method = method, value = value, poi = poi, ...)
@@ -90,7 +103,7 @@ methods::setMethod(
       new_obj <- new_obj$set_data(names(out), out)
     } else if(inherits(out,'RasterStack')) {
       # When stack loop through and add
-      for(n in names(out)){ new_obj <- new_obj$set_data(n, out[[n]]) }
+      new_obj <- new_obj$set_data(paste0("threshold_", method), out)
     }
     # Return altered object
     return(new_obj)
@@ -100,7 +113,7 @@ methods::setMethod(
 #' @noRd
 #' @keywords noexport
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            poi = NULL, return_threshold = FALSE) {
+                            poi = NULL, return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(poi,'sf'),
@@ -111,13 +124,13 @@ methods::setMethod(
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold) )
+                                                                value = value, poi = poi, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
     out <- raster::stack()
     for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold) )
+                                                                value = value, poi = poi, return_threshold = return_threshold, ...) )
   }
   return(out)
 }
@@ -246,12 +259,14 @@ methods::setMethod(
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
     # Check that a threshold layer is available and get the methods and data from it
-    assertthat::assert_that( grep('threshold', obj$get_model()$show_rasters())>0 ,
+    assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
                              msg = 'Call \' threshold \' for prediction first!')
     # Get threshold layer
-    ras_tr <- obj$get_model()$get_data( grep('threshold', obj$get_model()$show_rasters(),value = TRUE) )
-    tr <- attr(ras_tr, 'threshold')
-    names(tr) <- attr(ras_tr, 'method')
+    tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
+    if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
+    ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
+    tr <- attr(ras_tr[[1]], 'threshold')
+    names(tr) <- attr(ras_tr[[1]], 'method')
     # Otherwise sample?
     # tr <- threshold(  obj = obj$get_model()$get_data('prediction'),
     #                   method = method,
