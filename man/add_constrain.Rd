@@ -24,6 +24,13 @@ dispersal distance, connectivity between identified patches or limitations on sp
 \strong{Most constrains require pre-calculated thresholds to present in the \code{\linkS4class{BiodiversityScenario}} object!}
 }
 \details{
+Currently this method functions as a wrapper to support the definition of further modelling constraints.
+Supported are the options for dispersal and connectivity constrains:
+\link{-} sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep
+\link{-} sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin,
+\link{-} migclim - Applies the dispersal algorithm MigClim to the modelled objects
+\link{-} hardbarrier - Defines a hard barrier to any dispersal events
+
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).
 }

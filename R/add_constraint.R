@@ -15,6 +15,13 @@ NULL
 #'
 #' @seealso [`add_constrain_dispersal`], [`add_constrain_connectivity`]
 #' @details
+#' Currently this method functions as a wrapper to support the definition of further modelling constraints.
+#' Supported are the options for dispersal and connectivity constrains:
+#' [-] sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep
+#' [-] sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin,
+#' [-] migclim - Applies the dispersal algorithm MigClim to the modelled objects
+#' [-] hardbarrier - Defines a hard barrier to any dispersal events
+#'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
 #' @references Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
@@ -94,7 +101,7 @@ methods::setMethod(
     if(!is.Waiver(mod$get_constraints())){
       # If there are any dispersal constrains in there, raise warning
       if(any( "dispersal" %in% names(mod$get_constraints()) )){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Overwriting existing dispersal constraint')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Overwriting existing dispersal constraint.')
       }
     }
 
@@ -119,17 +126,20 @@ methods::setMethod(
       # http://doi.wiley.com/10.1111/j.1365-2699.2012.02737.x
       # http://doi.wiley.com/10.1111/gcb.13251
       # http://www.nature.com/articles/nclimate3414
-    } else if(method == "migclim"){
-      # Using the MigClim package.
-      # This requires prior calculates Thresholds!
-      check_package("MigClim") # remotes::install_github("robinengler/MigClim")
-      stop("Not yet implemented yet.")
     }
-    # --- #
-    new <- mod$set_constraints(cr)
-    return(
-      bdproto(NULL, new)
-    )
+    if(method == "migclim"){
+      # Using the MigClim package for calculating any transitions and
+      # This requires prior calculated Thresholds!
+      out <- add_constrain_MigClim(mod = mod, ...)
+      return(out)
+    } else {
+      # --- #
+      new <- mod$set_constraints(cr)
+      return(
+        bdproto(NULL, new)
+      )
+    }
+
   }
 )
 

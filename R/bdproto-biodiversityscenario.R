@@ -140,8 +140,8 @@ BiodiversityScenario <- bdproto(
     return(self$predictors)
   },
   # Get scenario predictions
-  get_scenarios = function(self){
-    return(self$scenarios)
+  get_scenarios = function(self, what = "scenarios"){
+    return(self[[what]])
   },
   # Calculate slopes
   calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
@@ -177,6 +177,39 @@ BiodiversityScenario <- bdproto(
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
     }
+  },
+  # Plot Migclim results if existing
+  plot_migclim = function(self){
+    # Get scenarios
+    mc <- self$get_scenarios("scenarios_migclim")
+    if(is.Waiver(mc)) return(mc)
+
+    # Otherwise plot the raster
+    ras <- mc$raster
+
+    # Colour coding from MigClim::MigClim.plot
+    rstVals <- sort(raster::unique(ras))
+    negativeNb <- length(which(rstVals < 0))
+    positiveNb <- length(which(rstVals > 1 & rstVals < 30000))
+    zeroExists <- any(rstVals == 0)
+    oneExists <- any(rstVals == 1)
+    unilimtedExists <- any(rstVals == 30000)
+    Colors <- rep("yellow", negativeNb)
+    if(zeroExists) Colors <- c(Colors, "grey94")
+    if (oneExists) Colors <- c(Colors, "black")
+    Colors <- c(Colors, rainbow(positiveNb, start = 0, end = 0.4))
+    if (unilimtedExists) Colors <- c(Colors, "pink")
+
+    # Plot
+
+    # 0 - Cells that have never been occupied and are unsuitable habitat at the end of the simulation
+    # 1 - Cells that belong to the species' initial distribution and that have remained occupied during the entire simulation.
+    # 1 < value < 30 000 - determine the dispersal step during which it was colonized. E.g. 101 is first dispersal even in first step
+    # 30 0000 - Potentially suitable cells that remained uncolonized
+    # <0 - Negative values indicate cells that were once occupied but have become decolonized. Code as for colonization
+    dev.new(width = 7, height = 7 * ((ymax(ras) - ymin(ras))/(xmax(ras) - xmin(ras))))
+    plot(ras, col = Colors, breaks = c(min(rstVals) - 1, rstVals), legend = FALSE,
+         main = "Newly colonized and stable habitats")
   },
   # Plot animation of scenarios
   plot_animation = function(self, what = "suitability", fname = NULL){

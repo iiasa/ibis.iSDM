@@ -54,6 +54,7 @@ Collate:
     'add_biodiversity.R'
     'bdproto-biodiversityscenario.R'
     'add_constraint.R'
+    'add_constraint_MigClim.R'
     'add_latent.R'
     'bdproto-log.R'
     'add_log.R'
