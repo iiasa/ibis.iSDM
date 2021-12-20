@@ -9,9 +9,12 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors}
 
-\item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details}
+\item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details.}
 
-\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units "m". Default: NULL}
+\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units "m". Default: NULL
+For kissmig the value needs to give the number of iteration steps (or within year migration steps).}
+
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
 
 \item{...}{passed on parameters}
 }

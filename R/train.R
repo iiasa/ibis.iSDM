@@ -178,6 +178,7 @@ methods::setMethod(
       model[['biodiversity']][[id]][['type']]         <- x$biodiversity$get_types(short = TRUE)[[id]] # Type
       model[['biodiversity']][[id]][['family']]       <- x$biodiversity$get_families()[[id]] # Family
       model[['biodiversity']][[id]][['equation']]     <- x$biodiversity$get_equations()[[id]]
+      model[['biodiversity']][[id]][['use_intercept']]<- x$biodiversity$data[[id]]$use_intercept # Separate intercept?
       # --- #
       # Rename observation column to 'observed'. Needs to be consistent for INLA
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
@@ -350,11 +351,14 @@ methods::setMethod(
 
           # Construct formula with all variables
           form <- paste('observed', '~', 0, '+ intercept',
-                        ifelse(length(types)==1, # Check whether a single intercept model is to be constructed
-                               '',
+                        ifelse(length(types)>1 && model$biodiversity[[id]]$use_intercept, # Check whether a single intercept model is to be constructed
                                paste(' + ',paste0('intercept_',
-                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                                                  make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
+                                                  # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                  # sapply( model$biodiversity, function(x) x$type ),
+                                                  )#collapse = ' + ')
+                                     ),
+                               ""
                         )
           )
           # Check whether priors have been specified and if yes, use those
@@ -476,18 +480,19 @@ methods::setMethod(
 
         # Default equation found (e.g. no separate specification of effects)
         if(model$biodiversity[[id]]$equation=='<Default>'){
-
+          # Check whether to use dataset specific intercepts
+          if(length(types)>1 && model$biodiversity[[id]]$use_intercept){
+            ii <- paste0('+ Intercept_',
+                         make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
+                         # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                         # sapply( model$biodiversity, function(x) x$type ),
+            )
+          } else ii <- ""
           # Go through each variable and build formula for likelihood
           form <- to_formula(paste("observed ~ ", "0 + Intercept +",
                                paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                # Check whether a single dataset is provided, otherwise add other intercepts
-                               ifelse(length(types)==1,
-                                      '',
-                                      paste('+',paste0('Intercept_',
-                                                         make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                                            )
-                               ),
+                               ii,
                                # # If multiple datasets, don't use intercept
                                # ifelse(length(ids)>1,"-1", ""),
                                collapse = " ")
@@ -522,14 +527,16 @@ methods::setMethod(
           # Add generic Intercept if not set in formula
           if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
           # If length of ids is larger than 1, add dataset specific intercept too
-          if(length(ids)>1){
+          # Check whether to use dataset specific intercepts
+          if(length(types)>1 && model$biodiversity[[id]]$use_intercept){
             form <- update.formula(form,
                                    paste0(". ~ . + ",
                                           paste0('Intercept_',
                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + '))
-                                   )
+            )
           }
+
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",

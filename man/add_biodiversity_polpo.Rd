@@ -14,6 +14,8 @@ add_biodiversity_polpo(
   simulate = FALSE,
   simulate_points = 100,
   simulate_weights = NULL,
+  simulate_strategy = "random",
+  separate_intercept = TRUE,
   ...
 )
 
@@ -37,6 +39,13 @@ add_biodiversity_polpo(
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation}
 
 \item{simulate_weights}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: NULL)}
+
+\item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either
+'random' or 'regular', the latter requiring a raster supplied in the \link{simulate_weights}
+parameter.}
+
+\item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
+shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
 \item{...}{Other parameters passed down}
 }

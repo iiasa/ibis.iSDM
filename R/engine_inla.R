@@ -491,8 +491,13 @@ engine_inla <- function(x,
         }
         # ----------- #
         # Provided or default formula
-        # TODO: Currently duplicate equations per dataset. Use only one here, but ideally support multiple?
-        master_form <- model$biodiversity[[1]]$equation
+        master_form <- as.formula(
+          paste0("observed ~ 0 + ",
+                              paste0(sapply(model$biodiversity, function(x){
+                                                attr(terms.formula(x$equation),"term.labels")
+                                              }) %>% c %>% unique(),collapse = " + ")
+          )
+        )
 
         # Perform variable selection
         if( settings$get(what='varsel') ){
@@ -568,8 +573,8 @@ engine_inla <- function(x,
                                  control.compute = list(cpo = FALSE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
                                  # control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
                                  verbose = settings$get(what='verbose'), # To see the log of the model runs
-                                 control.results = list(return.marginals.random = FALSE,
-                                                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
+                                 # control.results = list(return.marginals.random = FALSE,
+                                 #                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
                                  # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
                                  # control.fixed = INLA::control.fixed(mean = 0),#, prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                                  INLA::control.inla(int.strategy = "eb"), # Empirical bayes is generally faster
