@@ -1,7 +1,6 @@
-context('Check if testing data can be loaded.')
-
 # Loading data that comes with the package
-test_that('Loading data',{
+test_that('Check that data can be loaded.',{
+
   # Background Raster
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   expect_s4_class(background,'Raster')
@@ -25,4 +24,26 @@ test_that('Loading data',{
   expect_s4_class(predictors,'RasterStack')
   expect_true(nlayers(predictors)>1)
   expect_true(is_comparable_raster(background,predictors))
+})
+
+test_that('Check that test scenarios can be loaded.',{
+  # Load the scenario data
+  require(stars)
+
+  ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM'),full.names = TRUE)
+  expect_vector(ll)
+  expect_length(ll,9)
+  expect_true(all( assertthat::has_extension(ll,'nc') ))
+
+  # Load stars files
+  sc <- stars::read_stars(ll)
+  # Still having warnings for the bioclimatic files
+  expect_type(sc[1], 'list')
+  # Average
+  o <- mean(sc[[1]],na.rm = TRUE)
+  expect_true(o > 10)
+
+  # Get time attributes
+  tt <- stars::st_get_dimension_values(sc, 'Time')
+  expect_length(tt, 86)
 })

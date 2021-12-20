@@ -112,6 +112,7 @@ test_that('Add and modify priors to existing object', {
   skip_if_not_installed('INLA')
   skip_on_cran()
   library(raster)
+  options("ibis.setupmessages" = FALSE)
 
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
   # Get test species
@@ -137,7 +138,7 @@ test_that('Add and modify priors to existing object', {
   expect_s3_class(x$get_priors(),'Waiver')
 
   # Add priors to it
-  x <- x %>% set_priors(priors = pp)
+  x <- x %>% add_priors(priors = pp)
 
   expect_s3_class( x$get_priors(), 'PriorList')
   expect_vector(x$get_prior_variables(), "CLC3_132_mean_50km" )

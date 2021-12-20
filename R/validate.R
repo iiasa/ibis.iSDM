@@ -11,9 +11,10 @@
 #' Default set to 'observed'
 #' @param ... passed on parameters
 #' @returns Return a tidy [`tibble`] with validation results. See details for further information.
-#' @details TBD
+#' @details
+#' If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
 #' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-
+#' @references Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
 #' @name validate
 #' @aliases validate
 #' @keywords train
@@ -125,7 +126,7 @@ methods::setMethod(
         # obs: A vector containing the predicted suitability values or xy-coordinates (if fit is a Raster-Layer) of the validation points (presence records)
         # nclass : number of classes or vector with classes threshold. If nclass=0, Boyce index is calculated with a moving window (see next parameters)
         # windows.w : width of the moving window (by default 1/10 of the suitability range)
-        # res : resolution of the moving window (by default 100 focals)
+        # res : resolution of the moving window (by default 101 focals)
         # PEplot : if True, plot the predicted to expected ratio along the suitability class
         ecospat.boyce <-
           function(fit,
@@ -189,11 +190,9 @@ methods::setMethod(
                 stats::cor(f[r], vec.mov[to.keep][r], method = "spearman")  # calculation of the spearman correlation (i.e. Boyce index) after removing successive duplicated values
             }
 
-            HS <-
-              apply(interval, 1, sum) / 2  # mean habitat suitability in the moving window
-            HS[length(HS)] <-
-              HS[length(HS)] - 1  #Correction of the 'trick' to deal with closed interval
-            HS <- HS[to.keep]  #exlude the NaN
+            HS <- apply(interval, 1, sum) / 2  # mean habitat suitability in the moving window
+            HS[length(HS)] <- HS[length(HS)] - 1  #Correction of the 'trick' to deal with closed interval
+            HS <- HS[to.keep] # exlude the NaN
 
             if (PEplot == TRUE) {
               plot(
@@ -204,7 +203,6 @@ methods::setMethod(
                 col = "grey",
                 cex = 0.75
               )
-
               points(HS[r], f[r], pch = 19, cex = 0.75)
 
             }

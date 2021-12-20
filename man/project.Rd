@@ -4,10 +4,13 @@
 \alias{project}
 \title{Project a fitted model to new covariates}
 \usage{
-\S4method{project}{BiodiversityScenario}(mod)
+\S4method{project}{BiodiversityScenario, logical}(mod, no_projection)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors}
+
+\item{no_projection}{A \code{\link{logical}} flag whether future projection should be created. (Default: TRUE)
+Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
 
 \item{...}{passed on parameters}
 }

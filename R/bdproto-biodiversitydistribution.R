@@ -74,7 +74,7 @@ BiodiversityDistribution <- bdproto(
   },
   # Get provided limits
   get_limits = function(self){
-    if(is.Waiver(limits)) return(NULL)
+    if(is.Waiver(self$limits)) return(NULL)
     return(self$limits)
   },
   # Function for querying predictor names if existing
@@ -87,15 +87,16 @@ BiodiversityDistribution <- bdproto(
     }
   },
   # Adding latent factors
-  set_latent = function(self, type, method = NULL, priors = NULL ){
+  set_latent = function(self, type, method = NULL, separate_spde = FALSE){
     assertthat::assert_that(is.character(type),
-                            is.character(method),
                             type %in% c('<Spatial>','<Temporal>','<Spatial-temporal>'),
-                            is.null(priors) || inherits(priors, 'PriorList'))
+                            is.character(method),
+                            is.logical(separate_spde))
     # Assign argument if existing
     if(!is.null(method)){
       type <- paste0('<Spatial | ',method,'>')
       attr(type, 'method') <- method
+      attr(type, 'separate_spde') <- separate_spde
     }
     if(!is.Waiver(self$latentfactors)){
       bdproto(NULL, self, latentfactors = type )

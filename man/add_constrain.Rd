@@ -9,11 +9,14 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors}
 
-\item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details}
+\item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details.}
 
 \item{...}{passed on parameters}
 
-\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units "m". Default: NULL}
+\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units "m". Default: NULL
+For kissmig the value needs to give the number of iteration steps (or within year migration steps).}
+
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
 
 \item{resistance}{A \code{\link{RasterLayer}} object describing a resistance surface or barrier for use in connectivity constrains. Default: NULL}
 }
@@ -24,6 +27,14 @@ dispersal distance, connectivity between identified patches or limitations on sp
 \strong{Most constrains require pre-calculated thresholds to present in the \code{\linkS4class{BiodiversityScenario}} object!}
 }
 \details{
+Currently this method functions as a wrapper to support the definition of further modelling constraints.
+Supported are the options for dispersal and connectivity constrains:
+\link{-} sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep
+\link{-} sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin,
+\link{-} kissmig - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step
+\link{-} migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
+\link{-} hardbarrier - Defines a hard barrier to any dispersal events
+
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).
 }
@@ -31,6 +42,8 @@ can be found in Bateman et al. (2013).
 Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
 
 Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
+
+Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 }
 \seealso{
 \code{\link{add_constrain_dispersal}}, \code{\link{add_constrain_connectivity}}

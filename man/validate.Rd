@@ -29,9 +29,11 @@ either on the fitted point data or any supplied independent.
 \strong{Currently only supporting point. For validation of integrated models more work is needed.}
 }
 \details{
-TBD
+If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
 }
 \references{
 Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+
+Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
 }
 \keyword{train}
