@@ -9,7 +9,7 @@ Authors@R:
            email = "jung@@iiasa.ac.at",
            comment = c(ORCID = "0000-0002-7569-1390"))
 Maintainer: Martin Jung <jung@iiasa.ac.at>
-Description: Integrated framework of modelling the distribution of species and ecosystems. This package contains the integrated Species distribution Modelling functionalities of the wider ibis framework.
+Description: Integrated framework of modelling the distribution of species and ecosystems.
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
@@ -42,9 +42,9 @@ Suggests:
     xgboost,
     progress,
     ellipsis,
-    rstan (>= 2.18.1),
-    rstantools (>= 2.1.1),
-    rstanarm
+    rstan (>= 2.21.0),
+    rstantools (>= 2.1.1)
+    posterior
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.2

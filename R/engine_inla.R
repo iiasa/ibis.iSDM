@@ -583,13 +583,13 @@ engine_inla <- function(x,
                                  # ),
                                  num.threads = getOption('ibis.nthread')
             )
-          },silent = TRUE)
-          if(class(fit_pred)=='try-error') stop('Model did not converge. Try to simplify structure and check priors!')
+          },silent = FALSE)
+          if(class(fit_pred)=='try-error') print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!')
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
           # Only difference between linear.predictor and fitted.values is that
           # fitted.values applies the (inverse of the) link function,
-          # so it doesn't include the observation distribution part of posterior predictions.
+          # so it doesn't include the observation distribution part (measurement noise) of posterior predictions.
           post <- fit_pred$summary.linear.predictor[index.pred, ] # Changed to fitted values
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection

@@ -42,16 +42,30 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
   return(file_stan)
 }
 
-#' Fit cmdstanr model and convert to rstan
+#' Fit [cmdstanr] model and convert to [rstan] object
 #'
-#' @param file
+#' @description This function fits a stan model using the light-weight cmdstanr interface. Code
+#' was adapted from McElreath rethinking package.
+#' @param model_code A [`character`] pointing to the stan modelling code
+#' @param data A [`list`] with all the parameters required to run the [model_code] in stan.
+#' @param algorithm A [`character`] giving the algorithm to use. Either 'sampling' (Default), 'optimize' or 'variational' for penalized likelihood estimation.
+#' @param chains A [`numeric`] indicating the number of chains to use for estimation.
+#' @param cores Number of threads for sampling. Default set to 'getOption("ibis.nthread")'. See [ibis_options()]
+#' @param threads [`numeric`] giving the number of threads to be run per chain. Has to be specified in accordance with cores.
+#' @param iter A [`numeric`] value giving the number of MCMC samples to generate.
+#' @param warmup [`numeric`] for the number of warm-up samples for MCMC. Default set to 1/2 of iter.
+#' @param control A [`list`] with further control options for stan.
+#' @param cpp_options A [`list`] with options for the Cpp compiling.
+#' @param save_warmup A [`logical`] flag whether to save the warmup samples.
+#' @param ... Other non-specified parameters
 #' @seealso [rethinking] R package
 #' @returns A [rstan] object
 #' @keywords misc, stan
-fit_stan <- function( file , model_code , data=list(),
-                      chains = 1, cores = 1,
-                      iter = 1000, warmup,
+run_stan <- function( model_code, data = list(),
+                      algorithm = "sampling",
+                      chains = 4, cores = getOption("ibis.nthread"),
                       threads = 1,
+                      iter = 1000, warmup = floor(iter / 2),
                       control = list(adapt_delta=0.95),
                       cpp_options = list(),
                       save_warmup = TRUE, ... ) {
@@ -59,29 +73,33 @@ fit_stan <- function( file , model_code , data=list(),
     is.numeric(chains), is.numeric(cores),
     is.numeric(iter), is.numeric(warmup),
     is.numeric(threads),
+    threads < cores,
     is.list(control), is.list(cpp_options),
     is.logical(save_warmup)
   )
   # Check that cmdstanr is available
   check_package("cmdstanr")
+  cmdstanr::check_cmdstan_toolchain(quiet = TRUE)
 
-  if ( threads>1 ) cpp_options[['stan_threads']] <- TRUE
+  # Match the algorithm to be used
+  algorithm <- match.arg(algorithm, c("sampling", "optimize", "variational"), several.ok = FALSE)
 
-  if ( missing(file) & !missing(model_code) ) {
-    file <- cmdstanr_model_write( model_code )
-  }
+  if( threads > 1 ) cpp_options[['stan_threads']] <- TRUE
 
+  # Check extension
+  assertthat::assert_that(
+    is.character(model_code),
+    assertthat::has_extension(model_code, "stan")
+  )
 
+  # Now compile the model
+  mod <- cmdstanr::cmdstan_model( model_code,
+                                  compile = TRUE,
+                                  cpp_options = cpp_options )
 
-  mod <- cmdstan_model( file , compile=TRUE , cpp_options=cpp_options )
-
-  if ( missing(warmup) ) {
-    samp <- floor(iter/2)
-    warm <- floor(iter/2)
-  } else {
-    samp <- iter - warmup
-    warm <- warmup
-  }
+  # Final parameters for sampling
+  samp <- iter - warmup
+  warm <- warmup
 
   # pull out any control arguments
   carg_adapt_delta <- 0.95
@@ -91,27 +109,47 @@ fit_stan <- function( file , model_code , data=list(),
   if ( !is.null( control[['max_treedepth']] ) )
     carg_max_treedepth <- as.numeric(control[['max_treedepth']])
 
-  # sample
-  if ( threads > 1 )
-    cmdstanfit <- mod$sample( data=data ,
-                              chains=chains ,
-                              parallel_chains=cores ,
-                              iter_sampling=samp , iter_warmup=warm ,
-                              adapt_delta=carg_adapt_delta ,
-                              max_treedepth=carg_max_treedepth ,
-                              threads_per_chain=threads ,
-                              save_warmup=save_warmup , ... )
-  else
-    cmdstanfit <- mod$sample( data=data ,
-                              chains=chains ,
-                              parallel_chains=cores ,
-                              iter_sampling=samp , iter_warmup=warm ,
-                              adapt_delta=carg_adapt_delta ,
-                              max_treedepth=carg_max_treedepth ,
-                              save_warmup=save_warmup , ... )
+  if(algorithm == "sampling"){
+    # Sample
+    if ( threads > 1 ) {
+      cmdstanfit <- mod$sample( data = data,
+                                chains = chains,
+                                parallel_chains = cores,
+                                iter_sampling = samp, iter_warmup = warm,
+                                adapt_delta = carg_adapt_delta,
+                                max_treedepth = carg_max_treedepth,
+                                threads_per_chain = threads,
+                                save_warmup = save_warmup,
+                                ... )
+      # coerce to stanfit object
+      stanfit <- rstan::read_stan_csv( cmdstanfit$output_files() )
 
-  # coerce to stanfit object
-  stanfit <- rstan::read_stan_csv(cmdstanfit$output_files())
+    } else {
+      cmdstanfit <- mod$sample( data = data,
+                                chains = chains,
+                                parallel_chains = cores,
+                                iter_sampling = samp , iter_warmup = warm,
+                                adapt_delta = carg_adapt_delta,
+                                max_treedepth = carg_max_treedepth,
+                                save_warmup = save_warmup,
+                                ... )
+    }
+    # coerce to stanfit object
+    stanfit <- rstan::read_stan_csv( cmdstanfit$output_files() )
+
+  } else if(algorithm == "optimize"){
+    # Optimize for getting point estimates
+    stanfit <- mod$optimize(data = data,
+                               #seed = seed, # This could be passed on
+                               threads = threads
+                               )
+  } else if(algorithm == "variational") {
+    # Variational for approximating the posterior
+    stanfit <- mod$variational(data = data,
+                                  # seed = seed,
+                                  threads = threads
+    )
+  }
 
   return(stanfit)
 }

@@ -14,3 +14,11 @@ matrix GP(matrix x, real sigma_sq, real scale, real delta) {
     K[N, N] = sigma_sq + delta;
     return K;
 }
+
+// iCAR function
+functions {
+  real icar_normal_lpdf(vector bb, int nroutes, int[] node1, int[] node2) {
+    return -0.5 * dot_self(bb[node1] - bb[node2])
+      + normal_lpdf(sum(bb) | 0, 0.001 * nroutes); //soft sum to zero constraint on bb
+ }
+}
