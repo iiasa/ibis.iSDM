@@ -2,66 +2,53 @@
 // Stan code for a simple Point Process Model based on a single data source
 functions {
   //#include src/spatial_functions.stan // Stan functions such as CAR and GP models
+  #include src/prior_functions.stan
 }
 data {
-  // Data Flags
-  int<lower=1> N;                    // total number of observations
-  int observed[N];                   // response variable
-  int<lower=1> K;                    // number of population-level effects
-  matrix[N, K] X;                    // population-level design matrix
-  vector[N] offset_exposure;         // Vector with exposure offset
-  // Generic parameters for modelling options
-  int<lower=0,upper=1> has_intercept;// 1 = yes
-  int<lower=0,upper=2> has_spatial;  // 0 = none, 1 = CAR, 2 = GRMF
-  // // Prediction flags
-  // int<lower=0,upper=1> do_prediction;// 1 = yes
-  // int<lower=1> Npred;                // Number of prediction observations
-  // matrix[Npred, K] Xpred;            // Prediction matrix
-  // vector[Npred] offset_pred_exposure;// Prediction offset
+  #include src/data_parameters.stan
+  // data for the horseshoe prior
+  real<lower=0> hs_df;  // local degrees of freedom
+  real<lower=0> hs_df_global;  // global degrees of freedom
+  real<lower=0> hs_df_slab;  // slab degrees of freedom
+  real<lower=0> hs_scale_global;  // global prior scale
+  real<lower=0> hs_scale_slab;  // slab prior scale
 }
 transformed data {
 }
 parameters {
-  vector[K] b;                       // population-level effects for slopes
-  // real<lower = 0, upper = 5> sigma_noise;  // Sigma noise effect
-  // vector[N] noise;                   //  Generic error noise
+  // local parameters for horseshoe prior
+  vector[K] zb;
+  vector<lower=0>[K] hs_local;
+  // horseshoe shrinkage parameters
+  real<lower=0> hs_global;  // global shrinkage parameters
+  real<lower=0> hs_slab;  // slab regularization parameter
 }
 transformed parameters {
+  vector[K] beta;  // population-level effects
+  // compute actual regression coefficients
+  beta = horseshoe(zb, hs_local, hs_global, hs_scale_slab^2 * hs_slab);
 }
+
 model {
-  vector[N] lambda;
-  vector[N] mu;
-  // Initialize linear predictor term with or without intercept
-  if(has_intercept == 1){
-    mu = offset_exposure;
-  } else {
-    mu = rep_vector(0.0, N) + offset_exposure;
-  }
-  // Build lambda
-  // lambda = mu + X * b ;
-  for (n in 1:N){
-    lambda[n] = (mu[n] + X[n] * b);
-  }
+  // ---------------------- //
+  // likelihood
+  #include src/poipo_ll_poisson.stan
 
   // Add priors for all covariates
-  for (j in 1:K){
-      target += normal_lpdf(b[j] | 0, 5);
-  }
-  // ---------------------- //
-
-  // likelihood
-  // observed_i ~ poisson( exp(lambda_i) );
-  for (i in 1:N) {
-    target += poisson_log_lpmf(observed[i] | lambda[i]);
-    // observed[i] ~ poisson_log(lambda[i]);
-  }
-
-  // log poisson probability mass of y given log-rate alpha+x*beta
-  // target += poisson_log_glm_lpmf(observed | X, mu, b);
+  // for (j in 1:K){
+  //     target += normal_lpdf(b[j] | 0, 5);
+  // }
+  // priors including constants
+  target += std_normal_lpdf(zb);
+  target += student_t_lpdf(hs_local | hs_df, 0, 1)
+    - rows(hs_local) * log(0.5);
+  target += student_t_lpdf(hs_global | hs_df_global, 0, hs_scale_global)
+    - 1 * log(0.5);
+  target += inv_gamma_lpdf(hs_slab | 0.5 * hs_df_slab, 0.5 * hs_df_slab);
 }
 generated quantities {
-  // Simulated prediction. This works only if parameters are not local, transformed and thus part of the output
-  // vector[N] observedSim;
+  // // Simulated prediction. This works only if parameters are not local, transformed and thus part of outcome
+  // vector[N] observedSim;             // Vector to contain the observed Preditions
   // vector[N] log_lik; // Vector to contain the log-likelihood
   // for (i in 1:N) {
   //     if (lambda[i] > 20) {

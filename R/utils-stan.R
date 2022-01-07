@@ -24,6 +24,51 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
   }
 }
 
+#' Wrap a list with stan model code
+#'
+#' @description [engine_stan] builds a list with stan model code. This function
+#' concatenates them together
+#' @param sm_code A [list] object with exactly 7 entries
+#' @returns A [character] object
+#' @keywords stan_utils
+wrap_stanmodel <- function(sm_code){
+  assertthat::assert_that(is.list(sm_code),
+                          length(sm_code)==7)
+  out <- character(0)
+
+  # Functions
+  out <- paste0("functions {")
+  for(i in sm_code$functions) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Data
+  out <- paste(out, "data {")
+  for(i in sm_code$data) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Transformed data
+  out <- paste(out, "transformed data {")
+  for(i in sm_code$transformed_data) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Parameters
+  out <- paste(out, "parameters {")
+  for(i in sm_code$parameters) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Transformed parameters
+  out <- paste(out, "transformed parameters {")
+  for(i in sm_code$transformed_parameters) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Model
+  out <- paste(out, "model {")
+  for(i in sm_code$model) out <- paste0(out, i, "\n")
+  out <- paste0(out, "\n}\n")
+  # Generated quantities
+  out <- paste(out, "generated quantities {")
+  for(i in sm_code$generated_quantities) out <- paste0(out, i, "\n")
+  out <- paste0(out, "}")
+
+  assertthat::assert_that(is.character(out), length(out)>0)
+  return(out)
+}
+
 #' Write a cmdstanr model output to a specific file
 #'
 #' @description Write a [cmdstanr] model output to a specific destination
@@ -34,8 +79,8 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
   assertthat::assert_that(
     dir.exists(dir)
   )
-  fname <- file.path( dir , concat("rt_cmdstanr_", digest::digest(mod,"md5")) )
-  file_stan <- concat( fname, ".stan" )
+  fname <- file.path( dir , paste0("rt_cmdstanr_", digest::digest(mod,"md5")) )
+  file_stan <- paste0( fname, ".stan" )
   fileConn <- file( file_stan )
   writeLines( mod , fileConn )
   close(fileConn)
@@ -56,6 +101,8 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
 #' @param warmup [`numeric`] for the number of warm-up samples for MCMC. Default set to 1/2 of iter.
 #' @param control A [`list`] with further control options for stan.
 #' @param cpp_options A [`list`] with options for the Cpp compiling.
+#' @param force [`logical`] indication whether to force recompile the model (default: False).
+#' @param path [`character`] indicating a path to be made available to the stan compiler.
 #' @param save_warmup A [`logical`] flag whether to save the warmup samples.
 #' @param ... Other non-specified parameters
 #' @seealso [rethinking] R package
@@ -66,8 +113,10 @@ run_stan <- function( model_code, data = list(),
                       chains = 4, cores = getOption("ibis.nthread"),
                       threads = 1,
                       iter = 1000, warmup = floor(iter / 2),
-                      control = list(adapt_delta=0.95),
+                      control = list(adapt_delta = 0.95),
                       cpp_options = list(),
+                      force = FALSE,
+                      path = base::getwd(),
                       save_warmup = TRUE, ... ) {
   assertthat::assert_that(
     is.numeric(chains), is.numeric(cores),
@@ -75,7 +124,8 @@ run_stan <- function( model_code, data = list(),
     is.numeric(threads),
     threads < cores,
     is.list(control), is.list(cpp_options),
-    is.logical(save_warmup)
+    is.logical(save_warmup),
+    is.logical(force)
   )
   # Check that cmdstanr is available
   check_package("cmdstanr")
@@ -95,7 +145,10 @@ run_stan <- function( model_code, data = list(),
   # Now compile the model
   mod <- cmdstanr::cmdstan_model( model_code,
                                   compile = TRUE,
-                                  cpp_options = cpp_options )
+                                  force_recompile = force,
+                                  cpp_options = cpp_options,
+                                  include_paths = path
+                                  )
 
   # Final parameters for sampling
   samp <- iter - warmup
@@ -152,4 +205,82 @@ run_stan <- function( model_code, data = list(),
   }
 
   return(stanfit)
+}
+
+#' Create a posterior prediction with rstanfit object
+#'
+#' @description This function does ...
+#' @param obj A [`stanfit`] object (as used by [rstan]).
+#' @param form A [`formula`] object created for the [ibis.iSDM::DistributionModel].
+#' @param newdata A [data.frame] with new data to be used for prediction.
+#' @param offset A [vector] with an optionally specified offset.
+#' @param draws [numeric] indicating whether a specific number of draws should be taken.
+#' @import posterior
+#' @references [https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed](https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed)
+#' @export
+posterior_predict_stanfit <- function(obj, form, newdata, offset = NULL, draws = NULL){
+  assertthat::assert_that(
+    inherits(obj, "stanfit"),
+    is.formula(form),
+    is.data.frame(newdata),
+    is.null(draws) || is.numeric(draws)
+  )
+
+  # Formate the form and get relevant parts
+  te <- attr(terms(form), "term.labels")
+  res <- attr(terms(form), "response")
+
+  # Build model matrix
+  # Note: This removes all NA cells from matrix
+  mm <- Matrix::sparse.model.matrix(object = delete.response(terms(form)),
+                     data = newdata)
+  assertthat::assert_that(nrow(mm)>0, inherits(mm, "matrix") || inherits(mm, "dgCMatrix"))
+  # TODO: Remove intercept if set
+  mm <- mm[,-1]
+
+  # Draw from the posterior
+  pp <- posterior::as_draws_df(obj)
+  # Create a subset?
+  if (!is.null(draws)) {
+    pp <- pp[sample.int(nrow(pp), draws),]
+  }
+  # Get only beta coefficients
+  suppressWarnings( pp <- pp[ grep("beta", colnames(pp)) ] )
+
+  # Summarize the coefficients from the posterior
+  pp <- posterior::summarise_draws(pp) |>
+    subset(select = c("variable", "mean", "q5", "median", "q95", "sd"))  |>
+    as.data.frame()
+  # --- #
+  assertthat::assert_that(
+    ncol(mm) == nrow(pp) # Check that number of coefficients is equal to posterior summary
+  )
+  pp$variable <- colnames(mm)
+  # Calculate b*X + offset if set
+  preds <- cbind(
+    mm %*% pp[,"mean"] + ifelse(is.null(offset),0, offset),
+    mm %*% pp[,"q5"] + ifelse(is.null(offset),0, offset),
+    mm %*% pp[,"median"] + ifelse(is.null(offset),0, offset),
+    mm %*% pp[,"q95"] + ifelse(is.null(offset),0, offset),
+    mm %*% pp[,"sd"] + ifelse(is.null(offset),0, offset)
+    )
+
+  # Add random noise equivalent to the posterior length
+  .rnorm_matrix <- function(mean, sd) {
+    stopifnot(length(dim(mean)) == 2)
+    error <- matrix(rnorm(length(mean), 0, sd), ncol=ncol(mean), byrow=TRUE)
+    mean + error
+  }
+  preds <- .rnorm_matrix(preds, pp[,"sd"]) # FIXME: This only makes sense for mean. Apply mad to median
+
+  # Create output with cellid
+  out <- tibble::rowid_to_column(newdata,var = "cellid")["cellid"] %>% as.data.frame()
+  out$mean[as.numeric(row.names(mm))] <- preds[,1]
+  out$X0.05ci[as.numeric(row.names(mm))] <- preds[,2]
+  out$X0.5ci[as.numeric(row.names(mm))] <- preds[,3]
+  out$X0.95ci[as.numeric(row.names(mm))] <- preds[,4]
+  out$sd[as.numeric(row.names(mm))] <- preds[,5]
+  out$cellid <- NULL
+
+  return(out)
 }

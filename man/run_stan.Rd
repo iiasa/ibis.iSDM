@@ -15,6 +15,8 @@ run_stan(
   warmup = floor(iter/2),
   control = list(adapt_delta = 0.95),
   cpp_options = list(),
+  force = FALSE,
+  path = base::dirname(model_code),
   save_warmup = TRUE,
   ...
 )
@@ -39,6 +41,10 @@ run_stan(
 \item{control}{A \code{\link{list}} with further control options for stan.}
 
 \item{cpp_options}{A \code{\link{list}} with options for the Cpp compiling.}
+
+\item{force}{\code{\link{logical}} indication whether to force recompile the model (default: False).}
+
+\item{path}{\code{\link{character}} indicating a path to be made available to the stan compiler. Default: model_code dir}
 
 \item{save_warmup}{A \code{\link{logical}} flag whether to save the warmup samples.}
 

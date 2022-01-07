@@ -819,10 +819,7 @@ methods::setMethod(
     } else if( inherits(x$engine,"STAN-Engine") ){
       # ----------------------------------------------------------- #
       #### STAN Engine ####
-      if(length(ids)>1) stop("Joint likelihood not yet added!")
-      # Single model type specified. Define formulas for each likelihood
-      # Default equation found
-
+      # For stan, the actual model is built sequentially per id
       # Process per supplied dataset
       for(id in ids) {
 
@@ -831,8 +828,8 @@ methods::setMethod(
 
           # Go through each variable and build formula for likelihood
           form <- to_formula(paste("observed",
-                                   ifelse(model$biodiversity[[id]]$family=='poisson', '/ w',''), # Use E as weight for poisson
                                           " ~ ", "intercept +",
+                                   ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
                                    paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                    # Check whether a single dataset is provided, otherwise add other intercepts
                                    ifelse(length(types)==1,
@@ -875,6 +872,7 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+
 
     } else { stop('Specified Engine not implemented yet.') }
 

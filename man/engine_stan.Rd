@@ -29,7 +29,7 @@ engine_stan(
 
 \item{cores}{If set to NULL take values from specified ibis option getOption('ibis.nthread')}
 
-\item{algorithm}{Mode used to sample from the posterior. See \code{\link[rstanarm:stan_glm]{rstanarm::stan_glm}}}
+\item{algorithm}{Mode used to sample from the posterior. See \code{\link{cmdstanr}} package. Default: "sampling"}
 
 \item{control}{See rstan::stan for more details on specifying the controls}
 
