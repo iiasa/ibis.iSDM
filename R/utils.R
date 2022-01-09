@@ -150,24 +150,6 @@ capitalize_text <- function(x) {
         sep="", collapse=" ")
 }
 
-#' Logistic (invlogit) transformation function
-#' @param x A [`numeric`] value
-#' @keywords utils
-#' @noRd
-logistic <- function(a){
-  #assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
-  exp(a)/(1 + exp(a))
-}
-
-#' Logit transformation function
-#' @param x A [`numeric`] value
-#' @keywords utils
-#' @noRd
-logit <- function(a){
-  assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
-  log(a/(1-a))
-}
-
 #' Convert character to formula object
 #'
 #' @param x [`character`] text.

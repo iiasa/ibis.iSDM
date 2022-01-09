@@ -335,10 +335,6 @@ engine_stan <- function(x,
           )
         )
         full <- as(full, 'SpatialPixelsDataFrame')
-        # Remove missing data
-        # full <- subset(full, complete.cases(full@data))
-        # full$cellid <- rownames(full) # Add rownames
-        # full[is.na(full)] <- 0 # For Prediction set all NA to 0. Mask later
 
         # Model estimation
         # ---- #
@@ -374,11 +370,16 @@ engine_stan <- function(x,
             params$off <- model$offset[, 3]
           }
 
+          # For Integrated model, follow poisson
+          fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
+
           # Do the prediction by sampling from the posterior
           pred_stan <- posterior_predict_stanfit(obj = fit_stan,
                                          form = to_formula(paste0("observed ~ ", paste(model$biodiversity[[1]]$predictors_names,collapse = " + "))),
                                          newdata = full@data,
-                                         offset = NULL
+                                         offset = NULL,
+                                         family = fam,
+                                         mode = "response"
           )
 
           # Convert full to raster
