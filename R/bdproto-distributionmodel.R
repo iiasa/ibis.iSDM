@@ -86,7 +86,8 @@ DistributionModel <- bdproto(
       ))
     } else if( inherits(self, 'STAN-Model') ) {
       # Calculate variable importance from the posterior trees
-      summary(self$get_data('fit_best'))
+      summary(self$get_data('fit_best'))$summary |> as.data.frame() |>
+        tibble::rownames_to_column(var = "parameter") |> tibble::as_tibble(rownames = NULL)
 
       # message(paste0(
       #   'Trained ',class(self)[1],' (',self$show(),')',
@@ -191,7 +192,9 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
     } else if(inherits(self, 'STAN-Model')) {
-      plot( self$get_data(x) )
+      # Get true beta parameters
+      ra <- grep("beta", names(self$get_data(x)),value = TRUE) # Get range
+      rstan::stan_plot(self$fits$fit_best,pars = ra)
     } else if(inherits(self, 'INLABRU-Model')) {
       # Use inlabru effect plot
       ggplot2::ggplot() +

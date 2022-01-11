@@ -280,10 +280,12 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   A <- model.matrix(object = delete.response(terms(form)),
                      data = newdata)
   assertthat::assert_that(nrow(A)>0, inherits(A, "matrix") || inherits(A, "dgCMatrix"))
-  # Remove intercept if set
-  if(length(grep("Intercept", colnames(A), ignore.case = TRUE))>0){
-    A <- A[,-(grep("Intercept", colnames(A), ignore.case = TRUE))]
-  }
+  # Remove intercept unless set
+  # if(attr(terms(form),"intercept") != 1) {
+    if(length(grep("Intercept", colnames(A), ignore.case = TRUE))>0){
+      A <- A[,-(grep("Intercept", colnames(A), ignore.case = TRUE))]
+    }
+  # }
 
   # Draw from the posterior
   pp <- posterior::as_draws_df(obj)
@@ -291,15 +293,15 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   if (!is.null(draws)) {
     pp <- pp[sample.int(nrow(pp), draws),]
   }
-  # Get only beta coefficients
-  suppressWarnings( pp <- pp[ c(grep("beta", colnames(pp), value = TRUE)) ] )
+  # Get only beta coefficients and Intercept if set
+  if("Intercept" %in% colnames(pp)) what <- "beta|Intercept" else what <- "beta"
+  suppressWarnings( pp <- pp[ c(grep(what, colnames(pp), value = TRUE)) ] )
 
   # Prepare offset if set
   if(!is.null(offset)) {
     # Get only the rows in the A matrix (minus NA)
     offset <- offset[as.numeric(row.names(A))]
-  } else
-    { offset <- rep(0, nrow(A) ) }
+  } else { offset <- rep(0, nrow(A) ) }
 
   # Security checks
   assertthat::assert_that(
@@ -331,6 +333,15 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
       mean + error
     }
     preds <- .rnorm_matrix(preds, pp[,"sd"]) # FIXME: This only makes sense for mean. Apply mad to median?
+
+    # Apply ilink
+    if(!is.null(family)){
+      preds <- switch (family,
+        "poisson" = ilink(preds, link = "log"),
+        "binomial" = ilink(preds, link = "logit"),
+        ilink(preds, link = "log")
+      )
+    }
 
   } else {
     # Simulate linear response approximating poisson_rng in stan

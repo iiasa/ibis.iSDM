@@ -312,7 +312,7 @@ engine_stan <- function(x,
             observed = model$biodiversity[[1]]$observations[["observed"]],
             X = as.matrix( model$biodiversity[[1]]$predictors[, model$biodiversity[[1]]$predictors_names] ),
             K = length( model$biodiversity[[1]]$predictors_names ),
-            offset_exposure = log(model$biodiversity[[1]]$expect),
+            offsets = log(model$biodiversity[[1]]$expect),
             has_intercept = attr(terms(model$biodiversity[[1]]$equation), "intercept"),
             has_spatial = ifelse(is.null(self$get_equation_latent_spatial()), 0, 1),
             # Horseshoe prior default parameters
@@ -321,20 +321,9 @@ engine_stan <- function(x,
             hs_df_global = 1, hs_df_slab = 4,
             hs_scale_global = 1, hs_scale_slab = 2
           )
+          # If any additional offset is set, simply to the existing one in sum
+          if(!is.Waiver(model$offset)) dl$offsets <- dl$offsets + log( model$biodiversity[[1]]$offset[,3] )
         }
-
-        # Get output raster and new data
-        prediction <- self$get_data('template')
-        # Full data for prediction
-        full <- model$predictors
-        full <- subset(full, select = c('x','y',model$predictors_names))
-        suppressWarnings(
-          full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
-                                              data = full,
-                                              proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
-          )
-        )
-        full <- as(full, 'SpatialPixelsDataFrame')
 
         # Model estimation
         # ---- #
@@ -357,17 +346,37 @@ engine_stan <- function(x,
           # Messager
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
+          # Prepare prediction dataset
+          prediction <- self$get_data('template') # Get output raster and new data
+          # Full data for prediction
+          full <- subset(model$predictors, select = c('x','y',model$predictors_names))
+
+          # If poipo, add w to prediction container
+          bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
+          if(any(bd_poipo)){
+            # FIXME: Bit hackish. See if works for other projections
+            full$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
+          }
+          # Add offset if set
+          if(!is.Waiver(model$offset)) {
+            # Offsets are simply added linearly (albeit transformed)
+            if(hasName(full,"w")) full$w <- full$w + model$offset[,3] else full$w <- model$offset[,3]
+            # full[[colnames(model$offset)[3]]] <- model$offset[,3]
+          }
+          suppressWarnings(
+            full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
+                                               data = full,
+                                               proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+            )
+          )
+          full <- as(full, 'SpatialPixelsDataFrame')
+
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
             for(i in 1:length(settings$get('bias_variable'))){
               if(settings$get('bias_variable')[i] %notin% names(full)) next()
               full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
-          }
-          params <- list()
-          # Add offset
-          if('offset' %in% names(model$biodiversity[[1]]) ){
-            params$off <- model$offset[, 3]
           }
 
           # For Integrated model, follow poisson
@@ -377,9 +386,9 @@ engine_stan <- function(x,
           pred_stan <- posterior_predict_stanfit(obj = fit_stan,
                                          form = to_formula(paste0("observed ~ ", paste(model$biodiversity[[1]]$predictors_names,collapse = " + "))),
                                          newdata = full@data,
-                                         offset = NULL,
+                                         offset = (full$w),
                                          family = fam,
-                                         mode = "response"
+                                         mode = "predictor" # Linear predictor
           )
 
           # Convert full to raster
@@ -387,7 +396,7 @@ engine_stan <- function(x,
           # Fill output
           prediction <- fill_rasters(post = pred_stan, background = prediction)
           prediction <- raster::mask(prediction, model$background) # Mask with background
-          # plot(prediction, col = ibis.iSDM:::ibis_colours$sdm_colour)
+          # plot(prediction$mean, col = ibis.iSDM:::ibis_colours$sdm_colour)
 
         } else {
           prediction <- NULL
@@ -406,23 +415,178 @@ engine_stan <- function(x,
           settings = settings,
           fits = list(
             "fit_best" = fit_stan,
-            "prediction" = prediction
+            "prediction" = prediction,
+            "sm_code" = self$get_data("sm_code")
           ),
           # Project function
-          project = function(self, newdata){
-            return(NULL)
+          project = function(self, newdata, offset = NULL){
+            assertthat::assert_that(
+              nrow(newdata) > 0,
+              all( c("x", "y") %in% names(newdata) ),
+              is.null(offset) || is.numeric(offset)
+            )
+            # Check that fitted model exists
+            obj <- self$get_data("fit_best")
+            model <- self$model
+            assertthat::assert_that(inherits(obj, "stanfit"),
+                                    all(model$predictors_names %in% colnames(newdata)))
+
+            # For Integrated model, follow poisson
+            fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
+
+            # Build prediction stack
+            full <- subset(newdata, select = c('x','y', model$predictors_names))
+
+            # If poipo, add w to prediction container
+            bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
+            if(any(bd_poipo)){
+              # FIXME: Bit hackish. See if works for other projections
+              full$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
+            }
+            # Add offset if set
+            if(!null(offset)) {
+              # Offsets are simply added linearly (albeit transformed)
+              if(hasName(full,"w")) full$w <- full$w + offset else full$w <- offset
+              # full[[colnames(model$offset)[3]]] <- model$offset[,3]
+            }
+            suppressWarnings(
+              full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
+                                                 data = full,
+                                                 proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+              )
+            )
+            full <- as(full, 'SpatialPixelsDataFrame')
+
+            # Do the prediction by sampling from the posterior
+            pred_stan <- posterior_predict_stanfit(obj = obj,
+                                                   form = to_formula(paste0("observed ~ ", paste(model$predictors_names,collapse = " + "))),
+                                                   newdata = full@data,
+                                                   offset = (full$w),
+                                                   family = fam,
+                                                   mode = "predictor" # Linear predictor
+            )
+
+            # Fill output with summaries of the posterior
+            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- fill_rasters(pred_stan, prediction)
+
+            return(prediction)
+
           },
           # Partial effect
-          partial = function(self, x.vars, constant = NULL, variable_length = 100, plot = FALSE){
-            return(NULL)
+          partial = function(self, x.var, constant = NULL, length.out = 100, plot = FALSE, type = "predictor"){
+            mod <- self$get_data('fit_best')
+            model <- self$model
+            assertthat::assert_that(inherits(mod,'stanfit'),
+                                    is.character(x.var),
+                                    is.numeric(length.out),
+                                    is.null(constant) || is.numeric(constant)
+            )
+            # Check that given variable is in x.var
+            assertthat::assert_that(x.var %in% model$predictors_names)
+            # Calculate
+            rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            df_partial <- list()
+            # Add all others as constant
+            if(is.null(constant)){
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), length.out )
+            } else {
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
+            }
+            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            df_partial <- df_partial %>% as.data.frame()
+
+            # For Integrated model, follow poisson
+            fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
+
+            # Simulate from the posterior
+            pred_part <- posterior_predict_stanfit(obj = mod,
+                                                   form = to_formula(paste0("observed ~ ", paste(model$predictors_names,collapse = " + "))),
+                                                   newdata = df_partial,
+                                                   offset = NULL,
+                                                   family = fam,
+                                                   mode = type # Linear predictor
+            )
+            # Also attach the partial variable
+            pred_part <- cbind("partial_effect" = df_partial[[x.var]], pred_part)
+            if(plot){
+              o <- pred_part
+              pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
+                                                           ymin = mean-sd,
+                                                           ymax = mean+sd) ) +
+                ggplot2::theme_classic() +
+                ggplot2::geom_ribbon(fill = "grey90") +
+                ggplot2::geom_line() +
+                ggplot2::labs(x = x.var, y = "Partial effect")
+              print(pm)
+            }
+            return(pred_part) # Return the partial data
           },
           # Spatial partial effect plots
-          spartial = function(self, x.vars, constant = NULL, plot = TRUE,...){
-            return(NULL)
+          spartial = function(self, x.var, constant = NULL, plot = TRUE,type = "predictor", ...){
+            # Get model object and check that everything is in order
+            mod <- self$get_data('fit_best')
+            model <- self$model
+            assertthat::assert_that(inherits(mod,'stanfit'),
+                                    'model' %in% names(self),
+                                    is.character(x.var),
+                                    is.null(constant) || is.numeric(constant)
+            )
+
+            # Match variable name
+            x.var <- match.arg(x.var, model$predictors_names, several.ok = FALSE)
+
+            # Make spatial container for prediction
+            suppressWarnings(
+              df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+                                                       data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+              )
+            )
+            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+
+            # Add all others as constant
+            if(is.null(constant)){
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- mean(model$predictors[[n]], na.rm = TRUE)
+            } else {
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+            }
+            bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
+            if(any(bd_poipo)){
+              # FIXME: Bit hackish. See if works for other projections
+              df_partial$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
+            }
+
+            # For Integrated model, follow poisson
+            fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
+
+            # Simulate from the posterior
+            pred_part <- posterior_predict_stanfit(obj = mod,
+                                                   form = to_formula(paste0("observed ~ ", paste(model$predictors_names,collapse = " + "))),
+                                                   newdata = df_partial@data,
+                                                   offset = NULL,
+                                                   family = fam,
+                                                   mode = type # Linear predictor
+            )
+
+            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- fill_rasters(pred_part, prediction)
+
+            # Do plot and return result
+            if(plot){
+              plot(prediction[[c("mean","sd")]], col = ibis_colours$viridis_orig)
+            }
+            return(prediction)
           },
           # Spatial latent effect
           plot_spatial = function(self, plot = TRUE){
             return(NULL)
+          },
+          # Custom function to show stan code
+          show_code = function(self){
+            message(
+              self$get_data("sm_code")
+            )
           }
         )
         # Return
