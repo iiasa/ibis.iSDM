@@ -90,6 +90,7 @@ Collate:
     'print.R'
     'prior_gdb.R'
     'prior_inla.R'
+    'prior_stan.R'
     'prior_xgb.R'
     'priors.R'
     'project.R'

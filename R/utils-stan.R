@@ -267,7 +267,7 @@ run_stan <- function( model_code, data = list(),
 #' @export
 posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", family = NULL, offset = NULL, draws = NULL){
   assertthat::assert_that(
-    inherits(obj, "stanfit"),
+    inherits(obj, "stanfit") || inherits(obj, "CmdStanFit"),
     is.formula(form),
     is.data.frame(newdata),
     is.null(family) || is.character(family),
@@ -288,7 +288,11 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   # }
 
   # Draw from the posterior
-  pp <- posterior::as_draws_df(obj)
+  if(inherits(obj, "stanfit")) {
+    pp <- posterior::as_draws_df(obj)
+  } else {
+    pp <- obj$draws() |> as.data.frame()
+  }
   # Create a subset?
   if (!is.null(draws)) {
     pp <- pp[sample.int(nrow(pp), draws),]
@@ -373,7 +377,8 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
     )
   }
   # Create output with cellid
-  out <- tibble::rowid_to_column(newdata,var = "cellid")["cellid"] %>% as.data.frame()
+  out <- tibble::rowid_to_column(newdata,var = "cellid")["cellid"] |> as.data.frame()
+  out$CV <- out$Q95 <- out$Q50 <- out$Q05 <- out$sd <- out$mean <- NA
   out$mean[as.numeric(row.names(A))] <- preds[,1]
   out$sd[as.numeric(row.names(A))] <- preds[,5]
   out$Q05[as.numeric(row.names(A))] <- preds[,2]

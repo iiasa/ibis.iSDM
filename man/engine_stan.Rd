@@ -13,6 +13,7 @@ engine_stan(
   cores = getOption("ibis.nthread"),
   algorithm = "sampling",
   control = NULL,
+  type = "response",
   ...
 )
 }
@@ -32,6 +33,8 @@ engine_stan(
 \item{algorithm}{Mode used to sample from the posterior. See \code{\link{cmdstanr}} package. Default: "sampling"}
 
 \item{control}{See rstan::stan for more details on specifying the controls}
+
+\item{type}{The mode used for creating posterior predictions. Either summarizing the linear predictor or response}
 
 \item{...}{Other variables}
 }

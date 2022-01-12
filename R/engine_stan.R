@@ -10,6 +10,7 @@ NULL
 #' @param init Initial values for parameters. Default: 'random'. Can also be specified as list (see: rstan::stan)
 #' @param algorithm Mode used to sample from the posterior. See [`cmdstanr`] package. Default: "sampling"
 #' @param control See rstan::stan for more details on specifying the controls
+#' @param type The mode used for creating posterior predictions. Either summarizing the linear predictor or response
 #' @param ... Other variables
 #' @seealso rstan
 #' @name engine_stan
@@ -24,6 +25,7 @@ engine_stan <- function(x,
                         cores = getOption("ibis.nthread"),
                         algorithm = 'sampling',
                         control = NULL,
+                        type = "response",
                         ...) {
   # Check whether INLA package is available
   check_package('rstan')
@@ -43,9 +45,9 @@ engine_stan <- function(x,
     is.character(algorithm),
     msg = 'Input parameters wrongly specified!'
   )
-  # Match algorithm
+  # Match algorithm and posterior prediction type
   algorithm <- match.arg(algorithm, c("sampling", "optimize", "variational"),several.ok = FALSE)
-
+  type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
   if(is.null(cores)) cores <- getOption('ibis.nthread')
 
   # Create a background raster
@@ -296,6 +298,10 @@ engine_stan <- function(x,
         # an be "sampling" for MCMC (the default), "optimize" for optimization,
         # "variational" for variational inference with independent normal distributions,
         settings$set('algorithm', self$stan_param$algorithm)
+        settings$set('cores', self$stan_param$cores)
+        settings$set('chains', self$stan_param$chains)
+        settings$set('iter', self$stan_param$iter)
+        settings$set('warmup', self$stan_param$warmup)
 
         # Set a model seed for reproducibility
         # FIXME: Ideally this is passed on better and earlier
@@ -388,7 +394,7 @@ engine_stan <- function(x,
                                          newdata = full@data,
                                          offset = (full$w),
                                          family = fam,
-                                         mode = "predictor" # Linear predictor
+                                         mode = type # Simulated response
           )
 
           # Convert full to raster
