@@ -263,7 +263,8 @@ methods::setMethod(
         "<GDB>" = x$priors$classes() == 'GDBPrior',
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
-        "<INLABRU>" = x$priors$classes() == 'INLAPrior'
+        "<INLABRU>" = x$priors$classes() == 'INLAPrior',
+        "<STAN>" = x$priors$classes() == 'STANPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning

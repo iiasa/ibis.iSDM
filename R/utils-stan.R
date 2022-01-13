@@ -360,9 +360,9 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
     # Get family and number of observations and
     # draw random variable for each draw and lambda value
     if(family == "poisson"){
-      a <- lapply(out, function(lambda) rpois(nrow(A), lambda) )
+      a <- lapply(out, function(lambda) rpois(nrow(A), ilink(lambda, link = "log")) )
     } else if(family == "binomial") {
-      a <- lapply(out, function(mu) rbinom(nrow(A), size = 1, prob = mu) )
+      a <- lapply(out, function(mu) rbinom(nrow(A), size = 1, prob = ilink(mu, link = "logit")) )
     } else {
       stop("Not yet implemented method for linear response prediction")
     }

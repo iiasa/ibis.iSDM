@@ -81,7 +81,8 @@ engine_stan <- function(x,
         chains = chains, iter = iter,
         warmup = warmup, init = init,
         cores = cores, algorithm = algorithm,
-        control = control
+        control = control,
+        type = type
       ),
       # Function to respecify the control parameters
       set_control = function(self,
@@ -210,6 +211,19 @@ engine_stan <- function(x,
           # Parameters
           sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
 
+          # Add priors for each variable for which it is set to the model
+          sm_code$model <- append(sm_code$model, "// priors including constants")
+          # Now add for each one a normal effect
+          for(i in 1:length(model$predictors_names)){
+            if(model$predictors_names[i] %in% model$priors$varnames()) {
+              sm_code$model <- append(sm_code$model, paste0(
+                "target += normal_lpdf(beta[",i,"] | ",model$priors$get(model$predictors_names[8])[1],", ",model$priors$get(model$predictors_names[8])[2],");"
+                ))
+            } else {
+              # Default gaussian prior
+              sm_code$model <- append(sm_code$model, paste0("target += normal_lpdf(beta[",i,"] | 0, 2);"))
+            }
+          }
         } else {
           # Add regularized horseshoe prior
           # See brms::horseshoe
@@ -302,7 +316,7 @@ engine_stan <- function(x,
         settings$set('chains', self$stan_param$chains)
         settings$set('iter', self$stan_param$iter)
         settings$set('warmup', self$stan_param$warmup)
-
+        settings$set('type', self$stan_param$type)
         # Set a model seed for reproducibility
         # FIXME: Ideally this is passed on better and earlier
         settings$set('seed', 31337)
@@ -394,7 +408,7 @@ engine_stan <- function(x,
                                          newdata = full@data,
                                          offset = (full$w),
                                          family = fam,
-                                         mode = type # Simulated response
+                                         mode = self$stan_param$type # Simulated response
           )
 
           # Convert full to raster
@@ -425,15 +439,17 @@ engine_stan <- function(x,
             "sm_code" = self$get_data("sm_code")
           ),
           # Project function
-          project = function(self, newdata, offset = NULL){
+          project = function(self, newdata, offset = NULL, type = NULL){
             assertthat::assert_that(
               nrow(newdata) > 0,
               all( c("x", "y") %in% names(newdata) ),
-              is.null(offset) || is.numeric(offset)
+              is.null(offset) || is.numeric(offset),
+              is.character(type) || is.null(type)
             )
             # Check that fitted model exists
             obj <- self$get_data("fit_best")
             model <- self$model
+            if(is.null(type)) type <- self$settings$get("type")
             assertthat::assert_that(inherits(obj, "stanfit"),
                                     all(model$predictors_names %in% colnames(newdata)))
 
@@ -450,7 +466,7 @@ engine_stan <- function(x,
               full$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
             }
             # Add offset if set
-            if(!null(offset)) {
+            if(!is.null(offset)) {
               # Offsets are simply added linearly (albeit transformed)
               if(hasName(full,"w")) full$w <- full$w + offset else full$w <- offset
               # full[[colnames(model$offset)[3]]] <- model$offset[,3]
@@ -469,20 +485,21 @@ engine_stan <- function(x,
                                                    newdata = full@data,
                                                    offset = (full$w),
                                                    family = fam,
-                                                   mode = "predictor" # Linear predictor
+                                                   mode = type # Linear predictor
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- emptyraster( raster::stack(full) ) # Background
             prediction <- fill_rasters(pred_stan, prediction)
 
             return(prediction)
 
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, length.out = 100, plot = FALSE, type = "predictor"){
+          partial = function(self, x.var, constant = NULL, length.out = 100, plot = FALSE, type = NULL){
             mod <- self$get_data('fit_best')
             model <- self$model
+            if(is.null(type)) type <- self$settings$get("type")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
                                     is.numeric(length.out),
