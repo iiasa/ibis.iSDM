@@ -4,13 +4,43 @@
 \alias{engine_stan}
 \title{Use STAN as engine}
 \usage{
-engine_stan(x, ...)
+engine_stan(
+  x,
+  chains = 4,
+  iter = 2000,
+  warmup = floor(iter/2),
+  init = "random",
+  cores = getOption("ibis.nthread"),
+  algorithm = "sampling",
+  control = NULL,
+  type = "response",
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+
+\item{chains}{A positive integer specifying the number of Markov chains. The default is 4.}
+
+\item{iter}{A positive integer specifying the number of iterations for each chain (including warmup). The default is 2000.}
+
+\item{warmup}{positive integer specifying the number of warmup (aka burnin) iterations per chain. If step-size adaptation is on (which it is by default), this also controls the number of iterations for which adaptation is run (and hence these warmup samples should not be used for inference). The number of warmup iterations should be smaller than iter and the default is iter/2.}
+
+\item{init}{Initial values for parameters. Default: 'random'. Can also be specified as list (see: rstan::stan)}
+
+\item{cores}{If set to NULL take values from specified ibis option getOption('ibis.nthread')}
+
+\item{algorithm}{Mode used to sample from the posterior. See \code{\link{cmdstanr}} package. Default: "sampling"}
+
+\item{control}{See rstan::stan for more details on specifying the controls}
+
+\item{type}{The mode used for creating posterior predictions. Either summarizing the linear predictor or response}
 
 \item{...}{Other variables}
 }
 \description{
 Use STAN as engine
+}
+\seealso{
+rstan
 }

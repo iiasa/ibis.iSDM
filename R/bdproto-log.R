@@ -35,6 +35,7 @@ Log <- bdproto(
 
     #sink(output, append = TRUE, type = "output") # Writing console output to log file
     sink(output, append = TRUE, type = "message") # Writing messages to the log file
+    # TODO: Check capture.output() which works with cat?
 
     self$output <- output
     invisible()

@@ -84,6 +84,16 @@ DistributionModel <- bdproto(
                paste0("\n  Threshold created: ",text_green("yes")),
                "")
       ))
+    } else if( inherits(self, 'STAN-Model') ) {
+      # Calculate variable importance from the posterior trees
+      summary(self$get_data('fit_best'))$summary |> as.data.frame() |>
+        tibble::rownames_to_column(var = "parameter") |> tibble::as_tibble(rownames = NULL)
+
+      # message(paste0(
+      #   'Trained ',class(self)[1],' (',self$show(),')',
+      #   '\n  \033[2mStrongest effects:\033[22m',
+      #   '\n     ', name_atomic(vi$names)
+      # ))
     } else if( inherits(self, 'XGBOOST-Model') ) {
       vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
 
@@ -98,7 +108,6 @@ DistributionModel <- bdproto(
                paste0("\n  Threshold created: ",text_green("yes")),
                "")
       ))
-
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -151,6 +160,8 @@ DistributionModel <- bdproto(
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
       varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
+    } else if(inherits(self, 'STAN-Model')){
+      summary(self$get_data(x))
     } else if(inherits(self, "XGBOOST-Model")){
       xgboost::xgb.importance(model = self$get_data('fit_best'))
       # xgboost::xgb.ggplot.importance(o)
@@ -180,6 +191,10 @@ DistributionModel <- bdproto(
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = 'fixed')
+    } else if(inherits(self, 'STAN-Model')) {
+      # Get true beta parameters
+      ra <- grep("beta", names(self$get_data(x)),value = TRUE) # Get range
+      rstan::stan_plot(self$fits$fit_best,pars = ra)
     } else if(inherits(self, 'INLABRU-Model')) {
       # Use inlabru effect plot
       ggplot2::ggplot() +

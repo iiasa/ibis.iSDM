@@ -13,6 +13,8 @@
   #   packageStartupMessage("Installing INLA...")
   #   utils::install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable")
   # }
+  # Don't show constant rgdal warning
+  options("rgdal_show_exportToProj4_warnings" = "none")
 
   # Set some default ibis options
   options('ibis.nthread' = parallel::detectCores() - 1)
