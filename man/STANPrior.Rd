@@ -28,8 +28,21 @@ TBD
 }
 
 \references{
+Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
 
+Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 }
 \seealso{
 \code{\linkS4class{Prior}}.
+
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()}
 }
+\concept{prior}
+\keyword{priors}

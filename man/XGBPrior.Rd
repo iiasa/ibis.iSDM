@@ -27,4 +27,15 @@ TBD
 }
 \seealso{
 \code{\linkS4class{Prior}}.
+
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()}
 }
+\concept{prior}
+\keyword{priors}

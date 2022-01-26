@@ -4,13 +4,45 @@ development:
   mode: auto
 
 template:
-  params:
-    bootswatch: yeti
+  bootstrap: 5
+  bootswatch: yeti
   opengraph:
     twitter:
       creator: "@Martin_Ecology"
       site: "@IIASAVienna"
       card: summary_large_image
+
+home:
+  sidebar:
+    structure: [links, citation, license, authors, dev]
+  links:
+    - text: Learn about contributing
+      href: articles/contributing.html
+
+navbar:
+  structure:
+    left:  [home, intro, reference, comparison, articles, contributing, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: Train a model
+          href: articles/01_train_simple_model.html
+        - text: Integrate data
+          href: articles/02_integrate_data.html
+        - text: Model assessment
+          href: articles/03_model_assessment.html
+        - text: Biodiversity projections
+          href: articles/04_biodiversity_projections.html
+    comparison:
+      text: Comparison
+      href: articles/comparison.html
+    contributing:
+      text: Contributing
+      href: articles/contributing.html
+
+
 
 reference:
   - title: Setting up and training models
@@ -22,6 +54,8 @@ reference:
         - priors
         - prior_gdb
         - prior_inla
+        - prior_stan
+        - prior_xgb
         - train
         - scenario
 
@@ -33,6 +67,13 @@ reference:
       - starts_with("sel_")
       - starts_with("rm_")
 
+  - title: Create spatial-temporal projections
+    desc: Functions specifically for adding constrains and creating scenarios based on trained models.
+    contents:
+      - scenario
+      - starts_with("add_constraint")
+      - has_keyword("scenarios")
+
   - title: Engines
     desc: Statistical models used for estimation of species distributions
     contents:
@@ -43,8 +84,10 @@ reference:
     contents:
       - similarity
       - threshold
+      - ensemble
       - partial
       - spartial
+      - validate
 
   - title: Utility functions
     desc: Functions used by engines or spatial processing

@@ -13,7 +13,8 @@ NULL
 #' @references
 #'
 #' @seealso [`Prior-class`].
-#'
+#' @family prior
+#' @keywords priors
 #' @aliases XGBPrior
 #' @name XGBPrior
 NULL
@@ -60,6 +61,8 @@ methods::setMethod(
 #' @rdname XGBPriors
 #' @exportMethod XGBPriors
 #' @inheritParams XGBPrior
+#' @family prior
+#' @keywords priors
 #' @export
 methods::setGeneric(
   "XGBPriors",

@@ -22,8 +22,19 @@ Function to include prior information as monotonic constrain to a gradient desce
 TBD
 }
 \references{
-
+Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
 }
 \seealso{
 \code{\linkS4class{Prior}}.
+
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()}
 }
+\concept{prior}
+\keyword{priors}

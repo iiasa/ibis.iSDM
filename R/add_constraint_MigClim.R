@@ -27,7 +27,7 @@ NULL
 #' @param replicateNb Number of replicates to be used for the analysis. Default is 10
 #' @param dtmp A [`character`] to a folder where temporary files are to be created.
 #' @details The barrier parameter is defined through [add_barrier]
-#' @seealso [MigClim::MigClim.userGuide()]
+#' @seealso [`MigClim.userGuide()`]
 #' @references Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of dispersal constraints into projections of species distribution models. Ecography,
 #' @references Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.
 #' @name add_constrain_MigClim

@@ -31,25 +31,42 @@ add_biodiversity_poipo(
 \item{family}{A \code{\link{character}} stating the family to be used (Default: Poisson)}
 
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
-shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
+shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
 
-\item{...}{Other parameters passed down}
+\item{...}{Other parameters passed down to the object. Normally not used unless described in details.}
 }
 \description{
-Add biodiversity point dataset to a distribution object (presence-only)
+This function adds a presence-only biodiversity dataset to a
+distribution object.
 }
 \details{
-Say something about presence only biodiversity records in \pkg{ibis}
+This function allows to add presence-only biodiversity records to a \link{distribution} \pkg{ibis.iSDM}
+Presence-only data are usually modelled through some inferential model (see Guisan and Zimmerman, 2000) that
+relate their occurrence in relation to environmental covariates to a selected sample of
+'background' points. The most common approach for estimation are "Maxent" or poisson-process models (PPM), the
+latter of which are used in this package. See Renner et al. 2015 for an overview.
 }
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
- TBD
+ background <- raster::raster("inst/extdata/europegrid_50km.tif")
+ # Load virtual species
+ virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
+# Define model
+x <- distribution(background) \%>\%
+  add_biodiversity_poipo(virtual_species)
+x
 }
 }
 \references{
+Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 
+Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 }
+\seealso{
+See other functions for adding biodiversity data, e.g. \link{add_biodiversity}
+
+Other add_biodiversity: 
+\code{\link{add_biodiversity_poipa}()},
+\code{\link{add_biodiversity_polpo}()}
+}
+\concept{add_biodiversity}

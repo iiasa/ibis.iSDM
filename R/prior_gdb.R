@@ -9,10 +9,11 @@ NULL
 #' @param hyper A [`character`] object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'
 #' @param ... Variables passed on to prior object
 #' @details TBD
-#' @references
+#' @references Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
 #'
 #' @seealso [`Prior-class`].
-#'
+#' @keywords priors
+#' @family prior
 #' @aliases GDBPrior
 #' @name GDBPrior
 NULL
@@ -59,6 +60,8 @@ methods::setMethod(
 #' @rdname GDBPriors
 #' @exportMethod GDBPriors
 #' @inheritParams GDBPrior
+#' @keywords priors
+#' @family prior
 #' @export
 methods::setGeneric(
   "GDBPriors",

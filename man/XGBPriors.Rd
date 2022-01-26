@@ -18,3 +18,15 @@ XGBPriors(variable, hyper = "increasing", ...)
 \description{
 Helper function when multiple variables are supplied
 }
+\seealso{
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPrior}()}
+}
+\concept{prior}
+\keyword{priors}

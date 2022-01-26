@@ -16,7 +16,6 @@
 #' Containing both the set 'method' and a coefficient of variation across predictions.
 #' Critically this should not be interpreted as measure of uncertainty as it cannot
 #' capture parameter uncertainty of individual model; Rather it reflects prediction variation.
-#' @export
 
 #' @name ensemble
 #' @aliases ensemble

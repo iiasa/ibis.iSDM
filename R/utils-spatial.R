@@ -833,6 +833,7 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #'  @param ... Other parameters (dummy)
 #'  @returns A [`RasterStack`] object
 #'  @keywords utils
+#'  @export
 explode_factorized_raster <- function(ras, name = NULL, ...){
   assertthat::assert_that(inherits(ras, 'RasterLayer'),
                           is.factor(ras),
@@ -865,6 +866,7 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #' @param dt The datatype to be written. Default is Float64
 #' @param varNA The nodata value to be used. Default: -9999
 #' @keywords utils
+#' @export
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
   assertthat::assert_that(
     inherits(file,'Raster') || inherits(file, 'stars'),

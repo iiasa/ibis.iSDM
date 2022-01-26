@@ -3,6 +3,8 @@ NULL
 
 #' Add biodiversity point dataset to a distribution object (presence-only)
 #'
+#' @description This function adds a presence-only biodiversity dataset to a
+#' distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param poipo A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-only point occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier
@@ -10,16 +12,29 @@ NULL
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
 #' @param family A [`character`] stating the family to be used (Default: Poisson)
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
-#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
-#' @param ... Other parameters passed down
+#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
+#' @param ... Other parameters passed down to the object. Normally not used unless described in details.
 #'
-#' @details Say something about presence only biodiversity records in \pkg{ibis}
-#' @section Notes:
-#' @references
+#' @details This function allows to add presence-only biodiversity records to a [distribution] \pkg{ibis.iSDM}
+#' Presence-only data are usually modelled through some inferential model (see Guisan and Zimmerman, 2000) that
+#' relate their occurrence in relation to environmental covariates to a selected sample of
+#' 'background' points. The most common approach for estimation are "Maxent" or poisson-process models (PPM), the
+#' latter of which are used in this package. See Renner et al. 2015 for an overview.
 #'
+#' @references Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+#' @references Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+#' @seealso
+#' See other functions for adding biodiversity data, e.g. [add_biodiversity]
+#' @family add_biodiversity
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  background <- raster::raster("inst/extdata/europegrid_50km.tif")
+#'  # Load virtual species
+#'  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
+#' # Define model
+#' x <- distribution(background) %>%
+#'   add_biodiversity_poipo(virtual_species)
+#' x
 #' }
 #' @name add_biodiversity_poipo
 NULL
@@ -83,6 +98,8 @@ methods::setMethod(
 
 #' Add biodiversity point dataset to a distribution object (presence-absence)
 #'
+#' @description This function adds a presence-absence biodiversity dataset to a
+#' distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param poipa A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-absence point occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier
@@ -93,13 +110,22 @@ methods::setMethod(
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param ... Other parameters passed down
 #'
-#' @details Say something about presence-absence biodiversity records in \pkg{ibis}
+#' @details Opposed to presence-only data, presence-absence biodiversity records usually originate from
+#' structured biodiversity surveys where the absence of a species in a given region was specifically
+#' assessed. #' By default, the cloglog link function is used in a logistic regression setup unless the specific [engine]
+#' does not support generalised linear regressions (e.g. [engine_bart])
+#'
+#' @family add_biodiversity
 #' @section Notes:
-#' @references
+#' @references Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+#' @references Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 #'
 #' @examples
 #' \dontrun{
-#'  TBD
+#' # Define model
+#' x <- distribution(background) %>%
+#'   add_biodiversity_poipa(virtual_species)
+#' x
 #' }
 #' @name add_biodiversity_poipa
 NULL
@@ -169,6 +195,9 @@ methods::setMethod(
 
 #' Add biodiversity polygon dataset to a distribution object (presence-only)
 #'
+#' @description This function can be used to add a [`sf`] polygon dataset to an existing
+#' distribution object. Presence-only polygon data is treated differential than point data in
+#' subsequent engines and models.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param polpo A [`sf`] or [`Spatial`]) polygon object of presence-only occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier
@@ -185,8 +214,17 @@ methods::setMethod(
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param ... Other parameters passed down
 #'
-#' @details Say something about presence only biodiversity records in \pkg{ibis} and
-#' integration of ranges
+#' @details The default approach for polygon data is tosample presence-only points across
+#' the region of the polygons. This function thus adds as a wrapper to [add_biodiversity_poipo] as presence-only
+#' points are created by the model. Although [engine_inla] and [engine_inlabru] in the \pkg{ibis.iSDM} package
+#' are able to include (small) polygon data directly in the modelling,
+#' the link between covariates and polygonal data is established through a nearest-neighbour matching
+#' and thus is relatively equivalent to a point sampling.
+#'
+#' The 'simulate' options allow specify parameters with regards to the simulation steps.
+#'
+#' For an integration of range data as predictor or offset, see [add_predictor_range] and [add_offset_range] instead.
+#' @family add_biodiversity
 #' @section Notes:
 #' @references
 #'
