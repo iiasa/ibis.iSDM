@@ -11,6 +11,7 @@ add_biodiversity_poipa(
   field_occurrence = "Observed",
   formula = NULL,
   family = "binomial",
+  separate_intercept = TRUE,
   ...
 )
 
@@ -28,6 +29,9 @@ add_biodiversity_poipa(
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified)}
 
 \item{family}{A \code{\link{character}} stating the family to be used (Default: binomial)}
+
+\item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
+shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
 \item{...}{Other parameters passed down}
 }

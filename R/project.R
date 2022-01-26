@@ -88,15 +88,23 @@ methods::setMethod(
     if("dispersal" %in% names(scenario_constraints)){
       if(scenario_constraints[["dispersal"]]$method == "MigClim") {
         assertthat::assert_that(is.Raster(baseline_threshold))
-      }  else {
-        assertthat::assert_that(is.Waiver(scenario_threshold),msg = "Other constrains require calculated thresholds!")
+      } else if(scenario_constraints[["dispersal"]]$method == "kissmig"){
+        assertthat::assert_that( is.Raster(baseline_threshold))
+        if(!is.Waiver(scenario_threshold)) {
+          if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Using kissmig to calculate updated distribution thresholds.')
+          scenario_threshold <- new_waiver()
+        }
+      } else {
+        assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
     if(is.Waiver(baseline_threshold) && !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found!")
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Connectivity contraints need a set dispersal constraint.')
     }
-    # --- #
+    # ----------------------------- #
+    # Start of projection           #
+    # ----------------------------- #
 
     # Now convert to data.frame and subset
     df <- new_preds$get_data(df = TRUE)
@@ -125,13 +133,14 @@ methods::setMethod(
       # FIXME: Adapt for uncertainty projections as well!
       out <- fit$project(newdata = nd)[[1]] # First prediction being the mean
       names(out) <- paste0("suitability", "_", times)
+      if(is.na(raster::projection(out))) raster::projection(out) <- raster::projection( fit$model$background )
 
       # If constrains are set, apply them
       if(!is.Waiver(scenario_constraints)){
         # Calculate dispersal constraint if set
         if("dispersal" %in% names(scenario_constraints) ){
           # MigClim simulations are run posthoc
-          if(scenario_constraints$dispersal$method != 'MigClim'){
+          if(scenario_constraints$dispersal$method %in% c("sdd_fixed", "sdd_nexpkernel")){
             out <- switch (scenario_constraints$dispersal$method,
                            "sdd_fixed" = .sdd_fixed(baseline_threshold, out,
                                                     value = scenario_constraints$dispersal$params[1],
@@ -143,6 +152,20 @@ methods::setMethod(
             names(out) <-  paste0('suitability_', times)
           }
         }
+        # For kissmig generate threshold and masked suitabilities
+        if(scenario_constraints$dispersal$method %in% c("kissmig")){
+          out <- .kissmig_dispersal(baseline_threshold,
+                                    new_suit = out,
+                                    resistance = scenario_constraints$connectivity$params$resistance,
+                                    params = scenario_constraints$dispersal$params)
+          # Returns a layer of two with both the simulated threshold and the masked suitability raster
+          names(out) <- paste0(c('threshold_', 'suitability_'), times)
+          # Add threshold to result stack
+          proj_thresh <- raster::addLayer(proj_thresh, out[[1]] )
+          baseline_threshold <- out[[1]]
+          out <- out[[2]]
+        }
+
         # # Connectivity constraints
         if("connectivity" %in% names(scenario_constraints)){
           # By definition a hard barrier removes all suitable
@@ -152,7 +175,7 @@ methods::setMethod(
         }
 
       }
-      # Calculate thresholds if set
+      # Calculate thresholds if set manually
       if(!is.Waiver(scenario_threshold)){
         # FIXME: Currently this works only for mean thresholds. Think of how the other are to be handled
         scenario_threshold <- scenario_threshold[1]
@@ -252,8 +275,9 @@ methods::setMethod(
                      raster = run_sim)
         }
       }
-    } else mc <- new_waiver() # End of MigClim processing chain
-
+    } # End of MigClim processing chain
+    # If not found, set a waiver
+    if(!exists("mc")) mc <- new_waiver()
     # ---- #
     assertthat::assert_that(
       is.Raster(proj), is.Raster(proj_thresh),
@@ -265,7 +289,7 @@ methods::setMethod(
                                crs = sf::st_crs(new_crs)
     ); names(proj) <- 'suitability'
 
-    if((!is.Waiver(scenario_threshold))){
+    if(raster::nlayers(proj_thresh)>0){
       # Add the thresholded maps as well
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)

@@ -491,8 +491,13 @@ engine_inla <- function(x,
         }
         # ----------- #
         # Provided or default formula
-        # TODO: Currently duplicate equations per dataset. Use only one here, but ideally support multiple?
-        master_form <- model$biodiversity[[1]]$equation
+        master_form <- as.formula(
+          paste0("observed ~ 0 + ",
+                              paste0(sapply(model$biodiversity, function(x){
+                                                attr(terms.formula(x$equation),"term.labels")
+                                              }) %>% c %>% unique(),collapse = " + ")
+          )
+        )
 
         # Perform variable selection
         if( settings$get(what='varsel') ){
@@ -568,8 +573,8 @@ engine_inla <- function(x,
                                  control.compute = list(cpo = FALSE, waic = TRUE, config = TRUE, openmp.strategy	= 'huge' ),
                                  # control.mode = list(theta = thetas, restart = FALSE), # To speed up use previous thetas
                                  verbose = settings$get(what='verbose'), # To see the log of the model runs
-                                 control.results = list(return.marginals.random = FALSE,
-                                                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
+                                 # control.results = list(return.marginals.random = FALSE,
+                                 #                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
                                  # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
                                  # control.fixed = INLA::control.fixed(mean = 0),#, prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                                  INLA::control.inla(int.strategy = "eb"), # Empirical bayes is generally faster
@@ -578,13 +583,13 @@ engine_inla <- function(x,
                                  # ),
                                  num.threads = getOption('ibis.nthread')
             )
-          },silent = TRUE)
-          if(class(fit_pred)=='try-error') stop('Model did not converge. Try to simplify structure and check priors!')
+          },silent = FALSE)
+          if(class(fit_pred)=='try-error') print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!')
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
           # Only difference between linear.predictor and fitted.values is that
           # fitted.values applies the (inverse of the) link function,
-          # so it doesn't include the observation distribution part of posterior predictions.
+          # so it doesn't include the observation distribution part (measurement noise) of posterior predictions.
           post <- fit_pred$summary.linear.predictor[index.pred, ] # Changed to fitted values
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection

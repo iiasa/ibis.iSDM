@@ -386,17 +386,21 @@ engine_inlabru <- function(x,
         # --- #
         # Defining the component function
         if(length(model$biodiversity)>1){
-          # FIXME: Indiv. Likelihoods currently still have a full intercept in there
-          # Check that intercept formulation works correctly for INLABRU
+          # FIXME: # Check that intercept formulation works correctly for INLABRU
           comp <- as.formula(
-            paste(' ~ 0 + Intercept(1) + ',paste0('Intercept_',
-                             make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                             sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+            paste(' ~ 0 + Intercept(1) ',
+                  ifelse(model$biodiversity[[1]]$use_intercept,
+                         paste("+",paste0('Intercept_',
+                                make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                sapply( model$biodiversity, function(x) x$type ),"(1)",collapse = ' + ')
+                               ),
+                         ""
+                          )
                   )
           )
         } else {
           comp <- as.formula(
-            paste0( "~ Intercept(1)")
+            paste0( "~ 0 + Intercept(1)")
           )
         }
 
@@ -420,9 +424,10 @@ engine_inlabru <- function(x,
           if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
             # Built component
             if(settings$get('only_linear') == FALSE){
-              var_rw1 <- length( unique( model$biodiversity[[id]]$predictors[,i] ))
-              # Define a threshold over which to use rw. Currently set to 50 unique values. Could probably be done much cleverer
-              if(var_rw1 > 50) m <- 'rw1' else m <- 'linear'
+              # if there are less than 50 unique values, create linear variable instead
+              if(length(unique(model$predictors[,i])) > 50){
+                m <- paste0("rw1","__",model$predictors_types$predictors[i])
+              } else m <- "linear"
             } else { m <- 'linear' }
 
             # Specify priors if set
@@ -436,11 +441,11 @@ engine_inlabru <- function(x,
                 ),collapse = "" )
               } else {pp <- "" }
             } else { pp <- "" }
-            if(m == "rw1"){
+            if( m!= "linear" ){
                 # Could add RW effects with pc priors. PC priors are on the KL distance (difference between probability distributions), P(sigma >2)=0.05
                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015, so we define it like this here
                 pp <- ', hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
-              }
+            }
             comp <- update.formula(comp,
                                    paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
                                                           pp,', model = "',m,'")'), collapse = " ")
@@ -507,6 +512,30 @@ engine_inlabru <- function(x,
 
         # Get components
         comp <- self$get_data("components")
+
+        # Recreate non-linear variables in case they are set
+        if(settings$get('only_linear') == FALSE){
+          # TODO: Bypass grouping for now until this has been figured out
+          m = INLA::inla.models()
+          m$latent$rw1$min.diff = NULL
+          assign("inla.models", m, INLA::inla.get.inlaEnv())
+
+          for(i in 1:nrow(model$predictors_types)){
+            # if there are less than 50 unique values, create linear variable instead
+            if(length(unique(model$predictors[,i])) > 50){
+              # Create a one-dimensional array
+              m <- INLA::inla.mesh.1d(
+                seq(min(model$predictors[,i],na.rm = TRUE),
+                    max(model$predictors[,i],na.rm = TRUE), length.out = 100),
+                degree = 1)
+              m <- INLA::inla.spde2.matern(m)
+              # Internally assign
+              assign(x = paste0("rw1","__",model$predictors_types$predictors[i]),
+                     value = m )
+              rm(m)
+            }
+          }
+        }
 
         # Get spatial effect if existant
         if("latentspatial" %in% self$list_data() ){
@@ -639,6 +668,7 @@ engine_inlabru <- function(x,
         if(!exists("fit_bru")){
           stop('Model did not converge. Try to simplify structure and check priors!')
         }
+        if(is.null(fit_bru$names.fixed)) stop('Model did not converge. Try to simplify structure and check priors!')
 
         if(!settings$get('inference_only')){
           # Messenger
@@ -667,9 +697,14 @@ engine_inlabru <- function(x,
           # Get variables for inlabru
           if(length(model$biodiversity)>1){
             vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
-            ii <- paste("Intercept + ",paste0('Intercept_',
-                                              make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                              sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+            ii <- paste("Intercept",
+                        ifelse(model$biodiversity[[1]]$use_intercept,
+                               paste("+",paste0('Intercept_',
+                                                make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                               ),
+                               ""
+                               )
             )
             # Assert that variables are used in the likelihoods
             assertthat::assert_that(

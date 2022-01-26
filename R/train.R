@@ -178,6 +178,7 @@ methods::setMethod(
       model[['biodiversity']][[id]][['type']]         <- x$biodiversity$get_types(short = TRUE)[[id]] # Type
       model[['biodiversity']][[id]][['family']]       <- x$biodiversity$get_families()[[id]] # Family
       model[['biodiversity']][[id]][['equation']]     <- x$biodiversity$get_equations()[[id]]
+      model[['biodiversity']][[id]][['use_intercept']]<- x$biodiversity$data[[id]]$use_intercept # Separate intercept?
       # --- #
       # Rename observation column to 'observed'. Needs to be consistent for INLA
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
@@ -262,7 +263,8 @@ methods::setMethod(
         "<GDB>" = x$priors$classes() == 'GDBPrior',
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
-        "<INLABRU>" = x$priors$classes() == 'INLAPrior'
+        "<INLABRU>" = x$priors$classes() == 'INLAPrior',
+        "<STAN>" = x$priors$classes() == 'STANPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
@@ -350,11 +352,14 @@ methods::setMethod(
 
           # Construct formula with all variables
           form <- paste('observed', '~', 0, '+ intercept',
-                        ifelse(length(types)==1, # Check whether a single intercept model is to be constructed
-                               '',
+                        ifelse(length(types)>1 && model$biodiversity[[id]]$use_intercept, # Check whether a single intercept model is to be constructed
                                paste(' + ',paste0('intercept_',
-                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + '),' + ')
+                                                  make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
+                                                  # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                  # sapply( model$biodiversity, function(x) x$type ),
+                                                  )#collapse = ' + ')
+                                     ),
+                               ""
                         )
           )
           # Check whether priors have been specified and if yes, use those
@@ -476,18 +481,19 @@ methods::setMethod(
 
         # Default equation found (e.g. no separate specification of effects)
         if(model$biodiversity[[id]]$equation=='<Default>'){
-
+          # Check whether to use dataset specific intercepts
+          if(length(types)>1 && model$biodiversity[[id]]$use_intercept){
+            ii <- paste0('+ Intercept_',
+                         make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
+                         # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                         # sapply( model$biodiversity, function(x) x$type ),
+            )
+          } else ii <- ""
           # Go through each variable and build formula for likelihood
           form <- to_formula(paste("observed ~ ", "0 + Intercept +",
                                paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                # Check whether a single dataset is provided, otherwise add other intercepts
-                               ifelse(length(types)==1,
-                                      '',
-                                      paste('+',paste0('Intercept_',
-                                                         make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                         sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                                            )
-                               ),
+                               ii,
                                # # If multiple datasets, don't use intercept
                                # ifelse(length(ids)>1,"-1", ""),
                                collapse = " ")
@@ -522,14 +528,16 @@ methods::setMethod(
           # Add generic Intercept if not set in formula
           if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
           # If length of ids is larger than 1, add dataset specific intercept too
-          if(length(ids)>1){
+          # Check whether to use dataset specific intercepts
+          if(length(types)>1 && model$biodiversity[[id]]$use_intercept){
             form <- update.formula(form,
                                    paste0(". ~ . + ",
                                           paste0('Intercept_',
                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + '))
-                                   )
+            )
           }
+
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
             # Update with spatial term
             form <- update.formula(form, paste0(" ~ . + ",
@@ -812,103 +820,60 @@ methods::setMethod(
     } else if( inherits(x$engine,"STAN-Engine") ){
       # ----------------------------------------------------------- #
       #### STAN Engine ####
+      # For stan, the actual model is built sequentially per id
+      # Process per supplied dataset
+      for(id in ids) {
 
-      # Single model type specified. Define formula
-      # Default equation found
-      # TODO: Update equation object
-      if(model$biodiversity[[1]]$equation=='<Default>'){
-        # Construct formula with all variables
-        form <- paste( 'observed' ,ifelse(model$biodiversity[[1]]$family=='poisson', '/ w',''), ' ~ 1')
+        # Default equation found (e.g. no separate specification of effects)
+        if(model$biodiversity[[id]]$equation=='<Default>'){
 
-        # Load variables and add them
-        for(v in model$biodiversity[[1]]$predictors_names){
-          # Add
-          form <- paste0(form, ' + ', v)
+          # Go through each variable and build formula for likelihood
+          form <- to_formula(paste("observed",
+                                          " ~ 0 + ", #"intercept +",
+                                   ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
+                                   paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
+                                   # Check whether a single dataset is provided, otherwise add other intercepts
+                                   ifelse(length(types)==1,
+                                          '',
+                                          paste('+',paste0('intercept_',
+                                                           make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                           sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                                          )
+                                   ),
+                                   # # If multiple datasets, don't use intercept
+                                   # ifelse(length(ids)>1,"-1", ""),
+                                   collapse = " ")
+                            )
+
+          # Add offset if specified
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'binomial') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
+        } else {
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
+          form <- to_formula(model$biodiversity[[1]]$equation)
+          # Update formula to weights if forgotten
+          if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')
+          assertthat::assert_that(
+            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+          )
         }
-        # Convert to formula
-        form <- to_formula(form)
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- form
+        rm(form)
 
-        # Add offset if specified
-        if(!is.Waiver(x$offset) && (model[['biodiversity']][[1]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
-        # if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-        #   # Update with spatial term
-        #   form <- update.formula(form, paste0(" ~ . + ",
-        #                                       x$engine$get_equation_latent_spatial() )
-        #   )
-        # }
-      } else{
-        # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
-        form <- to_formula(model$biodiversity[[1]]$equation)
-        # Update formula to weights if forgotten
-        if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')
-        assertthat::assert_that(
-          all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
-        )
-      }
-      model$biodiversity[[1]]$equation <- form
-      rm(form)
-
-      # Add pseudo-absence points if necessary
-      # Include nearest predictor values for each
-      if('poipo' == model$biodiversity[[1]]$type) {
-
-        # Get background layer
-        bg <- x$engine$get_data('template')
-        assertthat::assert_that(!is.na(cellStats(bg,min)))
-
-        # Sample pseudo absences
-        abs <- create_pseudoabsence(
-          env = model$predictors,
-          presence = model$biodiversity[[1]]$observations,
-          bias = settings$get('bias_variable'),
-          template = bg,
-          npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
-          replace = TRUE
-        )
-        abs$intercept <- 1 # Add dummy intercept
-        # Combine absence and presence and save
-        abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
-        # Furthermore rasterize observed presences
-        pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg,
-                                  fun = 'count', background = 0)
-        # If family is not poisson, assume factor distribution
-        # FIXME: Ideally this is better organized through family
-        if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
-        obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
-                      model$biodiversity[[1]]$observations[,c('x','y')] )
-        model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
-
-        # Format out
-        df <- rbind(model$biodiversity[[1]]$predictors,
-                    abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
-          subset(., complete.cases(.) )
-
-        # Preprocessing security checks
-        assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
-                                 any(!is.na(rbind(obs, abs_observations)[['observed']] )),
-                                 nrow(df) == nrow(model$biodiversity[[1]]$observations)
-        )
-        # Add offset if existent
-        if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
-
-        # Define expectation as very small vector following Renner et al.
-        w <- ppm_weights(df = df,
-                         pa = model$biodiversity[[1]]$observations[['observed']],
-                         bg = bg,
-                         weight = 1e-6
-        )
-        df$w <- w # Also add as column
-
-        model$biodiversity[[1]]$predictors <- df
-        model$biodiversity[[1]]$expect <- w
+        # For each type include expected data
+        # expectation vector (area for integration points/nodes and 0 for presences)
+        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
+        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
       }
 
       # Run the engine setup script
-      x$engine$setup(model)
+      model <- x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
+
 
     } else { stop('Specified Engine not implemented yet.') }
 

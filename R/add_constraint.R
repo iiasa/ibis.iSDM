@@ -8,8 +8,10 @@ NULL
 #' dispersal distance, connectivity between identified patches or limitations on species vital rates.
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors
-#' @param method A [`character`] indicating the type of constrain to be added to the scenario. See details
+#' @param method A [`character`] indicating the type of constrain to be added to the scenario. See details.
 #' @param value A [`numeric`] value specifying a fixed constrain or constant in units "m". Default: NULL
+#' For kissmig the value needs to give the number of iteration steps (or within year migration steps).
+#' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
 #' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains. Default: NULL
 #' @param ... passed on parameters
 #'
@@ -19,14 +21,15 @@ NULL
 #' Supported are the options for dispersal and connectivity constrains:
 #' [-] sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep
 #' [-] sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin,
-#' [-] migclim - Applies the dispersal algorithm MigClim to the modelled objects
+#' [-] kissmig - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step
+#' [-] migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
 #' [-] hardbarrier - Defines a hard barrier to any dispersal events
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
 #' @references Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
 #' @references Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
-#'
+#' @references Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 #' @name add_constrain
 #' @aliases add_constrain
 #' @keywords scenario
@@ -51,7 +54,7 @@ methods::setMethod(
     )
     # Match method
     method <- match.arg(arg = method,
-                        choices = c("sdd_fixed", "sdd_nexpkernel", "migclim","hardbarrier"), several.ok = FALSE)
+                        choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim","hardbarrier"), several.ok = FALSE)
 
     # Now call the respective functions individually
     o <- switch(method,
@@ -59,6 +62,8 @@ methods::setMethod(
                   "sdd_fixed" = add_constrain_dispersal(mod, method = "sdd_fixed", ...),
                   # Short-distance dispersal
                   "sdd_nexpkernel" = add_constrain_dispersal(mod, method = "sdd_nexpkernel", ...),
+                  # Add kissmig dispersal
+                  "kissmig" = add_constrain_dispersal(mod, method = "kissmig", ...),
                   # Using the migclim package
                   "migclim" = add_constrain_dispersal(mod, method = "migclim", ...),
                   # --- #
@@ -78,7 +83,7 @@ methods::setMethod(
 NULL
 methods::setGeneric("add_constrain_dispersal",
                     signature = methods::signature("mod"),
-                    function(mod, method, value = NULL, ...) standardGeneric("add_constrain_dispersal"))
+                    function(mod, method, value = NULL, type = NULL, ...) standardGeneric("add_constrain_dispersal"))
 
 #' @name add_constrain_dispersal
 #' @rdname add_constrain_dispersal
@@ -86,16 +91,21 @@ methods::setGeneric("add_constrain_dispersal",
 methods::setMethod(
   "add_constrain_dispersal",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, method, value = NULL, ...){
+  function(mod, method, value = NULL, type = NULL, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
       is.character(method),
-      is.null(value) || is.numeric(value)
+      is.null(value) || is.numeric(value),
+      is.null(type) || is.character(type)
     )
     # Match method
     method <- match.arg(arg = method,
-                        choices = c("sdd_fixed", "sdd_nexpkernel", "migclim"), several.ok = FALSE)
+                        choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim"), several.ok = FALSE)
+
+    # Other arguments supplied
+    dots <- list(...)
+    argnames <- names(dots)
 
     # Check if there is already a dispersal constrain, if yes raise warning
     if(!is.Waiver(mod$get_constraints())){
@@ -122,10 +132,27 @@ methods::setMethod(
       )
       cr[['dispersal']] <- list(method = method,
                                 params = c("mean_dispersal_distance" = value))
-      # See if sth. can be taken from here
-      # http://doi.wiley.com/10.1111/j.1365-2699.2012.02737.x
-      # http://doi.wiley.com/10.1111/gcb.13251
-      # http://www.nature.com/articles/nclimate3414
+    } else if(method == "kissmig"){
+      # Check parameters to be correct
+      check_package("kissmig")
+      # Gather some default parameters
+      if(is.null(type)) type <- "DIS" else match.arg(type, c("DIS", "FOC", "LOC", "NOC"), several.ok = FALSE)
+      assertthat::assert_that(
+        is.numeric(value), msg = "For kissmig the value needs to give the number of iteration steps (or within time migration steps)."
+      )
+      # probability [0,1] a colonized cell becomes uncolonized between iteration steps, i.e., the species gets locally extinct
+      if("pext" %in% argnames) pext <- dots[["pext"]] else pext <- 0.1
+      # probability [0,1] corner cells are considered in the 3x3 cell neighborhood. Following Nobis & Nomand 2014, 0.2 is recommended for circular spread
+      if("pcor" %in% argnames) pcor <- dots[["pcor"]] else pcor <- 0.2
+
+      cr[['dispersal']] <- list(method = method,
+                                params = c("iteration" = value,
+                                           "type" = type,
+                                           "signed" = FALSE,
+                                           "pext" = pext,
+                                           "pcor" = pcor
+                                           ))
+
     }
     if(method == "migclim"){
       # Using the MigClim package for calculating any transitions and
@@ -220,6 +247,51 @@ methods::setMethod(
   # Thus removing any non-suitable grid cells (0) and changing the value of those within reach
   out <- new_suit * ras_dis
   return(out)
+}
+
+#' Keep it simple migration calculation.
+#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
+#' @param new_suit A new [`RasterLayer`] object.
+#' @param params A [vector] or [list] with passed on parameter values.
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL).
+#' @noRd
+#' @keywords internal
+.kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
+  assertthat::assert_that(
+    is.Raster(baseline_threshold), is.Raster(new_suit),
+    raster::compareRaster(baseline_threshold, new_suit),
+    is.vector(params) || is.list(params),
+    is.null(resistance) || is.logical(resistance) || is.Raster(resistance),
+    # Check that baseline threshold raster is binomial
+    length(unique(baseline_threshold))==2
+  )
+
+  check_package('kissmig')
+  if(!isNamespaceLoaded("kissmig")) { attachNamespace("kissmig");requireNamespace("kissmig") }
+
+  # Set suitability layer to 0 if set
+  if(is.Raster(resistance)){
+    new_suit[resistance>0] <- 0
+  }
+
+  # Simulate kissmig for a given threshold and suitability raster
+  km <- kissmig::kissmig(O = baseline_threshold,
+                         # Rescale newsuit to 0-1
+                         S = predictor_transform(new_suit, 'norm'),
+                         it = as.numeric( params['iteration'] ),
+                         type = params['type'],
+                         pext = as.numeric(params['pext']),
+                         pcor = as.numeric(params['pcor'])
+                        )
+  if(is.factor(km)) km <- raster::deratify(km, complete = TRUE)
+
+  # Now multiply the net suitability projection with this mask
+  # Thus removing any non-suitable grid cells (0) and changing the value of those within reach
+  ns <- new_suit * km
+
+  return(
+    raster::stack(km, ns)
+  )
 }
 
 # ------------------------ #
