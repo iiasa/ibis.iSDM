@@ -4,14 +4,14 @@ NULL
 #' Create a new monotonic prior
 #'
 #' Function to include prior information as monotonic constrain to a
-#' extreme gradient descent boosting model [engine_xgboost]
+#' extreme gradient descent boosting model [engine_xgboost].
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects
-#' @param hyper A [`character`] object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'
+#' @param variable A [`character`] matched against existing predictors or latent effects.
+#' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}
 #' @param ... Variables passed on to prior object
 #' @details TBD
 #' @references
-#'
+#' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
 #' @seealso [`Prior-class`].
 #' @family prior
 #' @keywords priors

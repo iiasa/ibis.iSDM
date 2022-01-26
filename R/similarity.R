@@ -10,9 +10,9 @@ NULL
 #' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`Raster`] object
 #' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`data.frame`] with extracted values (corresponding to those given in `obj`)
 #' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`]
-#' @param method A specifc method for similarity calculation. Currently supported: 'mess', 'nt'
-#' @param full should similarity values be returned for all variables (Default: FALSE)?
-#' @param plot Should the result be plotted? Otherwise return the output list (Default: TRUE)
+#' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}
+#' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
+#' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE})
 #' @return This function returns a list
 #'   containing:
 #'   - `similarity`: a `RasterStack` giving the environmental similarities for

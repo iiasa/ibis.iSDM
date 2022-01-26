@@ -3,9 +3,9 @@ NULL
 
 #' Print
 #'
-#' Display information about an object.
+#' Display information about any object created through the \pkg{ibis.iSDM} R-package.
 #'
-#' @param x Any object.
+#' @param x Any object created through the package.
 #' @param ... not used.
 #'
 #' @return None.
@@ -15,7 +15,10 @@ NULL
 #' @aliases print,Id-method print,tbl_df-method
 #' @keywords misc
 #' @examples
-#' a <- 1:4
+#' \dontrun{
+#' # Where mod is fitted object
+#' mod
+#' }
 #' print(a)
 NULL
 

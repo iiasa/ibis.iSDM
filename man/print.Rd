@@ -50,7 +50,7 @@
 \S4method{print}{tbl_df}(x)
 }
 \arguments{
-\item{x}{Any object.}
+\item{x}{Any object created through the package.}
 
 \item{...}{not used.}
 }
@@ -58,10 +58,13 @@
 None.
 }
 \description{
-Display information about an object.
+Display information about any object created through the \pkg{ibis.iSDM} R-package.
 }
 \examples{
-a <- 1:4
+\dontrun{
+# Where mod is fitted object
+mod
+}
 print(a)
 }
 \seealso{

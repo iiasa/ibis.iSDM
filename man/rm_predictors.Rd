@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_predictors.R
 \name{rm_predictors}
 \alias{rm_predictors}
-\title{Remove specific predictors from a distribution object}
+\title{Remove specific predictors from a \link{distribution} object}
 \usage{
 rm_predictors(x, names)
 
@@ -14,5 +14,5 @@ rm_predictors(x, names)
 \item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack}
 }
 \description{
-Remove specific predictors from a distribution object
+Remove specific predictors from a \link{distribution} object
 }

@@ -9,11 +9,11 @@ GDBPriors(variable, hyper = "increasing", ...)
 \S4method{GDBPriors}{character}(variable)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
 Helper function when multiple variables are supplied

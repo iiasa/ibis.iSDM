@@ -9,9 +9,9 @@ XGBPriors(variable, hyper = "increasing", ...)
 \S4method{XGBPriors}{character}(variable)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}}
 
 \item{...}{Variables passed on to prior object}
 }

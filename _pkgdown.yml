@@ -59,19 +59,11 @@ reference:
         - train
         - scenario
 
-  - title: Add or modify data and parameters
-    desc: Functions to add or modify data and parameters in existing objects
-    contents:
-      - starts_with("add_")
-      - starts_with("set_")
-      - starts_with("sel_")
-      - starts_with("rm_")
-
   - title: Create spatial-temporal projections
     desc: Functions specifically for adding constrains and creating scenarios based on trained models.
     contents:
       - scenario
-      - starts_with("add_constraint")
+      - starts_with("add_constrain")
       - has_keyword("scenarios")
 
   - title: Engines
@@ -79,15 +71,25 @@ reference:
     contents:
       - starts_with("engine_")
 
-  - title: Modifications and summaries
+  - title: Model summary and validation
     desc: Key functions to modify existing trained models
     contents:
+      - summary
+      - validate
       - similarity
-      - threshold
-      - ensemble
+      - effects
       - partial
       - spartial
-      - validate
+      - threshold
+      - ensemble
+
+  - title: Add or modify data and parameters
+    desc: Functions to add or modify data and parameters in existing objects
+    contents:
+      - starts_with("add_")
+      - starts_with("set_")
+      - starts_with("sel_")
+      - starts_with("rm_")
 
   - title: Utility functions
     desc: Functions used by engines or spatial processing

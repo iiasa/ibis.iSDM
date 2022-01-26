@@ -11,8 +11,8 @@ NULL
 #' @param ... Variables passed on to prior object
 #' @details TBD
 #' @section Notes:
-#' @references Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
-#'
+#' @references
+#' * Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
 #' @seealso [`Prior-class`].
 #' @keywords priors
 #' @family prior

@@ -22,8 +22,18 @@ spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
 \item{...}{Other engine specific parameters}
 }
-\description{
-Similar as \code{partial} calculates partial response of a trained model for a given variable
-However the result is a raster showing the spatial magnitude of the partial response
+\value{
+A \link{RasterLayer} containing the mapped partial response of the variable.
 }
-\keyword{misc}
+\description{
+Similar as \code{partial} calculates partial response of a trained model for a given variable in space.
+However the result is a \code{raster} showing the spatial magnitude of the partial response.
+}
+\details{
+By default the mean is calculated across all parameters that are not \code{x.var}.
+Instead a \emph{constant} can be set (for instance 0) to be applied to the output.
+}
+\seealso{
+\link{partial}
+}
+\keyword{partial}

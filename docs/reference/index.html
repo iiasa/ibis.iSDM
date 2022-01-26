@@ -90,6 +90,134 @@
         </dt>
         <dd>Create a new scenario based on trained model parameters</dd>
       </dl></div><div class="section level2">
+      <h2 id="create-spatial-temporal-projections">Create spatial-temporal projections<a class="anchor" aria-label="anchor" href="#create-spatial-temporal-projections"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions specifically for adding constrains and creating scenarios based on trained models.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="scenario.html">scenario()</a></code> 
+        </dt>
+        <dd>Create a new scenario based on trained model parameters</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain.html">add_constrain(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+        </dt>
+        <dd>Add a constrain to an existing <code>scenario</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+        </dt>
+        <dd>Add constrains to the modelled distribution projection through the MigClim approach</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain_connectivity.html">add_constrain_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; RasterLayer&gt;</i>)</a></code> 
+        </dt>
+        <dd>Adds a connectivity constrain to a scenario object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain_dispersal.html">add_constrain_dispersal(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
+        </dt>
+        <dd>Adds a dispersal constrain to a scenario object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="engines">Engines<a class="anchor" aria-label="anchor" href="#engines"></a></h2>
+      
+      <p class="section-desc"></p><p>Statistical models used for estimation of species distributions</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="engine_bart.html">engine_bart()</a></code> 
+        </dt>
+        <dd>Engine for use of Bayesian Additive Regression Trees (BART)</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_gdb.html">engine_gdb()</a></code> 
+        </dt>
+        <dd>Use of Gradient Descent Boosting for model estimation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_inla.html">engine_inla()</a></code> 
+        </dt>
+        <dd>Use INLA as engine</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_inlabru.html">engine_inlabru()</a></code> 
+        </dt>
+        <dd>Use inlabru as engine</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_stan.html">engine_stan()</a></code> 
+        </dt>
+        <dd>Use STAN as engine</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_xgboost.html">engine_xgboost()</a></code> 
+        </dt>
+        <dd>Engine for use of extreme gradient boosting (XGBoost)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-summary-and-validation">Model summary and validation<a class="anchor" aria-label="anchor" href="#model-summary-and-validation"></a></h2>
+      
+      <p class="section-desc"></p><p>Key functions to modify existing trained models</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> 
+        </dt>
+        <dd>Summarises a trained model or predictor object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+        </dt>
+        <dd>Validation of distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="similarity.html">similarity()</a></code> 
+        </dt>
+        <dd>Calculate environmental similarity of reference datasets to predictors.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="effects.html">effects(<i>&lt;DistributionModel&gt;</i>)</a></code> 
+        </dt>
+        <dd>Plot effects of trained model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="partial.html">partial()</a></code> 
+        </dt>
+        <dd>Obtain partial effects of trained model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="spartial.html">spartial()</a></code> 
+        </dt>
+        <dd>Obtain spatial partial effects of trained model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="threshold.html">threshold()</a></code> 
+        </dt>
+        <dd>Threshold a continuous prediction to a categorical layer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ensemble.html">ensemble(<i>&lt;ANY&gt;</i>)</a></code> 
+        </dt>
+        <dd>Function to create an ensemble of multiple fitted models</dd>
+      </dl></div><div class="section level2">
       <h2 id="add-or-modify-data-and-parameters">Add or modify data and parameters<a class="anchor" aria-label="anchor" href="#add-or-modify-data-and-parameters"></a></h2>
       
       <p class="section-desc"></p><p>Functions to add or modify data and parameters in existing objects</p>
@@ -119,7 +247,7 @@
           
           <code><a href="add_constrain.html">add_constrain(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
-        <dd>Add a constrain to an existing scenario</dd>
+        <dd>Add a constrain to an existing <code>scenario</code></dd>
       </dl><dl><dt>
           
           <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
@@ -185,105 +313,7 @@ For instance those previously selected</dd>
           
           <code><a href="rm_predictors.html">rm_predictors()</a></code> 
         </dt>
-        <dd>Remove specific predictors from a distribution object</dd>
-      </dl></div><div class="section level2">
-      <h2 id="create-spatial-temporal-projections">Create spatial-temporal projections<a class="anchor" aria-label="anchor" href="#create-spatial-temporal-projections"></a></h2>
-      
-      <p class="section-desc"></p><p>Functions specifically for adding constrains and creating scenarios based on trained models.</p>
-
-      
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="scenario.html">scenario()</a></code> 
-        </dt>
-        <dd>Create a new scenario based on trained model parameters</dd>
-      </dl></div><div class="section level2">
-      <h2 id="engines">Engines<a class="anchor" aria-label="anchor" href="#engines"></a></h2>
-      
-      <p class="section-desc"></p><p>Statistical models used for estimation of species distributions</p>
-
-      
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="engine_bart.html">engine_bart()</a></code> 
-        </dt>
-        <dd>Engine for use of Bayesian Additive Regression Trees (BART)</dd>
-      </dl><dl><dt>
-          
-          <code><a href="engine_gdb.html">engine_gdb()</a></code> 
-        </dt>
-        <dd>Use of Gradient Descent Boosting for model estimation</dd>
-      </dl><dl><dt>
-          
-          <code><a href="engine_inla.html">engine_inla()</a></code> 
-        </dt>
-        <dd>Use INLA as engine</dd>
-      </dl><dl><dt>
-          
-          <code><a href="engine_inlabru.html">engine_inlabru()</a></code> 
-        </dt>
-        <dd>Use inlabru as engine</dd>
-      </dl><dl><dt>
-          
-          <code><a href="engine_stan.html">engine_stan()</a></code> 
-        </dt>
-        <dd>Use STAN as engine</dd>
-      </dl><dl><dt>
-          
-          <code><a href="engine_xgboost.html">engine_xgboost()</a></code> 
-        </dt>
-        <dd>Engine for use of extreme gradient boosting (XGBoost)</dd>
-      </dl></div><div class="section level2">
-      <h2 id="modifications-and-summaries">Modifications and summaries<a class="anchor" aria-label="anchor" href="#modifications-and-summaries"></a></h2>
-      
-      <p class="section-desc"></p><p>Key functions to modify existing trained models</p>
-
-      
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="similarity.html">similarity()</a></code> 
-        </dt>
-        <dd>Calculate environmental similarity of reference datasets to predictors.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="threshold.html">threshold()</a></code> 
-        </dt>
-        <dd>Threshold a continuous prediction to a categorical layer</dd>
-      </dl><dl><dt>
-          
-          <code><a href="ensemble.html">ensemble(<i>&lt;ANY&gt;</i>)</a></code> 
-        </dt>
-        <dd>Function to create an ensemble of multiple fitted models</dd>
-      </dl><dl><dt>
-          
-          <code><a href="partial.html">partial()</a></code> 
-        </dt>
-        <dd>Obtain partial effects of trained model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="spartial.html">spartial()</a></code> 
-        </dt>
-        <dd>Obtain spatial partial effects of trained model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
-        </dt>
-        <dd>Validation of distribution object</dd>
+        <dd>Remove specific predictors from a <a href="https://rdrr.io/r/stats/Distributions.html" class="external-link">distribution</a> object</dd>
       </dl></div><div class="section level2">
       <h2 id="utility-functions">Utility functions<a class="anchor" aria-label="anchor" href="#utility-functions"></a></h2>
       
@@ -359,7 +389,7 @@ For instance those previously selected</dd>
           
           <code><a href="writeGeoTiff.html">writeGeoTiff()</a></code> 
         </dt>
-        <dd>Save a raster file in Geotiff format</dd>
+        <dd>Saves a raster file in Geotiff format</dd>
       </dl><dl><dt>
           
           <code><a href="writeNetCDF.html">writeNetCDF()</a></code> 
@@ -491,7 +521,7 @@ For instance those previously selected</dd>
           
           <code><a href="is.html">is.Id()</a></code> <code><a href="is.html">is.Waiver()</a></code> <code><a href="is.html">is.formula()</a></code> <code><a href="is.html">is.Raster()</a></code> 
         </dt>
-        <dd>Is Id</dd>
+        <dd>Check whether a provided object is truly of a specific type</dd>
       </dl><dl><dt>
           
           <code><a href="new_id.html">new_id()</a></code> 
@@ -502,11 +532,6 @@ For instance those previously selected</dd>
           <code><a href="new_waiver.html">new_waiver()</a></code> 
         </dt>
         <dd>Waiver</dd>
-      </dl><dl><dt>
-          
-          <code><a href="partial.html">partial()</a></code> 
-        </dt>
-        <dd>Obtain partial effects of trained model</dd>
       </dl><dl><dt>
           
           <code><a href="pipe.html">%&gt;%</a></code> 
@@ -522,16 +547,6 @@ For instance those previously selected</dd>
           <code><a href="print.html">print(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDistribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Prior&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Settings&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Log&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;tbl_df&gt;</i>)</a></code> 
         </dt>
         <dd>Print</dd>
-      </dl><dl><dt>
-          
-          <code><a href="spartial.html">spartial()</a></code> 
-        </dt>
-        <dd>Obtain spatial partial effects of trained model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> 
-        </dt>
-        <dd>Summarises a trained model or predictor object</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

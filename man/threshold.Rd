@@ -24,39 +24,59 @@ threshold(
 \arguments{
 \item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object}
 
-\item{method}{A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'}
+\item{method}{A specifc method for thresholding. See details for available options.}
 
-\item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: NULL)}
+\item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: \code{NULL}).}
 
-\item{poi}{A \code{\link{sf}} object containing observational data used for model training}
+\item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
 
-\item{return_threshold}{Should threshold value be returned instead (Default: FALSE)}
+\item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
+}
+\value{
+A \link{RasterLayer} if used with a \link{Raster} object as input.
+Otherwise the threshold is added to the respective \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.
 }
 \description{
-For \code{\link{BiodiversityScenario}} objects store a threshold attribute in
-the scenario object
+It is common in many applications of species distribution modelling that estimated
+continious suitability surfaces are converted into discrete representations of where
+suitable habitat might or might not exist. This threshold'ing can be done in various ways
+which are further described in the details.
+
+In case a \link{RasterLayer} or \link{RasterBrick} is provided as input for \code{obj}, it is furthermore
+necessary to provide a \code{\link{sf}} object for validation as there is no \code{\link{DistributionModel}} to read this
+information from.
+\strong{Note:} This of course also allows to estimate the threshold based on withheld data, for instance
+those created from an a-priori cross-validation procedure.
+
+For \code{\link{BiodiversityScenario}} objects, adding this function to the processing pipeline
+stores a threshold attribute in the created \link{scenario} object.
 }
 \details{
 The following options are currently implemented:
 \itemize{
-\item 'fixed' = applies a single pre-determined threshold
-\item 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
-\item 'percentile' = For a percentile threshold
-\item 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the \link{'modEvA'} package
-\item 'kappa' = Determines the optimal kappa value (Kappa). Requires the \link{'modEvA'} package
-\item 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the \link{'modEvA'} package
-\item 'F1score' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
-\item 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
-\item 'Specificity' = Determines the optimal sensitivity of presence records. Requires the \link{'modEvA'} package
+\item \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
+\item \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
+\item \code{'percentile'} = For a percentile threshold.
+\item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \link{modEvA} package to be installed.
+\item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \link{modEvA} package to be installed.
+\item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \link{modEvA} package to be installed.
+\item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
+\item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
+\item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
 }
 }
 \examples{
 \dontrun{
-print('test')
+ # Where mod is an estimated DistributionModel
+ tr <- threshold(mod)
+ tr$show_rasters()
 }
 }
 \references{
-Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. \href{https://doi.org/10.1111/2041-210X.12123}
 
-Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. \href{https://doi.org/10.1111/jbi.12058}
+}
+\seealso{
+\link{modEvA}
 }

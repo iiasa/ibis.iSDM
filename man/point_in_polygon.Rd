@@ -7,11 +7,11 @@
 point_in_polygon(poly, points, coords = c("x", "y"))
 }
 \arguments{
-\item{poly}{A \code{\link{sf}} object}
+\item{poly}{A \link{sf} object}
 
-\item{points}{A \code{\link{Spatial}} or \code{\link{sf}} object}
+\item{points}{A \code{\link{Spatial}} or \link{sf} object}
 
-\item{coords}{A vector pointing to the coordinate columns}
+\item{coords}{A \link{vector} pointing to the coordinate columns. (Default: \code{c("x", "y")})}
 }
 \value{
 An object with the spatial intersection

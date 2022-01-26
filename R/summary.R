@@ -8,24 +8,24 @@ NULL
 #'
 #' @return None.
 #' @seealso [base::summary()].
-#' @keywords misc
+#' @keywords summary
 #' @name summary
 NULL
 
 #' @rdname summary
 #' @method summary distribution
-#' @keywords misc
+#' @keywords summary
 #' @export
 summary.distribution <- function(x) x$summary()
 
 #' @rdname summary
 #' @method summary DistributionModel
-#' @keywords misc
+#' @keywords summary
 #' @export
 summary.DistributionModel <- function(x) x$summary()
 
 #' @rdname summary
 #' @method summary PredictorDataset
-#' @keywords misc
+#' @keywords summary
 #' @export
 summary.PredictorDataset <- function(x) x$summary()

@@ -11,8 +11,11 @@ NULL
 #' @param variable_length The interpolation depth (nr. of points) to be used (Default: 100)
 #' @param plot A [`logical`] indication of whether the result is to be plotted ?
 #' @param ... Other engine specific parameters
-#' @return None
-#' @keywords misc
+#' @seealso [partial]
+#' @details By default the mean is calculated across all parameters that are not \code{x.var}.
+#' Instead a *constant* can be set (for instance 0) to be applied to the output.
+#' @return A [data.frame] with the created partial response
+#' @keywords partial
 #' @name partial
 methods::setGeneric(
   "partial",
@@ -44,21 +47,25 @@ methods::setMethod(
 
 #' @rdname partial
 #' @method partial DistributionModel
-#' @keywords misc
+#' @keywords partial
 #' @export
 partial.DistributionModel <- function(x, ...) x$partial(...)
 
 #' Obtain spatial partial effects of trained model
 #'
-#' Similar as \code{partial} calculates partial response of a trained model for a given variable
-#' However the result is a raster showing the spatial magnitude of the partial response
+#' Similar as \code{partial} calculates partial response of a trained model for a given variable in space.
+#' However the result is a \code{raster} showing the spatial magnitude of the partial response.
 #'
 #' @param mod A trained `DistributionModel` model
 #' @param x.var A [`character`] indicating the variable for which a partial effect is to be calculated
 #' @param constant A [`numeric`] constant to be inserted for all other variables. Default calculates a mean per variable
 #' @param plot A [`logical`] indication of whether the result is to be plotted ?
 #' @param ... Other engine specific parameters
-#' @keywords misc
+#' @seealso [partial]
+#' @details By default the mean is calculated across all parameters that are not \code{x.var}.
+#' Instead a *constant* can be set (for instance 0) to be applied to the output.
+#' @returns A [RasterLayer] containing the mapped partial response of the variable.
+#' @keywords partial
 #' @name spartial
 methods::setGeneric(
   "spartial",
@@ -89,7 +96,7 @@ methods::setMethod(
 
 #' @rdname spartial
 #' @method spartial DistributionModel
-#' @keywords misc
+#' @keywords partial
 #' @export
 spartial.DistributionModel <- function(x, ...) x$spartial(...)
 

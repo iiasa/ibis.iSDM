@@ -7,10 +7,10 @@
 explode_factorized_raster(ras, name = NULL, ...)
 }
 \description{
-@description Takes a single raster that is a factor and creates
+@description Takes a single raster that is a \code{\link{factor}} and creates
 a new \code{\link{RasterStack}} that contains the individual levels
-@param ras A \code{\link{RasterLayer}} object that is a factor
-@param name An optional \code{\link{character}} name for the raster
+@param ras A \code{\link{RasterLayer}} object that is a \code{\link{factor}}.
+@param name An optional \code{\link{character}} name for the \link{raster}.
 @param ... Other parameters (dummy)
 @returns A \code{\link{RasterStack}} object
 @keywords utils

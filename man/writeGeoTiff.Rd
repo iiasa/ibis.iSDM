@@ -2,20 +2,20 @@
 % Please edit documentation in R/utils-spatial.R
 \name{writeGeoTiff}
 \alias{writeGeoTiff}
-\title{Save a raster file in Geotiff format}
+\title{Saves a raster file in Geotiff format}
 \usage{
 writeGeoTiff(file, fname, dt = "FLT4S", varNA = -9999)
 }
 \arguments{
-\item{file}{A \code{\link{raster}} object to be saved}
+\item{file}{A \code{\link{raster}} object to be saved.}
 
-\item{fname}{A \code{\link{character}} stating the output destination}
+\item{fname}{A \code{\link{character}} stating the output destination.}
 
-\item{dt}{The datatype to be written. Default is Float64}
+\item{dt}{The datatype to be written (Default: \emph{Float64})}
 
-\item{varNA}{The nodata value to be used. Default: -9999}
+\item{varNA}{The nodata value to be used (Default: \code{-9999}).}
 }
 \description{
-Save a raster file in Geotiff format
+Functions that acts as a wrapper to \link[raster:writeRaster]{raster::writeRaster}.
 }
 \keyword{utils}

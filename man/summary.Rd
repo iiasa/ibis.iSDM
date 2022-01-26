@@ -27,4 +27,4 @@ Summarises a trained model or predictor object
 \seealso{
 \code{\link[base:summary]{base::summary()}}.
 }
-\keyword{misc}
+\keyword{summary}

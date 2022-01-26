@@ -5,7 +5,7 @@
 \alias{is.Waiver}
 \alias{is.formula}
 \alias{is.Raster}
-\title{Is Id}
+\title{Check whether a provided object is truly of a specific type}
 \usage{
 is.Id(x)
 
@@ -19,14 +19,18 @@ is.Raster(x)
 \item{x}{an R Object.}
 }
 \value{
-Boolean evaluation
+Boolean evaluation with \link{logical} output.
 
-A boolean vector
+Boolean evaluation with \link{logical} output.
+
+Boolean evaluation with \link{logical} output.
+
+Boolean evaluation with \link{logical} output.
 }
 \description{
-Is Id
+Check whether a provided object is truly of a specific type
 
-Is waiver
+Is the provided object of type waiver?
 
 Check whether a formula is valid
 

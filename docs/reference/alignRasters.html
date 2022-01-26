@@ -85,11 +85,11 @@ in order to reduce computation time.</p>
 <dt>template</dt>
 <dd><p><code>Raster</code> or <code>Spatial</code> object from which geometry can be extracted</p></dd>
 <dt>method</dt>
-<dd><p>method for resampling ("ngb" or "bilinear")</p></dd>
+<dd><p>method for resampling (Options: <code>"ngb"</code> or <code>"bilinear"</code>)</p></dd>
 <dt>func</dt>
-<dd><p>function for resampling (Default: mean)</p></dd>
+<dd><p>function for resampling (Default: <a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a>)</p></dd>
 <dt>cl</dt>
-<dd><p>Boolean value if multicore computation should be used (Default: TRUE)</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value if multicore computation should be used (Default: <code>TRUE</code>)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -97,8 +97,8 @@ in order to reduce computation time.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Nearest Neighbour resampling (NGB) is recommended for discrete and Bilinear
-resampling for continious data.</p>
+    <p>Nearest Neighbour resampling (ngb) is recommended for discrete and Bilinear
+resampling for continuous data.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
