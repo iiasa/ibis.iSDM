@@ -36,10 +36,14 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 \item{...}{Other parameters passed down}
 }
 \description{
-Add biodiversity point dataset to a distribution object (presence-absence)
+This function adds a presence-absence biodiversity dataset to a
+distribution object.
 }
 \details{
-Say something about presence-absence biodiversity records in \pkg{ibis}
+Opposed to presence-only data, presence-absence biodiversity records usually originate from
+structured biodiversity surveys where the absence of a species in a given region was specifically
+assessed. #' By default, the cloglog link function is used in a logistic regression setup unless the specific \link{engine}
+does not support generalised linear regressions (e.g. \link{engine_bart})
 }
 \section{Notes}{
 
@@ -47,9 +51,20 @@ Say something about presence-absence biodiversity records in \pkg{ibis}
 
 \examples{
 \dontrun{
- TBD
+# Define model
+x <- distribution(background) \%>\%
+  add_biodiversity_poipa(virtual_species)
+x
 }
 }
 \references{
+Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 
+Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 }
+\seealso{
+Other add_biodiversity: 
+\code{\link{add_biodiversity_poipo}()},
+\code{\link{add_biodiversity_polpo}()}
+}
+\concept{add_biodiversity}

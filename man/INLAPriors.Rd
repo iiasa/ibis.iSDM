@@ -20,3 +20,15 @@ INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 \description{
 Helper function when multiple variables and types are supplied
 }
+\seealso{
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()}
+}
+\concept{prior}
+\keyword{priors}

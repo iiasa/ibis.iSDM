@@ -22,18 +22,59 @@ intersected with input data (Default: NULL).}
 data for building a biodiversity distribution modelling problem.
 }
 \description{
-Setup biodiversity distribution modelling procedure
+This function creates an object that contains all the data, parameters and settings
+for creating an (integrated) species distribution model.
+Key functions to add data are \code{\link[=add_biodiversity_*]{add_biodiversity_*()}} , \code{\link[=add_predictions]{add_predictions()}},
+\code{\link[=add_latent]{add_latent()}}, \code{\link[=engine_*]{engine_*()}}, \code{\link[=add_priors]{add_priors()}} and \code{\link[=add_offset]{add_offset()}}. This function then creates a
+prototype \code{\link{BiodiversityDistribution}} object with its own functions.
+After setting input data and parameters, missing parameters in the model can then be estimated
+via the \code{\link[=train]{train()}} function and predictions be created.
 }
 \details{
-TBD. Say something about PPMs, INLA and co.
+See \strong{Details} for further functions available to modify or summarize the created object.
 
-Option with constrain -> use reference
+** Note that any model requires at minimum a single added biodiversity distribution object
+as well as a specified engine. **
+
+This function creates a \code{\linkS4class{BiodiversityDistribution}} object that in itself contains
+other functions and stores input and pre-processed data.
+A full list of functions available can be queried via \code{object} although some of them
+are not intended to be manipulated directly but rather through convenience functions (e.g. \code{\link[=add_predictions]{add_predictions()}}).
+Several other objects are stored in the \code{\linkS4class{BiodiversityDistribution}} object that
+have their own functions as well and can be queried (e.g. \link{print}) by the author (list of functions in the respective help file).
+If some of those datasets are not set, then a \link{"Waiver"} object is returned instead.
+
+The following objects can be stored:
+\itemize{
+\item \code{object$biodiversity} A \code{\link{BiodiversityDatasetCollection}} object with the added biodiversity data.
+\item \code{object$engine} An \code{\link{engine}} object with function dependend on the added engine.
+\item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictions.
+\item \code{object$priors} A \code{\link{PriorList}} object with all specified priors.
+\item \code{object$log} A \code{\link{Log}} object that captures
+}
+
+Useful high-level functions to address those objects are for instance:
+\itemize{
+\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}} object contents. Can also be called via \link{print}
+\item \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors
+\item \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
+\item \code{object$get_extent()} Outputs the \link[raster:extent]{raster::extent} of the modelling region.
+\item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[raster:extent]{raster::extent} and the \link[sp:is.projected]{sp::proj4string}.
+\item \code{object$get_extent_dimensions()} Outputs the \link[raster:extent]{raster::extent} dimension by calling the \code{\link[=extent_dimensions]{extent_dimensions()}} function.
+\item \code{object$get_predictor_names()} Returns a \link{character} vector with the names of all added predictors.
+\item \code{object$get_prior_variables()} Returns a description of priors added.
+}
+
+There are other functions as well but those are better accessed through their respective wrapper functions.
 }
 \examples{
 \dontrun{
 print('test')
 }
 }
+\references{
+Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. \url{https://doi.org/10.1002/ecy.2710}
+}
 \seealso{
-\link{bdproto}
+\link{bdproto} on the general definition of proto objects and in particular \link{bdproto-biodiversitydistribution}.
 }

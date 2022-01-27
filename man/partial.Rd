@@ -25,9 +25,16 @@ partial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 \item{...}{Other engine specific parameters}
 }
 \value{
-None
+A \link{data.frame} with the created partial response
 }
 \description{
 Create a partial response or effect plot of a trained model
 }
-\keyword{misc}
+\details{
+By default the mean is calculated across all parameters that are not \code{x.var}.
+Instead a \emph{constant} can be set (for instance 0) to be applied to the output.
+}
+\seealso{
+\link{partial}
+}
+\keyword{partial}

@@ -50,11 +50,21 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 \item{...}{Other parameters passed down}
 }
 \description{
-Add biodiversity polygon dataset to a distribution object (presence-only)
+This function can be used to add a \code{\link{sf}} polygon dataset to an existing
+distribution object. Presence-only polygon data is treated differential than point data in
+subsequent engines and models.
 }
 \details{
-Say something about presence only biodiversity records in \pkg{ibis} and
-integration of ranges
+The default approach for polygon data is tosample presence-only points across
+the region of the polygons. This function thus adds as a wrapper to \link{add_biodiversity_poipo} as presence-only
+points are created by the model. Although \link{engine_inla} and \link{engine_inlabru} in the \pkg{ibis.iSDM} package
+are able to include (small) polygon data directly in the modelling,
+the link between covariates and polygonal data is established through a nearest-neighbour matching
+and thus is relatively equivalent to a point sampling.
+
+The 'simulate' options allow specify parameters with regards to the simulation steps.
+
+For an integration of range data as predictor or offset, see \link{add_predictor_range} and \link{add_offset_range} instead.
 }
 \section{Notes}{
 
@@ -68,3 +78,9 @@ integration of ranges
 \references{
 
 }
+\seealso{
+Other add_biodiversity: 
+\code{\link{add_biodiversity_poipa}()},
+\code{\link{add_biodiversity_poipo}()}
+}
+\concept{add_biodiversity}

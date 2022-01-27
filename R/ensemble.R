@@ -1,22 +1,26 @@
 #' Function to create an ensemble of multiple fitted models
 #'
 #' @description This function creates an ensemble of multiple provided distribution models
-#' fitted with the [`ibis.iSDM-package`]. Each model has to have a predictions with a mean layer and
+#' fitted with the [`ibis.iSDM-package`]. Each model has to have estimated predictions with a given method and
 #' optional uncertainty in form of the standard deviation or similar.
-#' @details Possible options for creating an ensemble includes:
-#' 'mean' - Calculates the mean of several predictions
-#' 'weighted.mean' - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
-#' 'min.sd' - Ensemble created by minimizing the uncertainty among predictions
-#' 'threshold.frequency' - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed
+#'
+#' Also returns a coefficient of variation (cv) as output of the ensemble, but note
+#' this should not be interpreted as measure of model uncertainty as it cannot
+#' capture parameter uncertainty of individual model; rather it reflects prediction variation.
+#' @details
+#' Possible options for creating an ensemble includes:
+#' * \code{'mean'} - Calculates the mean of several predictions
+#' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
+#' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions
+#' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed
+#' @note
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log]
 #' @param ... Provided [`DistributionModel`] objects
-#' @param method Approach on how the ensemble is to be created. See details for options (Default: 'mean')
-#' @param weights (Optional) weights provided to the ensemble function if weighted means are to be constructed. (Default: NULL)
-#' @param layer A [`character`] of the layer to be taken from each prediction
-#' @returns A [`RasterStack`] containing the ensemble of the provided predictions.
-#' Containing both the set 'method' and a coefficient of variation across predictions.
-#' Critically this should not be interpreted as measure of uncertainty as it cannot
-#' capture parameter uncertainty of individual model; Rather it reflects prediction variation.
-#' @export
+#' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
+#' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
+#' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}).
+#' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
+#' coefficient of variation across all models.
 
 #' @name ensemble
 #' @aliases ensemble

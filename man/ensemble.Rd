@@ -9,28 +9,35 @@
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects}
 
-\item{method}{Approach on how the ensemble is to be created. See details for options (Default: 'mean')}
+\item{method}{Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).}
 
-\item{weights}{(Optional) weights provided to the ensemble function if weighted means are to be constructed. (Default: NULL)}
+\item{weights}{(\emph{Optional}) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).}
 
-\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction}
+\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}).}
 }
 \value{
-A \code{\link{RasterStack}} containing the ensemble of the provided predictions.
-Containing both the set 'method' and a coefficient of variation across predictions.
-Critically this should not be interpreted as measure of uncertainty as it cannot
-capture parameter uncertainty of individual model; Rather it reflects prediction variation.
+A \code{\link{RasterStack}} containing the ensemble of the provided predictions specified by \code{method} and a
+coefficient of variation across all models.
 }
 \description{
 This function creates an ensemble of multiple provided distribution models
-fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have a predictions with a mean layer and
+fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have estimated predictions with a given method and
 optional uncertainty in form of the standard deviation or similar.
+
+Also returns a coefficient of variation (cv) as output of the ensemble, but note
+this should not be interpreted as measure of model uncertainty as it cannot
+capture parameter uncertainty of individual model; rather it reflects prediction variation.
 }
 \details{
 Possible options for creating an ensemble includes:
-'mean' - Calculates the mean of several predictions
-'weighted.mean' - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
-'min.sd' - Ensemble created by minimizing the uncertainty among predictions
-'threshold.frequency' - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed
+\itemize{
+\item \code{'mean'} - Calculates the mean of several predictions
+\item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
+\item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions
+\item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed
+}
+}
+\note{
+Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}
 }
 \keyword{train}

@@ -53,14 +53,19 @@ as.Id.character <- function(x, ...) {
   x
 }
 
-#' Is Id
+#' Check whether a provided object is truly of a specific type
+#'
+#' @param x A provided Id object
 #' @rdname is
+#' @return Boolean evaluation with [logical] output.
 #' @keywords misc
 #' @export
 is.Id <- function(x) inherits(x, "Id")
 
-#' Is waiver
+#' Is the provided object of type waiver?
+#' @param x A provided [Waiver] object
 #' @rdname is
+#' @return Boolean evaluation with [logical] output.
 #' @keywords misc
 #' @export
 is.Waiver <- function(x) inherits(x, "Waiver")
@@ -68,7 +73,7 @@ is.Waiver <- function(x) inherits(x, "Waiver")
 #' Check whether a formula is valid
 #'
 #' @param x A [`character`] object
-#' @return Boolean evaluation
+#' @return Boolean evaluation with [logical] output.
 #' @rdname is
 #' @keywords misc
 #' @export
@@ -77,7 +82,7 @@ is.formula <- function(x) inherits(x, "formula")
 #' Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
 #'
 #' @param x an R Object.
-#' @return A boolean vector
+#' @return Boolean evaluation with [logical] output.
 #' @rdname is
 #' @keywords misc
 #' @export

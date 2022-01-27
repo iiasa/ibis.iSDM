@@ -19,11 +19,11 @@ similarity(obj, ref, ref_type = "poipo", method = "mess", ...)
 
 \item{ref_type}{A \code{\link{character}} specifying the type of biodiversity to use when obj is a \code{\link{BiodiversityDistribution}}}
 
-\item{method}{A specifc method for similarity calculation. Currently supported: 'mess', 'nt'}
+\item{method}{A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}}
 
-\item{full}{should similarity values be returned for all variables (Default: FALSE)?}
+\item{full}{should similarity values be returned for all variables (Default: \code{FALSE})?}
 
-\item{plot}{Should the result be plotted? Otherwise return the output list (Default: TRUE)}
+\item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE})}
 }
 \value{
 This function returns a list

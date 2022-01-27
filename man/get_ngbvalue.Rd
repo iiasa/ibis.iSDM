@@ -18,19 +18,25 @@ get_ngbvalue(
 
 \item{env}{A \code{\link{data.frame}} object with the predictors}
 
-\item{longlat}{A boolean variable indicating whether the projection is long-lat}
+\item{longlat}{A \code{\link{logical}} variable indicating whether the projection is long-lat}
 
-\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: c('X','Y'))}
+\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: \code{c('X','Y')})}
 
-\item{cheap}{A boolean variable whether the dataset is considered to be large and faster computation could help}
+\item{cheap}{A \code{\link{logical}} variable whether the dataset is considered to be large and faster computation could help}
 }
 \value{
-Extracted data from each point
+A \code{\link{data.frame}} with the extracted covariate data from each provided data point.
 }
 \description{
 Function to extract nearest neighbour predictor values of provided points
 }
+\details{
+Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodist::geodist})
+}
 \note{
-If multiple values are of equal distance, average them
+If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+}
+\references{
+Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
 }
 \keyword{utils}

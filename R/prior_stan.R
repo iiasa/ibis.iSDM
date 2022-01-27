@@ -11,10 +11,12 @@ NULL
 #' @param ... Variables passed on to prior object
 #' @details TBD
 #' @section Notes:
-#' @references
-#'
+#' @references Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
+#' @references Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' @seealso [`Prior-class`].
 #'
+#' @family prior
+#' @keywords priors
 #' @aliases STANPrior
 #' @name STANPrior
 NULL
@@ -69,6 +71,8 @@ methods::setMethod(
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
 #' @param ... Variables passed on to prior object
 #' @rdname STANPriors
+#' @family prior
+#' @keywords priors
 #' @exportMethod STANPriors
 #' @export
 methods::setGeneric(

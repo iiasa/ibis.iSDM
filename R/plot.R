@@ -5,10 +5,13 @@ NULL
 #'
 #' Plots information from a given object where a plotting object is available
 #'
-#' @param x Any object.
-#' @param ... not used.
+#' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection], [PredictorDataset] or [BiodiversityScenario].
+#' @param ... Further arguments passed on to \code{x$plot}
 #'
-#' @return None.
+#' @details
+#' The plotted outputs vary depending on what object is being plotted.
+#' For example for fitted [DistributionModel] the output is usually the fitted spatial prediction (Default: 'mean')
+#' @return Graphical output
 #' @keywords misc
 #' @name plot
 NULL

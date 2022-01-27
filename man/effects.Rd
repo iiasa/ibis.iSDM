@@ -8,7 +8,7 @@
 \method{effects}{DistributionModel}(x, ...)
 }
 \arguments{
-\item{x}{Any prepared object.}
+\item{x}{Any fitted \link{distribution} object.}
 
 \item{...}{not used.}
 }
@@ -16,6 +16,20 @@
 None.
 }
 \description{
+This functions is handy wrapper that calls the default plotting
+functions for the model of a specific \link{engine}. Equivalent to
+calling \code{effects} of a fitted \link{distribution} function.
+}
+\details{
 Create a partial response or effect plot of a trained model
+}
+\examples{
+\dontrun{
+# Where mod is an estimated distribution model
+mod$effects()
+}
+}
+\references{
+
 }
 \keyword{misc}

@@ -3,27 +3,48 @@ NULL
 
 #' Threshold a continuous prediction to a categorical layer
 #'
+#' @description
+#' It is common in many applications of species distribution modelling that estimated
+#' continious suitability surfaces are converted into discrete representations of where
+#' suitable habitat might or might not exist. This threshold'ing can be done in various ways
+#' which are further described in the details.
+#'
+#' In case a [RasterLayer] or [RasterBrick] is provided as input for \code{obj}, it is furthermore
+#' necessary to provide a [`sf`] object for validation as there is no [`DistributionModel`] to read this
+#' information from.
+#' **Note:** This of course also allows to estimate the threshold based on withheld data, for instance
+#' those created from an a-priori cross-validation procedure.
+#'
+#' For [`BiodiversityScenario`] objects, adding this function to the processing pipeline
+#' stores a threshold attribute in the created [scenario] object.
+#'
 #' @param obj A trained [`DistributionModel`] or alternatively a [`Raster`] object
-#' @param method A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'
-#' @param value A [`numeric`] value for thresholding if method is fixed (Default: NULL)
-#' @param poi A [`sf`] object containing observational data used for model training
-#' @param return_threshold Should threshold value be returned instead (Default: FALSE)
+#' @param method A specifc method for thresholding. See details for available options.
+#' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
+#' @param poi A [`sf`] object containing observational data used for model training.
+#' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
 #' @details
-#' 'fixed' = applies a single pre-determined threshold
-#' 'mtp' = minimum training presence find and sets the lowest predicted suitability for any occurrence point
-#' 'percentile' = For a percentile threshold
-#' 'TSS' = Determines the optimal TSS (True Skill Statistic). Requires the 'modEvA' package
-#' 'kappa' = Determines the optimal kappa value (Kappa). Requires the 'modEvA' package
-#' 'F1score' = Determines the optimal F1score (also known as Sorensen similarity). Requires the 'modEvA' package
-#' 'F1score' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-#' 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
-#' 'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
+#' The following options are currently implemented:
+#' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
+#' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
+#' * \code{'percentile'} = For a percentile threshold.
+#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the [modEvA] package to be installed.
+#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the [modEvA] package to be installed.
+#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the [modEvA] package to be installed.
+#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the [modEvA] package to be installed.
+#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the [modEvA] package to be installed.
+#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the [modEvA] package to be installed.
 #' @name threshold
-#' @references Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
-#' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+#' @references Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. \href{https://doi.org/10.1111/2041-210X.12123}
+#' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. \href{https://doi.org/10.1111/jbi.12058}
+#' @seealso [modEvA]
+#' @returns A [RasterLayer] if used with a [Raster] object as input.
+#' Otherwise the threshold is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
 #' @examples
 #' \dontrun{
-#' print('test')
+#'  # Where mod is an estimated DistributionModel
+#'  tr <- threshold(mod)
+#'  tr$show_rasters()
 #' }
 #' @export
 NULL
@@ -245,8 +266,6 @@ methods::setMethod(
 
 #' Thresholds in scenario estimation
 #'
-#' @description For [`BiodiversityScenario`] objects store a threshold attribute in
-#' the scenario object
 #' @name threshold
 #' @inheritParams threshold
 #' @rdname threshold

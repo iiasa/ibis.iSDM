@@ -1,10 +1,10 @@
 ---
 title: "Construction of biodiversity projections"
-author: "Martin"
+author: "Martin Jung"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Construction of biodiversity projections}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
