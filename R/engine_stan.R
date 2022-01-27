@@ -150,15 +150,31 @@ engine_stan <- function(x,
             # Furthermore rasterize observed presences
             pres <- raster::rasterize(model$biodiversity[[i]]$predictors[,c('x','y')], bg,
                                       fun = 'count', background = 0)
+            # Get cell ids
+            ce <- raster::cellFromXY(pres, model[['biodiversity']][[i]]$observations[,c('x','y')])
+
             # If family is not poisson, assume factor distribution
             # FIXME: Ideally this is better organized through family
             if(model$biodiversity[[i]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
-            obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[i]]$observations[,c('x','y')])),
-                          model$biodiversity[[i]]$observations[,c('x','y')] )
+            # Get new presence data
+            obs <- cbind(
+              data.frame(observed = raster::values(pres)[ce],
+                         raster::xyFromCell(pres, ce) # Center of cell
+              )
+            ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
+
+            # Re-extract counts environment variables
+            envs <- get_ngbvalue(coords = obs[,c('x','y')],
+                                 env =  model$predictors[,c("x","y", model[['predictors_names']])],
+                                 longlat = raster::isLonLat(self$get_data("template")),
+                                 field_space = c('x','y')
+            )
+            envs$intercept <- 1
+            # Overwrite observations
             model$biodiversity[[i]]$observations <- rbind(obs, abs_observations)
 
             # Format out
-            df <- rbind(model$biodiversity[[i]]$predictors,
+            df <- rbind(envs,
                         abs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)]) %>%
               subset(., complete.cases(.) )
 
@@ -206,8 +222,8 @@ engine_stan <- function(x,
 
         # Transformed parameters
 
-        # Add (default) priors to model likelihood if set
-        if(!is.Waiver(model$priors)){
+        # Add (gaussian) priors to model likelihood if set
+        if((!is.Waiver(model$priors) || settings$get(what='varsel') == "none")){
           # Parameters
           sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
 
@@ -215,16 +231,23 @@ engine_stan <- function(x,
           sm_code$model <- append(sm_code$model, "// priors including constants")
           # Now add for each one a normal effect
           for(i in 1:length(model$predictors_names)){
-            if(model$predictors_names[i] %in% model$priors$varnames()) {
-              sm_code$model <- append(sm_code$model, paste0(
-                "target += normal_lpdf(beta[",i,"] | ",model$priors$get(model$predictors_names[8])[1],", ",model$priors$get(model$predictors_names[8])[2],");"
+            if(!is.Waiver(model$priors)){
+              if(model$predictors_names[i] %in% model$priors$varnames()) {
+                sm_code$model <- append(sm_code$model, paste0(
+                  "target += normal_lpdf(beta[",i,"] | ",model$priors$get(model$predictors_names[8])[1],", ",model$priors$get(model$predictors_names[8])[2],");"
                 ))
+              } else {
+                # Default gaussian prior
+                sm_code$model <- append(sm_code$model, paste0("target += normal_lpdf(beta[",i,"] | 0, 2);"))
+              }
             } else {
               # Default gaussian prior
               sm_code$model <- append(sm_code$model, paste0("target += normal_lpdf(beta[",i,"] | 0, 2);"))
             }
           }
-        } else {
+        } else
+          if( settings$get(what='varsel') == "reg" ){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
           # Add regularized horseshoe prior
           # See brms::horseshoe
           ir <- readLines( system.file("src/prior_functions.stan",package = "ibis.iSDM") )
@@ -265,12 +288,6 @@ engine_stan <- function(x,
           - 1 * log(0.5);
           target += inv_gamma_lpdf(hs_slab | 0.5 * hs_df_slab, 0.5 * hs_df_slab);
           ")
-
-          # sm_code$model <- append(sm_code$model,
-          # "for (j in 1:K){
-          #   target += normal_lpdf(b[j] | 0, 5);
-          # }"
-          # )
         }
 
         # Now add the model depending on the type

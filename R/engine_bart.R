@@ -144,13 +144,28 @@ engine_bart <- function(x,
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
                                     bg, fun = 'count', background = 0)
-          # Combine with observations
-          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
-                        model$biodiversity[[1]]$observations[,c('x','y')] )
+          # Get cell ids
+          ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
+
+          # Get new presence data
+          obs <- cbind(
+            data.frame(observed = raster::values(pres)[ce],
+                       raster::xyFromCell(pres, ce) # Center of cell
+            )
+          ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
+
+          # Re-extract counts environment variables
+          envs <- get_ngbvalue(coords = obs[,c('x','y')],
+                               env =  model$predictors[,c("x","y", model[['predictors_names']])],
+                               longlat = raster::isLonLat(self$get_data("template")),
+                               field_space = c('x','y')
+          )
+          envs$intercept <- 1
+          # Overwrite observations
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
-          df <- rbind(model$biodiversity[[1]]$predictors,
+          df <- rbind(envs,
                       abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
             subset(., complete.cases(.) )
 
@@ -173,6 +188,13 @@ engine_bart <- function(x,
         } else {
           # If family is not poisson, assume factor distribution for response
           assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
+          # calculating the case weights (equal weights)
+          # the order of weights should be the same as presences and backgrounds in the training data
+          prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
+          bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
+          w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+          model$biodiversity[[1]]$expect <- w
+
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
         }
 
@@ -224,7 +246,7 @@ engine_bart <- function(x,
 
         # --- #
         # Parameter tuning #
-        if(settings$get('varsel')){
+        if(settings$get('varsel') == "reg"){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
 
           cv_bart <- dbarts::xbart(
@@ -306,27 +328,25 @@ engine_bart <- function(x,
                                         newdata = full,
                                         type = 'response')
           )
-          # Fill output with summaries of the posterior
-          prediction[as.numeric(full$cellid)] <- apply(pred_bart, 2, mean)
-          names(prediction) <- 'mean'
-          prediction <- raster::stack(prediction)
-
           # Summarize quantiles and sd from posterior
           ms <- as.data.frame(
-                 cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                        matrixStats::colSds(pred_bart)
+                 cbind( apply(pred_bart, 2, mean),
+                        matrixStats::colSds(pred_bart),
+                        matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                        apply(pred_bart, 2, mode)
                        )
           )
-          names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
+          names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+          ms$cv <- ms$mean / ms$sd
+
           # Add them
+          prediction <- raster::stack()
           for(post in names(ms)){
             prediction2 <- self$get_data('template')
             prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
             prediction <- raster::addLayer(prediction, prediction2)
             rm(prediction2)
           }
-          # Clamp the raster at 0
-          # prediction <- raster::clamp(prediction, lower = 0)
 
         } else {
           # No prediction done

@@ -136,16 +136,30 @@ engine_gdb <- function(x,
           abs$intercept <- 1 # Add dummy intercept
           # Combine absence and presence and save
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
-          # Furthermore rasterize observed presences
+          # Furthermore rasterize observed presences and count within grid cells
           pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
                                     bg, fun = 'count', background = 0)
+          # Get cell ids
+          ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
+          # Get new presence data
+          obs <- cbind(
+            data.frame(observed = raster::values(pres)[ce],
+                       raster::xyFromCell(pres, ce) # Center of cell
+            )
+          ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
 
-          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
-                        model$biodiversity[[1]]$observations[,c('x','y')] )
+          # Re-extract counts environment variables
+          envs <- get_ngbvalue(coords = obs[,c('x','y')],
+                               env =  model$predictors[,c("x","y", model[['predictors_names']])],
+                               longlat = raster::isLonLat(self$get_data("template")),
+                               field_space = c('x','y')
+          )
+          envs$intercept <- 1
+          # Overwrite observations
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
-          df <- rbind(model$biodiversity[[1]]$predictors,
+          df <- rbind(envs,
                       abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
             subset(., complete.cases(.) )
 
@@ -158,7 +172,7 @@ engine_gdb <- function(x,
           if(!is.Waiver(model$offset)){
             ofs <- get_ngbvalue(coords = df[,c('x','y')],
                                 env =  model$offset,
-                                longlat = raster::isLonLat(x$background),
+                                longlat = raster::isLonLat(self$get_data('template')),
                                 field_space = c('x','y')
                                 )
             df[[names(ofs)[3]]] <- ofs[,3]
@@ -174,8 +188,16 @@ engine_gdb <- function(x,
           model$biodiversity[[1]]$predictors <- df
           model$biodiversity[[1]]$expect <- w
         } else if(model$biodiversity[[1]]$family != 'poisson'){
+          # calculating the case weights (equal weights)
+          # the order of weights should be the same as presences and backgrounds in the training data
+          prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
+          bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
+          w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+
           # If family is not poisson, assume factor distribution for response
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
+
+          model$biodiversity[[1]]$expect <- w
         }
 
         # ---- #
@@ -209,7 +231,7 @@ engine_gdb <- function(x,
         equation <- model$biodiversity[[1]]$equation
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         w <- model$biodiversity[[1]]$expect
-        if(model$biodiversity[[1]]$family!='poisson') w <- NULL # Set weights to 0 when binomial
+        # if(model$biodiversity[[1]]$family!='poisson') w <- NULL # Set weights to 0 when binomial
         full <- model$predictors
 
         # Select predictors
@@ -240,7 +262,7 @@ engine_gdb <- function(x,
             data = data,
             weights = w,
             family = fam,
-            # offset = off, # Offset added already
+            # offset = off, # Offset added already added to equation
             control = bc
           )
         })
@@ -258,6 +280,7 @@ engine_gdb <- function(x,
           )
         }
 
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
         # 5 fold Cross validation to prevent overfitting
         # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
         grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
@@ -267,7 +290,6 @@ engine_gdb <- function(x,
                               papply = pbapply::pblapply )
         },silent = TRUE)
         # TODO: parallize better? parallel::mclapply(mc.cores = getOption('ibis.nthread'))
-
         # Check whether crossvalidation has run through successfully
         if(exists('cvm') && mstop(cvm) > 0){
           # Set the model to the optimal mstop to limit overfitting

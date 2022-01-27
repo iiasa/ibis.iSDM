@@ -219,7 +219,7 @@ methods::setMethod(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     raster::compareRaster(baseline_threshold, new_suit),
     is.numeric(value),
-    is.logical(resistance) || is.Raster(resistance),
+    is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
     length(unique(baseline_threshold))==2
   )

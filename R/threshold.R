@@ -7,6 +7,7 @@ NULL
 #' @param method A specifc method for thresholding. One of 'fixed', 'mtp', 'percentile'
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: NULL)
 #' @param poi A [`sf`] object containing observational data used for model training
+#' @param truncate [`logical`] indication whether truncated thresholds should be used (Default: FALSE). See Muscatello et al. (2021).
 #' @param return_threshold Should threshold value be returned instead (Default: FALSE)
 #' @details
 #' 'fixed' = applies a single pre-determined threshold
@@ -19,8 +20,10 @@ NULL
 #' 'Sensitivity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
 #' 'Specificity' = Determines the optimal sensitivity of presence records. Requires the 'modEvA' package
 #' @name threshold
-#' @references Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
-#' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+#' @references
+#' * Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+#' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
 #' @examples
 #' \dontrun{
 #' print('test')
@@ -35,7 +38,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = FALSE, truncate = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -44,10 +47,11 @@ methods::setGeneric(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, truncate = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
-                            is.null(value) || is.numeric(value)
+                            is.null(value) || is.numeric(value),
+                            is.logical(truncate)
     )
     # Get raster
     ras <- obj$get_data('prediction')
@@ -112,24 +116,25 @@ methods::setMethod(
 #' @noRd
 #' @keywords noexport
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            poi = NULL, return_threshold = FALSE, ...) {
+                            poi = NULL, return_threshold = FALSE, truncate = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(poi,'sf'),
-                          is.null(value) || is.numeric(value)
+                          is.null(value) || is.numeric(value),
+                          is.logical(truncate)
   )
   # Apply threshold on each entry
   if(return_threshold){
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold, ...) )
+                                                                value = value, poi = poi, return_threshold = return_threshold, truncate = truncate, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
     out <- raster::stack()
     for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold, ...) )
+                                                                value = value, poi = poi, return_threshold = return_threshold, truncate = truncate,...) )
   }
   return(out)
 }
@@ -148,15 +153,21 @@ methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthr
 methods::setMethod(
   "threshold",
   methods::signature(obj = "RasterLayer"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, plot = FALSE) {
+  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, plot = FALSE, truncate = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'RasterLayer'),
                             is.character(method),
-                            is.null(value) || is.numeric(value)
+                            is.null(value) || is.numeric(value),
+                            is.logical(truncate)
     )
     # If poi is set, try to convert sf
     if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)})
     assertthat::assert_that(is.null(poi) || inherits(poi,'sf'))
+
+    # If observed is a factor, convert to numeric
+    if(is.factor(poi$observed)){
+      poi$observed <- as.numeric(as.character(poi$observed))
+    }
 
     # Match to correct spelling mistakes
     method <- match.arg(method, c('fixed','mtp','percentile',
@@ -165,7 +176,7 @@ methods::setMethod(
     # Check that raster has at least a mean prediction in name
     if(!is.null(poi)) assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
     assertthat::assert_that(hasName(poi, 'observed'))
-    poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data
+    poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
 
     # Get the raster layer
     raster_thresh <- obj
@@ -229,12 +240,19 @@ methods::setMethod(
     } else {
       # Finally threshold the raster
       raster_thresh[raster_thresh < tr[1]] <- 0
-      raster_thresh[raster_thresh >= tr[1]] <- 1
+      if(!truncate){
+        # Default is to create a binary presence-absence. Otherwise truncated hinge
+        raster_thresh[raster_thresh >= tr[1]] <- 1
+        raster_thresh <- raster::asFactor(raster_thresh)
+      } else {
+        # If truncate, ensure that resulting values are normalized
+        raster_thresh <- predictor_transform(raster_thresh, option = "norm")
+      }
       names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
-      raster_thresh <- raster::asFactor(raster_thresh)
       # Assign attributes
       base::attr(raster_thresh, 'method') <- method
       base::attr(raster_thresh, 'threshold') <- tr
+      base::attr(raster_thresh, 'truncate') <- truncate
     }
     # Return result
     return(raster_thresh)
@@ -271,7 +289,8 @@ methods::setMethod(
     #                   method = method,
     #                   value = value,
     #                   poi = poi,
-    #                   return_threshold = return_threshold
+    #                   return_threshold = return_threshold,
+    #                   truncate = truncate
     #                 )
     bdproto(NULL, obj, threshold = tr)
   }
