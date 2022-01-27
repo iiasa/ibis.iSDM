@@ -11,10 +11,10 @@
 
 \item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details.}
 
-\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units "m". Default: NULL
+\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units \code{"m"} (Default: \code{NULL}).
 For kissmig the value needs to give the number of iteration steps (or within year migration steps).}
 
-\item{resistance}{A \code{\link{RasterLayer}} object describing a resistance surface or barrier for use in connectivity constrains. Default: NULL}
+\item{resistance}{A \code{\link{RasterLayer}} object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).}
 
 \item{...}{passed on parameters}
 }

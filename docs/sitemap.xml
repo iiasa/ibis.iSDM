@@ -1,204 +1,333 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//index.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/404.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_biodiversity_poipa.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_biodiversity_poipo.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/02_integrate_data.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_biodiversity_polpo.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_model_assessment.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_latent_spatial.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_log.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_predictors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/comparison.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_range_offset.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/contributing.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/add_range_predictor.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/alignRasters.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/integrate_data.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/as.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/model_assessment.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/bbox2wkt.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/train_model.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/BiodiversityDataset-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/train_simple_model.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/BiodiversityDatasetCollection-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/authors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/BiodiversityDistribution-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/index.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/BiodiversityScenario-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/clean_rasterfile.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/news/index.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/coords_in_mesh.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_poipa.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/create_pseudoabsence.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_poipo.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/distribution.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_polpo.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/DistributionModel-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/effects.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_connectivity.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/emptyraster.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_dispersal.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/Engine-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_MigClim.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_bart.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_latent_spatial.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_gdb.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_log.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/engine_inla.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_range.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/extent_expand.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_predictors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/find_correlated_predictors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_predictor_range.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/format_biodiversity_data.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_priors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/GDBPrior.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_range_offset.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/GDBPriors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_range_predictor.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/get_ngbvalue.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/alignRasters.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/INLAPrior.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/as.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/INLAPriors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/bbox2wkt.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/intersecting_extents.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDataset-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/is.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDatasetCollection-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/is_comparable_raster.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/Log-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/new_id.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/new_waiver.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/coords_in_mesh.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/pipe.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/create_pseudoabsence.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/plot.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/distribution.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/point_in_polygon.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/PredictorDataset-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/effects.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/predictor_derivate.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/emptyraster.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/predictor_transform.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/Engine-class.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/print.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_bart.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/Prior-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_gdb.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/PriorList-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_inla.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/priors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_inlabru.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/rm_predictors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_stan.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/rm_priors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_xgboost.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/scenario.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ensemble.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/sel_predictors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/explode_factorized_raster.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/Settings-class.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/extent_expand.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/set_priors.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/find_correlated_predictors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/similarity.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/find_subset_of_predictors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/summary.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/format_biodiversity_data.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/threshold.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/GDBPrior.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/train.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/GDBPriors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/writeGeoTiff.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/get_ngbvalue.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//reference/writeNetCDF.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_options.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//articles/01_train_simple_model.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//articles/02_integrate_data.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/INLAPrior.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//articles/03_model_assessment.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/INLAPriors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM//articles/04_biodiversity_projections.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/intersecting_extents.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is_comparable_raster.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/Log-class.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/myLog.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/new_id.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/new_waiver.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/partial.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/plot.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/point_in_polygon.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/polynominal_transform.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/posterior_predict_stanfit.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ppm_weights.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/PredictorDataset-class.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_derivate.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/print.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/Prior-class.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/priors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/project.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_predictors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_priors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/run_stan.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/scenario.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/sel_predictors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/Settings-class.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/set_priors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/similarity.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/spartial.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/STANPrior.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/STANPriors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/stan_check_cmd.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/summary.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/threshold.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/train.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/validate.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/wrap_stanmodel.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/writeGeoTiff.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/writeNetCDF.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/write_stanmodel.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.html</loc>
   </url>
 </urlset>

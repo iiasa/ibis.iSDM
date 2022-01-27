@@ -3,24 +3,58 @@ NULL
 
 #' Setup biodiversity distribution modelling procedure
 #'
+#' This function creates an object that contains all the data, parameters and settings
+#' for creating an (integrated) species distribution model.
+#' Key functions to add data are [`add_biodiversity_*()`] , [`add_predictions()`],
+#' [`add_latent()`], [`engine_*()`], [`add_priors()`] and [`add_offset()`]. This function then creates a
+#' prototype [`BiodiversityDistribution`] object with its own functions.
+#' After setting input data and parameters, missing parameters in the model can then be estimated
+#' via the [`train()`] function and predictions be created.
+#'
+#' See **Details** for further functions available to modify or summarize the created object.
+#'
+#' ** Note that any model requires at minimum a single added biodiversity distribution object
+#' as well as a specified engine. **
 #' @param background Specification of the modelling background. Must be a
 #' [`raster`], [`sf`] or [`extent`] object
 #' @param limits A [`raster`] or [`sf`] object that limits the prediction surface when
 #' intersected with input data (Default: NULL).
 #'
-#' @details TBD. Say something about PPMs, INLA and co.
+#' @details
+#' This function creates a [`BiodiversityDistribution-class`] object that in itself contains
+#' other functions and stores input and pre-processed data.
+#' A full list of functions available can be queried via \code{object} although some of them
+#' are not intended to be manipulated directly but rather through convenience functions (e.g. [`add_predictions()`]).
+#' Several other objects are stored in the [`BiodiversityDistribution-class`] object that
+#' have their own functions as well and can be queried (e.g. [print]) by the author (list of functions in the respective help file).
+#' If some of those datasets are not set, then a ["Waiver"] object is returned instead.
 #'
-#' Option with constrain -> use reference
+#' The following objects can be stored:
+#' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with the added biodiversity data.
+#' * \code{object$engine} An [`engine`] object with function dependend on the added engine.
+#' * \code{object$predictors} A [`PredictorDataset`] object with all set predictions.
+#' * \code{object$priors} A [`PriorList`] object with all specified priors.
+#' * \code{object$log} A [`Log`] object that captures
 #'
+#' Useful high-level functions to address those objects are for instance:
+#' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`] object contents. Can also be called via [print]
+#' * \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors
+#' * \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
+#' * \code{object$get_extent()} Outputs the [raster::extent] of the modelling region.
+#' * \code{object$show_background_info()} Returns a [`list`] with the [raster::extent] and the [sp::proj4string].
+#' * \code{object$get_extent_dimensions()} Outputs the [raster::extent] dimension by calling the [`extent_dimensions()`] function.
+#' * \code{object$get_predictor_names()} Returns a [character] vector with the names of all added predictors.
+#' * \code{object$get_prior_variables()} Returns a description of priors added.
+#'
+#' There are other functions as well but those are better accessed through their respective wrapper functions.
 #' @return [`BiodiversityDistribution-class`] object containing
 #'   data for building a biodiversity distribution modelling problem.
 #'
-#' @seealso [bdproto]
+#' @seealso [bdproto] on the general definition of proto objects and in particular [bdproto-biodiversitydistribution].
 #'
+#' @references Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. [https://doi.org/10.1002/ecy.2710](https://doi.org/10.1002/ecy.2710)
 #' @aliases distribution
-#'
 #' @exportMethod distribution
-#'
 #' @name distribution
 #'
 #' @examples

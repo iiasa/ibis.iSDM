@@ -52,6 +52,6 @@ Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integrati
 Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.
 }
 \seealso{
-\code{\link[MigClim:MigClim.userGuide]{MigClim::MigClim.userGuide()}}
+\code{\link[=MigClim.userGuide]{MigClim.userGuide()}}
 }
 \keyword{scenario}

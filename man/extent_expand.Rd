@@ -9,10 +9,10 @@ extent_expand(e, f = 0.1)
 \arguments{
 \item{e}{an \code{\link{extent}} object}
 
-\item{f}{value to increase the extent (Default = 0.1)}
+\item{f}{\code{\link{numeric}} value to increase the extent (Default: \code{0.1})}
 }
 \value{
-Returns the unified total extent object
+Returns the unified total \code{\link{extent}} object
 }
 \description{
 Expand an extent by a certain number

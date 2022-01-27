@@ -34,15 +34,6 @@ might change. As soon as the package has reached a stable state, the
 repository will be made public An official release will be made as soon
 as the package is public **In development !!!**
 
-<details>
-<summary>
-<b>Citation</b>
-</summary>
-
-<TODO>
-
-</details>
-
 ## Package development
 
 (also see [issues](https://github.com/iiasa/ibis.iSDM/issues) and
@@ -70,48 +61,5 @@ as the package is public **In development !!!**
 -   🚧 Create a pkgdown website for the package with tutorials (in
     progress. Looking at it)
 -   …
-
-### Development guidelines
-
--   The ibis.iSDM contains primarily functions for fitting models.
--   Speed and flexibility are key
--   Don’t repeat yourself. Create new functions and if necessary
-    classes. Equally try to reuse common names from R, e.g. *plot*,
-    *summary*
--   Avoid using additional package dependencies where possible
--   Comment your code!!
--   Use assertions to verify inputs to functions
--   If bored, please write unit tests and ensure they all evaluate
-    (CRTL+SHIFT+T)!
-
-*Note that pushing to master or forking is disabled at the moment. Pull
-requests require a confirmation.*
-
-### Comparison with other packages
-
-Isn’t this just another SDM package? Indeed it is, but building our own
-modelling infrastructure allows greater flexibility in how models are
-created and run. It is less about reinventing the wheel, but rather
-bringing strengths from different tools together. *Not exhaustive list
-acknowledging other SDM packages in R:*
-
--   [hSDM](https://github.com/ghislainv/hSDM) -&gt; Bayesian framework
-    for mixed models. Fast, but little flexibility with regards to
-    weights or offsets
--   [multispeciesPP](https://github.com/wfithian/multispeciesPP) -&gt;
-    Not been further developed since years
--   [inlabru](https://github.com/inlabru-org/inlabru) -&gt; Package
-    specifically for LGCP with INLA, however little support to other
-    engines, likelihoods or data
--   [pointedSDMs](https://github.com/oharar/PointedSDMs) -&gt; INLA
-    based SDM package for integrating different datasets.
--   [biomod2](https://github.com/biomodhub/biomod2) -&gt; Popular
-    package for ensemble modeling, but no integration, not Bayesian
--   [sdmTMB](https://github.com/pbs-assess/sdmTMB) -&gt; Package for
-    fitting spatial-Temporal SDMs
--   [modleR](https://github.com/Model-R/modleR) -&gt; similar as biomod2
-    a wrapper to construct ensembles of models
--   [kuenm](https://peerj.com/articles/6281/) -&gt; Another wrapper for
-    Maxent
 
 <!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->

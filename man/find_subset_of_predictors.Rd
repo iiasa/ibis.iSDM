@@ -9,6 +9,7 @@ find_subset_of_predictors(
   observed,
   family,
   tune.type = "cv",
+  lambda = 0,
   weight = NULL,
   keep = NULL
 )
@@ -22,6 +23,8 @@ find_subset_of_predictors(
 
 \item{tune.type}{\code{\link{character}} indicating the type used for subset evaluation.
 Options are c("gic", "ebic", "bic", "aic", "cv") as listed in \link{abess}}
+
+\item{lambda}{A \code{\link{numeric}} single lambda value for regularized best subset selection. Default is 0.}
 
 \item{weight}{Observation weights. When weight = NULL, we set weight = 1 for each observation as default.}
 

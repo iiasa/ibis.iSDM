@@ -313,7 +313,7 @@ methods::setMethod(
   }
 )
 
-#' Remove specific predictors from a distribution object
+#' Remove specific predictors from a [distribution] object
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the environmental stack

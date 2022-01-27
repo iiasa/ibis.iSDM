@@ -5,14 +5,15 @@ NULL
 #'
 #' Function to include prior information as monotonic constrain to a gradient descent boosting model
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects
+#' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param hyper A [`character`] object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'
-#' @param ... Variables passed on to prior object
+#' @param ... Variables passed on to prior object.
 #' @details TBD
 #' @references
-#'
+#' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
 #' @seealso [`Prior-class`].
-#'
+#' @keywords priors
+#' @family prior
 #' @aliases GDBPrior
 #' @name GDBPrior
 NULL
@@ -59,6 +60,8 @@ methods::setMethod(
 #' @rdname GDBPriors
 #' @exportMethod GDBPriors
 #' @inheritParams GDBPrior
+#' @keywords priors
+#' @family prior
 #' @export
 methods::setGeneric(
   "GDBPriors",

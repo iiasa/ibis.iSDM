@@ -7,33 +7,44 @@
 \S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
 }
 \arguments{
-\item{mod}{A fitted \code{\link{BiodiversityScenario}} object with set predictors}
+\item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors.}
 
 \item{method}{Should the validation be conducted on continuous metrics or thresholded? See Details.}
 
-\item{layer}{In case multiple layers exist, which one to use? Default is 'mean'}
+\item{layer}{In case multiple layers exist, which one to use? (Default: \code{'mean'}).}
 
-\item{point}{A \code{\link{sf}} object with type \link{POINT} or \link{MULTIPOINT}}
+\item{point}{A \code{\link{sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
 
 \item{point_column}{A \code{\link{character}} vector with the name of the column containing the independent observations.
-Default set to 'observed'}
+(Default: \code{'observed'}).}
 
-\item{...}{passed on parameters}
+\item{...}{Other parameters that are passed on. Currently unused.}
 }
 \value{
-Return a tidy \code{\link{tibble}} with validation results. See details for further information.
+Return a tidy \code{\link{tibble}} with validation results.
 }
 \description{
 This function conducts a comprehensive model evaluation based on
 either on the fitted point data or any supplied independent.
-\strong{Currently only supporting point. For validation of integrated models more work is needed.}
+\strong{Currently only supporting point datasets. For validation of integrated models more work is needed.}
 }
 \details{
+The \code{validate} function does not work for all datasets equally.
+}
+\note{
 If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
 }
+\examples{
+\dontrun{
+ # Assuming that mod is a distribution object and has a thresholded layer
+ mod <- threshold(mod, method = "TSS")
+ validate(mod, method = "discrete")
+ }
+}
 \references{
-Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-
-Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+\itemize{
+\item Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+\item Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+}
 }
 \keyword{train}

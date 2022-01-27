@@ -12,9 +12,10 @@ NULL
 #' @details TBD
 #' @section Notes:
 #' @references
-#'
+#' * Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
 #' @seealso [`Prior-class`].
-#'
+#' @keywords priors
+#' @family prior
 #' @aliases INLAPrior
 #' @name INLAPrior
 NULL
@@ -92,6 +93,8 @@ methods::setMethod(
 #' @param ... Variables passed on to prior object
 #' @rdname INLAPriors
 #' @exportMethod INLAPriors
+#' @keywords priors
+#' @family prior
 #' @export
 methods::setGeneric(
   "INLAPriors",

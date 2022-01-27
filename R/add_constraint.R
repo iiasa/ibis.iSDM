@@ -1,29 +1,29 @@
 #' @include utils.R bdproto-biodiversityscenario.R
 NULL
 
-#' Add a constrain to an existing scenario
+#' Add a constrain to an existing \code{scenario}
 #'
 #' @description This function adds a constrain to a [`BiodiversityScenario-class`] object to
 #' constrain (future) projections. These constrains can for instance be constrains on a possible
-#' dispersal distance, connectivity between identified patches or limitations on species vital rates.
+#' dispersal distance, connectivity between identified patches or limitations on species vital rates (planned).
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors
 #' @param method A [`character`] indicating the type of constrain to be added to the scenario. See details.
-#' @param value A [`numeric`] value specifying a fixed constrain or constant in units "m". Default: NULL
+#' @param value A [`numeric`] value specifying a fixed constrain or constant in units \code{"m"} (Default: \code{NULL}).
 #' For kissmig the value needs to give the number of iteration steps (or within year migration steps).
 #' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains. Default: NULL
+#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
 #' @param ... passed on parameters
 #'
 #' @seealso [`add_constrain_dispersal`], [`add_constrain_connectivity`]
 #' @details
 #' Currently this method functions as a wrapper to support the definition of further modelling constraints.
 #' Supported are the options for dispersal and connectivity constrains:
-#' [-] sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep
-#' [-] sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin,
-#' [-] kissmig - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step
-#' [-] migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
-#' [-] hardbarrier - Defines a hard barrier to any dispersal events
+#' * sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep.
+#' * sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' * kissmig - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
+#' * migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
+#' * hardbarrier - Defines a hard barrier to any dispersal events.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).

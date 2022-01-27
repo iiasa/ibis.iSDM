@@ -20,3 +20,15 @@ STANPriors(variables, type, hyper = c(0, 2), ...)
 \description{
 Helper function when multiple variables and types are supplied
 }
+\seealso{
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()}
+}
+\concept{prior}
+\keyword{priors}

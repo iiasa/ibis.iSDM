@@ -41,9 +41,9 @@ intersecting_extents <- function(x, y) {
 
 
 #' Extract polygon data from intersecting point data
-#' @param poly A [`sf`] object
-#' @param points A [`Spatial`] or [`sf`] object
-#' @param coords A vector pointing to the coordinate columns
+#' @param poly A [sf] object
+#' @param points A [`Spatial`] or [sf] object
+#' @param coords A [vector] pointing to the coordinate columns. (Default: \code{c("x", "y")})
 #' @keywords utils
 #' @return An object with the spatial intersection
 point_in_polygon <- function(poly, points, coords = c('x','y')){
@@ -88,9 +88,9 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 
 #' Expand an extent by a certain number
 #' @param e an [`extent`] object
-#' @param f value to increase the extent (Default = 0.1)
+#' @param f [`numeric`] value to increase the extent (Default: \code{0.1})
 #' @keywords utils
-#' @return Returns the unified total extent object
+#' @return Returns the unified total [`extent`] object
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'Extent'))
   xi <- (e@xmax-e@xmin)*(f/2)
@@ -223,15 +223,15 @@ extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
 #' projection, the data set will be cropped and aggregated prior to resampling
 #' in order to reduce computation time.
 #'
-#' Nearest Neighbour resampling (NGB) is recommended for discrete and Bilinear
-#' resampling for continious data.
-#'
 #' @param data [`Raster-class`] object to be resampled
 #' @param template [`Raster-class`] or [`Spatial-class`] object from which geometry can be extracted
-#' @param method method for resampling ("ngb" or "bilinear")
-#' @param func function for resampling (Default: mean)
-#' @param cl Boolean value if multicore computation should be used (Default: TRUE)
+#' @param method method for resampling (Options: \code{"ngb"} or \code{"bilinear"})
+#' @param func function for resampling (Default: [mean])
+#' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE})
 #' @keywords utils
+#' @details
+#' Nearest Neighbour resampling (ngb) is recommended for discrete and Bilinear
+#' resampling for continuous data.
 #' @return New [`Raster`] object aligned to the supplied template layer
 alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TRUE){
   # Security checks
@@ -287,11 +287,13 @@ emptyraster <- function(x, ...) { # add name, filename,
 #'
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
-#' @param longlat A boolean variable indicating whether the projection is long-lat
-#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: c('X','Y'))
-#' @param cheap A boolean variable whether the dataset is considered to be large and faster computation could help
-#' @return Extracted data from each point
-#' @note If multiple values are of equal distance, average them
+#' @param longlat A [`logical`] variable indicating whether the projection is long-lat
+#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: \code{c('X','Y')})
+#' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help
+#' @return A [`data.frame`] with the extracted covariate data from each provided data point.
+#' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist})
+#' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+#' @references Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
 #' @keywords utils
 #' @export
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
@@ -826,13 +828,14 @@ clean_rasterfile <- function(x, verbose = FALSE)
 
 #' Split raster factor levels to stack
 #'
-#'  @description Takes a single raster that is a factor and creates
+#'  @description Takes a single raster that is a [`factor`] and creates
 #'  a new [`RasterStack`] that contains the individual levels
-#'  @param ras A [`RasterLayer`] object that is a factor
-#'  @param name An optional [`character`] name for the raster
+#'  @param ras A [`RasterLayer`] object that is a [`factor`].
+#'  @param name An optional [`character`] name for the [raster].
 #'  @param ... Other parameters (dummy)
 #'  @returns A [`RasterStack`] object
 #'  @keywords utils
+#'  @export
 explode_factorized_raster <- function(ras, name = NULL, ...){
   assertthat::assert_that(inherits(ras, 'RasterLayer'),
                           is.factor(ras),
@@ -858,13 +861,15 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
   return(out) # Return the result
 }
 
-#' Save a raster file in Geotiff format
+#' Saves a raster file in Geotiff format
 #'
-#' @param file A [`raster`] object to be saved
-#' @param fname A [`character`] stating the output destination
-#' @param dt The datatype to be written. Default is Float64
-#' @param varNA The nodata value to be used. Default: -9999
+#' @description Functions that acts as a wrapper to [raster::writeRaster].
+#' @param file A [`raster`] object to be saved.
+#' @param fname A [`character`] stating the output destination.
+#' @param dt The datatype to be written (Default: *Float64*)
+#' @param varNA The nodata value to be used (Default: \code{-9999}).
 #' @keywords utils
+#' @export
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
   assertthat::assert_that(
     inherits(file,'Raster') || inherits(file, 'stars'),

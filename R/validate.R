@@ -2,19 +2,27 @@
 #'
 #' @description This function conducts a comprehensive model evaluation based on
 #' either on the fitted point data or any supplied independent.
-#' **Currently only supporting point. For validation of integrated models more work is needed.**
-#' @param mod A fitted [`BiodiversityScenario`] object with set predictors
+#' **Currently only supporting point datasets. For validation of integrated models more work is needed.**
+#' @param mod A fitted [`BiodiversityDistribution`] object with set predictors.
 #' @param method Should the validation be conducted on continuous metrics or thresholded? See Details.
-#' @param layer In case multiple layers exist, which one to use? Default is 'mean'
-#' @param point A [`sf`] object with type [POINT] or [MULTIPOINT]
+#' @param layer In case multiple layers exist, which one to use? (Default: \code{'mean'}).
+#' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
 #' @param point_column A [`character`] vector with the name of the column containing the independent observations.
-#' Default set to 'observed'
-#' @param ... passed on parameters
-#' @returns Return a tidy [`tibble`] with validation results. See details for further information.
-#' @details
-#' If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
-#' @references Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-#' @references Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+#' (Default: \code{'observed'}).
+#' @param ... Other parameters that are passed on. Currently unused.
+#' @returns Return a tidy [`tibble`] with validation results.
+#' @details The \code{validate} function does not work for all datasets equally.
+#' @note If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
+#'
+#' @references
+#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+#' * Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+#' @examples
+#' \dontrun{
+#'  # Assuming that mod is a distribution object and has a thresholded layer
+#'  mod <- threshold(mod, method = "TSS")
+#'  validate(mod, method = "discrete")
+#'  }
 #' @name validate
 #' @aliases validate
 #' @keywords train

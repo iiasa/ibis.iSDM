@@ -4,7 +4,7 @@ author: "Martin Jung"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Train a basic model}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,33 +21,33 @@ knitr::opts_chunk$set(
 Load the test data that comes with the package. This comes with a simulated virtual species for Europe 
 as well as some test predictors
 
-```{r Load data}
-devtools::load_all(".")
+<!-- ```{r Load data} -->
+<!-- devtools::load_all(".") -->
 
-# Background layer
-background <- raster("inst/extdata/europegrid_50km.tif")
-# Load virtual species
-virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
-# Predictors
-predictors <- raster::stack(list.files("inst/extdata/predictors/","tif",full.names = TRUE))
+<!-- # Background layer -->
+<!-- background <- raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM")) -->
+<!-- # Load virtual species -->
+<!-- virtual_species <- sf::st_read(system.file("inst/extdata/input_data.gpkg",package = "ibis.iSDM"), "points") -->
+<!-- # Predictors -->
+<!-- predictors <- raster::stack(list.files("inst/extdata/predictors/","tif",full.names = TRUE)) -->
 
-```
+<!-- ``` -->
 
-Now lets define a simple model, using Gradient Descent Boosting (GDB) as engine for estimation
+<!-- Now lets define a simple model, using Gradient Descent Boosting (GDB) as engine for estimation -->
 
-```{r GDB}
-# Define model
-mod <- distribution(background) %>% 
-  add_biodiversity_poipo(virtual_species) %>% 
-  add_predictors(env = predictors, transform = "scale", derivates = "none") %>% 
-  add_latent_spatial() %>% 
-  engine_gdb(
-    boosting_iterations = 1000,
-    learning_rate = 0.01
-    )
+<!-- ```{r GDB} -->
+<!-- # Define model -->
+<!-- mod <- distribution(background) %>%  -->
+<!--   add_biodiversity_poipo(virtual_species) %>%  -->
+<!--   add_predictors(env = predictors, transform = "scale", derivates = "none") %>%  -->
+<!--   add_latent_spatial() %>%  -->
+<!--   engine_gdb( -->
+<!--     boosting_iterations = 1000, -->
+<!--     learning_rate = 0.01 -->
+<!--     ) -->
 
-# Fit
-fit <- train(mod, "Test GDB run")
+<!-- # Fit -->
+<!-- fit <- train(mod, "Test GDB run") -->
 
-```
+<!-- ``` -->
 

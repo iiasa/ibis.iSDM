@@ -20,14 +20,18 @@
 \method{plot}{BiodiversityScenario}(x, ...)
 }
 \arguments{
-\item{x}{Any object.}
+\item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection}, \link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{...}{not used.}
+\item{...}{Further arguments passed on to \code{x$plot}}
 }
 \value{
-None.
+Graphical output
 }
 \description{
 Plots information from a given object where a plotting object is available
+}
+\details{
+The plotted outputs vary depending on what object is being plotted.
+For example for fitted \link{DistributionModel} the output is usually the fitted spatial prediction (Default: 'mean')
 }
 \keyword{misc}
