@@ -10,6 +10,7 @@ threshold(
   value = NULL,
   poi = NULL,
   return_threshold = FALSE,
+  truncate = FALSE,
   ...
 )
 
@@ -31,6 +32,8 @@ threshold(
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
 
 \item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
+
+\item{truncate}{\code{\link{logical}} indication whether truncated thresholds should be used (Default: \code{FALSE}). See Muscatello et al. (2021).}
 }
 \value{
 A \link{RasterLayer} if used with a \link{Raster} object as input.
@@ -73,9 +76,11 @@ The following options are currently implemented:
 }
 }
 \references{
-Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. \href{https://doi.org/10.1111/2041-210X.12123}
-
-Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. \href{https://doi.org/10.1111/jbi.12058}
+\itemize{
+\item Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+\item Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+\item Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
+}
 }
 \seealso{
 \link{modEvA}
