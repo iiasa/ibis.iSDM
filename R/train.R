@@ -18,7 +18,10 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run
 #' @param rm_corPred Remove highly correlated predictors. Default is True
-#' @param varsel Perform a variable selection on the set of predictors
+#' @param varsel Perform a variable selection on the set of predictors either prior to building the model
+#' or via variable selection / regularization of the model. Available options are [`none`],
+#' [`reg`] either through AIC / regularization or hyperparameter tuning (Default), and [`abess`] as
+#' adaptive best subset selection via the [abess] R-package.
 #' @param inference_only Fit model only without spatial projection (Default: FALSE)
 #' @param only_linear Fit model only on linear covariate baselearners (DEFAULT: TRUE)
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
@@ -42,7 +45,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x", "runname","rm_corPred","varsel"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = FALSE, varsel = "reg", inference_only = FALSE,
            only_linear = TRUE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
 
@@ -52,7 +55,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution", runname = "character"),
-  function(x, runname, rm_corPred = FALSE, varsel = FALSE, inference_only = FALSE,
+  function(x, runname, rm_corPred = FALSE, varsel = "reg", inference_only = FALSE,
            only_linear = FALSE,
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
     # Make load checks
@@ -77,9 +80,11 @@ methods::setMethod(
     }
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
-
     # --- #
-    #rm_corPred = FALSE; varsel = FALSE; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    #rm_corPred = FALSE; varsel = "none"; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
+    # Match variable selection
+    if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
+    varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -247,6 +252,49 @@ methods::setMethod(
           env %>% dplyr::select(-dplyr::all_of(co)) -> env
         }
       } else { co <- NULL }
+
+      # Make use of adaptive best subset selection
+      if(settings$get("varsel") == "abess"){
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
+        if(!is.Waiver(x$priors)){
+          keep <- unique( as.character(x$priors$varnames()) )
+          if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
+        } else keep <- NULL
+
+        # If PPM, calculate points per grid cell first
+        if(model[['biodiversity']][[id]]$family == "poisson"){
+          bg <- x$engine$get_data("template")
+          if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
+
+          pres <- raster::rasterize( model[['biodiversity']][[id]]$observations[,c('x','y')],
+                                    bg, fun = 'count', background = 0)
+          ce <- raster::cellFromXY(pres, model[['biodiversity']][[id]]$observations[,c('x','y')])
+          # Get new presence data
+          obs <- cbind(
+            data.frame(observed = raster::values(pres)[ce],
+                       raster::xyFromCell(pres, ce) # Center of cell
+              )
+            ) |> unique()
+          envs <- get_ngbvalue(coords = obs[,c('x','y')],
+                              env =  model$predictors[,c("x","y", model[['predictors_names']][which( model[['predictors_names']] %notin% co )])],
+                              longlat = raster::isLonLat(x$background),
+                              field_space = c('x','y')
+          )
+        } else {
+          obs <- model[['biodiversity']][[id]]$observations$observed
+          envs <- env[,model[['predictors_names']][which( model[['predictors_names']] %notin% co )]]
+        }
+        # Add abess here
+        co2 <- find_subset_of_predictors(
+          env = envs,
+          observed = obs$observed,
+          family = model[['biodiversity']][[id]]$family,
+          tune.type = "cv",
+          weight = NULL,
+          keep = keep
+          )
+        co <- c(co, co2) |> unique()
+      }
 
       # Save predictors extracted for biodiversity extraction
       model[['biodiversity']][[id]][['predictors']] <- env
@@ -685,20 +733,16 @@ methods::setMethod(
       #### XGBoost Engine ####
     } else if( inherits(x$engine,"XGBOOST-Engine") ){
       # Create XGBboost regression and classification
-      if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
 
       # Process per supplied dataset and in order of supplied data
       for(id in ids) {
 
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
-          # XGboost does not explicitly work formulas, thus all supplied objects are assumed to be part
+          # XGboost does not explicitly work with formulas, thus all supplied objects are assumed to be part
+          # a covariate
           form <- new_waiver()
-          # Priors are added in the fitted distribution object through the model object
-          # Add offset as attributes to variables if specified
-          # FIXME: To be implemented
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
-
+          # Note: Priors are added in the fitted distribution object through the model object
         } else{
           # If custom supplied formula, check that variable names match supplied predictors
           stop("Custom formulas not yet implemented")

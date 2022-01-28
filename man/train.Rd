@@ -10,7 +10,7 @@ train(
   x,
   runname,
   rm_corPred = FALSE,
-  varsel = FALSE,
+  varsel = "reg",
   inference_only = FALSE,
   only_linear = TRUE,
   bias_variable = NULL,
@@ -28,7 +28,10 @@ train(
 
 \item{rm_corPred}{Remove highly correlated predictors. Default is True}
 
-\item{varsel}{Perform a variable selection on the set of predictors}
+\item{varsel}{Perform a variable selection on the set of predictors either prior to building the model
+or via variable selection / regularization of the model. Available options are \code{\link{none}},
+\code{\link{reg}} either through AIC / regularization or hyperparameter tuning (Default), and \code{\link{abess}} as
+adaptive best subset selection via the \link{abess} R-package.}
 
 \item{inference_only}{Fit model only without spatial projection (Default: FALSE)}
 

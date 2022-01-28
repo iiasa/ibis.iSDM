@@ -78,6 +78,9 @@ methods::setMethod(
 
     # Get/check point data
     if(!is.null(point)){
+      if(is.factor(point[[point_column]])){
+        point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
+      }
       assertthat::assert_that(
         unique(sf::st_geometry_type(point)) %in% c('POINT', 'MULTIPOINT'),
         # Check that the point data has presence-absence information
@@ -99,6 +102,9 @@ methods::setMethod(
                          subset(o, select = c(point_column, "name", "type", "geometry"))
                         } )
                         ) %>% tibble::remove_rownames()
+      if(is.factor(point[[point_column]])){
+        point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
+      }
       # Add ID
     }
     assertthat::assert_that(nrow(point)>0,
@@ -285,6 +291,13 @@ methods::setMethod(
         fa  <-  sum((df2["pred_tr"] == 0) & (df2[point_column] == 1))
         tp  <-  sum((df2["pred_tr"] == 1) & (df2[point_column] == 1))
 
+        # Binary brier Score
+        BS <- function(pred, obs, na.rm = TRUE) {
+          assertthat::assert_that(length(unique(pred)) <= 2,
+                                  length(unique(obs)) <= 2)
+          mean( (pred - obs)^2, na.rm = na.rm)
+        }
+
         # Output data.frame
         out <- data.frame(
           modelid =  as.character(mod$id),
@@ -293,7 +306,7 @@ methods::setMethod(
           metric = c('n','auc','overall.accuracy', 'true.presence.ratio',
                      'precision','sensitivity', 'specificity',
                      'tss', 'f1', 'logloss',
-                     'expected.accuracy', 'kappa'),
+                     'expected.accuracy', 'kappa', 'brier.score'),
           value = NA
         )
 
@@ -315,6 +328,8 @@ methods::setMethod(
           # Calculate AUC
           out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
         }
+        # Add brier score
+        out$value[out$metric=='brier.score'] <- BS(obs = df2[[point_column]], pred = df2[['pred_tr']])
 
         # Evaluate Log loss / Cross-Entropy Loss for a predicted probability measure
         # FIXME: Hacky. This likely won't work with specific formulations

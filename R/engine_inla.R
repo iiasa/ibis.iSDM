@@ -500,8 +500,8 @@ engine_inla <- function(x,
         )
 
         # Perform variable selection
-        if( settings$get(what='varsel') ){
-          message('Performing variable selection...')
+        if( settings$get(what='varsel') ==  "reg"){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing variable selection...')
 
           k <- NULL
           # Specify offsets and spde to be retained
@@ -601,7 +601,9 @@ engine_inla <- function(x,
             post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
           }
           post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
-          names(post) <- make.names(names(post))
+          post$cv <- post$mean / post$sd
+          # Rename
+          names(post) <- c("mean", "sd", "q05", "q50", "q95", "mode","cv")
 
           # Fill prediction
           prediction <- raster::stack(

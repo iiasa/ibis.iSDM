@@ -21,7 +21,9 @@ Settings <- bdproto(
   data = list(),
   # Print
   print = function(self) {
-    message(paste0( self$show(),': ',as.character( self$modelid ) ))
+    # Get number of settings set
+    ss <- sum(sapply(self$data, function(x) !is.Waiver(x)))
+    message(paste0( self$show(),': ', text_green(ss), ' parameters' ))
   },
   # Show
   show = function(self){

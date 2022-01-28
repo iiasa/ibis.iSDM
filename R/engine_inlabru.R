@@ -549,8 +549,8 @@ engine_inlabru <- function(x,
         # -------- #
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
-        if( settings$get(what='varsel') ){
-          message('Performing variable selection...')
+        if( settings$get(what='varsel') == "reg" ){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing variable selection...')
 
           # Catch all variables with set priors and keep them!
           if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
@@ -743,6 +743,7 @@ engine_inlabru <- function(x,
           prediction <- raster::stack(
             pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
           )
+          names(prediction) <- c("mean", "sd", "q025", "q50", "q975", "cv")
 
         } else {
           prediction <- NULL

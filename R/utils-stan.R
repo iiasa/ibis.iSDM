@@ -3,7 +3,6 @@
 #' @keywords utils
 #' @noRd
 logistic <- function(a){
-  message("Deprecated: Use ilink")
   ilink(a, link = "logit")
 }
 
@@ -378,13 +377,13 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   }
   # Create output with cellid
   out <- tibble::rowid_to_column(newdata,var = "cellid")["cellid"] |> as.data.frame()
-  out$CV <- out$Q95 <- out$Q50 <- out$Q05 <- out$sd <- out$mean <- NA
+  out$cv <- out$q95 <- out$q50 <- out$q05 <- out$sd <- out$mean <- NA
   out$mean[as.numeric(row.names(A))] <- preds[,1]
   out$sd[as.numeric(row.names(A))] <- preds[,5]
-  out$Q05[as.numeric(row.names(A))] <- preds[,2]
-  out$Q50[as.numeric(row.names(A))] <- preds[,3]
-  out$Q95[as.numeric(row.names(A))] <- preds[,4]
-  out$CV[as.numeric(row.names(A))] <- preds[,5] / preds[,1]
+  out$q05[as.numeric(row.names(A))] <- preds[,2]
+  out$q50[as.numeric(row.names(A))] <- preds[,3]
+  out$q95[as.numeric(row.names(A))] <- preds[,4]
+  out$cv[as.numeric(row.names(A))] <- preds[,5] / preds[,1]
   out$cellid <- NULL
 
   return(out)

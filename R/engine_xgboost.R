@@ -165,16 +165,31 @@ engine_xgboost <- function(x,
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
-          # If family is not poisson, assume factor distribution
-          # FIXME: Ideally this is better organized through family
-          if(model$biodiversity[[1]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
-          obs <- cbind( data.frame(observed = raster::extract(pres, model$biodiversity[[1]]$observations[,c('x','y')])),
-                        model$biodiversity[[1]]$observations[,c('x','y')] )
+
+          # Get cell ids
+          ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
+
+          # Get new presence data
+          obs <- cbind(
+            data.frame(observed = raster::values(pres)[ce],
+                       raster::xyFromCell(pres, ce) # Center of cell
+            )
+          ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
+
+          # Re-extract counts environment variables
+          envs <- get_ngbvalue(coords = obs[,c('x','y')],
+                               env =  model$predictors[,c("x","y", model[['predictors_names']])],
+                               longlat = raster::isLonLat(self$get_data("template")),
+                               field_space = c('x','y')
+          )
+          envs$intercept <- 1
+
+          # Overwrite observations
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
-          # Format and add predictors
-          abs <- subset(abs, select = c('x','y','intercept', model$biodiversity[[1]]$predictors_names) )
-          df <- rbind(model$biodiversity[[1]]$predictors, abs) %>%
+          # Format out
+          df <- rbind(envs,
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
             subset(., complete.cases(.) )
 
           # Pre-processing security checks
@@ -202,8 +217,14 @@ engine_xgboost <- function(x,
           )
 
         } else if(fam == "binary:logistic"){
-            # Convert to numeric
-            model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
+          # calculating the case weights (equal weights)
+          # the order of weights should be the same as presences and backgrounds in the training data
+          prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
+          bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
+          w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+          model$biodiversity[[1]]$expect <- w
+          # Convert to numeric
+          model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
         }
 
         # Get Preds and convert to sparse matrix with set labels
@@ -231,8 +252,8 @@ engine_xgboost <- function(x,
         if(fam == "count:poisson"){
           # Specifically for count poisson data we will set the areas
           # as an exposure offset for the base_margin
-          setinfo(df_train, "base_margin", log(w))
-          setinfo(df_pred, "base_margin", log(w_full))
+          xgboost::setinfo(df_train, "base_margin", log(w))
+          xgboost::setinfo(df_pred, "base_margin", log(w_full))
           params$eval_metric <- "logloss"
         } else if(fam == 'binary:logistic'){
           params$eval_metric <- "logloss"
@@ -255,6 +276,31 @@ engine_xgboost <- function(x,
           }
           # Save the monotonic constrain
           params$monotone_constraints <- mc
+        }
+
+        if('offset' %in% names(model$biodiversity[[1]]) ){
+          # For the offset we simply add the (log-transformed) offset to the existing
+          # Add exp at the end to backtransform
+          of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
+          of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
+          # Add offset to full prediction and load vector
+
+          # Respecify offset
+          # (Set NA to 1 so that log(1) == 0)
+          of <- model$offset; of[,3] <- ifelse(is.na(of[,3]), 1, of[,3])
+          of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[,c("x","y")],
+                               env =  of,
+                               longlat = raster::isLonLat(self$get_data("template")),
+                               field_space = c('x','y')
+          )
+          assertthat::assert_that(nrow(of1) == length(of_train),
+                                  nrow(of) == length(of_pred))
+          of_train <- log(of_train + of1[,3])
+          of_pred <- log(of_pred + of[,3])
+
+          # Set the new offset
+          xgboost::setinfo(df_train, "base_margin", of_train)
+          xgboost::setinfo(df_pred, "base_margin", of_pred)
         }
 
         # --- #
@@ -282,15 +328,16 @@ engine_xgboost <- function(x,
         # Messager
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
+        # Verbosity
+        verbose <- settings$get("verbose")
+
         # Get output raster
         prediction <- self$get_data('template')
 
         # Get parameters control
         params <- self$get_data('params')
         # Check only linear and reset to linear booster then
-        if(settings$data$only_linear) params$booster <- "gblinear"
-
-        verbose <- settings$get("verbose")
+        if(settings$data$only_linear) params$booster <- "gblinear" else params$booster <- "gbtree"
 
         # All other needed data for model fitting
         df_train <- self$get_data("df_train")
@@ -302,11 +349,6 @@ engine_xgboost <- function(x,
           all( colnames(df_train) %in% colnames(df_pred) )
         )
 
-        if('offset' %in% names(model$biodiversity[[1]]) ){
-          # Add offset to full prediction and load vector
-          stop("TBD")
-          # TBD
-        }
         # Get number of rounds from parameters
         nrounds <- params$nrounds;params$nrounds <- NULL
 
@@ -314,7 +356,7 @@ engine_xgboost <- function(x,
         # Pass this parameter possibly on from upper level
         # This implements a simple grid search for optimal parameter values
         # Using the training data only (!)
-        if(settings$get('varsel')){
+        if(settings$get('varsel') == "reg"){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
 
           # Create combinations of random hyper parameters
@@ -361,7 +403,7 @@ engine_xgboost <- function(x,
                 params = test_params,
                 data = df_train,
                 nrounds = 100,
-                verbose = 0
+                verbose = ifelse(verbose, 1, 0)
               )
             )
             if(verbose) pb$tick()
@@ -378,7 +420,7 @@ engine_xgboost <- function(x,
           fit_cv <- xgboost::xgb.cv(
             params = params,
             data = df_train,
-            verbose = verbose,
+            verbose = ifelse(verbose, 1, 0),
             print_every_n = 100,
             nrounds = nrounds, nfold = 5,
             showsd = TRUE,      # standard deviation of loss across folds
@@ -395,7 +437,7 @@ engine_xgboost <- function(x,
           params = params,
           data = df_train,
           nrounds = nrounds,
-          verbose = verbose,
+          verbose = ifelse(verbose, 1, 0),
           print_every_n = 100
         )
         # --- #

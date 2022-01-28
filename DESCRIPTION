@@ -43,7 +43,7 @@ Suggests:
     progress,
     ellipsis,
     rstan (>= 2.21.0),
-    rstantools (>= 2.1.1)
+    rstantools (>= 2.1.1),
     posterior
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
