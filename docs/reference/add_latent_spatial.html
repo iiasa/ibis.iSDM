@@ -88,10 +88,10 @@ to a model can account for spatial dependence in response or covariates</p>
 <dt>method</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> describing what kind of spatial effect is to be added to the model.</p></dd>
 <dt>priors</dt>
-<dd><p>A <code>Prior-List</code> object supplied to the latent effect. NULL equating default priors</p></dd>
+<dd><p>A <code>Prior-List</code> object supplied to the latent effect. NULL equating default priors.</p></dd>
 <dt>separate_spde</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> parameter indicating whether, in the case of SPDE effects, separate effects
-for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.</p></dd>
+for each likelihood are being fitted. Default (<code>FALSE</code>) uses a copy of the first added likelihood.</p></dd>
 <dt>...</dt>
 <dd><p>Other parameters passed down</p></dd>
 </dl></div>
@@ -109,9 +109,10 @@ we could see a higher posterior mean in areas with higher elevation.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Fletcher, R., &amp; Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.</p>
-<p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p>
-    </div>
+    
+<ul><li><p>Fletcher, R., &amp; Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.</p></li>
+<li><p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

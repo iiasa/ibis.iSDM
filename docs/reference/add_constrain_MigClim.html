@@ -82,30 +82,30 @@ and the UserGuide. <strong>The default parameters chosen here are suggestions.</
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mod</dt>
-<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with specified predictors</p></dd>
+<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with specified predictors.</p></dd>
 <dt>rcThresholdMode</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of either <strong>binary</strong> or <strong>continuous</strong> value. Default: <strong>continuous</strong></p></dd>
 <dt>dispSteps</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer)
-and ideally should be aligned with the number of steps for projection. Minimum is 1 (Default) and maximum is 99.</p></dd>
+and ideally should be aligned with the number of steps for projection. Minimum is <code>1</code> (Default) and maximum is <code>99</code>.</p></dd>
 <dt>dispKernel</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the number of the dispersal Kernel to be applied.
-Can be set either to a uniform numeric <a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a>, e.g. c(1,1,1,1) or to a proportional decline (1,0.4,0.16,0.06,0.03) (Default)
+Can be set either to a uniform numeric <a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a>, e.g. <code>c(1,1,1,1)</code> or to a proportional decline <code>(1,0.4,0.16,0.06,0.03)</code> (Default)
 <strong>Depending on the resolution of the raster, this parameter needs to be adapted</strong></p></dd>
 <dt>barrierType</dt>
-<dd><p>A <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> indicating whether any set barrier should be set as 'strong' or 'weak' barriers.
+<dd><p>A <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> indicating whether any set barrier should be set as <code>'strong'</code> or <code>'weak'</code> barriers.
 Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole dispKernel length
-is covered by the barrier. Default is 'strong'</p></dd>
+is covered by the barrier (Default: <code>'strong'</code>).</p></dd>
 <dt>lddFreq</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> parameter indicating the frequency of long-distance dispersal (LDD) events. Default is 0 so no long-distance dispersal.</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> parameter indicating the frequency of long-distance dispersal (LDD) events. Default is <code>0</code>, so no long-distance dispersal.</p></dd>
 <dt>lddRange</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value highlighting the minimum and maximum distance of LDD events.
 <strong>Note: The units for those distance are in cells, thus the projection units in the raster.</strong></p></dd>
 <dt>iniMatAge</dt>
-<dd><p>Initial maturity age. Used together with propaguleProd as a proxy of population growth.
-Must be set to the cell age in time units which are dispersal steps. Default to 1</p></dd>
+<dd><p>Initial maturity age. Used together with <code>propaguleProd</code> as a proxy of population growth.
+Must be set to the cell age in time units which are dispersal steps (Default: <code>1</code>).</p></dd>
 <dt>replicateNb</dt>
-<dd><p>Number of replicates to be used for the analysis. Default is 10</p></dd>
+<dd><p>Number of replicates to be used for the analysis (Default: <code>10</code>).</p></dd>
 <dt>dtmp</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to a folder where temporary files are to be created.</p></dd>
 <dt>propaguleProd</dt>
@@ -114,16 +114,21 @@ Set as probability vector that defines the probability of a cell producing propa
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The barrier parameter is defined through add_barrier</p>
+    <p>The barrier parameter is defined through add_barrier.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of dispersal constraints into projections of species distribution models. Ecography,</p>
-<p>Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.</p>
-    </div>
+    
+<ul><li><p>Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of dispersal constraints into projections of species distribution models. Ecography,</p></li>
+<li><p>Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code>MigClim.userGuide()</code></p></div>
+    <div class="dont-index"><p><code>MigClim.userGuide()</code></p>
+<p>Other constrain: 
+<code><a href="add_constrain_connectivity.html">add_constrain_connectivity</a>()</code>,
+<code><a href="add_constrain_dispersal.html">add_constrain_dispersal</a>()</code>,
+<code><a href="add_constrain.html">add_constrain</a>()</code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

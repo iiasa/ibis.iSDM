@@ -19,10 +19,10 @@ add_latent_spatial(
 
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model.}
 
-\item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. NULL equating default priors}
+\item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. NULL equating default priors.}
 
 \item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
-for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.}
+for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 }
@@ -50,7 +50,8 @@ we could see a higher posterior mean in areas with higher elevation.
 }
 }
 \references{
-Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
-
-Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+\itemize{
+\item Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+\item Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+}
 }

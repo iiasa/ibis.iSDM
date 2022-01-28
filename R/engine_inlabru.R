@@ -6,23 +6,30 @@ NULL
 #' @description Model components are specified with general inputs and mapping methods to the
 #' latent variables, and the predictors are specified via general R expressions,
 #' with separate expressions for each observation likelihood model in multi-likelihood models.
-#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for [INLA::inla]
-#' albeit inlabru has a number of convenience functions implemented that make particular predictions
-#' more straight forward (e.g. via posterior sampling).
+#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for [INLA::inla],
+#' albeit [inlabru] has a number of convenience functions implemented that make in particular predictions
+#' with new data much more straight forward (e.g. via posterior simulation instead of fitting).
+#' Since more recent versions [inlabru] also supports the addition of multiple likelihoods, therefore
+#' allowing full integrated inference.
+#' @details
+#' Priors can be set via [INLAPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
-#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
-#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
-#' @param offset interpreted as a numeric factor relative to the approximate data diameter;
-#' @param cutoff The minimum allowed distance between points on the mesh
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
-#' @param strategy Which aproximation to use for the joint posterior. Options are "auto","adaptative", "gaussian", "simplified.laplace" & "laplace".
-#' @param int.strategy Integration strategy. Options are "auto","grid", "eb" & "ccd".
+#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
+#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
+#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+#' @param offset interpreted as a numeric factor relative to the approximate data diameter.
+#' @param cutoff The minimum allowed distance between points on the mesh.
+#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
+#' @param strategy Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
+#'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
+#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param ... Other variables
-#' @references Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
-#' @references https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
-#' @source https://inlabru-org.github.io/inlabru/articles/
+#' @references
+#' * Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
+#' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
+#' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
+#' @family engine
 #' @name engine_inlabru
 NULL
 #' @rdname engine_inlabru

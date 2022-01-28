@@ -3,35 +3,69 @@ NULL
 
 #' Train the model from a given engine
 #'
-#' Train a [distribution()] model with the specified engine.
-#'
 #' @description
-#' TODO: Add explanation
-#' See [#details] for particularities on how parameters are handled by the individual engines
+#' This function trains a [distribution()] model with the specified engine and
+#' furthermore has some generic parameters that apply to all engines (regardless of type).
 #'
-#' Note several engines do not support joint likelihood models
-#' Therefore the strategy is to either run the model in sequence and
-#' informing the model as highlighted in Miller et al. 2019.
-#' In this case, when multiple datasets are supplied, the model is run in sequence where
-#' the nth' dataset is provided as input to the nth'+1 dataset.
+#' Users are advised to check the help files for individual [engine] for advice on how
+#' the estimation is being done.
+#' @details
+#' The resulting object contains both a [`fit_best`] object of the estimated model and, if \code{inference_only} is \code{FALSE}
+#' a [RasterLayer] object named [`prediction`] that contains the spatial prediction of the model.
+#' These objects can be requested via \code{object$get_data("fit_best")}.
+#'
+#' Note that several engines do not support fully integrated likelihood models (such [engine_gdb] or
+#' [engine_xgboost]) for example. In this case the estimation strategy for multiple added biodiversity datasets
+#' (e.g. more than 1) is to fit recurrent models in sequence, where
+#' the \code{nth'} spatial projection is provided as input to the \code{nth'+1} dataset.
+#' See also Miller et al. (2019) in the references for more details on this strategy. Of course,
+#' if users want more control about this aspect, another option is to fit separate models
+#' and make use of the [add_offset_range] and [ensemble] functionalities.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
-#' @param runname A [`character`] name of the trained run
-#' @param rm_corPred Remove highly correlated predictors. Default is True
+#' @param runname A [`character`] name of the trained run.
+#' @param rm_corPred Remove highly correlated predictors (Default: \code{FALSE}). This option
+#' removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's r = \code{>0.7}).
 #' @param varsel Perform a variable selection on the set of predictors either prior to building the model
-#' or via variable selection / regularization of the model. Available options are [`none`],
-#' [`reg`] either through AIC / regularization or hyperparameter tuning (Default), and [`abess`] as
-#' adaptive best subset selection via the [abess] R-package.
-#' @param inference_only Fit model only without spatial projection (Default: FALSE)
-#' @param only_linear Fit model only on linear covariate baselearners (DEFAULT: TRUE)
-#' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: NULL)
-#' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: NULL)
+#' or via variable selection / regularization of the model. Available options are:
+#' * [`none`] for no or default priors and no extensive hyperparameter search.
+#' * [`reg`] Model selection either through DIC or regularization / hyperparameter tuning depending on the
+#' engine (Default option).
+#' * [`abess`] A-priori adaptive best subset selection of covariates via the [abess] package (see References).
+#' Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
+#' Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
+#' @param inference_only By default the [engine] is used to create
+#' a spatial prediction of the suitability surface, which can take time. If only inferences of
+#' the strength of relationship between covariates and observations are required, this parameter
+#' can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE}).
+#' @param only_linear Fit model only on linear baselearners and functions. Depending
+#' on the [engine] setting this option to \code{FALSE} will result in non-linear relationships
+#' between observations and covariates, often increasing processing time (Default: \code{TRUE}).
+#' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
+#' This option can for instance be used to 'partial' out certain biases after predictions have been made.
+#' See Examples.
+#' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: \code{NULL}).
+#' Specifying a [`numeric`] value here sets \code{bias_variable} to the target value.
 #' @param ... further arguments passed on.
-#' @references Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
-#'
-#' @details TBD: Further details
+#' @references
+#' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
+#' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
 #' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla], [engine_inlabru]
-#' @return A distribution prediction object
+#' @returns A [DistributionModel] object.
+#' @examples
+#' \dontrun{
+#'  # Fit a linear penalized logistic regression model via stan
+#'  x <- distribution(background) %>%
+#'         # Presence-absence data
+#'         add_biodiversity_poipa(surveydata) %>%
+#'         # Add predictors and scale them
+#'         add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+#'         # Use stan for estimation
+#'         engine_stan(chains = 2,iter = 1000,warmup = 500)
+#'  # Train the model
+#'  mod <- train(x, only_linear = TRUE, varsel = 'reg')
+#'  mod
+#' }
 #' @name train
 #' @exportMethod train
 #' @aliases train, train-method

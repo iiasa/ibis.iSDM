@@ -17,17 +17,43 @@ engine_gdb(
 
 \item{boosting_iterations}{An \code{\link{integer}} giving the number of boosting iterations}
 
-\item{learning_rate}{A bounded \code{\link{numeric}} value between 0 and 1 defining the shrinkage parameter.}
+\item{learning_rate}{A bounded \code{\link{numeric}} value between \code{0} and \code{1} defining the shrinkage parameter.}
 
-\item{empirical_risk}{method for empirical risk calculation ('inbag','oobag','none')}
+\item{empirical_risk}{method for empirical risk calculation.
+Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).}
 
 \item{...}{Other variables or control parameters}
 }
 \description{
-Use of Gradient Descent Boosting for model estimation
+Gradient descent boosting is an efficient way to optimize any loss function
+of a generalized linear or additive model (such as the GAMs available through the \link{mgcv} R-package).
+It furthermore automatically regularizes the fit, thus the resulting model only contains the
+covariates whose baselearners have some influence on the response.
+Depending on the type of the \link{add_biodiversity} data, either poisson process models or
+logistic regressions are estimated. If the \code{only_linear} term in \link{train} is set to \code{FALSE},
+splines are added to the estimation, thus providing a non-linear additive inference.
+}
+\details{
+:
+This package requires the \link{mboost} R-package to be installed.
+It is in philosophy somewhat related to the \link{engine_xgboost} and \link{XGBoost} R-package,
+however providing some additional desirable features that make estimation quicker and
+particularly useful for spatial projections. Such as for instance the ability to specifically add
+spatial baselearners via \link{add_latent} or the specification of monotonically constrained priors
+via \link{GDBPrior}.
 }
 \references{
-Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
-
-Hofner, B., Müller, J., Hothorn, T., 2011. Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
+\itemize{
+\item Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
+\item Hofner, B., Müller, J., Hothorn, T., 2011. Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
 }
+}
+\seealso{
+Other engine: 
+\code{\link{engine_bart}()},
+\code{\link{engine_inlabru}()},
+\code{\link{engine_inla}()},
+\code{\link{engine_stan}()},
+\code{\link{engine_xgboost}()}
+}
+\concept{engine}

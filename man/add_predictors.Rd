@@ -31,15 +31,15 @@ add_predictors(
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental stack}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, 'norm')}
 
-\item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
+\item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'product'}) )}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
+\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: FALSE)}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
@@ -49,13 +49,11 @@ Add predictors to a Biodiversity distribution object
 \details{
 TBD
 }
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
- TBD
+ obj <- distribution(background) \%>\%
+        add_predictors(covariates, transform = 'scale')
+ obj
 }
 }
 \references{

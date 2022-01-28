@@ -6,21 +6,23 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
 #' @param names A [`vector`] of character names describing the environmental stack
-#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')
-#' @param derivates A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )
-#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: TRUE)
-#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: FALSE)
-#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
+#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, 'norm')
+#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'product'}) )
+#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
+#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 
-#' @details TBD
-#' @section Notes:
+#' @details
+#' TBD
 #' @aliases add_predictors
 #' @references
 #'
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  obj <- distribution(background) %>%
+#'         add_predictors(covariates, transform = 'scale')
+#'  obj
 #' }
 #' @name add_predictors
 NULL

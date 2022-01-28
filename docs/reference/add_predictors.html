@@ -100,27 +100,21 @@
 <dt>names</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> of character names describing the environmental stack</p></dd>
 <dt>transform</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be preprocessed in any way (Options: <code>'none'</code>,<code>'pca'</code>, <code>'scale'</code>, 'norm')</p></dd>
 <dt>derivates</dt>
-<dd><p>A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )</p></dd>
+<dd><p>A Boolean check whether derivate features should be considered (Options: <code>'none'</code>, <code>'thresh'</code>, <code>'hinge'</code>, <code>'product'</code>) )</p></dd>
 <dt>bgmask</dt>
-<dd><p>Check whether the environmental data should be masked with the background layer (Default: TRUE)</p></dd>
+<dd><p>Check whether the environmental data should be masked with the background layer (Default: <code>TRUE</code>)</p></dd>
 <dt>harmonize_na</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: FALSE)</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: <code>FALSE</code>)</p></dd>
 <dt>priors</dt>
-<dd><p>A <code><a href="PriorList-class.html">PriorList</a></code> object. Default is set to NULL which uses default prior assumptions</p></dd>
+<dd><p>A <code><a href="PriorList-class.html">PriorList</a></code> object. Default is set to <code>NULL</code> which uses default prior assumptions.</p></dd>
 <dt>...</dt>
 <dd><p>Other parameters passed down</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>TBD</p>
-    </div>
-    <div class="section level2">
-    <h2 id="notes">Notes<a class="anchor" aria-label="anchor" href="#notes"></a></h2>
-    
-
-
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -132,7 +126,9 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"> <span class="va">TBD</span></span>
+<span class="r-in"> <span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
+<span class="r-in">        <span class="fu">add_predictors</span><span class="op">(</span><span class="va">covariates</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span></span>
+<span class="r-in"> <span class="va">obj</span></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>

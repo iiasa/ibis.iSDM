@@ -4,7 +4,7 @@
 \alias{engine_inlabru}
 \title{Use inlabru as engine}
 \source{
-https://inlabru-org.github.io/inlabru/articles/
+\url{https://inlabru-org.github.io/inlabru/articles/}
 }
 \usage{
 engine_inlabru(
@@ -24,23 +24,24 @@ engine_inlabru(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: NULL)}
+\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
 
-\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)}
+\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})}
 
-\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
+\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.}
 
-\item{offset}{interpreted as a numeric factor relative to the approximate data diameter;}
+\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.}
 
-\item{cutoff}{The minimum allowed distance between points on the mesh}
+\item{cutoff}{The minimum allowed distance between points on the mesh.}
 
-\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
+\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})}
 
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
-\item{strategy}{Which aproximation to use for the joint posterior. Options are "auto","adaptative", "gaussian", "simplified.laplace" & "laplace".}
+\item{strategy}{Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
+\code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.}
 
-\item{int.strategy}{Integration strategy. Options are "auto","grid", "eb" & "ccd".}
+\item{int.strategy}{Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.}
 
 \item{...}{Other variables}
 }
@@ -48,12 +49,27 @@ engine_inlabru(
 Model components are specified with general inputs and mapping methods to the
 latent variables, and the predictors are specified via general R expressions,
 with separate expressions for each observation likelihood model in multi-likelihood models.
-The inlabru engine - similar as the \code{\link{engine_inla}} function acts a wrapper for \link[INLA:inla]{INLA::inla}
-albeit inlabru has a number of convenience functions implemented that make particular predictions
-more straight forward (e.g. via posterior sampling).
+The inlabru engine - similar as the \code{\link{engine_inla}} function acts a wrapper for \link[INLA:inla]{INLA::inla},
+albeit \link{inlabru} has a number of convenience functions implemented that make in particular predictions
+with new data much more straight forward (e.g. via posterior simulation instead of fitting).
+Since more recent versions \link{inlabru} also supports the addition of multiple likelihoods, therefore
+allowing full integrated inference.
+}
+\details{
+Priors can be set via \link{INLAPrior}.
 }
 \references{
-Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
-
-https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
+\itemize{
+\item Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
+\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 }
+}
+\seealso{
+Other engine: 
+\code{\link{engine_bart}()},
+\code{\link{engine_gdb}()},
+\code{\link{engine_inla}()},
+\code{\link{engine_stan}()},
+\code{\link{engine_xgboost}()}
+}
+\concept{engine}

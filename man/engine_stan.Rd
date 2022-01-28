@@ -2,7 +2,7 @@
 % Please edit documentation in R/engine_stan.R
 \name{engine_stan}
 \alias{engine_stan}
-\title{Use STAN as engine}
+\title{Use Stan as engine}
 \usage{
 engine_stan(
   x,
@@ -20,27 +20,60 @@ engine_stan(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{chains}{A positive integer specifying the number of Markov chains. The default is 4.}
+\item{chains}{A positive \code{\link{integer}} specifying the number of Markov chains (Default: \code{4} chains).}
 
-\item{iter}{A positive integer specifying the number of iterations for each chain (including warmup). The default is 2000.}
+\item{iter}{A positive \code{\link{integer}} specifying the number of iterations for each chain (including warmup). (Default: \code{2000}).}
 
-\item{warmup}{positive integer specifying the number of warmup (aka burnin) iterations per chain. If step-size adaptation is on (which it is by default), this also controls the number of iterations for which adaptation is run (and hence these warmup samples should not be used for inference). The number of warmup iterations should be smaller than iter and the default is iter/2.}
+\item{warmup}{A positive \code{\link{integer}} specifying the number of warmup (aka burnin) iterations per chain.
+If step-size adaptation is on (Default: \code{TRUE}), this also controls the number of iterations for which
+adaptation is run (and hence these warmup samples should not be used for inference).
+The number of warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.}
 
-\item{init}{Initial values for parameters. Default: 'random'. Can also be specified as list (see: rstan::stan)}
+\item{init}{Initial values for parameters (Default: \code{'random'}). Can also be specified as \link{list} (see: \code{\link[rstan:stan]{rstan::stan}})}
 
-\item{cores}{If set to NULL take values from specified ibis option getOption('ibis.nthread')}
+\item{cores}{If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.}
 
-\item{algorithm}{Mode used to sample from the posterior. See \code{\link{cmdstanr}} package. Default: "sampling"}
+\item{algorithm}{Mode used to sample from the posterior. Available options are \code{"sampling"}, \code{"optimize"},
+or \code{"variational"}.
+See \code{\link{cmdstanr}} package for more details. (Default: \code{"sampling"}).}
 
-\item{control}{See rstan::stan for more details on specifying the controls}
+\item{control}{See \code{\link[rstan:stan]{rstan::stan}} for more details on specifying the controls.}
 
-\item{type}{The mode used for creating posterior predictions. Either summarizing the linear predictor or response}
+\item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other variables}
 }
 \description{
-Use STAN as engine
+Stan is probabilistic programming language that can be used to
+specify most types of statistical linear and non-linear regression models.
+Stan provides full Bayesian inference for continuous-variable models through Markov chain Monte Carlo methods
+such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling.
+Stan code has to be written separately and this function acts as compiler to
+build the stan-model.
+\strong{Requires the \link{cmdstanr} package to be installed!}
+}
+\details{
+By default the posterior is obtained through sampling, however stan also supports
+approximate inference forms through penalized maximum likelihood estimation (see Carpenter et al. 2017).
+}
+\note{
+The function \code{obj$stancode()} can be used to print out the stancode of the model.
+}
+\references{
+\itemize{
+\item Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'. https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
+\item Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
+\item Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
+}
 }
 \seealso{
-rstan
+\link{rstan}, \link{cmdstanr}
+
+Other engine: 
+\code{\link{engine_bart}()},
+\code{\link{engine_gdb}()},
+\code{\link{engine_inlabru}()},
+\code{\link{engine_inla}()},
+\code{\link{engine_xgboost}()}
 }
+\concept{engine}

@@ -1,14 +1,19 @@
 #' @include utils.R bdproto.R bdproto-priorlist.R bdproto-prior.R
 NULL
 
-#' Creates a new PriorList object that contains Priors
+#' Creates a new PriorList object
 #'
-#' @param x A [`Prior-class`] object added to the list
-#' @param ... One or multiple additional [`Prior-class`] object added to the list
-#' @details TBD
-#' @section Notes:
-#' @references
-#'
+#' @description A [`PriorList`] object is essentially a list that contains individual
+#' [`Prior-class`] objects. In order to use priors for any of the engines,
+#' the respective [`Prior-class`] has to be identified (e.g. [`INLAPrior`]) and embedded
+#' in a [`PriorList`] object.
+#' @param x A [`Prior-class`] object added to the list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#' @returns A [`PriorList`] object.
+#' @examples
+#' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
+#' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
+#' priors(p1, pr2)
 #' @seealso [`Prior-class`], [`PriorList-class`]
 #'
 #' @aliases priors

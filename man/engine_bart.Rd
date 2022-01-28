@@ -9,26 +9,45 @@ engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples}
+\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples.}
 
 \item{ntree}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation.}
 
-\item{chains}{A number of the number of chains to be used (Default: 4)}
+\item{chains}{A number of the number of chains to be used (Default: \code{4})}
 }
 \description{
-Bayesian regression approach to a sum of complementary trees by shrinking
-the fit of each tree using a regularization prior.
-BART models have been shown to compare favourable among machine learning algorithms (Dorie et al. 2019)
-Default prior preference is for trees to be small (few terminal nodes) and shrinkage towards 0.
+The Bayesian regression approach to a sum of complementary trees is to shrink
+the said fit of each tree through a regularization prior. BART models provide
+non-linear highly flexible estimation and have been shown to compare favourable among machine learning
+algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
+and shrinkage towards \code{0}.
+
+This package requires the \link{dbarts} R-package to be installed.
+Many of the functionalities of this \link{engine} have been inspired by the \link{embarcadero} R-package. Users
+are therefore advised to cite if they make heavy use of BART.
+}
+\details{
 Prior distributions can furthermore be set for:
 \itemize{
 \item probability that a tree stops at a node of a given depth
 \item probability that a given variable is chosen for a splitting rule
 \item probability of splitting that variable at a particular value
+\strong{(However currently not yet implemented!)}
 }
 }
 \references{
-Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-
-Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
+\itemize{
+\item Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+\item Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
+\item Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
 }
+}
+\seealso{
+Other engine: 
+\code{\link{engine_gdb}()},
+\code{\link{engine_inlabru}()},
+\code{\link{engine_inla}()},
+\code{\link{engine_stan}()},
+\code{\link{engine_xgboost}()}
+}
+\concept{engine}
