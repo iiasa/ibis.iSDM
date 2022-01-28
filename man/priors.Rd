@@ -25,8 +25,21 @@ in a \code{\link{PriorList}} object.
 \examples{
 p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
-priors(p1, pr2)
+priors(p1, p2)
 }
 \seealso{
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
+
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{rm_priors}()}
 }
+\concept{prior}

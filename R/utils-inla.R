@@ -198,7 +198,8 @@ mesh_barrier <- function(mesh, region.poly){
 #' @param mesh A [`inla.mesh`] object
 #' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
 #' @keywords utils
-#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
+#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh
+#' @noRd
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),

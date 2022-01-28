@@ -3,6 +3,9 @@ NULL
 
 #' Summarises a trained model or predictor object
 #'
+#' @description
+#' This helper function summarizes a given object, including
+#' [DistributionModel] and [PredictorDataset].
 #' @param x Any prepared object.
 #' @param ... not used.
 #'

@@ -3,19 +3,22 @@
 #' @description This function creates an ensemble of multiple provided distribution models
 #' fitted with the [`ibis.iSDM-package`]. Each model has to have estimated predictions with a given method and
 #' optional uncertainty in form of the standard deviation or similar.
+#' Through the `layer` parameter it can be specified which part of the prediction
+#' should be averaged in an ensemble. This can be for instance the *mean* prediction and/or
+#' the standard deviation *sd*.
 #'
 #' Also returns a coefficient of variation (cv) as output of the ensemble, but note
 #' this should not be interpreted as measure of model uncertainty as it cannot
 #' capture parameter uncertainty of individual model; rather it reflects prediction variation.
 #' @details
 #' Possible options for creating an ensemble includes:
-#' * \code{'mean'} - Calculates the mean of several predictions
-#' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS)
-#' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions
-#' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed
+#' * \code{'mean'} - Calculates the mean of several predictions.
+#' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
+#' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
+#' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 #' @note
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log]
-#' @param ... Provided [`DistributionModel`] objects
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
+#' @param ... Provided [`DistributionModel`] objects.
 #' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}).

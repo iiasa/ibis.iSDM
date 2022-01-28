@@ -2,8 +2,9 @@
 % Please edit documentation in R/print.R
 \name{print}
 \alias{print}
-\alias{print,Id-method}
-\alias{print,tbl_df-method}
+\alias{print,}
+\alias{Id-method}
+\alias{tbl_df-method}
 \alias{print.distribution}
 \alias{print.BiodiversityDistribution}
 \alias{print.BiodiversityDatasetCollection}
@@ -55,7 +56,7 @@
 \item{...}{not used.}
 }
 \value{
-None.
+Object specific.
 }
 \description{
 Display information about any object created through the \pkg{ibis.iSDM} R-package.

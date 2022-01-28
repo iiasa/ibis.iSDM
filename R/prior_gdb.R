@@ -57,6 +57,7 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables are supplied
+#'
 #' @name GDBPriors
 #' @rdname GDBPriors
 #' @exportMethod GDBPriors

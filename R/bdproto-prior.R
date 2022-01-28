@@ -12,6 +12,7 @@ NULL
 #'
 #' @name Prior-class
 #' @aliases Prior
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

@@ -8,11 +8,11 @@ NULL
 #' @param x Any object created through the package.
 #' @param ... not used.
 #'
-#' @return None.
+#' @return Object specific.
 #' @seealso [base::print()].
 #'
 #' @name print
-#' @aliases print,Id-method print,tbl_df-method
+#' @aliases print, Id-method print, tbl_df-method
 #' @keywords misc
 #' @examples
 #' \dontrun{

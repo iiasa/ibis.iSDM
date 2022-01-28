@@ -9,28 +9,23 @@ STANPrior(variable, type, hyper = c(0, 2), ...)
 \S4method{STANPrior}{character, character}(variable, type)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{type}{A \code{\link{character}} specifying the type of prior to be set}
+\item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyperparameters. First entry is treated as mean, the second as precision}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyperparameters.
+First entry is treated as mean, the second as variation.}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
 Function to create a new stan prior that can be added to environmental predictors
 }
-\details{
-TBD
-}
-\section{Notes}{
-
-}
-
 \references{
-Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
-
-Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
+\itemize{
+\item Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
+\item Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
+}
 }
 \seealso{
 \code{\linkS4class{Prior}}.
@@ -42,7 +37,10 @@ Other prior:
 \code{\link{INLAPrior}()},
 \code{\link{STANPriors}()},
 \code{\link{XGBPriors}()},
-\code{\link{XGBPrior}()}
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

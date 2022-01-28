@@ -9,16 +9,17 @@ INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 \S4method{INLAPriors}{vector, character}(variables, type)
 }
 \arguments{
-\item{variables}{A \code{\link{vector}} of \code{\link{characters}} matched against existing predictors or latent effects}
+\item{variables}{A \code{\link{vector}} of \code{\link{characters}} matched against existing predictors or latent effects.}
 
-\item{type}{A \code{\link{character}} specifying the type of prior to be set}
+\item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
 \item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
-Helper function when multiple variables and types are supplied
+This is a helper function to specify several \link{INLAPrior} objects with the same
+hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
@@ -28,7 +29,10 @@ Other prior:
 \code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
 \code{\link{XGBPriors}()},
-\code{\link{XGBPrior}()}
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

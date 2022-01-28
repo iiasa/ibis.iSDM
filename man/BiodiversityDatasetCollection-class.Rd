@@ -7,4 +7,17 @@
 \description{
 Acts a container for BiodiversityDataset within
 }
+\seealso{
+Other bdproto: 
+\code{\link{BiodiversityDistribution-class}},
+\code{\link{BiodiversityScenario-class}},
+\code{\link{DistributionModel-class}},
+\code{\link{Engine-class}},
+\code{\link{Log-class}},
+\code{\link{PredictorDataset-class}},
+\code{\link{Prior-class}},
+\code{\link{PriorList-class}},
+\code{\link{Settings-class}}
+}
+\concept{bdproto}
 \keyword{bdproto}

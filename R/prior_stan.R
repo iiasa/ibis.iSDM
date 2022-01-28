@@ -5,14 +5,14 @@ NULL
 #'
 #' Function to create a new stan prior that can be added to environmental predictors
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects
-#' @param type A [`character`] specifying the type of prior to be set
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyperparameters. First entry is treated as mean, the second as precision
-#' @param ... Variables passed on to prior object
-#' @details TBD
-#' @section Notes:
-#' @references Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
-#' @references Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
+#' @param variable A [`character`] matched against existing predictors or latent effects.
+#' @param type A [`character`] specifying the type of prior to be set.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyperparameters.
+#' First entry is treated as mean, the second as variation.
+#' @param ... Variables passed on to prior object.
+#' @references
+#' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
+#' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' @seealso [`Prior-class`].
 #'
 #' @family prior
@@ -65,9 +65,13 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables and types are supplied
+#'
 #' @name STANPriors
-#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects
-#' @param type A [`character`] specifying the type of prior to be set
+#' @description
+#' This is a helper function to specify several [STANPrior] with the same
+#' hyper-parameters, but different variables.
+#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects.
+#' @param type A [`character`] specifying the type of prior to be set.
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
 #' @param ... Variables passed on to prior object
 #' @rdname STANPriors

@@ -8,4 +8,17 @@
 This class sets up the base class for priors and is the base class that is
 inherited by any specific prior.
 }
+\seealso{
+Other bdproto: 
+\code{\link{BiodiversityDatasetCollection-class}},
+\code{\link{BiodiversityDistribution-class}},
+\code{\link{BiodiversityScenario-class}},
+\code{\link{DistributionModel-class}},
+\code{\link{Engine-class}},
+\code{\link{Log-class}},
+\code{\link{PredictorDataset-class}},
+\code{\link{PriorList-class}},
+\code{\link{Settings-class}}
+}
+\concept{bdproto}
 \keyword{bdproto}

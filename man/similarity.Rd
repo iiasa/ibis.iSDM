@@ -13,21 +13,21 @@ similarity(obj, ref, ref_type = "poipo", method = "mess", ...)
 \S4method{similarity}{RasterStack}(obj)
 }
 \arguments{
-\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object}
+\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object.}
 
-\item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{data.frame}} with extracted values (corresponding to those given in \code{obj})}
+\item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively
+a \code{\link{data.frame}} with extracted values (corresponding to those given in \code{obj}).}
 
-\item{ref_type}{A \code{\link{character}} specifying the type of biodiversity to use when obj is a \code{\link{BiodiversityDistribution}}}
+\item{ref_type}{A \code{\link{character}} specifying the type of biodiversity to use when obj is a \code{\link{BiodiversityDistribution}}.}
 
-\item{method}{A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}}
+\item{method}{A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.}
 
 \item{full}{should similarity values be returned for all variables (Default: \code{FALSE})?}
 
-\item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE})}
+\item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).}
 }
 \value{
-This function returns a list
-containing:
+This function returns a list containing:
 \itemize{
 \item \code{similarity}: a \code{RasterStack} giving the environmental similarities for
 each variable in \code{x} (only included when \code{full=TRUE});
@@ -44,36 +44,29 @@ similar to its reference range.
 }
 \description{
 Calculate the environmental similarity of the provided covariates
-with respect to a reference dataset. Currently supported is Multivariate Environmental Similarity index
+with respect to a reference dataset.
+Currently supported is Multivariate Environmental Similarity index
 and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
 }
 \details{
 \code{\link{similarity}} implements the MESS algorithm described in Appendix S3
-of Elith et al. 2010 as well as the Mahalanobis dissimilarity described in Mesgaran et al. 2014
+of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
 }
 \examples{
  \dontrun{
-library(dismo)
-library(raster)
-ff <- list.files(system.file('ex', package='dismo'), '\\\\.grd$',
-                 full.names=TRUE )
-predictors <- stack(grep('biome', ff, value=TRUE, invert=TRUE))
-occ <- read.csv(system.file('ex/bradypus.csv', package='dismo'))[, -1]
-ref <- extract(predictors, occ)
-mess <- similarity(predictors, ref, full=TRUE)
-plot
+plot(
+  similarity(x) # Where x is a distribution or Raster object
+)
  }
-\dontrun{
-library(rasterVis)
-library(RColorBrewer)
-levelplot(mess[[2]], col.regions=brewer.pal(8, 'Set1'))
-}
 }
 \references{
 \itemize{
 \item Elith, J., Kearney, M., and Phillips, S. (2010) \href{https://doi.org/10.1111/j.2041-210X.2010.00036.x}{The art of modelling range-shifting species}. \emph{Methods in Ecology and Evolution}, 1: 330-342. doi:10.1111/j.2041-210X.2010.00036.x
 \item Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) \href{https://doi.org/10.1111/ddi.12209}{Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models}. \emph{Diversity and Distributions}, 20: 1147-1159. doi:10.1111/ddi.12209
 }
+}
+\seealso{
+\link{dismo} R-package
 }
 \keyword{environment}
 \keyword{mahalanobis,}

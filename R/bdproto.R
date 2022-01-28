@@ -16,6 +16,10 @@ NULL
 #'
 #' @param ... A list of members to add to the new `bdproto` object.
 #' @source https://ggplot2.tidyverse.org/reference/ggproto.html#examples
+#' @note
+#' All [bdproto] objects have several functions that allow to access data and
+#' summarize information within them. Run \code{names(object)} to show the
+#' available functions.
 #' @examples
 #' Adder <- bdproto("Adder",
 #'   x = 0,
@@ -36,6 +40,7 @@ NULL
 #' Abacus$subtract(10)
 #'
 #' @keywords bdproto
+#' @family bdproto
 #' @export
 #' @noRd
 bdproto <- function(`_class` = NULL, `_inherit` = NULL, ...) {

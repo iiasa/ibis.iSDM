@@ -12,6 +12,7 @@ NULL
 #'
 #' @name BiodiversityDatasetCollection-class
 #' @keywords bdproto
+#' @family bdproto
 #' @aliases BiodiversityDatasetCollection
 NULL
 

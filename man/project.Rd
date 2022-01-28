@@ -7,18 +7,19 @@
 \S4method{project}{BiodiversityScenario, logical}(mod, no_projection)
 }
 \arguments{
-\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors}
+\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.}
 
-\item{no_projection}{A \code{\link{logical}} flag whether future projection should be created. (Default: TRUE)
+\item{no_projection}{A \code{\link{logical}} flag whether future projection should be created. (Default: \code{TRUE}).
 Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
 
-\item{...}{passed on parameters}
+\item{...}{passed on parameters.}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.
 }
 \description{
-Wrapper functions to project a \code{\linkS4class{BiodiversityScenario}} object to
-new (future) covariates
+Equivalent to \link{train}, this function acts as a
+wrapper to project the model stored in a \code{\linkS4class{BiodiversityScenario}} object to
+newly supplied (future) covariates.
 }
 \keyword{scenario}

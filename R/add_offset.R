@@ -1,13 +1,28 @@
-#' Add a range of a species as offset to a distribution object
+#' Specify an offset object for a species
 #'
+#' @description
+#' Including offsets is another option to integrate spatial prior information
+#' in linear and additive regression models. Here, offset simply shift the intercept of
+#' the regression fit. Since offsets only make sense for linear regressions (and not for instance
+#' regression tree based methods such as [engine_bart]), they do not work for all engines.
+#'
+#' @details
 #' As options allow specifying including the range either as binary or using distance
-#' as parameter following Merow et al. (2017)
-#'
+#' as parameter following Merow et al. (2017). In this case the existing range needs
+#' to be transformed first, for instance using the [bossMaps] package.
+#' @note
+#' Only one offset per distribution object can currently be specified. This might
+#' change in the future.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param range A [`sf`] object with the range for the target feature
-#' @param method [`character`] describing how the range should be included (binary | distance)
-#' @param name [`character`] A name of the species if the offset is not specified
-#' @param distance_max Numeric threshold on the maximum distance (Default: 150000 [m])
+#' @param range A [`sf`] or [`RasterLayer`]object with the range for the target feature.
+#' @param method [`character`] describing how the range should be included (Options: \code{"binary"} | \code{"distance"}).
+#' @param name [`character`] A name of the species if the offset is not specified.
+#' @param distance_max Numeric threshold on the maximum distance (Default: \code{150000} [m]).
+#' @seealso [bossMaps]
+#' @references
+#' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @keywords prior
 #' @name add_offset_range
 NULL
 

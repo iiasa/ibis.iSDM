@@ -12,27 +12,27 @@ partial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 \method{partial}{DistributionModel}(x, ...)
 }
 \arguments{
-\item{mod}{A trained \code{DistributionModel} model}
+\item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model within.}
 
-\item{x.var}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
+\item{x.var}{A \link{character} indicating the variable for which a partial effect is to be calculated.}
 
-\item{constant}{A \code{\link{numeric}} constant to be inserted for all other variables. Default calculates a mean per variable}
+\item{constant}{A \link{numeric} constant to be inserted for all other variables. Default calculates a mean per variable.}
 
-\item{variable_length}{The interpolation depth (nr. of points) to be used (Default: 100)}
+\item{variable_length}{\link{numeric} The interpolation depth (nr. of points) to be used (Default: \code{100}).}
 
-\item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted ?}
+\item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
 \item{...}{Other engine specific parameters}
 }
 \value{
-A \link{data.frame} with the created partial response
+A \link{data.frame} with the created partial response.
 }
 \description{
 Create a partial response or effect plot of a trained model
 }
 \details{
 By default the mean is calculated across all parameters that are not \code{x.var}.
-Instead a \emph{constant} can be set (for instance 0) to be applied to the output.
+Instead a \emph{constant} can be set (for instance \code{0}) to be applied to the output.
 }
 \seealso{
 \link{partial}

@@ -1,18 +1,21 @@
 #' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-log.R
 NULL
 
-#' Adds a log file to distribution object to write messages and output in there
+#' Adds a log file to distribution object
 #'
+#' @description
+#' This function allows to specify a file as [Log-class] file, which is used to save all
+#' console outputs, prints and messages.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param filename A [`character`] object. Destination must be writeable and filename ends with 'txt'
-#' @details TBD
-#' @section Notes:
+#' @param filename A [`character`] object.
+#' The destination must be writeable and filename ends with \code{'txt'}.
 #' @aliases add_log
-#' @references
 #'
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  x <- distribution(background) %>%
+#'     add_log()
+#'  x
 #' }
 #' @name add_log
 NULL

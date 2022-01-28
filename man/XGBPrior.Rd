@@ -11,16 +11,14 @@ XGBPrior(variable, hyper = "increasing", ...)
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
 Function to include prior information as monotonic constrain to a
 extreme gradient descent boosting model \link{engine_xgboost}.
-}
-\details{
-TBD
+Note that monotonic priors enforce directionality in direction of certain variables.
 }
 \references{
 \itemize{
@@ -37,7 +35,10 @@ Other prior:
 \code{\link{INLAPrior}()},
 \code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()}
+\code{\link{XGBPriors}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

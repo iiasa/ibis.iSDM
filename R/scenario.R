@@ -3,16 +3,20 @@ NULL
 
 #' Create a new scenario based on trained model parameters
 #'
-#' @param fit A trained [`BiodiversityDistribution`] model
+#' @description
+#' This function creates a new [BiodiversityScenario-class] object
+#' that contains the projections of a model.
+#' @param fit A [`BiodiversityDistribution`] object containing a trained model.
 #' @param limits A [`raster`] or [`sf`] object that limits the projection surface when
-#' intersected with the prediction data (Default: NULL).
+#' intersected with the prediction data (Default: \code{NULL}). This can for instance be set
+#' as an expert-delineated constrain to limit spatial projections.
 #' @aliases scenario
 #' @exportMethod scenario
 #' @name scenario
 #'
 #' @examples
 #' \dontrun{
-#' print('test')
+#'   scenario(fit, limits = island_area)
 #' }
 #' @export
 methods::setGeneric("scenario",

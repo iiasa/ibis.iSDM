@@ -2,34 +2,45 @@
 % Please edit documentation in R/add_priors.R
 \name{add_priors}
 \alias{add_priors}
-\title{Set priors to an existing distribution object}
+\title{Add priors to an existing distribution object}
 \usage{
 add_priors(x, priors = NULL, ...)
 
 \S4method{add_priors}{BiodiversityDistribution}(x)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object containing multiple priors}
+\item{priors}{A \code{\linkS4class{PriorList}} object containing multiple priors.}
 
-\item{...}{Other parameters passed down}
+\item{...}{Other parameters passed down.}
 }
 \description{
-Set priors to an existing distribution object
+This function simply allows to add priors to an existing \link{distribution} object.
+The supplied priors must be a \code{\linkS4class{PriorList}} object created through
+calling \link{priors}.
 }
-\details{
-TBD
+\note{
+Alternatively priors to environmental predictors can also directly added as parameter
+via \link{add_predictors}
 }
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
- TBD
+ x <- distribution(background)
 }
 }
-\references{
-
+\seealso{
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
+\concept{prior}
+\keyword{priors}

@@ -23,7 +23,7 @@ threshold(
 \S4method{threshold}{BiodiversityScenario}(obj)
 }
 \arguments{
-\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object}
+\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object.}
 
 \item{method}{A specifc method for thresholding. See details for available options.}
 
@@ -41,13 +41,13 @@ Otherwise the threshold is added to the respective \code{\link{DistributionModel
 }
 \description{
 It is common in many applications of species distribution modelling that estimated
-continious suitability surfaces are converted into discrete representations of where
-suitable habitat might or might not exist. This threshold'ing can be done in various ways
-which are further described in the details.
+continuous suitability surfaces are converted into discrete representations of where
+suitable habitat might or might not exist. This so called \emph{threshold'ing}
+can be done in various ways which are further described in the details.
 
-In case a \link{RasterLayer} or \link{RasterBrick} is provided as input for \code{obj}, it is furthermore
-necessary to provide a \code{\link{sf}} object for validation as there is no \code{\link{DistributionModel}} to read this
-information from.
+In case a \link{RasterLayer} or \link{RasterBrick} is provided as input in this function
+for \code{obj}, it is furthermore necessary to provide a \code{\link{sf}} object for validation as
+there is no \code{\link{DistributionModel}} to read this information from.
 \strong{Note:} This of course also allows to estimate the threshold based on withheld data, for instance
 those created from an a-priori cross-validation procedure.
 

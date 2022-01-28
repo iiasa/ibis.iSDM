@@ -22,15 +22,15 @@ run_stan(
 )
 }
 \arguments{
-\item{model_code}{A \code{\link{character}} pointing to the stan modelling code}
+\item{model_code}{A \code{\link{character}} pointing to the stan modelling code.}
 
 \item{data}{A \code{\link{list}} with all the parameters required to run the \link{model_code} in stan.}
 
-\item{algorithm}{A \code{\link{character}} giving the algorithm to use. Either 'sampling' (Default), 'optimize' or 'variational' for penalized likelihood estimation.}
+\item{algorithm}{A \code{\link{character}} giving the algorithm to use. Either \code{'sampling'} (Default), \code{'optimize'} or \code{'variational'} for penalized likelihood estimation.}
 
 \item{chains}{A \code{\link{numeric}} indicating the number of chains to use for estimation.}
 
-\item{cores}{Number of threads for sampling. Default set to 'getOption("ibis.nthread")'. See \code{\link[=ibis_options]{ibis_options()}}}
+\item{cores}{Number of threads for sampling. Default set to \code{'getOption("ibis.nthread")'}. See \code{\link[=ibis_options]{ibis_options()}}.}
 
 \item{threads}{\code{\link{numeric}} giving the number of threads to be run per chain. Has to be specified in accordance with cores.}
 
@@ -42,20 +42,20 @@ run_stan(
 
 \item{cpp_options}{A \code{\link{list}} with options for the Cpp compiling.}
 
-\item{force}{\code{\link{logical}} indication whether to force recompile the model (default: False).}
+\item{force}{\code{\link{logical}} indication whether to force recompile the model (Default: \code{FALSE}).}
 
 \item{path}{\code{\link{character}} indicating a path to be made available to the stan compiler.}
 
 \item{save_warmup}{A \code{\link{logical}} flag whether to save the warmup samples.}
 
-\item{...}{Other non-specified parameters}
+\item{...}{Other non-specified parameters.}
 }
 \value{
 A \link{rstan} object
 }
 \description{
-This function fits a stan model using the light-weight cmdstanr interface. Code
-was adapted from McElreath rethinking package.
+This function fits a stan model using the light-weight interface provided
+by \link{cmdstanr}. The code was adapted from McElreath \link{rethinking} package.
 }
 \seealso{
 \link{rethinking} R package

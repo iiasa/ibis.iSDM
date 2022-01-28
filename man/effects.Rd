@@ -20,8 +20,9 @@ This functions is handy wrapper that calls the default plotting
 functions for the model of a specific \link{engine}. Equivalent to
 calling \code{effects} of a fitted \link{distribution} function.
 }
-\details{
-Create a partial response or effect plot of a trained model
+\note{
+For some models, where default coefficients plots are not available,
+this function will attempt to generate \link{partial} dependency plots instead.
 }
 \examples{
 \dontrun{
@@ -32,4 +33,4 @@ mod$effects()
 \references{
 
 }
-\keyword{misc}
+\keyword{partial}

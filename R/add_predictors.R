@@ -3,21 +3,33 @@ NULL
 
 #' Add predictors to a Biodiversity distribution object
 #'
+#' @description
+#' This function allows to add predictors to [distribution] or [BiodiversityScenario]
+#' objects.
+#' @details
+#' Predictors are covariates that in spatial projection have to match
+#' the geographic projection of the background layer in the [distribution] object.
+#' This function furthermore allows to transform or create derivates of provided
+#' predictors.
+#' A transformation takes the provided rasters and for instance rescales them or transforms
+#' them through a principal component analysis ([prcomp]). In contrast, derivates leave
+#' the original provided predictors alone, but instead create new ones, for instance by transforming
+#' their values through a quadratic or hinge transformation. Note that this effectively
+#' increases the number of predictors in the object, generally requiring stronger regularization by
+#' the used [engine].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
-#' @param names A [`vector`] of character names describing the environmental stack
-#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, 'norm')
-#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'product'}) )
+#' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed.
+#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
 #' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
-
-#' @details
-#' TBD
+#' @note
+#' Not every engine does actually need covariates. For instance it is perfectly legit
+#' to fit a model with only occurrence data and a spatial latent effect ([add_latent]).
 #' @aliases add_predictors
-#' @references
-#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) %>%

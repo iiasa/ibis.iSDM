@@ -3,11 +3,12 @@ NULL
 
 #' Plot effects of trained model
 #'
-#' Create a partial response or effect plot of a trained model
-#'
 #' @description This functions is handy wrapper that calls the default plotting
 #' functions for the model of a specific [engine]. Equivalent to
 #' calling \code{effects} of a fitted [distribution] function.
+#' @note
+#' For some models, where default coefficients plots are not available,
+#' this function will attempt to generate [partial] dependency plots instead.
 #' @param x Any fitted [distribution] object.
 #' @param ... not used.
 #'
@@ -17,13 +18,13 @@ NULL
 #' mod$effects()
 #' }
 #' @return None.
-#' @keywords misc
+#' @keywords partial
 #' @references
 #' @name effects
 NULL
 
 #' @rdname effects
 #' @method effects DistributionModel
-#' @keywords misc
+#' @keywords partial
 #' @export
 effects.DistributionModel <- function(x, ...) x$effects()

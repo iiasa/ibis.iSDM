@@ -2,7 +2,7 @@
 % Please edit documentation in R/distribution.R
 \name{distribution}
 \alias{distribution}
-\title{Setup biodiversity distribution modelling procedure}
+\title{Create distribution modelling procedure}
 \usage{
 distribution(background, limits = NULL)
 
@@ -12,7 +12,7 @@ distribution(background, limits = NULL)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object}
+\code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object.}
 
 \item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when
 intersected with input data (Default: \code{NULL}).}
@@ -23,25 +23,26 @@ intersected with input data (Default: \code{NULL}).}
 \description{
 This function creates an object that contains all the data, parameters and settings
 for building an (integrated) species distribution model.
-Key functions to add data are \code{\link[=add_biodiversity_*]{add_biodiversity_*()}} , \code{\link[=add_predictors]{add_predictors()}},
-\code{\link[=add_latent]{add_latent()}}, \code{\link[=engine_*]{engine_*()}}, \code{\link[=set_priors]{set_priors()}} and \code{\link[=add_offset_range]{add_offset_range()}}. This function then creates a
+Key functions to add data are \link{add_biodiversity}, \link{add_predictors},
+\link{add_latent}, \link{engine}, \link{add_priors} and \link{add_offset}. This creates a
 prototype \code{\link{BiodiversityDistribution}} object with its own functions.
-After setting input data and parameters, missing parameters in the model can then be estimated
-via the \code{\link[=train]{train()}} function and predictions be created.
+After setting input data and parameters, model predictions can then be created
+via the \link{train} function and predictions be created.
 See \strong{Details} for further functions available to modify or summarize the created object.
 
-\emph{Note that any model requires at minimum a single added biodiversity distribution object
-as well as a specified engine.}
+\strong{Note that any model requires at minimum a single added \link{biodiversity} dataset
+as well as a specified \link{engine}.}
 }
 \details{
 This function creates a \code{\linkS4class{BiodiversityDistribution}} object that in itself contains
-other functions and stores input and pre-processed data.
-A full list of functions available can be queried via \code{names(object)} or alternatively \code{names(x)}.
-Although note that some of the functions are not intended to be manipulated directly but rather through convenience functions (e.g. \code{\link[=object$set_predictors]{object$set_predictors()}}).
-Several other objects are stored in the \code{\linkS4class{BiodiversityDistribution}} object that
-have their own functions as well and can be queried (e.g. \link{print}). For a list of
-functions see the reference documentation..
-By default if some datasets are not set, then a \code{\link{Waiver}} object is returned instead.
+other functions and stores parameters and (pre-)processed data.
+A full list of functions available can be queried via \code{names(object)}.
+Some of the functions are not intended to be manipulated directly,
+but rather through convenience functions (e.g. \code{\link[=object$set_predictors]{object$set_predictors()}}).
+Similarly other objects are stored in the \code{\linkS4class{BiodiversityDistribution}} object that
+have their own functions as well and can be queried (e.g. \code{\link{names(object)}}). For a list of
+functions see the reference documentation. By default,
+if some datasets are not set, then a \code{\link{Waiver}} object is returned instead.
 
 The following objects can be stored:
 \itemize{

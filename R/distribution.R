@@ -1,35 +1,36 @@
 #' @include utils.R bdproto-biodiversitydistribution.R
 NULL
 
-#' Setup biodiversity distribution modelling procedure
+#' Create distribution modelling procedure
 #'
 #' @description
 #' This function creates an object that contains all the data, parameters and settings
 #' for building an (integrated) species distribution model.
-#' Key functions to add data are [`add_biodiversity_*()`] , [add_predictors()],
-#' [add_latent()], [`engine_*()`], [set_priors()] and [add_offset_range()]. This function then creates a
+#' Key functions to add data are [add_biodiversity], [add_predictors],
+#' [add_latent], [engine], [add_priors] and [add_offset]. This creates a
 #' prototype [`BiodiversityDistribution`] object with its own functions.
-#' After setting input data and parameters, missing parameters in the model can then be estimated
-#' via the [`train()`] function and predictions be created.
+#' After setting input data and parameters, model predictions can then be created
+#' via the [train] function and predictions be created.
 #' See **Details** for further functions available to modify or summarize the created object.
 #'
-#' *Note that any model requires at minimum a single added biodiversity distribution object
-#' as well as a specified engine.*
+#' **Note that any model requires at minimum a single added [biodiversity] dataset
+#' as well as a specified [engine].**
 #'
 #' @param background Specification of the modelling background. Must be a
-#' [`raster`], [`sf`] or [`extent`] object
+#' [`raster`], [`sf`] or [`extent`] object.
 #' @param limits A [`raster`] or [`sf`] object that limits the prediction surface when
 #' intersected with input data (Default: \code{NULL}).
 #'
 #' @details
 #' This function creates a [`BiodiversityDistribution-class`] object that in itself contains
-#' other functions and stores input and pre-processed data.
-#' A full list of functions available can be queried via \code{names(object)} or alternatively \code{names(x)}.
-#' Although note that some of the functions are not intended to be manipulated directly but rather through convenience functions (e.g. [`object$set_predictors()`]).
-#' Several other objects are stored in the [`BiodiversityDistribution-class`] object that
-#' have their own functions as well and can be queried (e.g. [print]). For a list of
-#' functions see the reference documentation..
-#' By default if some datasets are not set, then a [`Waiver`] object is returned instead.
+#' other functions and stores parameters and (pre-)processed data.
+#' A full list of functions available can be queried via \code{names(object)}.
+#' Some of the functions are not intended to be manipulated directly,
+#'  but rather through convenience functions (e.g. [`object$set_predictors()`]).
+#' Similarly other objects are stored in the [`BiodiversityDistribution-class`] object that
+#' have their own functions as well and can be queried (e.g. [`names(object)`]). For a list of
+#' functions see the reference documentation. By default,
+#' if some datasets are not set, then a [`Waiver`] object is returned instead.
 #'
 #' The following objects can be stored:
 #' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with the added biodiversity data.
@@ -37,7 +38,6 @@ NULL
 #' * \code{object$predictors} A [`PredictorDataset`] object with all set predictions.
 #' * \code{object$priors} A [`PriorList`] object with all specified priors.
 #' * \code{object$log} A [`Log`] object that captures.
-#'
 #'
 #' Useful high-level functions to address those objects are for instance:
 #' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`] object contents. Can also be called via [print].

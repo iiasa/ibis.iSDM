@@ -18,6 +18,7 @@ NULL
 #'    )
 #' }
 #' @aliases PriorList
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

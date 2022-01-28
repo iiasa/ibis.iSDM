@@ -13,9 +13,9 @@ NULL
 #' @examples
 #' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 #' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
-#' priors(p1, pr2)
+#' priors(p1, p2)
 #' @seealso [`Prior-class`], [`PriorList-class`]
-#'
+#' @family prior
 #' @aliases priors
 #' @name priors
 NULL

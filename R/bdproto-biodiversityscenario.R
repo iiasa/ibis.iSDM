@@ -7,8 +7,13 @@ NULL
 
 #' Prototype for a biodiversity scenario from a trained model
 #'
+#' Base [`proto`] class for any biodiversity scenario objects.
+#' Serves as container that supplies data and functions to
+#' other [`proto`] classes.
+#'
 #' @name BiodiversityScenario-class
 #' @aliases BiodiversityScenario
+#' @family bdproto
 #' @keywords bdproto
 NULL
 
