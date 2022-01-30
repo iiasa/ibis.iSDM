@@ -18,3 +18,4 @@ configure.ac
 ^inst/doc/\.install_extras$
 ^_pkgdown\.yml$
 ^docs$
+^\.github$
