@@ -16,9 +16,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/biodiversity_projections.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/comparison.html</loc>
   </url>
   <url>
@@ -26,18 +23,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/integrate_data.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/model_assessment.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/train_model.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/train_simple_model.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/authors.html</loc>
@@ -91,12 +76,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_priors.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_range_offset.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_range_predictor.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/alignRasters.html</loc>
   </url>
   <url>
@@ -119,9 +98,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/coords_in_mesh.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/create_pseudoabsence.html</loc>
@@ -173,9 +149,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/find_subset_of_predictors.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/format_biodiversity_data.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/GDBPrior.html</loc>
@@ -236,9 +209,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/posterior_predict_stanfit.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/ppm_weights.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/PredictorDataset-class.html</loc>

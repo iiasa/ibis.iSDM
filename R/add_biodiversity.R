@@ -355,12 +355,14 @@ methods::setMethod(
 #'
 #' @param x A [`data.frame`], [`sf`] or [`Spatial`]) object of biodiversity information
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
-#' @param field_space A [`vector`] on the column names (Default: 'X','Y')
+#' @param field_space A [`vector`] on the column names (Default: \code{'X'}, \code{'Y'})
 #' @param ... Other parameters passed down
 #'
 #' @import sf
 #' @name format_biodiversity_data
 #' @rdname format_biodiversity_data
+#' @keywords internal
+#' @noRd
 
 format_biodiversity_data <- function(x, field_occurrence, field_space = c('X','Y'),...){
   # Final checks

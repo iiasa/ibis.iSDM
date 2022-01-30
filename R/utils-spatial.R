@@ -835,7 +835,7 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #'  @param ... Other parameters (dummy)
 #'  @returns A [`RasterStack`] object
 #'  @keywords utils
-#'  @export
+#'  @noRd
 explode_factorized_raster <- function(ras, name = NULL, ...){
   assertthat::assert_that(inherits(ras, 'RasterLayer'),
                           is.factor(ras),

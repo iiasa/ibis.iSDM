@@ -14,5 +14,5 @@ a new \code{\link{RasterStack}} that contains the individual levels
 @param ... Other parameters (dummy)
 @returns A \code{\link{RasterStack}} object
 @keywords utils
-@export
+@noRd
 }

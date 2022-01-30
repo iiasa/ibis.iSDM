@@ -15,7 +15,7 @@ NULL
 #'
 #' @name project
 #' @aliases project
-#' @keywords scenario
+#' @keywords scenarios
 #' @exportMethod project
 #' @export
 NULL

@@ -54,10 +54,7 @@ reference:
     contents:
         - distribution
         - priors
-        - prior_gdb
-        - prior_inla
-        - prior_stan
-        - prior_xgb
+        - has_keyword("priors")
         - train
 
   - title: Add or modify data and parameters
@@ -77,6 +74,7 @@ reference:
     desc: Functions specifically for adding constrains and creating scenarios based on trained models.
     contents:
       - scenario
+      - project
       - starts_with("add_constrain")
       - has_keyword("scenarios")
 
@@ -95,8 +93,10 @@ reference:
   - title: Utility functions
     desc: Functions used by engines or spatial processing
     contents:
-      - coords_in_mesh
       - is_comparable_raster
+      - explode_factorized_raster
+      - posterior_predict_stanfit
+      - run_stan
       - intersecting_extents
       - point_in_polygon
       - bbox2wkt

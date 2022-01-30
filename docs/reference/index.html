@@ -17,7 +17,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div id="navbar" class="collapse navbar-collapse ms-2">
+    <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
@@ -79,6 +79,56 @@
           <code><a href="priors.html">priors()</a></code> 
         </dt>
         <dd>Creates a new PriorList object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_priors.html">add_priors()</a></code> 
+        </dt>
+        <dd>Add priors to an existing distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="GDBPrior.html">GDBPrior()</a></code> 
+        </dt>
+        <dd>Create a new monotonic prior</dd>
+      </dl><dl><dt>
+          
+          <code><a href="GDBPriors.html">GDBPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables are supplied</dd>
+      </dl><dl><dt>
+          
+          <code><a href="INLAPrior.html">INLAPrior()</a></code> 
+        </dt>
+        <dd>Create a new INLA prior</dd>
+      </dl><dl><dt>
+          
+          <code><a href="INLAPriors.html">INLAPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables and types are supplied</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rm_priors.html">rm_priors()</a></code> 
+        </dt>
+        <dd>Remove existing priors from an existing distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="STANPrior.html">STANPrior()</a></code> 
+        </dt>
+        <dd>Create a new stan prior</dd>
+      </dl><dl><dt>
+          
+          <code><a href="STANPriors.html">STANPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables and types are supplied</dd>
+      </dl><dl><dt>
+          
+          <code><a href="XGBPrior.html">XGBPrior()</a></code> 
+        </dt>
+        <dd>Create a new monotonic prior</dd>
+      </dl><dl><dt>
+          
+          <code><a href="XGBPriors.html">XGBPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables are supplied</dd>
       </dl><dl><dt>
           
           <code><a href="train.html">train()</a></code> 
@@ -240,6 +290,11 @@ For instance those previously selected</dd>
         <dd>Create a new scenario based on trained model parameters</dd>
       </dl><dl><dt>
           
+          <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
+        </dt>
+        <dd>Project a fitted model to new covariates</dd>
+      </dl><dl><dt>
+          
           <code><a href="add_constrain.html">add_constrain(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Add a constrain to an existing <code>scenario</code></dd>
@@ -327,6 +382,21 @@ For instance those previously selected</dd>
         <dd>Are rasters comparable?</dd>
       </dl><dl><dt>
           
+          <code><a href="explode_factorized_raster.html">explode_factorized_raster()</a></code> 
+        </dt>
+        <dd>Split raster factor levels to stack</dd>
+      </dl><dl><dt>
+          
+          <code><a href="posterior_predict_stanfit.html">posterior_predict_stanfit()</a></code> 
+        </dt>
+        <dd>Create a posterior prediction from a rstanfit object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="run_stan.html">run_stan()</a></code> 
+        </dt>
+        <dd>Fit cmdstanr model and convert to rstan object</dd>
+      </dl><dl><dt>
+          
           <code><a href="intersecting_extents.html">intersecting_extents()</a></code> 
         </dt>
         <dd>Do extents intersect?</dd>
@@ -349,7 +419,7 @@ For instance those previously selected</dd>
           
           <code><a href="alignRasters.html">alignRasters()</a></code> 
         </dt>
-        <dd>Align a <code>Raster</code> object to another by harmonizing geometry and extend.</dd>
+        <dd>Align a <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">Raster</a></code> object to another by harmonizing geometry and extend.</dd>
       </dl><dl><dt>
           
           <code><a href="emptyraster.html">emptyraster()</a></code> 
@@ -552,7 +622,7 @@ For instance those previously selected</dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
     </footer></div>

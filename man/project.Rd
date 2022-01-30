@@ -22,4 +22,4 @@ Equivalent to \link{train}, this function acts as a
 wrapper to project the model stored in a \code{\linkS4class{BiodiversityScenario}} object to
 newly supplied (future) covariates.
 }
-\keyword{scenario}
+\keyword{scenarios}

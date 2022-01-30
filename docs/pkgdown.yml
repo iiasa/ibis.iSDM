@@ -1,5 +1,5 @@
 pandoc: 2.14.0.3
-pkgdown: 2.0.1
+pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   01_train_simple_model: 01_train_simple_model.html
@@ -8,7 +8,7 @@ articles:
   04_biodiversity_projections: 04_biodiversity_projections.html
   comparison: comparison.html
   contributing: contributing.html
-last_built: 2022-01-28T23:08Z
+last_built: 2022-01-30T22:03Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles
