@@ -2,7 +2,7 @@
 % Please edit documentation in R/distribution.R
 \name{distribution}
 \alias{distribution}
-\title{Setup biodiversity distribution modelling procedure}
+\title{Create distribution modelling procedure}
 \usage{
 distribution(background, limits = NULL)
 
@@ -12,69 +12,75 @@ distribution(background, limits = NULL)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object}
+\code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object.}
 
 \item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when
-intersected with input data (Default: NULL).}
+intersected with input data (Default: \code{NULL}).}
 }
 \value{
-\code{\linkS4class{BiodiversityDistribution}} object containing
-data for building a biodiversity distribution modelling problem.
+\code{\linkS4class{BiodiversityDistribution}} object containing data for building a biodiversity distribution modelling problem.
 }
 \description{
 This function creates an object that contains all the data, parameters and settings
-for creating an (integrated) species distribution model.
-Key functions to add data are \code{\link[=add_biodiversity_*]{add_biodiversity_*()}} , \code{\link[=add_predictions]{add_predictions()}},
-\code{\link[=add_latent]{add_latent()}}, \code{\link[=engine_*]{engine_*()}}, \code{\link[=add_priors]{add_priors()}} and \code{\link[=add_offset]{add_offset()}}. This function then creates a
+for building an (integrated) species distribution model.
+Key functions to add data are \link{add_biodiversity}, \link{add_predictors},
+\link{add_latent}, \link{engine}, \link{add_priors} and \link{add_offset}. This creates a
 prototype \code{\link{BiodiversityDistribution}} object with its own functions.
-After setting input data and parameters, missing parameters in the model can then be estimated
-via the \code{\link[=train]{train()}} function and predictions be created.
-}
-\details{
+After setting input data and parameters, model predictions can then be created
+via the \link{train} function and predictions be created.
 See \strong{Details} for further functions available to modify or summarize the created object.
 
-** Note that any model requires at minimum a single added biodiversity distribution object
-as well as a specified engine. **
-
+\strong{Note that any model requires at minimum a single added \link{biodiversity} dataset
+as well as a specified \link{engine}.}
+}
+\details{
 This function creates a \code{\linkS4class{BiodiversityDistribution}} object that in itself contains
-other functions and stores input and pre-processed data.
-A full list of functions available can be queried via \code{object} although some of them
-are not intended to be manipulated directly but rather through convenience functions (e.g. \code{\link[=add_predictions]{add_predictions()}}).
-Several other objects are stored in the \code{\linkS4class{BiodiversityDistribution}} object that
-have their own functions as well and can be queried (e.g. \link{print}) by the author (list of functions in the respective help file).
-If some of those datasets are not set, then a \link{"Waiver"} object is returned instead.
+other functions and stores parameters and (pre-)processed data.
+A full list of functions available can be queried via \code{names(object)}.
+Some of the functions are not intended to be manipulated directly,
+but rather through convenience functions (e.g. \code{\link[=object$set_predictors]{object$set_predictors()}}).
+Similarly other objects are stored in the \code{\linkS4class{BiodiversityDistribution}} object that
+have their own functions as well and can be queried (e.g. \code{\link{names(object)}}). For a list of
+functions see the reference documentation. By default,
+if some datasets are not set, then a \code{\link{Waiver}} object is returned instead.
 
 The following objects can be stored:
 \itemize{
 \item \code{object$biodiversity} A \code{\link{BiodiversityDatasetCollection}} object with the added biodiversity data.
-\item \code{object$engine} An \code{\link{engine}} object with function dependend on the added engine.
+\item \code{object$engine} An \code{\link{engine}} object (e.g. \link{engine_inlabru}) with function depended on the added engine.
 \item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictions.
 \item \code{object$priors} A \code{\link{PriorList}} object with all specified priors.
-\item \code{object$log} A \code{\link{Log}} object that captures
+\item \code{object$log} A \code{\link{Log}} object that captures.
 }
 
 Useful high-level functions to address those objects are for instance:
 \itemize{
-\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}} object contents. Can also be called via \link{print}
-\item \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors
+\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}} object contents. Can also be called via \link{print}.
+\item \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
 \item \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
 \item \code{object$get_extent()} Outputs the \link[raster:extent]{raster::extent} of the modelling region.
 \item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[raster:extent]{raster::extent} and the \link[sp:is.projected]{sp::proj4string}.
 \item \code{object$get_extent_dimensions()} Outputs the \link[raster:extent]{raster::extent} dimension by calling the \code{\link[=extent_dimensions]{extent_dimensions()}} function.
 \item \code{object$get_predictor_names()} Returns a \link{character} vector with the names of all added predictors.
-\item \code{object$get_prior_variables()} Returns a description of priors added.
+\item \code{object$get_prior_variables()} Returns a description of \code{\link{priors}} added.
 }
 
 There are other functions as well but those are better accessed through their respective wrapper functions.
 }
 \examples{
 \dontrun{
-print('test')
+ # Load background raster
+ background <- raster::raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+ Define model
+ x <- distribution(background)
+ x
 }
 }
 \references{
-Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. \url{https://doi.org/10.1002/ecy.2710}
+\itemize{
+\item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. \url{https://doi.org/10.1002/ecy.2710}
+}
 }
 \seealso{
-\link{bdproto} on the general definition of proto objects and in particular \link{bdproto-biodiversitydistribution}.
+\code{\link{bdproto}} on the general definition of \code{\link{proto}} objects and in particular \code{\link{bdproto-biodiversitydistribution}}.
 }

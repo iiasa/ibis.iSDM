@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_log.R
 \name{add_log}
 \alias{add_log}
-\title{Adds a log file to distribution object to write messages and output in there}
+\title{Adds a log file to distribution object}
 \usage{
 add_log(x, filename)
 
@@ -11,23 +11,17 @@ add_log(x, filename)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{filename}{A \code{\link{character}} object. Destination must be writeable and filename ends with 'txt'}
+\item{filename}{A \code{\link{character}} object.
+The destination must be writeable and filename ends with \code{'txt'}.}
 }
 \description{
-Adds a log file to distribution object to write messages and output in there
+This function allows to specify a file as \linkS4class{Log} file, which is used to save all
+console outputs, prints and messages.
 }
-\details{
-TBD
-}
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
- TBD
+ x <- distribution(background) \%>\%
+    add_log()
+ x
 }
-}
-\references{
-
 }

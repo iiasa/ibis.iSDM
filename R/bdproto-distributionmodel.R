@@ -11,6 +11,7 @@ NULL
 #'
 #' @name DistributionModel-class
 #' @aliases DistributionModel
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

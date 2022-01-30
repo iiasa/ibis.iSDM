@@ -11,7 +11,8 @@ GDBPriors(variable, hyper = "increasing", ...)
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
+\code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -26,7 +27,10 @@ Other prior:
 \code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
 \code{\link{XGBPriors}()},
-\code{\link{XGBPrior}()}
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

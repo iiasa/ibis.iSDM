@@ -9,16 +9,18 @@ scenario(fit, limits = NULL)
 \S4method{scenario}{ANY}(fit)
 }
 \arguments{
-\item{fit}{A trained \code{\link{BiodiversityDistribution}} model}
+\item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}
 
 \item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the projection surface when
-intersected with the prediction data (Default: NULL).}
+intersected with the prediction data (Default: \code{NULL}). This can for instance be set
+as an expert-delineated constrain to limit spatial projections.}
 }
 \description{
-Create a new scenario based on trained model parameters
+This function creates a new \linkS4class{BiodiversityScenario} object
+that contains the projections of a model.
 }
 \examples{
 \dontrun{
-print('test')
+  scenario(fit, limits = island_area)
 }
 }

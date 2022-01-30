@@ -1,28 +1,32 @@
 #' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
 NULL
 
-#' Engine for use of extreme gradient boosting (XGBoost)
+#' Engine for extreme gradient boosting (XGBoost)
 #'
-#' @description eXtreme gradient descent boosting for tree-based or linear boosting.
-#' Flexible, yet powerful engine with many customization options.
-#' The XGBoost engine supports multiple options to perform single and multiclass regression
+#' @description Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.
+#' The XGBoost engine is a flexible, yet powerful engine with many customization options,
+#' supporting multiple options to perform single and multiclass regression
 #' and classification tasks. For a full list of options users are advised to have a look at the
-#' [xgboost::xgb.train] help file and [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io)
-#'
+#' [xgboost::xgb.train] help file and [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io).
+#' @details
+#' XGBoost supports the specification of monotonic contraints on certain variables. Within
+#' ibis this is possible via [`XGBPrior`].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param booster A [`character`] of the booster to use. Either "gbtree" or "gblinear" (Default: gblinear)
+#' @param booster A [`character`] of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})
 #' @param learning_rate [`numeric`] value indicating the learning rate (eta).
-#' Lower values generally being better but more costly
-#' @param nrounds [`numeric`] value giving the the maximum number of boosting iterations for cross-validation
+#' Lower values generally being better but also computationally more costly.
+#' @param nrounds [`numeric`] value giving the the maximum number of boosting iterations for cross-validation.
 #' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: 3)
 #' Also see [reg_lambda] parameter for the L2 regularization on the weights
-#' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: 0)
-#' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: 0)
-#' @param max_depth [`numeric`] The Maximum depth of a tree. (Default: 3)
-#' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting. (Default: 0.8)
-#' @param ... Other none specificed parameters. For constraints see [`XGBPrior`]
+#' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
+#' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
+#' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
+#' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting (Default: \code{0.8}).
+#' @param ... Other none specificed parameters.
 #' @seealso [xgboost::xgb.train]
-#' @references  Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
+#' @references
+#' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
+#' @family engine
 #' @name engine_xgboost
 NULL
 #' @rdname engine_xgboost

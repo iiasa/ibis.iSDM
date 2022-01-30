@@ -16,7 +16,6 @@ NULL
 #' `ggplot2` and `prioritizr` package.
 #'
 #' @return Object of class `Waiver`.
-#'
 #' @examples
 #' # create new waiver object
 #' w <- new_waiver()

@@ -12,26 +12,27 @@ spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 \method{spartial}{DistributionModel}(x, ...)
 }
 \arguments{
-\item{mod}{A trained \code{DistributionModel} model}
+\item{mod}{A \code{\linkS4class{DistributionModel}} object with trained model.}
 
-\item{x.var}{A \code{\link{character}} indicating the variable for which a partial effect is to be calculated}
+\item{x.var}{A \link{character} indicating the variable for which a partial effect is to be calculated.}
 
-\item{constant}{A \code{\link{numeric}} constant to be inserted for all other variables. Default calculates a mean per variable}
+\item{constant}{A \link{numeric} constant to be inserted for all other variables. Default calculates the \link{mean} per variable.}
 
-\item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted ?}
+\item{plot}{A \link{logical} indication of whether the result is to be plotted?}
 
-\item{...}{Other engine specific parameters}
+\item{...}{Other engine specific parameters.}
 }
 \value{
 A \link{RasterLayer} containing the mapped partial response of the variable.
 }
 \description{
-Similar as \code{partial} calculates partial response of a trained model for a given variable in space.
-However the result is a \code{raster} showing the spatial magnitude of the partial response.
+Similar as \link{partial} this function calculates a partial response of a trained model for a given variable.
+Differently from \link{partial} in space. However the result is a \code{raster}
+showing the spatial magnitude of the partial response.
 }
 \details{
-By default the mean is calculated across all parameters that are not \code{x.var}.
-Instead a \emph{constant} can be set (for instance 0) to be applied to the output.
+By default the \link{mean} is calculated across all parameters that are not \code{x.var}.
+Instead a \emph{constant} can be set (for instance \code{0}) to be applied to the output.
 }
 \seealso{
 \link{partial}

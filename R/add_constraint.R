@@ -27,10 +27,12 @@ NULL
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
-#' @references Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
-#' @references Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
-#' @references Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
+#' @references
+#' * Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
+#' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
+#' * Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 #' @name add_constrain
+#' @family constrain
 #' @aliases add_constrain
 #' @keywords scenario
 #' @exportMethod add_constrain
@@ -77,6 +79,7 @@ methods::setMethod(
 #' @name add_constrain_dispersal
 #' @aliases add_constrain_dispersal
 #' @inheritParams add_constrain
+#' @family constrain
 #' @keywords scenario
 #' @exportMethod add_constrain_dispersal
 #' @export
@@ -301,6 +304,7 @@ methods::setMethod(
 #' @name add_constrain_connectivity
 #' @aliases add_constrain_connectivity
 #' @inheritParams add_constrain
+#' @family constrain
 #' @keywords scenario
 #' @exportMethod add_constrain_connectivity
 #' @export

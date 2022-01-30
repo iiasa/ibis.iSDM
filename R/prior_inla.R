@@ -3,14 +3,15 @@ NULL
 
 #' Create a new INLA prior
 #'
-#' Function to create a new INLA prior that can be added to environmental predictors
+#' @description
+#' Function to create a new INLA prior that can be added to environmental predictors.
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects
-#' @param type A [`character`] specifying the type of prior to be set
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyperparameters. First entry is treated as mean, the second as precision
-#' @param ... Variables passed on to prior object
-#' @details TBD
-#' @section Notes:
+#' @param variable A [`character`] matched against existing predictors or latent effects.
+#' @param type A [`character`] specifying the type of prior to be set.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters. First entry is treated as mean, the second as precision.
+#' @param ... Variables passed on to prior object.
+#' @note
+#' Currently only linear and constrained linear priors are supported.
 #' @references
 #' * Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
 #' @seealso [`Prior-class`].
@@ -86,11 +87,14 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables and types are supplied
+#' @description
+#' This is a helper function to specify several [INLAPrior] objects with the same
+#' hyper-parameters, but different variables.
 #' @name INLAPriors
-#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects
-#' @param type A [`character`] specifying the type of prior to be set
+#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects.
+#' @param type A [`character`] specifying the type of prior to be set.
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
-#' @param ... Variables passed on to prior object
+#' @param ... Variables passed on to prior object.
 #' @rdname INLAPriors
 #' @exportMethod INLAPriors
 #' @keywords priors

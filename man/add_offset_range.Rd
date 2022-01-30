@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_range}
 \alias{add_offset_range}
-\title{Add a range of a species as offset to a distribution object}
+\title{Specify an offset object for a species}
 \usage{
 add_offset_range(
   x,
@@ -19,15 +19,36 @@ add_offset_range(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{range}{A \code{\link{sf}} object with the range for the target feature}
+\item{range}{A \code{\link{sf}} or \code{\link{RasterLayer}}object with the range for the target feature.}
 
-\item{method}{\code{\link{character}} describing how the range should be included (binary | distance)}
+\item{method}{\code{\link{character}} describing how the range should be included (Options: \code{"binary"} | \code{"distance"}).}
 
-\item{name}{\code{\link{character}} A name of the species if the offset is not specified}
+\item{name}{\code{\link{character}} A name of the species if the offset is not specified.}
 
-\item{distance_max}{Numeric threshold on the maximum distance (Default: 150000 \link{m})}
+\item{distance_max}{Numeric threshold on the maximum distance (Default: \code{150000} \link{m}).}
 }
 \description{
-As options allow specifying including the range either as binary or using distance
-as parameter following Merow et al. (2017)
+Including offsets is another option to integrate spatial prior information
+in linear and additive regression models. Here, offset simply shift the intercept of
+the regression fit. Since offsets only make sense for linear regressions (and not for instance
+regression tree based methods such as \link{engine_bart}), they do not work for all engines.
 }
+\details{
+As options allow specifying including the range either as binary or using distance
+as parameter following Merow et al. (2017). In this case the existing range needs
+to be transformed first, for instance using the \link{bossMaps} package.
+}
+\note{
+Only one offset per distribution object can currently be specified. This might
+change in the future.
+}
+\references{
+\itemize{
+\item Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+}
+}
+\seealso{
+\link{bossMaps}
+}
+\keyword{prior}

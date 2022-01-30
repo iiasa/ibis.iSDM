@@ -7,10 +7,11 @@ NULL
 
 #' Engine prototype.
 #'
-#' Basic object for engine, all other engines inherit from here
+#' Basic object for engine, all other engines inherit from here.
 #'
 #' @name Engine-class
 #' @aliases Engine
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

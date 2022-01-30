@@ -3,13 +3,14 @@ NULL
 
 #' Create a new monotonic prior
 #'
+#' @description
 #' Function to include prior information as monotonic constrain to a
 #' extreme gradient descent boosting model [engine_xgboost].
+#' Note that monotonic priors enforce directionality in direction of certain variables.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
-#' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}
-#' @param ... Variables passed on to prior object
-#' @details TBD
+#' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.
+#' @param ... Variables passed on to prior object.
 #' @references
 #' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
 #' @seealso [`Prior-class`].
@@ -58,6 +59,9 @@ methods::setMethod(
 
 #' Helper function when multiple variables are supplied
 #' @name XGBPriors
+#' @description
+#' This is a helper function to specify several [XGBPrior] with the same
+#' hyper-parameters, but different variables.
 #' @rdname XGBPriors
 #' @exportMethod XGBPriors
 #' @inheritParams XGBPrior

@@ -11,6 +11,7 @@ NULL
 #'
 #' @name Log-class
 #' @aliases Log
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

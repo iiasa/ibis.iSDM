@@ -1,19 +1,24 @@
 #' @include utils.R bdproto.R bdproto-prior.R bdproto-priorlist.R
 NULL
 
-#' Set priors to an existing distribution object
+#' Add priors to an existing distribution object
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param priors A [`PriorList-class`] object containing multiple priors
-#' @param ... Other parameters passed down
-#' @details TBD
-#' @section Notes:
+#' @description
+#' This function simply allows to add priors to an existing [distribution] object.
+#' The supplied priors must be a [`PriorList-class`] object created through
+#' calling [priors].
+#' @note
+#' Alternatively priors to environmental predictors can also directly added as parameter
+#' via [add_predictors]
+#' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param priors A [`PriorList-class`] object containing multiple priors.
+#' @param ... Other parameters passed down.
+#' @keywords priors
+#' @family prior
 #' @aliases add_priors
-#' @references
-#'
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  x <- distribution(background)
 #' }
 #' @name add_priors
 NULL
@@ -78,15 +83,15 @@ methods::setMethod(
 
 #' Remove existing priors from an existing distribution object
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names A [`vector`] or [`character`] object for priors to be removed
+#' @description
+#' This function allows to remove priors from an existing [distribution] object.
+#' In order to remove a set prior, the name of the prior has to be specified.
+#' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param names A [`vector`] or [`character`] object for priors to be removed.
 #' @param ... Other parameters passed down
-
-#' @details TBD
-#' @section Notes:
-#' @aliases add_predictors
-#' @references
-#'
+#' @aliases rm_priors
+#' @keywords priors
+#' @family prior
 #' @examples
 #' \dontrun{
 #'  TBD

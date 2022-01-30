@@ -7,13 +7,13 @@
 find_correlated_predictors(env, keep = NULL, cutoff = 0.7, method = "pearson")
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} with extracted environmental covariates for a given species}
+\item{env}{A \code{\link{data.frame}} with extracted environmental covariates for a given species.}
 
-\item{keep}{A \code{\link{vector}} with variables to keep regardless}
+\item{keep}{A \code{\link{vector}} with variables to keep regardless.}
 
-\item{cutoff}{A \code{\link{numeric}} variable specifying the maximal correlation cutoff}
+\item{cutoff}{A \code{\link{numeric}} variable specifying the maximal correlation cutoff.}
 
-\item{method}{Which method to use for constructing the correlation matrix (pearson|spearman|kendal)}
+\item{method}{Which method to use for constructing the correlation matrix (Options: \code{'pearson'}| \code{'spearman'}| \code{'kendal'})}
 }
 \value{
 vector of variable names to exclude

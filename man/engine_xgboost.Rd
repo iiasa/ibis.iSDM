@@ -2,7 +2,7 @@
 % Please edit documentation in R/engine_xgboost.R
 \name{engine_xgboost}
 \alias{engine_xgboost}
-\title{Engine for use of extreme gradient boosting (XGBoost)}
+\title{Engine for extreme gradient boosting (XGBoost)}
 \usage{
 engine_xgboost(
   x,
@@ -22,36 +22,50 @@ engine_xgboost(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{booster}{A \code{\link{character}} of the booster to use. Either "gbtree" or "gblinear" (Default: gblinear)}
+\item{booster}{A \code{\link{character}} of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})}
 
 \item{learning_rate}{\code{\link{numeric}} value indicating the learning rate (eta).
-Lower values generally being better but more costly}
+Lower values generally being better but also computationally more costly.}
 
-\item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation}
+\item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation.}
 
 \item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: 3)
 Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
 
-\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: 0)}
+\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: \code{0}).}
 
-\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default: 0)}
+\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default: \code{0}).}
 
-\item{max_depth}{\code{\link{numeric}} The Maximum depth of a tree. (Default: 3)}
+\item{max_depth}{\code{\link{numeric}} The Maximum depth of a tree (Default: \code{3}).}
 
-\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting. (Default: 0.8)}
+\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting (Default: \code{0.8}).}
 
-\item{...}{Other none specificed parameters. For constraints see \code{\link{XGBPrior}}}
+\item{...}{Other none specificed parameters.}
 }
 \description{
-eXtreme gradient descent boosting for tree-based or linear boosting.
-Flexible, yet powerful engine with many customization options.
-The XGBoost engine supports multiple options to perform single and multiclass regression
+Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.
+The XGBoost engine is a flexible, yet powerful engine with many customization options,
+supporting multiple options to perform single and multiclass regression
 and classification tasks. For a full list of options users are advised to have a look at the
-\link[xgboost:xgb.train]{xgboost::xgb.train} help file and \url{https://xgboost.readthedocs.io}
+\link[xgboost:xgb.train]{xgboost::xgb.train} help file and \url{https://xgboost.readthedocs.io}.
+}
+\details{
+XGBoost supports the specification of monotonic contraints on certain variables. Within
+ibis this is possible via \code{\link{XGBPrior}}.
 }
 \references{
-Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
+\itemize{
+\item Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
+}
 }
 \seealso{
 \link[xgboost:xgb.train]{xgboost::xgb.train}
+
+Other engine: 
+\code{\link{engine_bart}()},
+\code{\link{engine_gdb}()},
+\code{\link{engine_inlabru}()},
+\code{\link{engine_inla}()},
+\code{\link{engine_stan}()}
 }
+\concept{engine}

@@ -5,16 +5,16 @@ NULL
 #'
 #' Create a partial response or effect plot of a trained model
 #'
-#' @param mod A trained `DistributionModel` model
-#' @param x.var A [`character`] indicating the variable for which a partial effect is to be calculated
-#' @param constant A [`numeric`] constant to be inserted for all other variables. Default calculates a mean per variable
-#' @param variable_length The interpolation depth (nr. of points) to be used (Default: 100)
-#' @param plot A [`logical`] indication of whether the result is to be plotted ?
+#' @param mod A trained `DistributionModel` object with \code{fit_best} model within.
+#' @param x.var A [character] indicating the variable for which a partial effect is to be calculated.
+#' @param constant A [numeric] constant to be inserted for all other variables. Default calculates a mean per variable.
+#' @param variable_length [numeric] The interpolation depth (nr. of points) to be used (Default: \code{100}).
+#' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param ... Other engine specific parameters
 #' @seealso [partial]
 #' @details By default the mean is calculated across all parameters that are not \code{x.var}.
-#' Instead a *constant* can be set (for instance 0) to be applied to the output.
-#' @return A [data.frame] with the created partial response
+#' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
+#' @return A [data.frame] with the created partial response.
 #' @keywords partial
 #' @name partial
 methods::setGeneric(
@@ -53,17 +53,18 @@ partial.DistributionModel <- function(x, ...) x$partial(...)
 
 #' Obtain spatial partial effects of trained model
 #'
-#' Similar as \code{partial} calculates partial response of a trained model for a given variable in space.
-#' However the result is a \code{raster} showing the spatial magnitude of the partial response.
-#'
-#' @param mod A trained `DistributionModel` model
-#' @param x.var A [`character`] indicating the variable for which a partial effect is to be calculated
-#' @param constant A [`numeric`] constant to be inserted for all other variables. Default calculates a mean per variable
-#' @param plot A [`logical`] indication of whether the result is to be plotted ?
-#' @param ... Other engine specific parameters
+#' @description
+#' Similar as [partial] this function calculates a partial response of a trained model for a given variable.
+#' Differently from [partial] in space. However the result is a \code{raster}
+#' showing the spatial magnitude of the partial response.
+#' @param mod A [`DistributionModel-class`] object with trained model.
+#' @param x.var A [character] indicating the variable for which a partial effect is to be calculated.
+#' @param constant A [numeric] constant to be inserted for all other variables. Default calculates the [mean] per variable.
+#' @param plot A [logical] indication of whether the result is to be plotted?
+#' @param ... Other engine specific parameters.
 #' @seealso [partial]
-#' @details By default the mean is calculated across all parameters that are not \code{x.var}.
-#' Instead a *constant* can be set (for instance 0) to be applied to the output.
+#' @details By default the [mean] is calculated across all parameters that are not \code{x.var}.
+#' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
 #' @returns A [RasterLayer] containing the mapped partial response of the variable.
 #' @keywords partial
 #' @name spartial

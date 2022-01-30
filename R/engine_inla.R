@@ -3,21 +3,28 @@ NULL
 
 #' Use INLA as engine
 #'
+#' @description
+#' Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
+#' Engine has been largely superceded by the [engine_bru] package and users are advised to us this one,
+#' unless specific options are required.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: NULL)
-#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)
+#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
+#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
-#' @param offset interpreted as a numeric factor relative to the approximate data diameter;
-#' @param cutoff The minimum allowed distance between points on the mesh
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: NULL)
+#' @param offset interpreted as a numeric factor relative to the approximate data diameter.
+#' @param cutoff The minimum allowed distance between points on the mesh.
+#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
-#' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: FALSE) TBD
-#' @param nonconvex.convex Non-convex minimal extension radius for convex curvature TBD
-#' @param nonconvex.concave Non-convex minimal extension radius for concave curvature TBD
-#' @param nonconvex.res Computation resolution for nonconvex.hulls TBD
+#' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: \code{FALSE}) **Not yet implemented**
+#' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
+#' @param nonconvex.concave Non-convex minimal extension radius for concave curvature **Not yet implemented**
+#' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet implemented**
 #' @param ... Other variables
-#' @references https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
+#' @references
+#' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
+#' @family engine
 #' @name engine_inla
 NULL
 #' @rdname engine_inla

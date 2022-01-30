@@ -10,14 +10,18 @@ template:
     twitter:
       creator: "@Martin_Ecology"
       site: "@IIASAVienna"
-      card: summary_large_image
+      card: summary
 
 home:
+  title: A R-package for Integrated Biodiversity distribution modelling
+  description: Help and tutorial for building integrated species distribution models.
   sidebar:
     structure: [links, citation, license, authors, dev]
   links:
     - text: Learn about contributing
       href: articles/contributing.html
+    - text: IIASA BEC group
+      href: https://iiasa.ac.at/programs/biodiversity-and-natural-resources/biodiversity-ecology-and-conservation
 
 navbar:
   structure:
@@ -42,13 +46,11 @@ navbar:
       text: Contributing
       href: articles/contributing.html
 
-
-
 reference:
-  - title: Setting up and training models
+  - title: Setting up and train models
     desc: >
       Key functions for setting up models and training them. Start with
-      distribution and see examples how to build a model
+      distribution and see examples how to build a model.
     contents:
         - distribution
         - priors
@@ -57,7 +59,19 @@ reference:
         - prior_stan
         - prior_xgb
         - train
-        - scenario
+
+  - title: Add or modify data and parameters
+    desc: Functions to add or modify data and parameters in existing objects.
+    contents:
+      - starts_with("add_")
+      - starts_with("set_")
+      - starts_with("sel_")
+      - starts_with("rm_")
+
+  - title: Engines
+    desc: Statistical models used for estimation of species distributions.
+    contents:
+      - starts_with("engine_")
 
   - title: Create spatial-temporal projections
     desc: Functions specifically for adding constrains and creating scenarios based on trained models.
@@ -66,13 +80,8 @@ reference:
       - starts_with("add_constrain")
       - has_keyword("scenarios")
 
-  - title: Engines
-    desc: Statistical models used for estimation of species distributions
-    contents:
-      - starts_with("engine_")
-
   - title: Model summary and validation
-    desc: Key functions to modify existing trained models
+    desc: Key functions to summarize, validate or extract information from trained models.
     contents:
       - summary
       - validate
@@ -82,14 +91,6 @@ reference:
       - spartial
       - threshold
       - ensemble
-
-  - title: Add or modify data and parameters
-    desc: Functions to add or modify data and parameters in existing objects
-    contents:
-      - starts_with("add_")
-      - starts_with("set_")
-      - starts_with("sel_")
-      - starts_with("rm_")
 
   - title: Utility functions
     desc: Functions used by engines or spatial processing

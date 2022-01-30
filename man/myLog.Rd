@@ -9,12 +9,15 @@ myLog(title = "[Processing]", col = "green", ...)
 \arguments{
 \item{title}{The title in the log output}
 
-\item{col}{A \code{\link{character}} indicating the text colour to be used. Supported are green / yellow / red}
+\item{col}{A \code{\link{character}} indicating the text colour to be used. Supported are 'green' / 'yellow' / 'red'}
 
 \item{...}{Any additional outputs or words for display}
 }
 \description{
-\code{myLog} prints a log with a custom header
+This functions prints a message with a custom header and colour.
+}
+\examples{
+myLog("[Setup]", "red", "Some error occurred during data preparation.")
 }
 \keyword{internal,}
 \keyword{utils}

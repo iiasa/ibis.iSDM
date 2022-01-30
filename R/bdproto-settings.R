@@ -11,6 +11,7 @@ NULL
 #'
 #' @name Settings-class
 #' @aliases Settings
+#' @family bdproto
 #' @keywords bdproto
 NULL
 

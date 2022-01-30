@@ -22,7 +22,8 @@
 None.
 }
 \description{
-Summarises a trained model or predictor object
+This helper function summarizes a given object, including
+\link{DistributionModel} and \link{PredictorDataset}.
 }
 \seealso{
 \code{\link[base:summary]{base::summary()}}.

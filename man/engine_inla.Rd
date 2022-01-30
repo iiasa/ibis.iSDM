@@ -20,17 +20,17 @@ engine_inla(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: NULL)}
+\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
 
-\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: NULL)}
+\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})}
 
 \item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
 
-\item{offset}{interpreted as a numeric factor relative to the approximate data diameter;}
+\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.}
 
-\item{cutoff}{The minimum allowed distance between points on the mesh}
+\item{cutoff}{The minimum allowed distance between points on the mesh.}
 
-\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: NULL)}
+\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})}
 
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
@@ -38,17 +38,30 @@ engine_inla(
 
 \item{...}{Other variables}
 
-\item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: FALSE) TBD}
+\item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: \code{FALSE}) \strong{Not yet implemented}}
 
-\item{nonconvex.convex}{Non-convex minimal extension radius for convex curvature TBD}
+\item{nonconvex.convex}{Non-convex minimal extension radius for convex curvature \strong{Not yet implemented}}
 
-\item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature TBD}
+\item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature \strong{Not yet implemented}}
 
-\item{nonconvex.res}{Computation resolution for nonconvex.hulls TBD}
+\item{nonconvex.res}{Computation resolution for nonconvex.hulls \strong{Not yet implemented}}
 }
 \description{
-Use INLA as engine
+Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
+Engine has been largely superceded by the \link{engine_bru} package and users are advised to us this one,
+unless specific options are required.
 }
 \references{
-https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#ref-Simpsonetal:2016
+\itemize{
+\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 }
+}
+\seealso{
+Other engine: 
+\code{\link{engine_bart}()},
+\code{\link{engine_gdb}()},
+\code{\link{engine_inlabru}()},
+\code{\link{engine_stan}()},
+\code{\link{engine_xgboost}()}
+}
+\concept{engine}

@@ -9,4 +9,17 @@ Base \code{\link{proto}} class for any biodiversity distribution objects.
 Serves as container that supplies data and functions to
 other \code{\link{proto}} classes.
 }
+\seealso{
+Other bdproto: 
+\code{\link{BiodiversityDatasetCollection-class}},
+\code{\link{BiodiversityScenario-class}},
+\code{\link{DistributionModel-class}},
+\code{\link{Engine-class}},
+\code{\link{Log-class}},
+\code{\link{PredictorDataset-class}},
+\code{\link{Prior-class}},
+\code{\link{PriorList-class}},
+\code{\link{Settings-class}}
+}
+\concept{bdproto}
 \keyword{bdproto}

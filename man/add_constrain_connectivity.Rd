@@ -21,4 +21,11 @@ For kissmig the value needs to give the number of iteration steps (or within yea
 \description{
 Adds a connectivity constrain to a scenario object
 }
+\seealso{
+Other constrain: 
+\code{\link{add_constrain_MigClim}()},
+\code{\link{add_constrain_dispersal}()},
+\code{\link{add_constrain}()}
+}
+\concept{constrain}
 \keyword{scenario}

@@ -5,20 +5,20 @@ NULL
 #'
 #' @description
 #' It is common in many applications of species distribution modelling that estimated
-#' continious suitability surfaces are converted into discrete representations of where
-#' suitable habitat might or might not exist. This threshold'ing can be done in various ways
-#' which are further described in the details.
+#' continuous suitability surfaces are converted into discrete representations of where
+#' suitable habitat might or might not exist. This so called *threshold'ing*
+#' can be done in various ways which are further described in the details.
 #'
-#' In case a [RasterLayer] or [RasterBrick] is provided as input for \code{obj}, it is furthermore
-#' necessary to provide a [`sf`] object for validation as there is no [`DistributionModel`] to read this
-#' information from.
+#' In case a [RasterLayer] or [RasterBrick] is provided as input in this function
+#' for \code{obj}, it is furthermore necessary to provide a [`sf`] object for validation as
+#' there is no [`DistributionModel`] to read this information from.
 #' **Note:** This of course also allows to estimate the threshold based on withheld data, for instance
 #' those created from an a-priori cross-validation procedure.
 #'
 #' For [`BiodiversityScenario`] objects, adding this function to the processing pipeline
 #' stores a threshold attribute in the created [scenario] object.
 #'
-#' @param obj A trained [`DistributionModel`] or alternatively a [`Raster`] object
+#' @param obj A trained [`DistributionModel`] or alternatively a [`Raster`] object.
 #' @param method A specifc method for thresholding. See details for available options.
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
 #' @param poi A [`sf`] object containing observational data used for model training.

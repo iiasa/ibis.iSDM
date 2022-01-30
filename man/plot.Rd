@@ -22,16 +22,18 @@
 \arguments{
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection}, \link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{...}{Further arguments passed on to \code{x$plot}}
+\item{...}{Further arguments passed on to \code{x$plot}.}
+
+\item{what}{In case a \link{RasterLayer} is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).}
 }
 \value{
 Graphical output
 }
 \description{
-Plots information from a given object where a plotting object is available
+Plots information from a given object where a plotting object is available.
 }
 \details{
 The plotted outputs vary depending on what object is being plotted.
-For example for fitted \link{DistributionModel} the output is usually the fitted spatial prediction (Default: 'mean')
+For example for a fitted \link{DistributionModel} the output is usually the fitted spatial prediction (Default: \code{'mean'}).
 }
 \keyword{misc}

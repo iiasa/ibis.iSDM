@@ -1,18 +1,21 @@
 #' Inverse of in call for convenience
 #' Calculates the set of entries not present in the second vector
 #'
-#' @param a First [`vector`] object
-#' @param b Second [`vector`] object
+#' @param a First [`vector`] object.
+#' @param b Second [`vector`] object.
 #' @keywords internal, utils
 #' @noRd
 `%notin%` = function(a, b){!(a %in% b)}
 
 #' Custom messaging function for scripts
 #'
-#' \code{myLog} prints a log with a custom header
+#' @description
+#' This functions prints a message with a custom header and colour.
 #' @param title The title in the log output
-#' @param col A [`character`] indicating the text colour to be used. Supported are green / yellow / red
+#' @param col A [`character`] indicating the text colour to be used. Supported are 'green' / 'yellow' / 'red'
 #' @param ... Any additional outputs or words for display
+#' @examples
+#' myLog("[Setup]", "red", "Some error occurred during data preparation.")
 #' @keywords internal, utils
 #' @export
 myLog <- function(title = "[Processing]", col = 'green', ...) {
@@ -29,7 +32,7 @@ myLog <- function(title = "[Processing]", col = 'green', ...) {
 }
 
 #' Colour helpers for message logs
-#' @param text A [`character`]
+#' @param text A [`character`].
 #' @keywords internal, utils
 #' @aliases text_red
 #' @noRd
@@ -42,7 +45,7 @@ text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
 text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 
 #' Calculate the mode
-#' @param A [`vector`] of values or characters
+#' @param A [`vector`] of values or characters.
 #' @keywords utils
 #' @noRd
 mode <- function(x) {
@@ -51,10 +54,9 @@ mode <- function(x) {
 }
 #' Check whether function exist in name space
 #'
-#' @param x The name of a package from which a function is needed
+#' @param x The [character] name of a package from which a function is needed.
 #' @keywords internal, utils
 #' @noRd
-# You need the suggested package for this function
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
   if (!requireNamespace(x, quietly = TRUE)) {
@@ -80,10 +82,9 @@ to_camelcase <- function(x){
 #'
 #' Return a pretty character representation of an object with elements and
 #' names.
-#' Helpful function taken from `prioritizr` package
-#'
 #' @param x A [`vector`] object
 #' @return [`character`] object.
+#' @concept function taken from `prioritizr` package
 #' @keywords internal, utils
 #' @examples
 #' name_atomic(letters)
@@ -136,7 +137,6 @@ align_text <- function(x, n) {
 #' Convert character to capital text
 #'
 #' @param x [`character`] text.
-#'
 #' @examples
 #' capitalize_text('presence')
 #' capitalize_text('ducks are the best birds')
@@ -169,10 +169,11 @@ to_formula <- function(formula){
 #' Create formula matrix
 #'
 #' Function to create list of formulas with all possible combinations of variables
-#' @param form An input [`formula`] object
-#' @param response A [`character`] object giving the response. (Default: NULL)
-#' @param type Currently implemented are 'inla' (variable groups), 'All' (All possible combinations) or 'forward'
-#' @returns A [`vector`] object with [`formula`] objects
+#' @param form An input [`formula`] object.
+#' @param response A [`character`] object giving the response. (Default: \code{NULL})
+#' @param type Currently implemented are \code{'inla'} (variable groups),
+#'  \code{'All'} (All possible combinations) or \code{'forward'}.
+#' @returns A [`vector`] object with [`formula`] objects.
 #' @examples \dontrun{
 #' formula_combinations(form)
 #' }
@@ -353,10 +354,10 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 
 #' Filter a set of correlated predictors to fewer ones
 #'
-#' @param env A [`data.frame`] with extracted environmental covariates for a given species
-#' @param keep A [`vector`] with variables to keep regardless
-#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff
-#' @param method Which method to use for constructing the correlation matrix (pearson|spearman|kendal)
+#' @param env A [`data.frame`] with extracted environmental covariates for a given species.
+#' @param keep A [`vector`] with variables to keep regardless.
+#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff.
+#' @param method Which method to use for constructing the correlation matrix (Options: \code{'pearson'}| \code{'spearman'}| \code{'kendal'})
 #' @concept Code inspired from the [`caret`] package
 #' @keywords utils
 #' @returns vector of variable names to exclude
@@ -408,16 +409,20 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
 
 #' Apply the adaptive best subset selection framework on a set of predictors
 #'
-#' @param env A [`data.frame`] with extracted environmental covariates for a given species
-#' @param observed A [`vector`] with the observed response variable
+#' @description
+#' This is a wrapper function to fit the adaptive subset selection procedure outlined
+#' in Zhu et al. (2021) and Zhu et al. (2020).
+#' @param env A [`data.frame`] with extracted environmental covariates for a given species.
+#' @param observed A [`vector`] with the observed response variable.
 #' @param family A [`character`] indicating the family the observational data originates from.
 #' @param tune.type [`character`] indicating the type used for subset evaluation.
-#' Options are c("gic", "ebic", "bic", "aic", "cv") as listed in [abess]
-#' @param lambda A [`numeric`] single lambda value for regularized best subset selection. Default is 0.
-#' @param weight Observation weights. When weight = NULL, we set weight = 1 for each observation as default.
-#' @param keep A [`vector`] with variables to keep regardless. Default is NULL
-#' @references abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
-#' @references A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
+#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [abess].
+#' @param lambda A [`numeric`] single lambda value for regularized best subset selection (Default: \code{0}).
+#' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1} for each observation as default.
+#' @param keep A [`vector`] with variables to keep regardless (Default: \code{NULL}).
+#' @references
+#' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
+#' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
 #' @keywords utils
 #' @returns vector of variable names to exclude
 find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", lambda = 0,

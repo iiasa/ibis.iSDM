@@ -9,24 +9,20 @@ INLAPrior(variable, type, hyper = c(0, 0.001), ...)
 \S4method{INLAPrior}{character, character}(variable, type)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{type}{A \code{\link{character}} specifying the type of prior to be set}
+\item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyperparameters. First entry is treated as mean, the second as precision}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters. First entry is treated as mean, the second as precision.}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
-Function to create a new INLA prior that can be added to environmental predictors
+Function to create a new INLA prior that can be added to environmental predictors.
 }
-\details{
-TBD
+\note{
+Currently only linear and constrained linear priors are supported.
 }
-\section{Notes}{
-
-}
-
 \references{
 \itemize{
 \item Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
@@ -42,7 +38,10 @@ Other prior:
 \code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
 \code{\link{XGBPriors}()},
-\code{\link{XGBPrior}()}
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

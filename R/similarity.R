@@ -3,32 +3,34 @@ NULL
 
 #' Calculate environmental similarity of reference datasets to predictors.
 #'
+#' @description
 #' Calculate the environmental similarity of the provided covariates
-#' with respect to a reference dataset. Currently supported is Multivariate Environmental Similarity index
+#' with respect to a reference dataset.
+#' Currently supported is Multivariate Environmental Similarity index
 #' and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
 #'
-#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`Raster`] object
-#' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`data.frame`] with extracted values (corresponding to those given in `obj`)
-#' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`]
-#' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}
+#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`Raster`] object.
+#' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively
+#' a [`data.frame`] with extracted values (corresponding to those given in `obj`).
+#' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`].
+#' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.
 #' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
-#' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE})
-#' @return This function returns a list
-#'   containing:
-#'   - `similarity`: a `RasterStack` giving the environmental similarities for
+#' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
+#' @return This function returns a list containing:
+#'  * `similarity`: a `RasterStack` giving the environmental similarities for
 #'   each variable in `x` (only included when `full=TRUE`);
-#'   - `mis`: a `Raster` layer giving the minimum similarity value
+#'  * `mis`: a `Raster` layer giving the minimum similarity value
 #'   across all variables for each location (i.e. the MESS);
-#'   - `exip`: a `Raster` layer indicating whether any model would interpolate
+#'  * `exip`: a `Raster` layer indicating whether any model would interpolate
 #'   or extrapolate to this location based on environmental surface;
-#'   - `mod`: a factor `Raster` layer indicating which variable was most
+#'  * `mod`: a factor `Raster` layer indicating which variable was most
 #'   dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
 #'   and
-#'   - `mos`: a factor `Raster` layer indicating which variable was most
+#'  * `mos`: a factor `Raster` layer indicating which variable was most
 #'   similar to its reference range.
 #'
 #' @details [`similarity`] implements the MESS algorithm described in Appendix S3
-#'   of Elith et al. 2010 as well as the Mahalanobis dissimilarity described in Mesgaran et al. 2014
+#'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references
 #' * Elith, J., Kearney, M., and Phillips, S. (2010) [The art of modelling range-shifting species](https://doi.org/10.1111/j.2041-210X.2010.00036.x). _Methods in Ecology and Evolution_, 1: 330-342. doi:10.1111/j.2041-210X.2010.00036.x
@@ -36,25 +38,15 @@ NULL
 #' @importFrom raster stack nlayers init as.data.frame raster
 #' @importFrom methods is
 #' @importFrom stats na.omit
+#' @seealso [dismo] R-package
 #' @name similarity
 #' @export
 #' @examples
 #'  \dontrun{
-#' library(dismo)
-#' library(raster)
-#' ff <- list.files(system.file('ex', package='dismo'), '\\.grd$',
-#'                  full.names=TRUE )
-#' predictors <- stack(grep('biome', ff, value=TRUE, invert=TRUE))
-#' occ <- read.csv(system.file('ex/bradypus.csv', package='dismo'))[, -1]
-#' ref <- extract(predictors, occ)
-#' mess <- similarity(predictors, ref, full=TRUE)
-#' plot
+#' plot(
+#'   similarity(x) # Where x is a distribution or Raster object
+#' )
 #'  }
-#' \dontrun{
-#' library(rasterVis)
-#' library(RColorBrewer)
-#' levelplot(mess[[2]], col.regions=brewer.pal(8, 'Set1'))
-#' }
 NULL
 
 #' @name similarity
@@ -236,7 +228,8 @@ methods::setMethod(
 
 #' Function to calculate the multivariate combination novelty index (NT2)
 #'
-#' "NT1 ranges from infinite negative values to zero where zero indicates no
+#' @description
+#' NT1 ranges from infinite negative values to zero where zero indicates no
 #' extrapolation beyond the univariate coverage of reference data"
 #' (Mesgaran et al. 2014).
 #'
@@ -251,7 +244,8 @@ methods::setMethod(
 #' @param refdat A numerical [`matrix`] or [`data.frame`]. The reference values of variables organized
 #'   in columns.
 #'
-#' @references Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin.
+#' @references
+#'  * Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin.
 #'   2014. Here be dragons: a tool for quantifying novelty due to covariate
 #'   range and correlation change when projecting species distribution models.
 #'   Diversity and Distributions 20:1147-1159.
@@ -333,8 +327,8 @@ methods::setMethod(
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
   nt_novel <- emptyraster(bg)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  or1 <- c(cellStats(nt1,'min'), 0)
-  o_low <- raster::cut(nt1,or1,include.lowest=T)
+  or1 <- c(raster::cellStats(nt1,'min'), 0)
+  o_low <- raster::cut(nt1, or1, include.lowest=T)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
   # non-analogous covariate combinations

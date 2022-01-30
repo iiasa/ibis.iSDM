@@ -2,7 +2,6 @@
 % Please edit documentation in R/add_priors.R
 \name{rm_priors}
 \alias{rm_priors}
-\alias{add_predictors}
 \title{Remove existing priors from an existing distribution object}
 \usage{
 rm_priors(x, names = NULL, ...)
@@ -10,27 +9,33 @@ rm_priors(x, names = NULL, ...)
 \S4method{rm_priors}{BiodiversityDistribution}(x)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{names}{A \code{\link{vector}} or \code{\link{character}} object for priors to be removed}
+\item{names}{A \code{\link{vector}} or \code{\link{character}} object for priors to be removed.}
 
 \item{...}{Other parameters passed down}
 }
 \description{
-Remove existing priors from an existing distribution object
+This function allows to remove priors from an existing \link{distribution} object.
+In order to remove a set prior, the name of the prior has to be specified.
 }
-\details{
-TBD
-}
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
  TBD
 }
 }
-\references{
-
+\seealso{
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()}
 }
+\concept{prior}
+\keyword{priors}

@@ -2,30 +2,44 @@
 % Please edit documentation in R/priors.R
 \name{priors}
 \alias{priors}
-\title{Creates a new PriorList object that contains Priors}
+\title{Creates a new PriorList object}
 \usage{
 priors(x, ...)
 
 \S4method{priors}{Prior}(x)
 }
 \arguments{
-\item{x}{A \code{\linkS4class{Prior}} object added to the list}
+\item{x}{A \code{\linkS4class{Prior}} object added to the list.}
 
-\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list}
+\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list.}
+}
+\value{
+A \code{\link{PriorList}} object.
 }
 \description{
-Creates a new PriorList object that contains Priors
+A \code{\link{PriorList}} object is essentially a list that contains individual
+\code{\linkS4class{Prior}} objects. In order to use priors for any of the engines,
+the respective \code{\linkS4class{Prior}} has to be identified (e.g. \code{\link{INLAPrior}}) and embedded
+in a \code{\link{PriorList}} object.
 }
-\details{
-TBD
-}
-\section{Notes}{
-
-}
-
-\references{
-
+\examples{
+p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
+p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
+priors(p1, p2)
 }
 \seealso{
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
+
+Other prior: 
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{rm_priors}()}
 }
+\concept{prior}

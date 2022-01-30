@@ -6,7 +6,8 @@ NULL
 #' Function to include prior information as monotonic constrain to a gradient descent boosting model
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
-#' @param hyper A [`character`] object describing the type of constrain. Available options are 'increasing', 'decreasing','convex', 'concave', 'none'
+#' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'},
+#'  \code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.
 #' @param ... Variables passed on to prior object.
 #' @details TBD
 #' @references
@@ -56,6 +57,7 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables are supplied
+#'
 #' @name GDBPriors
 #' @rdname GDBPriors
 #' @exportMethod GDBPriors

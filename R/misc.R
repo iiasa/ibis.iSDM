@@ -32,6 +32,8 @@ NULL
 NULL
 
 #' Central colour repository
+#' @description This command contains all the colours
+#' specified for use in \pkg{ibis.iSDM}.
 #' @name ibis_colours
 #' @examples
 #' ibis_colours[['viridis_plasma']]

@@ -29,35 +29,44 @@ add_predictors(
 
 \item{env}{A \code{\linkS4class{RasterStack}}, \code{\linkS4class{RasterLayer}} or \code{\link{stars}} object.}
 
-\item{names}{A \code{\link{vector}} of character names describing the environmental stack}
+\item{names}{A \code{\link{vector}} of character names describing the environmental stack in case they should be renamed.}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: 'none','pca', 'scale', 'norm')}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 
-\item{derivates}{A Boolean check whether derivate features should be considered (Options: 'none', 'thresh', 'hinge', 'product') )}
+\item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: TRUE)}
+\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: FALSE)}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
 \description{
-Add predictors to a Biodiversity distribution object
+This function allows to add predictors to \link{distribution} or \link{BiodiversityScenario}
+objects.
 }
 \details{
-TBD
+Predictors are covariates that in spatial projection have to match
+the geographic projection of the background layer in the \link{distribution} object.
+This function furthermore allows to transform or create derivates of provided
+predictors.
+A transformation takes the provided rasters and for instance rescales them or transforms
+them through a principal component analysis (\link{prcomp}). In contrast, derivates leave
+the original provided predictors alone, but instead create new ones, for instance by transforming
+their values through a quadratic or hinge transformation. Note that this effectively
+increases the number of predictors in the object, generally requiring stronger regularization by
+the used \link{engine}.
 }
-\section{Notes}{
-
+\note{
+Not every engine does actually need covariates. For instance it is perfectly legit
+to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
 }
-
 \examples{
 \dontrun{
- TBD
+ obj <- distribution(background) \%>\%
+        add_predictors(covariates, transform = 'scale')
+ obj
 }
-}
-\references{
-
 }

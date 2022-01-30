@@ -18,13 +18,14 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model.
-#' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors
+#' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors.
 #' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
-#' for each likelihood are being fitted. Default (FALSE) uses a copy of the first added likelihood.
+#' for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
 #'
-#' @references Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
-#' @references Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+#' @references
+#' * Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+#' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
 #' @examples
 #' \dontrun{

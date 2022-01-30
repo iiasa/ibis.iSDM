@@ -3,14 +3,16 @@ NULL
 
 #' Plot wrappers
 #'
-#' Plots information from a given object where a plotting object is available
+#' @description
+#' Plots information from a given object where a plotting object is available.
 #'
 #' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection], [PredictorDataset] or [BiodiversityScenario].
-#' @param ... Further arguments passed on to \code{x$plot}
+#' @param what In case a [RasterLayer] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
+#' @param ... Further arguments passed on to \code{x$plot}.
 #'
 #' @details
 #' The plotted outputs vary depending on what object is being plotted.
-#' For example for fitted [DistributionModel] the output is usually the fitted spatial prediction (Default: 'mean')
+#' For example for a fitted [DistributionModel] the output is usually the fitted spatial prediction (Default: \code{'mean'}).
 #' @return Graphical output
 #' @keywords misc
 #' @name plot

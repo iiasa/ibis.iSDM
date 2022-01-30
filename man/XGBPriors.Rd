@@ -11,12 +11,13 @@ XGBPriors(variable, hyper = "increasing", ...)
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
 
-\item{...}{Variables passed on to prior object}
+\item{...}{Variables passed on to prior object.}
 }
 \description{
-Helper function when multiple variables are supplied
+This is a helper function to specify several \link{XGBPrior} with the same
+hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
@@ -26,7 +27,10 @@ Other prior:
 \code{\link{INLAPrior}()},
 \code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPrior}()}
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{priors}()},
+\code{\link{rm_priors}()}
 }
 \concept{prior}
 \keyword{priors}

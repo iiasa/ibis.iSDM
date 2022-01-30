@@ -7,13 +7,14 @@
 wrap_stanmodel(sm_code)
 }
 \arguments{
-\item{sm_code}{A \link{list} object with exactly 7 entries}
+\item{sm_code}{A \link{list} object with exactly 7 entries.}
 }
 \value{
-A \link{character} object
+A \link{character} object.
 }
 \description{
 \link{engine_stan} builds a list with stan model code. This function
-concatenates them together
+concatenates them together.
 }
-\keyword{stan_utils}
+\keyword{stan,}
+\keyword{utils}

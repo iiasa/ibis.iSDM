@@ -3,12 +3,14 @@ NULL
 
 #' Project a fitted model to new covariates
 #'
-#' @description Wrapper functions to project a [`BiodiversityScenario-class`] object to
-#' new (future) covariates
-#' @param mod A [`BiodiversityScenario`] object with set predictors
-#' @param no_projection A [`logical`] flag whether future projection should be created. (Default: TRUE)
+#' @description
+#' Equivalent to [train], this function acts as a
+#' wrapper to project the model stored in a [`BiodiversityScenario-class`] object to
+#' newly supplied (future) covariates.
+#' @param mod A [`BiodiversityScenario`] object with set predictors.
+#' @param no_projection A [`logical`] flag whether future projection should be created. (Default: \code{TRUE}).
 #' Note that some constrains such as [MigClim] can still simulate future change without projections.
-#' @param ... passed on parameters
+#' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
 #'
 #' @name project
