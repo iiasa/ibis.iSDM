@@ -71,7 +71,7 @@ There are other functions as well but those are better accessed through their re
 \dontrun{
  # Load background raster
  background <- raster::raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
- Define model
+ # Define model
  x <- distribution(background)
  x
 }

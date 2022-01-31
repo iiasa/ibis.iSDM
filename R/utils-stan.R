@@ -151,6 +151,7 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
 #' @seealso [rethinking] R package
 #' @returns A [rstan] object
 #' @keywords misc, stan
+#' @export
 run_stan <- function( model_code, data = list(),
                       algorithm = "sampling",
                       chains = 4, cores = getOption("ibis.nthread"),

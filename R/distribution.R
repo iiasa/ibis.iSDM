@@ -64,7 +64,7 @@ NULL
 #' \dontrun{
 #'  # Load background raster
 #'  background <- raster::raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
-#'  Define model
+#'  # Define model
 #'  x <- distribution(background)
 #'  x
 #' }
