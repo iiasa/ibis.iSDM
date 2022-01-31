@@ -44,6 +44,7 @@ Prior distributions can furthermore be set for:
 }
 \seealso{
 Other engine: 
+\code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
 \code{\link{engine_inlabru}()},
 \code{\link{engine_inla}()},

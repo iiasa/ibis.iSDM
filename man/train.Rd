@@ -90,7 +90,7 @@ and make use of the \link{add_offset_range} and \link{ensemble} functionalities.
         # Add predictors and scale them
         add_predictors(env = predictors, transform = "scale", derivates = "none") \%>\%
         # Use stan for estimation
-        engine_stan(chains = 2,iter = 1000,warmup = 500)
+        engine_stan(chains = 2, iter = 1000, warmup = 500)
  # Train the model
  mod <- train(x, only_linear = TRUE, varsel = 'reg')
  mod
@@ -103,5 +103,5 @@ and make use of the \link{add_offset_range} and \link{ensemble} functionalities.
 }
 }
 \seealso{
-\link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla}, \link{engine_inlabru}
+\link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla}, \link{engine_inlabru}, \link{engine_breg}
 }

@@ -1,0 +1,36 @@
+---
+output:
+  rmarkdown::github_document:
+    html_preview: no
+fontsize: 11pt
+documentclass: article
+---
+
+# Frequently Asked Questions (FAQ)
+
+This document contains a series of frequently asked questions when using the \pkg{ibis.iSDM} package and is a work in progress.
+
+### Model estimation
+
+<details>
+
+<summary>
+
+<b>Is there a way to limit my predictions to only certain regions in the extent?</b>
+
+</summary>
+
+Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see *add_constrain_dispersal*) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
+
+To do this with ibis, one has to specify the limit of projection to the *distribution* object.
+
+```{r, echo=TRUE,eval=FALSE}
+# Where zone is a provided raster
+mod <- distribution(background, limits = zone) %>% 
+  add_biodiversity_poipo(species_data) %>% 
+  engine_gdb() %>% 
+  train()
+plot(mod)
+```
+
+</details>

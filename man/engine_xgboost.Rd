@@ -63,6 +63,7 @@ ibis this is possible via \code{\link{XGBPrior}}.
 
 Other engine: 
 \code{\link{engine_bart}()},
+\code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
 \code{\link{engine_inlabru}()},
 \code{\link{engine_inla}()},

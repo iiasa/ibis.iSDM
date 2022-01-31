@@ -67,6 +67,7 @@ Priors can be set via \link{INLAPrior}.
 \seealso{
 Other engine: 
 \code{\link{engine_bart}()},
+\code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
 \code{\link{engine_inla}()},
 \code{\link{engine_stan}()},

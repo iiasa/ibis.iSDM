@@ -250,12 +250,11 @@ engine_gdb <- function(x,
         equation <- model$biodiversity[[1]]$equation
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         w <- model$biodiversity[[1]]$expect
-        # if(model$biodiversity[[1]]$family!='poisson') w <- NULL # Set weights to 0 when binomial
         full <- model$predictors
 
         # Select predictors
         full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
-        full$cellid <- rownames(full) # Add rownames
+        full$cellid <- rownames(full) # Add row.names
         full <- subset(full, complete.cases(full))
 
         assertthat::assert_that(

@@ -44,6 +44,8 @@ Suggests:
     ellipsis,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
+    cmdstanr (>= 0.4.0),
+    BoomSpikeSlab (>= 1.2.4),
     posterior
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
@@ -77,6 +79,7 @@ Collate:
     'distribution.R'
     'effects.R'
     'engine_bart.R'
+    'engine_breg.R'
     'engine_gdb.R'
     'utils-inla.R'
     'engine_inla.R'

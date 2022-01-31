@@ -109,6 +109,28 @@ DistributionModel <- bdproto(
                paste0("\n  Threshold created: ",text_green("yes")),
                "")
       ))
+    } else if( inherits(self, 'BREG-Model') ) {
+      obj <- self$get_data('fit_best')
+      # Summarize the beta coefficients from the posterior
+      ms <- posterior::summarise_draws(obj$beta) |>
+        subset(select = c('variable', 'mean'))
+      # Reorder
+      ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest summary effects:\033[22m',
+        '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
+        '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
+      ))
+
+
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -160,9 +182,11 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
-      varimp.bart(self$get_data('fit_best')) %>% tibble::remove_rownames()
+      varimp.bart(self$get_data(x)) %>% tibble::remove_rownames()
     } else if(inherits(self, 'STAN-Model')){
       summary(self$get_data(x))
+    } else if(inherits(self, 'BREG-Model')){
+      posterior::summarise_draws(self$get_data(x)$beta)
     } else if(inherits(self, "XGBOOST-Model")){
       xgboost::xgb.importance(model = self$get_data('fit_best'))
       # xgboost::xgb.ggplot.importance(o)
@@ -203,6 +227,18 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)
+    } else if(inherits(self, 'BREG-Model')){
+      obj <- self$get_data(x)
+      if(what == "fixed") what <- "coefficients"
+      what <- match.arg(what, choices = c("coefficients", "scaled.coefficients","residuals",
+                                           "size", "fit", "help", "inclusion"), several.ok = FALSE)
+      if( length( grep("poisson", obj$call) ) > 0 ){
+        BoomSpikeSlab::plot.poisson.spike(obj, y = what)
+      } else if( length( grep("binomial", obj$call) ) > 0 ){
+        BoomSpikeSlab::plot.logit.spike(obj, y = what)
+      } else {
+        BoomSpikeSlab::plot.lm.spike(obj, y = what)
+      }
     } else {
       self$partial(self$get_data(x), x.vars = NULL)
     }

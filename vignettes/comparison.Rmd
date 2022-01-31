@@ -6,10 +6,6 @@ fontsize: 11pt
 documentclass: article
 ---
 
-```{r, include = FALSE}
-devtools::load_all()
-```
-
 # Comparison with other SDM packages
 
 Isn’t this just another SDM package? Indeed it is, but building our own

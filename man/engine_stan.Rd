@@ -71,6 +71,7 @@ The function \code{obj$stancode()} can be used to print out the stancode of the 
 
 Other engine: 
 \code{\link{engine_bart}()},
+\code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
 \code{\link{engine_inlabru}()},
 \code{\link{engine_inla}()},

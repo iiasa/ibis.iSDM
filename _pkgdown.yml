@@ -25,7 +25,7 @@ home:
 
 navbar:
   structure:
-    left:  [home, intro, reference, comparison, articles, contributing, news]
+    left:  [home, intro, reference, comparison, faq, articles, contributing, news]
     right: [search, github]
   components:
     articles:
@@ -42,6 +42,9 @@ navbar:
     comparison:
       text: Comparison
       href: articles/comparison.html
+    faq:
+      text: FAQ
+      href: articles/frequently-asked-questions.html
     contributing:
       text: Contributing
       href: articles/contributing.html

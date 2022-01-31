@@ -50,7 +50,7 @@ NULL
 #' @references
 #' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
 #' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
-#' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla], [engine_inlabru]
+#' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla], [engine_inlabru], [engine_breg]
 #' @returns A [DistributionModel] object.
 #' @examples
 #' \dontrun{
@@ -61,7 +61,7 @@ NULL
 #'         # Add predictors and scale them
 #'         add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
 #'         # Use stan for estimation
-#'         engine_stan(chains = 2,iter = 1000,warmup = 500)
+#'         engine_stan(chains = 2, iter = 1000, warmup = 500)
 #'  # Train the model
 #'  mod <- train(x, only_linear = TRUE, varsel = 'reg')
 #'  mod
@@ -361,7 +361,6 @@ methods::setMethod(
     model[['priors']] <- spec_priors
 
     # Set offset if existing
-    # FIXME: Type-specific offset?
     if(!is.Waiver(x$offset)){
       # Check that they align
       if(!is_comparable_raster(x$offset, x$predictors$data) ){
@@ -953,14 +952,85 @@ methods::setMethod(
       out <- x$engine$train(model, settings)
 
 
-    } else { stop('Specified Engine not implemented yet.') }
+    } else if (inherits(x$engine,"BREG-Engine") ){
+    # ----------------------------------------------------------- #
+    #### BREG Engine ####
 
-    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+    # For each formula, process in sequence
+    for(id in ids){
+      # Default equation found
+      if(model$biodiversity[[id]]$equation=='<Default>'){
+        # Construct formula with all variables
+        form <- paste( 'observed' , ' ~ ')
+        # Add linear predictors
+        form <- paste(form, paste0(model$biodiversity[[id]]$predictors_names,collapse = ' + '))
+        if(settings$get('only_linear') == FALSE){
+          print("TBD")
+        }
+        # Convert to formula
+        form <- to_formula(form)
+      } else{
+        # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+        form <- to_formula(model$biodiversity[[id]]$equation)
+        assertthat::assert_that(
+          all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
+        )
+      }
+      model$biodiversity[[id]]$equation <- form
+      rm(form)
 
-    # Stop logging if specified
-    if(!is.Waiver(x$log)) x$log$close()
+      # Remove those not part of the modelling
+      model2 <- model
+      model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-    # return output object
-    return(out)
+      # Run the engine setup script
+      model2 <- x$engine$setup(model2, settings)
+
+      # Now train the model and create a predicted distribution model
+      settings2 <- settings
+      if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
+      out <- x$engine$train(model2, settings2)
+
+      # Add Prediction of model to next object if multiple are supplied
+      if(length(ids)>1 && id != ids[length(ids)]){
+        # Add to predictors frame
+        new <- out$get_data("prediction")
+        names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+
+        # Now for each biodiversity dataset and the overall predictors
+        # extract and add as variable
+        for(k in names(model$biodiversity)){
+          env <- as.data.frame(
+            raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+          # Rename to current id dataset
+          names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+          # Add
+          model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
+          model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
+                                                        names(env) )
+          model$biodiversity[[k]]$predictors_types <- rbind(
+            model$biodiversity[[k]]$predictors_types,
+            data.frame(predictors = names(env), type = c('numeric'))
+          )
+        }
+        # Add to overall predictors
+        model$predictors <- cbind(model$predictors, as.data.frame(new))
+        model$predictors_names <- c(model$predictors_names, names(new))
+        model$predictors_types <- rbind(model$predictors_types,
+                                        data.frame(predictors = names(new), type = c('numeric')))
+       }
+
+    }
+  # End of BREG engine
+  } else { stop('Specified Engine not implemented yet.') }
+
+  if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+
+  # Stop logging if specified
+  if(!is.Waiver(x$log)) x$log$close()
+
+  # return output object
+  return(out)
   }
 )
