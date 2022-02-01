@@ -42,7 +42,7 @@ methods::setMethod(
       is.character(variable),
       is.character(hyper)
     )
-    assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use GDBPriors')
+    assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use XGBPriors')
     # Match supplied constrain in case someone has been lazy
     hyper <- match.arg(hyper, c('increasing', 'decreasing','positive', 'negative', 'none'), several.ok = FALSE)
 

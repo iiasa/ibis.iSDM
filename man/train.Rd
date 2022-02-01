@@ -47,7 +47,8 @@ can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE
 
 \item{only_linear}{Fit model only on linear baselearners and functions. Depending
 on the \link{engine} setting this option to \code{FALSE} will result in non-linear relationships
-between observations and covariates, often increasing processing time (Default: \code{TRUE}).}
+between observations and covariates, often increasing processing time (Default: \code{TRUE}).
+How non-linearity is captured depends on the used \link{engine}.}
 
 \item{bias_variable}{A \code{\link{vector}} with names of variables to be set to \emph{bias_value} (Default: \code{NULL}).
 This option can for instance be used to 'partial' out certain biases after predictions have been made.

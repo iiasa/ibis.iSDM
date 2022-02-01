@@ -41,6 +41,7 @@ NULL
 #' @param only_linear Fit model only on linear baselearners and functions. Depending
 #' on the [engine] setting this option to \code{FALSE} will result in non-linear relationships
 #' between observations and covariates, often increasing processing time (Default: \code{TRUE}).
+#' How non-linearity is captured depends on the used [engine].
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
 #' This option can for instance be used to 'partial' out certain biases after predictions have been made.
 #' See Examples.
@@ -346,7 +347,8 @@ methods::setMethod(
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
         "<INLABRU>" = x$priors$classes() == 'INLAPrior',
-        "<STAN>" = x$priors$classes() == 'STANPrior'
+        "<STAN>" = x$priors$classes() == 'STANPrior',
+        "<BREG>" = x$priors$classes() == 'BREGPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
@@ -964,9 +966,7 @@ methods::setMethod(
         form <- paste( 'observed' , ' ~ ')
         # Add linear predictors
         form <- paste(form, paste0(model$biodiversity[[id]]$predictors_names,collapse = ' + '))
-        if(settings$get('only_linear') == FALSE){
-          print("TBD")
-        }
+        # NOTE: Non-linearity will be specified during engine setup!
         # Convert to formula
         form <- to_formula(form)
       } else{

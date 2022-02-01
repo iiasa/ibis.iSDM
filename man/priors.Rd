@@ -31,6 +31,8 @@ priors(p1, p2)
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
 
 Other prior: 
+\code{\link{BREGPriors}()},
+\code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},
 \code{\link{GDBPrior}()},
 \code{\link{INLAPriors}()},

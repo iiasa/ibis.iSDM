@@ -44,7 +44,6 @@ Suggests:
     ellipsis,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    cmdstanr (>= 0.4.0),
     BoomSpikeSlab (>= 1.2.4),
     posterior
 URL: https://github.com/iiasa/ibis.iSDM
@@ -91,6 +90,7 @@ Collate:
     'partial.R'
     'plot.R'
     'print.R'
+    'prior_breg.R'
     'prior_gdb.R'
     'prior_inla.R'
     'prior_stan.R'
@@ -103,6 +103,7 @@ Collate:
     'threshold.R'
     'train.R'
     'utils-bart.R'
+    'utils-boom.R'
     'utils-gdb.R'
     'utils-stan.R'
     'validate.R'
