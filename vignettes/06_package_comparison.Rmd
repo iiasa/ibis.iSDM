@@ -8,30 +8,28 @@ documentclass: article
 
 # Comparison with other SDM packages
 
-Isn’t this just another SDM package? Indeed it is, but building our own
-modelling infrastructure allows greater flexibility in how models are
-created and run. It is less about reinventing the wheel, but rather
-bringing strengths from different tools together. Furthermore the
-_ibis.iSDM_ package puts particular emphasis on
+Isn’t this just another SDM package? Indeed it is, but \pkg{ibis.iSDM} has
+particular features that allow greater flexibility in how models are
+created and run than other packages. It is less about reinventing the wheel, but rather bringing strengths from different tools together.
+
 *Non exhaustive list acknowledging other SDM packages in R:*
 
 -   [hSDM](https://github.com/ghislainv/hSDM) -&gt; Bayesian framework
     for mixed models. Fast, but little flexibility with regards to
-    weights or offsets
+    weights or offsets.
 -   [multispeciesPP](https://github.com/wfithian/multispeciesPP) -&gt;
-    Not been further developed since years
+    Package that allows integrated SDMs, however it has not been further 
+    developed since years and key gaps remain.
 -   [inlabru](https://github.com/inlabru-org/inlabru) -&gt; Package
     specifically for LGCP with INLA, now integrated as engine in _ibis.iSDM_
--   [pointedSDMs](https://github.com/oharar/PointedSDMs) -&gt; INLA
-    based SDM package for integrating different datasets.
+-   [pointedSDMs](https://github.com/oharar/PointedSDMs) -&gt; Another wrapper for INLA
+    that allows to integrate different datasets in a SDM.
 -   [biomod2](https://github.com/biomodhub/biomod2) -&gt; Popular
-    package for ensemble modeling, but no integration, not Bayesian
+    package for ensemble modelling, but fixed on specific (non-Bayesian) engines and 
+    no integration.
 -   [sdmTMB](https://github.com/pbs-assess/sdmTMB) -&gt; Package for
-    fitting spatial-Temporal SDMs
+    fitting spatial-Temporal SDMs.
 -   [modleR](https://github.com/Model-R/modleR) -&gt; similar as biomod2
-    a wrapper to construct ensembles of models
+    and a wrapper to construct ensembles of models.
 -   [kuenm](https://peerj.com/articles/6281/) -&gt; Another wrapper for
-    Maxent
-
-
-
+    Maxent.

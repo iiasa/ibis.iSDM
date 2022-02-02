@@ -23,6 +23,9 @@
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model',
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
+  # Use the future package for any options. Default is FALSE
+  options('ibis.use_future' = FALSE)
+
   # Set S2 use for SF to false owing to the multiple bugs and errors with
   # 29/06 To be changed later eventually
   suppressMessages( invisible( sf::sf_use_s2(FALSE) ) )

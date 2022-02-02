@@ -958,7 +958,6 @@ methods::setMethod(
     } else if (inherits(x$engine,"BREG-Engine") ){
     # ----------------------------------------------------------- #
     #### BREG Engine ####
-
     # For each formula, process in sequence
     for(id in ids){
       # Default equation found

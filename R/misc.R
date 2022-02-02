@@ -78,3 +78,41 @@ ibis_options <- function(){
   items <- options()[what]
   print(items)
 }
+
+#' Options to set up ibis for parallel processing with future
+#'
+#' @param cores A [`numeric`] number stating the number of cores to use.
+#' @param strategy A [`character`] denoting the strategy to be used for future. See help of [`future`] for options.
+#' (Default: \code{"multisession"}).
+#' @seealso [future]
+#' @keywords misc
+#' @export
+ibis_future <- function(cores = getOption("ibis.nthread"), strategy = "multisession") {
+  assertthat::assert_that(
+    is.numeric(cores),
+    is.character(strategy)
+  )
+  strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "remote"),
+                        several.ok = FALSE)
+  check_package("future")
+
+  if(isTRUE(Sys.info()[["sysname"]] == "Windows")){
+    if(strategy == "multicore") stop("Multicore is not supported ")
+  }
+
+  # Define plan
+  if(strategy == "remote"){
+    #TODO: See if a testing environment could be found.
+    stop("TBD. Requires specific setup.")
+  }
+  ev <- switch(strategy,
+               "sequential" = future::sequential(),
+               "multisession" = future::multisession(workers = cores),
+               "multicore" = future::multicore(workers = cores),
+               "cluster" = future::cluster(workers = cores)
+  )
+  # Set up plan
+  future::plan(ev)
+  invisible()
+}
+

@@ -16,12 +16,13 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     assertthat (>= 0.2.0),
-    doParallel,
     geodist,
     ggplot2,
     magrittr,
     methods,
     ncdf4,
+    parallel,
+    future (>= 1.23.0),
     rgeos (>= 0.5-5),
     proto (>= 1.0.0),
     raster (>= 3.4-5),

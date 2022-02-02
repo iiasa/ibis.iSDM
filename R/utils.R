@@ -166,6 +166,111 @@ to_formula <- function(formula){
   return(formula)
 }
 
+#' Parallel computation of function
+#'
+#' @description
+#' Some computations take considerable amount of time to execute. This
+#' function provides a helper wrapper for running functions of the [`apply`]
+#' family to specified outputs.
+#' @details
+#' By default, the [parallel] package is used for parallel computation,
+#' however an option exists to use the [future] package instead.
+#' @param X A [`list`] object to be fed to a single core or parallel [apply] call.
+#' @param FUN A [`function`] passed on for computation.
+#' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
+#' @param approach [`character`] for the parallelization approach taken (Options: \code{"parallel"} or \code{"future"}).
+#' @param export_package A [`vector`] with packages to export for use on parallel nodes (Default: \code{NULL}).
+#' @examples
+#' \dontrun{
+#'  run_par(list, mean, cores = 4)
+#' }
+#' @keywords utils
+#' @noRd
+run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
+  assertthat::assert_that(
+    is.list(X) || is.data.frame(X) || is.matrix(X),
+    is.function(FUN),
+    is.numeric(cores),
+    is.null(export_packages) || is.character(export_packages)
+  )
+  # Match approach
+  approach <- match.arg(approach, c("approach", "future"), several.ok = FALSE)
+
+  # Collect dots
+  dots <- list(...)
+
+  # .x <- .x[, , variables_x]
+  # n_vars <- length(variables_x)
+  # chunk_size <- ceiling(n_vars/.cores)
+  # n_chunks <- ceiling(n_vars/chunk_size)
+  # chunk_list <- vector(length = n_chunks, mode = "list")
+  # for (i in seq_len(n_chunks)) {
+  #   if ((chunk_size * (i - 1) + 1) <= n_vars) {
+  #     chunk <- (chunk_size * (i - 1) + 1):(min(c(chunk_size *
+  #                                                  i, n_vars)))
+  #     chunk_list[[i]] <- .x[, , chunk]
+  #   }
+  # }
+
+  # Determine the type of input and which function to use
+  if(approach == "parallel"){
+    # Use parallel package
+    check_package('parallel')
+    parfun <- switch (class(X),
+      "list" = parallel::parLapply,
+      "data.frame" = parallel::parApply,
+      "matrix" = parallel::parApply
+    )
+    if(class(X) %in% c("data.frame", "matrix")) dots[["MARGIN"]] <- 1
+    if (isTRUE(Sys.info()[["sysname"]] == "Windows") && !is.list(X) ){
+      # Use future instead for windows
+      return(
+        run_parallel(X, FUN, cores = 1, approach = "future", ...)
+      )
+    }
+  } else {
+    # Use future package
+    check_package('future.apply')
+    # Check that plan for future has been set up!
+    assertthat::assert_that( getOption("ibis.use_future") == TRUE,
+                             msg = "Set up a future plan via [ibis_future] to use this approach.")
+    parfun <- switch (class(X),
+                      "list" = future.apply::future_lapply,
+                      "data.frame" = future.apply::future_apply,
+                      "matrix" = future.apply::future_apply
+    )
+    if(class(X) %in% c("data.frame", "matrix")) dots[["MARGIN"]] <- 1
+  }
+  assertthat::assert_that(is.function(parfun))
+
+  # Process depending on cores
+  if (cores == 1) {
+    out <- parfun(X, FUN, ...)
+  } else {
+      if(approach == "parallel"){
+        if(!isTRUE(Sys.info()[["sysname"]] == "Windows") && is.list(X)) {
+          out <- parallel::mclapply(X = X, FUN = FUN, mc.cores = cores,
+                                    ...)
+        } else {
+          # Other operating systems
+          cl <- parallel::makePSOCKcluster(cores)
+          on.exit(parallel::stopCluster(cl))
+          if(!is.null(export_packages)){
+            # Send all specified packages to the cluster
+            for(val in export_packages){
+              parallel::clusterExport(cl, varlist = package_function_names(val),
+                                      envir = as.environment(asNamespace(val)))
+            }
+          }
+          out <- parfun(cl = cl, X = X, fun = FUN, ...)
+        }
+      } else {
+        # Check that future is loaded
+        out <- parfun(cl = cl, X = X, fun = FUN, ...)
+      }
+    }
+  return( out )
+}
 #' Create formula matrix
 #'
 #' Function to create list of formulas with all possible combinations of variables

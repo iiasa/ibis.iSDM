@@ -10,16 +10,24 @@ documentclass: article
 
 This document contains a series of frequently asked questions when using the \pkg{ibis.iSDM} package and is a work in progress.
 
-### Model estimation
+## Model setup
 
 <details>
+<summary><b>Is it possible to transform input predictors before model fitting?</b>
+</summary>
 
+Yes, in many instances it is desirable to transform input predictors to a new range or to remove
+extreme values from the predictors. For example the popular [`maxnet`] R-package for Maximum entropy estimation of species distribution modelling often transforms the variables via quadratic, hinge or threshold transformations. Although this can also (and preferably should) be done before 
+setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [`add_predictors`] for examples and descriptions.
+</details>
+
+<details>
 <summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b>
 </summary>
 
-Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see *add_constrain_dispersal*) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
+Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see [add_constrain_dispersal]) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
 
-To do this with ibis, one has to specify the limit of projection to the *distribution* object.
+To do this with ibis, one has to specify the limit of projection to the [distribution] object.
 
 ```{r, echo=TRUE,eval=FALSE}
 # Where zone is a provided raster
@@ -29,5 +37,8 @@ mod <- distribution(background, limits = zone) %>%
   train()
 plot(mod)
 ```
-
 </details>
+
+
+## Scenarios
+

@@ -40,4 +40,3 @@ Other prior:
 \code{\link{priors}()}
 }
 \concept{prior}
-\keyword{priors}

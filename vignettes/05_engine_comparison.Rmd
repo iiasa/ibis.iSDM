@@ -8,5 +8,11 @@ documentclass: article
 
 # Capabilities of included engines
 
-Idea is to show a table will all the information
+Not every engine included in the \pkg{ibis.iSDM} package supports every functionality.
+As outlined by [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710), there are many different forms of integration such as through [ensemble] modelling, adding [offsets] or [priors] and through full integration of different likelihoods.
+Below a list of each of the different forms of integration can be found and the engines
+that support it.
 
+<TBD>
+* [`ensemble`]
+* [`offset`]

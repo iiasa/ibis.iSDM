@@ -25,3 +25,8 @@ This will be changed in the future when the package has reached a stable state. 
 -   Use assertions to verify inputs to functions
 -   If bored, please write unit tests and ensure they all evaluate
     (CRTL+SHIFT+T)!
+
+(also see [issues](https://github.com/iiasa/ibis.iSDM/issues) and
+[projects](https://github.com/iiasa/ibis.iSDM/projects)) for open issues
+
+<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->

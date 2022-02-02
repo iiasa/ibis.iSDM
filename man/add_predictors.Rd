@@ -57,11 +57,32 @@ them through a principal component analysis (\link{prcomp}). In contrast, deriva
 the original provided predictors alone, but instead create new ones, for instance by transforming
 their values through a quadratic or hinge transformation. Note that this effectively
 increases the number of predictors in the object, generally requiring stronger regularization by
-the used \link{engine}.
+the used \code{\link{engine}}.
+Both transformations and derivates can also be combined.
+Available options for transformation are:
+\itemize{
+\item \code{'none'} - Leaves the provided predictors in the original scale.
+\item \code{'pca'} - Converts the predictors to principal components. Note that this
+results in a renaming of the variables to principal component axes!
+\item \code{'scale'} - Transforms all predictors by applying \link{scale} on them.
+\item \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
+\item \code{'windsor'} - Applies a windsorization to the target predictors. By default
+this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove
+extreme outliers.
+}
+
+Available options for creating derivates are:
+\itemize{
+\item \code{'none'} - No additional predictor derivates are created.
+\item \code{'quad'} - Adds quadratic transformed predictors.
+\item \code{'thresh'} - Add threshold transformed predictors.
+\item \code{'hinge'} - Add hinge transformed predictors.
+}
 }
 \note{
 Not every engine does actually need covariates. For instance it is perfectly legit
 to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
+This correspondents to a spatial kernel density estimate.
 }
 \examples{
 \dontrun{

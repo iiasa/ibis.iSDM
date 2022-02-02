@@ -16,7 +16,24 @@ NULL
 #' the original provided predictors alone, but instead create new ones, for instance by transforming
 #' their values through a quadratic or hinge transformation. Note that this effectively
 #' increases the number of predictors in the object, generally requiring stronger regularization by
-#' the used [engine].
+#' the used [`engine`].
+#' Both transformations and derivates can also be combined.
+#' Available options for transformation are:
+#' * \code{'none'} - Leaves the provided predictors in the original scale.
+#' * \code{'pca'} - Converts the predictors to principal components. Note that this
+#' results in a renaming of the variables to principal component axes!
+#' * \code{'scale'} - Transforms all predictors by applying [scale] on them.
+#' * \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
+#' * \code{'windsor'} - Applies a windsorization to the target predictors. By default
+#' this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove
+#' extreme outliers.
+#'
+#' Available options for creating derivates are:
+#' * \code{'none'} - No additional predictor derivates are created.
+#' * \code{'quad'} - Adds quadratic transformed predictors.
+#' * \code{'thresh'} - Add threshold transformed predictors.
+#' * \code{'hinge'} - Add hinge transformed predictors.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
 #' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed.
@@ -29,6 +46,7 @@ NULL
 #' @note
 #' Not every engine does actually need covariates. For instance it is perfectly legit
 #' to fit a model with only occurrence data and a spatial latent effect ([add_latent]).
+#' This correspondents to a spatial kernel density estimate.
 #' @aliases add_predictors
 #' @examples
 #' \dontrun{

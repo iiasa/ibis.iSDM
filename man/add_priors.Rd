@@ -45,4 +45,3 @@ Other prior:
 \code{\link{rm_priors}()}
 }
 \concept{prior}
-\keyword{priors}

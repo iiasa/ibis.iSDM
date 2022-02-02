@@ -48,21 +48,19 @@
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="active nav-item">
-  <a class="nav-link" href="../articles/comparison.html">Comparison</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
-</li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
     <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine Comparison</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/contributing.html">Contributing</a>
@@ -97,8 +95,8 @@
       <img src="../logo.svg" class="logo" alt=""><h1></h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/comparison.Rmd" class="external-link"><code>vignettes/comparison.Rmd</code></a></small>
-      <div class="d-none name"><code>comparison.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/06_package_comparison.Rmd" class="external-link"><code>vignettes/06_package_comparison.Rmd</code></a></small>
+      <div class="d-none name"><code>06_package_comparison.Rmd</code></div>
     </div>
 
     
@@ -106,25 +104,26 @@
 <div class="section level2">
 <h2 id="comparison-with-other-sdm-packages">Comparison with other SDM packages<a class="anchor" aria-label="anchor" href="#comparison-with-other-sdm-packages"></a>
 </h2>
-<p>Isn’t this just another SDM package? Indeed it is, but building our own modelling infrastructure allows greater flexibility in how models are created and run. It is less about reinventing the wheel, but rather bringing strengths from different tools together. Furthermore the <em>ibis.iSDM</em> package puts particular emphasis on <em>Non exhaustive list acknowledging other SDM packages in R:</em></p>
+<p>Isn’t this just another SDM package? Indeed it is, but  has particular features that allow greater flexibility in how models are created and run than other packages. It is less about reinventing the wheel, but rather bringing strengths from different tools together.</p>
+<p><em>Non exhaustive list acknowledging other SDM packages in R:</em></p>
 <ul>
 <li>
-<a href="https://github.com/ghislainv/hSDM" class="external-link">hSDM</a> -&gt; Bayesian framework for mixed models. Fast, but little flexibility with regards to weights or offsets</li>
+<a href="https://github.com/ghislainv/hSDM" class="external-link">hSDM</a> -&gt; Bayesian framework for mixed models. Fast, but little flexibility with regards to weights or offsets.</li>
 <li>
-<a href="https://github.com/wfithian/multispeciesPP" class="external-link">multispeciesPP</a> -&gt; Not been further developed since years</li>
+<a href="https://github.com/wfithian/multispeciesPP" class="external-link">multispeciesPP</a> -&gt; Package that allows integrated SDMs, however it has not been further developed since years and key gaps remain.</li>
 <li>
 <a href="https://github.com/inlabru-org/inlabru" class="external-link">inlabru</a> -&gt; Package specifically for LGCP with INLA, now integrated as engine in <em>ibis.iSDM</em>
 </li>
 <li>
-<a href="https://github.com/oharar/PointedSDMs" class="external-link">pointedSDMs</a> -&gt; INLA based SDM package for integrating different datasets.</li>
+<a href="https://github.com/oharar/PointedSDMs" class="external-link">pointedSDMs</a> -&gt; Another wrapper for INLA that allows to integrate different datasets in a SDM.</li>
 <li>
-<a href="https://github.com/biomodhub/biomod2" class="external-link">biomod2</a> -&gt; Popular package for ensemble modeling, but no integration, not Bayesian</li>
+<a href="https://github.com/biomodhub/biomod2" class="external-link">biomod2</a> -&gt; Popular package for ensemble modelling, but fixed on specific (non-Bayesian) engines and no integration.</li>
 <li>
-<a href="https://github.com/pbs-assess/sdmTMB" class="external-link">sdmTMB</a> -&gt; Package for fitting spatial-Temporal SDMs</li>
+<a href="https://github.com/pbs-assess/sdmTMB" class="external-link">sdmTMB</a> -&gt; Package for fitting spatial-Temporal SDMs.</li>
 <li>
-<a href="https://github.com/Model-R/modleR" class="external-link">modleR</a> -&gt; similar as biomod2 a wrapper to construct ensembles of models</li>
+<a href="https://github.com/Model-R/modleR" class="external-link">modleR</a> -&gt; similar as biomod2 and a wrapper to construct ensembles of models.</li>
 <li>
-<a href="https://peerj.com/articles/6281/" class="external-link">kuenm</a> -&gt; Another wrapper for Maxent</li>
+<a href="https://peerj.com/articles/6281/" class="external-link">kuenm</a> -&gt; Another wrapper for Maxent.</li>
 </ul>
 </div>
   </main>

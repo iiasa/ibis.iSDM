@@ -13,7 +13,6 @@ NULL
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param priors A [`PriorList-class`] object containing multiple priors.
 #' @param ... Other parameters passed down.
-#' @keywords priors
 #' @family prior
 #' @aliases add_priors
 #' @examples
@@ -90,7 +89,6 @@ methods::setMethod(
 #' @param names A [`vector`] or [`character`] object for priors to be removed.
 #' @param ... Other parameters passed down
 #' @aliases rm_priors
-#' @keywords priors
 #' @family prior
 #' @examples
 #' \dontrun{

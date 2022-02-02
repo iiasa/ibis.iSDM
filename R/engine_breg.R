@@ -134,16 +134,15 @@ engine_breg <- function(x,
 
         # Check whether regularization parameter is set to none, if yes, raise message
         if(settings$get("varsel") == "none"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Engine breg always applies regularization.')
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
         }
 
         # -- #
         # Expand predictors if specified in settings
         if(settings$get('only_linear') == FALSE){
-          print("Non-linear relationships to be added.")
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Non-linear estimation not added to engine. Suggest to create variable derivatives externally.')
         }
         # -- #
-
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){

@@ -522,28 +522,6 @@ predictor_derivate <- function(env, option, ...){
   # Hinge transformation
   # From`maxnet` package
   if(option == 'hinge'){
-    # Function to create hingevalue
-    makeHinge <- function(v, n, nknots = 4){
-      # Function to create hingeval
-      hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
-      # Get stats
-      v.min <- raster::cellStats(v, min)
-      v.max <- raster::cellStats(v, max)
-      k <- seq(v.min, v.max, length = nknots)
-      # Hinge up to max
-      lh <- outer(v[], utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
-      # Hinge starting from min
-      rh <- outer(v[], k[-1], function(w, h) hingeval(w, v.min, h))
-      colnames(lh) <- paste("hinge",n, round( utils::head(k, -1), 2),'__', round(v.max, 2),sep = ":")
-      colnames(rh) <- paste("hinge",n, round( v.min, 2),'__', round(k[-1], 2), sep = ":")
-      o <- as.data.frame(
-        cbind(lh, rh)
-      )
-      # Kick out first (min) and last (max) col as those are perfectly correlated
-      o <- o[,-c(1,ncol(o))]
-      return(o)
-    }
-
     # Build new stacks
     new_env <- raster::stack()
     for(val in names(env)){
@@ -559,17 +537,6 @@ predictor_derivate <- function(env, option, ...){
   # For thresholds
   # Take functionality in maxnet package
   if(option == 'thresh'){
-    # Function to create derivative thresholds
-    makeThresh <- function(v,n, nknots = 4){
-      # Get min max
-      v.min <- cellStats(v,min)
-      v.max <- cellStats(v,max)
-      k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
-      f <- outer(v[], k, function(w, t) ifelse(w >= t, 1, 0))
-      colnames(f) <- paste("thresh", n, round(k, 2), sep = ":")
-      return(as.data.frame(f))
-    }
-
     new_env <- raster::stack()
     for(val in names(env)){
       new_env <- raster::addLayer(new_env,
@@ -584,6 +551,67 @@ predictor_derivate <- function(env, option, ...){
   }
 
   return(new_env)
+}
+
+
+#' Hinge transformation of a given predictor
+#'
+#' @description
+#' This function transforms a provided predictor variable with a hinge transformation,
+#' e.g. a new range of values where any values lower than a certain knot are set to 0,
+#' while the remainder is left at the original values.
+#' @param v A [`Raster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nkots The number of knots to be used for the transformation (Default: \code{nkots}).
+#' @keywords utils, internal
+#' @concept Concept taken from the [maxnet] package.
+#' @returns A hinge transformed [`data.frame`].
+#' @noRd
+makeHinge <- function(v, n, nknots = 4){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nkots))
+  # Function to create hingeval
+  hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+  # Get stats
+  v.min <- raster::cellStats(v, min)
+  v.max <- raster::cellStats(v, max)
+  k <- seq(v.min, v.max, length = nknots)
+  # Hinge up to max
+  lh <- outer(v[], utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
+  # Hinge starting from min
+  rh <- outer(v[], k[-1], function(w, h) hingeval(w, v.min, h))
+  colnames(lh) <- paste("hinge",n, round( utils::head(k, -1), 2),'__', round(v.max, 2),sep = ":")
+  colnames(rh) <- paste("hinge",n, round( v.min, 2),'__', round(k[-1], 2), sep = ":")
+  o <- as.data.frame(
+    cbind(lh, rh)
+  )
+  # Kick out first (min) and last (max) col as those are perfectly correlated
+  o <- o[,-c(1,ncol(o))]
+  return(o)
+}
+
+#' Threshold transformation of a given predictor
+#'
+#' @description
+#' This function transforms a provided predictor variable with a threshold transformation,
+#' e.g. a new range of values where any values lower than a certain knot are set to 0,
+#' while the remainder is set to 1.
+#' @param v A [`Raster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nkots The number of knots to be used for the transformation (Default: \code{nkots}).
+#' @keywords utils, internal
+#' @concept Concept taken from the [maxnet] package.
+#' @returns A threshold transformed [`data.frame`].
+#' @noRd
+makeThresh <- function(v, n, nknots = 4){
+  # Get min max
+  v.min <- raster::cellStats(v,min)
+  v.max <- raster::cellStats(v,max)
+  k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
+  f <- outer(v[], k, function(w, t) ifelse(w >= t, 1, 0))
+  colnames(f) <- paste("thresh", n, round(k, 2), sep = ":")
+  return(as.data.frame(f))
 }
 
 #' Homogenize NA values across a set of predictors.

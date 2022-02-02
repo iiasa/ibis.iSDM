@@ -27,39 +27,10 @@ devtools::install_github("IIASA/ibis.iSDM")
 
 ## Usage
 
-See relevant reference sites and vignettes.
+See relevant reference articles and vignettes.
 
+**In development !!!**
 Note that the package in constant development and individual functions
 might change. As soon as the package has reached a stable state, the
 repository will be made public An official release will be made as soon
-as the package is public **In development !!!**
-
-## Package development
-
-(also see [issues](https://github.com/iiasa/ibis.iSDM/issues) and
-[projects](https://github.com/iiasa/ibis.iSDM/projects))
-
--   ✅ Fitting Point Poisson Models (PPMs) using INLA and at least
-    another Engine
--   ✅ Basic documentation present that however can be further improved
--   ✅ Various functions to include offsets, ranges, predictor
-    transformations
--   ✅ Plotting functions for models and effect are there
--   ✅ Actually support multiple likelihoods depending on included
-    biodiversity dataset
--   ✅ Add new class for priors and ensure that they linked in a flexible
-    manner
--   🚧 Add a wrapper for PPMs in Stan as new engine for max flexibility
--   🚧 Implement options to add occupancy model for detectability, see
-    [Altwegg and
-    Nichols](https://onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13090)
-    and [Guillera-Arroita](http://doi.wiley.com/10.1111/ecog.02445)
--   🚧 There are reports that iCAR can
-    [outperforms](https://arxiv.org/pdf/1204.6087v1.pdf) Matern
-    covariance? It likely is also considerably faster, thus could be
-    implemented
--   🚧 Create a pkgdown website for the package with tutorials (in
-    progress. Looking at it)
--   …
-
-<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
+as the package is public and a preprint has been written.
