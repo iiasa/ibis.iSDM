@@ -227,6 +227,11 @@ engine_stan <- function(x,
         names(sm_code) <- c("functions","data","transformed_data","parameters","transformed_parameters",
                             "model","generated_quantities")
 
+        # Has intercept?
+        has_intercept <- attr(terms.formula(model$biodiversity[[1]]$equation), "intercept") == 1
+        # Family
+        fam <- model$biodiversity[[1]]$family
+
         # Any spatial or other functions needed?
         if(!is.null(self$get_equation_latent_spatial())){
           # Stan functions for CAR and GP models
@@ -241,13 +246,47 @@ engine_stan <- function(x,
         for(i in ir) sm_code$data <- append(sm_code$data, i)
 
         # Transformed data
+        if(has_intercept){
+          # Equation has intercept
+          sm_code$transformed_data <- append(sm_code$transformed_data,"
+                                              int Kc = K - 1;
+                                              matrix[N, Kc] Xc;  // centered version of X without an intercept
+                                              vector[Kc] means_X;  // column means of X before centering
+                                              for (i in 2:K) {
+                                                means_X[i - 1] = mean(X[, i]);
+                                                Xc[, i - 1] = X[, i] - means_X[i - 1];
+                                              }
+                                             ")
+          # Add population level effects for rest of coefficients
+          sm_code$parameters <- append(sm_code$parameters,"
+                                          vector[Kc] b;  // population-level effects
+                                          real Intercept;  // temporary intercept for centered predictors
+                                       ")
+          # add a prior on the intercept
+          sm_code$model <- append(sm_code$model,
+          paste0("
+                                    // priors including constants
+                                    target += student_t_lpdf(Intercept | 3, ",
+                                    ifelse(fam == "poisson", -2, 0), # Adapted student prior for poisson
+                                    ", 2.5);
+                                  ")
+          )
+          # Generate actual population-level intercept
+          sm_code$generated_quantities <- append(sm_code$generated_quantities,"
+                                                // actual population-level intercept
+                                                real b_Intercept = Intercept - dot_product(means_X, b);
+                                                 ")
+        }
 
         # Transformed parameters
 
         # Add (gaussian) priors to model likelihood if set
         if((!is.Waiver(model$priors) || settings$get(what='varsel') == "none")){
-          # Parameters
-          sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
+          # If no intercept is specified, add beta
+          if(!has_intercept){
+            # Parameters
+            sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
+          }
 
           # Add priors for each variable for which it is set to the model
           sm_code$model <- append(sm_code$model, "// priors including constants")
@@ -319,13 +358,21 @@ engine_stan <- function(x,
 
         } else if(model$biodiversity[[1]]$type == "poipo" && model$biodiversity[[1]]$family == "poisson"){
           # For poisson process model add likelihood
-          ir <- readLines( system.file("src/poipo_ll_poisson.stan",package = "ibis.iSDM") )
+          if(has_intercept){
+            ir <- readLines( system.file("src/poipo_ll_poisson_intercept.stan",package = "ibis.iSDM"))
+          } else {
+            ir <- readLines( system.file("src/poipo_ll_poisson.stan",package = "ibis.iSDM") )
+          }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)
 
         } else if(model$biodiversity[[1]]$type == "poipa" && model$biodiversity[[1]]$family == "binomial"){
           # For logistic regression
-          ir <- readLines( system.file("src/poipa_ll_bernoulli.stan",package = "ibis.iSDM") )
+          if(has_intercept){
+            ir <- readLines( system.file("src/poipa_ll_bernoulli_intercept.stan",package = "ibis.iSDM") )
+          } else {
+            ir <- readLines( system.file("src/poipa_ll_bernoulli.stan",package = "ibis.iSDM") )
+          }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)
         } else {

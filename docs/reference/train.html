@@ -30,13 +30,17 @@ the estimation is being done."><meta property="og:image" content="https://iiasa.
 <li class="nav-item">
   <a class="nav-link" href="../articles/comparison.html">Comparison</a>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
+</li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/01_train_simple_model.html">Train a model</a>
-    <a class="dropdown-item" href="../articles/02_integrate_data.html">Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
+    <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
+    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
+    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine Comparison</a>
   </div>
 </li>
 <li class="nav-item">
@@ -118,7 +122,8 @@ can be set to <code>TRUE</code> to ignore any spatial projection (Default: <code
 <dt>only_linear</dt>
 <dd><p>Fit model only on linear baselearners and functions. Depending
 on the engine setting this option to <code>FALSE</code> will result in non-linear relationships
-between observations and covariates, often increasing processing time (Default: <code>TRUE</code>).</p></dd>
+between observations and covariates, often increasing processing time (Default: <code>TRUE</code>).
+How non-linearity is captured depends on the used engine.</p></dd>
 <dt>bias_variable</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with names of variables to be set to <em>bias_value</em> (Default: <code>NULL</code>).
 This option can for instance be used to 'partial' out certain biases after predictions have been made.
@@ -154,7 +159,7 @@ and make use of the <a href="add_offset_range.html">add_offset_range</a> and <a 
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="engine_gdb.html">engine_gdb</a>, <a href="engine_xgboost.html">engine_xgboost</a>, <a href="engine_bart.html">engine_bart</a>, <a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a></p></div>
+    <div class="dont-index"><p><a href="engine_gdb.html">engine_gdb</a>, <a href="engine_xgboost.html">engine_xgboost</a>, <a href="engine_bart.html">engine_bart</a>, <a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a>, <a href="engine_breg.html">engine_breg</a></p></div>
     </div>
 
     <div class="section level2">
@@ -167,7 +172,7 @@ and make use of the <a href="add_offset_range.html">add_offset_range</a> and <a 
 <span class="r-in">        <span class="co"># Add predictors and scale them</span></span>
 <span class="r-in">        <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
 <span class="r-in">        <span class="co"># Use stan for estimation</span></span>
-<span class="r-in">        <span class="fu"><a href="engine_stan.html">engine_stan</a></span><span class="op">(</span>chains <span class="op">=</span> <span class="fl">2</span>,iter <span class="op">=</span> <span class="fl">1000</span>,warmup <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
+<span class="r-in">        <span class="fu"><a href="engine_stan.html">engine_stan</a></span><span class="op">(</span>chains <span class="op">=</span> <span class="fl">2</span>, iter <span class="op">=</span> <span class="fl">1000</span>, warmup <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span class="r-in"> <span class="co"># Train the model</span></span>
 <span class="r-in"> <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">train</span><span class="op">(</span><span class="va">x</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, varsel <span class="op">=</span> <span class="st">'reg'</span><span class="op">)</span></span>
 <span class="r-in"> <span class="va">mod</span></span>

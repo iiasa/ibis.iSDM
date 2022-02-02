@@ -7,7 +7,13 @@ NULL
 #' Efficient MCMC algorithm for linear regression models that makes use of
 #' 'spike-and-slab' priors for some modest regularization on the amount of posterior
 #' probability for a subset of the coefficients.
-#' @details TBD
+#' @details
+#' This engine provides efficient Bayesian predictions through the \pkg{Boom} R-package. However note
+#' that not all link and models functions are supported and certain functionalities such as offsets are generally
+#' not available.
+#' This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} parameter
+#' specified in [train]. If set to \code{FALSE}, non-linearity will be approximated through a combination of
+#' B- and I-Splines.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param iter [`numeric`] on the number of MCMC iterations to run (Default: \code{10000}).
 #' @param nthreads [`numeric`] on the number of CPU-threads to use for data augmentation.
@@ -115,9 +121,29 @@ engine_breg <- function(x,
 
         # Get parameters
         params <- self$data$params
+        settings$set('iter', params$iter)
+        settings$set('type', params$type)
 
         # Distribution specific procedure
         fam <- model$biodiversity[[1]]$family
+
+        # If offset is specified, raise warning
+        if(!is.Waiver(model$offset)){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Engine breg can not use offsets. Ignored for now.')
+        }
+
+        # Check whether regularization parameter is set to none, if yes, raise message
+        if(settings$get("varsel") == "none"){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Engine breg always applies regularization.')
+        }
+
+        # -- #
+        # Expand predictors if specified in settings
+        if(settings$get('only_linear') == FALSE){
+          print("Non-linear relationships to be added.")
+        }
+        # -- #
+
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
@@ -205,6 +231,70 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
         }
 
+        # Define priors for modelling if set
+        if(!is.Waiver(model$priors)){
+          stop("TBD. Tcrossprod errors...")
+          if(length( unique(model$priors$types()) ) > 1){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','More than one prior type specified!')
+            stop("Not yet implemented!")
+          }
+          if(all(model$priors$types() == "coefficients")){
+            # Specificy parameters for all coefficients
+            # Match position of variables with monotonic constrains
+            mp <- rep(0, length(model$biodiversity[[1]]$predictors_names)); names(mp) <- model$biodiversity[[1]]$predictors_names
+            ms <- rep(1e-4, length(model$biodiversity[[1]]$predictors_names)); names(ms) <- model$biodiversity[[1]]$predictors_names
+            # Also add observed dummy for both
+            mp["observed"] <- 0; ms["observed"] <- 0
+            for(v in model$priors$varnames()){
+              mp[v] <- model$priors$get(v)[1]
+              ms[v] <- model$priors$get(v)[2]
+            }
+            # Expected size:
+            # Assume that only half of the covariates (plus prior variables) are relevant
+            esize <- ceiling(length(mp) * .5) + model$priors$length()
+
+            # Models that use specified coefficients
+            pp <- BoomSpikeSlab::SpikeSlabGlmPriorDirect(
+              coefficient.mean = mp,
+              coefficient.precision = ms,
+              expected.model.size = esize,
+              prior.inclusion.probabilities = NULL
+            )
+            # Save the prior for later
+            self$set_data("prior", pp)
+
+          } else if((all(model$priors$types() == "inclusion.probability"))){
+            # Probability of Inclusion of variables in the model
+
+            # Define prior
+            pp <- BoomSpikeSlab::SpikeSlabGlmPrior(
+              predictors = model$biodiversity[[1]]$predictors,
+              weight = 1, # prior weight assigned to each observation in predictors
+              mean.on.natural.scale = s,
+              prior.information.weight = NA,
+              expected.model.size = d,
+              diagonal.shrinkage = 0
+            )
+            PoissonZellnerPrior(predictors = model$biodiversity[[1]]$predictors,
+                                # exposure = model$biodiversity[[1]]$expect,
+                                # counts = model$biodiversity[[1]]$observations$observed,
+                                prior.event.rate = sum(model$biodiversity[[1]]$observations$observed>0) / nrow(model$biodiversity[[1]]$observations),
+                                expected.model.size = 1,
+                                prior.information.weight = 0.01,
+                                diagonal.shrinkage = 0.5,
+                                optional.coefficient.estimate = NULL,
+                                max.flips = -1,
+                                prior.inclusion.probabilities = NULL
+                                )
+
+            # Save the prior for later
+            self$set_data("prior", pp)
+
+          } else{
+            stop("Some error occured during prior setup...")
+          }
+        }
+
         # Instead of invisible return the model object
         return( model )
       },
@@ -222,9 +312,12 @@ engine_breg <- function(x,
         # Verbosity
         verbose <- settings$get("verbose")
 
+        # Set prediction type also for later
+        settings$set('type', self$get_data("params")$type)
+
         # seed
         seed <- settings$get("seed")
-        if(is.Waiver(seed)) seed <- 1337
+        if(is.Waiver(seed)) { seed <- 1337; settings$set('seed', 1337) }
 
         # Get output raster
         prediction <- self$get_data('template')
@@ -232,15 +325,13 @@ engine_breg <- function(x,
         # Get parameters control
         params <- self$get_data('params')
 
-        # Check only linear and reset to linear booster then
-        if(settings$data$only_linear) params$booster <- "gblinear" else params$booster <- "gbtree"
-
         # All other needed data for model fitting
         fam <- model$biodiversity[[1]]$family
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
                     data.frame(observed = model$biodiversity[[1]]$observations[,'observed'])
                     )
+        df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed"))
         w <- model$biodiversity[[1]]$expect # The expected exposure
         # Get full prediction container
         full <- model$predictors
@@ -248,7 +339,9 @@ engine_breg <- function(x,
 
         # Priors
         if(!is.Waiver(model$priors)){
-          print("TBD")
+          # Get the prior defined during set up
+          pp <- self$get_data("prior")
+          assertthat::assert_that(inherits(pp, "SpikeSlabPriorBase"))
         } else { pp <- NULL }
 
         assertthat::assert_that(
@@ -256,82 +349,6 @@ engine_breg <- function(x,
         )
 
         # --- #
-        # Pass this parameter possibly on from upper levels
-        if(settings$get('varsel') == "reg"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
-
-          # Create combinations of random hyper parameters
-          set.seed(20)
-          if(params$booster == 'gblinear'){
-            parameters_df <- expand.grid(
-              lambda = seq(0,7,0.25), alpha = seq(0,1, 0.1),
-              eval = NA
-            )
-          } else {
-            parameters_df <- expand.grid(
-              # overfitting
-              max_depth = 1:6,
-              gamma = 0:5,
-              min_child_weight = 0:6,
-              # Randomness
-              subsample = runif(1, .7, 1),
-              colsample_bytree = runif(1, .6, 1),
-              eval = NA
-            )
-          }
-
-          # Progressbar
-          pb <- progress::progress_bar$new(total = nrow(parameters_df))
-          # TODO: Could be parallized
-          for (row in 1:nrow(parameters_df)){
-            test_params <- list(
-              booster = params$booster,
-              objective = params$objective
-            )
-            if(test_params$booster=='gblinear'){
-              test_params$lambda <- parameters_df$lambda[row]
-              test_params$alpha <- parameters_df$alpha[row]
-            } else {
-              test_params$gamma <- parameters_df$gamma[row]
-              test_params$max_depth <- parameters_df$max_depth[row]
-              test_params$min_child_weight <- parameters_df$min_child_weight[row]
-              test_params$subsample <- parameters_df$subsample[row]
-              test_params$colsample_bytree <- parameters_df$colsample_bytree[row]
-            }
-
-            suppressMessages(
-              test_xgb <- xgboost::xgboost(
-                params = test_params,
-                data = df_train,
-                nrounds = 100,
-                verbose = ifelse(verbose, 1, 0)
-              )
-            )
-            if(verbose) pb$tick()
-            parameters_df$eval[row] <- min(test_xgb$evaluation_log[,2])
-          }
-          # Get the one with minimum error and replace params values
-          p <- parameters_df[which.min(parameters_df$eval),]
-          p$eval <- NULL
-          for(i in names(p)){ params[[i]] <- as.numeric(p[i]) }
-
-          # Find the optimal number of rounds using 5-fold cross validation
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Crossvalidation for determining early stopping rule.')
-
-          fit_cv <- xgboost::xgb.cv(
-            params = params,
-            data = df_train,
-            verbose = ifelse(verbose, 1, 0),
-            print_every_n = 100,
-            nrounds = nrounds, nfold = 5,
-            showsd = TRUE,      # standard deviation of loss across folds
-            stratified = TRUE,  # sample is unbalanced; use stratified samplin
-            maximize = FALSE,
-            early_stopping_rounds = 10
-          )
-          # Set new number of rounds
-          nround <- fit_cv$best_iteration
-        }
 
         # Fit the model depending on the family
         if(fam == "poisson"){
@@ -376,38 +393,15 @@ engine_breg <- function(x,
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
           # Make a prediction
-          if(fam == "poisson"){
-            suppressWarnings(
-              pred_breg <- BoomSpikeSlab::predict.poisson.spike(
-                object = fit_breg,
-                newdata = full,
-                exposure = w_full,
-                burn = ceiling(params$iter*0.1),
-                type = params$type,
-                mean.only = FALSE # Return full posterior
-              )
-            )
-          } else if(fam == "binomial"){
-            suppressWarnings(
-              pred_breg <- BoomSpikeSlab::predict.logit.spike(
-                object = fit_breg,
-                newdata = full,
-                burn = ceiling(params$iter*0.1),
-                type = params$type,
-                mean.only = FALSE # Return full posterior
-              )
-            )
-          } else {
-            suppressWarnings(
-              pred_breg <- BoomSpikeSlab::predict.lm.spike(
-                object = fit_breg,
-                newdata = full,
-                burn = ceiling(params$iter*0.1),
-                type = params$type,
-                mean.only = FALSE # Return full posterior
-              )
-            )
-          }
+          # -> external code in utils-boom
+          pred_breg <- predict_boom(
+            obj = fit_breg,
+            newdata = full,
+            w = w_full,
+            fam = fam,
+            params = params
+          )
+
           # Summarize the posterior
           preds <- cbind(
             matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
@@ -442,120 +436,208 @@ engine_breg <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, plot = TRUE, ...){
-            assertthat::assert_that(is.character(x.var) || is.null(x.var))
+          partial = function(self, x.var = NULL, constant = NULL, length.out = 100, plot = FALSE, type = NULL, ...){
+            assertthat::assert_that(is.character(x.var) || is.null(x.var),
+                                    is.null(constant) || is.numeric(constant),
+                                    is.null(type) || is.character(type),
+                                    is.numeric(length.out)
+            )
+            # Settings
+            settings <- self$settings
+            # Set type
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
+
             mod <- self$get_data('fit_best')
             df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
-            df <- subset(df, select = mod$feature_names)
+            df <- subset(df, select = attr(mod$terms, "term.labels"))
+            w <- self$model$biodiversity[[1]]$expect # Also get exposure variable
 
             # Match x.var to argument
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
+              x.var <- match.arg(x.var, names(df), several.ok = FALSE)
             }
 
-            # Check that variables are in
-            assertthat::assert_that(all( x.var %in% colnames(df) ),
-                                    msg = 'Variable not in predicted model.')
+            # Calculate range of predictors
+            rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            df_partial <- list()
 
-            pp <- data.frame()
-            pb <- progress::progress_bar$new(total = length(x.var))
-            for(v in x.var){
-              p1 <- pdp::partial(mod, pred.var = v, ice = FALSE, center = TRUE,
-                                 plot = FALSE, rug = TRUE, train = df)
-              names(p1) <- c("partial", "yhat")
-              p1$variable <- v
-              pp <- rbind(pp, p1)
-              if(length(x.var) > 1) pb$tick()
+            # Add all others as constant
+            if(is.null(constant)){
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), length.out )
+            } else {
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
             }
+
+            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            df_partial <- df_partial %>% as.data.frame()
+
+            # For Integrated model, take the last one
+            fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            pred_breg <- predict_boom(
+              obj = mod,
+              newdata = df_partial,
+              w = unique(w)[2], # The second entry of unique contains the non-observed variables
+              fam = fam,
+              params = settings$data # Use the settings as list
+            )            # Also attach the partial variable
+
+            # Summarize the partial effect
+            pred_part <- cbind(
+              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+              matrixStats::rowSds(pred_breg, na.rm = TRUE),
+              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+              apply(pred_breg, 1, mode)
+            ) %>% as.data.frame()
+            names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+            pred_part$cv <- pred_part$mean / pred_part$sd
+            # And attach the variable
+            pred_part <- cbind("partial_effect" = df_partial[[x.var]], pred_part)
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial, y = yhat)) +
+              ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
                 ggplot2::theme_classic(base_size = 18) +
+                ggplot2::geom_ribbon(fill = 'grey90') +
                 ggplot2::geom_line() +
-                ggplot2::labs(x = "", y = expression(hat(y))) +
-                ggplot2::facet_wrap(~variable,scales = 'free')
+                ggplot2::labs(x = paste0("partial of ",x.var), y = expression(hat(y)))
             }
             # Return the data
-            return(pp)
+            return(pred_part)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL){
+          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = NULL){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
-                                    "model" %in% names(self))
-            stop("TBD")
-            # Get data
+                                    "model" %in% names(self),
+                                    is.null(constant) || is.numeric(constant),
+                                    is.logical(plot),
+                                    is.character(type) || is.null(type)
+                                    )
+
+            # Settings
+            settings <- self$settings
+            # Set type
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
+
             mod <- self$get_data('fit_best')
             model <- self$model
-            x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
+            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+            df <- subset(df, select = attr(mod$terms, "term.labels"))
+            w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
-            # Get predictor
-            df <- subset(model$predictors, select = mod$feature_names)
-            # Convert all non x.vars to the mean
-            # Make template of target variable(s)
-            template <- raster::rasterFromXYZ(cbind(model$predictors$x,model$predictors$y),
-                                              crs = raster::projection(model$background))
-
-            # Set all variables other the target variable to constant
-            if(is.null(constant)){
-              # Calculate mean
-              # FIXME: for factor use mode!
-              constant <- apply(df, 2, function(x) mean(x, na.rm=T))
-              for(v in mod$feature_names[ mod$feature_names %notin% x.var]){
-                if(v %notin% names(df) ) next()
-                df[!is.na(df[v]),v] <- as.numeric( constant[v] )
-              }
+            # Match x.var to argument
+            if(is.null(x.var)){
+              x.var <- colnames(df)
             } else {
-              df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
+              x.var <- match.arg(x.var, names(df), several.ok = FALSE)
             }
-            df <- xgboost::xgb.DMatrix(data = as.matrix(df))
 
-            # Spartial prediction
+            # Make spatial container for prediction
             suppressWarnings(
-              pp <- xgboost:::predict.xgb.Booster(
-                object = mod,
-                newdata = df
+              df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+                                                       data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
               )
             )
-            # Fill output with summaries of the posterior
-            template[] <- pp
-            names(template) <- 'mean'
-            template <- raster::mask(template, model$background)
+            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
 
-            # Quick plot
-            raster::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
-            # Also return spatial
-            return(template)
+            # Add all others as constant
+            if(is.null(constant)){
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- mean(model$predictors[[n]], na.rm = TRUE)
+            } else {
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+            }
+
+            # For Integrated model, take the last one
+            fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            pred_breg <- predict_boom(
+              obj = mod,
+              newdata = df_partial@data,
+              w = unique(w)[2], # The second entry of unique contains the non-observed variables
+              fam = fam,
+              params = settings$data # Use the settings as list
+            )
+
+            # Summarize the partial effect
+            pred_part <- cbind(
+              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+              matrixStats::rowSds(pred_breg, na.rm = TRUE),
+              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+              apply(pred_breg, 1, mode)
+            ) %>% as.data.frame()
+            names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+            pred_part$cv <- pred_part$mean / pred_part$sd
+
+            # Now create spatial prediction
+            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- fill_rasters(pred_part, prediction)
+
+            # Do plot and return result
+            if(plot){
+              plot(prediction, col = ibis_colours$viridis_orig)
+            }
+            return(prediction)
           },
           # Engine-specific projection function
-          project = function(self, newdata){
-            assertthat::assert_that(!missing(newdata),
-                                    is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
-            stop("TBD")
-
-            mod <- self$get_data('fit_best')
-            if(!inherits(newdata, "xgb.DMatrix")){
-              assertthat::assert_that(
-                all( mod$feature_names %in% colnames(newdata) )
-              )
-              newdata <- subset(newdata, select = mod$feature_names)
-              newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
-            }
-
-            # Make a prediction
-            suppressWarnings(
-              pred_xgb <- xgboost:::predict.xgb.Booster(
-                object = mod,
-                newdata = newdata
-              )
+          project = function(self, newdata, type = NULL){
+            assertthat::assert_that("model" %in% names(self),
+                                    nrow(newdata) > 0,
+                                    all( c("x", "y") %in% names(newdata) ),
+                                    is.character(type) || is.null(type)
             )
 
-            # Fill output with summaries of the posterior
+            # Settings
+            settings <- self$settings
+            # Set type
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
+
+            mod <- self$get_data('fit_best')
+            model <- self$model
+            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+            df <- subset(df, select = attr(mod$terms, "term.labels"))
+            w <- model$biodiversity[[1]]$expect # Also get exposure variable
+
+            # Make spatial container for prediction
+            suppressWarnings(
+              df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+                                                       data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+              )
+            )
+            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+            # For Integrated model, take the last one
+            fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            pred_breg <- predict_boom(
+              obj = mod,
+              newdata = df_partial@data,
+              w = unique(w)[2], # The second entry of unique contains the non-observed variables
+              fam = fam,
+              params = settings$data # Use the settings as list
+            )
+
+            # Summarize the partial effect
+            pred_part <- cbind(
+              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+              matrixStats::rowSds(pred_breg, na.rm = TRUE),
+              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+              apply(pred_breg, 1, mode)
+            ) %>% as.data.frame()
+            names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+            pred_part$cv <- pred_part$mean / pred_part$sd
+
+            # Now create spatial prediction
             prediction <- emptyraster( self$get_data('prediction') ) # Background
-            prediction[] <- pred_xgb
-            prediction <- raster::mask(prediction, self$get_data('prediction') )
+            prediction <- fill_rasters(pred_part, prediction)
 
             return(prediction)
           }

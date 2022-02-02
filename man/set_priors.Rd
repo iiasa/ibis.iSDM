@@ -27,6 +27,8 @@ calling \link{priors}.
 }
 \seealso{
 Other prior: 
+\code{\link{BREGPriors}()},
+\code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},
 \code{\link{GDBPrior}()},
 \code{\link{INLAPriors}()},

@@ -24,13 +24,17 @@
 <li class="nav-item">
   <a class="nav-link" href="../articles/comparison.html">Comparison</a>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
+</li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/01_train_simple_model.html">Train a model</a>
-    <a class="dropdown-item" href="../articles/02_integrate_data.html">Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
+    <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
+    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
+    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine Comparison</a>
   </div>
 </li>
 <li class="nav-item">
@@ -84,6 +88,16 @@
           <code><a href="add_priors.html">add_priors()</a></code> 
         </dt>
         <dd>Add priors to an existing distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="BREGPrior.html">BREGPrior()</a></code> 
+        </dt>
+        <dd>Create a new spike and slab prior for Bayesian generalized linear models</dd>
+      </dl><dl><dt>
+          
+          <code><a href="BREGPriors.html">BREGPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables are supplied</dd>
       </dl><dl><dt>
           
           <code><a href="GDBPrior.html">GDBPrior()</a></code> 
@@ -247,6 +261,11 @@ For instance those previously selected</dd>
           <code><a href="engine_bart.html">engine_bart()</a></code> 
         </dt>
         <dd>Engine for use of Bayesian Additive Regression Trees (BART)</dd>
+      </dl><dl><dt>
+          
+          <code><a href="engine_breg.html">engine_breg()</a></code> 
+        </dt>
+        <dd>Engine for Bayesian regularized regression models</dd>
       </dl><dl><dt>
           
           <code><a href="engine_gdb.html">engine_gdb()</a></code> 
@@ -419,7 +438,7 @@ For instance those previously selected</dd>
           
           <code><a href="alignRasters.html">alignRasters()</a></code> 
         </dt>
-        <dd>Align a <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">Raster</a></code> object to another by harmonizing geometry and extend.</dd>
+        <dd>Align a <code>Raster</code> object to another by harmonizing geometry and extend.</dd>
       </dl><dl><dt>
           
           <code><a href="emptyraster.html">emptyraster()</a></code> 

@@ -31,14 +31,16 @@ navbar:
     articles:
       text: Articles
       menu:
-        - text: Train a model
+        - text: 1. Train a model
           href: articles/01_train_simple_model.html
-        - text: Integrate data
+        - text: 2. Integrate data
           href: articles/02_integrate_data.html
-        - text: Model assessment
+        - text: 3. Model assessment
           href: articles/03_model_assessment.html
-        - text: Biodiversity projections
+        - text: 4. Biodiversity projections
           href: articles/04_biodiversity_projections.html
+        - text: 5. Engine Comparison
+          href: articles/05_engine_comparison.html
     comparison:
       text: Comparison
       href: articles/comparison.html

@@ -1,0 +1,12 @@
+---
+output:
+  rmarkdown::github_document:
+    html_preview: no
+fontsize: 11pt
+documentclass: article
+---
+
+# Capabilities of included engines
+
+Idea is to show a table will all the information
+

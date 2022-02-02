@@ -14,10 +14,7 @@ This document contains a series of frequently asked questions when using the \pk
 
 <details>
 
-<summary>
-
-<b>Is there a way to limit my predictions to only certain regions in the extent?</b>
-
+<summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b>
 </summary>
 
 Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see *add_constrain_dispersal*) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).

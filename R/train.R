@@ -41,6 +41,7 @@ NULL
 #' @param only_linear Fit model only on linear baselearners and functions. Depending
 #' on the [engine] setting this option to \code{FALSE} will result in non-linear relationships
 #' between observations and covariates, often increasing processing time (Default: \code{TRUE}).
+#' How non-linearity is captured depends on the used [engine].
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
 #' This option can for instance be used to 'partial' out certain biases after predictions have been made.
 #' See Examples.
@@ -346,7 +347,8 @@ methods::setMethod(
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
         "<INLABRU>" = x$priors$classes() == 'INLAPrior',
-        "<STAN>" = x$priors$classes() == 'STANPrior'
+        "<STAN>" = x$priors$classes() == 'STANPrior',
+        "<BREG>" = x$priors$classes() == 'BREGPrior'
       )
       spec_priors <- x$priors$collect( names(which(spec_priors)) )
       # Check whether prior objects match the used engine, otherwise raise warning
@@ -900,13 +902,15 @@ methods::setMethod(
       # For stan, the actual model is built sequentially per id
       # Process per supplied dataset
       for(id in ids) {
+        # TODO
+        if(length(model$biodiversity)>1) stop("Not yet implemented")
 
         # Default equation found (e.g. no separate specification of effects)
         if(model$biodiversity[[id]]$equation=='<Default>'){
 
           # Go through each variable and build formula for likelihood
           form <- to_formula(paste("observed",
-                                          " ~ 0 + ", #"intercept +",
+                                          " ~ ", "0 + ",
                                    ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
                                    paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                    # Check whether a single dataset is provided, otherwise add other intercepts
@@ -923,8 +927,7 @@ methods::setMethod(
                             )
 
           # Add offset if specified
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'binomial') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
           # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
         } else {
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
@@ -964,9 +967,7 @@ methods::setMethod(
         form <- paste( 'observed' , ' ~ ')
         # Add linear predictors
         form <- paste(form, paste0(model$biodiversity[[id]]$predictors_names,collapse = ' + '))
-        if(settings$get('only_linear') == FALSE){
-          print("TBD")
-        }
+        # NOTE: Non-linearity will be specified during engine setup!
         # Convert to formula
         form <- to_formula(form)
       } else{
