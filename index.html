@@ -31,7 +31,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="index.html">ibis.iSDM</a>
 
@@ -47,12 +47,6 @@
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="articles/comparison.html">Comparison</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="articles/frequently-asked-questions.html">FAQ</a>
-</li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -60,8 +54,12 @@
     <a class="dropdown-item" href="articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="articles/03_model_assessment.html">3. Model assessment</a>
     <a class="dropdown-item" href="articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="articles/05_engine_comparison.html">5. Engine Comparison</a>
+    <a class="dropdown-item" href="articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="articles/06_package_comparison.html">6. Other packages</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="articles/frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="articles/contributing.html">Contributing</a>
@@ -106,28 +104,8 @@
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>See relevant reference sites and vignettes.</p>
-<p>Note that the package in constant development and individual functions might change. As soon as the package has reached a stable state, the repository will be made public An official release will be made as soon as the package is public <strong>In development !!!</strong></p>
-</div>
-<div class="section level2">
-<h2 id="package-development">Package development<a class="anchor" aria-label="anchor" href="#package-development"></a>
-</h2>
-<p>(also see <a href="https://github.com/iiasa/ibis.iSDM/issues" class="external-link">issues</a> and <a href="https://github.com/iiasa/ibis.iSDM/projects" class="external-link">projects</a>)</p>
-<ul>
-<li>✅ Fitting Point Poisson Models (PPMs) using INLA and at least another Engine</li>
-<li>✅ Basic documentation present that however can be further improved</li>
-<li>✅ Various functions to include offsets, ranges, predictor transformations</li>
-<li>✅ Plotting functions for models and effect are there</li>
-<li>✅ Actually support multiple likelihoods depending on included biodiversity dataset</li>
-<li>✅ Add new class for priors and ensure that they linked in a flexible manner</li>
-<li>🚧 Add a wrapper for PPMs in Stan as new engine for max flexibility</li>
-<li>🚧 Implement options to add occupancy model for detectability, see <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13090" class="external-link">Altwegg and Nichols</a> and <a href="http://doi.wiley.com/10.1111/ecog.02445" class="external-link">Guillera-Arroita</a>
-</li>
-<li>🚧 There are reports that iCAR can <a href="https://arxiv.org/pdf/1204.6087v1.pdf" class="external-link">outperforms</a> Matern covariance? It likely is also considerably faster, thus could be implemented</li>
-<li>🚧 Create a pkgdown website for the package with tutorials (in progress. Looking at it)</li>
-<li>…</li>
-</ul>
-<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
+<p>See relevant reference articles and vignettes.</p>
+<p><strong>In development !!!</strong> Note that the package in constant development and individual functions might change. As soon as the package has reached a stable state, the repository will be made public An official release will be made as soon as the package is public and a preprint has been written.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

@@ -22,7 +22,7 @@
     <loc>https://iiasa.github.io/ibis.iSDM/articles/05_engine_comparison.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/comparison.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/06_package_comparison.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/contributing.html</loc>
@@ -206,6 +206,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_ngbvalue.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_future.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_options.html</loc>

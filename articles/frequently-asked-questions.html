@@ -31,7 +31,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -47,12 +47,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../articles/comparison.html">Comparison</a>
-</li>
-<li class="active nav-item">
-  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
-</li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -60,8 +54,12 @@
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
     <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine Comparison</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
   </div>
+</li>
+<li class="active nav-item">
+  <a class="nav-link" href="../articles/frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/contributing.html">Contributing</a>
@@ -105,12 +103,14 @@
 <h2 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="anchor" aria-label="anchor" href="#frequently-asked-questions-faq"></a>
 </h2>
 <p>This document contains a series of frequently asked questions when using the  package and is a work in progress.</p>
-<div class="section level4">
-<h4 id="model-estimation">Model estimation<a class="anchor" aria-label="anchor" href="#model-estimation"></a>
-</h4>
-<details><p><summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b> </summary></p>
-<p>Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see <em>add_constrain_dispersal</em>) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of <a href="https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2" class="external-link">Wessels, Merow and Trisos (2021)</a>.</p>
-<p>To do this with ibis, one has to specify the limit of projection to the <em>distribution</em> object.</p>
+<div class="section level3">
+<h3 id="model-setup">Model setup<a class="anchor" aria-label="anchor" href="#model-setup"></a>
+</h3>
+<details><p><summary><b>Is it possible to transform input predictors before model fitting?</b> </summary></p>
+Yes, in many instances it is desirable to transform input predictors to a new range or to remove extreme values from the predictors. For example the popular [<code>maxnet</code>] R-package for Maximum entropy estimation of species distribution modelling often transforms the variables via quadratic, hinge or threshold transformations. Although this can also (and preferably should) be done before setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [<code>add_predictors</code>] for examples and descriptions.
+</details><details><p><summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b> </summary></p>
+<p>Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see [add_constrain_dispersal]) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of <a href="https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2" class="external-link">Wessels, Merow and Trisos (2021)</a>.</p>
+<p>To do this with ibis, one has to specify the limit of projection to the [distribution] object.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Where zone is a provided raster</span>
 <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span>, limits <span class="op">=</span> <span class="va">zone</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
@@ -119,6 +119,10 @@
   <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="op">)</span>
 <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></code></pre></div>
 </details>
+</div>
+<div class="section level3">
+<h3 id="scenarios">Scenarios<a class="anchor" aria-label="anchor" href="#scenarios"></a>
+</h3>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
