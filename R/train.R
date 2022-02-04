@@ -171,6 +171,8 @@ methods::setMethod(
       lu <- apply(model[['predictors']][model[['predictors_names']]],
                   2, function(x) length(unique(na.omit( x[] ) )))
       model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu >2 ,'numeric','factor') )
+      # Assign attribute to predictors to store the name of object
+      model[['predictors_object']] <- x$predictors
       rm(lu)
     }
 
@@ -228,12 +230,11 @@ methods::setMethod(
       model$biodiversity[[id]]$observations <- as.data.frame(model$biodiversity[[id]]$observations) # Get only observed column and coordinates
 
       # Now extract coordinates and extract estimates
-      env <- get_ngbvalue(
-        coords = x$biodiversity$get_coordinates(id),
-        env = model[['predictors']],
-        field_space = c('x','y'),
-        longlat = raster::isLonLat(x$background)
-      )
+      # Now shifted to raster extraction by default to improve speed!
+      env <- get_rastervalue(coords = x$biodiversity$get_coordinates(id),
+                             env = x$predictors$get_data(df = FALSE),
+                             rm.na = FALSE)
+
       # Remove missing values as several engines can't deal with those easily
       miss <- complete.cases(env)
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
@@ -245,11 +246,10 @@ methods::setMethod(
       # TODO: Ideally this can be further specified in the add_range_offset call
       if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){
         # Extract offset for each observed point
-        ofs <- get_ngbvalue(
+        ofs <- get_rastervalue(
           coords = x$biodiversity$get_coordinates(id),
-          env = raster::as.data.frame(x$offset, xy = TRUE),
-          field_space = c('x','y'),
-          longlat = raster::isLonLat(x$background)
+          env = x$offset,
+          na.rm = FALSE
         )
         ofs <- subset(ofs, miss)
         assertthat::assert_that(nrow(ofs) == nrow( model$biodiversity[[id]]$observations ))
@@ -310,10 +310,10 @@ methods::setMethod(
                        raster::xyFromCell(pres, ce) # Center of cell
               )
             ) |> unique()
-          envs <- get_ngbvalue(coords = obs[,c('x','y')],
-                              env =  model$predictors[,c("x","y", model[['predictors_names']][which( model[['predictors_names']] %notin% co )])],
-                              longlat = raster::isLonLat(x$background),
-                              field_space = c('x','y')
+          envs <- get_rastervalue(
+            coords = obs[,c('x','y')],
+            env = x$predictors$get_data(df = FALSE)[model[['predictors_names']][which( model[['predictors_names']] %notin% co )]],
+            na.rm = TRUE
           )
         } else {
           obs <- model[['biodiversity']][[id]]$observations$observed

@@ -12,6 +12,7 @@ add_biodiversity_poipo(
   formula = NULL,
   family = "poisson",
   separate_intercept = TRUE,
+  docheck = TRUE,
   ...
 )
 
@@ -32,6 +33,8 @@ add_biodiversity_poipo(
 
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
+
+\item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
 
 \item{...}{Other parameters passed down to the object. Normally not used unless described in details.}
 }

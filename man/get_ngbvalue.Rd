@@ -28,7 +28,9 @@ get_ngbvalue(
 A \code{\link{data.frame}} with the extracted covariate data from each provided data point.
 }
 \description{
-Function to extract nearest neighbour predictor values of provided points
+This function performs nearest neighbour matching between biodiversity observations and independent
+predictors, and operates directly on provided data.frames.
+\strong{Note that despite being parallized this function can be rather slow for large data volumes of data!}
 }
 \details{
 Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodist::geodist})
@@ -37,6 +39,8 @@ Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodi
 If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
 }
 \references{
-Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
+\itemize{
+\item Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
+}
 }
 \keyword{utils}

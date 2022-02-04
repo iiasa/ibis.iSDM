@@ -140,7 +140,7 @@ engine_bart <- function(x,
           assertthat::assert_that(!is.na(cellStats(bg,min)))
 
           abs <- create_pseudoabsence(
-            env = model$predictors,
+            env = model$predictors_object,
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
@@ -165,19 +165,18 @@ engine_bart <- function(x,
           ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
 
           # Re-extract counts environment variables
-          envs <- get_ngbvalue(coords = obs[,c('x','y')],
-                               env =  model$predictors[,c("x","y", model[['predictors_names']])],
-                               longlat = raster::isLonLat(self$get_data("template")),
-                               field_space = c('x','y')
-          )
+          envs <- get_rastervalue(coords = obs[,c('x','y')],
+                                  env = model$predictors_object$get_data(df = FALSE),
+                                  rm.na = FALSE)
           envs$intercept <- 1
+
+          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
+          if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+          df <- subset(df, complete.cases(df))
           # Overwrite observations
           model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
-
-          # Format out
-          df <- rbind(envs,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
-            subset(., complete.cases(.) )
 
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
@@ -219,7 +218,7 @@ engine_bart <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Get output raster
@@ -251,7 +250,11 @@ engine_bart <- function(x,
 
         if('offset' %in% names(model$biodiversity[[1]]) ){
           # Add offset to full prediction and load vector
-          # TBD
+          # TODO:
+          # Offsets are only supported for binary dbarts models, but maybe there is an option
+          # use weights instead
+          stop("not yet")
+
         } else { off = NULL }
 
         # --- #

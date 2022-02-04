@@ -13,7 +13,7 @@ The inlabru engine - similar as the engine_inla function acts a wrapper for INLA
 albeit inlabru has a number of convenience functions implemented that make in particular predictions
 with new data much more straight forward (e.g. via posterior simulation instead of fitting).
 Since more recent versions inlabru also supports the addition of multiple likelihoods, therefore
-allowing full integrated inference."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+allowing full integrated inference."><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
@@ -31,7 +31,7 @@ allowing full integrated inference."><meta property="og:image" content="https://
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div id="navbar" class="collapse navbar-collapse ms-3">
+    <div id="navbar" class="collapse navbar-collapse ms-2">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
@@ -71,7 +71,7 @@ allowing full integrated inference."><meta property="og:image" content="https://
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Use inlabru as engine</h1>
+      <img src="" class="logo" alt=""><h1>Use inlabru as engine</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/engine_inlabru.R" class="external-link"><code>R/engine_inlabru.R</code></a></small>
       <div class="d-none name"><code>engine_inlabru.Rd</code></div>
     </div>
@@ -92,7 +92,6 @@ allowing full integrated inference.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_inlabru</span><span class="op">(</span>
   <span class="va">x</span>,
   optional_mesh <span class="op">=</span> <span class="cn">NULL</span>,
-  optional_projstk <span class="op">=</span> <span class="cn">NULL</span>,
   max.edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>,
   offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,
   cutoff <span class="op">=</span> <span class="fl">1</span>,
@@ -114,8 +113,6 @@ allowing full integrated inference.</p>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
 <dt>optional_mesh</dt>
 <dd><p>A directly supplied <code>INLA</code> mesh (Default: <code>NULL</code>)</p></dd>
-<dt>optional_projstk</dt>
-<dd><p>A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: <code>NULL</code>)</p></dd>
 <dt>max.edge</dt>
 <dd><p>The largest allowed triangle edge length, must be in the same scale units as the coordinates.</p></dd>
 <dt>offset</dt>
@@ -136,7 +133,9 @@ allowing full integrated inference.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
+    <p>If a mesh has already been pre-computed it can be supplied to engine_inlabru via the <code>optional_mesh</code>
+parameter.
+Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -164,7 +163,7 @@ allowing full integrated inference.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
     </footer></div>

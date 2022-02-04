@@ -175,7 +175,7 @@ to_formula <- function(formula){
 #' @details
 #' By default, the [parallel] package is used for parallel computation,
 #' however an option exists to use the [future] package instead.
-#' @param X A [`list`] object to be fed to a single core or parallel [apply] call.
+#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a single core or parallel [apply] call.
 #' @param FUN A [`function`] passed on for computation.
 #' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
 #' @param approach [`character`] for the parallelization approach taken (Options: \code{"parallel"} or \code{"future"}).
@@ -199,18 +199,23 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
   # Collect dots
   dots <- list(...)
 
-  # .x <- .x[, , variables_x]
-  # n_vars <- length(variables_x)
-  # chunk_size <- ceiling(n_vars/.cores)
-  # n_chunks <- ceiling(n_vars/chunk_size)
-  # chunk_list <- vector(length = n_chunks, mode = "list")
-  # for (i in seq_len(n_chunks)) {
-  #   if ((chunk_size * (i - 1) + 1) <= n_vars) {
-  #     chunk <- (chunk_size * (i - 1) + 1):(min(c(chunk_size *
-  #                                                  i, n_vars)))
-  #     chunk_list[[i]] <- .x[, , chunk]
-  #   }
-  # }
+  if(!is.list(X)){
+    # Convert input object to a list of split parameters
+    n_vars <- length( ncol(X) )
+    chunk_size <- ceiling(n_vars / cores)
+    n_chunks <- ceiling(n_vars / chunk_size)
+    chunk_list <- vector(length = n_chunks, mode = "list")
+
+    for (i in seq_len(n_chunks)) {
+      if ((chunk_size * (i - 1) + 1) <= n_vars) {
+        chunk <- (chunk_size * (i - 1) + 1):(min(c(chunk_size *
+                                                     i, n_vars)))
+        chunk_list[[i]] <- X[chunk, ]
+      }
+    }
+    X <- chunk_list
+    input_type = "data.frame" # Save to aggregate later again
+  } else { input_type = "list"}
 
   # Determine the type of input and which function to use
   if(approach == "parallel"){
@@ -268,7 +273,11 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
         # Check that future is loaded
         out <- parfun(cl = cl, X = X, fun = FUN, ...)
       }
-    }
+  }
+  # If input data was not a list, combine again
+  if(input_type != "list"){
+    out <- do.call(rbind, out)
+  }
   return( out )
 }
 #' Create formula matrix

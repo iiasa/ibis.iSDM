@@ -12,10 +12,11 @@ NULL
 #' Since more recent versions [inlabru] also supports the addition of multiple likelihoods, therefore
 #' allowing full integrated inference.
 #' @details
+#' If a mesh has already been pre-computed it can be supplied to [engine_inlabru] via the \code{optional_mesh}
+#' parameter.
 #' Priors can be set via [INLAPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
-#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter.
 #' @param cutoff The minimum allowed distance between points on the mesh.
@@ -36,7 +37,6 @@ NULL
 #' @export
 engine_inlabru <- function(x,
                         optional_mesh = NULL,
-                        optional_projstk = NULL,
                         max.edge = c(1,5),
                         offset = c(1,1),
                         cutoff = 1,
@@ -58,7 +58,6 @@ engine_inlabru <- function(x,
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           inherits(optional_mesh,'inla.mesh') || is.null(optional_mesh),
-                          is.list(optional_projstk) || is.null(optional_projstk),
                           is.vector(max.edge),
                           is.vector(offset) || is.numeric(offset),
                           is.null(timeout) || is.numeric(timeout),
@@ -143,8 +142,7 @@ engine_inlabru <- function(x,
       data = list(
         'mesh' = mesh,
         'mesh.area' = ar,
-        'proj_stepsize' = proj_stepsize,
-        'stk_pred' = optional_projstk
+        'proj_stepsize' = proj_stepsize
       ),
       # Generic plotting function for the mesh
       plot = function(self, assess = FALSE){
@@ -275,10 +273,9 @@ engine_inlabru <- function(x,
             )
           )
           # Extract predictors add to integration point data
-          d <- get_ngbvalue(coords = ips@coords,
-                            env = model$predictors,
-                            longlat = raster::isLonLat(ips),
-                            field_space = c("x","y"))
+          d <- get_rastervalue(coords = ips@coords,
+                               env = model$predictors_object$get_data(df = FALSE),
+                               rm.na = FALSE)
           for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
           ips@data$Intercept <- 1
           ips <- subset(ips, complete.cases(ips@data)) # Necessary as some integration points can fall outside land area

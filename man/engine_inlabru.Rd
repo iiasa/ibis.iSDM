@@ -10,7 +10,6 @@
 engine_inlabru(
   x,
   optional_mesh = NULL,
-  optional_projstk = NULL,
   max.edge = c(1, 5),
   offset = c(1, 1),
   cutoff = 1,
@@ -25,8 +24,6 @@ engine_inlabru(
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
 \item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
-
-\item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})}
 
 \item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.}
 
@@ -56,6 +53,8 @@ Since more recent versions \link{inlabru} also supports the addition of multiple
 allowing full integrated inference.
 }
 \details{
+If a mesh has already been pre-computed it can be supplied to \link{engine_inlabru} via the \code{optional_mesh}
+parameter.
 Priors can be set via \link{INLAPrior}.
 }
 \references{

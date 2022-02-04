@@ -16,6 +16,7 @@ add_biodiversity_polpo(
   simulate_weights = NULL,
   simulate_strategy = "random",
   separate_intercept = TRUE,
+  docheck = TRUE,
   ...
 )
 
@@ -46,6 +47,8 @@ parameter.}
 
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
+
+\item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
 
 \item{...}{Other parameters passed down}
 }

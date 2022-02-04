@@ -80,6 +80,12 @@ Available options for creating derivates are:
 }
 }
 \note{
+\strong{Important:}
+Not every \code{\link{engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
+among extracted covariates. Thus any observation with missing data is generally removed prior
+from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
+values to \code{0} or another out of range constant).
+
 Not every engine does actually need covariates. For instance it is perfectly legit
 to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
 This correspondents to a spatial kernel density estimate.

@@ -10,6 +10,35 @@ documentclass: article
 
 This document contains a series of frequently asked questions when using the \pkg{ibis.iSDM} package and is a work in progress.
 
+## Data preparation
+
+<details>
+<summary><b>What are the necessary data preparation steps for `ibis.iSDM` ?</b>
+</summary>
+The \pkg{ibis.iSDM} R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`raster`] and [`stars`] packages to do much of the formatting and processing work.
+When adding [`biodiversity`] and [`predictor`] variables to a \code{distribution} object a number of default validity checks and alignments are commonly conducted, for instance ensuring that provided points align in geographic projection.
+
+To ease up the modelling and to avoid any unfortunate errors or crashes, ideally ensure the following steps are taken:
+- A \code{background} layer describing the modelling extent is provided directly as [`sf`] \code{POLYGON} or \code{MULTIPOLYGON} object and covers all biodiversity and predictor data
+- All provided data are in the same geographic projection.
+- Biodiversity data is provided in [`sf`] format and covers the \code{background} bounding box. Furthermore each biodiversity dataset has a set \code{"field_occurrence"} field with numeric values.
+- \code{NA} is appropriately formatted (see also below).
+
+**Important:**
+For environmental predictors it becomes important to ensure that nodata values are appropriately
+handled. Unfortunately many of the implemented [`engines`] can not handle nodata values well, thus it
+is necessary during the pre-processing to remove any rows of covariate extraction where at least one variable has missing data. For instance by assinging a constant to \code{NA} values:
+```{r, echo=TRUE,eval=FALSE}
+predictors[is.na(predictors)] <- 0
+```
+
+</details>
+
+<details>
+<summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b>
+</summary>
+
+
 ## Model setup
 
 <details>
@@ -27,7 +56,8 @@ setting up a model, there are options available to transform the predictors when
 
 Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see [add_constrain_dispersal]) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
 
-To do this with ibis, one has to specify the limit of projection to the [distribution] object.
+To do this with ibis, one has to specify the limit of projection to the [distribution] object. In this context the zones extent over the whole background (and have the same extent and spatial scale). The prediction will however be limited only to those zones where supplied biodiversity observations fall
+in.
 
 ```{r, echo=TRUE,eval=FALSE}
 # Where zone is a provided raster
@@ -39,6 +69,24 @@ plot(mod)
 ```
 </details>
 
+<details>
+<summary><b>What are the options for parallelization in `ibis.iSDM`?</b>
+</summary>
+
+Most code in the \pkg{ibis.iSDM} R-package is by default already parallelized and many 
+computationally-intensive operations should be making use of all cores (if you can find an example where this is not the case, please raise an issue). The number of cores is generally being decided by
+the option \code{"ibis.nthread"} in [`ibis_options()`].
+
+In most cases, parallelized code will be run via the \pkg{parallel} and \code{doParallel} packages, although there is some code in its infancy to support the \pkg{future} parallelization approaches as well, offering greater flexibility. See the function [`ibis_future`] for more information also on the use.
+
+The typical use case is thus to run separate models (via \code{train}) in a loop or scheduler of a High-Performance-Computer. Users should be careful in the case of shared resources, e.g. don't parallelize such operations on the same machine. If there is a need to parallelize multiple models on the same instance, it is suggested to disable the \code{'ibis.runparallel'} option.
+```{r, echo=TRUE,eval=FALSE}
+# Check ibis options if set
+ibis_options()
+options('ibis.runparallel' = FALSE) # Set to FALSE
+```
+
+</details>
 
 ## Scenarios
 

@@ -13,6 +13,7 @@ NULL
 #' @param family A [`character`] stating the family to be used (Default: Poisson)
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
+#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down to the object. Normally not used unless described in details.
 #'
 #' @details This function allows to add presence-only biodiversity records to a [distribution] \pkg{ibis.iSDM}
@@ -46,7 +47,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, ...) standardGeneric("add_biodiversity_poipo"))
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipo"))
 
 # TODO: Support supplement of other object types, such as data.frame, sp, etc...
 
@@ -56,13 +57,14 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, ...) {
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, docheck = TRUE, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
-                            is.logical(separate_intercept)
+                            is.logical(separate_intercept),
+                            is.logical(docheck)
                             )
     assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column.")
@@ -70,8 +72,10 @@ methods::setMethod(
     # Messager
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipo dataset...")
 
-    # Get only those records that fall onto the background data
-    suppressMessages( poipo <- point_in_polygon(poly = x$background, points = poipo) )
+    if(docheck){
+      # Get only those records that fall onto the background data
+      suppressMessages( poipo <- point_in_polygon(poly = x$background, points = poipo) )
+    }
 
     # Convert formula if necessary
     formula <- to_formula(formula)
@@ -108,6 +112,7 @@ methods::setMethod(
 #' @param family A [`character`] stating the family to be used (Default: binomial)
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down
 #'
 #' @details Opposed to presence-only data, presence-absence biodiversity records usually originate from
@@ -137,7 +142,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipa",
   signature = methods::signature("x", "poipa"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
@@ -145,13 +150,14 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE,  ... ) {
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipa, "Spatial") || inherits(poipa, "sf") || inherits(poipa, "data.frame") || inherits(poipa, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
-                            is.logical(separate_intercept)
+                            is.logical(separate_intercept),
+                            is.logical(docheck)
     )
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
                             msg = "Presence-Absence requires at exactly 2 unique values.")
@@ -159,8 +165,10 @@ methods::setMethod(
     # Messager
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipa dataset...")
 
-    # Get only those records that fall onto the background data
-    suppressMessages( poipa <- point_in_polygon(poly = x$background, points = poipa) )
+    if(docheck){
+      # Get only those records that fall onto the background data
+      suppressMessages( poipa <- point_in_polygon(poly = x$background, points = poipa) )
+    }
 
     # Record presence absence to 0 and 1
     if(is.character(poipa[[field_occurrence]]) ){
@@ -212,6 +220,7 @@ methods::setMethod(
 #' parameter.
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down
 #'
 #' @details The default approach for polygon data is tosample presence-only points across
@@ -243,7 +252,7 @@ methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, ...) standardGeneric("add_biodiversity_polpo"))
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_polpo"))
 
 #' @name add_biodiversity_polpo
 #' @rdname add_biodiversity_polpo
@@ -252,7 +261,7 @@ methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, ... ) {
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo, "Spatial") || inherits(polpo, "sf") || inherits(polpo, "data.frame") || inherits(polpo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo, field_occurrence),
@@ -372,21 +381,24 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c('X','Y
   # If data.frame or tibble, check whether coordinates are in there
   if(!(inherits(x,'sf') )){
     # Check whether field_space columns are present
-
-    # FIXME: Implement a lookup of commonly used column names
-    # if(!all(assertthat::has_name(x, field_space))){
-    #   # Spatial column suggestions
-    #   spat_cols <- c('x','y','long','lat','long','longitude','latitude')
-    #   assertthat::assert_that(
-    #     any(assertthat::has_name(x,spat_cols)) || any( has_name(x, sapply(spat_cols, capitalize_text)) ),
-    #     msg = 'No spatial column found in the dataset. Specify manually or set to [x] and [y].'
-    #   )
-    # }
-    # TODO: Make sure this function is comprehensive and captures all possible spatial formats
-    stop('To be coded')
+    if(all(assertthat::has_name(x, field_space))){
+      # Convert data.frame to spatial format
+      x <- sf::st_as_sf(x, coords = field_space)
+    } else {
+      x <- guess_sf(x)
+      # Spatial column suggestions
+      assertthat::assert_that(
+        inherits(x, "sf"),
+        msg = 'Data could not be converted to spatial format. Specify manually or set to [x] and [y].'
+      )
+      # Add field_space columns if not already existing
+      if(!all(assertthat::has_name(x, field_space))){
+        x[[field_space[1]]] <- sf::st_coordinates(x)[,1]
+        x[[field_space[2]]] <- sf::st_coordinates(x)[,2]
+      }
+    }
     assertthat::assert_that( all(assertthat::has_name(x, field_space)),
                              msg ='No spatial column found in the dataset. Specify manually or set to [X] and [Y].')
-
     # Select and format
     out <- subset(x, select = c(field_space, field_occurrence) ) %>%
       as_tibble()

@@ -165,7 +165,7 @@ BiodiversityDatasetCollection <- bdproto(
 
     par.ori <- par(no.readonly = TRUE)
     # Base plot
-    g <- ggplot2::ggplot(x$background) + ggplot2::geom_sf() + ggplot2::labs( title = self$name())
+    g <- ggplot2::ggplot() + ggplot2::geom_sf() + ggplot2::labs( title = self$name())
     # Adding the other elements
     for(dataset in names(cols)){
 

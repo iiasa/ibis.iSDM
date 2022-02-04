@@ -285,6 +285,10 @@ emptyraster <- function(x, ...) { # add name, filename,
 
 #' Function to extract nearest neighbour predictor values of provided points
 #'
+#' @description
+#' This function performs nearest neighbour matching between biodiversity observations and independent
+#' predictors, and operates directly on provided data.frames.
+#' **Note that despite being parallized this function can be rather slow for large data volumes of data!**
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
 #' @param longlat A [`logical`] variable indicating whether the projection is long-lat
@@ -293,7 +297,8 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist})
 #' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
-#' @references Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
+#' @references
+#' * Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
 #' @keywords utils
 #' @export
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
@@ -375,6 +380,58 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
     out[,field_space] <- as.data.frame(coords) # Ensure that coordinates are back in
   }
   return(out)
+}
+
+#' Function to extract directly the raster value of provided points
+#'
+#' @description
+#' This function simply extracts the values from a provided [`RasterLayer`],
+#' [`RasterStack`] or [`RasterBrick`] object. For points where or NA values were extracted
+#' a small buffer is applied to try and obtain the remaining values.
+#' @param coords A [`Spatial`] or [`sf`] object.
+#' @param env A [`Raster`] object with the provided predictors.
+#' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
+#' @return A [`data.frame`] with the extracted covariate data from each provided data point.
+#' @keywords utils
+#' @export
+get_rastervalue <- function(coords, env, rm.na = FALSE){
+  assertthat::assert_that(
+    inherits(coords,"sf") || inherits(coords, "Spatial") || (is.data.frame(coords) || is.matrix(coords)),
+    is.Raster(env),
+    is.logical(rm.na)
+    )
+
+  # Try an extraction
+  try({ex <- raster::extract(x = env,
+                             y = coords,
+                             method = "simple",
+                             df = TRUE)},silent = FALSE)
+  if(class(ex) == "try-error") stop(paste("Raster extraction failed: ", ex))
+  # Find those that have NA in there
+  check_again <- apply(ex, 1, function(x) anyNA(x))
+  if(any(check_again)){
+    # Re-extract but with a small buffer
+    coords_sub <- coords[which(check_again),]
+    try({ex_sub <- raster::extract(x = env,
+                               y = coords_sub,
+                               method = "bilinear",
+                               small = TRUE,
+                               df = TRUE)},silent = FALSE)
+    if(class(ex_sub) == "try-error") stop(paste("Raster extraction failed: ", ex_sub))
+    ex[which(check_again),] <- ex_sub
+  }
+  # Add coordinate fields to the predictors as these might be needed later
+  if(!any(assertthat::has_name(ex, c("x", "y")))){
+    ex[["x"]] <- coords[,1]; ex[["y"]] <- coords[,2]
+  }
+
+  if(rm.na){
+    ex <- subset(ex, complete.cases(ex))
+  }
+  assertthat::assert_that(is.data.frame(ex),
+                          nrow(ex)>0,
+                          msg = "Something went wrong with the extraction or all points had missing data.")
+  return(ex)
 }
 
 #' Spatial adjustment of raster stacks
@@ -678,18 +735,18 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
 
 #' Create pseudo absence points over a raster dataset
 #'
-#' @param env An environmental dataset either in [`data.frame`] or [`raster`] format
-#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records
-#' @param bias An optional weights raster to control placement of pseudo-absences further
-#' @param template If template is not null then env needs to be a [`raster`] dataset
-#' @param npoints A [`numeric`] number of pseudo-absence points to create
-#' @param replace Sample with replacement? (Default: False)
+#' @param env An environmental dataset either as [`PredictorDataset`] in [`data.frame`] or [`raster`] format.
+#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records.
+#' @param bias An optional weights raster to control placement of pseudo-absences further.
+#' @param template If template is not null then env needs to be a [`raster`] dataset.
+#' @param npoints A [`numeric`] number of pseudo-absence points to create.
+#' @param replace Sample with replacement? (Default: False).
 #' @keywords utils
-#' @returns A [`data.frame`] containing the newly created pseudo absence points
+#' @returns A [`data.frame`] containing the newly created pseudo absence points.
 create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
                                  npoints = 1000, replace = FALSE){
   assertthat::assert_that(
-    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble'),
+    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble') || inherits(env, "PredictorDataset"),
     is.data.frame(presence),
     (hasName(presence,'x') && hasName(presence,'y')) || inherits(presence, 'sf'),
     is.null(bias) || is.Waiver(bias) || is.character(bias),
@@ -697,14 +754,31 @@ create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
     is.null(template) || inherits(template,'Raster')
   )
   if(is.null(template)) {
-    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file')
+    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file!')
   }
+  # Format to raster if not already in this format
+  if(is.data.frame(env) || tibble::is.tibble(env)){
+    env <- suppressWarnings(
+      sp::SpatialPixelsDataFrame(
+        points = env[,c("x", "y")],
+        data = env[,names(env) %notin% c("x","y")],
+        proj4string = raster::proj4string(template)
+      )
+    )
+    env <- raster::stack(env)
+  } else if( inherits(env, "PredictorDataset") ){
+    # Supplied predictor dataset
+    env <- env$get_data(df = FALSE)
+  }
+
+  assertthat::assert_that(is.Raster(env))
+
   # If bias is set, check that it is in env
+  # FIXME: This might not yet work with supplied raster
   if(is.character(bias)){
     assertthat::assert_that(bias %in% names(env))
     nb <- (env[[bias]] - min(env[[bias]],na.rm = TRUE)) / ( max(env[[bias]],na.rm = TRUE) - min(env[[bias]],na.rm = TRUE) )
   } else { nb = NULL }
-  if(inherits(env,'Raster')) env <- as.data.frame(env, xy = TRUE)
 
   # Add coordinates if still sf object
   if(inherits(presence,'sf')) { presence$x <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,1];presence$y <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,2] }
@@ -726,17 +800,12 @@ create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
   }
 
   # Now get absence environmental data
-  abs <- get_ngbvalue(
+  abs <- get_rastervalue(
     coords = raster::xyFromCell(bg1, abs),
     env = env,
-    field_space = c('x','y'),
-    longlat = raster::isLonLat(template)
+    rm.na = TRUE # Remove NA data in case points were sampled over non-valid regions
   )
-
-  # Remove NA data in case points were sampled over non-valid regions
-  abs <- subset(abs, complete.cases(abs))
-  assertthat::assert_that( all( names(abs) %in% names(env) ) )
-
+  assertthat::assert_that( all( names(env) %in% names(abs) ) )
   return(abs)
 }
 

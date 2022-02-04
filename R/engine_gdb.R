@@ -52,15 +52,17 @@ engine_gdb <- function(x,
                           is.character(empirical_risk),
                           empirical_risk %in% c('inbag','oobag','none')
                           )
+  # Get background
+  background <- x$background
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
     template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+      ext = raster::extent(background),
+      crs = raster::projection(background),
+      res = c(diff( (sf::st_bbox(background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+              diff( (sf::st_bbox(background)[c(1,3)]) ) / 100
                     )
                       )
   } else {
@@ -69,7 +71,7 @@ engine_gdb <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- raster::rasterize(background, template, field = 0)
 
   # Set up boosting control
   bc <- mboost::boost_control(mstop = boosting_iterations,
@@ -128,11 +130,11 @@ engine_gdb <- function(x,
          assertthat::has_name(model, 'biodiversity'),
          inherits(settings,'Settings') || is.null(settings),
          # Check that all predictors are present
-         nrow(model$predictors) == ncell(self$get_data('template')),
+         nrow(model$predictors) == raster::ncell(self$get_data('template')),
          length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Add in case anything needs to be further prepared here
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Add pseudo-absence points if necessary
@@ -145,7 +147,7 @@ engine_gdb <- function(x,
 
           # Sample pseudo absences
           abs <- create_pseudoabsence(
-            env = model$predictors,
+            env = model$predictors_object,
             presence = model$biodiversity[[1]]$observations,
             bias = settings$get('bias_variable'),
             template = bg,
@@ -168,19 +170,19 @@ engine_gdb <- function(x,
           ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
 
           # Re-extract counts environment variables
-          envs <- get_ngbvalue(coords = obs[,c('x','y')],
-                               env =  model$predictors[,c("x","y", model[['predictors_names']])],
-                               longlat = raster::isLonLat(self$get_data("template")),
-                               field_space = c('x','y')
-          )
+          envs <- get_rastervalue(coords = obs[,c('x','y')],
+                                 env = model$predictors_object$get_data(df = FALSE),
+                                 rm.na = FALSE)
           envs$intercept <- 1
-          # Overwrite observations
-          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Format out
-          df <- rbind(envs,
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)]) %>%
-            subset(., complete.cases(.) )
+          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
+          if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+          df <- subset(df, complete.cases(df))
+          # Overwrite observations
+          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
 
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),

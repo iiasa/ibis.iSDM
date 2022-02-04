@@ -159,7 +159,7 @@ engine_stan <- function(x,
 
             # Sample pseudo absences
             abs <- create_pseudoabsence(
-              env = model$predictors,
+              env = model$predictors_object,
               presence = model$biodiversity[[i]]$observations,
               bias = settings$get('bias_variable'),
               template = bg,
@@ -186,19 +186,19 @@ engine_stan <- function(x,
             ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
 
             # Re-extract counts environment variables
-            envs <- get_ngbvalue(coords = obs[,c('x','y')],
-                                 env =  model$predictors[,c("x","y", model[['predictors_names']])],
-                                 longlat = raster::isLonLat(self$get_data("template")),
-                                 field_space = c('x','y')
-            )
+            envs <- get_rastervalue(coords = obs[,c('x','y')],
+                                    env = model$predictors_object$get_data(df = FALSE),
+                                    rm.na = FALSE)
             envs$intercept <- 1
+
+            # Overwrite observations
+            df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)],
+                        abs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)])
+            any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
+            if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+            df <- subset(df, complete.cases(df))
             # Overwrite observations
             model$biodiversity[[i]]$observations <- rbind(obs, abs_observations)
-
-            # Format out
-            df <- rbind(envs,
-                        abs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)]) %>%
-              subset(., complete.cases(.) )
 
             # Preprocessing security checks
             assertthat::assert_that( all( model$biodiversity[[i]]$observations[['observed']] >= 0 ),

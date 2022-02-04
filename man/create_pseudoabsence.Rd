@@ -14,20 +14,20 @@ create_pseudoabsence(
 )
 }
 \arguments{
-\item{env}{An environmental dataset either in \code{\link{data.frame}} or \code{\link{raster}} format}
+\item{env}{An environmental dataset either as \code{\link{PredictorDataset}} in \code{\link{data.frame}} or \code{\link{raster}} format.}
 
-\item{presence}{Presence records. Necessary to avoid sampling pseudo-absences over existing presence records}
+\item{presence}{Presence records. Necessary to avoid sampling pseudo-absences over existing presence records.}
 
-\item{bias}{An optional weights raster to control placement of pseudo-absences further}
+\item{bias}{An optional weights raster to control placement of pseudo-absences further.}
 
-\item{template}{If template is not null then env needs to be a \code{\link{raster}} dataset}
+\item{template}{If template is not null then env needs to be a \code{\link{raster}} dataset.}
 
-\item{npoints}{A \code{\link{numeric}} number of pseudo-absence points to create}
+\item{npoints}{A \code{\link{numeric}} number of pseudo-absence points to create.}
 
-\item{replace}{Sample with replacement? (Default: False)}
+\item{replace}{Sample with replacement? (Default: False).}
 }
 \value{
-A \code{\link{data.frame}} containing the newly created pseudo absence points
+A \code{\link{data.frame}} containing the newly created pseudo absence points.
 }
 \description{
 Create pseudo absence points over a raster dataset
