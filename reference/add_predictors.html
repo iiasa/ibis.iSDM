@@ -145,7 +145,12 @@ extreme outliers.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Not every engine does actually need covariates. For instance it is perfectly legit
+    <p><strong>Important:</strong>
+Not every <code>engine</code> supported by the <span class="pkg">ibis.iSDM</span> R-package allows missing data points
+among extracted covariates. Thus any observation with missing data is generally removed prior
+from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting <code>NA</code>
+values to <code>0</code> or another out of range constant).</p>
+<p>Not every engine does actually need covariates. For instance it is perfectly legit
 to fit a model with only occurrence data and a spatial latent effect (add_latent).
 This correspondents to a spatial kernel density estimate.</p>
     </div>

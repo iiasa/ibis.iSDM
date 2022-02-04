@@ -92,7 +92,6 @@ allowing full integrated inference.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_inlabru</span><span class="op">(</span>
   <span class="va">x</span>,
   optional_mesh <span class="op">=</span> <span class="cn">NULL</span>,
-  optional_projstk <span class="op">=</span> <span class="cn">NULL</span>,
   max.edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>,
   offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,
   cutoff <span class="op">=</span> <span class="fl">1</span>,
@@ -114,8 +113,6 @@ allowing full integrated inference.</p>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
 <dt>optional_mesh</dt>
 <dd><p>A directly supplied <code>INLA</code> mesh (Default: <code>NULL</code>)</p></dd>
-<dt>optional_projstk</dt>
-<dd><p>A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: <code>NULL</code>)</p></dd>
 <dt>max.edge</dt>
 <dd><p>The largest allowed triangle edge length, must be in the same scale units as the coordinates.</p></dd>
 <dt>offset</dt>
@@ -136,7 +133,9 @@ allowing full integrated inference.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
+    <p>If a mesh has already been pre-computed it can be supplied to engine_inlabru via the <code>optional_mesh</code>
+parameter.
+Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
