@@ -81,17 +81,18 @@ PriorList <- bdproto(
     }
   },
   # Get specific prior values from the list if set
-  get = function(self, variable, type = NULL){
+  get = function(self, variable, type = NULL, what = "value"){
     assertthat::assert_that(!missing(variable),
                             is.character(variable),
                             is.character(type) || is.null(type),
+                            is.character(what),
                             msg = 'Specify a variable to query a prior.')
     # Check whether there is an id
     ex <- self$exists(variable, type)
     # Catch and return NULL in case if not set
     if(is.null(ex)) ex else {
       # Get all values
-      vals <- lapply(self$priors, function(x) x$get() )
+      vals <- lapply(self$priors, function(x) x$get(what) )
       vals[[ex]]
     }
   },

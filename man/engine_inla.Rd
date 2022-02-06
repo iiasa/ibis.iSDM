@@ -14,6 +14,7 @@ engine_inla(
   proj_stepsize = NULL,
   timeout = NULL,
   barrier = FALSE,
+  type = "predictor",
   ...
 )
 }
@@ -35,6 +36,8 @@ engine_inla(
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
 \item{barrier}{Should a barrier model be added to the model?}
+
+\item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other variables}
 

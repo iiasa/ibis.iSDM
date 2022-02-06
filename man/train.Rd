@@ -34,7 +34,7 @@ or via variable selection / regularization of the model. Available options are:
 \itemize{
 \item \code{\link{none}} for no or default priors and no extensive hyperparameter search.
 \item \code{\link{reg}} Model selection either through DIC or regularization / hyperparameter tuning depending on the
-engine (Default option).
+engine (Default).
 \item \code{\link{abess}} A-priori adaptive best subset selection of covariates via the \link{abess} package (see References).
 Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
 Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
@@ -66,7 +66,7 @@ A \link{DistributionModel} object.
 This function trains a \code{\link[=distribution]{distribution()}} model with the specified engine and
 furthermore has some generic parameters that apply to all engines (regardless of type).
 
-Users are advised to check the help files for individual \link{engine} for advice on how
+Users are advised to check the help files for individual \link{engine}s for advice on how
 the estimation is being done.
 }
 \details{
@@ -80,7 +80,7 @@ Note that several engines do not support fully integrated likelihood models (suc
 the \code{nth'} spatial projection is provided as input to the \code{nth'+1} dataset.
 See also Miller et al. (2019) in the references for more details on this strategy. Of course,
 if users want more control about this aspect, another option is to fit separate models
-and make use of the \link{add_offset_range} and \link{ensemble} functionalities.
+and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
 }
 \examples{
 \dontrun{

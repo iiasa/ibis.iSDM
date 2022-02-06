@@ -17,7 +17,7 @@ After setting input data and parameters, model predictions can then be created
 via the train function and predictions be created.
 See Details for further functions available to modify or summarize the created object.
 Note that any model requires at minimum a single added biodiversity dataset
-as well as a specified engine."><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+as well as a specified engine."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
@@ -35,7 +35,7 @@ as well as a specified engine."><meta name="twitter:card" content="summary"><met
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div id="navbar" class="collapse navbar-collapse ms-2">
+    <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
@@ -75,7 +75,7 @@ as well as a specified engine."><meta name="twitter:card" content="summary"><met
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Create distribution modelling procedure</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Create distribution modelling procedure</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/distribution.R" class="external-link"><code>R/distribution.R</code></a></small>
       <div class="d-none name"><code>distribution.Rd</code></div>
     </div>
@@ -84,7 +84,7 @@ as well as a specified engine."><meta name="twitter:card" content="summary"><met
     <p>This function creates an object that contains all the data, parameters and settings
 for building an (integrated) species distribution model.
 Key functions to add data are add_biodiversity, <a href="add_predictors.html">add_predictors</a>,
-add_latent, engine, <a href="add_priors.html">add_priors</a> and add_offset. This creates a
+add_latent, engine, <a href="add_priors.html">add_priors</a> and <a href="add_offset.html">add_offset</a>. This creates a
 prototype <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object with its own functions.
 After setting input data and parameters, model predictions can then be created
 via the <a href="train.html">train</a> function and predictions be created.
@@ -173,7 +173,7 @@ if some datasets are not set, then a <code>Waiver</code> object is returned inst
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
     </footer></div>

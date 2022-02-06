@@ -7,7 +7,7 @@ NULL
 #' This function trains a [distribution()] model with the specified engine and
 #' furthermore has some generic parameters that apply to all engines (regardless of type).
 #'
-#' Users are advised to check the help files for individual [engine] for advice on how
+#' Users are advised to check the help files for individual [engine]s for advice on how
 #' the estimation is being done.
 #' @details
 #' The resulting object contains both a [`fit_best`] object of the estimated model and, if \code{inference_only} is \code{FALSE}
@@ -20,7 +20,7 @@ NULL
 #' the \code{nth'} spatial projection is provided as input to the \code{nth'+1} dataset.
 #' See also Miller et al. (2019) in the references for more details on this strategy. Of course,
 #' if users want more control about this aspect, another option is to fit separate models
-#' and make use of the [add_offset_range] and [ensemble] functionalities.
+#' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
@@ -30,7 +30,7 @@ NULL
 #' or via variable selection / regularization of the model. Available options are:
 #' * [`none`] for no or default priors and no extensive hyperparameter search.
 #' * [`reg`] Model selection either through DIC or regularization / hyperparameter tuning depending on the
-#' engine (Default option).
+#' engine (Default).
 #' * [`abess`] A-priori adaptive best subset selection of covariates via the [abess] package (see References).
 #' Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
 #' Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
@@ -201,14 +201,35 @@ methods::setMethod(
           model$predictors_names <- c(model$predictors_names, names(coords_poly))
           model$predictors_types <- rbind(model$predictors_types,
                                           data.frame(predictors = names(coords_poly), type = "numeric"))
-          # Overwrite since we include this now as predictor in all models
-          x$latentfactors <- new_waiver()
+          # Also add to predictor object
+          pred <- model$predictors_object$get_data(df = FALSE)
+          new <-  fill_rasters(coords_poly, emptyraster(pred))
+          for(val in names(new)){
+            model$predictors_object$set_data(val, new[[val]] )
+          }
+          rm(pred, new)
         } else {
           # Calculate the spatial model
           x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
         }
       }
     }
+
+    # Set offset if existing
+    if(!is.Waiver(x$offset)){
+      # Aggregate offset if necessary
+      if(raster::nlayers(x$offset)>1){
+        ras_of <- sum(x$offset, na.rm = TRUE)
+        names(ras_of) <- "spatial_offset"
+      } else {
+        ras_of <- x$offset
+        names(ras_of) <- "spatial_offset"
+      }
+      # Save overall offset
+      ofs <- as.data.frame(ras_of, xy = TRUE)
+      names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
+      model[['offset']] <- ofs
+    } else { model[['offset']] <- new_waiver() }
 
     # Get biodiversity data
     model[['biodiversity']] <- list()
@@ -240,19 +261,21 @@ methods::setMethod(
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       env <- subset(env, miss)
       # Add intercept
-      env$intercept <- 1
+      env$Intercept <- 1
 
       # Add offset if specified and model is of poisson type
-      # TODO: Ideally this can be further specified in the add_range_offset call
-      if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){
+      if(!is.Waiver(x$offset) ){
+        # Note: ras_of object is created above already
         # Extract offset for each observed point
         ofs <- get_rastervalue(
           coords = x$biodiversity$get_coordinates(id),
-          env = x$offset,
-          na.rm = FALSE
+          env = ras_of,
+          rm.na = FALSE
         )
         ofs <- subset(ofs, miss)
         assertthat::assert_that(nrow(ofs) == nrow( model$biodiversity[[id]]$observations ))
+        # Rename
+        names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
         model[['biodiversity']][[id]][['offset']] <- ofs
       }
 
@@ -266,7 +289,7 @@ methods::setMethod(
       # Check whether predictors should be refined and do so
       if(settings$get('rm_corPred') && model[['predictors_names']] != 'dummy'){
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Removing highly correlated variables...')
-        test <- env;test$x <- NULL;test$y <- NULL;test$intercept <- NULL
+        test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
 
         # Ignore variables for which we have priors
         if(!is.Waiver(x$priors)){
@@ -338,7 +361,6 @@ methods::setMethod(
     }
 
     # Get and assign Priors
-    # FIXME: Type-specific priors?
     if(!is.Waiver(x$priors)){
       # First clean and remove all priors that are not relevant to the engine
       spec_priors <- switch(
@@ -361,18 +383,6 @@ methods::setMethod(
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
-
-    # Set offset if existing
-    if(!is.Waiver(x$offset)){
-      # Check that they align
-      if(!is_comparable_raster(x$offset, x$predictors$data) ){
-        new <- raster::resample(x$offset,x$predictors$data)
-        assertthat::assert_that(compareRaster(new,x$predictors$data))
-        suppressWarnings( x <- x$set_offset(new) )
-      }
-      # Save overall offset
-      model[['offset']] <- as.data.frame(x$offset, xy = TRUE)
-    } else { model[['offset']] <- new_waiver() }
 
     # Applying prediction filter based on model input data if specified
     # TODO: Potentially outsource to a function in the future
@@ -400,7 +410,7 @@ methods::setMethod(
       if(!is.Waiver(x$offset)){
         model$offset[which( is.na(
           point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-        )),3] <- NA # Fill with NA
+        )), "spatial_offset" ] <- NA # Fill with NA
       }
     }
     # Messenger
@@ -434,9 +444,9 @@ methods::setMethod(
           }
 
           # Construct formula with all variables
-          form <- paste('observed', '~', 0, '+ intercept',
+          form <- paste('observed', '~', 0, '+ Intercept',
                         ifelse(length(types)>1 && model$biodiversity[[id]]$use_intercept, # Check whether a single intercept model is to be constructed
-                               paste(' + ',paste0('intercept_',
+                               paste(' + ',paste0('Intercept_',
                                                   make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
                                                   # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                   # sapply( model$biodiversity, function(x) x$type ),
@@ -515,23 +525,25 @@ methods::setMethod(
           }
           form <- to_formula(form) # Convert to formula
           # Add offset if specified
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-            # Update with spatial term
-            form <- update.formula(form, paste0(" ~ . + ",
-                                                x$engine$get_equation_latent_spatial(
-                                                  method = attr(x$get_latent(),'method'),
-                                                  vars = which(ids == id),
-                                                  separate_spde = attr(x$get_latent(),'separate_spde')
-                                                )
-                                               )
-            )
+            if(attr(x$get_latent(), "method") != "poly"){
+              # Update with spatial term
+              form <- update.formula(form, paste0(" ~ . + ",
+                                                  x$engine$get_equation_latent_spatial(
+                                                    method = attr(x$get_latent(),'method'),
+                                                    vars = which(ids == id),
+                                                    separate_spde = attr(x$get_latent(),'separate_spde')
+                                                  )
+                )
+              )
+            }
           }
         } else{
           # If custom supplied formula, check that variable names match supplied predictors
           assertthat::assert_that(
-            all( all.vars(form) %in% c('observed','intercept',
-                                       paste0('intercept_',sapply( model$biodiversity, function(x) x$type )),
+            all( all.vars(form) %in% c('observed','Intercept',
+                                       paste0('Intercept_',sapply( model$biodiversity, function(x) x$type )),
                                        model$biodiversity[[id]]$predictors_names) )
           )
           # FIXME: check that
@@ -584,14 +596,16 @@ methods::setMethod(
 
           # Add offset if specified
           # TODO: Not quite sure if this formulation works for inlabru predictor expressions
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson') ){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-            # Update with spatial term
-            form <- update.formula(form, paste0(" ~ . + ",
-                                                # For SPDE components, simply add spatial.field
-                                                paste0("spatial.field",which(ids == id))
-                                       )
-            )
+            if(attr(x$get_latent(), "method") != "poly"){
+              # Update with spatial term
+              form <- update.formula(form, paste0(" ~ . + ",
+                                                  # For SPDE components, simply add spatial.field
+                                                  paste0("spatial.field",which(ids == id))
+                                         )
+              )
+            }
           }
         } else {
           # If custom likelihood formula is provided, check that variable names match supplied predictors
@@ -622,12 +636,14 @@ methods::setMethod(
           }
 
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-            # Update with spatial term
-            form <- update.formula(form, paste0(" ~ . + ",
-                                                # For SPDE components, simply add spatial.field
-                                                paste0("spatial.field",which(ids == id))
-                                               )
-            )
+            if(attr(x$get_latent(), "method") != "poly"){
+              # Update with spatial term
+              form <- update.formula(form, paste0(" ~ . + ",
+                                                  # For SPDE components, simply add spatial.field
+                                                  paste0("spatial.field",which(ids == id))
+                                                 )
+              )
+            }
           }
 
         }
@@ -694,12 +710,14 @@ methods::setMethod(
           # Convert to formula
           form <- to_formula(form)
           # Add offset if specified
-          if(!is.Waiver(x$offset) && (model[['biodiversity']][[id]][['family']] == 'poisson')){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-            # Update with spatial term
-            form <- update.formula(form, paste0(" ~ . + ",
-                                                x$engine$get_equation_latent_spatial() )
-            )
+            if(attr(x$get_latent(), "method") != "poly"){
+              # Update with spatial term
+              form <- update.formula(form, paste0(" ~ . + ",
+                                                  x$engine$get_equation_latent_spatial() )
+              )
+            }
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
@@ -834,7 +852,7 @@ methods::setMethod(
     } else if( inherits(x$engine,"BART-Engine") ){
       # Output some warnings on things ignored
       if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
-      if(!is.Waiver(model$offset)) warning('Option to provide offsets not yet implemented. Ignored...')
+      if(!is.Waiver(model$offset)) warning('Option to provide offsets not available. Ignored...')
 
       # Process each id
       for(id in ids){
@@ -916,7 +934,7 @@ methods::setMethod(
                                    # Check whether a single dataset is provided, otherwise add other intercepts
                                    ifelse(length(types)==1,
                                           '',
-                                          paste('+',paste0('intercept_',
+                                          paste('+',paste0('Intercept_',
                                                            make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                            sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
                                           )
@@ -927,7 +945,7 @@ methods::setMethod(
                             )
 
           # Add offset if specified
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(log(',x$get_offset(),'))') ) }
+          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
           # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
         } else {
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')

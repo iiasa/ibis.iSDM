@@ -76,8 +76,13 @@ BiodiversityDatasetCollection <- bdproto(
     assertthat::assert_that(is.Id(id) || is.character(id))
     # Get data
     o <- self$get_data(id)
+    o <- guess_sf(o)
+    # Add lowercase coordinates for consistency
+    o$x <- sf::st_coordinates(o)[,1]
+    o$y <- sf::st_coordinates(o)[,2]
+
     # Return coordinates
-    if(hasName(o,'geom')) sf::st_coordinates(o$geom) else o[,c('X','Y')]
+    if(hasName(o,'geom')) sf::st_coordinates(o) else o[,c('x','y')]
   },
   # Remove a specific biodiversity dataset by id
   rm_data = function(self, id) {

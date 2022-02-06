@@ -36,7 +36,7 @@ BiodiversityDistribution <- bdproto(
     # Query information from the distribution object
     ex =  self$show_background_info()
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
-    of = ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", self$get_offset(),">" ) )
+    of = ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
     pio = ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
 
     message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
@@ -164,14 +164,22 @@ BiodiversityDistribution <- bdproto(
   # Set offset
   # FIXME: For logical consistency could define a new bdproto object
   set_offset = function(self, x){
-    assertthat::assert_that(inherits(x, "Raster"))
-    if (!is.Waiver(self$offset)) warning("Overwriting previously defined offset.")
+    assertthat::assert_that(is.Raster(x))
     bdproto(NULL, self, offset = x )
   },
   # Get offset (print name)
   get_offset = function(self){
-    if(is.Waiver(self$offset)) return('None')
+    if(is.Waiver(self$offset)) return( self$offset() )
     names( self$offset )
+  },
+  # Plot offset
+  plot_offset = function(self){
+    if(is.Waiver(self$offset)) return( self$offset() )
+    if(raster::nlayers(self$offset)>1){
+      of <- sum(self$offset,na.rm = TRUE)
+      of <- raster::mask(of, self$background)
+    } else {of <- self$offset}
+    raster::plot(of, col = ibis_colours$viridis_orig, main = "Combined offset")
   },
   # Get log
   get_log = function(self){

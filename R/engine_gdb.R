@@ -154,11 +154,11 @@ engine_gdb <- function(x,
             npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
             replace = TRUE
           )
-          abs$intercept <- 1 # Add dummy intercept
+          abs$Intercept <- 1 # Add dummy Intercept
           # Combine absence and presence and save
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
           # Furthermore rasterize observed presences and count within grid cells
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
                                     bg, fun = 'count', background = 0)
           # Get cell ids
           ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
@@ -173,11 +173,11 @@ engine_gdb <- function(x,
           envs <- get_rastervalue(coords = obs[,c('x','y')],
                                  env = model$predictors_object$get_data(df = FALSE),
                                  rm.na = FALSE)
-          envs$intercept <- 1
+          envs$Intercept <- 1
 
           # Format out
-          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
           if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
           df <- subset(df, complete.cases(df))
@@ -196,7 +196,7 @@ engine_gdb <- function(x,
                                 longlat = raster::isLonLat(self$get_data('template')),
                                 field_space = c('x','y')
                                 )
-            df[[names(ofs)[3]]] <- ofs[,3]
+            df[["spatial_offset"]] <- ofs[,"spatial_offset"]
           }
           # Define expectation as very small vector following Renner et al.
           w <- ppm_weights(df = df,
@@ -267,11 +267,11 @@ engine_gdb <- function(x,
 
         if('offset' %in% names(model$biodiversity[[1]]) ){
           # Add offset to full prediction and load vector
-          n <- data.frame(model$offset[as.numeric(full$cellid),3], log(model$offset[as.numeric(full$cellid),3]) )
-          names(n) <- c( names(model$offset)[3], paste0('offset(log(',names(model$offset)[3],'))') )
+          n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
+          names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
 
           full <- cbind(full, n)
-          off <- model$biodiversity[[1]]$offset[, names(model$offset)[3] ]
+          off <- model$biodiversity[[1]]$offset[, "spatial_offset" ]
         } else { off = NULL }
 
         # --- #

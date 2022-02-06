@@ -4,7 +4,7 @@
 \alias{engine_bart}
 \title{Engine for use of Bayesian Additive Regression Trees (BART)}
 \usage{
-engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
+engine_bart(x, nburn = 250, ntree = 1000, chains = 4, type = "response", ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -14,6 +14,8 @@ engine_bart(x, nburn = 250, ntree = 1000, chains = 4, ...)
 \item{ntree}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation.}
 
 \item{chains}{A number of the number of chains to be used (Default: \code{4})}
+
+\item{type}{The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).}
 }
 \description{
 The Bayesian regression approach to a sum of complementary trees is to shrink

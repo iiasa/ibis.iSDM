@@ -53,6 +53,9 @@ NULL
 #' Not every engine does actually need covariates. For instance it is perfectly legit
 #' to fit a model with only occurrence data and a spatial latent effect ([add_latent]).
 #' This correspondents to a spatial kernel density estimate.
+#'
+#' Certain names such \code{"offset"} are forbidden as predictor variable names. The function
+#' will return an error message if these are used.
 #' @aliases add_predictors
 #' @examples
 #' \dontrun{
@@ -132,6 +135,12 @@ methods::setMethod(
                                                 msg = 'Provided names not of same length as environmental data.')
       # Set names of env
       names(env) <- names
+    }
+
+    # Check that all names allowed
+    problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
+    if( length(problematic_names)>0 ){
+      stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
     # If priors have been set, save them in the distribution object

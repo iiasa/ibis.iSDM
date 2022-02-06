@@ -16,6 +16,8 @@ Currently supported are:
 \item \code{'ibis.runparallel'} : \code{\link{logical}} value on whether processing should be run in parallel
 \item \code{'ibis.nthread'} : \code{\link{numeric}} value on how many cores should be used by default
 \item \code{'ibis.setupmessages'} : \code{\link{logical}} value indicating whether message during object creation should be shown
+\item \code{'ibis.engines'} : Returns a \code{\link{vector}} with all valid engines.
+\item \code{'ibis.use_future'} : \code{\link{logical}} on whether the \pkg{future} package should be used for parallel computing.
 }
 }
 \keyword{misc}

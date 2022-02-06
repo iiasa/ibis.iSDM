@@ -8,7 +8,7 @@ get_ngbvalue(
   coords,
   env,
   longlat = TRUE,
-  field_space = c("X", "Y"),
+  field_space = c("x", "y"),
   cheap = FALSE,
   ...
 )
@@ -20,7 +20,7 @@ get_ngbvalue(
 
 \item{longlat}{A \code{\link{logical}} variable indicating whether the projection is long-lat}
 
-\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: \code{c('X','Y')})}
+\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})}
 
 \item{cheap}{A \code{\link{logical}} variable whether the dataset is considered to be large and faster computation could help}
 }

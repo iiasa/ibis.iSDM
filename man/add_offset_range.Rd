@@ -2,45 +2,41 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_range}
 \alias{add_offset_range}
-\title{Specify an offset object for a species}
+\title{Specify a expert-based species range as offset}
 \usage{
 add_offset_range(
   x,
-  range,
+  layer,
   method = "distance",
-  name = "range_distance",
-  distance_max = 150000
+  distance_max = 150000,
+  add = TRUE
 )
 
-\S4method{add_offset_range}{BiodiversityDistribution, raster}(x, range)
+\S4method{add_offset_range}{BiodiversityDistribution, raster}(x, layer)
 
-\S4method{add_offset_range}{BiodiversityDistribution,sf, vector}(x, range, method)
+\S4method{add_offset_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{range}{A \code{\link{sf}} or \code{\link{RasterLayer}}object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
 
 \item{method}{\code{\link{character}} describing how the range should be included (Options: \code{"binary"} | \code{"distance"}).}
 
-\item{name}{\code{\link{character}} A name of the species if the offset is not specified.}
-
 \item{distance_max}{Numeric threshold on the maximum distance (Default: \code{150000} \link{m}).}
+
+\item{add}{\code{\link{logical}} specifiying whether new offset is to be added. Setting
+this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 }
 \description{
-Including offsets is another option to integrate spatial prior information
-in linear and additive regression models. Here, offset simply shift the intercept of
-the regression fit. Since offsets only make sense for linear regressions (and not for instance
-regression tree based methods such as \link{engine_bart}), they do not work for all engines.
+This function has additional nuance compared to the more generic
+\code{\link[=add_offset]{add_offset()}}, allowing to specify transformations and modifications.
+It is customized specifically for expert-based ranges as offsets.
 }
 \details{
 As options allow specifying including the range either as binary or using distance
 as parameter following Merow et al. (2017). In this case the existing range needs
-to be transformed first, for instance using the \link{bossMaps} package.
-}
-\note{
-Only one offset per distribution object can currently be specified. This might
-change in the future.
+to be transformed first, for instance using the \pkg{bossMaps} package.
 }
 \references{
 \itemize{
@@ -50,5 +46,10 @@ change in the future.
 }
 \seealso{
 \link{bossMaps}
+
+Other offset: 
+\code{\link{add_offset}()}
 }
-\keyword{prior}
+\concept{offset}
+\keyword{offset}
+\keyword{prior,}

@@ -159,11 +159,11 @@ engine_breg <- function(x,
             replace = TRUE
           )
           # Combine absence and presence and save
-          abs$intercept <- 1
+          abs$Intercept <- 1
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
                                     bg, fun = 'count', background = 0)
 
           # Get cell ids
@@ -180,10 +180,10 @@ engine_breg <- function(x,
           envs <- get_rastervalue(coords = obs[,c('x','y')],
                                   env = model$predictors_object$get_data(df = FALSE),
                                   rm.na = FALSE)
-          envs$intercept <- 1
+          envs$Intercept <- 1
 
-          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
           if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
           df <- subset(df, complete.cases(df))
@@ -226,70 +226,6 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$expect <- w
           # Convert to numeric
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
-        }
-
-        # Define priors for modelling if set
-        if(!is.Waiver(model$priors)){
-          stop("TBD. Tcrossprod errors...")
-          if(length( unique(model$priors$types()) ) > 1){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','More than one prior type specified!')
-            stop("Not yet implemented!")
-          }
-          if(all(model$priors$types() == "coefficients")){
-            # Specificy parameters for all coefficients
-            # Match position of variables with monotonic constrains
-            mp <- rep(0, length(model$biodiversity[[1]]$predictors_names)); names(mp) <- model$biodiversity[[1]]$predictors_names
-            ms <- rep(1e-4, length(model$biodiversity[[1]]$predictors_names)); names(ms) <- model$biodiversity[[1]]$predictors_names
-            # Also add observed dummy for both
-            mp["observed"] <- 0; ms["observed"] <- 0
-            for(v in model$priors$varnames()){
-              mp[v] <- model$priors$get(v)[1]
-              ms[v] <- model$priors$get(v)[2]
-            }
-            # Expected size:
-            # Assume that only half of the covariates (plus prior variables) are relevant
-            esize <- ceiling(length(mp) * .5) + model$priors$length()
-
-            # Models that use specified coefficients
-            pp <- BoomSpikeSlab::SpikeSlabGlmPriorDirect(
-              coefficient.mean = mp,
-              coefficient.precision = ms,
-              expected.model.size = esize,
-              prior.inclusion.probabilities = NULL
-            )
-            # Save the prior for later
-            self$set_data("prior", pp)
-
-          } else if((all(model$priors$types() == "inclusion.probability"))){
-            # Probability of Inclusion of variables in the model
-
-            # Define prior
-            pp <- BoomSpikeSlab::SpikeSlabGlmPrior(
-              predictors = model$biodiversity[[1]]$predictors,
-              weight = 1, # prior weight assigned to each observation in predictors
-              mean.on.natural.scale = s,
-              prior.information.weight = NA,
-              expected.model.size = d,
-              diagonal.shrinkage = 0
-            )
-            PoissonZellnerPrior(predictors = model$biodiversity[[1]]$predictors,
-                                # exposure = model$biodiversity[[1]]$expect,
-                                # counts = model$biodiversity[[1]]$observations$observed,
-                                prior.event.rate = sum(model$biodiversity[[1]]$observations$observed>0) / nrow(model$biodiversity[[1]]$observations),
-                                expected.model.size = 1,
-                                prior.information.weight = 0.01,
-                                diagonal.shrinkage = 0.5,
-                                optional.coefficient.estimate = NULL,
-                                max.flips = -1,
-                                prior.inclusion.probabilities = NULL
-                                )
-
-            # Save the prior for later
-            self$set_data("prior", pp)
-
-          } else{
-            stop("Some error occured during prior setup...")
-          }
         }
 
         # Instead of invisible return the model object
@@ -336,9 +272,13 @@ engine_breg <- function(x,
 
         # Priors
         if(!is.Waiver(model$priors)){
-          # Get the prior defined during set up
-          pp <- self$get_data("prior")
-          assertthat::assert_that(inherits(pp, "SpikeSlabPriorBase"))
+          # Define a family specific Boom prior
+          pp <- setup_prior_boom(form = form,
+                                 data = df,
+                                 prior = model$priors,
+                                 family = fam,
+                                 exposure = w
+                                 )
         } else { pp <- NULL }
 
         assertthat::assert_that(

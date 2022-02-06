@@ -364,7 +364,7 @@ methods::setMethod(
 #'
 #' @param x A [`data.frame`], [`sf`] or [`Spatial`]) object of biodiversity information
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
-#' @param field_space A [`vector`] on the column names (Default: \code{'X'}, \code{'Y'})
+#' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'})
 #' @param ... Other parameters passed down
 #'
 #' @import sf
@@ -373,7 +373,7 @@ methods::setMethod(
 #' @keywords internal
 #' @noRd
 
-format_biodiversity_data <- function(x, field_occurrence, field_space = c('X','Y'),...){
+format_biodiversity_data <- function(x, field_occurrence, field_space = c('x','y'),...){
   # Final checks
   if(inherits(x,'sf')) assertthat::assert_that(unique(sf::st_geometry_type(x)) %in% c('POINT','MULTIPOINT',
                                                                                       'POLYGON','MULTIPOLYGON'))
@@ -398,7 +398,7 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c('X','Y
       }
     }
     assertthat::assert_that( all(assertthat::has_name(x, field_space)),
-                             msg ='No spatial column found in the dataset. Specify manually or set to [X] and [Y].')
+                             msg ='No spatial column found in the dataset. Specify manually or set to [x] and [y].')
     # Select and format
     out <- subset(x, select = c(field_space, field_occurrence) ) %>%
       as_tibble()

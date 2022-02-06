@@ -4,17 +4,16 @@
 \alias{BREGPriors}
 \title{Helper function when multiple variables are supplied}
 \usage{
-BREGPriors(variable, type, hyper)
+BREGPriors(variable, hyper = NULL, ip = NULL)
 
-\S4method{BREGPriors}{character}(variable, type, hyper)
+\S4method{BREGPriors}{character}(variable)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{type}{A \code{\link{character}} specifying the type of prior to be set. Can be set either to
-\code{"coefficient"} or \code{"inclusion.probability"}. See details.}
+\item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients.}
 
-\item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients}
+\item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).}
 }
 \description{
 This is a helper function to specify several \link{BREGPrior} with the same

@@ -194,14 +194,14 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
     is.null(export_packages) || is.character(export_packages)
   )
   # Match approach
-  approach <- match.arg(approach, c("approach", "future"), several.ok = FALSE)
+  approach <- match.arg(approach, c("parallel", "future"), several.ok = FALSE)
 
   # Collect dots
   dots <- list(...)
 
   if(!is.list(X)){
     # Convert input object to a list of split parameters
-    n_vars <- length( ncol(X) )
+    n_vars <- nrow(X)
     chunk_size <- ceiling(n_vars / cores)
     n_chunks <- ceiling(n_vars / chunk_size)
     chunk_list <- vector(length = n_chunks, mode = "list")
@@ -213,46 +213,20 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
         chunk_list[[i]] <- X[chunk, ]
       }
     }
-    X <- chunk_list
+    assertthat::assert_that(sum(sapply(chunk_list, nrow)) == nrow(X))
+    X <- chunk_list;rm(chunk_list)
     input_type = "data.frame" # Save to aggregate later again
   } else { input_type = "list"}
 
-  # Determine the type of input and which function to use
-  if(approach == "parallel"){
-    # Use parallel package
-    check_package('parallel')
-    parfun <- switch (class(X),
-      "list" = parallel::parLapply,
-      "data.frame" = parallel::parApply,
-      "matrix" = parallel::parApply
-    )
-    if(class(X) %in% c("data.frame", "matrix")) dots[["MARGIN"]] <- 1
-    if (isTRUE(Sys.info()[["sysname"]] == "Windows") && !is.list(X) ){
-      # Use future instead for windows
-      return(
-        run_parallel(X, FUN, cores = 1, approach = "future", ...)
-      )
-    }
-  } else {
-    # Use future package
-    check_package('future.apply')
-    # Check that plan for future has been set up!
-    assertthat::assert_that( getOption("ibis.use_future") == TRUE,
-                             msg = "Set up a future plan via [ibis_future] to use this approach.")
-    parfun <- switch (class(X),
-                      "list" = future.apply::future_lapply,
-                      "data.frame" = future.apply::future_apply,
-                      "matrix" = future.apply::future_apply
-    )
-    if(class(X) %in% c("data.frame", "matrix")) dots[["MARGIN"]] <- 1
-  }
-  assertthat::assert_that(is.function(parfun))
-
   # Process depending on cores
   if (cores == 1) {
-    out <- parfun(X, FUN, ...)
+    out <- lapply(X, FUN, ...)
   } else {
       if(approach == "parallel"){
+        # check_package('doParallel')
+        # require(foreach)
+        # isTRUE(Sys.info()[["sysname"]] == "Windows")
+        # Other operating systems
         if(!isTRUE(Sys.info()[["sysname"]] == "Windows") && is.list(X)) {
           out <- parallel::mclapply(X = X, FUN = FUN, mc.cores = cores,
                                     ...)
@@ -267,15 +241,28 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
                                       envir = as.environment(asNamespace(val)))
             }
           }
-          out <- parfun(cl = cl, X = X, fun = FUN, ...)
+          out <- parallel::parLapply(cl = cl, X = X, fun = FUN, ...)
         }
+        # out <- foreach::foreach(z = iterators::iter(X),
+        #                .combine = ifelse(input_type!="list", "rbind", foreach:::defcombine),
+        #                .inorder = FALSE,
+        #                .multicombine = TRUE,
+        #                .errorhandling = 'stop',
+        #                .export = c("FUN"),
+        #                .packages = export_packages,
+        #                ...
+        # ) %dopar% { return( FUN(z, ...) ) }
       } else {
         # Check that future is loaded
-        out <- parfun(cl = cl, X = X, fun = FUN, ...)
+        check_package('future.apply')
+        # Check that plan for future has been set up!
+        assertthat::assert_that( getOption("ibis.use_future") == TRUE,
+                                 msg = "Set up a future plan via [ibis_future] to use this approach.")
+        out <- future.apply::future_lapply(cl = cl, X = X, fun = FUN, ...)
       }
   }
   # If input data was not a list, combine again
-  if(input_type != "list"){
+  if(input_type != "list" && is.list(out)){
     out <- do.call(rbind, out)
   }
   return( out )
@@ -304,7 +291,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
   te <- attr(stats::terms.formula(form),'term.label')
   # Varnames
   varnames <- all.vars(form)
-  varnames <- varnames[varnames %notin% c('spde','spatial.field','observed','intercept')] # Exclude things not necessarily needed in there
+  varnames <- varnames[varnames %notin% c('spde','spatial.field','observed','Intercept')] # Exclude things not necessarily needed in there
   # Variable length
   fl <- length(varnames)
   # --- #
@@ -314,7 +301,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     # INLA modelling groups
     # Instead of selecting variables piece by piece, consider individual groups
     form_temp <- c()
-    val_int <- grep(pattern = 'intercept',x = te, value = T)
+    val_int <- grep(pattern = 'Intercept',x = te, value = T)
     val_lin <- grep(pattern = 'linear',x = te, value = T)
     val_rw1 <- grep(pattern = 'rw1',x = te,value = TRUE)
     # Alternative quadratic variables in case rw1 fails
@@ -589,7 +576,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
   # Get best vars
   co <- coef(abess_fit, support.size = abess_fit[["best.size"]])
   co <- names( which(co[,1] != 0))
-  co <- co[grep("intercept", co, ignore.case = TRUE, invert = TRUE)]
+  co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
   # Make some checks on the list of reduced variables
   if(length(co) <= 2) {
     warning("Abess was likely to rigours. Likely to low signal-to-noise ratio.")

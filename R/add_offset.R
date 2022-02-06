@@ -1,28 +1,111 @@
-#' Specify an offset object for a species
+#' Specify a spatial explicit offset
 #'
 #' @description
 #' Including offsets is another option to integrate spatial prior information
-#' in linear and additive regression models. Here, offset simply shift the intercept of
-#' the regression fit. Since offsets only make sense for linear regressions (and not for instance
+#' in linear and additive regression models. Offsets shift the intercept of
+#' the regression fit by a certain amount. Although only one offset can be added
+#' to a regression model, it is possible to combine several spatial-explicit estimates into
+#' one offset by calculating the sum of all spatial-explicit layers.
+#'
+#' @details
+#' This function allows to set any specific offset to a regression model. The offset
+#' has to be provided as spatial [`RasterLayer`] object. This function simply adds the layer to
+#' a [`distribution()`] object.
+#' **Note that any transformation of the offset (such as \code{log}) has do be done externally!**
+#'
+#' If the layer is range and requires additional formatting, consider using the
+#' function [`add_offset_range()`] which has additional functionalities such such distance
+#' transformations.
+#'
+#' @note
+#' Since offsets only make sense for linear regressions (and not for instance
 #' regression tree based methods such as [engine_bart]), they do not work for all engines.
+#' Offsets specified for non-supported engines are ignored during the estimation
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param layer A [`sf`] or [`RasterLayer`] object with the range for the target feature.
+#' @param add [`logical`] specifiying whether new offset is to be added. Setting
+#' this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).
+#' @param ... Other parameters or arguments (currently not supported)
+#' @references
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @family offset
+#' @keywords prior, offset
+#' @examples
+#' \dontrun{
+#'  x <- distribution(background) %>%
+#'    add_predictors(covariates) %>%
+#'    add_offset(samplingBias)
+#' }
+#' @name add_offset
+NULL
+
+#' @name add_offset
+#' @rdname add_offset
+#' @exportMethod add_offset
+#' @export
+methods::setGeneric(
+  "add_offset",
+  signature = methods::signature("x", "layer"),
+  function(x, layer, add = TRUE) standardGeneric("add_offset"))
+
+#' @name add_offset
+#' @rdname add_offset
+#' @usage \S4method{add_offset}{BiodiversityDistribution, raster}(x, layer)
+methods::setMethod(
+  "add_offset",
+  methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
+  function(x, layer, add = TRUE) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.Raster(layer),
+                            is.logical(add)
+    )
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit offset...')
+    ori.name <- names(layer)
+
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+      warning('Supplied layer does not align with background! Aligning them now...')
+      layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name
+    }
+    # Check whether an offset exists already
+    if(!is.Waiver(x$offset) && add){
+      # Add to current object
+      of <- x$offset
+      layer <- raster::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name # In case the layer name got lost
+      of <- raster::stack(of) |> raster::addLayer(layer)
+      x <- x$set_offset(of)
+    } else {
+      # Add as a new offset
+      x <- x$set_offset(layer)
+    }
+    return(x)
+  }
+)
+
+#' Specify a expert-based species range as offset
+#'
+#' @description
+#' This function has additional nuance compared to the more generic
+#' [`add_offset()`], allowing to specify transformations and modifications.
+#' It is customized specifically for expert-based ranges as offsets.
 #'
 #' @details
 #' As options allow specifying including the range either as binary or using distance
 #' as parameter following Merow et al. (2017). In this case the existing range needs
-#' to be transformed first, for instance using the [bossMaps] package.
-#' @note
-#' Only one offset per distribution object can currently be specified. This might
-#' change in the future.
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param range A [`sf`] or [`RasterLayer`]object with the range for the target feature.
+#' to be transformed first, for instance using the \pkg{bossMaps} package.
+#' @inheritParams add_offset
 #' @param method [`character`] describing how the range should be included (Options: \code{"binary"} | \code{"distance"}).
-#' @param name [`character`] A name of the species if the offset is not specified.
 #' @param distance_max Numeric threshold on the maximum distance (Default: \code{150000} [m]).
 #' @seealso [bossMaps]
 #' @references
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
-#' @keywords prior
+#' @keywords prior, offset
+#' @family offset
 #' @name add_offset_range
 NULL
 
@@ -32,55 +115,70 @@ NULL
 #' @export
 methods::setGeneric(
   "add_offset_range",
-  signature = methods::signature("x", "range", "method"),
-  function(x, range, method = 'distance', name = 'range_distance', distance_max = 150000) standardGeneric("add_offset_range"))
+  signature = methods::signature("x", "layer", "method"),
+  function(x, layer, method = 'distance', distance_max = 150000, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
 #' @rdname add_offset_range
-#' @usage \S4method{add_offset_range}{BiodiversityDistribution, raster}(x, range)
+#' @usage \S4method{add_offset_range}{BiodiversityDistribution, raster}(x, layer)
 methods::setMethod(
   "add_offset_range",
-  methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
-  function(x, range, method = 'range_distance') {
+  methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
+  function(x, layer, method = 'range_distance', add = TRUE) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.Raster(range),
-                            is.character(method)
+                            is.Raster(layer),
+                            is.character(method),
+                            is.logical(add)
     )
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 
-    # Check that background and range align, otherwise raise error
-    if(compareRaster(range, x$background,stopiffalse = FALSE)){
-      warning('Supplied range does not align with background! Aligning them now...')
-      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
-    }
-    names(range) <- method
+    # Save name
+    ori.name <- names(layer)
 
-    # Add as a new offset
-    x <- x$set_offset(range)
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+      warning('Supplied range does not align with background! Aligning them now...')
+      layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name # In case the layer name got lost
+    }
+
+    # Check whether an offset exists already
+    if(!is.Waiver(x$offset) && add){
+      # Add to current object
+      of <- x$offset
+      layer <- raster::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name # In case the layer name got lost
+      of <- raster::stack(of) |> raster::addLayer(layer)
+      x <- x$set_offset(of)
+    } else {
+      # Add as a new offset
+      x <- x$set_offset(layer)
+    }
     return(x)
   }
 )
 
 #' @name add_offset_range
 #' @rdname add_offset_range
-#' @usage \S4method{add_offset_range}{BiodiversityDistribution,sf, vector}(x, range, method)
+#' @usage \S4method{add_offset_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
 methods::setMethod(
   "add_offset_range",
-  methods::signature(x = "BiodiversityDistribution", range = "sf", method = "character"),
-  function(x, range, method = 'distance', name = 'range_distance', distance_max = 150000 ) {
+  methods::signature(x = "BiodiversityDistribution", layer = "sf", method = "character"),
+  function(x, layer, method = 'distance', distance_max = 150000, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
-                            inherits(range, 'sf'),
+                            inherits(layer, 'sf'),
                             method %in% c('binary','distance'),
-                            is.null(distance_max) || is.numeric(distance_max)
+                            is.null(distance_max) || is.numeric(distance_max),
+                            is.logical(add)
     )
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 
     # Reproject if necessary
-    if(st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
+    if(st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
 
     # Template raster for background
     if(!is.Waiver(x$predictors)){
@@ -92,17 +190,17 @@ methods::setMethod(
     }
 
     # Rasterize the range
-    range$id <- 1:nrow(range) # Assign an id if not already existing
+    layer$id <- 1:nrow(layer) # Assign an id if not already existing
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(range, temp, field = NULL)
+      ras_range <- fasterize::fasterize(layer, temp, field = NULL)
     } else {
-      ras_range <- raster::rasterize(range, temp,field = NULL)
+      ras_range <- raster::rasterize(layer, temp,field = NULL)
     }
 
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
-      names(dis) <- 'binary_range'
+      names(dis) <- "range_binary"
     } else if(method == 'distance'){
       # TODO: The below can be much more sophisticated.
       # - For instance adding a exponential decay
@@ -110,23 +208,33 @@ methods::setMethod(
       dis <- raster::distance(ras_range)
       dis <- raster::mask(dis, x$background)
       # Set areas not intersecting with range to 0
-      suppressMessages( suppressWarnings( range <- sf::st_buffer(range, 0)) )
+      suppressMessages( suppressWarnings( layer <- sf::st_buffer(layer, 0)) )
 
       suppressMessages(
         dis <- raster::mask(dis,
-                        x$background[unlist( st_intersects(range, x$background) ),]
+                        x$background[unlist( sf::st_intersects(layer, x$background) ),]
         )
       )
       # If max distance is specified
       if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
       # Convert to relative for better scaling
-      dis <- 1 - predictor_transform(dis,option = 'norm') #1 - (dis / cellStats(dis,'max') )
-      names(dis) <- name
+      dis <- 1 - predictor_transform(dis, option = 'norm') #1 - (dis / cellStats(dis,'max') )
+      names(dis) <- "range_distance"
     }
 
-    # Add as a new offset
-    x <- x$set_offset(dis)
+    # Check whether an offset exists already
+    if(!is.Waiver(x$offset) && add){
+      # Add to current object
+      of <- x$offset
+      ori.name <- names(dis)
+      dis <- raster::resample(dis, of, method = 'bilinear', func = mean, cl = FALSE)
+      names(dis) <- ori.name # In case the layer name got lost
+      of <- raster::stack(of) |> raster::addLayer(dis)
+      x <- x$set_offset(of)
+    } else {
+      # Add as a new offset
+      x <- x$set_offset(dis)
+    }
     return(x)
   }
 )
-

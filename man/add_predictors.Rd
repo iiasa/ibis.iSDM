@@ -89,6 +89,9 @@ values to \code{0} or another out of range constant).
 Not every engine does actually need covariates. For instance it is perfectly legit
 to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
 This correspondents to a spatial kernel density estimate.
+
+Certain names such \code{"offset"} are forbidden as predictor variable names. The function
+will return an error message if these are used.
 }
 \examples{
 \dontrun{

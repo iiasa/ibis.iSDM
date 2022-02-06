@@ -17,6 +17,7 @@ NULL
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
+#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: \code{FALSE}) **Not yet implemented**
 #' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature **Not yet implemented**
@@ -38,6 +39,7 @@ engine_inla <- function(x,
                         proj_stepsize = NULL,
                         timeout = NULL,
                         barrier = FALSE,
+                        type = "predictor",
                         # nonconvex.bdry = FALSE,
                         # nonconvex.convex = -0.15,
                         # nonconvex.concave = -0.05,
@@ -61,9 +63,10 @@ engine_inla <- function(x,
                           is.vector(offset) || is.numeric(offset),
                           is.null(timeout) || is.numeric(timeout),
                           is.numeric(cutoff),
+                          is.character(type),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
-
+  type <- match.arg(type, c("predictor", "response"), several.ok = FALSE)
   # Convert the study region
   region.poly <- as(sf::st_geometry(x$background), "Spatial")
 
@@ -125,6 +128,12 @@ engine_inla <- function(x,
     mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
   )
 
+  # Create
+  params <- list(
+    type = type,
+    ...
+  )
+
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
@@ -139,7 +148,8 @@ engine_inla <- function(x,
         'mesh.area' = ar,
         'mesh.bar' = mesh_bar,
         'proj_stepsize' = proj_stepsize,
-        'stk_pred' = optional_projstk
+        'stk_pred' = optional_projstk,
+        'params' = params
       ),
       # Generic plotting function for the mesh
       plot = function(self, assess = FALSE){
@@ -272,11 +282,11 @@ engine_inla <- function(x,
         # Include intercept in here
         # TODO: Note that this sets intercepts by type and not by dataset id
         if(intercept) {
-          env$intercept <- 1 # Overall intercept
-          env[[paste0('intercept',
+          env$Intercept <- 1 # Overall Intercept
+          env[[paste0('Intercept',
                       ifelse(joint,paste0('_',
                                           make.names(tolower(model$name)),'_',
-                                          model$type),''))]] <- 1 # Setting intercept to common type, thus sharing with similar types
+                                          model$type),''))]] <- 1 # Setting Intercept to common type, thus sharing with similar types
         }
         # Set up projection matrix for the data
         suppressWarnings(
@@ -308,15 +318,15 @@ engine_inla <- function(x,
         # Effects matrix
         ll_effects <- list()
         # Note, order adding this is important and matches the A matrix below
-        # ll_effects[['intercept']] <- rep(1, nrow(model$observations))
-        # ll_effects[['intercept']][[paste0('intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n) # Old code
+        # ll_effects[['Intercept']] <- rep(1, nrow(model$observations))
+        # ll_effects[['Intercept']][[paste0('Intercept',ifelse(joint,paste0('_',make.names(tolower(model$name)),'_',model$type),''))]]  <- seq(1, self$get_data('mesh')$n) # Old code
         ll_effects[['predictors']] <- env
         ll_effects[['spatial.field1']] <- seq(1, self$get_data('mesh')$n)
 
         # Add offset if specified
         if(!is.null(model$offset)){
          ll_effects[['predictors']] <- cbind( ll_effects[['predictors']],
-                                              subset(model[['offset']],select = 3) # FIXME: If I want type-specific offsets, this would be the place
+                                              subset(model[['offset']],select = "spatial_offset")
                                               )
         }
 
@@ -370,7 +380,7 @@ engine_inla <- function(x,
         } else { spde <- NULL }
 
         # Check for existence of specified offset and use the full one in this case
-        if(!is.Waiver(model$offset)) offset <- subset(model[['offset']],select = 3) else offset <- NULL
+        if(!is.Waiver(model$offset)) offset <- subset(model[['offset']],select = "spatial_offset") else offset <- NULL
 
         # Projection stepsize
         if(is.null( self$get_data('proj_stepsize') )){
@@ -406,9 +416,7 @@ engine_inla <- function(x,
               stk_int <- inla_make_integration_stack(
                 mesh      = self$get_data('mesh'),
                 mesh.area = self$get_data('mesh.area'),
-                cov       = model$predictors,
-                pred_names= model$predictors_names,
-                bdry      = model$background,
+                model     = model,
                 id        = names(model$biodiversity)[id],
                 joint     = ifelse(nty > 1, TRUE, FALSE)
               )
@@ -430,12 +438,9 @@ engine_inla <- function(x,
         if(is.null(self$data$stk_pred)){
           stk_pred <- inla_make_projection_stack(
             stk_resp   = stk_inference,
-            cov        = model$predictors,
-            pred.names = model$predictors_names,
-            offset     = model$offset,
+            model      = model,
             mesh       = self$get_data('mesh'),
             mesh.area  = self$get_data('mesh.area'),
-            background = model$background,
             res        = self$get_data('proj_stepsize'),
             type       = model$biodiversity[[id]]$type,
             spde       = spde,
@@ -551,11 +556,8 @@ engine_inla <- function(x,
 
         # Predict spatially
         if(!settings$get(what='inference_only')){
-          # Messager
+          # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
-
-          # Get thetas from initially fitted model as starting parameters
-          thetas = fit_resp$mode$theta
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -591,13 +593,17 @@ engine_inla <- function(x,
                                  num.threads = getOption('ibis.nthread')
             )
           },silent = FALSE)
-          if(class(fit_pred)=='try-error') print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!')
+          if(class(fit_pred)=='try-error') { print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!') }
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
           # Only difference between linear.predictor and fitted.values is that
           # fitted.values applies the (inverse of the) link function,
           # so it doesn't include the observation distribution part (measurement noise) of posterior predictions.
-          post <- fit_pred$summary.linear.predictor[index.pred, ] # Changed to fitted values
+          if(self$get_data("params")$type == "predictor"){
+            post <- fit_pred$summary.linear.predictor[index.pred, ]
+          } else {
+            post <- fit_pred$summary.fitted.values[index.pred, ]
+          }
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection
           if(length(fam)==1){
@@ -613,11 +619,13 @@ engine_inla <- function(x,
           names(post) <- c("mean", "sd", "q05", "q50", "q95", "mode","cv")
 
           # Fill prediction
-          prediction <- raster::stack(
-            sp::SpatialPixelsDataFrame(
-              points = predcoords,
-              data = post,
-              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+          suppressWarnings(
+            prediction <- raster::stack(
+              sp::SpatialPixelsDataFrame(
+                points = predcoords,
+                data = post,
+                proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+              )
             )
           )
           prediction <- raster::mask(prediction, model$background) # Mask with background

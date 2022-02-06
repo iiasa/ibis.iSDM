@@ -8,36 +8,31 @@ documentclass: article
 
 # Frequently Asked Questions (FAQ)
 
-This document contains a series of frequently asked questions when using the \pkg{ibis.iSDM} package and is a work in progress.
+This document contains a series of frequently asked questions when using the `ibis.iSDM` package and is a work in progress.
 
 ## Data preparation
 
 <details>
 <summary><b>What are the necessary data preparation steps for `ibis.iSDM` ?</b>
 </summary>
-The \pkg{ibis.iSDM} R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`raster`] and [`stars`] packages to do much of the formatting and processing work.
-When adding [`biodiversity`] and [`predictor`] variables to a \code{distribution} object a number of default validity checks and alignments are commonly conducted, for instance ensuring that provided points align in geographic projection.
+The `ibis.iSDM` R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`raster`] and [`stars`] packages to do much of the formatting and processing work.
+When adding [`biodiversity`] and [`predictor`] variables to a `distribution()` object a number of default validity checks and alignments are commonly conducted, for instance ensuring that provided points align in geographic projection.
 
 To ease up the modelling and to avoid any unfortunate errors or crashes, ideally ensure the following steps are taken:
-- A \code{background} layer describing the modelling extent is provided directly as [`sf`] \code{POLYGON} or \code{MULTIPOLYGON} object and covers all biodiversity and predictor data
+
+- A `'background'` layer describing the modelling extent is provided directly as [`sf`] `'POLYGON'` or `'MULTIPOLYGON'` object and covers all biodiversity and predictor data.
 - All provided data are in the same geographic projection.
-- Biodiversity data is provided in [`sf`] format and covers the \code{background} bounding box. Furthermore each biodiversity dataset has a set \code{"field_occurrence"} field with numeric values.
+- Biodiversity data is provided in [`sf`] format and covers the `'background'` bounding box. Furthermore each biodiversity dataset has a set `"field_occurrence"` field with numeric values.
 - \code{NA} is appropriately formatted (see also below).
 
 **Important:**
 For environmental predictors it becomes important to ensure that nodata values are appropriately
 handled. Unfortunately many of the implemented [`engines`] can not handle nodata values well, thus it
-is necessary during the pre-processing to remove any rows of covariate extraction where at least one variable has missing data. For instance by assinging a constant to \code{NA} values:
+is necessary during the pre-processing to remove any rows of covariate extraction where at least one variable has missing data. For instance by assinging a constant to `NA` values:
 ```{r, echo=TRUE,eval=FALSE}
 predictors[is.na(predictors)] <- 0
 ```
-
 </details>
-
-<details>
-<summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b>
-</summary>
-
 
 ## Model setup
 
@@ -47,16 +42,16 @@ predictors[is.na(predictors)] <- 0
 
 Yes, in many instances it is desirable to transform input predictors to a new range or to remove
 extreme values from the predictors. For example the popular [`maxnet`] R-package for Maximum entropy estimation of species distribution modelling often transforms the variables via quadratic, hinge or threshold transformations. Although this can also (and preferably should) be done before 
-setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [`add_predictors`] for examples and descriptions.
+setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [`add_predictors()`] for examples and descriptions.
 </details>
 
 <details>
 <summary><b>Is there a way to limit my predictions to only certain regions in the extent?</b>
 </summary>
 
-Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see [add_constrain_dispersal]) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
+Yes, this can be a desirable outcome during the modelling. For instance one can make - in the absence of better information on dispersal constrain (see [`add_constrain_dispersal`]) - the assumption that certain species can only disperse within a given ecoregion and not beyond. See for instance the method section of [Wessels, Merow and Trisos (2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
 
-To do this with ibis, one has to specify the limit of projection to the [distribution] object. In this context the zones extent over the whole background (and have the same extent and spatial scale). The prediction will however be limited only to those zones where supplied biodiversity observations fall
+To do this directly with the `ibis.iSDM` R-package, one has to specify the limit of projection to the [`distribution()`] object. In this context the zones extent over the whole background (and have the same extent and spatial scale). The prediction will however be limited only to those zones where supplied biodiversity observations fall
 in.
 
 ```{r, echo=TRUE,eval=FALSE}
@@ -70,23 +65,154 @@ plot(mod)
 </details>
 
 <details>
+<summary><b>How exactly do I add a prior to a model ?</b>
+</summary>
+
+The `ibis.iSDM` R-package allows to users to add prior information on parameters to any model to be estimated. These priors have to be added as engine-specific priors and their format depends on the engine in question (see specific help pages for more information).
+A prior can generally be define via a combination of `ENGINENAME` + `Prior` and has to be wrapped in a `PriorList` to be used in the estimation.
+
+Example:
+```{r, echo=TRUE,eval=FALSE}
+# We have prior information that 'Forest' is important for a species
+# In this case and for the INLA engine we define normal prior on the mean and precision
+p <- INLAPrior(variable = "Forest",type = "normal",hyper = c(2, 10))
+# This is then wrapped in a PriorList
+pp <- priors(p)
+print( pp )
+
+# We can specify multiple priors of course
+p <- list(
+  INLAPrior(variable = "Forest",type = "normal",hyper = c(2, 10)),
+  INLAPrior(variable = "Cropland",type = "normal",hyper = c(0, 1))
+)
+pp <- priors(pp)
+
+# And can now added to the model
+mod <- distribution(background, limits = zone) %>% 
+  add_biodiversity_poipo(species_data) %>% 
+  add_predictors(covariates) %>% 
+  add_priors(priors = pp)
+  engine_gdb()
+  
+```
+Multiple priors for an Engine can be defined in a `PriorList`. Whenever a prior 
+for the same variable is set again, it overwrites the previous value.
+
+</details>
+
+<details>
 <summary><b>What are the options for parallelization in `ibis.iSDM`?</b>
 </summary>
 
-Most code in the \pkg{ibis.iSDM} R-package is by default already parallelized and many 
+Most code in the `ibis.iSDM` R-package is by default already parallelized and many 
 computationally-intensive operations should be making use of all cores (if you can find an example where this is not the case, please raise an issue). The number of cores is generally being decided by
-the option \code{"ibis.nthread"} in [`ibis_options()`].
+the option `"ibis.nthread"` in [`ibis_options()`].
 
-In most cases, parallelized code will be run via the \pkg{parallel} and \code{doParallel} packages, although there is some code in its infancy to support the \pkg{future} parallelization approaches as well, offering greater flexibility. See the function [`ibis_future`] for more information also on the use.
+In most cases, parallelized code will be run via the [`parallel`] and [`doParallel`] packages, although there is some code in its infancy to support the [`future`] parallelization approaches as well, offering greater flexibility. See the function [`ibis_future`] for more information also on the use.
 
-The typical use case is thus to run separate models (via \code{train}) in a loop or scheduler of a High-Performance-Computer. Users should be careful in the case of shared resources, e.g. don't parallelize such operations on the same machine. If there is a need to parallelize multiple models on the same instance, it is suggested to disable the \code{'ibis.runparallel'} option.
+The typical use case is thus to run separate models (via `train()`) in a loop or scheduler of a High-Performance-Computer. Users should be careful in the case of shared resources, e.g. don't parallelize such operations on the same machine. If there is a need to parallelize multiple models on the same instance, it is suggested to disable the `'ibis.runparallel'` option.
 ```{r, echo=TRUE,eval=FALSE}
 # Check ibis options if set
 ibis_options()
 options('ibis.runparallel' = FALSE) # Set to FALSE
 ```
+</details>
+
+<details>
+<summary><b> Can I add multiple offsets to a `distribution()` object ?</b>
+</summary>
+
+Yes. The `add_offset()` and `add_offset_range()` functions allows to specify a spatial explicit offset term which is then added to the regression model in question. An offset is generally just a coefficient set to a specific value. To get more than one offset, one just needs to combine the different provided offsets in a way that is consistent to get that fixed value (see [here](https://stats.stackexchange.com/questions/250528/is-it-possible-to-use-two-offsets) for reference. This can be done either by summing them as transformed value (discouraged as it can be errorprone) or by simply multiplying them.
+```{r, echo=TRUE,eval=FALSE}
+offset1 <- runif(10)
+offset2 <- runif(10)
+# Identical
+log(offset1) + log(offset2)
+log(offset1*offset2)
+```
+
+Internally all provided offsets to model object are combined via simple addition together. This
+thus requires that users transform them aprior (for instance log transform) before adding them to
+the estimation.
 
 </details>
 
-## Scenarios
+
+## Fitting and Scenarios
+
+<details>
+<summary><b>There are too many messages. How can I run `ibis.iSDM` more verbosely ?</b>
+</summary>
+
+There are two options that can be enabled to reduce the number of messages:
+
+* By setting the parameter `verbose` in `train()` to `FALSE` all messages created
+by the respective engine are suppressed.
+* Setting the parameter `ibis.setupmessages` to `FALSE` suppresses all other package
+related message. This can be done via
+```{r, echo=TRUE,eval=FALSE}
+options("ibis.setupmessages" = FALSE)
+```
+</details>
+
+
+<details>
+<summary><b>Why are there 2 INLA engines and which one should I use ? </b>
+</summary>
+
+In the `ibis.iSDM` R-package there are two engines that makes use of the INLA framework,
+namely [`engine_inla`] and [`engine_inlabru`]. When the package author started developing this package, the [`engine_inlabru`] did not yet support multiple likelihoods and thus this was implemented directly. Predictions from [`engine_inla`] and [`engine_inlabru`] should be identical, although the latter does not infer the predictions directly, instead simulating from the posterior.
+This simulation is particularly helpful for creating (future) projections as otherwise a new model would need to be fitted for every newdata object.
+
+Users are advised to use [`engine_inlabru`] by **default** in most cases and only use [`engine_inla`] if predictions look uncertain.
+</details>
+
+
+<details>
+<summary><b>Where can I find predictions created by `train` ? </b>
+</summary>
+
+After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `RasterStack`. By default all engines will produce a `Raster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
+
+In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename.
+
+**Example:**
+```{r, echo=TRUE,eval=FALSE}
+mod <- distribution(background) %>% 
+  add_biodiversity_poipo(species_data) %>% 
+  engine_inlabru() %>% 
+  train()
+# To plot 
+plot(mod, "mean")
+plot(mod, "sd")
+
+# To get the layer
+mod$get_data("prediction")
+
+# To save the output layer as floating point geoTiff
+mod$save("myoutput.tif", type = "gtif", dt = "FLT4S")
+
+```
+</details>
+
+
+## Model troubleshooting
+
+<details>
+<summary><b>What can I do when my model outputs with presence-only data seem odd?</b>
+</summary>
+By default, presence only biodiversity data is modelled as point-process model (PPM, see [Renner e tal. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.
+
+* Modify the targeted background sampling for better control of background points. More options to modify this will be made available.
+* Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525).
+* Partial out a biased variable during the prediction. The `bias_variable` can be specified in the `train()` command and has to be part the predictor set of the model. In addition a `bias_value` has to be specified and this can be set for instance to `0`.
+* Apply more rigorous filtering and bias control to the input data. In the end no correction can replace good data preparation and cleaning. Remember the [GIGO principle](https://en.wikipedia.org/wiki/Garbage_in,_garbage_out).
+</details>
+
+<details>
+<summary><b>My model keeps crashing, what can I do?</b>
+</summary>
+Sorry to hear and unless the model or input data are grossely misspecified, this should not happen.
+Please report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the concrete error message, your R session information (call `sessionInfo()`) and preferably some example data and code.
+</details>
 

@@ -40,8 +40,9 @@ Prior <- bdproto(
     )
   },
   # Get prior values
-  get = function(self){
-    return(self$value)
+  get = function(self, what = "value"){
+    assertthat::assert_that(what %in% names(self))
+    return(self[[what]])
   },
   # Set prior
   set = function(self, x){

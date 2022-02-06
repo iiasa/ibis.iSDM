@@ -292,7 +292,7 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors
 #' @param longlat A [`logical`] variable indicating whether the projection is long-lat
-#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: \code{c('X','Y')})
+#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})
 #' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist})
@@ -301,7 +301,7 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' * Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
 #' @keywords utils
 #' @export
-get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), cheap = FALSE, ...) {
+get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), cheap = FALSE, ...) {
   # Security checks
   assertthat::assert_that(
     is.data.frame(coords) || inherits(coords,'sf') || inherits(coords,'matrix'),
@@ -327,6 +327,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('X','Y'), 
   disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
 
   if(process_in_parallel){
+    check_package("doParallel")
     suppressPackageStartupMessages(require(doParallel))
 
     # Split coordinates into equal size batches of 10
@@ -422,7 +423,8 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
   }
   # Add coordinate fields to the predictors as these might be needed later
   if(!any(assertthat::has_name(ex, c("x", "y")))){
-    ex[["x"]] <- coords[,1]; ex[["y"]] <- coords[,2]
+    if(inherits(coords,"sf")) coords <- sf::st_coordinates(coords)
+    ex[["x"]] <- as.numeric(coords[,1]); ex[["y"]] <- as.numeric(coords[,2])
   }
 
   if(rm.na){

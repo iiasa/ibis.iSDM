@@ -45,6 +45,7 @@ predict_gdbclass <- function(fit, nd, template){
 ppm_weights <- function(df, pa, bg, weight = 1e-6){
   assertthat::assert_that(
     is.data.frame(df),
+    length(unique(pa)) > 1,
     nrow(df) == length(pa),
     is.numeric(weight)
   )

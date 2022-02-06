@@ -22,6 +22,7 @@ NULL
 #' @param nburn A [`numeric`] estimate of the burn in samples.
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
 #' @param chains A number of the number of chains to be used (Default: \code{4})
+#' @param type The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
@@ -36,6 +37,7 @@ engine_bart <- function(x,
                         nburn = 250,
                         ntree = 1000,
                         chains = 4,
+                        type = "response",
                        ...) {
 
   # Check whether dbarts package is available
@@ -49,8 +51,10 @@ engine_bart <- function(x,
                           inherits(x$background,'sf'),
                           is.numeric(nburn),
                           is.numeric(ntree),
+                          is.character(type),
                           is.numeric(chains)
                           )
+  type <- match.arg(type, choices = c("link", "response"),several.ok = FALSE)
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
@@ -77,6 +81,12 @@ engine_bart <- function(x,
                               n.chains = chains,
                               n.threads = ifelse( dbarts::guessNumCores() < getOption('ibis.nthread'),dbarts::guessNumCores(),getOption('ibis.nthread'))
   )
+  # Other parameters
+  # Set up the parameter list
+  params <- list(
+    type = type,
+    ...
+  )
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
@@ -89,7 +99,8 @@ engine_bart <- function(x,
       name = "<BART>",
       data = list(
         'template' = template,
-        'dc' = dc
+        'dc' = dc,
+        'params' = params
       ),
       # Dummy function for spatial latent effects
       calc_latent_spatial = function(self, type = NULL, priors = NULL){
@@ -147,12 +158,12 @@ engine_bart <- function(x,
             npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
             replace = TRUE
           )
-          abs$intercept <- 1 # Redundant for this engine
+          abs$Intercept <- 1 # Redundant for this engine
           # Combine absence and presence and save
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')],
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
                                     bg, fun = 'count', background = 0)
           # Get cell ids
           ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
@@ -168,10 +179,10 @@ engine_bart <- function(x,
           envs <- get_rastervalue(coords = obs[,c('x','y')],
                                   env = model$predictors_object$get_data(df = FALSE),
                                   rm.na = FALSE)
-          envs$intercept <- 1
+          envs$Intercept <- 1
 
-          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
           if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
           df <- subset(df, complete.cases(df))
@@ -234,7 +245,6 @@ engine_bart <- function(x,
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
         w <- model$biodiversity[[1]]$expect # The expected weight
-        data$w <- w # Also add as predictor
         full <- model$predictors # All predictors
 
         # Select predictors
@@ -253,7 +263,7 @@ engine_bart <- function(x,
           # TODO:
           # Offsets are only supported for binary dbarts models, but maybe there is an option
           # use weights instead
-          stop("not yet")
+          warning("Offsets not availble for BART")
 
         } else { off = NULL }
 
@@ -309,8 +319,8 @@ engine_bart <- function(x,
                                    verbose = settings$get('verbose')
           )
         } else {
-          fit_bart <- dbarts::bart(equation,
-                                   data,
+          fit_bart <- dbarts::bart(y.train = data[,'observed'],
+                                   x.train = data[,model$biodiversity[[1]]$predictors_names],
                                    keeptrees = dc@keepTrees,
                                    weights = w,
                                    ntree = dc@n.trees,
@@ -335,12 +345,20 @@ engine_bart <- function(x,
               full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
           }
+          params <- self$get_data("params")
           # Make a prediction
-          suppressWarnings(
-            pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                        newdata = full,
-                                        type = 'response')
-          )
+          pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                             newdata = full[,model$biodiversity[[1]]$predictors_names],
+                                             type = params$type
+                                             )
+          # pred_bart <- run_parallel(X = full[,model$biodiversity[[1]]$predictors_names],
+          #                           FUN = dbarts:::predict.bart,
+          #                           cores = ifelse(getOption("ibis.runparallel"), getOption("ibis.nthread"), 1),
+          #                           approach = ifelse(getOption("ibis.use_future"), "future", "parallel"),
+          #                           object = fit_bart,
+          #                           type = params$type
+          #                           )
+          # if(is.list(pred_bart)) pred_bart <- do.call(rbind, pred_bart)
           # Summarize quantiles and sd from posterior
           ms <- as.data.frame(
                  cbind( apply(pred_bart, 2, mean),
@@ -351,8 +369,8 @@ engine_bart <- function(x,
           )
           names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
           ms$cv <- ms$mean / ms$sd
-
-          # Add them
+          rm(pred_bart)
+          # Add them through a loop since the cellid changed
           prediction <- raster::stack()
           for(post in names(ms)){
             prediction2 <- self$get_data('template')
@@ -369,7 +387,7 @@ engine_bart <- function(x,
         settings$set('end.time', Sys.time())
         # Also append boosting control option to settings
         for(entry in slotNames(dc)) settings$set(entry, slot(dc,entry))
-
+        for(entry in names(params)) settings$set(entry, params[[entry]])
         # Create output
         out <- bdproto(
           "BART-Model",

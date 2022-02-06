@@ -166,11 +166,11 @@ engine_stan <- function(x,
               npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
               replace = TRUE
             )
-            abs$intercept <- 1 # Add dummy intercept
+            abs$Intercept <- 1 # Add dummy intercept
             # Combine absence and presence and save
             abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
             # Furthermore rasterize observed presences
-            pres <- raster::rasterize(model$biodiversity[[i]]$predictors[,c('x','y')], bg,
+            pres <- raster::rasterize(model$biodiversity[[i]]$observations[,c("x","y")], bg,
                                       fun = 'count', background = 0)
             # Get cell ids
             ce <- raster::cellFromXY(pres, model[['biodiversity']][[i]]$observations[,c('x','y')])
@@ -189,11 +189,11 @@ engine_stan <- function(x,
             envs <- get_rastervalue(coords = obs[,c('x','y')],
                                     env = model$predictors_object$get_data(df = FALSE),
                                     rm.na = FALSE)
-            envs$intercept <- 1
+            envs$Intercept <- 1
 
             # Overwrite observations
-            df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)],
-                        abs[,c('x','y','intercept', model$biodiversity[[i]]$predictors_names)])
+            df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)],
+                        abs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)])
             any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
             if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
             df <- subset(df, complete.cases(df))
@@ -206,7 +206,16 @@ engine_stan <- function(x,
                                      nrow(df) == nrow(model$biodiversity[[i]]$observations)
             )
             # Add offset if existent
-            if(!is.Waiver(x$offset)) df[[x$get_offset()]] <- raster::extract(x$offset, df[,c('x','y')])
+            if(!is.Waiver(model$offset)) {
+              # Respecify offset if not set
+              of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
+              of1 <- get_ngbvalue(coords = model$biodiversity[[i]]$observations[,c("x","y")],
+                                  env =  of,
+                                  longlat = raster::isLonLat(self$get_data("template")),
+                                  field_space = c('x','y')
+              )
+              df[["spatial_offset"]] <- of1
+            }
 
             # Define expectation as very small vector following Renner et al.
             w <- ppm_weights(df = df,
@@ -418,7 +427,7 @@ engine_stan <- function(x,
             observed = model$biodiversity[[1]]$observations[["observed"]],
             X = as.matrix( model$biodiversity[[1]]$predictors[, model$biodiversity[[1]]$predictors_names] ),
             K = length( model$biodiversity[[1]]$predictors_names ),
-            offsets = log(model$biodiversity[[1]]$expect),
+            offsets = log(model$biodiversity[[1]]$expect), # Notice that exposure is log-transformed here!
             has_intercept = attr(terms(model$biodiversity[[1]]$equation), "intercept"),
             has_spatial = ifelse(is.null(self$get_equation_latent_spatial()), 0, 1),
             # Horseshoe prior default parameters
@@ -428,7 +437,7 @@ engine_stan <- function(x,
             hs_scale_global = 1, hs_scale_slab = 2
           )
           # If any additional offset is set, simply to the existing one in sum
-          if(!is.Waiver(model$offset)) dl$offsets <- dl$offsets + log( model$biodiversity[[1]]$offset[,3] )
+          if(!is.Waiver(model$offset)) dl$offsets <- dl$offsets + model$biodiversity[[1]]$offset[,"spatial_offset"]
         }
 
         # Model estimation
@@ -466,8 +475,7 @@ engine_stan <- function(x,
           # Add offset if set
           if(!is.Waiver(model$offset)) {
             # Offsets are simply added linearly (albeit transformed)
-            if(hasName(full,"w")) full$w <- full$w + model$offset[,3] else full$w <- model$offset[,3]
-            # full[[colnames(model$offset)[3]]] <- model$offset[,3]
+            if(hasName(full,"w")) full$w <- full$w + model$offset[,"spatial_offset"] else full$w <- model$offset[,"spatial_offset"]
           }
           suppressWarnings(
             full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
@@ -555,7 +563,6 @@ engine_stan <- function(x,
             if(!is.null(offset)) {
               # Offsets are simply added linearly (albeit transformed)
               if(hasName(full,"w")) full$w <- full$w + offset else full$w <- offset
-              # full[[colnames(model$offset)[3]]] <- model$offset[,3]
             }
             suppressWarnings(
               full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],

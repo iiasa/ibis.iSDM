@@ -153,10 +153,11 @@ mesh_boundary <- function(mesh){
 
 #' Create a barrier representation of a mesh
 #'
-#' Following physical barrier model for SDM
-#' https://www.sciencedirect.com/science/article/pii/S221167531830099X
+#' Work in progress for creating a physical barrier model for INLA
+#'
 #' @param mesh A [`inla.mesh`] object
 #' @param region.poly A [`SpatialPolygons`] object
+#' @source https://www.sciencedirect.com/science/article/pii/S221167531830099X
 #' @keywords utils
 #' @noRd
 mesh_barrier <- function(mesh, region.poly){
@@ -269,10 +270,8 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   model <- mod$get_data('fit_best')
   mesh <- mod$get_data('mesh')
   # Covariates for prediction points
-  preds <- mod$model$predictors
+  preds <- mod$model$predictors_object
   ofs <- mod$model$offset
-  # Set intercept variables
-  preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
 
   # Some checks between models and data
   assertthat::assert_that(is.character(type),
@@ -285,10 +284,14 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   if(is.null(coords)) coords <- preds[,c('x','y')]
   if(nrow(coords)!= nrow(preds)){
     # Recalculate average predictors for new coordinates
-    preds <- get_ngbvalue(coords = coords,
-                 env = preds,
-                 longlat = isLonLat(mesh$crs),
-                 field_space = c('x','y'))
+    preds <- get_rastervalue(coords = coords,
+                             env = preds,
+                             rm.na = FALSE
+                             )
+    # Set Intercept variables
+    for(val in grep('Intercept',rownames(model$summary.fixed),value = TRUE)){
+      preds[[val]] <- 1
+    }
   }
   temp = rasterFromXYZ(coords,crs = projection(mesh$crs))
 
@@ -374,7 +377,7 @@ post_prediction <- function(mod, nsamples = 100,
   # Covariates for prediction points
   preds <- mod$model$predictors
   # Set any other existing intercept variables
-  preds[,grep('intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
+  preds[,grep('Intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
   preds <- SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
   preds_names <- mod$model$predictors_names
   preds_types <- mod$model$predictors_types
@@ -663,8 +666,7 @@ post_prediction <- function(mod, nsamples = 100,
                           longlat = isLonLat(mesh$crs),
                           field_space = c('x','y'))
     }
-    # ofs[is.na(ofs[,3]),3] <- 0
-    out <- out + ofs[,3]
+    out <- out + ofs[,"spatial_offset"]
   }
 
   # Fill output raster
@@ -679,34 +681,31 @@ post_prediction <- function(mod, nsamples = 100,
 #' Make Integration stack
 #' @param mesh The background projection mesh
 #' @param mesh.area The area of the mesh, has to match the number of integration points
-#' @param cov The covariate data stack
-#' @param pred_names The names of the used predictors
-#' @param bdry The boundary used to create the mesh
-#' @param id An id tag for this integration stack
+#' @param model A prepared model object.
+#' @param id A id supplied to name this object.
 #' @param joint Whether a model with multiple likelihood functions is to be specified
-#' @keywords utils
+#' @keywords utils, internal
 #' @noRd
-inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
-                                        id,
-                                        joint = FALSE){
+inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALSE){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
     length(mesh.area) == mesh$n, is.vector(mesh.area),
-    is.data.frame(cov), assertthat::has_name(cov, c('x','y')),
-    is.data.frame(bdry),is.logical(joint)
+    is.list(model) && ("predictors_names" %in% names(model)),
+    is.logical(joint)
   )
+  # Get from model object everything we need
+  cov <- model$predictors_object
+  pred_names <- model$predictors_names
+  bdry <- model$background
 
   # Get nearest average environmental data
-  all_env <- suppressMessages(
-    get_ngbvalue(
-      coords = mesh$loc[,1:2],
-      env = cov,
-      field_space = c('x','y'),
-      longlat = raster::isLonLat(bdry)
-    )
+  all_env <- get_rastervalue(
+    coords = mesh$loc[,1:2],
+    env = cov$get_data(df = FALSE),
+    rm.na = FALSE
   )
   # Get only target variables
-  all_env$intercept <- 1
+  all_env$Intercept <- 1
 
   # Add diagonal for integration points
   idiag <- Matrix::Diagonal(mesh$n, rep(1, mesh$n))
@@ -729,7 +728,7 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
   # Effects list
   ll_effects <- list()
   # Note, order adding this is important apparently...
-  # ll_effects[['intercept']] <- rep(1, nrow(all_env)) # Added 05/09
+  # ll_effects[['Intercept']] <- rep(1, nrow(all_env)) # Added 05/09
   ll_effects[['predictors']] <- all_env
   ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1, mesh$n) ) # Changed to spatial.field by default
 
@@ -746,29 +745,29 @@ inla_make_integration_stack <- function(mesh, mesh.area, cov, pred_names, bdry,
 #' Create a projection stack
 #'
 #' @param stk_resp A inla stack object
-#' @param cov The covariate data stack
-#' @param pred.names The predictors to use
-#' @param offset If an offset is specified, use it
+#' @param model A prepared model object.
 #' @param mesh The background projection mesh
 #' @param mesh.area The area calculate for the mesh
 #' @param type Name to use
 #' @param spde An spde field if specified
-#' @param background A supplied background
 #' @param res Approximate resolution to the projection grid (default: null)
-#' @keywords utils
+#' @keywords utils, internal
 #' @noRd
-inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, mesh.area,
-                                       background, type,
+inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
                                        res = NULL, spde = NULL,joint = FALSE){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
     inherits(mesh,'inla.mesh'),
     is.character(type),
-    is.data.frame(cov),
     is.null(spde)  || 'spatial.field1' %in% names(spde),
     is.logical(joint)
   )
+  cov        <- model$predictors
+  cov_object <- model$predictors_object
+  pred.names <- model$predictors_names
+  background <- model$background
+  offset     <- model$offset
 
   # New formulation of the projection matrix
   bdry <- mesh$loc[mesh$segm$int$idx[,2],]  # get the boundary of the region
@@ -826,16 +825,21 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
   # predcoords <- projgrid$lattice$loc[which(cellsIn),]
   Apred <- projgrid$proj$A[cellsIn, ]
 
-  # Extract covariates for points
-  if(!is.Waiver(offset)) cov <- cbind(cov, offset)
-
   # For all coordinates get nearest value
-  nearest_cov <- get_ngbvalue(coords = predcoords,
-                              env = cov,
-                              field_space = c('x','y'))
+  nearest_cov <- get_rastervalue(coords = predcoords,
+                                 env = cov_object$get_data(df = FALSE),
+                                 rm.na = FALSE)
+
+  # Extract covariates for points
+  if(!is.Waiver(offset)) {
+    ofs <- get_ngbvalue(coords = predcoords,
+                        env = offset,
+                        field_space = c('x','y'))
+    nearest_cov[["spatial_offset"]] <- ofs[["spatial_offset"]]
+  }
 
   # Get from supplied stack this information
-  nearest_cov[,'intercept'] <- 1
+  nearest_cov[,'Intercept'] <- 1
 
 
   # Empty lists
@@ -851,7 +855,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
-    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
+    # ll_effects[['Intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1,mesh$n)) # Changed to spatial.field. intercept already included in neatest_cov
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
@@ -867,7 +871,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     ll_pred[['Ntrials']] <- rep(1, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
-    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
+    # ll_effects[['Intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field1']]  <- list(spatial.field1 = seq(1,mesh$n))
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
@@ -880,7 +884,7 @@ inla_make_projection_stack <- function(stk_resp, cov, pred.names, offset, mesh, 
     ll_pred[['e']] <- rep(0, nrow(nearest_cov))
 
     # Note, order adding this is important apparently...
-    # ll_effects[['intercept']] <- rep(1, nrow(nearest_cov))
+    # ll_effects[['Intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
     ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1,mesh$n) )
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
@@ -1097,7 +1101,7 @@ inla.backstep <- function(master_form,
   if(is.null(response)) response <- all.vars(master_form)[1]
   # Formula terms
   te <- attr(stats::terms.formula(master_form),'term.label')
-  te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
+  te <- te[grep('Intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
   # Remove variables that are never removed
   if(!is.null(keep)){
     te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
@@ -1147,7 +1151,7 @@ inla.backstep <- function(master_form,
     oo <- data.frame()
 
     te <- attr(stats::terms.formula(test_form),'term.label')
-    te <- te[grep('intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
+    te <- te[grep('Intercept',te,ignore.case = T,invert = T)] # remove intercept(s)
 
     # Now for each term in variable list
     for(vars in te){

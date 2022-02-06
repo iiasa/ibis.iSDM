@@ -4,24 +4,24 @@
 \alias{BREGPrior}
 \title{Create a new spike and slab prior for Bayesian generalized linear models}
 \usage{
-BREGPrior(variable, type, hyper)
+BREGPrior(variable, hyper = NULL, ip = NULL)
 
 \S4method{BREGPrior}{character}(variable)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{type}{A \code{\link{character}} specifying the type of prior to be set. Can be set either to
-\code{"coefficient"} or \code{"inclusion.probability"}. See details.}
+\item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients.}
 
-\item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients}
+\item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
 Function to include prior information via Zellner-style spike and slab prior for
 generalized linear models used in \link{engine_breg}. These priors are similar to
-the horseshoe priors used in regularized \link{engine_stan} models.
+the horseshoe priors used in regularized \link{engine_stan} models and penalize regressions
+by assuming most predictors having an effect of \code{zero}.
 }
 \details{
 The Zellner-style spike and slab prior for generalized linear models are specified as described
@@ -29,11 +29,26 @@ in the \pkg{Boom} R-package. Currently supported are two options which work for 
 Poisson and binomial (bernoulli) distributed errors.
 Two types of priors can be provided on a variable:
 \itemize{
-\item \code{"coefficient"} Allows to specify Gaussian priors on the coefficient mean and
-precision (!) for the model. Either the mean or the mean and precision has to be supplied.
+\item \code{"coefficient"} Allows to specify Gaussian priors on the coefficient mean for the model.
+To do do provide an estimate to hyper.
 \item \code{"inclusion.probability"} A \code{\link{vector}} giving the prior probability of inclusion for the
 specified variable. This can be useful when prior information on preference is known but not the
 strength of it.
+}
+
+If coefficients are set, then the inclusion probability is also modified by default. However
+even when not knowing estimates of the beta coefficients and their direction one can still
+provide an estimate of the inclusion probability.
+In other words: \strong{The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.}
+}
+\examples{
+\dontrun{
+# Positive coefficient
+p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
+p1
+# Coefficient and direction unknown but variable def. important
+p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
+p2
 }
 }
 \references{

@@ -28,5 +28,5 @@
 
   # Set S2 use for SF to false owing to the multiple bugs and errors with
   # 29/06 To be changed later eventually
-  suppressMessages( invisible( sf::sf_use_s2(FALSE) ) )
+  suppressMessages( sf::sf_use_s2(FALSE) )
 }

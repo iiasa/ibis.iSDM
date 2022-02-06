@@ -300,7 +300,7 @@ engine_inlabru <- function(x,
                                             proj4string = self$get_data('mesh')$crs
           )
           # Select only the predictor names
-          ips <- subset(ips, select = c("observed", "intercept", "e", model$predictors_names))
+          ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
           ips <- subset(ips, complete.cases(ips@data))
           abs_E <- ips$e; ips$e <- NULL
           # Return list of result
@@ -355,8 +355,8 @@ engine_inlabru <- function(x,
             abs_E = ips$E; ips <- ips$ips
             assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
             new <- sp:::rbind.SpatialPointsDataFrame(
-              df[,c('observed', 'intercept', model$biodiversity[[j]]$predictors_names)],
-              ips[,c('observed', 'intercept', model$biodiversity[[j]]$predictors_names)])
+              df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
+              ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
             # Formulate the likelihood
             lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
                                 family = model$biodiversity[[j]]$family,
@@ -390,7 +390,6 @@ engine_inlabru <- function(x,
         # --- #
         # Defining the component function
         if(length(model$biodiversity)>1){
-          # FIXME: # Check that intercept formulation works correctly for INLABRU
           comp <- as.formula(
             paste(' ~ 0 + Intercept(1) ',
                   ifelse(model$biodiversity[[1]]$use_intercept,
@@ -410,7 +409,7 @@ engine_inlabru <- function(x,
 
         # Add Offset if set
         if(!is.Waiver(model$offset)){
-          ovn <- colnames(model$offset)[3]
+          ovn <- "spatial_offset"
           comp <- update.formula(comp,
                                  paste(c(' ~ . +', paste0(ovn,'(main = ', ovn, ', model = "offset")')), collapse = " ")
           )
@@ -507,7 +506,6 @@ engine_inlabru <- function(x,
           is.list(model),length(model)>1,
           # Check that model id and setting id are identical
           settings$modelid == model$id,
-          any(  (c('stk_full','stk_pred') %in% names(self$data)) ),
           inherits(self$get_data("likelihoods"), 'list')
         )
 
@@ -721,8 +719,8 @@ engine_inlabru <- function(x,
           }
           # Add offset if set
           if(!is.Waiver(model$offset)){
-            ovn <- colnames(model$offset)[3]
-            ofs <- paste0("log(", ovn,') + ')
+            ovn <- "spatial_offset"
+            ofs <- paste0("", ovn," + ")
           } else { ofs <- ""}
 
           pfo <- as.formula(
@@ -738,6 +736,7 @@ engine_inlabru <- function(x,
           suppressWarnings(
             pred_bru <- inlabru:::predict.bru(
               object = fit_bru,
+              num.threads = ifelse(getOption("ibis.runparallel"), getOption("ibis.nthread"), NULL),
               data = preds,
               formula = pfo,
               n.samples = 1000 # Pass as parameter?

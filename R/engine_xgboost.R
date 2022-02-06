@@ -164,11 +164,12 @@ engine_xgboost <- function(x,
             replace = TRUE
           )
           # Combine absence and presence and save
-          abs$intercept <- 1
+          abs$Intercept <- 1
           abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$predictors[,c('x','y')], bg, fun = 'count', background = 0)
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+                                    bg, fun = 'count', background = 0)
 
           # Get cell ids
           ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
@@ -184,11 +185,11 @@ engine_xgboost <- function(x,
           envs <- get_rastervalue(coords = obs[,c('x','y')],
                                   env = model$predictors_object$get_data(df = FALSE),
                                   rm.na = FALSE)
-          envs$intercept <- 1
+          envs$Intercept <- 1
 
           # Overwrite observations
-          df <- rbind(envs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','intercept', model$biodiversity[[1]]$predictors_names)])
+          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
           if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
           df <- subset(df, complete.cases(df))
@@ -281,7 +282,7 @@ engine_xgboost <- function(x,
           params$monotone_constraints <- mc
         }
 
-        if('offset' %in% names(model$biodiversity[[1]]) ){
+        if('offset' %in% names(model) ){
           # For the offset we simply add the (log-transformed) offset to the existing
           # Add exp at the end to backtransform
           of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
@@ -290,7 +291,7 @@ engine_xgboost <- function(x,
 
           # Respecify offset
           # (Set NA to 1 so that log(1) == 0)
-          of <- model$offset; of[,3] <- ifelse(is.na(of[,3]), 1, of[,3])
+          of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
           of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[,c("x","y")],
                                env =  of,
                                longlat = raster::isLonLat(self$get_data("template")),
@@ -298,8 +299,8 @@ engine_xgboost <- function(x,
           )
           assertthat::assert_that(nrow(of1) == length(of_train),
                                   nrow(of) == length(of_pred))
-          of_train <- log(of_train + of1[,3])
-          of_pred <- log(of_pred + of[,3])
+          of_train <- of_train + of1[,"spatial_offset"]
+          of_pred <- of_pred + of[,"spatial_offset"]
 
           # Set the new offset
           xgboost::setinfo(df_train, "base_margin", of_train)

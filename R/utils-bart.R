@@ -1,30 +1,3 @@
-#' Bart model predictions in parallel
-#'
-#' @description
-#' The default model prediction functionalities in the \pkg{dbarts} are rather slow
-#' and can take considerable amount of time. This handy function parallizes the prediction
-#' process in tiles
-#' @param obj A fitted [dbarts] model.
-#' @param newdata A [`data.frame`] with the new predictors.
-#' @param cores [`numeric`] on the number of cores to be used for prediction.
-#' @param type A [`character`] on the type of prediction, focussing either on [`response`] or [`linear`] predictor.
-#' @keywords utils, internal
-#' @noRd
-predict_bartpar <- function(obj, newdata, cores = getOption("ibis."), type = "response"){
-  assertthat::assert_that(
-    inherits(obj, "bart"),
-    is.data.frame(newdata) && nrow(newdata) > 0,
-    is.character(type)
-  )
-  stop("TBD")
-  if(getOption("ibis.runparallel") && cores > 1){
-    dbarts:::predict.bart
-
-  } else {
-    stop("Not yet done")
-  }
-}
-
 #' Variable importance for dbarts models
 #'
 #' Variable importance measured in the proportion of total branches used for a given variable. Explicitly dropped variables are included as 0

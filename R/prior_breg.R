@@ -6,27 +6,40 @@ NULL
 #' @description
 #' Function to include prior information via Zellner-style spike and slab prior for
 #' generalized linear models used in [engine_breg]. These priors are similar to
-#' the horseshoe priors used in regularized [engine_stan] models.
+#' the horseshoe priors used in regularized [engine_stan] models and penalize regressions
+#' by assuming most predictors having an effect of \code{zero}.
 #'
 #' @details
 #' The Zellner-style spike and slab prior for generalized linear models are specified as described
 #' in the \pkg{Boom} R-package. Currently supported are two options which work for models with
 #' Poisson and binomial (bernoulli) distributed errors.
 #' Two types of priors can be provided on a variable:
-#' * \code{"coefficient"} Allows to specify Gaussian priors on the coefficient mean and
-#' precision (!) for the model. Either the mean or the mean and precision has to be supplied.
+#' * \code{"coefficient"} Allows to specify Gaussian priors on the coefficient mean for the model.
+#' To do do provide an estimate to hyper.
 #' * \code{"inclusion.probability"} A [`vector`] giving the prior probability of inclusion for the
 #' specified variable. This can be useful when prior information on preference is known but not the
 #' strength of it.
 #'
+#' If coefficients are set, then the inclusion probability is also modified by default. However
+#' even when not knowing estimates of the beta coefficients and their direction one can still
+#' provide an estimate of the inclusion probability.
+#' In other words: **The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.**
 #' @param variable A [`character`] matched against existing predictors or latent effects.
-#' @param type A [`character`] specifying the type of prior to be set. Can be set either to
-#' \code{"coefficient"} or \code{"inclusion.probability"}. See details.
-#' @param hyper A [`numeric`] estimate of the mean regression coefficients
+#' @param hyper A [`numeric`] estimate of the mean regression coefficients.
+#' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster, Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection" Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
 #' @seealso [`Prior-class`]
+#' @examples
+#' \dontrun{
+#' # Positive coefficient
+#' p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
+#' p1
+#' # Coefficient and direction unknown but variable def. important
+#' p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
+#' p2
+#' }
 #' @family prior
 #' @keywords priors
 #' @aliases BREGPrior
@@ -39,35 +52,37 @@ NULL
 #' @export
 methods::setGeneric(
   "BREGPrior",
-  signature = methods::signature("variable", "type", "hyper"),
-  function(variable, type, hyper) standardGeneric("BREGPrior"))
+  signature = methods::signature("variable"),
+  function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPrior"))
 
 #' @name BREGPrior
 #' @rdname BREGPrior
 #' @usage \S4method{BREGPrior}{character}(variable)
 methods::setMethod(
   "BREGPrior",
-  methods::signature(variable = "character", type = "character", hyper = "numeric"),
-  function(variable, type, hyper) {
-    assertthat::assert_that(!missing(variable),!missing(hyper),
+  methods::signature(variable = "character"),
+  function(variable, hyper = NULL, ip = NULL) {
+    assertthat::assert_that(!missing(variable),
                             msg = 'Variable or constrain unset.')
     assertthat::assert_that(
       is.character(variable),
-      is.character(type),
-      is.numeric(hyper)
+      is.null(hyper) || is.numeric(hyper),
+      is.null(ip) || is.numeric(ip)
     )
     assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use BREGPriors')
-    # Match supplied type in case someone has been lazy
-    type <- match.arg(type,  c("coefficient", "inclusion.probability"), several.ok = FALSE)
+    # Both hyper and ip can not both be NULL
+    if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
 
+    # Check that ip is between 0 and 1
+    if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)
     # Create new prior object
     bdproto(
       'BREGPrior',
       Prior,
       id = new_id(),
       variable = variable,
-      type = type,
-      value = hyper
+      value = hyper,
+      prob = ip
     )
   }
 )
@@ -85,30 +100,33 @@ methods::setMethod(
 #' @export
 methods::setGeneric(
   "BREGPriors",
-  signature = methods::signature("variable", "type", "hyper"),
-  function(variable, type, hyper) standardGeneric("BREGPriors"))
+  signature = methods::signature("variable"),
+  function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPriors"))
 
 #' @name BREGPriors
 #' @rdname BREGPriors
-#' @usage \S4method{BREGPriors}{character}(variable, type, hyper)
+#' @usage \S4method{BREGPriors}{character}(variable)
 methods::setMethod(
   "BREGPriors",
-  methods::signature(variable = "character", type = "character", hyper = "numeric"),
-  function(variable, type, hyper ) {
-    assertthat::assert_that(!missing(variable),!missing(hyper),
-                            msg = 'Variable or constrain unset.')
+  methods::signature(variable = "character"),
+  function(variable, hyper = NULL, ip = NULL) {
+    assertthat::assert_that(!missing(variable),
+                            msg = 'Variable not set.')
     assertthat::assert_that(
       is.character(variable),
-      is.character(type),
-      is.numeric(hyper)
+      is.null(hyper) || is.numeric(hyper),
+      is.null(ip) || is.numeric(ip)
     )
     assertthat::assert_that(length(variable)>1, msg = 'Only one prior variable supplied. Use BREGPrior')
-    # Match supplied type in case someone has been lazy
-    type <- match.arg(type,  c("coefficient", "inclusion.probability"), several.ok = FALSE)
+    # Both hyper and ip can not both be NULL
+    if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
+
+    # Check that ip is between 0 and 1
+    if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)
 
     multiple_priors <- list()
     for(k in variable){
-      np <- BREGPrior(variable = k,type = type, hyper = hyper)
+      np <- BREGPrior(variable = k, hyper = hyper, ip = ip)
       multiple_priors[[as.character(np$id)]] <- np
     }
     return(multiple_priors)
