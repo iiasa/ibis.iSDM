@@ -153,6 +153,8 @@ values to <code>0</code> or another out of range constant).</p>
 <p>Not every engine does actually need covariates. For instance it is perfectly legit
 to fit a model with only occurrence data and a spatial latent effect (add_latent).
 This correspondents to a spatial kernel density estimate.</p>
+<p>Certain names such <code>"offset"</code> are forbidden as predictor variable names. The function
+will return an error message if these are used.</p>
     </div>
 
     <div class="section level2">
