@@ -282,7 +282,7 @@ engine_xgboost <- function(x,
           params$monotone_constraints <- mc
         }
 
-        if('offset' %in% names(model) ){
+        if(!is.Waiver(model$offset) ){
           # For the offset we simply add the (log-transformed) offset to the existing
           # Add exp at the end to backtransform
           of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
@@ -293,9 +293,9 @@ engine_xgboost <- function(x,
           # (Set NA to 1 so that log(1) == 0)
           of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
           of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[,c("x","y")],
-                               env =  of,
-                               longlat = raster::isLonLat(self$get_data("template")),
-                               field_space = c('x','y')
+                              env = of,
+                              longlat = raster::isLonLat(self$get_data("template")),
+                              field_space = c('x','y')
           )
           assertthat::assert_that(nrow(of1) == length(of_train),
                                   nrow(of) == length(of_pred))

@@ -336,7 +336,7 @@ methods::setMethod(
           envs <- get_rastervalue(
             coords = obs[,c('x','y')],
             env = x$predictors$get_data(df = FALSE)[model[['predictors_names']][which( model[['predictors_names']] %notin% co )]],
-            na.rm = TRUE
+            rm.na = TRUE
           )
         } else {
           obs <- model[['biodiversity']][[id]]$observations$observed

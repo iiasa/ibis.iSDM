@@ -287,9 +287,7 @@ engine_inlabru <- function(x,
           # FIXME: Ideally sample from a provided pseudo-background
           istk <- inla_make_integration_stack(mesh = self$get_data('mesh'),
                                               mesh.area = self$get_data("mesh.area"),
-                                              cov = model$predictors,
-                                              pred_names =  model$predictors_names,
-                                              bdry = model$background,
+                                              model = model,
                                               id = "istack",
                                               joint = FALSE)
           ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
