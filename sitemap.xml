@@ -112,6 +112,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_poipo.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_polpa.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_polpo.html</loc>
   </url>
   <url>
@@ -134,6 +137,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_bias.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_range.html</loc>
