@@ -194,6 +194,15 @@ engine_bart <- function(x,
                                    any(!is.na(rbind(obs, abs_observations)[['observed']] )),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
+          # Add offset if existent
+          if(!is.Waiver(model$offset)){
+            ofs <- get_ngbvalue(coords = df[,c('x','y')],
+                                env =  model$offset,
+                                longlat = raster::isLonLat(self$get_data('template')),
+                                field_space = c('x','y')
+            )
+            model$biodiversity[[1]]$offset <- ofs
+          }
 
           # Define expectation as very small vector following Renner et al.
           w <- ppm_weights(df = df,
@@ -258,14 +267,24 @@ engine_bart <- function(x,
           all( model$biodiversity[[1]]$predictors_names %in% names(full) )
         )
 
-        if('offset' %in% names(model$biodiversity[[1]]) ){
+        if(!is.Waiver(model$offset)){
           # Add offset to full prediction and load vector
-          # TODO:
-          # Offsets are only supported for binary dbarts models, but maybe there is an option
-          # use weights instead
-          warning("Offsets not availble for BART")
-
-        } else { off = NULL }
+          if(model$biodiversity[[1]]$family == "poisson"){
+            # Offsets are only supported for binary dbarts models, but maybe there is an option
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Offsets are not supported for poisson models. Trying to modify weights.')
+            w <- w + model$biodiversity[[1]]$offset[,"spatial_offset"]
+            # Check and correct for issues
+            if(any(w < 0,na.rm = TRUE)) {
+              w <- scales::rescale(w, to = c(1e-6, 1))
+            }
+            if(anyNA(w)){
+              w[is.na(w)] <- 1e-6
+            }
+          } else if(model$biodiversity[[1]]$family == "binomial"){
+            # Set the created ranges and binaryOffset
+            off = model$biodiversity[[1]]$offset[,"spatial_offset"]
+          }
+        } else { off = 0.0 }
 
         # --- #
         # Parameter tuning #
@@ -279,6 +298,7 @@ engine_bart <- function(x,
             method = "k-fold",
             n.reps = 4L, # For replications
             control = dc,
+            offset = off,
             loss = ifelse(is.factor(data$observed), "log", "rmse"),
             n.trees = dc@n.trees,
             k = c(1, 2, 4), # Prior for node-mean SD
@@ -310,6 +330,7 @@ engine_bart <- function(x,
           fit_bart <- dbarts::bart(y.train = data[,'observed'],
                                    x.train = data[,model$biodiversity[[1]]$predictors_names],
                                    keeptrees = dc@keepTrees,
+                                   binaryOffset = off,
                                    # Hyper parameters
                                    k = k, power = power, base =  base,
                                    ntree = dc@n.trees,

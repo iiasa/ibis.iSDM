@@ -9,8 +9,8 @@ threshold(
   method = "mtp",
   value = NULL,
   poi = NULL,
-  return_threshold = FALSE,
   truncate = FALSE,
+  return_threshold = FALSE,
   ...
 )
 
@@ -31,9 +31,9 @@ threshold(
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
 
-\item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
-
 \item{truncate}{\code{\link{logical}} indication whether truncated thresholds should be used (Default: \code{FALSE}). See Muscatello et al. (2021).}
+
+\item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
 }
 \value{
 A \link{RasterLayer} if used with a \link{Raster} object as input.

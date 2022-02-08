@@ -35,7 +35,7 @@
 #' \dontrun{
 #'  x <- distribution(background) %>%
 #'    add_predictors(covariates) %>%
-#'    add_offset(samplingBias)
+#'    add_offset(nicheEstimate)
 #' }
 #' @name add_offset
 NULL
@@ -64,12 +64,109 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit offset...')
     ori.name <- names(layer)
 
+    # Check for infinite values
+    assertthat::assert_that(
+      all( is.finite(cellStats(layer, "range")) ),
+      msg = "Infinite values found in the layer (maybe log of 0?)."
+    )
+
     # Check that background and range align, otherwise raise error
     if(compareRaster(layer, x$background,stopiffalse = FALSE)){
       warning('Supplied layer does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       names(layer) <- ori.name
     }
+
+    # Check whether an offset exists already
+    if(!is.Waiver(x$offset) && add){
+      # Add to current object
+      of <- x$offset
+      layer <- raster::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name # In case the layer name got lost
+      of <- raster::stack(of) |> raster::addLayer(layer)
+      x <- x$set_offset(of)
+    } else {
+      # Add as a new offset
+      x <- x$set_offset(layer)
+    }
+    return(x)
+  }
+)
+
+#' Specify a spatial explicit offset as bias
+#'
+#' @description
+#' Including offsets is another option to integrate spatial prior information
+#' in linear and additive regression models. Offsets shift the intercept of
+#' the regression fit by a certain amount. Although only one offset can be added
+#' to a regression model, it is possible to combine several spatial-explicit estimates into
+#' one offset by calculating the sum of all spatial-explicit layers.
+#'
+#' @details
+#' This functions emulates the use of the [`add_offset()`] function, however applies an inverse
+#' transformation to remove the provided layer from the overall offset.
+#' So if for instance a offset is already specified (such as area), this function
+#' removes the provided \code{bias.layer} from it via \code{"offset(log(off.area)-log(bias.layer))"}
+#'
+#' **Note that any transformation of the offset (such as \code{log}) has do be done externally!**
+#'
+#' If a generic offset is added, consider using the [`add_offset()`] function. If the layer is a expert-based range and
+#' requires additional formatting, consider using the
+#' function [`add_offset_range()`].
+#'
+#' @inheritParams add_offset
+#' @references
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @family offset
+#' @keywords prior, offset
+#' @examples
+#' \dontrun{
+#'  x <- distribution(background) %>%
+#'    add_predictors(covariates) %>%
+#'    add_offset_bias(samplingBias)
+#' }
+#' @name add_offset_bias
+NULL
+
+#' @name add_offset_bias
+#' @rdname add_offset_bias
+#' @exportMethod add_offset_bias
+#' @export
+methods::setGeneric(
+  "add_offset_bias",
+  signature = methods::signature("x", "layer"),
+  function(x, layer, add = TRUE) standardGeneric("add_offset_bias"))
+
+#' @name add_offset_bias
+#' @rdname add_offset_bias
+#' @usage \S4method{add_offset_bias}{BiodiversityDistribution, raster}(x, layer)
+methods::setMethod(
+  "add_offset_bias",
+  methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
+  function(x, layer, add = TRUE) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.Raster(layer),
+                            is.logical(add)
+    )
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit bias offset...')
+    ori.name <- names(layer)
+
+    # Check that background and range align, otherwise raise error
+    if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+      warning('Supplied layer does not align with background! Aligning them now...')
+      layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      names(layer) <- ori.name
+    }
+    # Since it is a bias offset and removal is equivalent to simple subtraction, multiply with *-1
+    layer <- layer * -1
+
+    # Check for infinite values
+    assertthat::assert_that(
+      all( is.finite(cellStats(layer, "range")) ),
+      msg = "Infinite values found in the layer (maybe log of 0?)."
+    )
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -136,6 +233,12 @@ methods::setMethod(
 
     # Save name
     ori.name <- names(layer)
+
+    # Check for infinite values
+    assertthat::assert_that(
+      all( is.finite(cellStats(layer, "range")) ),
+      msg = "Infinite values found in the layer (maybe log of 0?)."
+    )
 
     # Check that background and range align, otherwise raise error
     if(compareRaster(layer, x$background,stopiffalse = FALSE)){

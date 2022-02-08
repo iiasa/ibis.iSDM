@@ -48,6 +48,7 @@ to be transformed first, for instance using the \pkg{bossMaps} package.
 \link{bossMaps}
 
 Other offset: 
+\code{\link{add_offset_bias}()},
 \code{\link{add_offset}()}
 }
 \concept{offset}

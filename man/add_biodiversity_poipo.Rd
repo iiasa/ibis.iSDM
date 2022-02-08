@@ -70,6 +70,7 @@ See other functions for adding biodiversity data, e.g. \link{add_biodiversity}
 
 Other add_biodiversity: 
 \code{\link{add_biodiversity_poipa}()},
+\code{\link{add_biodiversity_polpa}()},
 \code{\link{add_biodiversity_polpo}()}
 }
 \concept{add_biodiversity}

@@ -68,6 +68,7 @@ Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecolo
 \seealso{
 Other add_biodiversity: 
 \code{\link{add_biodiversity_poipo}()},
+\code{\link{add_biodiversity_polpa}()},
 \code{\link{add_biodiversity_polpo}()}
 }
 \concept{add_biodiversity}

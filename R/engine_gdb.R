@@ -23,6 +23,7 @@ NULL
 #' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1} defining the shrinkage parameter.
 #' @param empirical_risk method for empirical risk calculation.
 #' Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).
+#' @param type The mode used for creating posterior predictions. Either making \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).
 #' @param ... Other variables or control parameters
 #' @references
 #' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
@@ -37,6 +38,7 @@ engine_gdb <- function(x,
                        boosting_iterations = 1000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
+                       type = "response",
                         ...) {
   # Check whether mboost package is available
   check_package('mboost')
@@ -50,8 +52,11 @@ engine_gdb <- function(x,
                           is.numeric(boosting_iterations),
                           is.numeric(learning_rate),
                           is.character(empirical_risk),
+                          is.character(type),
                           empirical_risk %in% c('inbag','oobag','none')
                           )
+  # Match type
+  type <- match.arg(type, choices = c("link", "response", "class"),several.ok = FALSE)
   # Get background
   background <- x$background
 
@@ -79,6 +84,12 @@ engine_gdb <- function(x,
                               risk = empirical_risk
                               )
 
+  # Set up the parameter list
+  params <- list(
+    type = type,
+    ...
+  )
+
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
 
@@ -90,7 +101,8 @@ engine_gdb <- function(x,
       name = "<GDB>",
       data = list(
         'template' = template,
-        'bc' = bc
+        'bc' = bc,
+        'params' = params
       ),
       # Function to respecify the control parameters
       set_control = function(self,
@@ -196,7 +208,7 @@ engine_gdb <- function(x,
                                 longlat = raster::isLonLat(self$get_data('template')),
                                 field_space = c('x','y')
                                 )
-            df[["spatial_offset"]] <- ofs[,"spatial_offset"]
+            model$biodiversity[[1]]$offset <- ofs
           }
           # Define expectation as very small vector following Renner et al.
           w <- ppm_weights(df = df,
@@ -265,14 +277,17 @@ engine_gdb <- function(x,
           all( model$biodiversity[[1]]$predictors_names %in% names(full) )
         )
 
-        if('offset' %in% names(model$biodiversity[[1]]) ){
+        if(!is.Waiver(model$offset)){
           # Add offset to full prediction and load vector
           n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
           names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
-
           full <- cbind(full, n)
-          off <- model$biodiversity[[1]]$offset[, "spatial_offset" ]
-        } else { off = NULL }
+          # And for biodiversity object
+          n <- cbind(model$biodiversity[[1]]$offset[,"spatial_offset"],
+                     model$biodiversity[[1]]$offset[,"spatial_offset"]) |> as.data.frame()
+          names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
+          data <- cbind(data, n)
+        }
 
         # --- #
         # Fit the base model
@@ -280,9 +295,9 @@ engine_gdb <- function(x,
           fit_gdb <- mboost::gamboost(
             formula = equation,
             data = data,
-            weights = w,
+            # weights = w,
             family = fam,
-            # offset = off, # Offset added already added to equation
+            offset = w, # Add exposure as offset
             control = bc
           )
         })
@@ -293,9 +308,9 @@ engine_gdb <- function(x,
           fit_gdb <- mboost::gamboost(
             formula = equation,
             data = data,
-            weights = w,
+            # weights = w,
             family = fam,
-            # offset = off, # Offset added already
+            offset = w, # Add exposure as offset
             control = bc
           )
         }
@@ -333,7 +348,7 @@ engine_gdb <- function(x,
           # Make a prediction
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-                                               type = 'response', aggregate = 'sum')
+                                               type = self$get_data('params')$type, aggregate = 'sum')
           )
           # Fill output
           prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
@@ -362,7 +377,7 @@ engine_gdb <- function(x,
             "prediction" = prediction
           ),
           # Project function
-          project = function(self, newdata){
+          project = function(self, newdata, type = NULL){
             assertthat::assert_that('fit_best' %in% names(self$fits),
                                     is.data.frame(newdata) || is.matrix(newdata),
                                     assertthat::has_name(newdata,c('x','y'))
@@ -370,6 +385,7 @@ engine_gdb <- function(x,
             # Get model
             mod <- self$get_data('fit_best')
             assertthat::assert_that(inherits(mod,'mboost'),msg = 'No model found!')
+            if(is.null(type)) type <- self$get_data('params')$type
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
 
@@ -382,7 +398,7 @@ engine_gdb <- function(x,
             # Predict
             y <- suppressWarnings(
               mboost::predict.mboost(object = mod,newdata = newdata,
-                                     type = 'response', aggregate = 'sum')
+                                     type = type, aggregate = 'sum')
             )
             temp[as.numeric(newdata$rowid)] <- y[,1]
             names(temp) <- "mean" # Rename to mean
@@ -411,7 +427,7 @@ engine_gdb <- function(x,
 
             # Now predict with model
             pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
-                                               type = 'link', aggregate = 'sum')
+                                               type = self$get_data('params')$type, aggregate = 'sum')
             # Combine with
             out <- data.frame(observed = pp[,1]); out[[x.var]] <- dummy[[x.var]]
 

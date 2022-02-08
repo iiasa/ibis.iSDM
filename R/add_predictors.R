@@ -114,7 +114,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
-    transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),

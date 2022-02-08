@@ -199,6 +199,16 @@ mod$save("myoutput.tif", type = "gtif", dt = "FLT4S")
 ## Model troubleshooting
 
 <details>
+<summary><b>How exactly does the model integration work and how does it differ among engines?</b>
+</summary>
+There are various forms of integration from a simple approach of adding [`priors`] or [`offsets`] to fully integrated multiple likelihood models (see [Fletcher et al. 2019](https://doi.org/10.1002/ecy.2710)). Thus, users have a range of possibilities to combine different sources of evidence in their modelling.
+
+With regards to how different [`engines`] treat multiple biodiversity datasets. Unfortunately only the [`engine_inla()`], [`engine_inlabru()`] and [`engine_stan()`] support for fully integrated multiple likelihood models. All other [`engines`] combine multiple datasets by running separate models in sequence where the order is determined by the sequence the datasets were added to the model. The output of each model is then provided as input predictor to the next one.
+In the future rather than adding outputs as predictors, there might be an option to specify an offset of the prediction instead. This has yet not been implemented.
+
+</details>
+
+<details>
 <summary><b>What can I do when my model outputs with presence-only data seem odd?</b>
 </summary>
 By default, presence only biodiversity data is modelled as point-process model (PPM, see [Renner e tal. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.

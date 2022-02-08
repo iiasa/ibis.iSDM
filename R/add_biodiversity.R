@@ -205,41 +205,38 @@ methods::setMethod(
 #'
 #' @description This function can be used to add a [`sf`] polygon dataset to an existing
 #' distribution object. Presence-only polygon data is treated differential than point data in
-#' subsequent engines and models.
+#' some engines particular through the way that points are generated.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param polpo A [`sf`] or [`Spatial`]) polygon object of presence-only occurrences.
-#' @param name The name of the biodiversity dataset used as internal identifier
+#' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
-#' @param family A [`character`] stating the family to be used (Default: Poisson)
-#' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: FALSE)
-#' @param simulate_points A [`numeric`] number of points to be created by simulation
-#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: NULL)
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default: \code{poisson}).
+#' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE})
+#' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
+#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL})
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either
-#' 'random' or 'regular', the latter requiring a raster supplied in the [simulate_weights]
+#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
-#' @param ... Other parameters passed down
+#' @param ... Other parameters passed down.
 #'
-#' @details The default approach for polygon data is tosample presence-only points across
-#' the region of the polygons. This function thus adds as a wrapper to [add_biodiversity_poipo] as presence-only
-#' points are created by the model. Although [engine_inla] and [engine_inlabru] in the \pkg{ibis.iSDM} package
-#' are able to include (small) polygon data directly in the modelling,
-#' the link between covariates and polygonal data is established through a nearest-neighbour matching
-#' and thus is relatively equivalent to a point sampling.
+#' @details The default approach for polygon data is to sample presence-only points across
+#' the region of the polygons. This function thus adds as a wrapper to [`add_biodiversity_poipo()`] as presence-only
+#' points are created by the model. If no points are simulated directly (Default) then the polygon is processed
+#' by [`train()`] by creating regular point data.
 #'
-#' The 'simulate' options allow specify parameters with regards to the simulation steps.
+#' Use [`add_biodiversity_polpa()`] to create binomial distributed inside-outside points for the given polygon!
 #'
-#' For an integration of range data as predictor or offset, see [add_predictor_range] and [add_offset_range] instead.
+#' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
-#' @section Notes:
-#' @references
 #'
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  x <- distribution(mod) %>%
+#'    add_biodiversity_polpo(protectedArea)
 #' }
 #' @name add_biodiversity_polpo
 NULL
@@ -260,7 +257,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson",
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo, "Spatial") || inherits(polpo, "sf") || inherits(polpo, "data.frame") || inherits(polpo, "tibble"),
@@ -284,7 +281,6 @@ methods::setMethod(
 
     # Simulate presence absence points rather than using the range directly
     if(simulate){
-      if(family == "poisson") warning("Simulated points created. Binomial distribution is advised.")
       # Simulation strategy
       simulate_strategy <- match.arg(simulate_strategy, c('random', 'regular'), several.ok = FALSE)
 
@@ -299,41 +295,25 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_weights[which(!is.na(simulate_weights[]))],
                           replace = TRUE)
-        poipa_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
-        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
+        poipo_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
+        poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
 
       } else {
       # Simply sample presence points within as determined
         suppressMessages(
-          poipa_on <- sf::st_as_sf(
+          poipo_on <- sf::st_as_sf(
             sf::st_sample(x = polpo, size = simulate_points, type = simulate_strategy)
           )
         )
       }
 
-      names(poipa_on) <- "geometry"; st_geometry(poipa_on) <- "geometry"
-      poipa_on[[field_occurrence]] <- 1
-      poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
-      # Get absence data
-      # FIXME: Quick fix. Ideally cookie cut the range out instead.
-      suppressMessages(
-        poipa_off <- sf::st_as_sf(
-          sf::st_sample(x = x$background, size = simulate_points*2, type = "random")
-        )
-      )
-      names(poipa_off) <- "geometry"; st_geometry(poipa_off) <- "geometry"
-      # Remove points on the range
-      suppressMessages(
-        wi <- sf::st_within(poipa_off, polpo, sparse = FALSE)
-      )
-      poipa_off <- poipa_off[!apply(wi, 1, any),]
-      poipa_off[[field_occurrence]] <- 0
-      poipa_off$x <- st_coordinates(poipa_off)[,1];poipa_off$y <- st_coordinates(poipa_off)[,2]
+      names(poipo_on) <- "geometry"; st_geometry(poipo_on) <- "geometry"
+      poipo_on[[field_occurrence]] <- 1
+      poipo_on$x <- st_coordinates(poipo_on)[,1];poipo_on$y <- st_coordinates(poipo_on)[,2]
+      poipo <- poipo_on
 
-      poipa <- rbind(poipa_on,poipa_off)
-
-      # Add simulated poipa object instead
-      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
+      # Add simulated poipo object instead
+      add_biodiversity_poipo(x, poipo = poipo, name = paste0(name, "_simulated"),
                              field_occurrence = field_occurrence, formula = formula, family = family, ... )
     } else {
       # Convert formula if necessary
@@ -353,6 +333,176 @@ methods::setMethod(
                 type = "polpo",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo,field_occurrence),
+                use_intercept = separate_intercept
+        )
+      )
+    }
+  }
+)
+
+#' Add biodiversity polygon dataset to a distribution object (presence-absence)
+#'
+#' @description This function can be used to add a [`sf`] polygon dataset to an existing
+#' distribution object. Presence-absence polygon data assumes that each area within the polygon
+#' can be treated as 'presence' for the species, while each area outside the polygon is where the
+#' species is absent.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param polpa A [`sf`] or [`Spatial`]) polygon object of presence-absence occurrences.
+#' @param name The name of the biodiversity dataset used as internal identifier.
+#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
+#' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
+#' @param simulate_points A [`numeric`] number of points to be created by simulation.
+#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
+#' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
+#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
+#' parameter.
+#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
+#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param ... Other parameters passed down.
+#'
+#' @details The default approach for polygon data is to sample presence-absence points across
+#' the region of the polygons. This function thus adds as a wrapper to [`add_biodiversity_poipa()`] as presence-only
+#' points are created by the model.
+#' Note if the polygon is used directly in the modelling the link between covariates and polygonal data is established by
+#' regular sampling of points within the polygon and is thus equivalent to simulating the points directly.
+#'
+#' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
+#' @family add_biodiversity
+#'
+#' @examples
+#' \dontrun{
+#'  x <- distribution(background) %>%
+#'    add_biodiversity_polpa(protectedArea)
+#' }
+#' @name add_biodiversity_polpa
+NULL
+
+#' @name add_biodiversity_polpa
+#' @rdname add_biodiversity_polpa
+#' @exportMethod add_biodiversity_polpa
+#' @export
+methods::setGeneric(
+  "add_biodiversity_polpa",
+  signature = methods::signature("x", "polpa"),
+  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_polpa"))
+
+#' @name add_biodiversity_polpa
+#' @rdname add_biodiversity_polpa
+#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution, sf}(x, polpa)
+methods::setMethod(
+  "add_biodiversity_polpa",
+  methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
+  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            inherits(polpa, "Spatial") || inherits(polpa, "sf") || inherits(polpa, "data.frame") || inherits(polpa, "tibble"),
+                            assertthat::is.scalar(field_occurrence), assertthat::has_name(polpa, field_occurrence),
+                            inherits(formula, "formula") || is.null(formula) || is.character(formula),
+                            is.character(family),
+                            assertthat::is.flag(simulate), is.numeric(simulate_points),
+                            is.null(simulate_weights) || inherits(simulate_weights, "Raster"),
+                            is.logical(separate_intercept)
+    )
+
+    # Check type and ensure that is a polygon
+    assertthat::assert_that(all( unique( st_geometry_type(polpa) ) %in% c("POLYGON","MULTIPOLYGON") ),
+                            msg = "This method works for spatial data of type polygon only.")
+
+    assertthat::assert_that(length(unique(polpa[[field_occurrence]])) <= 2,
+                            msg = "More 2 unique values. Specify a column.")
+
+    # Messenger
+    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpa dataset...")
+
+    # Simulate presence absence points rather than using the range directly
+    if(simulate){
+      # Simulation strategy
+      simulate_strategy <- match.arg(simulate_strategy, c('random', 'regular'), several.ok = FALSE)
+
+      if(!is.null(simulate_weights)){
+        # Crop to target range
+        simulate_weights <- raster::crop(simulate_weights, polpa)
+        # Normalize the weight layer if is not a factorized, else set everything to 1
+        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights, "norm") else simulate_weights[simulate_weights>0] <- 1
+
+        # Weighted sampling on background raster, the greater the value, the more likely sampled points
+        ptscell <- sample(which(!is.na(simulate_weights[])),
+                          size = simulate_points,
+                          prob = simulate_weights[which(!is.na(simulate_weights[]))],
+                          replace = TRUE)
+        poipa_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
+        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
+
+      } else {
+        # Simply sample presence points within as determined
+        suppressMessages(
+          poipa_on <- sf::st_as_sf(
+            sf::st_sample(x = polpo, size = simulate_points, type = simulate_strategy)
+          )
+        )
+      }
+
+      names(poipa_on) <- "geometry"; st_geometry(poipa_on) <- "geometry"
+      poipa_on[[field_occurrence]] <- 1
+      poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
+
+      # Get absence data for poipa data, masking out the range of first
+      if(is.Raster(x$background)){
+        bg_masked <- raster::mask(x$background, polpa, inverse = TRUE)
+      } else bg_masked <- x$background
+
+      suppressMessages(
+        poipa_off <- sf::st_as_sf(
+          sf::st_sample(x = bg_masked, size = simulate_points, type = "random")
+        )
+      )
+      names(poipa_off) <- "geometry"; st_geometry(poipa_off) <- "geometry"
+
+      if(!is.Raster(x$background)){
+        # Remove points on the range
+        suppressMessages(
+          wi <- sf::st_within(poipa_off, polpa, sparse = FALSE)
+        )
+        poipa_off <- poipa_off[!apply(wi, 1, any),]
+      }
+
+      # Remove points on the range
+      poipa_off[[field_occurrence]] <- 0
+      poipa_off$x <- st_coordinates(poipa_off)[,1];poipa_off$y <- st_coordinates(poipa_off)[,2]
+
+      poipa <- rbind(poipa_on,poipa_off)
+
+      # Add simulated poipa object instead
+      add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
+                             field_occurrence = field_occurrence, formula = formula, family = family, ... )
+    } else {
+
+      # If no points are simulated, ensure that the polygon has objects with at least 2 factor levels
+      assertthat::assert_that(
+        length(unique(polpa[[field_occurrence]]))==2
+      )
+      # Convert formula if necessary
+      formula = to_formula(formula)
+
+      # Create a new id for this dataset
+      id = new_id()
+
+      # Finally set the data to the BiodiversityDistribution object
+      x$set_biodiversity(
+        id,
+        bdproto(NULL, BiodiversityDataset,
+                name = ifelse(is.null(name), "Species: ", name),
+                id = id,
+                equation = formula,
+                family = family,
+                type = "polpa",
+                field_occurrence = field_occurrence,
+                data = format_biodiversity_data(polpo, field_occurrence),
                 use_intercept = separate_intercept
         )
       )

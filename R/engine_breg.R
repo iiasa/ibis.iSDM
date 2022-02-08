@@ -128,9 +128,9 @@ engine_breg <- function(x,
         fam <- model$biodiversity[[1]]$family
 
         # If offset is specified, raise warning
-        if(!is.Waiver(model$offset)){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Engine breg can not use offsets. Ignored for now.')
-        }
+        # if(!is.Waiver(model$offset)){
+        #   if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Engine breg can not use offsets. Ignored for now.')
+        # }
 
         # Check whether regularization parameter is set to none, if yes, raise message
         if(settings$get("varsel") == "none"){
@@ -195,6 +195,15 @@ engine_breg <- function(x,
                                    any(!is.na(rbind(obs, abs_observations)[['observed']] )),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
+          # Add offset if existent
+          if(!is.Waiver(model$offset)){
+            ofs <- get_ngbvalue(coords = df[,c('x','y')],
+                                env =  model$offset,
+                                longlat = raster::isLonLat(self$get_data('template')),
+                                field_space = c('x','y')
+            )
+            model$biodiversity[[1]]$offset <- ofs
+          }
 
           # Define expectation as very small vector following Renner et al.
           w <- ppm_weights(df = df,
@@ -281,12 +290,27 @@ engine_breg <- function(x,
                                  )
         } else { pp <- NULL }
 
+        # Get offset and add it to exposure
+        if(!is.Waiver(model$offset)){
+          # Add offset to full prediction and load vector
+          w <- w + model$biodiversity[[1]]$offset[, 'spatial_offset']
+          w_full <- w_full + model$offset[,'spatial_offset']
+          # negative exposure does not work, so normalize again to range of 1e-6 to 1
+          if(any(w < 0,na.rm = TRUE)) {
+            w <- scales::rescale(w, to = c(1e-6, 1))
+            w_full <- scales::rescale(w_full, to = c(1e-6, 1))
+          }
+          if(anyNA(w)){
+            w[is.na(w)] <- 1e-6
+            w_full[is.na(w_full)] <- 1e-6
+          }
+        }
+
         assertthat::assert_that(
-          is.null(w) || length(w) == nrow(df)
+          is.null(w) || length(w) == nrow(df),
+          all(w >= 0,na.rm = TRUE) # Required for engine_breg
         )
-
         # --- #
-
         # Fit the model depending on the family
         if(fam == "poisson"){
           # Fitting poisson model

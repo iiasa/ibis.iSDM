@@ -39,7 +39,7 @@ engine_inla <- function(x,
                         proj_stepsize = NULL,
                         timeout = NULL,
                         barrier = FALSE,
-                        type = "predictor",
+                        type = "response",
                         # nonconvex.bdry = FALSE,
                         # nonconvex.convex = -0.15,
                         # nonconvex.concave = -0.05,
@@ -504,7 +504,9 @@ engine_inla <- function(x,
         # ----------- #
         # Provided or default formula
         master_form <- as.formula(
-          paste0("observed ~ 0 + ",
+          paste0("observed ~ ",
+                 # # If multiple datasets, remove intercept
+                 ifelse(length(model$biodiversity)>1,"0 + ", ""),
                               paste0(sapply(model$biodiversity, function(x){
                                                 attr(terms.formula(x$equation),"term.labels")
                                               }) %>% c %>% unique(),collapse = " + ")

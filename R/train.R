@@ -113,7 +113,7 @@ methods::setMethod(
     if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
       bias_variable <- new_waiver(); bias_value <- new_waiver()
     }
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
     #rm_corPred = FALSE; varsel = "none"; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver()
@@ -228,6 +228,9 @@ methods::setMethod(
       # Save overall offset
       ofs <- as.data.frame(ras_of, xy = TRUE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
+      if(anyNA(ofs$spatial_offset)){
+        ofs$spatial_offset[is.na(ofs$spatial_offset)] <- 0 # Replace NA with 0
+      }
       model[['offset']] <- ofs
     } else { model[['offset']] <- new_waiver() }
 
@@ -444,7 +447,7 @@ methods::setMethod(
           }
 
           # Construct formula with all variables
-          form <- paste('observed', '~', 0, '+ Intercept',
+          form <- paste('observed', '~ Intercept',
                         ifelse(length(types)>1 && model$biodiversity[[id]]$use_intercept, # Check whether a single intercept model is to be constructed
                                paste(' + ',paste0('Intercept_',
                                                   make.names(tolower(model$biodiversity[[id]]$name)),'_',model$biodiversity[[id]]$type
@@ -585,12 +588,12 @@ methods::setMethod(
             )
           } else ii <- ""
           # Go through each variable and build formula for likelihood
-          form <- to_formula(paste("observed ~ ", "0 + Intercept +",
+          form <- to_formula(paste("observed ~ ", "Intercept +",
                                paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                                # Check whether a single dataset is provided, otherwise add other intercepts
                                ii,
-                               # # If multiple datasets, don't use intercept
-                               # ifelse(length(ids)>1,"-1", ""),
+                               # # If multiple datasets, remove intercept
+                               ifelse(length(ids)>1,"-1", ""),
                                collapse = " ")
                           )
 
@@ -673,7 +676,8 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Construct formula with all variables
-          form <- paste( 'observed' ,ifelse(model$biodiversity[[id]]$family=='poisson', '/w',''), '~ ')
+          # Now using offset directly instead
+          form <- "observed ~ " #paste( 'observed' ,ifelse(model$biodiversity[[id]]$family=='poisson', '',''), '~ ')
           if(!is.Waiver(model$priors)){
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
@@ -724,7 +728,7 @@ methods::setMethod(
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
           form <- to_formula(model$biodiversity[[id]]$equation)
           # Update formula to weights if forgotten
-          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed /w ~ .')
+          if(model$biodiversity[[id]]$family=='poisson') form <- update.formula(form, 'observed ~ .')
           assertthat::assert_that(
             all( all.vars(form) %in% c('observed', model[['predictors_names']]) )
           )
@@ -852,7 +856,6 @@ methods::setMethod(
     } else if( inherits(x$engine,"BART-Engine") ){
       # Output some warnings on things ignored
       if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
-      if(!is.Waiver(model$offset)) warning('Option to provide offsets not available. Ignored...')
 
       # Process each id
       for(id in ids){

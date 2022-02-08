@@ -401,7 +401,7 @@ engine_inlabru <- function(x,
           )
         } else {
           comp <- as.formula(
-            paste0( "~ 0 + Intercept(1)")
+            paste0( "~ Intercept(1)")
           )
         }
 
@@ -698,6 +698,8 @@ engine_inlabru <- function(x,
           if(length(model$biodiversity)>1){
             vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
             ii <- paste("Intercept",
+                        # # If multiple datasets, remove intercept
+                        ifelse(length(model$biodiversity)>1,"+ 0", ""),
                         ifelse(model$biodiversity[[1]]$use_intercept,
                                paste("+",paste0('Intercept_',
                                                 make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name

@@ -9,6 +9,7 @@ engine_gdb(
   boosting_iterations = 1000,
   learning_rate = 0.1,
   empirical_risk = "inbag",
+  type = "response",
   ...
 )
 }
@@ -21,6 +22,8 @@ engine_gdb(
 
 \item{empirical_risk}{method for empirical risk calculation.
 Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).}
+
+\item{type}{The mode used for creating posterior predictions. Either making \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).}
 
 \item{...}{Other variables or control parameters}
 }

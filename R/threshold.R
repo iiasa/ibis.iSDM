@@ -59,7 +59,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, poi = NULL, return_threshold = FALSE, truncate = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, poi = NULL,  truncate = FALSE, return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -68,7 +68,7 @@ methods::setGeneric(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, return_threshold = FALSE, truncate = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, truncate = FALSE, return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
@@ -119,7 +119,7 @@ methods::setMethod(
     poi <- sf::st_as_sf( poi, coords = c('x','y'), crs = sf::st_crs(obj$get_data('prediction')))
 
     # Now self call threshold
-    out <- threshold(ras, method = method, value = value, poi = poi, ...)
+    out <- threshold(ras, method = method, value = value, poi = poi, truncate = truncate,...)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj
     new_obj <- obj
@@ -137,7 +137,7 @@ methods::setMethod(
 #' @noRd
 #' @keywords noexport
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            poi = NULL, return_threshold = FALSE, truncate = FALSE, ...) {
+                            poi = NULL, truncate = FALSE, return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(poi,'sf'),
@@ -149,13 +149,13 @@ methods::setMethod(
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold, truncate = truncate, ...) )
+                                                                value = value, poi = poi,  truncate = truncate, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
     out <- raster::stack()
     for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, return_threshold = return_threshold, truncate = truncate,...) )
+                                                                value = value, poi = poi, truncate = truncate, return_threshold = return_threshold, ...) )
   }
   return(out)
 }
@@ -174,7 +174,7 @@ methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthr
 methods::setMethod(
   "threshold",
   methods::signature(obj = "RasterLayer"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, return_threshold = FALSE, plot = FALSE, truncate = FALSE) {
+  function(obj, method = 'fixed', value = NULL, poi = NULL, truncate = FALSE, return_threshold = FALSE, plot = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'RasterLayer'),
                             is.character(method),
@@ -182,12 +182,12 @@ methods::setMethod(
                             is.logical(truncate)
     )
     # If poi is set, try to convert sf
-    if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)})
+    if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)}, silent = TRUE)
     assertthat::assert_that(is.null(poi) || inherits(poi,'sf'))
 
     # If observed is a factor, convert to numeric
     if(is.factor(poi$observed)){
-      poi$observed <- as.numeric(as.character(poi$observed))
+      poi$observed <- as.numeric(as.character( poi$observed ))
     }
 
     # Match to correct spelling mistakes
@@ -205,7 +205,7 @@ methods::setMethod(
     # Specify by type:
     if(method == "fixed"){
       # Fixed threshold. Confirm to be set
-      assertthat::assert_that(is.numeric(value),msg = 'Fixed value is missing!')
+      assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
       tr <- value
     } else if(method == "mtp"){
       # minimum training presence
@@ -218,9 +218,9 @@ methods::setMethod(
       # percentile training threshold
       if(is.null(value)) value <- 0.1 # If value is not set, use 10%
       if(length(pointVals) < 10) {
-        perc <- floor(length(pointVals) * (1-value))
+        perc <- floor(length(pointVals) * (1 - value))
       } else {
-        perc <- ceiling(length(pointVals) * (1-value))
+        perc <- ceiling(length(pointVals) * (1 - value))
       }
       tr <- rev(sort(pointVals))[perc] # Percentile threshold
 

@@ -14,7 +14,7 @@ engine_inla(
   proj_stepsize = NULL,
   timeout = NULL,
   barrier = FALSE,
-  type = "predictor",
+  type = "response",
   ...
 )
 }

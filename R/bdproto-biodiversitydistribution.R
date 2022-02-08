@@ -173,7 +173,7 @@ BiodiversityDistribution <- bdproto(
     names( self$offset )
   },
   # Plot offset
-  plot_offset = function(self){
+  plot_offsets = function(self){
     if(is.Waiver(self$offset)) return( self$offset() )
     if(raster::nlayers(self$offset)>1){
       of <- sum(self$offset,na.rm = TRUE)
