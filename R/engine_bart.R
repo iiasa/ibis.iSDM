@@ -148,57 +148,44 @@ engine_bart <- function(x,
 
           # Get background layer
           bg <- self$get_data('template')
-          assertthat::assert_that(!is.na(cellStats(bg,min)))
+          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
 
-          abs <- create_pseudoabsence(
-            env = model$predictors_object,
-            presence = model$biodiversity[[1]]$observations,
-            bias = settings$get('bias_variable'),
-            template = bg,
-            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
-            replace = TRUE
-          )
-          abs$Intercept <- 1 # Redundant for this engine
-          # Combine absence and presence and save
-          abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
-
-          # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
-                                    bg, fun = 'count', background = 0)
-          # Get cell ids
-          ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
-
-          # Get new presence data
-          obs <- cbind(
-            data.frame(observed = raster::values(pres)[ce],
-                       raster::xyFromCell(pres, ce) # Center of cell
-            )
-          ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
-
-          # Re-extract counts environment variables
-          envs <- get_rastervalue(coords = obs[,c('x','y')],
+          # Add pseudo-absence points
+          presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
+                                       field_occurrence = 'observed',
+                                       template = bg,
+                                       settings = model$biodiversity[[1]]$pseudoabsence_settings)
+          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          # Sample environmental points for absence only points
+          abs <- subset(presabs, observed == 0)
+          # Re-extract environmental information for absence points
+          envs <- get_rastervalue(coords = abs[,c('x','y')],
                                   env = model$predictors_object$get_data(df = FALSE),
                                   rm.na = FALSE)
-          envs$Intercept <- 1
+          if(assertthat::has_name(model$biodiversity[[1]]$predictors, "Intercept")){ envs$Intercept <- 1}
 
-          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
+          # Format out
+          df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
           df <- subset(df, complete.cases(df))
-          # Overwrite observations
-          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+          assertthat::assert_that(nrow(presabs) == nrow(df))
+
+          # Overwrite observation data
+          model$biodiversity[[1]]$observations <- presabs
 
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
-                                   any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                   any(!is.na(presabs[['observed']])),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
+
           # Add offset if existent
           if(!is.Waiver(model$offset)){
             ofs <- get_ngbvalue(coords = df[,c('x','y')],
                                 env =  model$offset,
-                                longlat = raster::isLonLat(self$get_data('template')),
+                                longlat = raster::isLonLat(bg),
                                 field_space = c('x','y')
             )
             model$biodiversity[[1]]$offset <- ofs

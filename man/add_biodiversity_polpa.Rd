@@ -17,6 +17,7 @@ add_biodiversity_polpa(
   simulate_strategy = "random",
   separate_intercept = TRUE,
   docheck = TRUE,
+  pseudoabsence_settings = NULL,
   ...
 )
 
@@ -49,6 +50,8 @@ parameter.}
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
+
+\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
 
 \item{...}{Other parameters passed down.}
 }

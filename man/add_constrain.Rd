@@ -7,23 +7,24 @@
 \S4method{add_constrain}{BiodiversityScenario, character}(mod, method)
 }
 \arguments{
-\item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors}
+\item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
 \item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details.}
 
-\item{...}{passed on parameters}
+\item{...}{passed on parameters. See also the specific methods for adding constrains.}
 
-\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units \code{"m"} (Default: \code{NULL}).
-For kissmig the value needs to give the number of iteration steps (or within year migration steps).}
+\item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
+fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
+give the number of iteration steps (or within year migration steps).
+For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
+should be performed.}
 
 \item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
-
-\item{resistance}{A \code{\link{RasterLayer}} object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).}
 }
 \description{
 This function adds a constrain to a \code{\linkS4class{BiodiversityScenario}} object to
 constrain (future) projections. These constrains can for instance be constrains on a possible
-dispersal distance, connectivity between identified patches or limitations on species vital rates (planned).
+dispersal distance, connectivity between identified patches or limitations on species adaptability.
 \strong{Most constrains require pre-calculated thresholds to present in the \code{\linkS4class{BiodiversityScenario}} object!}
 }
 \details{
@@ -35,6 +36,8 @@ Supported are the options for dispersal and connectivity constrains:
 \item kissmig - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
 \item migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
 \item hardbarrier - Defines a hard barrier to any dispersal events.
+\item nichelimit - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
 }
 
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
@@ -48,10 +51,11 @@ can be found in Bateman et al. (2013).
 }
 }
 \seealso{
-\code{\link{add_constrain_dispersal}}, \code{\link{add_constrain_connectivity}}
+\code{\link{add_constrain_dispersal}}, \code{\link{add_constrain_connectivity}}, \code{\link{add_constrain_adaptability}}
 
 Other constrain: 
 \code{\link{add_constrain_MigClim}()},
+\code{\link{add_constrain_adaptability}()},
 \code{\link{add_constrain_connectivity}()},
 \code{\link{add_constrain_dispersal}()}
 }

@@ -26,6 +26,8 @@
   # Use the future package for any options. Default is FALSE
   options('ibis.use_future' = FALSE)
 
+  # Set default settings for pseudo-absence sampling
+  options('ibis.pseudoabsence' = pseudoabs_settings() )
   # Set S2 use for SF to false owing to the multiple bugs and errors with
   # 29/06 To be changed later eventually
   suppressMessages( sf::sf_use_s2(FALSE) )

@@ -155,52 +155,46 @@ engine_xgboost <- function(x,
           bg <- self$get_data("template")
           assertthat::assert_that(!is.na(cellStats(bg,min)))
 
-          abs <- create_pseudoabsence(
-            env = model$predictors_object,
-            presence = model$biodiversity[[1]]$observations,
-            bias = settings$get('bias_variable'),
-            template = bg,
-            npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
-            replace = TRUE
-          )
-          # Combine absence and presence and save
-          abs$Intercept <- 1
-          abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
-
-          # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
-                                    bg, fun = 'count', background = 0)
-
-          # Get cell ids
-          ce <- raster::cellFromXY(pres, model[['biodiversity']][[1]]$observations[,c('x','y')])
-
-          # Get new presence data
-          obs <- cbind(
-            data.frame(observed = raster::values(pres)[ce],
-                       raster::xyFromCell(pres, ce) # Center of cell
-            )
-          ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
-
-          # Re-extract counts environment variables
-          envs <- get_rastervalue(coords = obs[,c('x','y')],
+          # Add pseudo-absence points
+          presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
+                                       field_occurrence = 'observed',
+                                       template = bg,
+                                       settings = model$biodiversity[[1]]$pseudoabsence_settings)
+          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          # Sample environmental points for absence only points
+          abs <- subset(presabs, observed == 0)
+          # Re-extract environmental information for absence points
+          envs <- get_rastervalue(coords = abs[,c('x','y')],
                                   env = model$predictors_object$get_data(df = FALSE),
                                   rm.na = FALSE)
-          envs$Intercept <- 1
+          if(assertthat::has_name(model$biodiversity[[1]]$predictors, "Intercept")){ envs$Intercept <- 1}
 
-          # Overwrite observations
-          df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
-                      abs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)])
+          # Format out
+          df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                      envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
           df <- subset(df, complete.cases(df))
-          # Overwrite observations
-          model$biodiversity[[1]]$observations <- rbind(obs, abs_observations)
+          assertthat::assert_that(nrow(presabs) == nrow(df))
 
-          # Pre-processing security checks
+          # Overwrite observation data
+          model$biodiversity[[1]]$observations <- presabs
+
+          # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
-                                   any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                   any(!is.na(presabs[['observed']])),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
+
+          # Add offset if existent
+          if(!is.Waiver(model$offset)){
+            ofs <- get_ngbvalue(coords = df[,c('x','y')],
+                                env =  model$offset,
+                                longlat = raster::isLonLat(bg),
+                                field_space = c('x','y')
+            )
+            model$biodiversity[[1]]$offset <- ofs
+          }
 
           # Define expectation as very small vector following Renner et al.
           w <- ppm_weights(df = df,
@@ -214,6 +208,8 @@ engine_xgboost <- function(x,
           model$biodiversity[[1]]$expect <- w
 
           # Get for the full dataset
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+                                    bg, fun = 'count', background = 0)
           w_full <- ppm_weights(df = model$predictors,
                                 pa = pres[],
                                 bg = bg,
@@ -485,7 +481,7 @@ engine_xgboost <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, plot = TRUE, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, plot = TRUE){
             assertthat::assert_that(is.character(x.var) || is.null(x.var))
             check_package("pdp")
             mod <- self$get_data('fit_best')

@@ -1,15 +1,44 @@
 #' @include utils.R bdproto-biodiversityscenario.R
 NULL
 
-#' Project a fitted model to new covariates
+#' Project a fitted model to a new environment and covariates
 #'
 #' @description
 #' Equivalent to [train], this function acts as a
 #' wrapper to project the model stored in a [`BiodiversityScenario-class`] object to
-#' newly supplied (future) covariates.
+#' newly supplied (future) covariates. Supplied predictors are usually spatial-temporal predictors
+#' which should be prepared via [`add_predictors()`] (e.g. transformations and derivates) in the same way as they have been during
+#' the initial modelling with [`distribution()`].
+#' Any constrains specified in the scenario object are applied during the projection.
+#'
+#' @details
+#' In the background the function \code{x$project()} for the respective model object is called, where
+#' \code{x} is fitted model object. For specifics on the constrains, see the relevant [constrain] functions,
+#' respectively:
+#' * [`add_constrain()`] for generic wrapper to add any of the available constrains.
+#' * [`add_constrain_dispersal()`] for specifying dispersal constrain on the temporal projections at each step.
+#' * [`add_constrain_MigClim()`] Using the \pkg{MigClim} R-package to simulate dispersal in projections.
+#' * [`add_constrain_connectivity()`] Apply a connectivity constrain at the projection, for instance by adding
+#' a barrier that prevents migration.
+#' * [`add_constrain_adaptability()`] Apply an adaptability constrain to the projection, for instance
+#' constraining the speed a species is able to adapt to new conditions.
+#'
+#' Many constrains also requires thresholds to be calculated. Adding [`threshold()`] to a
+#' [`BiodiversityScenario-class`] object enables the computation of thresholds at every step based on the threshold
+#' used for the main model (threshold values are taken from there).
+#'
+#' Finally this function also allows temporal stabilization across prediction steps via enabling
+#' the parameter \code{stabilize} and checking the \code{stablize_method} argument. Stabilization can for instance
+#' be helpful in situations where environmental variables are quite dynamic, but changes in projected suitability
+#' are not expected to abruptly increase or decrease. It is thus a way to smoothen out outliers from the projection.
+#' Options are so far for instance \code{'loess'} which fits a [`loess()`] model per pixel and time step. This is conducted at
+#' the very of the processing steps and any thresholds will be recalculated afterwards.
+#'
+#' @seealso [`scenario()`]
 #' @param mod A [`BiodiversityScenario`] object with set predictors.
-#' @param no_projection A [`logical`] flag whether future projection should be created. (Default: \code{TRUE}).
 #' Note that some constrains such as [MigClim] can still simulate future change without projections.
+#' @param stabilize A [`boolean`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
+#' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
 #' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
 #'
@@ -21,20 +50,21 @@ NULL
 NULL
 methods::setGeneric("project",
                     signature = methods::signature("mod"),
-                    function(mod, no_projection = TRUE,...) standardGeneric("project"))
+                    function(mod, stabilize = FALSE, stabilize_method = "loess", ...) standardGeneric("project"))
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario, logical}(mod, no_projection)
+#' @usage \S4method{project}{BiodiversityScenario, logical, character }(mod, stabilize, stabilize_method)
 methods::setMethod(
   "project",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, no_projection = TRUE, ...){
+  function(mod, stabilize = FALSE, stabilize_method = "loess", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
-      is.logical(no_projection)
+      is.logical(stabilize)
     )
+    stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
     if(!is.Waiver(mod$get_scenarios())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
@@ -126,18 +156,31 @@ methods::setMethod(
     proj <- raster::stack()
     proj_thresh <- raster::stack()
 
-    #TODO: Add no_projection step
     pb <- progress::progress_bar$new(total = length(unique(df$time)))
-    # TODO: Do this in parallel
-    for(times in sort(unique(df$time))){
-      nd <- subset(df, time == times)
+    # TODO: Do this in parallel but in sequence
+    times <- sort(unique(df$time))
+    for(step in times){
+      # Get data
+      nd <- subset(df, time == step)
+
+      # Apply adaptability constrain
+      if("adaptability" %in% names(scenario_constraints)){
+        if(scenario_constraints[["adaptability"]]$method == "nichelimit") {
+          nd <- .nichelimit(newdata = nd, model = mod$get_model()[['model']],
+                           names = scenario_constraints[["adaptability"]]$params['names'],
+                           value = scenario_constraints[["adaptability"]]$params['value'],
+                           increment = scenario_constraints[["adaptability"]]$params['increment'],
+                           increment_step = which(step==times) )
+        }
+      }
+
       # Project suitability
       # FIXME: Adapt for uncertainty projections as well!
       out <- fit$project(newdata = nd)[[1]] # First prediction being the mean
-      names(out) <- paste0("suitability", "_", times)
+      names(out) <- paste0("suitability", "_", step)
       if(is.na(raster::projection(out))) raster::projection(out) <- raster::projection( fit$model$background )
 
-      # If constrains are set, apply them
+      # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
         # Calculate dispersal constraint if set
         if("dispersal" %in% names(scenario_constraints) ){
@@ -151,24 +194,23 @@ methods::setMethod(
                                                               value = scenario_constraints$dispersal$params[1],
                                                               resistance = scenario_constraints$connectivity$params$resistance)
             )
-            names(out) <-  paste0('suitability_', times)
+            names(out) <-  paste0('suitability_', step)
+          }
+          # For kissmig generate threshold and masked suitabilities
+          if(scenario_constraints$dispersal$method == "kissmig"){
+            out <- .kissmig_dispersal(baseline_threshold,
+                                      new_suit = out,
+                                      resistance = scenario_constraints$connectivity$params$resistance,
+                                      params = scenario_constraints$dispersal$params)
+            # Returns a layer of two with both the simulated threshold and the masked suitability raster
+            names(out) <- paste0(c('threshold_', 'suitability_'), step)
+            # Add threshold to result stack
+            proj_thresh <- raster::addLayer(proj_thresh, out[[1]] )
+            baseline_threshold <- out[[1]]
+            out <- out[[2]]
           }
         }
-        # For kissmig generate threshold and masked suitabilities
-        if(scenario_constraints$dispersal$method %in% c("kissmig")){
-          out <- .kissmig_dispersal(baseline_threshold,
-                                    new_suit = out,
-                                    resistance = scenario_constraints$connectivity$params$resistance,
-                                    params = scenario_constraints$dispersal$params)
-          # Returns a layer of two with both the simulated threshold and the masked suitability raster
-          names(out) <- paste0(c('threshold_', 'suitability_'), times)
-          # Add threshold to result stack
-          proj_thresh <- raster::addLayer(proj_thresh, out[[1]] )
-          baseline_threshold <- out[[1]]
-          out <- out[[2]]
-        }
-
-        # # Connectivity constraints
+        # Connectivity constraints
         if("connectivity" %in% names(scenario_constraints)){
           # By definition a hard barrier removes all suitable
           if(scenario_constraints$connectivity$method == "hardbarrier"){
@@ -183,7 +225,7 @@ methods::setMethod(
         scenario_threshold <- scenario_threshold[1]
         out_thresh <- out
         out_thresh[out_thresh < scenario_threshold] <- 0; out_thresh[out_thresh >= scenario_threshold] <- 1
-        names(out_thresh) <-  paste0('threshold_', times)
+        names(out_thresh) <-  paste0('threshold_', step)
         # If threshold is
         if( cellStats(out_thresh, 'max') == 0){
           if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
@@ -197,8 +239,8 @@ methods::setMethod(
       pb$tick()
     }
     rm(pb)
-    proj <- raster::setZ(proj, as.Date(sort(unique(df$time))) )
-    if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, as.Date(sort(unique(df$time))) )
+    proj <- raster::setZ(proj, as.Date(times) )
+    if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, as.Date(times) )
 
     # Apply MigClim if set
     # FIXME: Ideally make this whole setup more modular. So create suitability projections first
@@ -223,9 +265,7 @@ methods::setMethod(
             rm(hsMap)
           };rm(pb)
           # For threshold, define based on type
-          tr <- ifelse(params[["rcThreshold"]] == "continuous",
-                       0,
-                       750) # Set to 75% as suitability threshold
+          tr <- ifelse(params[["rcThreshold"]] == "continuous", 0, 750) # Set to 75% as suitability threshold
 
           # Now run MigClim by switching to temporary dir
           dir.ori <- getwd()
@@ -285,6 +325,51 @@ methods::setMethod(
       is.Raster(proj), is.Raster(proj_thresh),
       msg = "Something went wrong with the projection."
     )
+
+    # Should stabilization be applied?
+    if(stabilize){
+      if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Applying stabilization.')
+      if(stabilize_method == "loess"){
+        # FIXME: Could outsource this code
+        impute.loess <- function(y, x.length = NULL, s = 0.75,
+                                 smooth = TRUE, na.rm, ...) {
+          if (is.null(x.length)) {
+            x.length = length(y)
+          }
+          if(length(y[!is.na(y)]) < 8) {
+            y <- rep(NA, x.length)
+          } else {
+            x <- 1:x.length
+            p <- suppressWarnings( stats::loess(y ~ x, span = s,
+                                                data.frame(x = x, y = y)) )
+            if (smooth == TRUE) {
+              y <- stats::predict(p, x)
+            } else {
+              na.idx <- which(is.na(y))
+              if (length(na.idx) > 1) {
+                y[na.idx] <- stats::predict(p, data.frame(x = na.idx))
+              }
+            }
+          }
+          return(y)
+        }
+        if(getOption("ibis.runparallel")) raster::beginCluster(n = getOption("ibis.nthread"))
+        new_proj <- raster::overlay(proj, fun = impute.loess, unstack = TRUE, forcefun = FALSE)
+        if(getOption("ibis.runparallel")) raster::endCluster()
+        # Rename again
+        names(new_proj) <- names(proj)
+        new_proj <- raster::setZ(new_proj, as.Date(times) )
+        proj <- new_proj; rm(new_proj)
+        # Were thresholds calculated? If yes, recalculate on the smoothed estimates
+        if(raster::nlayers(proj_thresh)>0){
+          new_thresh <- proj
+          new_thresh[new_thresh < scenario_threshold[1]] <- 0
+          new_thresh[new_thresh >= scenario_threshold[1]] <- 1
+          names(new_thresh) <-  names(proj_thresh)
+          thresh <- new_thresh; rm(new_thresh)
+        }
+      }
+    }
 
     # Finally convert to stars and rename
     proj <- stars::st_as_stars(proj,

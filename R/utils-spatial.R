@@ -153,6 +153,39 @@ guess_sf <- function(df, geom_name = 'geometry'){
  return(df)
 }
 
+#' Polygon to points
+#'
+#' @description
+#' Converts a polygon [`sf`] layer to a point layer by rasterizing it
+#' over a provided Raster layer.
+#' @param poly A \code{POLYGON} or \code{MULTIPOLYGON} [`sf`] object.
+#' @param template A template [`Raster`] object.
+#' @param field_occurrence A [`character`] specifying the occurrence field. Should contain information on the type.
+#' @keywords utils
+#' @noRd
+polygon_to_points <- function(poly, template, field_occurrence ) {
+  assertthat::assert_that(
+    inherits(poly, 'sf'),
+    is.Raster(template),
+    is.character(field_occurrence),
+    assertthat::has_name(poly, field_occurrence)
+  )
+
+  # Rasterize the polygon to
+  out <- raster::rasterize(poly, template, field = field_occurrence)
+
+  # Construct new point data
+  co <- raster::xyFromCell(out, cell = which(!is.na(out[])) ) |> as.data.frame()
+  co[[field_occurrence]] <- out[!is.na(out[])]
+  co <- guess_sf(co) # Convert to sf and add coordinates
+  co$x <- sf::st_coordinates(co)[,1]
+  co$y <- sf::st_coordinates(co)[,2]
+  sf::st_crs(co) <- sf::st_crs(template)
+
+  assertthat::assert_that(inherits(co, 'sf'))
+  return(co)
+}
+
 #' Calculate the dimensions from a provided extent object
 #'
 #' @description Calculate the dimensions of an extent
@@ -436,12 +469,33 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
   return(ex)
 }
 
-#' Spatial adjustment of raster stacks
+#' Spatial adjustment of environmental predictors and raster stacks
 #'
-#' @param env A [`Raster`] object
-#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','scale','norm','pca')
-#' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: c(.05,.95))
-#' @return Returns a adjusted [`Raster`] object of identical resolution
+#' @description
+#' This function allows the transformation of provided environmental predictors (in [`Raster`] format).
+#' A common use case is for instance the standardization (or scaling) of all predictors prior to model fitting.
+#' This function works both with [`Raster`] as well as with [`stars`] objects.
+#' @details
+#' Available options are:
+#' * \code{'none'} The original layer(s) are returned.
+#' * \code{'scale'} This run the [`scale()`] function with default settings (1 Standard deviation) across all predictors.
+#' A sensible default to for most model fitting.
+#' * \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
+#' * \code{'pca'} This option runs a principal component decomposition of all predictors (via [`prcomp()`]).
+#' It returns new predictors resembling all components in order of the most important ones. Can be useful to
+#' reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
+#' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
+#' Identified outliers are by default set to \code{NA}.
+#' @param env A [`Raster`] object.
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},
+#' \code{'scale'}, \code{'norm'}, \code{'pca'}, \code{'revjack'}). See Details.
+#' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
+#' @returns Returns a adjusted [`Raster`] object of identical resolution.
+#' @examples
+#' \dontrun{
+#' # Where x is a rasterstack
+#' new_x <- predictor_transform(x, option = 'scale')
+#' }
 #' @keywords utils
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
@@ -449,9 +503,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
      inherits(env,'Raster') || inherits(env, 'stars'),
      is.character(option),
      base::length(option) == 1,   # TODO: incorporate possibility of doing multiple options at once and in the order they are supplied?
-     option %in% c('none','pca', 'scale', 'norm','windsor'),
      is.numeric(windsor_props) & length(windsor_props)==2
    )
+  # Match option
+  option <- match.arg(option, c('none','pca', 'scale', 'norm','windsor', 'revjack'), several.ok = FALSE)
 
   # Nothing to be done
   if(option == 'none') return(env)
@@ -503,6 +558,23 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
       out <- win(env, windsor_props )
     } else {
       out <- lapply(env_list, function(x) win(x, windsor_props))
+    }
+  }
+
+  # Reverse jackknife removal of outliers
+  if(option == 'revjack'){
+    rj <- function(x){
+      o <- emptyraster(x)
+      o[] <- rm_outlier_revjack(x[], procedure = "missing")
+      return(o)
+    }
+    if(is.Raster(env)){
+      out <- env
+      for(n in 1:nlayers(out)){
+        out <- raster::addLayer(out, rj(env[[n]]) )
+      }
+    } else {
+      out <- lapply(env_list, function(x) rj(x))
     }
   }
 
@@ -733,82 +805,6 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
   )
   # Return the result
   return(env)
-}
-
-#' Create pseudo absence points over a raster dataset
-#'
-#' @param env An environmental dataset either as [`PredictorDataset`] in [`data.frame`] or [`raster`] format.
-#' @param presence Presence records. Necessary to avoid sampling pseudo-absences over existing presence records.
-#' @param bias An optional weights raster to control placement of pseudo-absences further.
-#' @param template If template is not null then env needs to be a [`raster`] dataset.
-#' @param npoints A [`numeric`] number of pseudo-absence points to create.
-#' @param replace Sample with replacement? (Default: False).
-#' @keywords utils
-#' @returns A [`data.frame`] containing the newly created pseudo absence points.
-create_pseudoabsence <- function(env, presence, bias = NULL, template = NULL,
-                                 npoints = 1000, replace = FALSE){
-  assertthat::assert_that(
-    inherits(env,'Raster') || inherits(env, 'data.frame') || inherits(env, 'tibble') || inherits(env, "PredictorDataset"),
-    is.data.frame(presence),
-    (hasName(presence,'x') && hasName(presence,'y')) || inherits(presence, 'sf'),
-    is.null(bias) || is.Waiver(bias) || is.character(bias),
-    is.numeric(npoints),
-    is.null(template) || inherits(template,'Raster')
-  )
-  if(is.null(template)) {
-    assertthat::assert_that(inherits(env,'Raster'), msg = 'Supply a template raster or a raster file!')
-  }
-  # Format to raster if not already in this format
-  if(is.data.frame(env) || tibble::is.tibble(env)){
-    env <- suppressWarnings(
-      sp::SpatialPixelsDataFrame(
-        points = env[,c("x", "y")],
-        data = env[,names(env) %notin% c("x","y")],
-        proj4string = raster::proj4string(template)
-      )
-    )
-    env <- raster::stack(env)
-  } else if( inherits(env, "PredictorDataset") ){
-    # Supplied predictor dataset
-    env <- env$get_data(df = FALSE)
-  }
-
-  assertthat::assert_that(is.Raster(env))
-
-  # If bias is set, check that it is in env
-  # FIXME: This might not yet work with supplied raster
-  if(is.character(bias)){
-    assertthat::assert_that(bias %in% names(env))
-    nb <- (env[[bias]] - min(env[[bias]],na.rm = TRUE)) / ( max(env[[bias]],na.rm = TRUE) - min(env[[bias]],na.rm = TRUE) )
-  } else { nb = NULL }
-
-  # Add coordinates if still sf object
-  if(inherits(presence,'sf')) { presence$x <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,1];presence$y <- sf::st_coordinates(presence[attr(presence, "sf_column")])[,2] }
-  # Rasterize the presence estimates
-  bg1 <- raster::rasterize(presence[,c('x','y')], template, fun = 'count', background = 0)
-  bg1 <- raster::mask(bg1, template)
-
-  assertthat::assert_that(
-    is.finite(raster::cellStats(bg1,'max',na.rm = T)[1])
-  )
-  # Generate pseudo absence data
-  # Now sample from all cells not occupied
-  if(is.null(nb)){
-    prob_bias <- nb[which(bg1[]==0)]
-    if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-    abs <- sample(which(bg1[]==0), size = npoints, replace = replace, prob = prob_bias)
-  } else {
-    abs <- sample(which(bg1[]==0), size = npoints, replace = replace)
-  }
-
-  # Now get absence environmental data
-  abs <- get_rastervalue(
-    coords = raster::xyFromCell(bg1, abs),
-    env = env,
-    rm.na = TRUE # Remove NA data in case points were sampled over non-valid regions
-  )
-  assertthat::assert_that( all( names(env) %in% names(abs) ) )
-  return(abs)
 }
 
 #' Create new raster stack from a given data.frame

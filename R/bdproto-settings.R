@@ -18,17 +18,19 @@ NULL
 #' @export
 Settings <- bdproto(
   "Settings",
+  name = character(0),
   modelid = new_waiver(), # The id to which the model belong
   data = list(),
   # Print
   print = function(self) {
     # Get number of settings set
     ss <- sum(sapply(self$data, function(x) !is.Waiver(x)))
-    message(paste0( self$show(),': ', text_green(ss), ' parameters' ))
+    ss <- text_green(ss)
+    message(paste0( self$show(),': ', ss, ' parameters' ))
   },
   # Show
   show = function(self){
-    'Model settings'
+    paste(self$name, 'Settings')
   },
   # Number of options
   length = function(self){

@@ -5,17 +5,19 @@ NULL
 #'
 #' @description This function adds a constrain to a [`BiodiversityScenario-class`] object to
 #' constrain (future) projections. These constrains can for instance be constrains on a possible
-#' dispersal distance, connectivity between identified patches or limitations on species vital rates (planned).
+#' dispersal distance, connectivity between identified patches or limitations on species adaptability.
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
-#' @param mod A [`BiodiversityScenario`] object with specified predictors
+#' @param mod A [`BiodiversityScenario`] object with specified predictors.
 #' @param method A [`character`] indicating the type of constrain to be added to the scenario. See details.
-#' @param value A [`numeric`] value specifying a fixed constrain or constant in units \code{"m"} (Default: \code{NULL}).
-#' For kissmig the value needs to give the number of iteration steps (or within year migration steps).
+#' @param value For many dispersal [`constrain`] this is set as [`numeric`] value specifying a
+#' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
+#' give the number of iteration steps (or within year migration steps).
+#' For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
+#' should be performed.
 #' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
-#' @param ... passed on parameters
+#' @param ... passed on parameters. See also the specific methods for adding constrains.
 #'
-#' @seealso [`add_constrain_dispersal`], [`add_constrain_connectivity`]
+#' @seealso [`add_constrain_dispersal`], [`add_constrain_connectivity`], [`add_constrain_adaptability`]
 #' @details
 #' Currently this method functions as a wrapper to support the definition of further modelling constraints.
 #' Supported are the options for dispersal and connectivity constrains:
@@ -24,6 +26,8 @@ NULL
 #' * kissmig - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
 #' * migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
 #' * hardbarrier - Defines a hard barrier to any dispersal events.
+#' * nichelimit - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+#' can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -56,7 +60,9 @@ methods::setMethod(
     )
     # Match method
     method <- match.arg(arg = method,
-                        choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim","hardbarrier"), several.ok = FALSE)
+                        choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
+                                    "hardbarrier",
+                                    "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
     o <- switch(method,
@@ -69,7 +75,9 @@ methods::setMethod(
                   # Using the migclim package
                   "migclim" = add_constrain_dispersal(mod, method = "migclim", ...),
                   # --- #
-                 "hardbarrier" = add_constrain_connectivity(mod, method = "hardbarrier", ...)
+                 "hardbarrier" = add_constrain_connectivity(mod, method = "hardbarrier", ...),
+                  # --- #
+                  "nichelimit" = add_constrain_adaptability(mod, method = "nichelimit", ...)
                   )
     return(o)
   }
@@ -304,6 +312,7 @@ methods::setMethod(
 #' @name add_constrain_connectivity
 #' @aliases add_constrain_connectivity
 #' @inheritParams add_constrain
+#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
 #' @family constrain
 #' @keywords scenario
 #' @exportMethod add_constrain_connectivity
@@ -362,3 +371,121 @@ methods::setMethod(
     )
   }
 )
+
+# ------------------------ #
+#### Adaptability constraints ####
+
+#' @title Adds an adaptability constrain to a scenario object
+#' @name add_constrain_adaptability
+#' @aliases add_constrain_adaptability
+#' @inheritParams add_constrain
+#' @param names A [`character`] vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).
+#' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
+#' Allows incremental widening of the niche space, thus opening constraints.
+#' @family constrain
+#' @keywords scenario
+#' @exportMethod add_constrain_adaptability
+#' @export
+NULL
+methods::setGeneric("add_constrain_adaptability",
+                    signature = methods::signature("mod"),
+                    function(mod, method, names = NULL, value = NULL, increment = 0, ...) standardGeneric("add_constrain_adaptability"))
+
+#' @name add_constrain_adaptability
+#' @rdname add_constrain_adaptability
+#' @usage \S4method{add_constrain_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
+methods::setMethod(
+  "add_constrain_adaptability",
+  methods::signature(mod = "BiodiversityScenario"),
+  function(mod, method, names = NULL, value = 1, increment = 0, ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      !is.Waiver(mod$get_predictors()),
+      is.character(method),
+      is.null(names) || is.character(names),
+      is.null(value) || is.numeric(value),
+      is.numeric(increment)
+    )
+    # Match method
+    method <- match.arg(arg = method,
+                        choices = c("nichelimit"), several.ok = FALSE)
+
+    # Add processing method #
+    # --- #
+    co <- list()
+    if(method == "nichelimit"){
+      # Add a constrain on parameter space, e.g. max 1 SD from training data covariates
+      assertthat::assert_that(
+        is.numeric(value),
+        is.null(names) || is.character(names),
+        value > 0, msg = "Specify a value threshold (SD) and names of predictors, for which
+        we do not expect the species to persist."
+      )
+      if(is.null(names)) names <- character()
+      co[['adaptability']] <- list(method = method,
+                                   params = c("names" = names, "value" = value,
+                                              "increment" = increment))
+    }
+    # --- #
+    new <- mod$set_constraints(co)
+    return(
+      bdproto(NULL, new)
+    )
+  }
+)
+
+#' Adaptability constrain by applying a limit on extrapolation beyond the niche
+#' @param newdata A [`data.frame`] with the information about new data layers.
+#' @param model A [`list`] created by the modelling object containing the full predictors and biodiversity predictors.
+#' @param names A [`character`] or \code{NULL} of the names of predictors.
+#' @param value A [`numeric`] value in units of standard deviation (Default: \code{1}).
+#' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
+#' Allows incremental widening of the niche space, thus opening constraints.
+#' @param increment_step A [`numeric`] indicating the number of time increment should be applied.
+#' @keywords internal
+#' @noRd
+.nichelimit <- function(newdata, model, names = NULL, value = 1, increment = 0, increment_step = 1){
+  assertthat::assert_that(
+    is.data.frame(newdata),
+    is.list(model),
+    is.numeric(as.numeric(value)),
+    is.null(names) || is.na(names) || is.character(names),
+    is.numeric(as.numeric(increment)),
+    is.numeric(as.numeric(increment_step))
+  )
+  # Check that names are present if set
+  if(is.null(names) || is.na(names)) names <- model$predictors_names
+  if(is.character(names) ) assertthat::assert_that(all(names %in% model$predictors_names))
+  # Convert numeric paramters to numeric to be sure
+  value <- as.numeric(value)
+  increment <- as.numeric(increment)
+  increment_step <- as.numeric(increment_step)
+  # --- #
+  # Now calculate the range across each target predictor and occurrence dataset
+  df <- data.frame()
+  for(id in names(model$biodiversity)){
+    sub <- model$biodiversity[[id]]
+    # Which are presence data
+    is_presence <- which(sub$observations[['observed']] > 0)
+    df <- rbind(df,
+                sub$predictors[is_presence, names])
+  }
+  rr <- sapply(df, function(x) range(x, na.rm = TRUE))   # Calculate ranges
+  rsd <- sapply(df, function(x) sd(x, na.rm = TRUE))   # Calculate standard deviation
+
+  # Apply value and increment if set
+  rsd <- rsd * (value + (increment*increment_step))
+  rr[1,] <- rr[1,] - rsd; rr[2,] <- rr[2,] + rsd
+
+  # Now 'clamb' all predictor values beyond these names to 0, e.g. partial out
+  nd <- newdata
+  for(n in names){
+    # Calc min
+    min_ex <- which(nd[,n] < rr[1,n])
+    max_ex <- which(nd[,n] > rr[2,n])
+    if(length(min_ex)>0) nd[min_ex,n] <- NA
+    if(length(max_ex)>0) nd[max_ex,n] <- NA
+    # FIXME Or rather do a smooth logistic decay for less extreme?
+  }
+  return(nd)
+}

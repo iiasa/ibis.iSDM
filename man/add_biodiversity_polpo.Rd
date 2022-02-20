@@ -17,6 +17,7 @@ add_biodiversity_polpo(
   simulate_strategy = "random",
   separate_intercept = TRUE,
   docheck = TRUE,
+  pseudoabsence_settings = NULL,
   ...
 )
 
@@ -50,6 +51,8 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
 
+\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
+
 \item{...}{Other parameters passed down.}
 }
 \description{
@@ -61,7 +64,7 @@ some engines particular through the way that points are generated.
 The default approach for polygon data is to sample presence-only points across
 the region of the polygons. This function thus adds as a wrapper to \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}} as presence-only
 points are created by the model. If no points are simulated directly (Default) then the polygon is processed
-by \code{\link[=train]{train()}} by creating regular point data.
+by \code{\link[=train]{train()}} by creating regular point data over the supplied predictors.
 
 Use \code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}} to create binomial distributed inside-outside points for the given polygon!
 

@@ -2,21 +2,44 @@
 % Please edit documentation in R/utils-spatial.R
 \name{predictor_transform}
 \alias{predictor_transform}
-\title{Spatial adjustment of raster stacks}
+\title{Spatial adjustment of environmental predictors and raster stacks}
 \usage{
 predictor_transform(env, option, windsor_props = c(0.05, 0.95), ...)
 }
 \arguments{
-\item{env}{A \code{\link{Raster}} object}
+\item{env}{A \code{\link{Raster}} object.}
 
-\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: 'none','scale','norm','pca')}
+\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},
+\code{'scale'}, \code{'norm'}, \code{'pca'}, \code{'revjack'}). See Details.}
 
-\item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be clipped for windsorization (Default: c(.05,.95))}
+\item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).}
 }
 \value{
-Returns a adjusted \code{\link{Raster}} object of identical resolution
+Returns a adjusted \code{\link{Raster}} object of identical resolution.
 }
 \description{
-Spatial adjustment of raster stacks
+This function allows the transformation of provided environmental predictors (in \code{\link{Raster}} format).
+A common use case is for instance the standardization (or scaling) of all predictors prior to model fitting.
+This function works both with \code{\link{Raster}} as well as with \code{\link{stars}} objects.
+}
+\details{
+Available options are:
+\itemize{
+\item \code{'none'} The original layer(s) are returned.
+\item \code{'scale'} This run the \code{\link[=scale]{scale()}} function with default settings (1 Standard deviation) across all predictors.
+A sensible default to for most model fitting.
+\item \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
+\item \code{'pca'} This option runs a principal component decomposition of all predictors (via \code{\link[=prcomp]{prcomp()}}).
+It returns new predictors resembling all components in order of the most important ones. Can be useful to
+reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
+\item \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
+Identified outliers are by default set to \code{NA}.
+}
+}
+\examples{
+\dontrun{
+# Where x is a rasterstack
+new_x <- predictor_transform(x, option = 'scale')
+}
 }
 \keyword{utils}

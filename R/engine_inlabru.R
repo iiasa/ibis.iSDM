@@ -675,12 +675,14 @@ engine_inlabru <- function(x,
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
 
           # Build coordinates
-          preds <- inla_predpoints(mesh = self$get_data('mesh'),
-                                   background = model$background,
-                                   cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
-                                   proj_stepsize = self$get_data('proj_stepsize'),
-                                   spatial = TRUE
-                                   )
+          suppressWarnings(
+            preds <- inla_predpoints(mesh = self$get_data('mesh'),
+                                     background = model$background,
+                                     cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
+                                     proj_stepsize = self$get_data('proj_stepsize'),
+                                     spatial = TRUE
+            )
+          )
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){

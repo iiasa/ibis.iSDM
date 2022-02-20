@@ -250,12 +250,32 @@ methods::setMethod(
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
       model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations %>% dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
-      # FIXME: For polygons this won't work. Ideally switch to WKT as default in future
-      model$biodiversity[[id]]$observations <- as.data.frame(model$biodiversity[[id]]$observations) # Get only observed column and coordinates
 
-      # Now extract coordinates and extract estimates
-      # Now shifted to raster extraction by default to improve speed!
-      env <- get_rastervalue(coords = x$biodiversity$get_coordinates(id),
+      # If the type is polygon, convert to regular sampled points per covered grid cells
+      if(any(sf::st_geometry_type(guess_sf(model$biodiversity[[id]]$observations)) %in% c("POLYGON", "MULTIPOLYGON"))){
+        o <- polygon_to_points(
+          poly = guess_sf(model$biodiversity[[id]]$observations),
+          template = emptyraster(x$predictors$get_data(df = FALSE)),
+          field_occurrence = "observed" # renamed above
+                               )
+        model[['biodiversity']][[id]][['observations']] <- o |> as.data.frame()
+        model[['biodiversity']][[id]][['type']] <- ifelse(model[['biodiversity']][[id]][['type']] == 'polpo', 'poipo', 'poipa')
+        rm(o)
+      } else {
+        # FIXME: For polygons this won't work. Ideally switch to WKT as default in future
+        model$biodiversity[[id]]$observations <- as.data.frame(model$biodiversity[[id]]$observations) # Get only observed column and coordinates
+      }
+
+      # Get pseudo-absence information if set, otherwise default options
+      if(model[['biodiversity']][[id]][['type']] == "poipo"){
+        psa <- x$biodiversity$data[[id]][["pseudoabsence_settings"]]
+        if(!is.null(psa)){
+          model[['biodiversity']][[id]][['pseudoabsence_settings']] <- psa
+        } else { model[['biodiversity']][[id]][['pseudoabsence_settings']] <- getOption("ibis.pseudoabsence")}
+      }
+
+      # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
+      env <- get_rastervalue(coords = guess_sf(model$biodiversity[[id]]$observations),
                              env = x$predictors$get_data(df = FALSE),
                              rm.na = FALSE)
 
@@ -271,7 +291,7 @@ methods::setMethod(
         # Note: ras_of object is created above already
         # Extract offset for each observed point
         ofs <- get_rastervalue(
-          coords = x$biodiversity$get_coordinates(id),
+          coords = sf::st_coordinates( guess_sf(model$biodiversity[[id]]$observations) ),
           env = ras_of,
           rm.na = FALSE
         )
@@ -391,7 +411,6 @@ methods::setMethod(
     # TODO: Potentially outsource to a function in the future
     if(!is.Waiver(x$limits)){
       # Get biodiversity data
-      # FIXME: Only working for point coordinates as of now
       coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y')] ) )
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
@@ -419,7 +438,9 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
-    # ----------------- #
+    # --------------------------------------------------------------------- #
+    # Engine specific code starts below                                     #
+    # --------------------------------------------------------------------- #
     # Number of dataset types, families and ids
     types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
     fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
@@ -752,7 +773,11 @@ methods::setMethod(
         if(length(ids)>1 && id != ids[length(ids)]){
           # Add to predictors frame
           new <- out$get_data("prediction")
-          names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+          pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+          names(new) <- pred_name
+
+          # Add the object to the overall prediction object
+          model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
 
           # Now for each biodiversity dataset and the overall predictors
           # extract and add as variable
@@ -760,7 +785,7 @@ methods::setMethod(
             env <- as.data.frame(
               raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
             # Rename to current id dataset
-            names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+            names(env) <- pred_name
             # Add
             model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
             model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -821,19 +846,22 @@ methods::setMethod(
         settings2 <- settings
         if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
         out <- x$engine$train(model2, settings2)
+
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           # Add to predictors frame
           new <- out$get_data("prediction")
-          names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
-
+          pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+          names(new) <- pred_name
+          # Add the object to the overall prediction object
+          model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
           # Now for each biodiversity dataset and the overall predictors
           # extract and add as variable
           for(k in names(model$biodiversity)){
             env <- as.data.frame(
               raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
             # Rename to current id dataset
-            names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+            names(env) <- pred_name
             # Add
             model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
             model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -892,7 +920,10 @@ methods::setMethod(
         if(length(ids)>1 && id != ids[length(ids)]){
           # Add to predictors frame
           new <- out$get_data("prediction")[[1]] # Only take the mean!
-          names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+          pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+          names(new) <- pred_name
+          # Add the object to the overall prediction object
+          model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
 
           # Now for each biodiversity dataset and the overall predictors
           # extract and add as variable
@@ -900,7 +931,7 @@ methods::setMethod(
             env <- as.data.frame(
               raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
             # Rename to current id dataset
-            names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+            names(env) <- pred_name
             # Add
             model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
             model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -1017,7 +1048,10 @@ methods::setMethod(
       if(length(ids)>1 && id != ids[length(ids)]){
         # Add to predictors frame
         new <- out$get_data("prediction")
-        names(new) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+        pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+        names(new) <- pred_name
+        # Add the object to the overall prediction object
+        model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
 
         # Now for each biodiversity dataset and the overall predictors
         # extract and add as variable
@@ -1025,7 +1059,7 @@ methods::setMethod(
           env <- as.data.frame(
             raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
           # Rename to current id dataset
-          names(env) <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name), "_mean")
+          names(env) <- pred_name
           # Add
           model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
           model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,

@@ -135,7 +135,7 @@ methods::setMethod(
 )
 
 #' @noRd
-#' @keywords noexport
+#' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
                             poi = NULL, truncate = FALSE, return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),

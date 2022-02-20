@@ -13,6 +13,7 @@ add_biodiversity_poipo(
   family = "poisson",
   separate_intercept = TRUE,
   docheck = TRUE,
+  pseudoabsence_settings = NULL,
   ...
 )
 
@@ -35,6 +36,8 @@ add_biodiversity_poipo(
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
+
+\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
 
 \item{...}{Other parameters passed down to the object. Normally not used unless described in details.}
 }

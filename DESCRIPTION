@@ -13,7 +13,6 @@ Description: Integrated framework of modelling the distribution of species and e
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
-LazyData: true
 Imports: 
     assertthat (>= 0.2.0),
     geodist,
@@ -33,7 +32,8 @@ Imports:
     sf (>= 0.9),
     stars (>= 0.5),
     testthat (>= 3.0.0),
-    tibble (>= 2.0.0)
+    tibble (>= 2.0.0),
+    posterior
 Depends:
     R(>= 4.0.0)
 Suggests:
@@ -46,8 +46,7 @@ Suggests:
     ellipsis,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    BoomSpikeSlab (>= 1.2.4),
-    posterior
+    BoomSpikeSlab (>= 1.2.4)
 URL: https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.1.2

@@ -157,61 +157,44 @@ engine_stan <- function(x,
             bg <- x$engine$get_data('template')
             assertthat::assert_that(!is.na(cellStats(bg,min)))
 
-            # Sample pseudo absences
-            abs <- create_pseudoabsence(
-              env = model$predictors_object,
-              presence = model$biodiversity[[i]]$observations,
-              bias = settings$get('bias_variable'),
-              template = bg,
-              npoints = ifelse(ncell(bg)<10000,ncell(bg),10000), # FIXME: Ideally query this from settings
-              replace = TRUE
-            )
-            abs$Intercept <- 1 # Add dummy intercept
-            # Combine absence and presence and save
-            abs_observations <- abs[,c('x','y')]; abs_observations[['observed']] <- 0
-            # Furthermore rasterize observed presences
-            pres <- raster::rasterize(model$biodiversity[[i]]$observations[,c("x","y")], bg,
-                                      fun = 'count', background = 0)
-            # Get cell ids
-            ce <- raster::cellFromXY(pres, model[['biodiversity']][[i]]$observations[,c('x','y')])
-
-            # If family is not poisson, assume factor distribution
-            # FIXME: Ideally this is better organized through family
-            if(model$biodiversity[[i]]$family != 'poisson') pres[] <- ifelse(pres[]==1,1,0)
-            # Get new presence data
-            obs <- cbind(
-              data.frame(observed = raster::values(pres)[ce],
-                         raster::xyFromCell(pres, ce) # Center of cell
-              )
-            ) |> unique() # Unique to remove any duplicate values (otherwise double counted cells)
-
-            # Re-extract counts environment variables
-            envs <- get_rastervalue(coords = obs[,c('x','y')],
+            # Add pseudo-absence points
+            presabs <- add_pseudoabsence(df = model$biodiversity[[i]]$observations,
+                                         field_occurrence = 'observed',
+                                         template = bg,
+                                         settings = model$biodiversity[[i]]$pseudoabsence_settings)
+            if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+            # Sample environmental points for absence only points
+            abs <- subset(presabs, observed == 0)
+            # Re-extract environmental information for absence points
+            envs <- get_rastervalue(coords = abs[,c('x','y')],
                                     env = model$predictors_object$get_data(df = FALSE),
                                     rm.na = FALSE)
-            envs$Intercept <- 1
+            if(assertthat::has_name(model$biodiversity[[i]]$predictors, "Intercept")){ envs$Intercept <- 1}
 
-            # Overwrite observations
-            df <- rbind(envs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)],
-                        abs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)])
+            # Format out
+            df <- rbind(model$biodiversity[[i]]$predictors[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)],
+                        envs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)] )
             any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-            if(length(any_missing)>0) abs_observations <- abs_observations[-any_missing,]
+            if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
             df <- subset(df, complete.cases(df))
-            # Overwrite observations
-            model$biodiversity[[i]]$observations <- rbind(obs, abs_observations)
+            assertthat::assert_that(nrow(presabs) == nrow(df))
+
+            # Overwrite observation data
+            model$biodiversity[[i]]$observations <- presabs
 
             # Preprocessing security checks
             assertthat::assert_that( all( model$biodiversity[[i]]$observations[['observed']] >= 0 ),
-                                     any(!is.na(rbind(obs, abs_observations)[['observed']] )),
+                                     any(!is.na(presabs[['observed']])),
                                      nrow(df) == nrow(model$biodiversity[[i]]$observations)
             )
+
             # Add offset if existent
             if(!is.Waiver(model$offset)) {
               # Respecify offset if not set
               of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
               of1 <- get_ngbvalue(coords = model$biodiversity[[i]]$observations[,c("x","y")],
                                   env =  of,
-                                  longlat = raster::isLonLat(self$get_data("template")),
+                                  longlat = raster::isLonLat(bg),
                                   field_space = c('x','y')
               )
               df[["spatial_offset"]] <- of1
@@ -244,13 +227,13 @@ engine_stan <- function(x,
         # Any spatial or other functions needed?
         if(!is.null(self$get_equation_latent_spatial())){
           # Stan functions for CAR and GP models
-          ir <- readLines( system.file("src/spatial_functions.stan",package = "ibis.iSDM") )
+          ir <- readLines( system.file("inst/stanfiles/spatial_functions.stan",package = "ibis.iSDM") )
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$functions <- append(sm_code$functions, i)
         }
 
         # Load all the data parameters
-        ir <- readLines( system.file("src/data_parameters.stan",package = "ibis.iSDM") )
+        ir <- readLines( system.file("inst/stanfiles/data_parameters.stan",package = "ibis.iSDM") )
         assertthat::assert_that(length(ir)>0)
         for(i in ir) sm_code$data <- append(sm_code$data, i)
 
@@ -320,7 +303,7 @@ engine_stan <- function(x,
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
           # Add regularized horseshoe prior
           # See brms::horseshoe
-          ir <- readLines( system.file("src/prior_functions.stan",package = "ibis.iSDM") )
+          ir <- readLines( system.file("inst/stanfiles/prior_functions.stan",package = "ibis.iSDM") )
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$functions <- append(sm_code$functions, i)
 
@@ -368,9 +351,9 @@ engine_stan <- function(x,
         } else if(model$biodiversity[[1]]$type == "poipo" && model$biodiversity[[1]]$family == "poisson"){
           # For poisson process model add likelihood
           if(has_intercept){
-            ir <- readLines( system.file("src/poipo_ll_poisson_intercept.stan",package = "ibis.iSDM"))
+            ir <- readLines( system.file("inst/stanfiles/poipo_ll_poisson_intercept.stan",package = "ibis.iSDM"))
           } else {
-            ir <- readLines( system.file("src/poipo_ll_poisson.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("inst/stanfiles/poipo_ll_poisson.stan",package = "ibis.iSDM") )
           }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)
@@ -378,9 +361,9 @@ engine_stan <- function(x,
         } else if(model$biodiversity[[1]]$type == "poipa" && model$biodiversity[[1]]$family == "binomial"){
           # For logistic regression
           if(has_intercept){
-            ir <- readLines( system.file("src/poipa_ll_bernoulli_intercept.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("inst/stanfiles/poipa_ll_bernoulli_intercept.stan",package = "ibis.iSDM") )
           } else {
-            ir <- readLines( system.file("src/poipa_ll_bernoulli.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("inst/stanfiles/poipa_ll_bernoulli.stan",package = "ibis.iSDM") )
           }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)
@@ -437,6 +420,7 @@ engine_stan <- function(x,
             hs_scale_global = 1, hs_scale_slab = 2
           )
           # If any additional offset is set, simply to the existing one in sum
+          # This works as log(2) + log(5) == log(2*5)
           if(!is.Waiver(model$offset)) dl$offsets <- dl$offsets + model$biodiversity[[1]]$offset[,"spatial_offset"]
         }
 

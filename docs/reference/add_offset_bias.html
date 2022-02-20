@@ -3,7 +3,7 @@
 in linear and additive regression models. Offsets shift the intercept of
 the regression fit by a certain amount. Although only one offset can be added
 to a regression model, it is possible to combine several spatial-explicit estimates into
-one offset by calculating the sum of all spatial-explicit layers."><title>Specify a spatial explicit offset — add_offset • ibis.iSDM</title><!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png"><link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png"><link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png"><link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png"><link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png"><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Specify a spatial explicit offset — add_offset"><meta property="og:description" content="Including offsets is another option to integrate spatial prior information
+one offset by calculating the sum of all spatial-explicit layers."><title>Specify a spatial explicit offset as bias — add_offset_bias • ibis.iSDM</title><!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png"><link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png"><link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png"><link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png"><link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png"><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Specify a spatial explicit offset as bias — add_offset_bias"><meta property="og:description" content="Including offsets is another option to integrate spatial prior information
 in linear and additive regression models. Offsets shift the intercept of
 the regression fit by a certain amount. Although only one offset can be added
 to a regression model, it is possible to combine several spatial-explicit estimates into
@@ -65,9 +65,9 @@ one offset by calculating the sum of all spatial-explicit layers."><meta propert
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Specify a spatial explicit offset</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Specify a spatial explicit offset as bias</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/add_offset.R" class="external-link"><code>R/add_offset.R</code></a></small>
-      <div class="d-none name"><code>add_offset.Rd</code></div>
+      <div class="d-none name"><code>add_offset_bias.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
@@ -80,10 +80,10 @@ one offset by calculating the sum of all spatial-explicit layers.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_offset_bias</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co"># S4 method for BiodiversityDistribution, raster</span>
-<span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></code></pre></div>
+<span class="fu">add_offset_bias</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -95,24 +95,17 @@ one offset by calculating the sum of all spatial-explicit layers.</p>
 <dt>add</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> specifiying whether new offset is to be added. Setting
 this parameter to <code>FALSE</code> replaces the current offsets with the new one (Default: <code>TRUE</code>).</p></dd>
-<dt>...</dt>
-<dd><p>Other parameters or arguments (currently not supported)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function allows to set any specific offset to a regression model. The offset
-has to be provided as spatial <code>RasterLayer</code> object. This function simply adds the layer to
-a <code><a href="distribution.html">distribution()</a></code> object.
-<strong>Note that any transformation of the offset (such as <code>log</code>) has do be done externally!</strong></p>
-<p>If the layer is range and requires additional formatting, consider using the
-function <code><a href="add_offset_range.html">add_offset_range()</a></code> which has additional functionalities such such distance
-transformations.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Since offsets only make sense for linear regressions (and not for instance
-regression tree based methods such as <a href="engine_bart.html">engine_bart</a>), they do not work for all engines.
-Offsets specified for non-supported engines are ignored during the estimation</p>
+    <p>This functions emulates the use of the <code><a href="add_offset.html">add_offset()</a></code> function, however applies an inverse
+transformation to remove the provided layer from the overall offset.
+So if for instance a offset is already specified (such as area), this function
+removes the provided <code>bias.layer</code> from it via <code>"offset(log(off.area)-log(bias.layer))"</code></p>
+<p><strong>Note that any transformation of the offset (such as <code>log</code>) has do be done externally!</strong></p>
+<p>If a generic offset is added, consider using the <code><a href="add_offset.html">add_offset()</a></code> function. If the layer is a expert-based range and
+requires additional formatting, consider using the
+function <code><a href="add_offset_range.html">add_offset_range()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -122,8 +115,8 @@ Offsets specified for non-supported engines are ignored during the estimation</p
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other offset: 
-<code><a href="add_offset_bias.html">add_offset_bias</a>()</code>,
-<code><a href="add_offset_range.html">add_offset_range</a>()</code></p></div>
+<code><a href="add_offset_range.html">add_offset_range</a>()</code>,
+<code><a href="add_offset.html">add_offset</a>()</code></p></div>
     </div>
 
     <div class="section level2">
@@ -131,7 +124,7 @@ Offsets specified for non-supported engines are ignored during the estimation</p
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"> <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
 <span class="r-in">   <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">   <span class="fu">add_offset</span><span class="op">(</span><span class="va">nicheEstimate</span><span class="op">)</span></span>
+<span class="r-in">   <span class="fu">add_offset_bias</span><span class="op">(</span><span class="va">samplingBias</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>

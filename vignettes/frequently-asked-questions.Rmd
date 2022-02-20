@@ -34,6 +34,25 @@ predictors[is.na(predictors)] <- 0
 ```
 </details>
 
+<details>
+<summary><b>I have presence-only data (GBIF and co). How can I model a probability of occurrence? </b>
+</summary>
+Technically, it is impossible to estimate a probability of occurrence just with presence-only data (such as commonly available from databases like GBIF). What people normally do is to add so called pseudo-absence (often in excessive numbers) over the entire background to their data.
+
+In the `ibis.iSDM` package it is possible to add these pseudo-absence points to a presence-only dataset as follows:
+
+```{r, echo=TRUE,eval=FALSE}
+virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
+# This takes the default pseudo-absence options created when loading the Ibis package.
+virtual_points <- add_pseudoabsence(virtual_points, field_occurrence = "Observed")
+# Check that absence points are present
+unique(virtual_points$Observed)
+```
+
+Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for more settings and information here.
+</details>
+
+
 ## Model setup
 
 <details>
@@ -97,6 +116,32 @@ mod <- distribution(background, limits = zone) %>%
 ```
 Multiple priors for an Engine can be defined in a `PriorList`. Whenever a prior 
 for the same variable is set again, it overwrites the previous value.
+
+</details>
+
+<details>
+<summary><b>How can I control pseudo-absence sampling, for instance with targeted sampling? </b></summary>
+
+A great number of SDM literature suggests that altering how the background / pseudo-absence points are created, can greatly affect model outcomes (see `add_pseudoabsence()` for references). In the `ibis.iSDM` R-package there are options available to modify how pseudo-absence points are created. By default the package creates at least 10 000 points or at least 25% of the presence-points (what ever is larger). 
+To change the default pseudo-absence sampling settings, there are two options. Either change the global default settings for pseudo-absence sampling or by adding these settings to the `add_biodiversity` function.
+
+To overwrite the global settings, do the following:
+```{r, echo=TRUE,eval=FALSE}
+# Define new settings with greater number of background points
+ss <- pseudoabs_settings(background = NULL, nrpoints =  1e6)
+# Overwrite the default settings
+options("ibis.pseudoabsence" = ss)
+```
+
+Alternatively one could think of specifying specific pseudo-absence sampling information to one biodiversity dataset specifically:
+```{r, echo=TRUE,eval=FALSE}
+# Define absence layer with biased background to sample from
+ss <- pseudoabs_settings(background = NULL, bias = bias_layer)
+
+# Assuming background and point data exists
+x <- distribution(background) %>% 
+  add_biodiversity_poipo(points, pseudoabsence_settings = ss)
+```
 
 </details>
 
@@ -211,11 +256,12 @@ In the future rather than adding outputs as predictors, there might be an option
 <details>
 <summary><b>What can I do when my model outputs with presence-only data seem odd?</b>
 </summary>
-By default, presence only biodiversity data is modelled as point-process model (PPM, see [Renner e tal. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.
+By default, presence only biodiversity data is modelled as point-process model (PPM, see [Renner et al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.
 
-* Modify the targeted background sampling for better control of background points. More options to modify this will be made available.
-* Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525).
+* Modify the targeted background sampling for better control of background points. This can be for instance done via the `add_pseudoabsence()` and `pseudoabs_settings()` methods. See the respective help files.
+* Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525). Note however that spatial thinning does remove data points, affecting for instance any `poisson` distributed models (PPMs) in the process. The `ibis.iSDM` package currently has no built-in methods for spatial thinning.
 * Partial out a biased variable during the prediction. The `bias_variable` can be specified in the `train()` command and has to be part the predictor set of the model. In addition a `bias_value` has to be specified and this can be set for instance to `0`.
+* Add a spatial offset to account for the bias as introduced in [Merow et al. 2016](http://doi.wiley.com/10.1111/geb.12453). This can be done via the `add_offset_bias()` function and requires preparation of a bias layer in advance.
 * Apply more rigorous filtering and bias control to the input data. In the end no correction can replace good data preparation and cleaning. Remember the [GIGO principle](https://en.wikipedia.org/wiki/Garbage_in,_garbage_out).
 </details>
 

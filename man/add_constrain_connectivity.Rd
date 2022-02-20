@@ -7,16 +7,19 @@
 \S4method{add_constrain_connectivity}{BiodiversityScenario, character, numeric, RasterLayer}(mod, method, value, resistance)
 }
 \arguments{
-\item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors}
+\item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
 \item{method}{A \code{\link{character}} indicating the type of constrain to be added to the scenario. See details.}
 
-\item{value}{A \code{\link{numeric}} value specifying a fixed constrain or constant in units \code{"m"} (Default: \code{NULL}).
-For kissmig the value needs to give the number of iteration steps (or within year migration steps).}
+\item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
+fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
+give the number of iteration steps (or within year migration steps).
+For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
+should be performed.}
 
 \item{resistance}{A \code{\link{RasterLayer}} object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).}
 
-\item{...}{passed on parameters}
+\item{...}{passed on parameters. See also the specific methods for adding constrains.}
 }
 \description{
 Adds a connectivity constrain to a scenario object
@@ -24,6 +27,7 @@ Adds a connectivity constrain to a scenario object
 \seealso{
 Other constrain: 
 \code{\link{add_constrain_MigClim}()},
+\code{\link{add_constrain_adaptability}()},
 \code{\link{add_constrain_dispersal}()},
 \code{\link{add_constrain}()}
 }

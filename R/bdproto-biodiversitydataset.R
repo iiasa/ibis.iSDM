@@ -95,7 +95,7 @@ BiodiversityDatasetCollection <- bdproto(
   length = function(self) {
     base::length(self$data)
   },
-  # Get observations of all datasets
+  # Get number of observations of all datasets
   get_observations = function(self) {
     x <- sapply(self$data, function(z) z$get_observations())
     x

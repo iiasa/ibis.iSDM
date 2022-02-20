@@ -14,6 +14,7 @@ NULL
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
 #' @param ... Other parameters passed down to the object. Normally not used unless described in details.
 #'
 #' @details This function allows to add presence-only biodiversity records to a [distribution] \pkg{ibis.iSDM}
@@ -47,9 +48,8 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipo"))
-
-# TODO: Support supplement of other object types, such as data.frame, sp, etc...
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_poipo"))
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
@@ -57,7 +57,8 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", separate_intercept = TRUE, docheck = TRUE, ...) {
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo, field_occurrence),
@@ -93,8 +94,9 @@ methods::setMethod(
               family = family,
               type = "poipo",
               field_occurrence = field_occurrence,
-              data = format_biodiversity_data(poipo,field_occurrence),
-              use_intercept = separate_intercept
+              data = format_biodiversity_data(poipo, field_occurrence),
+              use_intercept = separate_intercept,
+              pseudoabsence_settings = pseudoabsence_settings
       )
     )
   }
@@ -221,12 +223,13 @@ methods::setMethod(
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
 #' @param ... Other parameters passed down.
 #'
 #' @details The default approach for polygon data is to sample presence-only points across
 #' the region of the polygons. This function thus adds as a wrapper to [`add_biodiversity_poipo()`] as presence-only
 #' points are created by the model. If no points are simulated directly (Default) then the polygon is processed
-#' by [`train()`] by creating regular point data.
+#' by [`train()`] by creating regular point data over the supplied predictors.
 #'
 #' Use [`add_biodiversity_polpa()`] to create binomial distributed inside-outside points for the given polygon!
 #'
@@ -249,7 +252,8 @@ methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_polpo"))
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
 #' @name add_biodiversity_polpo
 #' @rdname add_biodiversity_polpo
@@ -258,7 +262,8 @@ methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ... ) {
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo, "Spatial") || inherits(polpo, "sf") || inherits(polpo, "data.frame") || inherits(polpo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo, field_occurrence),
@@ -333,7 +338,8 @@ methods::setMethod(
                 type = "polpo",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo,field_occurrence),
-                use_intercept = separate_intercept
+                use_intercept = separate_intercept,
+                pseudoabsence_settings =  pseudoabsence_settings
         )
       )
     }
@@ -362,6 +368,7 @@ methods::setMethod(
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
 #' @param ... Other parameters passed down.
 #'
 #' @details The default approach for polygon data is to sample presence-absence points across
@@ -389,7 +396,8 @@ methods::setGeneric(
   "add_biodiversity_polpa",
   signature = methods::signature("x", "polpa"),
   function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_polpa"))
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpa"))
 
 #' @name add_biodiversity_polpa
 #' @rdname add_biodiversity_polpa
@@ -398,7 +406,8 @@ methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
   function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random", separate_intercept = TRUE, docheck = TRUE, ... ) {
+           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpa, "Spatial") || inherits(polpa, "sf") || inherits(polpa, "data.frame") || inherits(polpa, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpa, field_occurrence),
@@ -503,7 +512,8 @@ methods::setMethod(
                 type = "polpa",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo, field_occurrence),
-                use_intercept = separate_intercept
+                use_intercept = separate_intercept,
+                pseudoabsence_settings = pseudoabsence_settings
         )
       )
     }

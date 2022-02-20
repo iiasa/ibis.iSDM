@@ -59,6 +59,7 @@ reference:
         - distribution
         - has_keyword("priors")
         - priors
+        - pseudoabs_settings
         - train
 
   - title: Add or modify data and parameters
