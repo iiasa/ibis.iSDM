@@ -80,6 +80,7 @@ distribution object.</p>
   family <span class="op">=</span> <span class="st">"poisson"</span>,
   separate_intercept <span class="op">=</span> <span class="cn">TRUE</span>,
   docheck <span class="op">=</span> <span class="cn">TRUE</span>,
+  pseudoabsence_settings <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>
 <span class="op">)</span>
 
@@ -106,6 +107,8 @@ distribution object.</p>
 shared likelihood models for engines <a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a> and <a href="engine_stan.html">engine_stan</a>. Otherwise ignored.</p></dd>
 <dt>docheck</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on whether additional checks should be performed (e.g. intersection tests) (Default: <code>TRUE</code>).</p></dd>
+<dt>pseudoabsence_settings</dt>
+<dd><p>Either <code>NULL</code> or a <code><a href="pseudoabs_settings.html">pseudoabs_settings()</a></code> created settings object.</p></dd>
 <dt>...</dt>
 <dd><p>Other parameters passed down to the object. Normally not used unless described in details.</p></dd>
 </dl></div>

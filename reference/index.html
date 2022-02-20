@@ -133,6 +133,11 @@
         <dd>Creates a new PriorList object</dd>
       </dl><dl><dt>
           
+          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
+        </dt>
+        <dd>Specify settings for pseudo-absence sampling from a background</dd>
+      </dl><dl><dt>
+          
           <code><a href="train.html">train()</a></code> 
         </dt>
         <dd>Train the model from a given engine</dd>
@@ -177,6 +182,11 @@
           <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Add constrains to the modelled distribution projection through the MigClim approach</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain_adaptability.html">add_constrain_adaptability(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
+        </dt>
+        <dd>Adds an adaptability constrain to a scenario object</dd>
       </dl><dl><dt>
           
           <code><a href="add_constrain_connectivity.html">add_constrain_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; RasterLayer&gt;</i>)</a></code> 
@@ -227,6 +237,11 @@
           <code><a href="add_priors.html">add_priors()</a></code> 
         </dt>
         <dd>Add priors to an existing distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_pseudoabsence.html">add_pseudoabsence()</a></code> 
+        </dt>
+        <dd>Add pseudo-absence points to a point data set</dd>
       </dl><dl><dt>
           
           <code><a href="set_priors.html">set_priors()</a></code> 
@@ -312,9 +327,9 @@ For instance those previously selected</dd>
         <dd>Create a new scenario based on trained model parameters</dd>
       </dl><dl><dt>
           
-          <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
+          <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; character &gt;</i>)</a></code> 
         </dt>
-        <dd>Project a fitted model to new covariates</dd>
+        <dd>Project a fitted model to a new environment and covariates</dd>
       </dl><dl><dt>
           
           <code><a href="add_constrain.html">add_constrain(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
@@ -325,6 +340,11 @@ For instance those previously selected</dd>
           <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Add constrains to the modelled distribution projection through the MigClim approach</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constrain_adaptability.html">add_constrain_adaptability(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
+        </dt>
+        <dd>Adds an adaptability constrain to a scenario object</dd>
       </dl><dl><dt>
           
           <code><a href="add_constrain_connectivity.html">add_constrain_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; RasterLayer&gt;</i>)</a></code> 
@@ -353,7 +373,7 @@ For instance those previously selected</dd>
         <dd>Summarises a trained model or predictor object</dd>
       </dl><dl><dt>
           
-          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="validate.html">validate(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Validation of distribution object</dd>
       </dl><dl><dt>
@@ -456,7 +476,7 @@ For instance those previously selected</dd>
           
           <code><a href="predictor_transform.html">predictor_transform()</a></code> 
         </dt>
-        <dd>Spatial adjustment of raster stacks</dd>
+        <dd>Spatial adjustment of environmental predictors and raster stacks</dd>
       </dl><dl><dt>
           
           <code><a href="predictor_derivate.html">predictor_derivate()</a></code> 
@@ -477,11 +497,6 @@ For instance those previously selected</dd>
           <code><a href="writeNetCDF.html">writeNetCDF()</a></code> 
         </dt>
         <dd>Save a raster stack to a netcdf file</dd>
-      </dl><dl><dt>
-          
-          <code><a href="create_pseudoabsence.html">create_pseudoabsence()</a></code> 
-        </dt>
-        <dd>Create pseudo absence points over a raster dataset</dd>
       </dl><dl><dt>
           
           <code><a href="find_correlated_predictors.html">find_correlated_predictors()</a></code> 

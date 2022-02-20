@@ -75,21 +75,25 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mod</dt>
-<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with specified predictors</p></dd>
+<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with specified predictors.</p></dd>
 <dt>method</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type of constrain to be added to the scenario. See details.</p></dd>
 <dt>value</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying a fixed constrain or constant in units <code>"m"</code> (Default: <code>NULL</code>).
-For kissmig the value needs to give the number of iteration steps (or within year migration steps).</p></dd>
+<dd><p>For many dispersal <code>constrain</code> this is set as <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying a
+fixed constrain or constant in units <code>"m"</code> (Default: <code>NULL</code>). For kissmig the value needs to
+give the number of iteration steps (or within year migration steps).
+For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
+should be performed.</p></dd>
 <dt>resistance</dt>
 <dd><p>A <code>RasterLayer</code> object describing a resistance surface or barrier for use in connectivity constrains (Default: <code>NULL</code>).</p></dd>
 <dt>...</dt>
-<dd><p>passed on parameters</p></dd>
+<dd><p>passed on parameters. See also the specific methods for adding constrains.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other constrain: 
 <code><a href="add_constrain_MigClim.html">add_constrain_MigClim</a>()</code>,
+<code><a href="add_constrain_adaptability.html">add_constrain_adaptability</a>()</code>,
 <code><a href="add_constrain_dispersal.html">add_constrain_dispersal</a>()</code>,
 <code><a href="add_constrain.html">add_constrain</a>()</code></p></div>
     </div>
