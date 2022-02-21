@@ -751,10 +751,12 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 #' @param type Name to use
 #' @param spde An spde field if specified
 #' @param res Approximate resolution to the projection grid (default: null)
+#' @param settings A settings object
+#' @param joint Whether more than 2 likelihoods are estimated
 #' @keywords utils, internal
 #' @noRd
 inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
-                                       res = NULL, spde = NULL,joint = FALSE){
+                                       res = NULL, spde = NULL, settings = NULL,joint = FALSE){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
@@ -829,6 +831,14 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   nearest_cov <- get_rastervalue(coords = predcoords,
                                  env = cov_object$get_data(df = FALSE),
                                  rm.na = FALSE)
+
+  # Set target variables to bias_value for prediction if specified
+  if(!is.Waiver(settings$get('bias_variable'))){
+    for(i in 1:length(settings$get('bias_variable'))){
+      if(settings$get('bias_variable')[i] %notin% names(nearest_cov)) next()
+      nearest_cov[!is.na(nearest_cov[[settings$get('bias_variable')[i]]]), settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+    }
+  }
 
   # Extract covariates for points
   if(!is.Waiver(offset)) {

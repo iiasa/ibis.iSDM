@@ -586,7 +586,7 @@ methods::setMethod(
 
       # Run the engine setup script
       # FIXME: Do some checks on whether an observation falls into the mesh?
-      x$engine$setup(model)
+      x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)

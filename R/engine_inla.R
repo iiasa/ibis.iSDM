@@ -356,7 +356,7 @@ engine_inla <- function(x,
       },
       # Main INLA training function ----
       # Setup computation function
-      setup = function(self, model, ...){
+      setup = function(self, model, settings,...){
         assertthat::assert_that(
           'background' %in% names(model),
           'biodiversity' %in% names(model),
@@ -394,7 +394,7 @@ engine_inla <- function(x,
         nty <- length( unique( as.character(sapply(model$biodiversity, function(z) z$type)) ) )
 
         # Clean up previous data and integration stacks
-        chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa|stk_pred', self$list_data())
+        chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa|stk_pred|stk_full', self$list_data())
         if(length(chk)>0) self$data[chk] <- NULL
 
         # Now for each dataset create a INLA stack
@@ -436,6 +436,7 @@ engine_inla <- function(x,
 
         # Make projection stack if not directly supplied
         if(is.null(self$data$stk_pred)){
+
           stk_pred <- inla_make_projection_stack(
             stk_resp   = stk_inference,
             model      = model,
@@ -444,6 +445,7 @@ engine_inla <- function(x,
             res        = self$get_data('proj_stepsize'),
             type       = model$biodiversity[[id]]$type,
             spde       = spde,
+            settings   = settings,
             joint      = ifelse(nty > 1, TRUE, FALSE)
           )
           self$set_data('stk_pred', stk_pred)
@@ -560,15 +562,6 @@ engine_inla <- function(x,
         if(!settings$get(what='inference_only')){
           # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
-
-          # Set target variables to bias_value for prediction if specified
-          if(!is.Waiver(settings$get('bias_variable'))){
-            for(i in 1:length(settings$get('bias_variable'))){
-              if(settings$get('bias_variable')[i] %notin% names(stack_data_full)) next()
-              ind <- which(is.na(stack_data_full[['observed']])) # Get rows with non-observed values
-              stack_data_full[[settings$get('bias_variable')[i]]][ind] <- settings$get('bias_value')[i]
-            }
-          }
 
           # Predict on full
           fit_pred <- try({INLA::inla(formula = master_form, # The specified formula
