@@ -84,6 +84,7 @@ species is absent.</p>
   field_occurrence <span class="op">=</span> <span class="st">"Observed"</span>,
   formula <span class="op">=</span> <span class="cn">NULL</span>,
   family <span class="op">=</span> <span class="st">"binomial"</span>,
+  link <span class="op">=</span> <span class="cn">NULL</span>,
   simulate <span class="op">=</span> <span class="cn">FALSE</span>,
   simulate_points <span class="op">=</span> <span class="fl">100</span>,
   simulate_weights <span class="op">=</span> <span class="cn">NULL</span>,
@@ -112,6 +113,8 @@ species is absent.</p>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default is to use all covariates (if specified).</p></dd>
 <dt>family</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default: <code>binomial</code>).</p></dd>
+<dt>link</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default: <code>NULL</code>).</p></dd>
 <dt>simulate</dt>
 <dd><p>Simulate poipa points within its boundaries. Result are passed to <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a></code> (Default: <code>FALSE</code>).</p></dd>
 <dt>simulate_points</dt>
