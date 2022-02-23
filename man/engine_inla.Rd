@@ -15,6 +15,7 @@ engine_inla(
   timeout = NULL,
   barrier = FALSE,
   type = "response",
+  area = "gpc2",
   ...
 )
 }
@@ -38,6 +39,8 @@ engine_inla(
 \item{barrier}{Should a barrier model be added to the model?}
 
 \item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
+
+\item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).}
 
 \item{...}{Other variables}
 

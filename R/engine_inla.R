@@ -18,6 +18,7 @@ NULL
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param barrier Should a barrier model be added to the model?
 #' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: \code{FALSE}) **Not yet implemented**
 #' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature **Not yet implemented**
@@ -40,6 +41,7 @@ engine_inla <- function(x,
                         timeout = NULL,
                         barrier = FALSE,
                         type = "response",
+                        area = "gpc2",
                         # nonconvex.bdry = FALSE,
                         # nonconvex.convex = -0.15,
                         # nonconvex.concave = -0.05,
@@ -64,9 +66,11 @@ engine_inla <- function(x,
                           is.null(timeout) || is.numeric(timeout),
                           is.numeric(cutoff),
                           is.character(type),
+                          is.character(area),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
   type <- match.arg(type, c("predictor", "response"), several.ok = FALSE)
+  area <- match.arg(area, c("gpc", "gpc2", "km"), several.ok = FALSE)
   # Convert the study region
   region.poly <- as(sf::st_geometry(x$background), "Spatial")
 
@@ -123,9 +127,9 @@ engine_inla <- function(x,
     mesh_bar <- mesh_barrier(mesh, region.poly)
   } else { mesh_bar <- new_waiver() }
 
-  # Calculate area in km²
+  # Calculate area
   ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
+    mesh_area(mesh = mesh, region.poly = region.poly, variant = area)
   )
 
   # Create
@@ -484,8 +488,9 @@ engine_inla <- function(x,
         stk_full <- self$get_data('stk_full')
         predcoords <- self$get_data('stk_pred')$predcoords
 
-        # Get families
+        # Get families and links
         fam <- unique( as.character( sapply(model$biodiversity, function(x) x$family) ) )
+        lin <- sapply(model$biodiversity, function(x) x$link)
         # Define control family
         cf <- list()
         for(i in 1:length(fam)) cf[[i]] <- list(link = ifelse(fam[i] == 'poisson','log','cloglog' ))

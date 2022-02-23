@@ -357,7 +357,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
   # Thus making this dependency suggested and optional
   # disfun <- geosphere::distHaversine
-  disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
+  if(longlat){
+    disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
+  } else {
+    disfun <- function(x1, x2) raster::pointDistance(x1, x2, lonlat = longlat)
+  }
 
   if(process_in_parallel){
     check_package("doParallel")

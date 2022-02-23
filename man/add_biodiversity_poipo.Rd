@@ -11,6 +11,7 @@ add_biodiversity_poipo(
   field_occurrence = "Observed",
   formula = NULL,
   family = "poisson",
+  link = NULL,
   separate_intercept = TRUE,
   docheck = TRUE,
   pseudoabsence_settings = NULL,
@@ -24,13 +25,15 @@ add_biodiversity_poipo(
 
 \item{poipo}{A \code{\link{data.frame}}, \code{\link{sf}} or \code{\link{Spatial}}) object of presence-only point occurrences.}
 
-\item{name}{The name of the biodiversity dataset used as internal identifier}
+\item{name}{The name of the biodiversity dataset used as internal identifier.}
 
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified)}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default: Poisson)}
+\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'Poisson'}).}
+
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}

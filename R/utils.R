@@ -654,12 +654,18 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
 #' Mandatory and possible parameters are:
 #' * \code{background} Specifies the extent over which background points are to be sampled.
 #' * \code{nrpoints} The number of background points to be used.
+#' * \code{method} The specific method on how pseudo-absence points should be generated. Available options
+#' are 'random' (Default), 'buffer' to generate only within a buffer of existing points, or 'mcp' to only generate within the
+#' bounding pox of provided points.
+#' * \code{buffer_distance} The numeric value indicating the distance from presence points where absence points are to be created.
 #' * \code{min_ratio} The minimum ratio of absence points relative presence points. Ensures a minimum number of
 #' absence points.
 #' * \code{bias} An optional bias layer over which points should preferentially be sampled.
 #' @param background A [`RasterLayer`] or [`sf`] object over which background points can be sampled. Default is
 #' \code{NULL} is the default and the background is then added when the sampling is first called.
 #' @param nrpoints A [`numeric`] given the number of background points to be created (Default: \code{10 000}).
+#' @param method [`character`] denoting how the sampling should be done. For details for options.
+#' @param buffer_distance [`numeric`] A distance from the observations in which pseudo-absence points are to be generated.
 #' @param min_ratio A [`numeric`] with the minimum Ratio of background points relative to presence points.
 #' Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).
 #' @param bias A [`RasterLayer`] with the same extent and projection and background. Background points will
@@ -680,29 +686,36 @@ NULL
 methods::setGeneric("pseudoabs_settings",
                     signature = methods::signature("background"),
                     function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
+                             method = "random", buffer_distance = 100,
                              bias = NULL, ...) standardGeneric("pseudoabs_settings"))
 
 #' @name pseudoabs_settings
 #' @rdname pseudoabs_settings
-#' @usage \S4method{pseudoabs_settings}{ANY, numeric, numeric, ANY}(background, nrpoints, min_ratio, bias)
+#' @usage \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, ANY}(background, nrpoints, min_ratio, method, buffer_distance, bias)
 methods::setMethod(
   "pseudoabs_settings",
   methods::signature(background = "ANY"),
   function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
+           method = "random", buffer_distance = 100,
            bias = NULL, ...){
     # Check inputs
     assertthat::assert_that(
       is.Raster(background) || inherits(background, 'sf') || is.null(background),
       is.numeric(nrpoints),
       is.numeric(min_ratio),
+      is.character(method),
+      is.numeric(buffer_distance),
       is.Raster(bias) || is.null(bias)
     )
+    method <- match.arg(method, c("random", "buffer", "mcp"), several.ok = FALSE)
     # Create the settings object
     settings <- bdproto(NULL, Settings)
     settings$name <- "Background"
     # Set all options
     settings$set('nrpoints', nrpoints)
     settings$set('min_ratio', min_ratio)
+    settings$set('method', method)
+    settings$set('buffer_distance', buffer_distance)
     settings$set('bias', bias)
     # Other settings
     mc <- match.call(expand.dots = FALSE)
@@ -820,6 +833,9 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   assertthat::assert_that(
     is.finite(raster::cellStats(bg1,'max',na.rm = T)[1])
   )
+
+  # TODO:
+  if(settings$get("method")!= 'random') stop("Other sampling forms not yet implemented!")
   # Generate pseudo absence data
   # Now sample from all cells not occupied
   if(!is.null(bias)){

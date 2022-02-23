@@ -243,6 +243,7 @@ methods::setMethod(
       model[['biodiversity']][[id]][['observations']] <- x$biodiversity$get_data(id) # Observational data
       model[['biodiversity']][[id]][['type']]         <- x$biodiversity$get_types(short = TRUE)[[id]] # Type
       model[['biodiversity']][[id]][['family']]       <- x$biodiversity$get_families()[[id]] # Family
+      model[['biodiversity']][[id]][['link']]         <- x$biodiversity$get_links()[[id]]
       model[['biodiversity']][[id]][['equation']]     <- x$biodiversity$get_equations()[[id]]
       model[['biodiversity']][[id]][['use_intercept']]<- x$biodiversity$data[[id]]$use_intercept # Separate intercept?
       # --- #
@@ -737,12 +738,10 @@ methods::setMethod(
           # Add offset if specified
           if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
           if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
-            if(attr(x$get_latent(), "method") != "poly"){
-              # Update with spatial term
-              form <- update.formula(form, paste0(" ~ . + ",
-                                                  x$engine$get_equation_latent_spatial() )
-              )
-            }
+            # Update with spatial term
+            form <- update.formula(form, paste0(" ~ . + ",
+                                                x$engine$get_equation_latent_spatial())
+            )
           }
         } else{
           # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object

@@ -110,6 +110,11 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$get_family())
     x
   },
+  # Get custom link functions
+  get_links = function(self){
+    x <- lapply(self$data, function(z) z$get_link() )
+    x
+  },
   # Get fields with observation columns
   get_columns_occ = function(self){
     x <- lapply(self$data, function(z) z$get_column_occ())
@@ -211,6 +216,7 @@ BiodiversityDataset <- bdproto(
   id               = character(0),
   equation         = new_waiver(),
   family           = character(0),
+  link             = new_waiver(),
   type             = new_waiver(),
   field_occurrence = character(0),
   data             = new_waiver(),
@@ -266,6 +272,10 @@ BiodiversityDataset <- bdproto(
   get_family = function(self){
     assertthat::assert_that(is.character(self$family))
     self$family
+  },
+  # Get custom link function
+  get_link = function(self){
+    self$link
   },
   # Get data
   get_data = function(self){

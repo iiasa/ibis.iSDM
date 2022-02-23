@@ -24,6 +24,7 @@ NULL
 #' @param strategy Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
 #'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
 #' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.
+#' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
 #' @param ... Other variables
 #' @references
@@ -41,9 +42,10 @@ engine_inlabru <- function(x,
                         offset = c(1,1),
                         cutoff = 1,
                         proj_stepsize = NULL,
-                        timeout = NULL,
                         strategy = "auto",
                         int.strategy = "auto",
+                        area = "gpc2",
+                        timeout = NULL,
                         ...) {
 
   # Check whether INLA package is available
@@ -64,12 +66,14 @@ engine_inlabru <- function(x,
                           is.numeric(cutoff),
                           is.character(strategy),
                           is.character(int.strategy),
+                          is.character(area),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
   )
 
   # Match strategy
   strategy <- match.arg(strategy, c('auto', 'gaussian', 'simplified.laplace', 'laplace', 'adaptive'), several.ok = FALSE)
   int.strategy <- match.arg(int.strategy, c('auto', 'ccd', 'grid', 'eb'), several.ok = FALSE)
+  area <- match.arg(area, c("gpc", "gpc2", "km"), several.ok = FALSE)
 
   # Set inlabru options for strategies. These are set globally
   inlabru::bru_options_set(control.inla = list(strategy = strategy,
@@ -127,7 +131,7 @@ engine_inlabru <- function(x,
 
   # Calculate area in km²
   ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = 'gpc2')
+    mesh_area(mesh = mesh,region.poly = region.poly, variant = area, relative = FALSE)
   )
 
   # Print a message in case there is already an engine object
@@ -678,7 +682,8 @@ engine_inlabru <- function(x,
           suppressWarnings(
             preds <- inla_predpoints(mesh = self$get_data('mesh'),
                                      background = model$background,
-                                     cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
+                                     cov = model$predictors_object$get_data(df = FALSE),
+                                     # cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
                                      proj_stepsize = self$get_data('proj_stepsize'),
                                      spatial = TRUE
             )

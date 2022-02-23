@@ -239,6 +239,9 @@ DistributionModel <- bdproto(
       } else {
         BoomSpikeSlab::plot.lm.spike(obj, y = what)
       }
+    } else if(inherits(self, "XGBOOST-Model")){
+      obj <- self$get_data(x)
+      xgboost::xgb.plot.multi.trees(obj)
     } else {
       self$partial(self$get_data(x), x.vars = NULL)
     }

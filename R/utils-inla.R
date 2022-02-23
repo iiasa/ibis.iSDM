@@ -925,17 +925,17 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
 #' Prediction coordinates for INLA
 #'
 #' @param mesh A [INLA::inla.mesh] object.
-#' @param background A [sf] object containing the background region
-#' @param cov A [data.frame] or [matrix] with the covariates for the modelling
-#' @param proj_stepsize A numeric indication on the prediction stepsize to be used
-#' @param spatial A [logical] flag whether a spatialpoints dataframe should be returned
+#' @param background A [sf] object containing the background region.
+#' @param cov A [data.frame] or [matrix] with the covariates for the modelling.
+#' @param proj_stepsize A numeric indication on the prediction stepsize to be used.
+#' @param spatial A [logical] flag whether a spatialpoints [data.frame] should be returned.
 #' @keywords utils
 #' @noRd
 inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatial = TRUE){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
     inherits(background, 'sf'),
-    is.data.frame(cov) || is.matrix(cov),
+    is.data.frame(cov) || is.matrix(cov) || is.Raster(cov),
     is.null(proj_stepsize) || is.numeric(proj_stepsize),
     is.logical(spatial)
   )
@@ -975,11 +975,18 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
   # Get prediction coordinates
   predcoords <- projgrid$lattice$loc[cellsIn,]
   colnames(predcoords) <- c('x','y')
+
   # Get covariates
-  preds <- get_ngbvalue(coords = predcoords,
-                        env = cov,
-                        longlat = raster::isLonLat(background),
-                        field_space = c('x','y'))
+  if(is.Raster(cov)){
+    preds <- get_rastervalue(coords = predcoords,
+                             env = cov,
+                             rm.na = FALSE)
+  } else {
+    preds <- get_ngbvalue(coords = predcoords,
+                          env = cov,
+                          longlat = raster::isLonLat(background),
+                          field_space = c('x','y'))
+  }
 
   if(spatial){
     # Convert predictors to SpatialPixelsDataFrame as required for inlabru

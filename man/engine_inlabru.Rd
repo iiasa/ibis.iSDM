@@ -14,9 +14,10 @@ engine_inlabru(
   offset = c(1, 1),
   cutoff = 1,
   proj_stepsize = NULL,
-  timeout = NULL,
   strategy = "auto",
   int.strategy = "auto",
+  area = "gpc2",
+  timeout = NULL,
   ...
 )
 }
@@ -33,12 +34,14 @@ engine_inlabru(
 
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})}
 
-\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
-
 \item{strategy}{Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
 \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.}
 
 \item{int.strategy}{Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.}
+
+\item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).}
+
+\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
 \item{...}{Other variables}
 }

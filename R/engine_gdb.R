@@ -127,10 +127,12 @@ engine_gdb <- function(x,
       },
       # Get equation for spatial effect
       get_equation_latent_spatial = function(self, spatial_field = c('x','y'),
-                                             df = 6, knots = 10,...){
+                                             df = 6, knots = 4,...){
         return(
           paste0(
-            'bspatial(',spatial_field[1],',',spatial_field[2],', center = TRUE, df = ',df,', knots = ',knots,')'
+            'bspatial(',spatial_field[1],',',spatial_field[2],', center = TRUE, df = ',df,', knots = ',knots,')',
+            ' + ',
+            'bols(',spatial_field[1],')', '+', 'bols(',spatial_field[2],')', '+', 'bols(',spatial_field[1],',',spatial_field[2],')'
             )
           )
       },

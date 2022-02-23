@@ -4,7 +4,7 @@
 \alias{pseudoabs_settings}
 \title{Specify settings for pseudo-absence sampling from a background}
 \usage{
-\S4method{pseudoabs_settings}{ANY, numeric, numeric, ANY}(background, nrpoints, min_ratio, bias)
+\S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, ANY}(background, nrpoints, min_ratio, method, buffer_distance, bias)
 }
 \arguments{
 \item{background}{A \code{\link{RasterLayer}} or \code{\link{sf}} object over which background points can be sampled. Default is
@@ -14,6 +14,10 @@
 
 \item{min_ratio}{A \code{\link{numeric}} with the minimum Ratio of background points relative to presence points.
 Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).}
+
+\item{method}{\code{\link{character}} denoting how the sampling should be done. For details for options.}
+
+\item{buffer_distance}{\code{\link{numeric}} A distance from the observations in which pseudo-absence points are to be generated.}
 
 \item{bias}{A \code{\link{RasterLayer}} with the same extent and projection and background. Background points will
 be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
@@ -29,6 +33,10 @@ Mandatory and possible parameters are:
 \itemize{
 \item \code{background} Specifies the extent over which background points are to be sampled.
 \item \code{nrpoints} The number of background points to be used.
+\item \code{method} The specific method on how pseudo-absence points should be generated. Available options
+are 'random' (Default), 'buffer' to generate only within a buffer of existing points, or 'mcp' to only generate within the
+bounding pox of provided points.
+\item \code{buffer_distance} The numeric value indicating the distance from presence points where absence points are to be created.
 \item \code{min_ratio} The minimum ratio of absence points relative presence points. Ensures a minimum number of
 absence points.
 \item \code{bias} An optional bias layer over which points should preferentially be sampled.

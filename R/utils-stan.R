@@ -3,7 +3,11 @@
 #' @keywords utils
 #' @noRd
 logistic <- function(a){
-  ilink(a, link = "logit")
+  if(is.data.frame(a)){
+    apply(a, 2, function(x) ilink(x, link = "logit") )
+  } else {
+    ilink(a, link = "logit")
+  }
 }
 
 #' Logit transformation function
@@ -11,8 +15,11 @@ logistic <- function(a){
 #' @keywords utils
 #' @noRd
 logit <- function(a){
-  assertthat::assert_that(is.numeric(a),msg = 'Provided value not numeric')
-  log(a/(1-a))
+  if(is.data.frame(a)){
+    apply(a, 2, function(x) log(x/(1-x))  )
+  } else {
+    log(a/(1-a))
+  }
 }
 
 #' Inverse transformation function for the link function

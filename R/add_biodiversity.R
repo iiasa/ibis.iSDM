@@ -7,10 +7,11 @@ NULL
 #' distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param poipo A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-only point occurrences.
-#' @param name The name of the biodiversity dataset used as internal identifier
+#' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
-#' @param family A [`character`] stating the family to be used (Default: Poisson)
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default: \code{'Poisson'}).
+#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
@@ -48,7 +49,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_poipo"))
 
 #' @name add_biodiversity_poipo
@@ -57,13 +58,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
-                            is.character(family),
+                            is.character(family), is.null(link) || is.character(link),
                             is.logical(separate_intercept),
                             is.logical(docheck)
                             )
@@ -92,6 +93,7 @@ methods::setMethod(
               id = id,
               equation = formula,
               family = family,
+              link = link,
               type = "poipo",
               field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipo, field_occurrence),
@@ -108,11 +110,12 @@ methods::setMethod(
 #' distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param poipa A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-absence point occurrences.
-#' @param name The name of the biodiversity dataset used as internal identifier
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified)
-#' @param family A [`character`] stating the family to be used (Default: binomial)
-#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
+#' @param name The name of the biodiversity dataset used as internal identifier.
+#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
+#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
+#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in.
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down
@@ -144,7 +147,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipa",
   signature = methods::signature("x", "poipa"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL, separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
@@ -152,12 +155,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", separate_intercept = TRUE, docheck = TRUE, ... ) {
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL, separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipa, "Spatial") || inherits(poipa, "sf") || inherits(poipa, "data.frame") || inherits(poipa, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
+                            is.null(link) || is.character(link),
                             is.logical(separate_intercept),
                             is.logical(docheck)
     )
@@ -173,11 +177,7 @@ methods::setMethod(
     }
 
     # Record presence absence to 0 and 1
-    if(is.character(poipa[[field_occurrence]]) ){
-      # TODO:
-      stop("Guessing conversion to be coded")
-    }
-    poipa[[field_occurrence]] <- as.numeric(poipa[[field_occurrence]]) # Convert to numeric for ocassional factor formatting
+    poipa[[field_occurrence]] <- as.numeric(poipa[[field_occurrence]]) # Convert to numeric for occasional factor formatting
 
     # Convert formula if necessary
     formula = to_formula(formula)
@@ -193,6 +193,7 @@ methods::setMethod(
               id = id,
               equation = formula,
               family = family,
+              link = link,
               type = "poipa",
               field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipa,field_occurrence),
@@ -214,6 +215,7 @@ methods::setMethod(
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{poisson}).
+#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE})
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
 #' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL})
@@ -251,7 +253,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
-  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson",
+  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
@@ -261,7 +263,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson",
+  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson", link = NULL,
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -269,6 +271,7 @@ methods::setMethod(
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpo, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
+                            is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
                             is.null(simulate_weights) || inherits(simulate_weights, "Raster"),
                             is.logical(separate_intercept)
@@ -319,7 +322,7 @@ methods::setMethod(
 
       # Add simulated poipo object instead
       add_biodiversity_poipo(x, poipo = poipo, name = paste0(name, "_simulated"),
-                             field_occurrence = field_occurrence, formula = formula, family = family, ... )
+                             field_occurrence = field_occurrence, formula = formula, family = family, link = link, ... )
     } else {
       # Convert formula if necessary
       formula = to_formula(formula)
@@ -335,6 +338,7 @@ methods::setMethod(
                 id = id,
                 equation = formula,
                 family = family,
+                link = link,
                 type = "polpo",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo,field_occurrence),
@@ -359,6 +363,7 @@ methods::setMethod(
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
+#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation.
 #' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
@@ -395,7 +400,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpa",
   signature = methods::signature("x", "polpa"),
-  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
+  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpa"))
 
@@ -405,7 +410,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
-  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial",
+  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
            simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -413,6 +418,7 @@ methods::setMethod(
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(polpa, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family),
+                            is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
                             is.null(simulate_weights) || inherits(simulate_weights, "Raster"),
                             is.logical(separate_intercept)
@@ -488,7 +494,7 @@ methods::setMethod(
 
       # Add simulated poipa object instead
       add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
-                             field_occurrence = field_occurrence, formula = formula, family = family, ... )
+                             field_occurrence = field_occurrence, formula = formula, family = family, link = link, ... )
     } else {
 
       # If no points are simulated, ensure that the polygon has objects with at least 2 factor levels
@@ -509,6 +515,7 @@ methods::setMethod(
                 id = id,
                 equation = formula,
                 family = family,
+                link = link,
                 type = "polpa",
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo, field_occurrence),
