@@ -336,38 +336,91 @@ BiodiversityScenario <- bdproto(
     return(out)
   },
   # Save object
-  save = function(self, fname, type = 'gtif', dt = 'FLT4S'){
+  save = function(self, fname, type = 'tif', dt = 'FLT4S'){
     assertthat::assert_that(
       !missing(fname),
       is.character(fname),
-      type %in% c('gtif','gtiff','tif','nc','ncdf', 'feather'),
-      'fits' %in% self$ls(),
-      dt %in% c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S')
+      is.character(type),
+      !is.Waiver(self$get_scenarios()),
+      is.character(dt)
     )
-    type <- tolower(type)
+    # Match input types
+    type <- match.arg(type, c('gtif','gtiff','tif','nc','ncdf', 'feather'), several.ok = FALSE)
+    dt <- match.arg(dt, c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S'), several.ok = FALSE )
+
+    if(file.exists(fname)) warning('Overwritting existing file...')
 
     # Respecify type if output filename has already been set
     if(gsub('\\.','',raster::extension(fname)) != type) type <- gsub('\\.','',raster::extension(fname))
 
-    # Get raster file in fitted object
-    cl <- sapply(self$scenarios, class)
-    ras <- self$scenarios[[grep('raster', cl,ignore.case = T)]]
+    # Change output type for stars
+    dtstars <- switch(dt,
+                    "LOG1S" = "Byte",
+                    "INT1U" = "UInt16",
+                    "INT1S" = "Int16",
+                    "INT2U" = "UInt16",
+                    "INT2S" = "Int16",
+                    "INT4S" = "Int32",
+                    "INT4U" = "UInt32",
+                    "FLT4S" = "Float32",
+                    "FLT8S" = "Float64"
+    )
 
-    # Check that no-data value is not present in ras
-    assertthat::assert_that(any(!cellStats(ras,min) <= -9999),msg = 'No data value -9999 is potentially in prediction!')
+    # Get scenario object
+    ras <- self$get_scenarios()
+    # If Migclim has been computed, save as well
+    if(!is.Waiver(self$scenarios_migclim)) ras_migclim <- self$get_scenarios("scenarios_migclim")
 
-    if(file.exists(fname)) warning('Overwritting existing file...')
     if(type %in% c('gtif','gtiff','tif')){
-      # Save as geotiff
-      writeGeoTiff(ras, fname = fname, dt = dt)
+      # Write stars output for every band
+      for(i in 1:length(ras)){
+        # Band specific output
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], raster::extension(fname))
+        stars::write_stars(
+          obj = ras,
+          layer = i,
+          dsn = fname2,
+          options = c("COMPRESS=DEFLATE"),
+          type = ifelse(is.factor(ras[[1]]), "Byte", dtstars),
+          NA_value = NA_real_,
+          update = ifelse(file.exists(fname2), TRUE, FALSE),
+          normalize_path = TRUE,
+          progress = TRUE
+        )
+      }
+      if(!is.Waiver(self$scenarios_migclim)){
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        writeGeoTiff(ras_migclim, fname = fname, dt = dt)
+      }
     } else if(type %in% c('nc','ncdf')) {
-      # Save as netcdf
-      # TODO: Potentially change the unit descriptions
-      writeNetCDF(ras, fname = fname, varName = 'iSDM prediction', varUnit = "",varLong = "")
+      # Save as netcdf, for now in individual files
+      for(i in 1:length(ras)){
+        # Band specific output
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], raster::extension(fname))
+        stars::write_stars(
+          obj = ras,
+          layer = 1:length(ras),
+          dsn = fname2,
+          type = ifelse(is.factor(ras[[1]]), "Byte", dtstars),
+          NA_value = NA_real_,
+          update = ifelse(file.exists(fname2), TRUE, FALSE),
+          normalize_path = TRUE,
+          progress = TRUE
+        )
+      }
+      if(!is.Waiver(self$scenarios_migclim)){
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        writeNetCDF(ras_migclim, fname = fname, varName = "MigCLIM output", dt = dt)
+      }
     } else if(type %in% 'feather'){
       assertthat::assert_that('feather' %in% installed.packages()[,1],
                               msg = 'Feather package not installed!')
+      fname <- paste0( tools::file_path_sans_ext(fname), "__migclim", ".feather")
       feather::write_feather(ras, path = fname)
+      if(!is.Waiver(self$scenarios_migclim)){
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        feather::write_feather(ras, path = fname)
+      }
     }
     invisible()
   }

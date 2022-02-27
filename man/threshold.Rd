@@ -68,6 +68,9 @@ The following options are currently implemented:
 \item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
 }
 }
+\note{
+Settings such as \code{truncate} will be ignored in scenario-based predictions!
+}
 \examples{
 \dontrun{
  # Where mod is an estimated DistributionModel

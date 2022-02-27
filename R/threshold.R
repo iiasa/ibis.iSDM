@@ -284,6 +284,8 @@ methods::setMethod(
 
 #' Thresholds in scenario estimation
 #'
+#' @note
+#' Settings such as \code{truncate} will be ignored in scenario-based predictions!
 #' @name threshold
 #' @inheritParams threshold
 #' @rdname threshold

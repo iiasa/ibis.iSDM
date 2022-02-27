@@ -108,6 +108,7 @@ Collate:
     'utils-gdb.R'
     'utils-stan.R'
     'validate.R'
+    'write_output.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
 Biarch: true

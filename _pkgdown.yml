@@ -112,8 +112,7 @@ reference:
       - predictor_transform
       - predictor_derivate
       - clean_rasterfile
-      - writeGeoTiff
-      - writeNetCDF
+      - write_output
       - has_keyword("utils")
 
   - title: Class definitions and methods

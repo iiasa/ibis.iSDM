@@ -289,30 +289,32 @@ methods::setMethod(
     } else {
       # TODO: Eventually make this work better
       myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
-      temp <- raster::raster(extent(x$background),resolution = 1)
+      temp <- raster::raster(extent(x$background), resolution = 1)
     }
 
     # Rasterize the range
     layer$id <- 1:nrow(layer) # Assign an id if not already existing
+    layer$val <- 1e-3 # 1e-3 Representing belief of experts being wrong
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(layer, temp, field = NULL)
+      ras_range <- fasterize::fasterize(layer, temp, field = "val",background = NA)
     } else {
-      ras_range <- raster::rasterize(layer, temp,field = NULL)
+      ras_range <- raster::rasterize(layer, temp,field = "val",background = NA)
     }
 
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
+      dis[is.na(dis)] <- 1e-10
+      dis <- raster::mask(dis, x$background)
       names(dis) <- "range_binary"
+      # Log transform
+      dis <- log(dis)
     } else if(method == 'distance'){
-      # TODO: The below can be much more sophisticated.
       # - For instance adding a exponential decay
       # Calculate the linear distance
       dis <- raster::distance(ras_range)
-      dis <- raster::mask(dis, x$background)
-      # Set areas not intersecting with range to 0
+      # Set areas not intersecting with range to val
       suppressMessages( suppressWarnings( layer <- sf::st_buffer(layer, 0)) )
-
       suppressMessages(
         dis <- raster::mask(dis,
                         x$background[unlist( sf::st_intersects(layer, x$background) ),]
@@ -320,9 +322,14 @@ methods::setMethod(
       )
       # If max distance is specified
       if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
-      # Convert to relative for better scaling
-      dis <- 1 - predictor_transform(dis, option = 'norm') #1 - (dis / cellStats(dis,'max') )
+      # Now scale all values linear with distance
+      rr <- cellStats(dis,'range') |> rev()
+      dis[] <- (dis[] - rr[1])/diff(rr) * diff(c(1e-6, unique(layer$val))) + 1e-6
+      dis[is.na(dis)] <- 1e-10
+      dis <- raster::mask(dis, x$background)
       names(dis) <- "range_distance"
+      # Log transform
+      dis <- log(dis)
     }
 
     # Check whether an offset exists already

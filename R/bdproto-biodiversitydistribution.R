@@ -148,7 +148,7 @@ BiodiversityDistribution <- bdproto(
   # Set Engine
   set_engine = function(self, x) {
     assertthat::assert_that(inherits(x, "Engine"))
-    if (!is.Waiver(self$engine)) warning("Overwriting previously defined engine.")
+    if(!is.Waiver(self$engine)) warning("Overwriting previously defined engine.")
     bdproto(NULL, self, engine = x)
   },
   # Get Engine
@@ -171,6 +171,10 @@ BiodiversityDistribution <- bdproto(
   get_offset = function(self){
     if(is.Waiver(self$offset)) return( self$offset() )
     names( self$offset )
+  },
+  # Remove offsets
+  rm_offset = function(self){
+    bdproto(NULL, self, offset = new_waiver() )
   },
   # Plot offset
   plot_offsets = function(self){

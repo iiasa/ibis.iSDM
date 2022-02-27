@@ -149,7 +149,7 @@ DistributionModel <- bdproto(
     self$model$runname
   },
   # Plot the prediction
-  plot = function(self, what = 'mean',...){
+  plot = function(self, what = 'mean'){
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
       assertthat::assert_that(is.Raster(pred))
@@ -160,8 +160,8 @@ DistributionModel <- bdproto(
            main = paste0(self$model$runname, ' prediction (',what,')'),
            box = FALSE,
            axes = TRUE,
-           colNA = NA, col = ibis_colours[['sdm_colour']],...)
-
+           colNA = NA, col = ibis_colours[['sdm_colour']]
+           )
     } else {
       message(
         paste0('No model predictions found.')

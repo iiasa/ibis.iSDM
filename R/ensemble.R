@@ -53,8 +53,10 @@ methods::setMethod(
     }
 
     # Further checks
+    assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
+                            msg = "No use calculating an ensemble on one object only..."
+    )
     assertthat::assert_that(
-      length(mods)>=2, # Need at least 2 otherwise this does not make sense
       is.character(method),
       is.character(layer),
       is.null(weights) || is.vector(weights)
@@ -70,6 +72,12 @@ methods::setMethod(
         all( sapply(mods, function(x) !is.Waiver(x$get_data('prediction')) ) ),
         msg = "All distribution models need a fitted prediction object!"
       )
+      # Check that layer is present in supplied mods
+      assertthat::assert_that(
+        all( sapply(mods, function(x) layer %in% names(x$get_data('prediction')) ) ),
+        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+      )
+
       # Check that weight lengths is equal to provided distribution objects
       if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
       # If weights vector is numeric, standardize the weights
@@ -144,6 +152,11 @@ methods::setMethod(
       all( sapply(mods, function(x) !is.Waiver(x$get_scenarios()) ) ),
       msg = "All distribution models need a fitted scenario object!"
     )
+    # Check that layer is present in supplied mods
+    assertthat::assert_that(
+      all( sapply(mods, function(x) layer %in% names(x$get_scenarios()) ) ),
+      msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+    )
     # Check that weight lengths is equal to provided distribution objects
     if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
     # If weights vector is numeric, standardize the weights
@@ -169,10 +182,11 @@ methods::setMethod(
     } else if(method == 'min.sd'){
       stop("This has not been reasonably implemented in this context.")
     }
-    out <- cbind( lmat[,1:3], "ensemble" = out ) |> as.data.frame()
+    # Add dimensions to output
+    out <- cbind( sf::st_coordinates(mods[[1]]$get_scenarios()[layer]), "ensemble" = out ) |> as.data.frame()
 
     # Convert to stars
-    out <- out |> stars:::st_as_stars.data.frame(out,dims = c(1,2,3),coords = 1:2)
+    out <- out |> stars:::st_as_stars.data.frame(out, dims = c(1,2,3), coords = 1:2)
     # Rename dimension names
     out <- out |> stars:::st_set_dimensions(names = c("x", "y", "band"))
     # Also calculate coefficient of variation across predictions
