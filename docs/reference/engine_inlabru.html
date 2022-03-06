@@ -96,9 +96,10 @@ allowing full integrated inference.</p>
   offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,
   cutoff <span class="op">=</span> <span class="fl">1</span>,
   proj_stepsize <span class="op">=</span> <span class="cn">NULL</span>,
-  timeout <span class="op">=</span> <span class="cn">NULL</span>,
   strategy <span class="op">=</span> <span class="st">"auto"</span>,
   int.strategy <span class="op">=</span> <span class="st">"auto"</span>,
+  area <span class="op">=</span> <span class="st">"gpc2"</span>,
+  timeout <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -121,13 +122,15 @@ allowing full integrated inference.</p>
 <dd><p>The minimum allowed distance between points on the mesh.</p></dd>
 <dt>proj_stepsize</dt>
 <dd><p>The stepsize in coordinate units between cells of the projection grid (Default: <code>NULL</code>)</p></dd>
-<dt>timeout</dt>
-<dd><p>Specify a timeout for INLA models in sec. Afterwards it passed.</p></dd>
 <dt>strategy</dt>
 <dd><p>Which aproximation to use for the joint posterior. Options are <code>"auto"</code>, <code>"adaptative"</code>,
 <code>"gaussian"</code>, <code>"simplified.laplace"</code> &amp; <code>"laplace"</code>.</p></dd>
 <dt>int.strategy</dt>
 <dd><p>Integration strategy. Options are <code>"auto"</code>,<code>"grid"</code>, <code>"eb"</code> &amp; <code>"ccd"</code>.</p></dd>
+<dt>area</dt>
+<dd><p>Accepts a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the type of area calculation to be done on the mesh (Default: <code>'gpc2'</code>).</p></dd>
+<dt>timeout</dt>
+<dd><p>Specify a timeout for INLA models in sec. Afterwards it passed.</p></dd>
 <dt>...</dt>
 <dd><p>Other variables</p></dd>
 </dl></div>

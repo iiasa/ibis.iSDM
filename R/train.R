@@ -165,12 +165,9 @@ methods::setMethod(
       model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
       # Also set predictor names
       model[['predictors_names']] <- x$get_predictor_names()
-      # Try to guess predictor types
-      # Since [add_predictors] splits all factorized raster layers into individual layer
-      # we can say with certainty that layers with only two unique values are factor
-      lu <- apply(model[['predictors']][model[['predictors_names']]],
-                  2, function(x) length(unique(na.omit( x[] ) )))
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu >2 ,'numeric','factor') )
+      # Get predictor types
+      lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
+      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric') )
       # Assign attribute to predictors to store the name of object
       model[['predictors_object']] <- x$predictors
       rm(lu)
@@ -284,6 +281,7 @@ methods::setMethod(
       miss <- complete.cases(env)
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       env <- subset(env, miss)
+      if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na'.")
       # Add intercept
       env$Intercept <- 1
 
@@ -348,18 +346,12 @@ methods::setMethod(
           bg <- x$engine$get_data("template")
           if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
 
-          pres <- raster::rasterize( model[['biodiversity']][[id]]$observations[,c('x','y')],
-                                    bg, fun = 'count', background = 0)
-          ce <- raster::cellFromXY(pres, model[['biodiversity']][[id]]$observations[,c('x','y')])
-          # Get new presence data
-          obs <- cbind(
-            data.frame(observed = raster::values(pres)[ce],
-                       raster::xyFromCell(pres, ce) # Center of cell
-              )
-            ) |> unique()
+          obs <- aggregate_observations2grid(df = model[['biodiversity']][[id]]$observations,
+                                              template = bg,field_occurrence = "observed")
+
           envs <- get_rastervalue(
             coords = obs[,c('x','y')],
-            env = x$predictors$get_data(df = FALSE)[model[['predictors_names']][which( model[['predictors_names']] %notin% co )]],
+            env = x$predictors$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
             rm.na = TRUE
           )
         } else {
@@ -423,10 +415,10 @@ methods::setMethod(
       # Limit zones
       zones <- subset(x$limits, limit %in% unique(zones$limit) )
       # Now clip all predictors and background to this
-      model$background <- suppressMessages(suppressWarnings( st_union(st_intersection(zones, model$background),by_feature = TRUE) ))
+      model$background <- suppressMessages(suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) ))
 
       model$predictors[which( is.na(
-        point_in_polygon(poly = zones,points = model$predictors[,c('x','y')] )[['limit']]
+        point_in_polygon(poly = zones, points = model$predictors[,c('x','y')] )[['limit']]
       )),model$predictors_names] <- NA # Fill with NA
 
       # The same with offset if specified
@@ -457,15 +449,26 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Check potential for rw1 fits
           if(settings$get('only_linear') == FALSE){
-            var_rw1 <- apply(model$biodiversity[[id]][['predictors']], 2, function(x) length(unique(x)))
-            # var_rw1 <- names(which(var_rw1 > 100)) # Get only those greater than 150 unique values (arbitrary)
-            var_rw1 <- names(var_rw1)[names(var_rw1) %in% model$biodiversity[[id]][['predictors_names']]]
-            # Set remaining variables to linear
-            var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
+            # Get Numeric variables
+            vf <- model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="numeric"]
+            var_rw1 <- vf
+            # Set remaining variables to linear, especially if they are factors
+            var_lin <- c()
+            if(any(model$biodiversity[[id]]$predictors_types$type=="factor")){
+              vf <- model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="factor"]
+              var_lin <- c(var_lin, names(explode_factor(model$biodiversity[[id]]$predictors[[vf]], vf)) )
+            } else {
+              var_lin <- model$biodiversity[[id]][['predictors_names']][which( model$biodiversity[[id]][['predictors_names']] %notin% var_rw1 )]
+            }
           } else {
             var_rw1 <- c()
             # Set remaining variables to linear
-            var_lin <- model$biodiversity[[id]][['predictors_names']]
+            var_lin <- model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="numeric"]
+            # If any factors are present, split them and add too
+            if(any(model$biodiversity[[id]]$predictors_types$type=="factor")){
+              vf <- model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="factor"]
+              var_lin <- c(var_lin, names(explode_factor(model$biodiversity[[id]]$predictors[[vf]], vf)) )
+            }
           }
 
           # Construct formula with all variables
@@ -587,7 +590,7 @@ methods::setMethod(
 
       # Run the engine setup script
       # FIXME: Do some checks on whether an observation falls into the mesh?
-      x$engine$setup(model, settings)
+      model <- x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -698,8 +701,7 @@ methods::setMethod(
         # Default equation found
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Construct formula with all variables
-          # Now using offset directly instead
-          form <- "observed ~ " #paste( 'observed' ,ifelse(model$biodiversity[[id]]$family=='poisson', '',''), '~ ')
+          form <- "observed ~ "
           if(!is.Waiver(model$priors)){
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
@@ -716,7 +718,8 @@ methods::setMethod(
               # Add linear predictors
               form <- paste(form, paste0('bols(',miss,')',collapse = ' + '))
               if(is.Waiver(settings$get('only_linear'))){
-                # And smooth effects
+                # And smooth effects for all numeric data
+                miss <- miss[ miss %in% model$predictors_types$predictors[which(model$predictors_types$type=="numeric")] ]
                 form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
                                                   collapse = ' + '
                 ))
@@ -732,6 +735,12 @@ methods::setMethod(
                                                 collapse = ' + '
               ))
             }
+            # Add also random effect if there are any factors? THIS currently crashes when there are too few factors
+            # if(any(model$predictors_types$type=="factor")){
+            #   form <- paste(form, ' + ' ,paste0('brandom(',
+            #                              model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'factor')],
+            #                              ')',collapse = " + "))
+            # }
           }
           # Convert to formula
           form <- to_formula(form)

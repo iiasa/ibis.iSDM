@@ -463,6 +463,10 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
     if(inherits(coords,"sf")) coords <- sf::st_coordinates(coords)
     ex[["x"]] <- as.numeric(coords[,1]); ex[["y"]] <- as.numeric(coords[,2])
   }
+  # Convert to factor if any
+  if(any(is.factor(env))){
+    ex[,names(env)[which(is.factor(env))]] <- factor(ex[,names(env)[which(is.factor(env))]])
+  }
 
   if(rm.na){
     ex <- subset(ex, complete.cases(ex))

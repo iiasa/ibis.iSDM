@@ -401,8 +401,52 @@ engine_inla <- function(x,
         chk <- grep('stk_int|stk_poipo|stk_poipa|stk_polpo|stk_polpa|stk_pred|stk_full', self$list_data())
         if(length(chk)>0) self$data[chk] <- NULL
 
+        # Re-format the full predictors if there are any factor variables
+        # FIXME: Potentially outsource?
+        if(any(model$predictors_types$type=="factor")){
+          vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+          for(k in vf){
+            o <- explode_factor(model$predictors[[k]],name = k)
+            model$predictors <- cbind(model$predictors, o)
+            model$predictors_names <- c(model$predictors_names, colnames(o))
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = colnames(o), type = "numeric") )
+            # Finally remove the original column from the predictor object
+            model$predictors[[k]] <- NULL
+            model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
+            model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
+            # FIXME: Hacky solution as to not overwrite predictor object
+            ras_back <- model$predictors_object$data
+            # Explode the columns in the raster object
+            model$predictors_object$data <- raster::addLayer(
+              model$predictors_object$data,
+              explode_factorized_raster(model$predictors_object$data[[k]])
+            )
+            model$predictors_object$data <- raster::dropLayer(model$predictors_object$data, k)
+          }
+        } else { ras_back <- new_waiver() }
+
         # Now for each dataset create a INLA stack
         for(id in 1:length(model$biodiversity) ){
+
+          # If there any factor variables split them per type and explode them
+          if(any(model$biodiversity[[id]]$predictors_types$type=="factor")){
+            vf <- model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="factor"]
+            fv <- model$biodiversity[[id]]$predictors[vf]
+            for(k in 1:ncol(fv)){
+              o <- explode_factor(fv[,k],name = colnames(fv)[k])
+              # Add
+              model$biodiversity[[id]]$predictors <- cbind(model$biodiversity[[id]]$predictors, o)
+              model$biodiversity[[id]]$predictors_names <- c(model$biodiversity[[id]]$predictors_names, colnames(o))
+              model$biodiversity[[id]]$predictors_types <- rbind(model$biodiversity[[id]]$predictors_types,
+                                                                 data.frame(predictors = colnames(o), type = "numeric") )
+              # Finally remove the original column from the predictor object
+              model$biodiversity[[id]]$predictors[[colnames(fv)[k]]] <- NULL
+              model$biodiversity[[id]]$predictors_names <- model$biodiversity[[id]]$predictors_names[-which( model$biodiversity[[id]]$predictors_names == colnames(fv)[k] )]
+              model$biodiversity[[id]]$predictors_types <- subset(model$biodiversity[[id]]$predictors_types, subset = predictors != colnames(fv)[k])
+
+            }
+          }
           # Calculate observation stack INLA stack
           # Save stacks by id instead of type
           self$make_stack(model = model$biodiversity[[id]],
@@ -463,7 +507,8 @@ engine_inla <- function(x,
         self$set_data('stk_full',
                       INLA::inla.stack(stk_inference, stk_pred$stk_proj)
                       )
-        invisible()
+        if(!is.Waiver(ras_back)) model$predictors_object$data # Overwrite model object back to avoid issues with other engines. Hacky!
+        return(model)
       },
       train = function(self, model, settings) {
         # Check that all inputs are there
@@ -475,7 +520,7 @@ engine_inla <- function(x,
           any(  (c('stk_full','stk_pred') %in% names(self$data)) ),
           inherits(self$get_data('stk_full'),'inla.data.stack')
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Get all datasets with id. This includes the data stacks and integration stacks
@@ -606,12 +651,15 @@ engine_inla <- function(x,
           }
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection
-          if(length(fam)==1){
-            if(fam == 'poisson') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
-            if(fam == 'binomial') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- logistic(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
-          } else{
-            # Joint likelihood of Poisson log and binomial cloglog following Simpson et al.
-            post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
+          # Back-transform for predictor
+          if(self$get_data("params")$type == "predictor"){
+              if(length(fam)==1){
+                if(fam == 'poisson') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
+                if(fam == 'binomial') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- logistic(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
+            } else {
+              # Joint likelihood of Poisson log and binomial cloglog following Simpson et al.
+              post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
+            }
           }
           post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
           post$cv <- post$mean / post$sd

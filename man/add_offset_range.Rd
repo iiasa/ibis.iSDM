@@ -4,39 +4,41 @@
 \alias{add_offset_range}
 \title{Specify a expert-based species range as offset}
 \usage{
-add_offset_range(
-  x,
-  layer,
-  method = "distance",
-  distance_max = 150000,
-  add = TRUE
-)
+add_offset_range(x, layer, distance_max = Inf, presence_prop = 0.9, add = TRUE)
 
 \S4method{add_offset_range}{BiodiversityDistribution, raster}(x, layer)
 
-\S4method{add_offset_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
+\S4method{add_offset_range}{BiodiversityDistribution, sf}(x, layer)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
 \item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
 
-\item{method}{\code{\link{character}} describing how the range should be included (Options: \code{"binary"} | \code{"distance"}).}
+\item{distance_max}{A \code{\link{numeric}} threshold on the maximum distance beyond the range that should be considered
+to have a high likelihood of containing species occurrences (Default: \code{Inf} \link{m}). Can be set to \code{NULL} or \code{0}
+to indicate that no distance should be calculated.}
 
-\item{distance_max}{Numeric threshold on the maximum distance (Default: \code{150000} \link{m}).}
+\item{presence_prop}{\code{\link{numeric}} giving the proportion of all records expected to be inside the range. By
+default this is set to \code{0.9} indicating that 10\% of all records are likely outside the range.}
 
-\item{add}{\code{\link{logical}} specifiying whether new offset is to be added. Setting
+\item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 }
 \description{
-This function has additional nuance compared to the more generic
-\code{\link[=add_offset]{add_offset()}}, allowing to specify transformations and modifications.
-It is customized specifically for expert-based ranges as offsets.
+This function has additional options compared to the more generic
+\code{\link[=add_offset]{add_offset()}}, allowing customized options specifically for expert-based ranges as offsets or spatialized
+polygon information on species occurrences.
+If even more control is needed, the user is informed of the \pkg{bossMaps} package Merow et al. (2017). The \pkg{bossMaps} package
+calculates - based on supplied point information - the probability of occurrences being inside vs outside the
+range map and can thus be used as a method to 'improve' the mapping of a species range.
 }
 \details{
-As options allow specifying including the range either as binary or using distance
-as parameter following Merow et al. (2017). In this case the existing range needs
-to be transformed first, for instance using the \pkg{bossMaps} package.
+The output created by this function creates a \code{\link{RasterLayer}} to be added to a provided distribution object. Offsets
+in regression models are likelihood specific as they are added directly to the overall estimate of \code{`y^hat`}.
+
+Note that all offsets created by this function are by default log-transformed before export. Background values
+(e.g. beyond \code{\link{distance_max}}) are set to a very small constant (\code{1e-10}).
 }
 \references{
 \itemize{
@@ -45,10 +47,11 @@ to be transformed first, for instance using the \pkg{bossMaps} package.
 }
 }
 \seealso{
-\link{bossMaps}
+\code{\link{bossMaps}}
 
 Other offset: 
 \code{\link{add_offset_bias}()},
+\code{\link{add_offset_elevation}()},
 \code{\link{add_offset}()}
 }
 \concept{offset}

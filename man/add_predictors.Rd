@@ -12,6 +12,7 @@ add_predictors(
   derivates = "none",
   bgmask = TRUE,
   harmonize_na = FALSE,
+  explode_factors = FALSE,
   priors = NULL,
   ...
 )
@@ -38,6 +39,8 @@ add_predictors(
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
 
 \item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
+
+\item{explode_factors}{\code{\link{logical}} of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
 

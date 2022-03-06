@@ -56,7 +56,7 @@ engine_gdb <- function(x,
                           empirical_risk %in% c('inbag','oobag','none')
                           )
   # Match type
-  type <- match.arg(type, choices = c("link", "response", "class"),several.ok = FALSE)
+  type <- match.arg(type, choices = c("link", "response", "class"), several.ok = FALSE)
   # Get background
   background <- x$background
 
@@ -188,6 +188,11 @@ engine_gdb <- function(x,
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
+          # Check that factors have been correctly set if any
+          if(any(model$predictors_types$type=="factor")){
+            df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]])
+          }
+
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
 
@@ -221,6 +226,8 @@ engine_gdb <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+          # Weights for IWLR
+          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
 
           # If family is not poisson, assume factor distribution for response
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
@@ -253,6 +260,7 @@ engine_gdb <- function(x,
         # Get boosting control and family data
         bc <- self$get_data('bc')
         bc$trace <- settings$get('verbose') # Reset trace as specified
+        params <- self$get_data('params')
         fam <- self$get_data('family')
 
         # All other needed data for model fitting
@@ -368,6 +376,7 @@ engine_gdb <- function(x,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,
+            "params" = params,
             "fit_best_equation" = equation,
             "prediction" = prediction
           ),
@@ -406,25 +415,55 @@ engine_gdb <- function(x,
             # Unlike the effects function, build specific predictor for target variable(s) only
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
             assertthat::assert_that( all( x.var %in% variables), msg = 'x.var variable not found in model!' )
-            variable_range <- range(self$model$predictors[[x.var]],na.rm = TRUE)
+            # Special treatment for factors
+            if(any(model$predictors_types$type=="factor")){
+              if(x.var %in% model$predictors_types$predictors[model$predictors_types$type=="factor"]){
+                variable_range <- levels(self$model$predictors[,x.var])
+              } else {
+                variable_range <- range(self$model$predictors[[x.var]],na.rm = TRUE)
+              }
+            } else {
+              variable_range <- range(self$model$predictors[[x.var]],na.rm = TRUE)
+            }
 
             # Create dummy data.frame
-            dummy <- as.data.frame(matrix(nrow = variable_length))
-            dummy[,x.var] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+            if(is.character(variable_range)){
+              # For factors, just add them
+              dummy <- as.data.frame(matrix(nrow = length(variable_range)))
+              dummy[,x.var] <- factor(variable_range)
+            } else {
+              dummy <- as.data.frame(matrix(nrow = variable_length))
+              dummy[,x.var] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+            }
             # For the others
             if(is.null(constant)){
-              # Calculate mean
-              constant <- apply(self$model$predictors,2, function(x) mean(x, na.rm=T))
-              dummy <- cbind(dummy,t(constant))
+              if(any(self$model$predictors_types$type=='factor')){
+                # Numeric names
+                nn <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='numeric')]
+                constant <- apply(self$model$predictors[,nn], 2, function(x) mean(x, na.rm=T))
+                dummy <- cbind(dummy,t(constant))
+                # For each factor duplicate the entire matrix and add factor levels
+                # nf <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='factor')]
+                # for(n in nf){
+                #   var <- data.frame( factor( rep(levels(self$model$predictors[,nf]), nrow(dummy)) ) )
+                #   names(var) <- n
+                #   dummy <- cbind(dummy,var);rm(var)
+                # }
+              } else {
+                # Calculate mean
+                constant <- apply(self$model$predictors, 2, function(x) mean(x, na.rm=T))
+                dummy <- cbind(dummy,t(constant))
+              }
             } else {
               dummy[,variables] <- constant
             }
 
             # Now predict with model
             pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
-                                               type = self$get_data('params')$type, aggregate = 'sum')
+                                         which = x.var,
+                                         type = self$get_data('params')$type, aggregate = 'sum')
             # Combine with
-            out <- data.frame(observed = pp[,1]); out[[x.var]] <- dummy[[x.var]]
+            out <- data.frame(partial = pp[,grep(x.var, colnames(pp))] ); out[[x.var]] <- dummy[[x.var]]
 
             # If plot, make plot, otherwise
             if(plot){
@@ -451,8 +490,8 @@ engine_gdb <- function(x,
             # Set all variables other the target variable to constant
             if(is.null(constant)){
               # Calculate mean
-              # FIXME: for factor use mode!
-              constant <- apply(target, 2, function(x) mean(x, na.rm=T))
+              nn <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='numeric')]
+              constant <- apply(target[,nn], 2, function(x) mean(x, na.rm=T))
               for(v in variables[ variables %notin% x.var]){
                 if(v %notin% names(target) ) next()
                 target[!is.na(target[v]),v] <- constant[v]

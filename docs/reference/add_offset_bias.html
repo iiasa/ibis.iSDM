@@ -95,6 +95,9 @@ one offset by calculating the sum of all spatial-explicit layers.</p>
 <dt>add</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> specifiying whether new offset is to be added. Setting
 this parameter to <code>FALSE</code> replaces the current offsets with the new one (Default: <code>TRUE</code>).</p></dd>
+<dt>distance_max</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value determining the maximum distance outside the range in which an elevated species
+occurrence should be expected (Default: <code>Inf</code>).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -104,8 +107,8 @@ So if for instance a offset is already specified (such as area), this function
 removes the provided <code>bias.layer</code> from it via <code>"offset(log(off.area)-log(bias.layer))"</code></p>
 <p><strong>Note that any transformation of the offset (such as <code>log</code>) has do be done externally!</strong></p>
 <p>If a generic offset is added, consider using the <code><a href="add_offset.html">add_offset()</a></code> function. If the layer is a expert-based range and
-requires additional formatting, consider using the
-function <code><a href="add_offset_range.html">add_offset_range()</a></code>.</p>
+requires additional parametrization, consider using the
+function <code><a href="add_offset_range.html">add_offset_range()</a></code> or the <code>bossMaps</code> R-package.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

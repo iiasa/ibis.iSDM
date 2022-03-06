@@ -168,6 +168,26 @@ DistributionModel <- bdproto(
       )
     }
   },
+  # Plot threshold
+  plot_threshold = function(self){
+    # Determines whether a threshold exists and plots it
+    rl <- self$show_rasters()
+    if(length(grep('threshold',rl))>0){
+      # Get stack of computed thresholds
+      ras <- raster::stack( self$get_data( grep('threshold',rl,value = TRUE) ) )
+      if(attr(ras[[1]], 'truncate')){
+        col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(100)
+      } else { col <- c("grey", "black")}
+      raster::plot(ras,
+                   box = FALSE,
+                   axes = TRUE,
+                   colNA = NA, col = col
+      )
+    } else {
+      message("No computed threshold was found!")
+      invisible()
+    }
+  },
   # Show model run time if settings exist
   show_duration = function(self){
     if(!is.Waiver(self$settings)) self$settings$duration()
@@ -265,6 +285,14 @@ DistributionModel <- bdproto(
     rn <- names(self$fits)
     rn <- rn[ which( sapply(rn, function(x) is.Raster(self$get_data(x)) ) ) ]
     return(rn)
+  },
+  # Remove calculated thresholds
+  rm_threshold = function(self){
+    rl <- self$show_rasters()
+    if(length(grep('threshold',rl))>0){
+      self$fits[[grep('threshold',rl,value = TRUE)]] <- NULL
+    }
+    invisible()
   },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){

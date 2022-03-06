@@ -7,14 +7,15 @@
 engine_xgboost(
   x,
   booster = "gbtree",
-  learning_rate = 0.01,
+  learning_rate = 0.001,
   nrounds = 10000,
-  gamma = 3,
+  gamma = 6,
   reg_lambda = 0,
   reg_alpha = 0,
   max_depth = 2,
-  subsample = 0.8,
+  subsample = 0.75,
   colsample_bytree = 0.4,
+  min_child_weight = 3,
   nthread = getOption("ibis.nthread"),
   ...
 )
@@ -25,7 +26,7 @@ engine_xgboost(
 \item{booster}{A \code{\link{character}} of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})}
 
 \item{learning_rate}{\code{\link{numeric}} value indicating the learning rate (eta).
-Lower values generally being better but also computationally more costly.}
+Lower values generally being better but also computationally more costly. (Default: \code{1e-3})}
 
 \item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation.}
 
@@ -38,7 +39,12 @@ Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
 
 \item{max_depth}{\code{\link{numeric}} The Maximum depth of a tree (Default: \code{3}).}
 
-\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting (Default: \code{0.8}).}
+\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting. Also used for creating a random
+tresting dataset (Default: \code{0.75}).}
+
+\item{colsample_bytree}{\code{\link{numeric}} Subsample ratio of columns when constructing each tree (Default: \code{0.4}).}
+
+\item{min_child_weight}{\code{\link{numeric}} Broadly related to the number of instances necessary for each node (Default: \code{3}).}
 
 \item{...}{Other none specificed parameters.}
 }
@@ -50,6 +56,8 @@ and classification tasks. For a full list of options users are advised to have a
 \link[xgboost:xgb.train]{xgboost::xgb.train} help file and \url{https://xgboost.readthedocs.io}.
 }
 \details{
+The default parameters have been set relatively conservative as to reduce overfitting.
+
 XGBoost supports the specification of monotonic contraints on certain variables. Within
 ibis this is possible via \code{\link{XGBPrior}}.
 }

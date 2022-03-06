@@ -107,6 +107,7 @@ Collate:
     'utils-boom.R'
     'utils-gdb.R'
     'utils-stan.R'
+    'utils-xgboost.R'
     'validate.R'
     'write_output.R'
     'zzz.R'

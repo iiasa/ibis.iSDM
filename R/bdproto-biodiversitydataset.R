@@ -192,7 +192,7 @@ BiodiversityDatasetCollection <- bdproto(
       if('Point - Presence absence' == self$get_types()[dataset] ){
         dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
         dd[[cols[[dataset]]]] <- factor(dd[[cols[[dataset]]]])
-        # FIXME: Tidy evaluation via {{}} does not seem to work.
+        dd$observed <- dd[[cols[[dataset]]]]
         g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = Observed) )
       }
     }

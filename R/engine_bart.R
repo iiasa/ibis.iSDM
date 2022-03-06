@@ -209,6 +209,8 @@ engine_bart <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+          # Weights for IWLR
+          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
           model$biodiversity[[1]]$expect <- w
 
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
@@ -317,6 +319,7 @@ engine_bart <- function(x,
           fit_bart <- dbarts::bart(y.train = data[,'observed'],
                                    x.train = data[,model$biodiversity[[1]]$predictors_names],
                                    keeptrees = dc@keepTrees,
+                                   # weights = w,
                                    binaryOffset = off,
                                    # Hyper parameters
                                    k = k, power = power, base =  base,
@@ -408,7 +411,7 @@ engine_bart <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, plot = FALSE, ...){
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )

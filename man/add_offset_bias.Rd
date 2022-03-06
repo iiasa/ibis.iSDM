@@ -13,8 +13,11 @@ add_offset_bias(x, layer, add = TRUE)
 
 \item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
 
-\item{add}{\code{\link{logical}} specifiying whether new offset is to be added. Setting
+\item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
+
+\item{distance_max}{A \code{\link{numeric}} value determining the maximum distance outside the range in which an elevated species
+occurrence should be expected (Default: \code{Inf}).}
 }
 \description{
 Including offsets is another option to integrate spatial prior information
@@ -32,8 +35,8 @@ removes the provided \code{bias.layer} from it via \code{"offset(log(off.area)-l
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 
 If a generic offset is added, consider using the \code{\link[=add_offset]{add_offset()}} function. If the layer is a expert-based range and
-requires additional formatting, consider using the
-function \code{\link[=add_offset_range]{add_offset_range()}}.
+requires additional parametrization, consider using the
+function \code{\link[=add_offset_range]{add_offset_range()}} or the \code{bossMaps} R-package.
 }
 \examples{
 \dontrun{
@@ -49,6 +52,7 @@ function \code{\link[=add_offset_range]{add_offset_range()}}.
 }
 \seealso{
 Other offset: 
+\code{\link{add_offset_elevation}()},
 \code{\link{add_offset_range}()},
 \code{\link{add_offset}()}
 }

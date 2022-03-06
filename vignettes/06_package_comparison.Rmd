@@ -33,3 +33,6 @@ created and run than other packages. It is less about reinventing the wheel, but
     and a wrapper to construct ensembles of models.
 -   [kuenm](https://peerj.com/articles/6281/) -&gt; Another wrapper for
     Maxent.
+
+Also in case the data allows to make robust inferences on the detectability of species occurrences, 
+there is now also a new package available ([spOccupancy](https://www.jeffdoser.com/files/spoccupancy-web/)) that allows to fit spatial and integrated occupancy models in R.

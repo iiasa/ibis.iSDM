@@ -652,6 +652,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
 #' engines background points are necessary to model poisson (or binomial) distributed data.
 #' @details
 #' Mandatory and possible parameters are:
+#'
 #' * \code{background} Specifies the extent over which background points are to be sampled.
 #' * \code{nrpoints} The number of background points to be used.
 #' * \code{method} The specific method on how pseudo-absence points should be generated. Available options
@@ -663,6 +664,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
 #' * \code{bias} An optional bias layer over which points should preferentially be sampled.
 #' @param background A [`RasterLayer`] or [`sf`] object over which background points can be sampled. Default is
 #' \code{NULL} is the default and the background is then added when the sampling is first called.
+#'
 #' @param nrpoints A [`numeric`] given the number of background points to be created (Default: \code{10 000}).
 #' @param method [`character`] denoting how the sampling should be done. For details for options.
 #' @param buffer_distance [`numeric`] A distance from the observations in which pseudo-absence points are to be generated.

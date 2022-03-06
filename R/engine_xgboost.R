@@ -8,20 +8,26 @@ NULL
 #' supporting multiple options to perform single and multiclass regression
 #' and classification tasks. For a full list of options users are advised to have a look at the
 #' [xgboost::xgb.train] help file and [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io).
+#'
 #' @details
+#' The default parameters have been set relatively conservative as to reduce overfitting.
+#'
 #' XGBoost supports the specification of monotonic contraints on certain variables. Within
 #' ibis this is possible via [`XGBPrior`].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param booster A [`character`] of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})
 #' @param learning_rate [`numeric`] value indicating the learning rate (eta).
-#' Lower values generally being better but also computationally more costly.
+#' Lower values generally being better but also computationally more costly. (Default: \code{1e-3})
 #' @param nrounds [`numeric`] value giving the the maximum number of boosting iterations for cross-validation.
 #' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: 3)
 #' Also see [reg_lambda] parameter for the L2 regularization on the weights
 #' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
 #' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
 #' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
-#' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting (Default: \code{0.8}).
+#' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting. Also used for creating a random
+#' tresting dataset (Default: \code{0.75}).
+#' @param colsample_bytree [`numeric`] Subsample ratio of columns when constructing each tree (Default: \code{0.4}).
+#' @param min_child_weight [`numeric`] Broadly related to the number of instances necessary for each node (Default: \code{3}).
 #' @param ... Other none specificed parameters.
 #' @seealso [xgboost::xgb.train]
 #' @references
@@ -34,14 +40,15 @@ NULL
 
 engine_xgboost <- function(x,
                         booster = "gbtree",
-                        learning_rate = 0.01,
+                        learning_rate = 1e-3,
                         nrounds = 10000,
-                        gamma = 3,
+                        gamma = 6,
                         reg_lambda = 0,
                         reg_alpha = 0,
                         max_depth = 2,
-                        subsample = 0.8,
+                        subsample = 0.75,
                         colsample_bytree = 0.4,
+                        min_child_weight = 3,
                         nthread = getOption('ibis.nthread'),
                         ...) {
 
@@ -92,6 +99,7 @@ engine_xgboost <- function(x,
     max_depth = max_depth,
     subsample = subsample,
     colsample_bytree = colsample_bytree,
+    min_child_weight = min_child_weight,
     nthread = nthread,
     ...
     )
@@ -150,7 +158,7 @@ engine_xgboost <- function(x,
                       model$biodiversity[[1]]$family
         )
         # If a poisson family is used, weight the observations by their exposure
-        if(fam == "count:poisson"){
+        if(fam == "count:poisson" && model$biodiversity[[1]]$type == "poipo"){
           # Get background layer
           bg <- self$get_data("template")
           assertthat::assert_that(!is.na(cellStats(bg,min)))
@@ -229,16 +237,58 @@ engine_xgboost <- function(x,
 
         # Get Preds and convert to sparse matrix with set labels
         # FIXME: Support manual provision of data via xgb.DMatrix.save to save preprocessing time?
-        train_cov <- as.matrix(
-          model$biodiversity[[1]]$predictors[,model$biodiversity[[1]]$predictors_names]
-        )
+        train_cov <- model$biodiversity[[1]]$predictors[,model$biodiversity[[1]]$predictors_names]
+        # Check if there any factors, if yes split up
+        if(any(model$biodiversity[[1]]$predictors_types$type=='factor')){
+          vf <- model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == "factor")]
+          # Get factors
+          z <- explode_factor(train_cov[[vf]], name = vf)
+          # Remove variables from train_cov and append
+          train_cov[[vf]] <- NULL
+          train_cov <- cbind(train_cov, z)
+          model$biodiversity[[1]]$predictors <- train_cov # Save new in model object
+          model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
+        }
+        train_cov <- as.matrix( train_cov )
         labels <- model$biodiversity[[1]]$observations$observed
 
-        # Create the sparse matrix
-        df_train <- xgboost::xgb.DMatrix(data = train_cov,
-                                         label = labels)
+        # ---- #
+        # Create the subsample based on the subsample parameter for all presence data
+        if(model$biodiversity[[1]]$type == "poipo"){
+          ind <- sample(which(labels>0), size = params$subsample * length(which(labels>0)) )
+          ind2 <- which( which(labels>0) %notin% ind )
+          ind_ab <- which(labels==0)
+          ind_train <- c(ind, ind_ab); ind_test <- c(ind2, ind_ab)
+        } else {
+          ind_train <- sample(1:length(labels), size = params$subsample * length(labels) )
+          ind_test <- which((1:length(labels)) %notin% ind_train )
+        }
+        # Create the sparse matrix for training and testing data
+        df_train <- xgboost::xgb.DMatrix(data = train_cov[ind_train,],
+                                         label = labels[ind_train]
+        )
+        df_test <- xgboost::xgb.DMatrix(data = train_cov[c(ind_test),],
+                                        label = labels[c(ind_test)]
+        )
+        # --- #
         # Prediction container
         pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
+        if(any(model$predictors_types$type=='factor')){
+          vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
+          # Get factors
+          z <- explode_factor(pred_cov[[vf]], name = vf)
+          # Remove variables from train_cov and append
+          pred_cov[[vf]] <- NULL
+          pred_cov <- cbind(pred_cov, z)
+          model$predictors <- pred_cov # Save new in model object
+          model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
+          model$biodiversity[[1]]$predictors_names <- colnames(pred_cov)
+          model$predictors_names <- colnames(pred_cov)
+        }
+        pred_cov <- as.matrix( pred_cov )
+        # Ensure that the column names are identical for both
+        pred_cov <- pred_cov[, colnames(train_cov)]
+
         # Set target variables to bias_value for prediction if specified
         if(!is.Waiver(settings$get('bias_variable'))){
           for(i in 1:length(settings$get('bias_variable'))){
@@ -252,7 +302,8 @@ engine_xgboost <- function(x,
         if(fam == "count:poisson"){
           # Specifically for count poisson data we will set the areas
           # as an exposure offset for the base_margin
-          xgboost::setinfo(df_train, "base_margin", log(w))
+          xgboost::setinfo(df_train, "base_margin", log(w[ind_train]))
+          xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
           xgboost::setinfo(df_pred, "base_margin", log(w_full))
           params$eval_metric <- "logloss"
         } else if(fam == 'binary:logistic'){
@@ -282,30 +333,40 @@ engine_xgboost <- function(x,
           # For the offset we simply add the (log-transformed) offset to the existing
           # Add exp at the end to backtransform
           of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
+          of_test <- xgboost::getinfo(df_test, "base_margin") |> exp()
           of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
           # Add offset to full prediction and load vector
 
           # Respecify offset
           # (Set NA to 1 so that log(1) == 0)
           of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
-          of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[,c("x","y")],
+          of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[ind_train,c("x","y")],
+                              env = of,
+                              longlat = raster::isLonLat(self$get_data("template")),
+                              field_space = c('x','y')
+          )
+          of2 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[ind_test,c("x","y")],
                               env = of,
                               longlat = raster::isLonLat(self$get_data("template")),
                               field_space = c('x','y')
           )
           assertthat::assert_that(nrow(of1) == length(of_train),
+                                  nrow(of2) == length(of_test),
                                   nrow(of) == length(of_pred))
           of_train <- of_train + of1[,"spatial_offset"]
+          of_test <- of_test + of2[,"spatial_offset"]
           of_pred <- of_pred + of[,"spatial_offset"]
 
           # Set the new offset
           xgboost::setinfo(df_train, "base_margin", of_train)
+          xgboost::setinfo(df_test, "base_margin", of_test)
           xgboost::setinfo(df_pred, "base_margin", of_pred)
         }
 
         # --- #
         # Save both training and predicting data in the engine data
         self$set_data("df_train", df_train)
+        self$set_data("df_test", df_test)
         self$set_data("df_pred", df_pred)
         # --- #
 
@@ -341,11 +402,12 @@ engine_xgboost <- function(x,
 
         # All other needed data for model fitting
         df_train <- self$get_data("df_train")
+        df_test <- self$get_data("df_test")
         df_pred <- self$get_data("df_pred")
         w <- model$biodiversity[[1]]$expect # The expected weight
 
         assertthat::assert_that(
-          is.null(w) || length(w) == nrow(df_train),
+          # is.null(w) || length(w) == nrow(df_train),
           all( colnames(df_train) %in% colnames(df_pred) )
         )
 
@@ -433,11 +495,14 @@ engine_xgboost <- function(x,
         }
 
         # Fit the model.
-        fit_xgb <- xgboost::xgboost(
+        watchlist <- list(train = df_train,test = df_test)
+        fit_xgb <- xgboost::xgb.train(
           params = params,
           data = df_train,
+          watchlist = watchlist,
           nrounds = nrounds,
           verbose = ifelse(verbose, 1, 0),
+          # early_stopping_rounds = 10,
           print_every_n = 100
         )
         # --- #
@@ -522,21 +587,23 @@ engine_xgboost <- function(x,
             return(pp)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL){
+          spartial = function(self, x.var, constant = NULL, plot = TRUE, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     "model" %in% names(self))
 
             # Get data
             mod <- self$get_data('fit_best')
             model <- self$model
-            x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
+            x.var <- match.arg(x.var, model$predictors_names, several.ok = FALSE)
 
             # Get predictor
             df <- subset(model$predictors, select = mod$feature_names)
             # Convert all non x.vars to the mean
             # Make template of target variable(s)
-            template <- raster::rasterFromXYZ(cbind(model$predictors$x,model$predictors$y),
-                                          crs = raster::projection(model$background))
+            template <- raster::rasterFromXYZ(
+              raster::coordinates( model$predictors_object$get_data() ),
+              crs = raster::projection(model$background)
+            )
 
             # Set all variables other the target variable to constant
             if(is.null(constant)){
@@ -564,8 +631,10 @@ engine_xgboost <- function(x,
             names(template) <- 'mean'
             template <- raster::mask(template, model$background)
 
-            # Quick plot
-            raster::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+            if(plot){
+              # Quick plot
+              raster::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+            }
             # Also return spatial
             return(template)
           },

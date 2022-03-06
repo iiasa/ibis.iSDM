@@ -146,11 +146,51 @@ engine_stan <- function(x,
         # Set cores
         options(mc.cores = self$stan_param$cores)
 
+        # FIXME: Stan should handle factors directly. For now outsourced to split up
+        if(any(model$predictors_types$type=="factor")){
+          vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+          for(k in vf){
+            o <- explode_factor(model$predictors[[k]],name = k)
+            model$predictors <- cbind(model$predictors, o)
+            model$predictors_names <- c(model$predictors_names, colnames(o))
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = colnames(o), type = "numeric") )
+            # Finally remove the original column from the predictor object
+            model$predictors[[k]] <- NULL
+            model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
+            model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
+            # Explode the columns in the raster object
+            model$predictors_object$data <- raster::addLayer(
+              model$predictors_object$data,
+              explode_factorized_raster(model$predictors_object$data[[k]])
+            )
+            model$predictors_object$data <- raster::dropLayer(model$predictors_object$data, k)
+          }
+        }
+
         # Stan procedure - First add integration points to all poipo datasets
         # FIXME: Possibly outsoure this across methods
         for(i in 1:length(model$biodiversity)){
-          # Add pseudo-absence points if necessary
-          # Include nearest predictor values for each
+
+          # If there any factor variables split them per type and explode them
+          if(any(model$biodiversity[[i]]$predictors_types$type=="factor")){
+            vf <- model$biodiversity[[i]]$predictors_types$predictors[model$biodiversity[[i]]$predictors_types$type=="factor"]
+            fv <- model$biodiversity[[i]]$predictors[vf]
+            for(k in 1:ncol(fv)){
+              o <- explode_factor(fv[,k],name = colnames(fv)[k])
+              # Add
+              model$biodiversity[[i]]$predictors <- cbind(model$biodiversity[[i]]$predictors, o)
+              model$biodiversity[[i]]$predictors_names <- c(model$biodiversity[[i]]$predictors_names, colnames(o))
+              model$biodiversity[[i]]$predictors_types <- rbind(model$biodiversity[[i]]$predictors_types,
+                                                                 data.frame(predictors = colnames(o), type = "numeric") )
+              # Finally remove the original column from the predictor object
+              model$biodiversity[[i]]$predictors[[colnames(fv)[k]]] <- NULL
+              model$biodiversity[[i]]$predictors_names <- model$biodiversity[[i]]$predictors_names[-which( model$biodiversity[[i]]$predictors_names == colnames(fv)[k] )]
+              model$biodiversity[[i]]$predictors_types <- subset(model$biodiversity[[i]]$predictors_types, subset = predictors != colnames(fv)[k])
+            }
+          }
+
+          # Add pseudo-absence points if necessary, by including nearest predictor values for each
           if('poipo' == model$biodiversity[[i]]$type){
 
             # Get background layer

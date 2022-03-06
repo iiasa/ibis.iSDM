@@ -40,7 +40,14 @@ PredictorDataset <- bdproto(
   # Get data
   get_data = function(self, df = FALSE, na.rm = TRUE, ...){
     if(df) {
-      raster::as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
+      if(any(is.factor(self$data))){
+        # Bugs for factors, so need
+        out <- self$data[] |> as.data.frame()
+        out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
+        cbind(raster::coordinates(self$data), out ) # Attach coordinates and return
+      } else {
+        raster::as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
+      }
     } else self$data
   },
   # Get Projection
@@ -51,8 +58,10 @@ PredictorDataset <- bdproto(
   # Clip the predictor dataset by another dataset
   crop_data = function(self, pol){
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
-                            inherits(pol, 'sf'))
-    self$data <- self$data %>% sf::st_crop(pol)
+                            inherits(pol, 'sf'),
+                            all( unique(sf::st_geometry_type(pol)) %in% c("POLYGON","MULTIPOLYGON") )
+                            )
+    self$data <- raster::crop(self$data, pol)
     invisible()
   },
   # Add a new Predictor dataset to this collection
@@ -80,15 +89,21 @@ PredictorDataset <- bdproto(
   },
   # Collect info statistics with optional decimals
   summary = function(self, digits = 2) {
-    # Maybe make a little bit prettier
-    round(
-      raster::summary( self$get_data() ), digits = digits
-         )
+    # Need special handling if there any factors
+    if(any(is.factor(self$get_data()))){
+      out <- self$get_data()[] |> as.data.frame()
+      out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
+      summary(out, digits = digits)
+    } else {
+      round(
+        raster::summary( self$get_data() ), digits = digits
+      )
+    }
   },
   # Number of Predictors in object
   length = function(self) {
     if(inherits(self$get_data(),'Raster'))
-      nlayers(self$get_data())
+      raster::nlayers(self$get_data())
     else
       ncol(self$get_data)
   },

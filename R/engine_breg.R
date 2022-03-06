@@ -133,7 +133,7 @@ engine_breg <- function(x,
         # }
 
         # Check whether regularization parameter is set to none, if yes, raise message
-        if(settings$get("varsel") == "none"){
+        if(settings$get("varsel") != "none"){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
         }
 
@@ -221,6 +221,8 @@ engine_breg <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
+          # Calculate weights for Infinetly weighted logistic regressions (although not possible to fit using Boom)
+          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
           model$biodiversity[[1]]$expect <- w
           # Convert to numeric
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
@@ -400,9 +402,10 @@ engine_breg <- function(x,
             settings$set("type", type)
 
             mod <- self$get_data('fit_best')
-            df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
+            model <- self$model
+            df <- model$biodiversity[[1]]$predictors
             df <- subset(df, select = attr(mod$terms, "term.labels"))
-            w <- self$model$biodiversity[[1]]$expect # Also get exposure variable
+            w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
             # Match x.var to argument
             if(is.null(x.var)){
@@ -412,7 +415,13 @@ engine_breg <- function(x,
             }
 
             # Calculate range of predictors
-            rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            if(any(model$predictors_types$type=="factor")){
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            } else {
+              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            }
+
             df_partial <- list()
 
             # Add all others as constant
@@ -424,6 +433,11 @@ engine_breg <- function(x,
 
             df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
             df_partial <- df_partial %>% as.data.frame()
+            if(any(model$predictors_types$type=="factor")){
+              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+              df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+                factor(lvl[1], levels = lvl)
+            }
 
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
@@ -499,9 +513,15 @@ engine_breg <- function(x,
 
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- mean(model$predictors[[n]], na.rm = TRUE)
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
             } else {
               for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+            }
+            if(any(model$predictors_types$type=="factor")){
+              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+              df_partial[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
+                factor(lvl[1], levels = lvl)
+              # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
             }
 
             # For Integrated model, take the last one

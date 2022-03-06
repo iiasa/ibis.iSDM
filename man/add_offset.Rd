@@ -13,7 +13,7 @@ add_offset(x, layer, add = TRUE)
 
 \item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
 
-\item{add}{\code{\link{logical}} specifiying whether new offset is to be added. Setting
+\item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 
 \item{...}{Other parameters or arguments (currently not supported)}
@@ -55,6 +55,7 @@ Offsets specified for non-supported engines are ignored during the estimation
 \seealso{
 Other offset: 
 \code{\link{add_offset_bias}()},
+\code{\link{add_offset_elevation}()},
 \code{\link{add_offset_range}()}
 }
 \concept{offset}

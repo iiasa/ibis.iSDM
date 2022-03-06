@@ -79,6 +79,7 @@ objects.</p>
   derivates <span class="op">=</span> <span class="st">"none"</span>,
   bgmask <span class="op">=</span> <span class="cn">TRUE</span>,
   harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,
+  explode_factors <span class="op">=</span> <span class="cn">FALSE</span>,
   priors <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>
 <span class="op">)</span>
@@ -112,6 +113,8 @@ objects.</p>
 <dd><p>Check whether the environmental data should be masked with the background layer (Default: <code>TRUE</code>)</p></dd>
 <dt>harmonize_na</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: <code>FALSE</code>)</p></dd>
+<dt>explode_factors</dt>
+<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether any factor variables should be split up into binary variables (one per class). (Default: <code>FALSE</code>).</p></dd>
 <dt>priors</dt>
 <dd><p>A <code><a href="PriorList-class.html">PriorList</a></code> object. Default is set to <code>NULL</code> which uses default prior assumptions.</p></dd>
 <dt>...</dt>

@@ -77,9 +77,11 @@ methods::setMethod(
       method <- 'continuous'
     }
     # If mode truncate was used, also switch to continuous data
-    if(attr(threshold,'truncate') && method == "discrete"){
-      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
-      method <- 'continuous'
+    if(!is.null(attr(threshold,'truncate')) && method == "discrete"){
+      if(attr(threshold,'truncate')){
+        if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
+        method <- 'continuous'
+      }
     }
 
     # Get/check point data
@@ -91,6 +93,7 @@ methods::setMethod(
         unique(sf::st_geometry_type(point)) %in% c('POINT', 'MULTIPOINT'),
         # Check that the point data has presence-absence information
         hasName(point, point_column),
+        !is.na(sf::st_crs(point)$proj),
         length( unique( point[[point_column]] ) ) >1
       )
       # If sf is different, reproject to prediction
@@ -135,7 +138,7 @@ methods::setMethod(
       # Subset to name
       df2 <- subset.data.frame(df, name == dataset)
       # Validate the threshold
-      out <- .validatethreshold(df2, point_column = point_column, mod = mod,
+      out <- .validatethreshold(df2 = df2, point_column = point_column, mod = mod,
                                 name = dataset, method = method, id = as.character(mod$id))
       results <- rbind.data.frame(results, out)
     }
@@ -341,7 +344,11 @@ methods::setMethod(
     out$value[out$metric=='normgini'] <- NormalizedGini(y_pred = df2$pred, y_true = df2[[point_column]])
     # Boyce index. Wrap in try since is known to crash
     try({
-      boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, PEplot = FALSE)
+      # Run boyce a few times as average sample ?
+      # obs <- df2[df2[[point_column]]>0,]
+      # abs <- df2[sample(which(df2[[point_column]]==0), size = nrow(obs)), ]
+      # test <- rbind(obs, abs)
+      boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, nclass = 0, PEplot = FALSE)
     },silent = TRUE)
     if(exists('boi')) out$value[out$metric=='cont.boyce'] <- boi$Spearman.cor
 
@@ -402,7 +409,7 @@ methods::setMethod(
     # Evaluate Log loss / Cross-Entropy Loss for a predicted probability measure
     # FIXME: Hacky. This likely won't work with specific formulations
     if(!is.null(mod)){
-      if(mod$model$biodiversity[[which(sapply(mod$model$biodiversity, function(x) x$name) == name)]]$family == 'binomial'){
+      if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
         LogLoss <- function(y_pred, y_true) {
           eps <- 1e-15
           y_pred <- pmax(pmin(y_pred, 1 - eps), eps)

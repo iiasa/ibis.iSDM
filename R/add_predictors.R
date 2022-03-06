@@ -41,6 +41,7 @@ NULL
 #' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
 #' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
+#' @param explode_factors [`logical`] of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @note
@@ -73,7 +74,7 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
 
 #' @name add_predictors
 #' @rdname add_predictors
@@ -81,12 +82,12 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, priors, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors = FALSE, priors, ...)
   }
 )
 
@@ -96,12 +97,12 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, priors, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors = FALSE, priors, ...)
   }
 )
 
@@ -112,7 +113,7 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
@@ -122,6 +123,7 @@ methods::setMethod(
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
@@ -145,7 +147,6 @@ methods::setMethod(
 
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
-      # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
       x <- x$set_priors(priors)
     }
@@ -160,20 +161,22 @@ methods::setMethod(
       # Make subsets to join back later
       env_f <- raster::subset(env,which(is.factor(env)))
       env <- raster::subset(env, which(!is.factor(env)))
-
-      # Refactor categorical variables
-      if(inherits(env_f,'RasterLayer')){
-        env_f <- explode_factorized_raster(env_f)
-      } else {
-        o <- raster::stack()
-        for(layer in env_f){
-          o <- raster::addLayer(o, explode_factorized_raster(layer))
+      if(explode_factors){
+        # Refactor categorical variables
+        if(inherits(env_f,'RasterLayer')){
+          env_f <- explode_factorized_raster(env_f)
+        } else {
+          o <- raster::stack()
+          for(layer in env_f){
+            o <- raster::addLayer(o, explode_factorized_raster(layer))
+          }
+          env_f <- o;rm(o)
         }
-        env_f <- o;rm(o)
-      }
-      # Joing back to full raster stack
-      env <- raster::stack(env, env_f);rm(env_f)
-    }
+        # Joing back to full raster stack
+        env <- raster::stack(env, env_f);rm(env_f)
+        has_factors <- FALSE # Set to false since factors have been exploded.
+      } else { has_factors <- TRUE }
+    } else {has_factors <- FALSE}
 
     # Standardization and scaling
     if('none' %notin% transform){
@@ -188,8 +191,12 @@ methods::setMethod(
       for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
 
       # Add to env
-      env <- addLayer(env, new_env)
+      env <- raster::addLayer(env, new_env)
     }
+
+    # Add factors back in if there are any
+    if(has_factors) env <- raster::addLayer(env, env_f)
+    attr(env, 'has_factors') <- has_factors
 
     # Assign an attribute to this object to keep track of it
     attr(env,'transform') <- transform
@@ -198,15 +205,14 @@ methods::setMethod(
     if(bgmask){
       env <- raster::mask(env, mask = x$background)
       # Reratify, work somehow only on stacks
-      if(any(is.factor(env))){
+      if(has_factors){
         new_env <- raster::stack(env)
         new_env[[which(is.factor(env))]] <- ratify(env[[which(is.factor(env))]])
-        new_env <- env;rm(new_env)
+        env <- new_env;rm(new_env)
       } else env <- raster::stack(env)
     }
 
     # Check whether predictors already exist, if so overwrite
-    # TODO: In the future one could think of supplying predictors of varying grain
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Finally set the data to the BiodiversityDistribution object
@@ -284,12 +290,12 @@ methods::setMethod(
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", range = "sf", method = "character"),
-  function(x, range, method = 'distance', distance_max = NULL, priors = NULL ) {
+  function(x, range, method = 'distance', distance_max = Inf, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
                             inherits(range, 'sf'),
                             method %in% c('binary','distance'),
-                            is.null(distance_max) || is.numeric(distance_max),
+                            is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messager
@@ -317,30 +323,25 @@ methods::setMethod(
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
-      # Probability for which the species is not in the expert range map
-      dis <- dis + 0.001
-      # Transform to log-scale
-      dis <- log(dis)
+      dis[is.na(dis)] <- 0
+      # Mask with temp again
+      dis <- raster::mask(dis, x$background)
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
-      # TODO: The below can be much more sophisticated.
-      # - For instance adding a exponential decay
-      # Calculate the linear distance
-      dis <- raster::distance(ras_range)
+      # Calculate the linear distance from the range
+      dis <- raster::gridDistance(ras_range, origin = 1)
       dis <- raster::mask(dis, x$background)
-      # Set areas not intersecting with range to 0
-      dis <- raster::mask(dis,
-                          x$background[unlist( st_intersects(st_buffer(range,0), x$background) ),]
-      )
       # If max distance is specified
-      if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to NA
-      # Convert to relative for better scaling
+      if(!is.null(distance_max) && !is.infinite(distance_max)){
+        dis[dis > distance_max] <- NA # Set values above threshold to NA
+        attr(dis, "distance_max") <- distance_max
+      }
+      # Convert to relative for better scaling in predictions
       dis <- 1 - (dis / cellStats(dis,'max'))
-      # Probability for which the species is not in the expert range map
-      dis <- dis + 0.001
-      # Transform to log-scale
-      dis <- log(dis)
-      names(dis) <- 'range_distance'
+      # Set NA to 0 and mask again
+      dis[is.na(dis)] <- 0
+      dis <- raster::mask(dis, x$background)
+      names(dis) <- 'distance_range'
     }
 
     # If priors have been set, save them in the distribution object

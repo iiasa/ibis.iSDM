@@ -459,7 +459,7 @@ engine_inlabru <- function(x,
             # factor_full uses the full factor. fact_contrast uses the first level as reference
             # Built component
             comp <- update(comp,
-                           paste(c(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
+                           paste(c(' ~ . + ', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
             )
           }
         }
@@ -751,7 +751,7 @@ engine_inlabru <- function(x,
           )
           # Get only the predicted variables of interest
           prediction <- raster::stack(
-            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # FIXME: Columns need to be adapted if quantiles are changed
           )
           names(prediction) <- c("mean", "sd", "q025", "q50", "q975", "cv")
 
@@ -857,6 +857,7 @@ engine_inlabru <- function(x,
             # Check that provided model exists and variable exist in model
             mod <- self$get_data('fit_best')
             model <- self$model
+            df <- model$biodiversity[[1]]$predictors
             assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
                                     is.character(x.var),
@@ -869,16 +870,28 @@ engine_inlabru <- function(x,
             x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = FALSE)
 
             # Make a prediction via inlabru
-            rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) %>% as.data.frame()
+            if(any(model$predictors_types$type=="factor")){
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            } else {
+              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            }
+
             df_partial <- list()
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), length.out )
             } else {
               for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
             }
             df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
             df_partial <- df_partial %>% as.data.frame()
+
+            if(any(model$predictors_types$type=="factor")){
+              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+              df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+                factor(lvl[1], levels = lvl)
+            }
 
             ## plot the unique effect of the covariate
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
@@ -932,9 +945,15 @@ engine_inlabru <- function(x,
 
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- mean(model$predictors[[n]], na.rm = TRUE)
+              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
             } else {
               for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+            }
+            if(any(model$predictors_types$type=="factor")){
+              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+              df_partial[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
+                factor(lvl[1], levels = lvl)
+              # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
             }
 
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
@@ -952,7 +971,6 @@ engine_inlabru <- function(x,
                 inlabru:::gg(o, ggplot2::aes(fill = mean)) +
                 ggplot2::scale_fill_gradientn(colours = ibis_colours$divg_bluegreen) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
-
             }
             return(
               raster::stack(
