@@ -315,8 +315,9 @@ methods::setMethod(
       # Calculate a distance raster
       dis <- raster::gridDistance(ras_range, origin = 1)
       # If max distance is specified
-      if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to a very small constant
+      # if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to a very small constant
       # Inverse of distance
+      if(is.infinite(distance_max)) distance_max <- cellStats(dis,"max")
       alpha <- 1 / distance_max
       # Grow baseline raster by using an exponentially weighted kernel
       dis <- raster::calc(dis, fun = function(x) exp(-alpha * x))
