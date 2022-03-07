@@ -288,6 +288,7 @@ engine_breg <- function(x,
           w_full <- w_full + model$offset[,'spatial_offset']
           # negative exposure does not work, so normalize again to range of 1e-6 to 1
           if(any(w < 0,na.rm = TRUE)) {
+            check_package('scales')
             w <- scales::rescale(w, to = c(1e-6, 1))
             w_full <- scales::rescale(w_full, to = c(1e-6, 1))
           }

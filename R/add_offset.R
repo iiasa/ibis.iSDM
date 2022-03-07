@@ -208,6 +208,7 @@ methods::setMethod(
 #' to indicate that no distance should be calculated.
 #' @param presence_prop [`numeric`] giving the proportion of all records expected to be inside the range. By
 #' default this is set to \code{0.9} indicating that 10% of all records are likely outside the range.
+#' @param distance_clip [`logical`] as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).
 #' @seealso [`bossMaps`]
 #' @references
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
@@ -224,7 +225,7 @@ NULL
 methods::setGeneric(
   "add_offset_range",
   signature = methods::signature("x", "layer"),
-  function(x, layer, distance_max = Inf, presence_prop = 0.9, add = TRUE) standardGeneric("add_offset_range"))
+  function(x, layer, distance_max = Inf, presence_prop = 0.9, distance_clip = FALSE, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
@@ -279,11 +280,12 @@ methods::setMethod(
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
-  function(x, layer, distance_max = Inf, presence_prop = 0.9, add = TRUE ) {
+  function(x, layer, distance_max = Inf, presence_prop = 0.9, distance_clip = FALSE, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(layer, 'sf'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.numeric(presence_prop),
+                            is.logical(distance_clip),
                             is.logical(add)
     )
     # Messenger
@@ -315,10 +317,13 @@ methods::setMethod(
       # Calculate a distance raster
       dis <- raster::gridDistance(ras_range, origin = 1)
       # If max distance is specified
-      # if(!is.null(distance_max)) dis[dis > distance_max] <- NA # Set values above threshold to a very small constant
+      if(distance_clip && is.finite(distance_max)){
+        dis[dis > distance_max] <- NA # Set values above threshold to a very small constant
+      }
       # Inverse of distance
       if(is.infinite(distance_max)) distance_max <- cellStats(dis,"max")
-      alpha <- 1 / distance_max
+      # ---- #
+      alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
       # Grow baseline raster by using an exponentially weighted kernel
       dis <- raster::calc(dis, fun = function(x) exp(-alpha * x))
       # Set the remaining ones to very small constant
@@ -348,7 +353,7 @@ methods::setMethod(
     # Log transform
     ras_range  <- log(ras_range)
     # Rescaling does not affect relative differences.
-    # ras_range <- raster::scale(ras_range, scale = F)
+    ras_range <- raster::scale(ras_range, scale = F)
     names(ras_range) <- "range_distance"
 
     # Check whether an offset exists already

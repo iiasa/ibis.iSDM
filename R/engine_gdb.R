@@ -308,14 +308,17 @@ engine_gdb <- function(x,
         if(!exists("fit_gdb")){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
           bc$nu <- bc$nu * 0.01
-          fit_gdb <- mboost::gamboost(
-            formula = equation,
-            data = data,
-            # weights = w,
-            family = fam,
-            offset = w, # Add exposure as offset
-            control = bc
-          )
+          fit_gdb <- try({
+            mboost::gamboost(
+              formula = equation,
+              data = data,
+              # weights = w,
+              family = fam,
+              offset = w, # Add exposure as offset
+              control = bc
+            )
+          },silent = FALSE)
+          if(inherits(fit_gdb, "try-error")) myLog('[Estimation]','red','Fitting failed. Check model and alter parameters!')
         }
 
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
