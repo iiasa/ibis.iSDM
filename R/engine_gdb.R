@@ -203,11 +203,16 @@ engine_gdb <- function(x,
           )
           # Add offset if existent
           if(!is.Waiver(model$offset)){
-            ofs <- get_ngbvalue(coords = df[,c('x','y')],
-                                env =  model$offset,
-                                longlat = raster::isLonLat(bg),
-                                field_space = c('x','y')
-                                )
+            ofs <- get_rastervalue(coords = df[,c('x','y')],
+                                   env = model$offset_object,
+                                   rm.na = FALSE)
+            # Rename to spatial offset
+            names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
+            # ofs <- get_ngbvalue(coords = df[,c('x','y')],
+            #                     env =  model$offset,
+            #                     longlat = raster::isLonLat(bg),
+            #                     field_space = c('x','y')
+            #                     )
             model$biodiversity[[1]]$offset <- ofs
           }
           # Define expectation as very small vector following Renner et al.
@@ -294,8 +299,8 @@ engine_gdb <- function(x,
 
         # --- #
         # Fit the base model
-        try({
-          fit_gdb <- mboost::gamboost(
+        fit_gdb <- try({
+          mboost::gamboost(
             formula = equation,
             data = data,
             # weights = w,
@@ -305,7 +310,7 @@ engine_gdb <- function(x,
           )
         },silent = FALSE)
         # If error, decrease step size by a factor of 10 and try again.
-        if(!exists("fit_gdb")){
+        if(inherits(fit_gdb, "try-error") || length(names(coef(fit_gdb)))< 2){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
           bc$nu <- bc$nu * 0.01
           fit_gdb <- try({

@@ -225,10 +225,9 @@ methods::setMethod(
       # Save overall offset
       ofs <- as.data.frame(ras_of, xy = TRUE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
-      if(anyNA(ofs$spatial_offset)){
-        ofs$spatial_offset[is.na(ofs$spatial_offset)] <- 0 # Replace NA with 0
-      }
       model[['offset']] <- ofs
+      # Also add offset object for faster extraction
+      model[['offset_object']] <- ras_of
     } else { model[['offset']] <- new_waiver() }
 
     # Get biodiversity data
@@ -287,17 +286,16 @@ methods::setMethod(
 
       # Add offset if specified and model is of poisson type
       if(!is.Waiver(x$offset) ){
-        # Note: ras_of object is created above already
         # Extract offset for each observed point
         ofs <- get_rastervalue(
           coords = sf::st_coordinates( guess_sf(model$biodiversity[[id]]$observations) ),
-          env = ras_of,
+          env = model$offset_object,
           rm.na = FALSE
         )
         ofs <- subset(ofs, miss)
         assertthat::assert_that(nrow(ofs) == nrow( model$biodiversity[[id]]$observations ))
         # Rename
-        names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
+        names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
         model[['biodiversity']][[id]][['offset']] <- ofs
       }
 

@@ -196,11 +196,16 @@ engine_xgboost <- function(x,
 
           # Add offset if existent
           if(!is.Waiver(model$offset)){
-            ofs <- get_ngbvalue(coords = df[,c('x','y')],
-                                env =  model$offset,
-                                longlat = raster::isLonLat(bg),
-                                field_space = c('x','y')
-            )
+            # ofs <- get_ngbvalue(coords = df[,c('x','y')],
+            #                     env =  model$offset,
+            #                     longlat = raster::isLonLat(bg),
+            #                     field_space = c('x','y')
+            # )
+            ofs <- get_rastervalue(coords = df[,c('x','y')],
+                                   env = model$offset_object,
+                                   rm.na = FALSE)
+            # Rename to spatial offset
+            names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
             model$biodiversity[[1]]$offset <- ofs
           }
 
@@ -254,22 +259,22 @@ engine_xgboost <- function(x,
 
         # ---- #
         # Create the subsample based on the subsample parameter for all presence data
-        if(model$biodiversity[[1]]$type == "poipo"){
-          ind <- sample(which(labels>0), size = params$subsample * length(which(labels>0)) )
-          ind2 <- which( which(labels>0) %notin% ind )
-          ind_ab <- which(labels==0)
-          ind_train <- c(ind, ind_ab); ind_test <- c(ind2, ind_ab)
-        } else {
-          ind_train <- sample(1:length(labels), size = params$subsample * length(labels) )
-          ind_test <- which((1:length(labels)) %notin% ind_train )
-        }
+        # if(model$biodiversity[[1]]$type == "poipo"){
+        #   ind <- sample(which(labels>0), size = params$subsample * length(which(labels>0)) )
+        #   ind2 <- which( which(labels>0) %notin% ind )
+        #   ind_ab <- which(labels==0)
+        #   ind_train <- c(ind, ind_ab); ind_test <- c(ind2, ind_ab)
+        # } else {
+        #   ind_train <- sample(1:length(labels), size = params$subsample * length(labels) )
+        #   ind_test <- which((1:length(labels)) %notin% ind_train )
+        # }
         # Create the sparse matrix for training and testing data
-        df_train <- xgboost::xgb.DMatrix(data = train_cov[ind_train,],
-                                         label = labels[ind_train]
+        df_train <- xgboost::xgb.DMatrix(data = train_cov,
+                                         label = labels#[ind_train]
         )
-        df_test <- xgboost::xgb.DMatrix(data = train_cov[c(ind_test),],
-                                        label = labels[c(ind_test)]
-        )
+        # df_test <- xgboost::xgb.DMatrix(data = train_cov[c(ind_test),],
+        #                                 label = labels[c(ind_test)]
+        # )
         # --- #
         # Prediction container
         pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
@@ -298,12 +303,13 @@ engine_xgboost <- function(x,
           }
         }
         df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
+        assertthat::assert_that(all(colnames(df_train) == colnames(df_pred)))
 
         if(fam == "count:poisson"){
           # Specifically for count poisson data we will set the areas
           # as an exposure offset for the base_margin
-          xgboost::setinfo(df_train, "base_margin", log(w[ind_train]))
-          xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
+          xgboost::setinfo(df_train, "base_margin", log(w))
+          # xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
           xgboost::setinfo(df_pred, "base_margin", log(w_full))
           params$eval_metric <- "logloss"
         } else if(fam == 'binary:logistic'){
@@ -333,40 +339,42 @@ engine_xgboost <- function(x,
           # For the offset we simply add the (log-transformed) offset to the existing
           # Add exp at the end to backtransform
           of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
-          of_test <- xgboost::getinfo(df_test, "base_margin") |> exp()
+          # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
           of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
           # Add offset to full prediction and load vector
 
           # Respecify offset
           # (Set NA to 1 so that log(1) == 0)
           of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
-          of1 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[ind_train,c("x","y")],
-                              env = of,
-                              longlat = raster::isLonLat(self$get_data("template")),
-                              field_space = c('x','y')
+          of1 <- get_rastervalue(coords = model$biodiversity[[1]]$observations[,c("x","y")],
+                              env = model$offset_object,
+                              rm.na = FALSE
           )
-          of2 <- get_ngbvalue(coords = model$biodiversity[[1]]$observations[ind_test,c("x","y")],
-                              env = of,
-                              longlat = raster::isLonLat(self$get_data("template")),
-                              field_space = c('x','y')
-          )
+          names(of1)[which(names(of1)==names(model$offset_object))] <- "spatial_offset"
+          # of2 <- get_rastervalue(coords = model$biodiversity[[1]]$observations[ind_test,c("x","y")],
+          #                        env = model$offset_object,
+          #                        rm.na = FALSE
+          #                     # longlat = raster::isLonLat(self$get_data("template")),
+          #                     # field_space = c('x','y')
+          # )
+          # names(of2)[which(names(of2)==names(model$offset_object))] <- "spatial_offset"
           assertthat::assert_that(nrow(of1) == length(of_train),
-                                  nrow(of2) == length(of_test),
+                                  # nrow(of2) == length(of_test),
                                   nrow(of) == length(of_pred))
           of_train <- of_train + of1[,"spatial_offset"]
-          of_test <- of_test + of2[,"spatial_offset"]
+          # of_test <- of_test + of2[,"spatial_offset"]
           of_pred <- of_pred + of[,"spatial_offset"]
 
           # Set the new offset
           xgboost::setinfo(df_train, "base_margin", of_train)
-          xgboost::setinfo(df_test, "base_margin", of_test)
+          # xgboost::setinfo(df_test, "base_margin", of_test)
           xgboost::setinfo(df_pred, "base_margin", of_pred)
         }
 
         # --- #
         # Save both training and predicting data in the engine data
         self$set_data("df_train", df_train)
-        self$set_data("df_test", df_test)
+        # self$set_data("df_test", df_test)
         self$set_data("df_pred", df_pred)
         # --- #
 
@@ -402,12 +410,12 @@ engine_xgboost <- function(x,
 
         # All other needed data for model fitting
         df_train <- self$get_data("df_train")
-        df_test <- self$get_data("df_test")
+        # df_test <- self$get_data("df_test")
         df_pred <- self$get_data("df_pred")
         w <- model$biodiversity[[1]]$expect # The expected weight
 
         assertthat::assert_that(
-          # is.null(w) || length(w) == nrow(df_train),
+          !is.null(df_pred),
           all( colnames(df_train) %in% colnames(df_pred) )
         )
 
@@ -495,14 +503,14 @@ engine_xgboost <- function(x,
         }
 
         # Fit the model.
-        watchlist <- list(train = df_train,test = df_test)
-        fit_xgb <- xgboost::xgb.train(
+        # watchlist <- list(train = df_train,test = df_test)
+        fit_xgb <- xgboost::xgboost(
           params = params,
           data = df_train,
-          watchlist = watchlist,
+          # watchlist = watchlist,
           nrounds = nrounds,
           verbose = ifelse(verbose, 1, 0),
-          # early_stopping_rounds = 10,
+          # early_stopping_rounds = 1000,
           print_every_n = 100
         )
         # --- #

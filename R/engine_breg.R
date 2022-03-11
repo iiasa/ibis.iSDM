@@ -183,11 +183,16 @@ engine_breg <- function(x,
 
           # Add offset if existent
           if(!is.Waiver(model$offset)){
-            ofs <- get_ngbvalue(coords = df[,c('x','y')],
-                                env =  model$offset,
-                                longlat = raster::isLonLat(bg),
-                                field_space = c('x','y')
-            )
+            ofs <- get_rastervalue(coords = df[,c('x','y')],
+                                   env = model$offset_object,
+                                   rm.na = FALSE)
+            # Rename to spatial offset
+            names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
+            # ofs <- get_ngbvalue(coords = df[,c('x','y')],
+            #                     env =  model$offset,
+            #                     longlat = raster::isLonLat(bg),
+            #                     field_space = c('x','y')
+            # )
             model$biodiversity[[1]]$offset <- ofs
           }
 
@@ -339,34 +344,56 @@ engine_breg <- function(x,
           )
         }
         # --- #
+        # Call garbage collector to save memory
+        invisible(gc())
 
         # Predict spatially
         if(!settings$get('inference_only')){
           # Messager
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
-          # Make a prediction
-          # -> external code in utils-boom
-          pred_breg <- predict_boom(
-            obj = fit_breg,
-            newdata = full,
-            w = w_full,
-            fam = fam,
-            params = params
-          )
+          # Make a prediction, but do in parallel so as to not overuse memory
+          full$rowid <- 1:nrow(full)
+          full_sub <- subset(full, complete.cases(full))
+          w_full_sub <- w_full[full_sub$rowid]
+          assert_that(nrow(full_sub) == length(w_full_sub))
 
-          # Summarize the posterior
-          preds <- cbind(
-            matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-            matrixStats::rowSds(pred_breg, na.rm = TRUE),
-            matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-            apply(pred_breg, 1, mode)
-          ) %>% as.data.frame()
-          names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-          preds$cv <- preds$mean / preds$sd
+          out <- data.frame()
+          # Tile the problem
+          splits <- cut(1:nrow(full_sub), nrow(full_sub) / 100 )
+          pb <- progress::progress_bar$new(total = length(levels(unique(splits))))
+          for(s in unique(splits)){
+            pb$tick()
+            i <- which(splits == s)
+            # -> external code in utils-boom
+            pred_breg <- predict_boom(
+              obj = fit_breg,
+              newdata = full_sub[i,],
+              w = w_full_sub[i],
+              fam = fam,
+              params = params
+            )
+            # Summarize the posterior
+            preds <- cbind(
+              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+              matrixStats::rowSds(pred_breg, na.rm = TRUE),
+              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+              apply(pred_breg, 1, mode)
+            ) %>% as.data.frame()
+            names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+            preds$cv <- preds$mean / preds$sd
+            out <- rbind(out, preds)
+          }
 
           # Fill output with summaries of the posterior
-          prediction <- fill_rasters(preds, prediction)
+          stk <- raster::stack()
+          for(v in colnames(out)){
+            temp <- emptyraster(prediction)
+            temp[full_sub$rowid] <- out[,v]
+            names(temp) <- v
+            stk <- raster::addLayer(stk, temp)
+          }
+          prediction <- stk;rm(stk)
           prediction <- raster::mask(prediction, self$get_data("template"))
 
         } else {
