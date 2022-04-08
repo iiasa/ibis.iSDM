@@ -4,7 +4,15 @@
 \alias{add_offset_range}
 \title{Specify a expert-based species range as offset}
 \usage{
-add_offset_range(x, layer, distance_max = Inf, presence_prop = 0.9, add = TRUE)
+add_offset_range(
+  x,
+  layer,
+  distance_max = Inf,
+  type = "poisson",
+  presence_prop = 0.9,
+  distance_clip = FALSE,
+  add = TRUE
+)
 
 \S4method{add_offset_range}{BiodiversityDistribution, raster}(x, layer)
 
@@ -19,8 +27,15 @@ add_offset_range(x, layer, distance_max = Inf, presence_prop = 0.9, add = TRUE)
 to have a high likelihood of containing species occurrences (Default: \code{Inf} \link{m}). Can be set to \code{NULL} or \code{0}
 to indicate that no distance should be calculated.}
 
+\item{type}{A \code{\link{character}} denoting the type of model to which this offset is to be added. By default
+it assumes a \code{'poisson'} distributed model and as a result the output created by this function will be log-transformed.
+If however a \code{'binomial'} distribution is chosen, than the output will be \code{`logit`} transformed.
+For integrated models leave at default.}
+
 \item{presence_prop}{\code{\link{numeric}} giving the proportion of all records expected to be inside the range. By
 default this is set to \code{0.9} indicating that 10\% of all records are likely outside the range.}
+
+\item{distance_clip}{\code{\link{logical}} as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}

@@ -315,12 +315,14 @@ methods::setMethod(
         if(!is.Waiver(x$priors)){
           keep <- unique( as.character(x$priors$varnames()) )
           if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
+          test <- test[,-which(names(test) %in% keep)]
+          assert_that(!any(keep %in% names(test)))
         } else keep <- NULL
 
         co <- find_correlated_predictors(env = test,
                                          keep = keep,
-                                         cutoff = 0.7, # Probably keep default, but maybe sth. to vary in the future
-                                         method = 'pear')
+                                         cutoff = getOption('ibis.corPred'), # Probably keep default, but maybe sth. to vary in the future
+                                         method = 'pearson')
 
         # For all factor variables, remove those with only the minimal value (e.g. 0)
         fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
@@ -402,23 +404,36 @@ methods::setMethod(
     # TODO: Potentially outsource to a function in the future
     if(!is.Waiver(x$limits)){
       # Get biodiversity data
-      coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y')] ) )
+      coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y','observed')] ) )
+      coords <- subset(coords, observed > 0)
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
-          zones <- st_intersection(sf::st_as_sf(coords, coords = c('x','y'), crs = sf::st_crs(model$background)),
-                                   x$limits)
+          zones <- sf::st_intersection(sf::st_as_sf(coords, coords = c('x','y'),
+                                                    crs = sf::st_crs(model$background)),
+                                       x$limits)
         )
       )
       # Limit zones
       zones <- subset(x$limits, limit %in% unique(zones$limit) )
+
       # Now clip all predictors and background to this
-      model$background <- suppressMessages(suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) ))
+      model$background <- suppressMessages(suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) )) %>%
+        sf::st_cast("MULTIPOLYGON")
 
-      model$predictors[which( is.na(
-        point_in_polygon(poly = zones, points = model$predictors[,c('x','y')] )[['limit']]
-      )),model$predictors_names] <- NA # Fill with NA
-
+      # Extract predictors and offsets again if set
+      if(!is.Waiver(model$predictors_object)){
+        # Using the raster operations is generally faster than point in polygon tests
+        pred_ov <- model$predictors_object$get_data()
+        # Make a rasterized mask of the background
+        pred_ov <- raster::mask( pred_ov, model$background )
+        # Convert Predictors to data.frame
+        model[['predictors']] <- raster::as.data.frame(pred_ov, xy = TRUE)
+      } else {
+        model$predictors[which( is.na(
+          point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
+        )),model$predictors_names] <- NA # Fill with NA
+      }
       # The same with offset if specified
       if(!is.Waiver(x$offset)){
         model$offset[which( is.na(
@@ -430,7 +445,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # --------------------------------------------------------------------- #
-    # Engine specific code starts below                                     #
+    #### Engine specific code starts below                               ####
     # --------------------------------------------------------------------- #
     # Number of dataset types, families and ids
     types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
@@ -700,18 +715,23 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Construct formula with all variables
           form <- "observed ~ "
+
+          # Use only variables that have sufficient covariate range for training
+          # Finally check that a minimum of unique numbers are present in the predictor range and if not, remove them
+          covariates <- rm_insufficient_covs(model = model$biodiversity[[id]], tr = 5)
+
           if(!is.Waiver(model$priors)){
             # Loop through all provided GDB priors
             supplied_priors <- as.vector(model$priors$varnames())
             for(v in supplied_priors){
-              if(v %notin% model$biodiversity[[id]]$predictors_names) next() # In case the variable has been removed
+              if(v %notin% covariates) next() # In case the variable has been removed
               # First add linear effects
               form <- paste(form, paste0('bmono(', v,
                                          ', constraint = \'', model$priors$get(v) ,'\'',
                                          ')', collapse = ' + ' ), ' + ' )
             }
             # Add linear and smooth effects for all missing ones
-            miss <- model$biodiversity[[id]]$predictors_names[model$biodiversity[[id]]$predictors_names %notin% supplied_priors]
+            miss <- covariates[covariates %notin% supplied_priors]
             if(length(miss)>0){
               # Add linear predictors
               form <- paste(form, paste0('bols(',miss,')',collapse = ' + '))
@@ -724,12 +744,13 @@ methods::setMethod(
               }
             }
           } else {
+
             # Add linear predictors
-            form <- paste(form, paste0('bols(',model$biodiversity[[id]]$predictors_names,')',collapse = ' + '))
+            form <- paste(form, paste0('bols(',covariates,')',collapse = ' + '))
             if(settings$get('only_linear') == FALSE){
               # And smooth effects
               form <- paste(form, ' + ', paste0('bbs(',
-                                                model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'numeric')],', knots = 4)',
+                                                covariates[which(covariates %in% model$biodiversity[[id]]$predictors_types$predictors[model$biodiversity[[id]]$predictors_types$type=="numeric"] )],', knots = 4)',
                                                 collapse = ' + '
               ))
             }

@@ -95,7 +95,9 @@ methods::setMethod(
                        subset(o, select = c('observed', "name", "type", "geometry"))
                      } )
     ) %>% tibble::remove_rownames()
-    poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
+    suppressWarnings(
+      poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
+    )
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
     if((!any(poi$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(poi$name)) > 1){
@@ -112,7 +114,9 @@ methods::setMethod(
       abs <- subset(abs, select = c('x','y'));abs$observed <- 0
       abs <- guess_sf(abs)
       abs$name <- 'Background point'; abs$type <- "generated"
-      abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
+      suppressWarnings(
+        abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
+      )
       poi <- rbind(poi, abs);rm(abs)
     }
     # Convert to sf

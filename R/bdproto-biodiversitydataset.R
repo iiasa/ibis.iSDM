@@ -193,7 +193,7 @@ BiodiversityDatasetCollection <- bdproto(
         dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
         dd[[cols[[dataset]]]] <- factor(dd[[cols[[dataset]]]])
         dd$observed <- dd[[cols[[dataset]]]]
-        g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = Observed) )
+        g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = observed) )
       }
     }
     g

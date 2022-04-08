@@ -394,7 +394,7 @@ engine_xgboost <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Verbosity
@@ -406,7 +406,7 @@ engine_xgboost <- function(x,
         # Get parameters control
         params <- self$get_data('params')
         # Check only linear and reset to linear booster then
-        if(settings$data$only_linear) params$booster <- "gblinear" else params$booster <- "gbtree"
+        if(settings$get("only_linear")) params$booster <- "gblinear" else params$booster <- "gbtree"
 
         # All other needed data for model fitting
         df_train <- self$get_data("df_train")
@@ -416,7 +416,7 @@ engine_xgboost <- function(x,
 
         assertthat::assert_that(
           !is.null(df_pred),
-          all( colnames(df_train) %in% colnames(df_pred) )
+          all( colnames(df_pred) %in% colnames(df_train) )
         )
 
         # Get number of rounds from parameters

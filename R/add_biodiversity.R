@@ -457,7 +457,7 @@ methods::setMethod(
         # Simply sample presence points within as determined
         suppressMessages(
           poipa_on <- sf::st_as_sf(
-            sf::st_sample(x = polpo, size = simulate_points, type = simulate_strategy)
+            sf::st_sample(x = polpa, size = simulate_points, type = simulate_strategy)
           )
         )
       }

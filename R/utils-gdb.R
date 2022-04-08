@@ -32,6 +32,60 @@ predict_gdbclass <- function(fit, nd, template){
   return(prediction)
 }
 
+#' Check training predictor complexity
+#'
+#' @description
+#' This internal function tests an existing set of covariates (usually the training data)
+#' on the number of unique values within.
+#' If fewer values than a given threshold (\code{'tr'}) is detected, then the predictor is removed, thus
+#' reducing complexity.
+#' @note Maybe in the future a more cleverer solution could be thought of, for instance using a singular value decompoistion?
+#' @param model A [`list`] of a model object containing the various predictors and biodiversity occurence information.
+#' @param tr A [`numeric`] value describing a threshold of minimum unique values to be retained.
+#' @returns A [`vector`] with the variables that fullfill the threshold.
+#' @keywords internal
+#' @noRd
+rm_insufficient_covs <- function(model, tr = 5){
+  assertthat::assert_that(
+    is.list(model),
+    is.numeric(tr),
+    tr > 0
+  )
+
+  # Check that biodiversity information is present
+  assertthat::assert_that(
+    assertthat::has_name(model, "observations"),
+    assertthat::has_name(model, "predictors_names")
+  )
+
+  # Now get all continuous ones
+  vars_num <- model$predictors_types$predictors[model$predictors_types$type=="numeric"]
+  vars_fac <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+
+  vars_uniques <- apply(model$predictors[,vars_num], 2, function(x) length(unique(x,na.rm = TRUE)) )
+
+  # Get all variables smaller than the threshold and return the original data.frame without them
+  sufficient <- which(vars_uniques >= tr)
+
+  # Get the factor variables in it as well
+  if(length(vars_fac)>0){
+    vars_uniques <- apply(model$predictors[,vars_fac], 2, function(x) length(unique(x,na.rm = TRUE)) )
+    # Get all factor variables with at least 2 levels
+    sufficient_fac <- which(vars_uniques >= 2)
+    if(length(sufficient_fac)>0){
+      sufficient <- c(names(sufficient), names(sufficient_fac))
+    }
+  } else {
+    sufficient <- names(sufficient)
+  }
+  assertthat::assert_that(all(sufficient %in% model$predictors_names)) # This should return a character of covariate names
+  if(length(sufficient)==0){
+    return(NULL)
+  } else {
+    return(sufficient)
+  }
+}
+
 #' Calculate weights for Point Process models
 #'
 #' @param df The [`data.frame`] for which weights are to be calculated.

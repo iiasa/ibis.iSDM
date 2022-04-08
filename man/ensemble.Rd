@@ -35,12 +35,14 @@ capture parameter uncertainty of individual model; rather it reflects prediction
 Possible options for creating an ensemble includes:
 \itemize{
 \item \code{'mean'} - Calculates the mean of several predictions.
+\item \code{'median'} - Calculates the median of several predictions.
 \item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 }
 }
 \note{
+If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
 Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}.
 }
 \keyword{train}

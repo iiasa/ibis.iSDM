@@ -115,8 +115,9 @@ methods::setMethod(
 #' function [`add_offset_range()`] or the \code{bossMaps} R-package.
 #'
 #' @inheritParams add_offset
-#' @param distance_max A [`numeric`] value determining the maximum distance outside the range in which an elevated species
-#' occurrence should be expected (Default: \code{Inf}).
+#' @param points An optional [`sf`] object with key points. The location of the points are then used to
+#' calculate the probability that a cell has been sampled while accounting for area differences.
+#' (Default: \code{NULL}).
 #' @references
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @family offset
@@ -137,7 +138,7 @@ NULL
 methods::setGeneric(
   "add_offset_bias",
   signature = methods::signature("x", "layer"),
-  function(x, layer, add = TRUE) standardGeneric("add_offset_bias"))
+  function(x, layer, add = TRUE, points = NULL) standardGeneric("add_offset_bias"))
 
 #' @name add_offset_bias
 #' @rdname add_offset_bias
@@ -145,10 +146,11 @@ methods::setGeneric(
 methods::setMethod(
   "add_offset_bias",
   methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
-  function(x, layer, add = TRUE) {
+  function(x, layer, add = TRUE, points = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(layer),
-                            is.logical(add)
+                            is.logical(add),
+                            is.null(points) || inherits(points, 'sf')
     )
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit bias offset...')
@@ -160,8 +162,27 @@ methods::setMethod(
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       names(layer) <- ori.name
     }
-    # Since it is a bias offset and removal is equivalent to simple subtraction, multiply with *-1
-    layer <- layer * -1
+    if(is.null(points)){
+      # Since it is a bias offset and removal is equivalent to simple subtraction, multiply with *-1
+      layer <- layer * -1
+    } else {
+      ## Count the number of records per cell
+      tab <- raster::cellFromXY(layer, sf::st_coordinates(points))
+      r <- emptyraster(layer)
+      r[tab] <- layer[tab]
+      r <- raster::mask(r, background)
+
+      ## Make zeros a very small number otherwise issues with log(0).
+      r[r[]==0] <- 1e-6
+      suppressWarnings({ar <- raster::area(r)})
+
+      ## Calculate the probability that a cell has been sampled while accounting for area differences in lat/lon
+      off.bias <- (-log(1-exp(-r * ar)) - log(ar))
+      names(off.bias) <- "off.bias"
+      # Add bias as covariate
+      layer <- off.bias
+      ## NOTE: if area offset considered, use "+ offset(log(off.area)-log(off.bias))"
+    }
 
     # Check for infinite values
     assertthat::assert_that(
@@ -206,6 +227,10 @@ methods::setMethod(
 #' @param distance_max A [`numeric`] threshold on the maximum distance beyond the range that should be considered
 #' to have a high likelihood of containing species occurrences (Default: \code{Inf} [m]). Can be set to \code{NULL} or \code{0}
 #' to indicate that no distance should be calculated.
+#' @param type A [`character`] denoting the type of model to which this offset is to be added. By default
+#' it assumes a \code{'poisson'} distributed model and as a result the output created by this function will be log-transformed.
+#' If however a \code{'binomial'} distribution is chosen, than the output will be \code{`logit`} transformed.
+#' For integrated models leave at default.
 #' @param presence_prop [`numeric`] giving the proportion of all records expected to be inside the range. By
 #' default this is set to \code{0.9} indicating that 10% of all records are likely outside the range.
 #' @param distance_clip [`logical`] as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).
@@ -225,7 +250,7 @@ NULL
 methods::setGeneric(
   "add_offset_range",
   signature = methods::signature("x", "layer"),
-  function(x, layer, distance_max = Inf, presence_prop = 0.9, distance_clip = FALSE, add = TRUE) standardGeneric("add_offset_range"))
+  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9, distance_clip = FALSE, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
@@ -280,14 +305,18 @@ methods::setMethod(
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
-  function(x, layer, distance_max = Inf, presence_prop = 0.9, distance_clip = FALSE, add = TRUE ) {
+  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9, distance_clip = FALSE, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(layer, 'sf'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.numeric(presence_prop),
                             is.logical(distance_clip),
+                            is.character(type),
                             is.logical(add)
     )
+    # Match the type if set
+    type <- match.arg(type, c("poisson", "binomial"), several.ok = FALSE)
+
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 

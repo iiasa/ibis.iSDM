@@ -4,7 +4,7 @@
 \alias{add_offset_bias}
 \title{Specify a spatial explicit offset as bias}
 \usage{
-add_offset_bias(x, layer, add = TRUE)
+add_offset_bias(x, layer, add = TRUE, points = NULL)
 
 \S4method{add_offset_bias}{BiodiversityDistribution, raster}(x, layer)
 }
@@ -16,8 +16,9 @@ add_offset_bias(x, layer, add = TRUE)
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 
-\item{distance_max}{A \code{\link{numeric}} value determining the maximum distance outside the range in which an elevated species
-occurrence should be expected (Default: \code{Inf}).}
+\item{points}{An optional \code{\link{sf}} object with key points. The location of the points are then used to
+calculate the probability that a cell has been sampled while accounting for area differences.
+(Default: \code{NULL}).}
 }
 \description{
 Including offsets is another option to integrate spatial prior information

@@ -175,7 +175,11 @@ DistributionModel <- bdproto(
     if(length(grep('threshold',rl))>0){
       # Get stack of computed thresholds
       ras <- raster::stack( self$get_data( grep('threshold',rl,value = TRUE) ) )
-      if(attr(ras[[1]], 'truncate')){
+      suppressWarnings(
+        ras <- raster::deratify(ras, complete = TRUE)
+      )
+      # Get colour palette
+      if(attr(ras[[1]], 'truncate')== TRUE){
         col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(100)
       } else { col <- c("grey", "black")}
       raster::plot(ras,

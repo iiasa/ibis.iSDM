@@ -27,8 +27,8 @@ NULL
 #' @param ... Other variables or control parameters
 #' @references
 #' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
-#' * Hofner, B., Müller, J., Hothorn, T., 2011. Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
-#'
+#' * Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
+#' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
 #' @family engine
 #' @name engine_gdb
 NULL
@@ -257,7 +257,7 @@ engine_gdb <- function(x,
       },
       # Training function
       train = function(self, model, settings, ...){
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Get output raster
@@ -309,6 +309,7 @@ engine_gdb <- function(x,
             control = bc
           )
         },silent = FALSE)
+
         # If error, decrease step size by a factor of 10 and try again.
         if(inherits(fit_gdb, "try-error") || length(names(coef(fit_gdb)))< 2){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
@@ -323,19 +324,35 @@ engine_gdb <- function(x,
               control = bc
             )
           },silent = FALSE)
-          if(inherits(fit_gdb, "try-error")) myLog('[Estimation]','red','Fitting failed. Check model and alter parameters!')
+          if(inherits(fit_gdb, "try-error")) {
+            myLog('[Estimation]','red','Fitting failed. Check model and alter parameters!')
+            return(NULL)
+          }
         }
 
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
         # 5 fold Cross validation to prevent overfitting
-        # Andreas Mayr, Benjamin Hofner, and Matthias Schmid (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
-        grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
-        cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
-        try({cvm <- mboost::cvrisk(fit_gdb,
-                              folds = cvf, grid = grs,
-                              papply = pbapply::pblapply )
-        },silent = TRUE)
-        # TODO: parallize better? parallel::mclapply(mc.cores = getOption('ibis.nthread'))
+        if(getOption("ibis.runparallel")){
+          grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
+          cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+
+          # Start cluster
+          # cl <- parallel::makeCluster( getOption('ibis.nthread') )
+          try({cvm <- mboost::cvrisk(fit_gdb,
+                                     folds = cvf, grid = grs,
+                                     papply = parallel::mclapply,
+                                     mc.cores = getOption("ibis.nthread"))
+          }, silent = TRUE)
+          # parallel::stopCluster(cl)
+
+        } else {
+          grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
+          cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+          try({cvm <- mboost::cvrisk(fit_gdb,
+                                     folds = cvf, grid = grs,
+                                     papply = pbapply::pblapply )
+          }, silent = TRUE)
+        }
         # Check whether crossvalidation has run through successfully
         if(exists('cvm') && mstop(cvm) > 0){
           # Set the model to the optimal mstop to limit overfitting

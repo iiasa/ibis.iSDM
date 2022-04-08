@@ -124,9 +124,9 @@ methods::setMethod(
         limits <- sf::st_as_sf( raster::rasterToPolygons(limits, n = 16, dissolve = TRUE) )
       }
       # Ensure that limits has the same projection as background
-      if(st_crs(limits) != st_crs(background)) limits <- st_transform(limits, background)
+      if(sf::st_crs(limits) != sf::st_crs(background)) limits <- sf::st_transform(limits, background)
       # Ensure that limits is intersecting the background
-      if(suppressMessages(length( st_intersects(limits, background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      if(suppressMessages(length( sf::st_intersects(limits, background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
 
       # Get fir column and rename
       limits <- limits[,1]; names(limits) <- c('limit','geometry')

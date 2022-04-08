@@ -58,8 +58,51 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
     sf::st_crs(poly) == sf::st_crs(points)
   )
 
-  # Within test
-  ov <- suppressMessages( sf::st_join(points, poly, join = st_within) )
+  # Parallize if number of points large and allowed
+  if(getOption("ibis.runparallel") && nrow(points) > 5000){
+    # Within test
+    # Paralise any simple features analysis.
+    # @source https://www.spatialanalytics.co.nz/post/2018/04/01/fixing-st-par/
+    st_parallel <- function(sf_df, sf_func, n_cores, ...){
+
+      # Create a vector to split the data set up by.
+      split_vector <- rep(1:n_cores, each = nrow(sf_df) / n_cores, length.out = nrow(sf_df))
+
+      # Perform GIS analysis
+      split_results <- split(sf_df, split_vector) %>%
+        parallel::mclapply(function(x) sf_func(x, ...), mc.cores = n_cores)
+
+
+      # Define the output_class. If length is greater than two, then grab the second variable.
+      output_class <- class(split_results[[1]])
+      if (length(output_class) == 2){
+        output_class <- output_class[2]
+      }
+
+      # Combine results back together. Method of combining depends on the output from the function.
+      if (output_class == "matrix"){
+        result <- do.call("rbind", split_results)
+        names(result) <- NULL
+      } else if (output_class == "sfc") {
+        result <- do.call("c", split_results)
+        result <- sf_func(result) # do.call combines the list but there are still n_cores of the geometry which had been split up. Running st_union or st_collect gathers them up into one, as is the expected output of these two functions.
+      } else if (output_class %in% c('list', 'sgbp') ){
+        result <- do.call("c", split_results)
+        names(result) <- NULL
+      } else if (output_class == "data.frame" ){
+        result <- do.call("rbind", split_results)
+      } else {
+        stop("Unknown class. st_parallel only accepts the following outputs at present: sfc, list, sf, matrix, sgbp.")
+      }
+
+      # Return result
+      return(result)
+    }
+    ov <- st_parallel(points, function(x) sf::st_join(x, poly, join = st_within), getOption("ibis.nthread"))
+  } else {
+    # Within test
+    ov <- suppressMessages( sf::st_join(points, poly, join = st_within) )
+  }
   return(ov)
 }
 
@@ -102,6 +145,25 @@ extent_expand <- function(e,f=0.1){
   ymax <- e@ymax+yi
 
   return(extent(c(xmin,xmax,ymin,ymax)))
+}
+
+#' Helper function rename the geometry of a provided
+#'
+#' @param g A [`sf`] object containing some data.
+#' @param name A [`character`] with the new name for the geometry.
+#' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
+#' @keywords internal
+#' @noRd
+rename_geometry <- function(g, name){
+  assertthat::assert_that(
+    inherits(g, "sf"),
+    is.character(name)
+  )
+  current = attr(g, "sf_column")
+  if(current == name) return(g)
+  names(g)[names(g)==current] = name
+  sf::st_geometry(g)=name
+  g
 }
 
 #' Convert a data.frame or tibble to simple features

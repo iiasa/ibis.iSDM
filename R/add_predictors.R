@@ -226,14 +226,94 @@ methods::setMethod(
   }
 )
 
+# Add elevational delineation as predictor ----
+
+#' Create lower and upper limits for an elevational range and add them as separate predictors
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param layer A [`character`] stating the elevational layer in the Distribution object or [`RasterLayer`] object.
+#' @param lower [`numeric`] value for a lower elevational preference of a species.
+#' @param upper [`numeric`] value for a upper elevational preference of a species.
+#' @param transform [`character`] Any optional transformation to be applied. Usually not needed (Default: \code{"none"}).
+#' @name add_predictor_elevationpref
+NULL
+
+#' @name add_predictor_elevationpref
+#' @rdname add_predictor_elevationpref
+#' @exportMethod add_predictor_elevationpref
+#' @export
+methods::setGeneric(
+  "add_predictor_elevationpref",
+  signature = methods::signature("x", "layer", "lower", "upper", "transform"),
+  function(x, layer, lower, upper, transform = "none") standardGeneric("add_predictor_elevationpref"))
+
+#' @name add_predictor_elevationpref
+#' @rdname add_predictor_elevationpref
+#' @usage \S4method{add_predictor_elevationpref}{BiodiversityDistribution, ANY, numeric, numeric, character}(x, layer, lower, upper, transform)
+methods::setMethod(
+  "add_predictor_elevationpref",
+  methods::signature(x = "BiodiversityDistribution", layer = "ANY", lower = "numeric", upper = "numeric"),
+  function(x, layer, lower, upper, transform = "none") {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.Raster(layer) || is.character(layer),
+                            is.numeric(lower) || is.na(lower),
+                            is.numeric(upper) || is.na(upper),
+                            is.character(transform)
+    )
+    # Messager
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting elevational preference predictors...')
+
+    # If layer is a character, check that it is in the provided object
+    if(is.character(layer)){
+      assertthat::assert_that(layer %in% x$get_predictor_names())
+      layer <- x$predictors$get_data()[[layer]]
+    } else {
+      # If it is a raster
+      # Check that background and range align, otherwise raise error
+      if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+        warning('Supplied range does not align with background! Aligning them now...')
+        layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      }
+    }
+
+    # Format lower and upper preferences
+    if(is.na(lower)) lower <- raster::cellStats(layer, "min")
+    if(is.na(upper)) upper <- raster::cellStats(layer, "max")
+
+    # Now create thresholded derivatives of lower and upper elevation
+    ras1 <- layer
+    # ras2[ras2 < lower] <- 0; ras2[ras2 > upper] <- 0; ras2[ras2 > 0] <- 1 # Both ways
+    ras1[ras1 < lower] <- 0; ras1[ras1 >= lower] <- 1
+    ras2 <- layer
+    ras2[ras2 < upper] <- 0; ras2[ras2 > 0] <- 1
+    o <- raster::stack(ras1, ras2)
+    names(o) <- c('elev_low', 'elev_high')
+    rm(ras1,ras2)
+
+    # Add as predictor
+    if(is.Waiver(x$predictors)){
+      x <- add_predictors(x, env = o, transform = transform, derivates = 'none')
+    } else {
+      for(n in names(o)){
+        r <- o[[n]]
+        # If predictor transformation is specified, apply
+        if(transform != "none") r <- predictor_transform(r, option = transform)
+        x$predictors$set_data(n, r)
+      }
+    }
+    return(x)
+  }
+)
+
+# Add species ranges as predictor ----
 #' Add a range of a species as predictor to a distribution object
 #'
 #' As options allow specifying including the range either as binary or distance
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param range A [`sf`] object with the range for the target feature
-#' @param method [`character`] describing how the range should be included (binary | distance)
-#' @param distance_max Numeric threshold on the maximum distance (Default: NULL)
+#' @param layer A [`sf`] object with the range for the target feature
+#' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
+#' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
 #' @name add_predictor_range
 NULL
@@ -244,39 +324,39 @@ NULL
 #' @export
 methods::setGeneric(
   "add_predictor_range",
-  signature = methods::signature("x", "range", "method"),
-  function(x, range, method = 'distance', distance_max = NULL, priors = NULL) standardGeneric("add_predictor_range"))
+  signature = methods::signature("x", "layer", "method"),
+  function(x, layer, method = 'distance', distance_max = NULL, priors = NULL) standardGeneric("add_predictor_range"))
 
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, raster}(x, range)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, raster}(x, layer)
 methods::setMethod(
   "add_predictor_range",
-  methods::signature(x = "BiodiversityDistribution", range = "RasterLayer"),
-  function(x, range, method = 'precomputed_range', priors = NULL) {
+  methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
+  function(x, layer, method = 'precomputed_range', priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.Raster(range),
+                            is.Raster(layer),
                             is.character(method)
     )
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
-    if(compareRaster(range, x$background,stopiffalse = FALSE)){
+    if(compareRaster(layer, x$background,stopiffalse = FALSE)){
       warning('Supplied range does not align with background! Aligning them now...')
-      range <- alignRasters(range, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
-    names(range) <- method
+    names(layer) <- method
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = range,transform = 'none',derivates = 'none', priors)
+      x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors$set_data('range_distance', range)
+      x$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
-        assertthat::assert_that( all( priors$varnames() %in% names(range) ) )
+        assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
         x <- x$set_priors(priors)
       }
     }
@@ -286,14 +366,14 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution,sf, vector}(x, range, method)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
 methods::setMethod(
   "add_predictor_range",
-  methods::signature(x = "BiodiversityDistribution", range = "sf", method = "character"),
-  function(x, range, method = 'distance', distance_max = Inf, priors = NULL ) {
+  methods::signature(x = "BiodiversityDistribution", layer = "sf", method = "character"),
+  function(x, layer, method = 'distance', distance_max = Inf, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
-                            inherits(range, 'sf'),
+                            inherits(layer, 'sf'),
                             method %in% c('binary','distance'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
@@ -302,7 +382,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
-    if(sf::st_crs(range) != sf::st_crs(x$background)) range <- sf::st_transform(range, sf::st_crs(x$background))
+    if(sf::st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
 
     # Template raster for background
     if(!is.Waiver(x$predictors)){
@@ -315,9 +395,9 @@ methods::setMethod(
 
     # Rasterize the range
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(range, temp, field = NULL)
+      ras_range <- fasterize::fasterize(layer, temp, field = NULL)
     } else {
-      ras_range <- raster::rasterize(range, temp,field = NULL)
+      ras_range <- raster::rasterize(layer, temp,field = NULL)
     }
 
     # -------------- #
