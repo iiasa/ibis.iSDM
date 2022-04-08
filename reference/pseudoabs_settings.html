@@ -71,8 +71,8 @@ engines background points are necessary to model poisson (or binomial) distribut
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, ANY</span>
-<span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">bias</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, logical, ANY</span>
+<span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">mcp_inside</span>, <span class="va">bias</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -86,9 +86,13 @@ engines background points are necessary to model poisson (or binomial) distribut
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the minimum Ratio of background points relative to presence points.
 Usually ignored unless the ratio exceeds the <code>nrpoints</code> parameters (Default: <code>0.25</code>).</p></dd>
 <dt>method</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting how the sampling should be done. For details for options.</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting how the sampling should be done. For details for options (Default: <code>"random"</code>).</p></dd>
 <dt>buffer_distance</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A distance from the observations in which pseudo-absence points are to be generated.</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A distance from the observations in which pseudo-absence points are not to be generated.
+The units in <code>m</code>.</p></dd>
+<dt>mcp_inside</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value of whether absence points should be sampled inside (Default) or outside the
+minimum convex polygon when this is chosen (parameter <code>method = "mcp"</code>).</p></dd>
 <dt>bias</dt>
 <dd><p>A <code>RasterLayer</code> with the same extent and projection and background. Background points will
 be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</code>).</p></dd>
@@ -100,8 +104,8 @@ be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</c
     <p>Mandatory and possible parameters are:</p><ul><li><p><code>background</code> Specifies the extent over which background points are to be sampled.</p></li>
 <li><p><code>nrpoints</code> The number of background points to be used.</p></li>
 <li><p><code>method</code> The specific method on how pseudo-absence points should be generated. Available options
-are 'random' (Default), 'buffer' to generate only within a buffer of existing points, or 'mcp' to only generate within the
-bounding pox of provided points.</p></li>
+are <code>'random'</code> (Default), <code>'buffer'</code> to generate only within a buffer of existing points, or <code>'mcp'</code> to only generate within the
+for a minimum convex polygon of provided points so that absence points are only sampled outside of it.</p></li>
 <li><p><code>buffer_distance</code> The numeric value indicating the distance from presence points where absence points are to be created.</p></li>
 <li><p><code>min_ratio</code> The minimum ratio of absence points relative presence points. Ensures a minimum number of
 absence points.</p></li>
@@ -113,7 +117,6 @@ absence points.</p></li>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="co"># It is also possible to match the number of presence-absence points directly.</span></span>
 <span class="r-in"><span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">0</span>, min_ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
 <span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>
