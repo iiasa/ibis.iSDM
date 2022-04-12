@@ -902,7 +902,8 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   # FIXME: Ignoring this as one might want to stress contrast to biases cells
   # abs <- unique(abs)
   # Combine with presence information and return
-  out <- rbind(df, abs)
+  out <- rbind.data.frame(subset(df, select = names(abs)),
+                          abs)
   return(out)
 }
 

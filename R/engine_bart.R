@@ -364,6 +364,7 @@ engine_bart <- function(x,
                                    ntree = dc@n.trees,
                                    # Hyper parameters
                                    k = k, power = power, base =  base,
+                                   splitprobs = splitprobs,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
                                    nskip = dc@n.burn,

@@ -68,10 +68,12 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
       # Create a vector to split the data set up by.
       split_vector <- rep(1:n_cores, each = nrow(sf_df) / n_cores, length.out = nrow(sf_df))
 
+      # FIXME:
+      # MC.cores does not work properly on windows. To be replaced with future
+      if(Sys.info()['sysname']=="Windows") n_cores <- 1
       # Perform GIS analysis
       split_results <- split(sf_df, split_vector) %>%
         parallel::mclapply(function(x) sf_func(x, ...), mc.cores = n_cores)
-
 
       # Define the output_class. If length is greater than two, then grab the second variable.
       output_class <- class(split_results[[1]])

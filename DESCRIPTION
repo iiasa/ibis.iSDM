@@ -39,7 +39,7 @@ Depends:
 Suggests:
     deldir,
     mboost,
-    dbarts,
+    dbarts (>= 0.9-22),
     modEvA,
     xgboost,
     progress,
