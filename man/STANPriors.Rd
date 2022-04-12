@@ -23,6 +23,8 @@ hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},

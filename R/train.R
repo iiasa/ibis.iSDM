@@ -383,6 +383,7 @@ methods::setMethod(
         x$engine$name,
         "<GDB>" = x$priors$classes() == 'GDBPrior',
         "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
+        "<BART>" = x$priors$classes() == 'BARTPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
         "<INLABRU>" = x$priors$classes() == 'INLAPrior',
         "<STAN>" = x$priors$classes() == 'STANPrior',
@@ -909,8 +910,6 @@ methods::setMethod(
       # ----------------------------------------------------------- #
       #### BART Engine ####
     } else if( inherits(x$engine,"BART-Engine") ){
-      # Output some warnings on things ignored
-      if(!is.Waiver(model$priors)) warning('Option to provide priors not yet implemented. Ignored...')
 
       # Process each id
       for(id in ids){
@@ -918,7 +917,7 @@ methods::setMethod(
         if(model$biodiversity[[id]]$equation=='<Default>'){
           # Construct formula with all variables
           form <- paste( 'observed' ,ifelse(model$biodiversity[[id]]$family=='poisson', '/w',''), '~ ',
-                         paste(model$predictors_names,collapse = " + "))
+                         paste(model$biodiversity[[id]]$predictors_names,collapse = " + "))
           # Convert to formula
           form <- to_formula(form)
         } else {

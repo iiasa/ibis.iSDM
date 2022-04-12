@@ -32,6 +32,8 @@ Currently only linear and constrained linear priors are supported.
 \code{\linkS4class{Prior}}.
 
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},

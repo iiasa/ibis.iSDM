@@ -91,6 +91,7 @@ Collate:
     'partial.R'
     'plot.R'
     'print.R'
+    'prior_bart.R'
     'prior_breg.R'
     'prior_gdb.R'
     'prior_inla.R'

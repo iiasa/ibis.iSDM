@@ -283,7 +283,7 @@ methods::setMethod(
     # Now create thresholded derivatives of lower and upper elevation
     ras1 <- layer
     # ras2[ras2 < lower] <- 0; ras2[ras2 > upper] <- 0; ras2[ras2 > 0] <- 1 # Both ways
-    ras1[ras1 < lower] <- 0; ras1[ras1 >= lower] <- 1
+    ras1[layer < lower] <- 0; ras1[ras1 > lower] <- 1
     ras2 <- layer
     ras2[ras2 < upper] <- 0; ras2[ras2 > 0] <- 1
     o <- raster::stack(ras1, ras2)

@@ -31,6 +31,8 @@ Function to create a new stan prior that can be added to environmental predictor
 \code{\linkS4class{Prior}}.
 
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},

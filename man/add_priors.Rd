@@ -31,6 +31,8 @@ via \link{add_predictors}
 }
 \seealso{
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},

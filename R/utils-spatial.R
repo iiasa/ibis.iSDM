@@ -106,6 +106,60 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
   return(ov)
 }
 
+#' Create mask based on a zonal layer
+#'
+#' @description
+#' This function takes available point data and intersects it with a zonal layer
+#' of the
+#' @param df A [`sf`] object with point information.
+#' @param zones A [`sf`] or [`RasterLayer`] object with polygons of the zones to be used for occurrence masking.
+#' @param column A [`character`] giving the column in which zonal ids are found. Only used when zones is of
+#' type [`sf`].  (Default: \code{"limits"}).
+#' @param template An optional [`RasterLayer`] object on which which the zones should be rasterized (Default: \code{NULL}).
+#' @returns A [`sf`] or [`RasterLayer`] object.
+#' @keywords utils
+#' @noRd
+create_zonaloccurrence_mask <- function(df, zones, column = "limits", template = NULL){
+  assertthat::assert_that(
+    inherits(df, "sf"),
+    unique(sf::st_geometry_type(df)) %in% "POINT",
+    is.character(column),
+    inherits(zones, "sf") || is.Raster(zones),
+    is.null(template) || is.Raster(template)
+  )
+  # If zones is sf, check that it is of type polygon
+  if(inherits(zones, "sf")) assertthat::assert_that( all( unique(sf::st_geometry_type(zones)) %in% c("POLYGON", "MULTIPOLYGON") ) )
+
+  if(inherits(zones, "sf")){
+    # Get zones from the limiting area, e.g. those intersecting with input
+    suppressMessages(
+      suppressWarnings(
+        zones <- sf::st_intersection(df, zones)
+      )
+    )
+    # Limit zones
+    zones <- subset(zones, limit %in% unique(zones[[column]]) )
+
+    # Finally rasterize if template is set
+    if(!is.null(template)) zones <- raster::rasterize(zones, template, field = column)
+  } else {
+    # Extract values from zonal raster layer
+    ex <- raster::extract(zones, df) |> unique()
+    # Remove NA if found
+    if(anyNA(ex)) ex <- ex[-which(is.na(ex))]
+
+    # Now create copy of zonal raster and set all values other than ex to NA
+    new <- emptyraster(zones)
+    new[zones %in% ex] <- 1
+    zones <- new
+    # Align with template if set
+    if(!is.null(template)){
+      zones <- alignRasters(zones, template, method = "ngb", func = raster::modal, cl = FALSE)
+    }
+  }
+  return(zones)
+}
+
 #' Converts a bounding box to a Well Known Text (WKT) polygon
 #'
 #' @param minx Minimum x value, or the most western longitude

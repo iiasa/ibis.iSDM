@@ -21,6 +21,8 @@ Helper function when multiple variables are supplied
 }
 \seealso{
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPrior}()},

@@ -26,6 +26,8 @@ In order to remove a set prior, the name of the prior has to be specified.
 }
 \seealso{
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},

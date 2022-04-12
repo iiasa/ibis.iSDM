@@ -60,6 +60,8 @@ p2
 \code{\linkS4class{Prior}}
 
 Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
 \code{\link{BREGPriors}()},
 \code{\link{GDBPriors}()},
 \code{\link{GDBPrior}()},

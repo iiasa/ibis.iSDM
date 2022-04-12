@@ -183,11 +183,14 @@ engine_bart <- function(x,
 
           # Add offset if existent
           if(!is.Waiver(model$offset)){
-            ofs <- get_ngbvalue(coords = df[,c('x','y')],
-                                env =  model$offset,
-                                longlat = raster::isLonLat(bg),
-                                field_space = c('x','y')
-            )
+            ofs <- get_rastervalue(coords = df[,c('x','y')],
+                                   env = model$offset_object,
+                                   rm.na = FALSE)
+            # ofs <- get_ngbvalue(coords = df[,c('x','y')],
+            #                     env =  model$offset,
+            #                     longlat = raster::isLonLat(bg),
+            #                     field_space = c('x','y')
+            # )
             model$biodiversity[[1]]$offset <- ofs
           }
 
@@ -216,6 +219,23 @@ engine_bart <- function(x,
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
         }
 
+        # Process and add priors if set
+        params <- self$get_data("params")
+        if(!is.Waiver(model$priors)){
+          assertthat::assert_that(
+            all( model$priors$varnames() %in% model$biodiversity[[1]]$predictors_names )
+          )
+          # Match position of variables with monotonic constrains
+          mc <- rep(1 / length( model$biodiversity[[1]]$predictors_names ), length( model$biodiversity[[1]]$predictors_names ) )
+          names(mc) <- model$biodiversity[[1]]$predictors_names
+          for(v in model$priors$varnames()){
+            mc[v] <- model$priors$get(v)
+          }
+          # Save the priors in the model parameters
+          params[["priors"]] <- mc
+        } else { params[["priors"]] <- new_waiver() }
+        self$set_data("params", params)
+
         # Instead of invisible return the model object
         return( model )
       },
@@ -233,8 +253,9 @@ engine_bart <- function(x,
         # Get output raster
         prediction <- self$get_data('template')
 
-        # Get dbarts control
+        # Get dbarts control and params
         dc <- self$get_data('dc')
+        params <- self$get_data('params')
 
         # All other needed data for model fitting
         equation <- model$biodiversity[[1]]$equation
@@ -274,6 +295,11 @@ engine_bart <- function(x,
             off = model$biodiversity[[1]]$offset[,"spatial_offset"]
           }
         } else { off = 0.0 }
+
+        # Specify splitprobs depending on whether priors have been set
+        if( !is.Waiver(params[["priors"]]) ){
+          splitprobs = params[["priors"]]
+        } else { splitprobs = NULL }
 
         # --- #
         # Parameter tuning #
@@ -323,6 +349,7 @@ engine_bart <- function(x,
                                    binaryOffset = off,
                                    # Hyper parameters
                                    k = k, power = power, base =  base,
+                                   splitprobs = splitprobs,
                                    ntree = dc@n.trees,
                                    nthread = dc@n.threads,
                                    nchain = dc@n.chains,
@@ -362,14 +389,6 @@ engine_bart <- function(x,
                                              newdata = full[,model$biodiversity[[1]]$predictors_names],
                                              type = params$type
                                              )
-          # pred_bart <- run_parallel(X = full[,model$biodiversity[[1]]$predictors_names],
-          #                           FUN = dbarts:::predict.bart,
-          #                           cores = ifelse(getOption("ibis.runparallel"), getOption("ibis.nthread"), 1),
-          #                           approach = ifelse(getOption("ibis.use_future"), "future", "parallel"),
-          #                           object = fit_bart,
-          #                           type = params$type
-          #                           )
-          # if(is.list(pred_bart)) pred_bart <- do.call(rbind, pred_bart)
           # Summarize quantiles and sd from posterior
           ms <- as.data.frame(
                  cbind( apply(pred_bart, 2, mean),
