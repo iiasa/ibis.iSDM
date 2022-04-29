@@ -32,9 +32,12 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  x <- x %>% add_offset_range(virtual_range, method = 'binary')
-  expect_equal(x$get_offset(),'binary_range')
+  x <- x %>% add_offset_range(virtual_range)
+  expect_equal(x$get_offset(),'range_distance')
   expect_s4_class(x$offset,'Raster')
+  # remove again
+  x <- x$rm_offset()
+  expect_true(is.Waiver( x$get_offset() ) )
 
   # Add Predictors
   x <- x %>% add_predictors(predictors)
@@ -54,7 +57,7 @@ test_that('Setting up a distribution model',{
   pb <- raster::brick(predictors)
   x <- distribution(background) %>% add_predictors(pb$aspect_mean_50km,derivates = 'quadratic')
   testthat::expect_equal(x$predictors$length(),2)
-  x <- distribution(background) %>% add_predictors(pb,derivates = c('quadratic','hinge'))
+  x <- distribution(background) %>% add_predictors(pb, derivates = c('quadratic','hinge'))
   testthat::expect_equal(x$predictors$length(),84)
 
   x <- x %>% engine_inla()
@@ -69,7 +72,29 @@ test_that('Setting up a distribution model',{
   expect_gt(sum(x$engine$get_data('mesh.area')),800)
 
   # Add latent effect and see whether the attributes is changed
-  y <- x %>% add_latent_spatial()
+  y <- x %>% add_latent_spatial(method = "spde")
   expect_vector( attr(y$get_latent(),'method'),'spde')
+
+  # ---- #
+  # Check that all engines can be added with default options
+  # Also add a zonal layer for limits
+  zones <- raster::ratify( predictors$koeppen_50km )
+  x <- distribution(background,limits = zones)
+  expect_s3_class(x$get_limits(), "sf")
+
+  y <- x %>% engine_bart()
+  expect_equal( y$engine$name, "<BART>")
+  y <- x %>% engine_breg()
+  expect_equal( y$engine$name, "<BREG>")
+  y <- x %>% engine_gdb()
+  expect_equal( y$engine$name, "<GDB>")
+  y <- x %>% engine_inla()
+  expect_equal( y$engine$name, "<INLA>")
+  y <- x %>% engine_inlabru()
+  expect_equal( y$engine$name, "<INLABRU>")
+  y <- x %>% engine_stan()
+  expect_equal( y$engine$name, "<STAN>")
+  y <- x %>% engine_xgboost()
+  expect_equal( y$engine$name, "<XGBOOST>")
 
 })

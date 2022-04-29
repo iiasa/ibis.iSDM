@@ -14,6 +14,8 @@
 \item{weights}{(\emph{Optional}) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).}
 
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}).}
+
+\item{normalize}{\code{\link{logical}} on whether the output of the resemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
 }
 \value{
 A \code{\link{RasterStack}} containing the ensemble of the provided predictions specified by \code{method} and a

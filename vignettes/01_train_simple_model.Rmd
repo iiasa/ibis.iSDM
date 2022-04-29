@@ -18,36 +18,167 @@ knitr::opts_chunk$set(
 
 ### Load package and make a basic model
 
-Load the test data that comes with the package. This comes with a simulated virtual species for Europe 
-as well as some test predictors
+The examples below demonstrate how to fit a basic model with the ibis.iSDM package using a variety of engines. 
+The ibis.iSDM package loosely follows the **tidyverse** strategy where a model is built by adding different components via pipes. Every model needs to have a minimum of at least 3 components:
 
-<!-- ```{r Load data} -->
-<!-- devtools::load_all(".") -->
+* A background layer that delineates the modelling extent. This layer can be supplied as `sf` or `RasterLayer` object and provides the package with general knowledge about the modelling extent, the geographic projection and grain size as well as areas with no (`NA`) and valid data range (`1` or other values).
 
-<!-- # Background layer -->
-<!-- background <- raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM")) -->
-<!-- # Load virtual species -->
-<!-- virtual_species <- sf::st_read(system.file("inst/extdata/input_data.gpkg",package = "ibis.iSDM"), "points") -->
-<!-- # Predictors -->
-<!-- predictors <- raster::stack(list.files("inst/extdata/predictors/","tif",full.names = TRUE)) -->
+* Spatial-explicit biodiversity distribution data such as point or polygon data on species or ecosystems. Methods to add those are available in functions that start with [`add_biodiversity_*`] can be of various types. Types in this context refer to the form the biodiversity data was raised, such as presence-only or presence-absence information. 
+There are ways to convert for instance presence-only
 
-<!-- ``` -->
+* A engine to do the estimation. Like many other species distribution modelling approaches, the ibis.iSDM package makes use of Bayesian and Machine Learning approaches to do the estimation. While writing this text the package supports a total of 7 (```length(getOption("ibis.engines") )```) different engines, each with their own modelling approaches.
 
-<!-- Now lets define a simple model, using Gradient Descent Boosting (GDB) as engine for estimation -->
+--- 
 
-<!-- ```{r GDB} -->
-<!-- # Define model -->
-<!-- mod <- distribution(background) %>%  -->
-<!--   add_biodiversity_poipo(virtual_species) %>%  -->
-<!--   add_predictors(env = predictors, transform = "scale", derivates = "none") %>%  -->
-<!--   add_latent_spatial() %>%  -->
-<!--   engine_gdb( -->
-<!--     boosting_iterations = 1000, -->
-<!--     learning_rate = 0.01 -->
-<!--     ) -->
+```{r Load the package,echo=FALSE,message=FALSE,eval=TRUE}
+# Load the package
+devtools::load_all(".")
+library(assertthat)
 
-<!-- # Fit -->
-<!-- fit <- train(mod, "Test GDB run") -->
+```
 
-<!-- ``` -->
 
+Creating a model in the ibis.iSDM package is relatively straight forward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a  simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
+So first lets load the data:
+
+```{r Load data}
+# Background layer
+background <- raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+# Load virtual species points
+virtual_species <- sf::st_read(system.file("inst/extdata/input_data.gpkg",package = "ibis.iSDM"), "points") 
+# Predictors
+predictors <- raster::stack(list.files(system.file("inst/extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
+# Make use only of a few of them
+predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
+                                            "CLC3_112_mean_50km","CLC3_132_mean_50km",
+                                            "CLC3_211_mean_50km","CLC3_312_mean_50km",
+                                            "elevation_mean_50km"))
+
+```
+
+For our example model we are going to use 'Integrated Nested Laplace approximation (INLA)' modelling framework as available through the `INLA` and `inlabru` packages. Both have been implemented separately in the ibis.iSDM package, but especially when dealing with future scenarios the use of the `inlabru` package is advised.
+
+Now lets build a simple model object:
+
+```{r INLA}
+
+# First we define a distribution object using the background layer
+mod <- distribution(background)
+
+# Then lets add species data to it. 
+# This data needs to be in sf format and key information is that
+# the model knows where occurrence data is stored (e.g. how many observations per entry) as
+# indicated by the field_occurrence field.
+mod <- add_biodiversity_poipo(mod, virtual_species,
+                                      name = "Virtual test species",
+                                      field_occurrence = "Observed")
+
+# Then lets add predictor information
+# Here we are interested in basic transformations (scaling), but derivates (like quadratic)
+# for now, but check options
+mod <- add_predictors(mod, 
+                      env = predictors,
+                      transform = "scale", derivates = "none")
+
+# Finally define the engine for the model
+# This uses the default data currently backed in the model,
+# but any other data might require an adaptation of the mesh parameters used
+# by the engine.
+mod <- engine_inlabru(mod)
+
+# Print out the object to see the information that is now stored within
+print(mod)
+```
+
+The `print` call at the end now shows some summary statistics contained in this object, such as the extent of the modelling background and the projection used, the number of biodiversity datasets added and statistics on the predictors, eventual priors and which engine is being used.
+
+Of course all of these steps can also be done in "pipe" using the ` %>% ` or `|>` syntax.
+
+```{r, eval=FALSE,warning=FALSE,message=FALSE}
+
+mod <- distribution(background) %>% 
+       add_biodiversity_poipo(virtual_species,
+                              name = "Virtual test species",
+                              field_occurrence = "Observed") %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      engine_inlabru() 
+
+```
+
+Also very helpful to know is that this object contains a number of helper functions that allow easy summary or visualization of the contained data. 
+For example, it is possible to plot and obtain any of the data added to this object.
+
+```{r}
+# Make visualization of the contained biodiversity data
+plot(mod$biodiversity)
+
+# Other options to explore
+names(mod)
+
+```
+
+Now finally the model can be estimated using the supplied engine. The `train` function has many available parameters that affect how the model is being fitted. Unless not possible, the default way is fitting a linear model based on the provided engine and biodiversity data types.
+
+```{r}
+
+# Finally train
+fit <- train(mod,
+             runname =  "Test INLA run",
+             verbose = FALSE # Don't be chatty
+             )
+
+```
+
+### Summarizing and plotting the fitted distribution object
+
+As before the created distribution model object can be visualized and interacted with.
+
+* `print()` outputs the model, inherent parameters and whether any predictions are contained within.
+* `summary()` creates a summary output of the contained model.
+* `plot()` makes a visualization of prediction over the background
+* `effects()` visualizes the effects, usually the default plot through the package used to fit the model.
+
+```{r Plot the model output}
+# Plot the mean of the posterior predictions
+plot(fit, "mean")
+# Print out some summary statistics
+summary(fit)
+
+# Show the default effect plot from inlabru
+effects(fit)
+
+```
+
+See the reference and help pages for further options including calculating a `threshold()`, `partial()` or `similarity()` estimate of the used data. 
+
+
+```{r partial effect}
+# To calculate a partial effect for a given variable
+o <- partial(fit, x.var = "CLC3_312_mean_50km", plot = T)
+# The object o contains the data underlying this figure
+
+# Similarly the patial effect can be visualized spatially as 'spartial'
+s <- spartial(fit, x.var = "CLC3_312_mean_50km")
+plot(s[[1]], col = rainbow(10), main = "Partial effect of forest on the relative reporting rate")
+
+```
+
+```{r Example for model-based thresholding}
+
+# Calculate a threshold based on a 50% percentile criterion
+fit <- threshold(fit, method = "percentile", value = 0.5)
+
+# Notice that this is now indicated in the fit object
+print(fit)
+
+# There is also a convenient plotting function
+fit$plot_threshold()
+
+# It is also possible to use truncated thresholds, which removes non-suitable areas
+# while retaining those that are suitable. These are then normalized to a range of [0-1]
+fit <- threshold(fit, method = "percentile", value = 0.5, truncate = TRUE)
+fit$plot_threshold()
+
+```
+
+For more options for any of the functions please see the help pages!

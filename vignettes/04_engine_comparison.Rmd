@@ -1,0 +1,28 @@
+---
+title: "Comparison of different engines"
+author: "Martin Jung"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+fig_width: 8 
+fig_height: 6 
+vignette: >
+  %\VignetteIndexEntry{Train a basic model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Capabilities of included engines
+
+As outlined by [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710), there are many different forms of integration such as through [`ensemble`] modelling, adding [`offsets`] or [`priors`] and through full integration of different likelihoods. Not all of these options are available for every engine supported by the \pkg{ibis.iSDM} package and this page intends to show the various types of possible integration.
+
+Below can be found a table of the various engines and the types of integration supported by them. Stating the name and function call of each engine and its supported model complexity with linear (ln) and non-linear (nl) formulations, although it should be noted that linear models can approximate non-linearity by including transformations (as with Maxent, e.g. hinge/product/quadratic). Not every engine supports the different types of integration via `ensembles`, `offsets`, `priors`, joint likelihood estimation and `ensemble` compositing of models using separate datasets of the same species.
+
+| Name                                              |     Complexity      |  Engine  | `offsets` | `priors` | Joint likel. | `ensemble` | 
+|---------------------------------------------------|:----------:|:------------:|:------------:|:------------:|:------------:|-------------:|
+| Bayesian additive regression trees (BART)         |  nl        |  [`engine_bart()`]   | (x)|  `BARTPrior()` |   | x |
+| Bayesian regularized regression (BREG)            |  ln        |  [`engine_breg()`]   |    |  `BREGPrior()` |  | x |
+| Gradient descent boosting (GDB)                   |  ln/nl     |   [`engine_gdb()`]   |  x |  `GDBPrior()` |  | x |
+| Integrated Nested Laplace approximation (INLA)    |  ln        |  [`engine_inla()`]   |  x |  `INLAPrior()` | x | x |
+| Integrated Nested Laplace approximation (INLABRU) |  ln        | [`engine_inlabru()`] |  x |  `INLAPrior()` | x | x |
+| Bayesian regressions (Stan)                       |  ln        |  [`engine_stan()`]   |  x |  `STANPrior()` | x | x |
+| eXtreme Gradient Boosting (XGBOOST)               |  ln/nl     | [`engine_xgboost()`] |  x |  `XGBPrior()` |  | x |

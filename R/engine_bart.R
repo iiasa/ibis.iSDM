@@ -14,10 +14,9 @@ NULL
 #' are therefore advised to cite if they make heavy use of BART.
 #' @details
 #' Prior distributions can furthermore be set for:
-#' * probability that a tree stops at a node of a given depth
+#' * probability that a tree stops at a node of a given depth (Not yet implemented)
 #' * probability that a given variable is chosen for a splitting rule
-#' * probability of splitting that variable at a particular value
-#' **(However currently not yet implemented!)**
+#' * probability of splitting that variable at a particular value (Not yet implemented)
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param nburn A [`numeric`] estimate of the burn in samples.
 #' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
@@ -386,21 +385,59 @@ engine_bart <- function(x,
           }
           params <- self$get_data("params")
           # Make a prediction
-          pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                             newdata = full[,model$biodiversity[[1]]$predictors_names],
-                                             type = params$type
-                                             )
-          # Summarize quantiles and sd from posterior
-          ms <- as.data.frame(
-                 cbind( apply(pred_bart, 2, mean),
-                        matrixStats::colSds(pred_bart),
-                        matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                        apply(pred_bart, 2, mode)
-                       )
-          )
-          names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-          ms$cv <- ms$mean / ms$sd
-          rm(pred_bart)
+          if(!getOption("ibis.runparallel")){
+            pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                               newdata = full[,model$biodiversity[[1]]$predictors_names],
+                                               type = params$type
+            )
+            # Summarize quantiles and sd from posterior
+            ms <- as.data.frame(
+              cbind( apply(pred_bart, 2, mean),
+                     matrixStats::colSds(pred_bart),
+                     matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                     apply(pred_bart, 2, mode)
+              )
+            )
+            names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+            ms$cv <- ms$mean / ms$sd
+            rm(pred_bart)
+          } else {
+            full$rowid <- 1:nrow(full)
+
+            # Tile the problem
+            splits <- cut(1:nrow(full), nrow(full) / 5000 )
+
+            doParallel::registerDoParallel(cores = getOption("ibis.nthread")) # getOption("ibis.nthread")
+            ms <- foreach::foreach(s = unique(splits),
+                             .inorder = TRUE,
+                             .combine = rbind,
+                             .errorhandling = "stop",
+                             .multicombine = TRUE,
+                             .export = c("splits", "fit_bart", "full", "model", "params"),
+                             .packages = c("dbarts", "matrixStats")) %dopar% {
+                               i <- which(splits == s)
+
+                               pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                                                  newdata = full[i, model$biodiversity[[1]]$predictors_names],
+                                                                  type = params$type
+                               )
+                               # Summarize quantiles and sd from posterior
+                               ms <- as.data.frame(
+                                 cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                        matrixStats::colSds(pred_bart),
+                                        matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                        apply(pred_bart, 2, mode)
+                                 )
+                               )
+                               names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                               ms$cv <- ms$mean / ms$sd
+                               rm(pred_bart)
+                               return( ms )
+                             }
+          }
+          assertthat::assert_that(nrow(ms)>0,
+                                  nrow(ms) == nrow(full))
+
           # Add them through a loop since the cellid changed
           prediction <- raster::stack()
           for(post in names(ms)){
@@ -409,7 +446,7 @@ engine_bart <- function(x,
             prediction <- raster::addLayer(prediction, prediction2)
             rm(prediction2)
           }
-
+          try({rm(ms, full)},silent = TRUE)
         } else {
           # No prediction done
           prediction <- NULL

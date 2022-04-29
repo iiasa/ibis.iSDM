@@ -22,7 +22,7 @@ test_that('Load ranges and add them to distribution object', {
   x <- distribution(background)
   # This won't work since not aligned
   expect_warning(
-    expect_error(  x %>% add_predictor_range(virtual_range,method = 'distance') )
+    expect_error(  x %>% add_predictor_range(virtual_range, method = 'distance') )
   )
 
   # Try and add a range as raster

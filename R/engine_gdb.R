@@ -344,6 +344,7 @@ engine_gdb <- function(x,
                                      mc.cores = getOption("ibis.nthread"))
           }, silent = TRUE)
           # parallel::stopCluster(cl)
+          rm(cvf, grs)
 
         } else {
           grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
@@ -352,6 +353,7 @@ engine_gdb <- function(x,
                                      folds = cvf, grid = grs,
                                      papply = pbapply::pblapply )
           }, silent = TRUE)
+          rm(cvf, grs)
         }
         # Check whether crossvalidation has run through successfully
         if(exists('cvm') && mstop(cvm) > 0){
@@ -376,12 +378,13 @@ engine_gdb <- function(x,
           # Make a prediction
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-                                               type = self$get_data('params')$type, aggregate = 'sum')
+                                               type = self$get_data('params')$type,
+                                               aggregate = 'sum')
           )
           # Fill output
           prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
           names(prediction) <- 'mean'
-
+          rm(pred_gdb)
         } else {
           prediction <- NULL
         }

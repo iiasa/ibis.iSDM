@@ -5,7 +5,7 @@ development:
 
 template:
   bootstrap: 5
-  bootswatch: lumen
+  bootswatch: materia
   opengraph:
     twitter:
       creator: "@Martin_Ecology"

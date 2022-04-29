@@ -356,7 +356,7 @@ engine_breg <- function(x,
           full$rowid <- 1:nrow(full)
           full_sub <- subset(full, complete.cases(full))
           w_full_sub <- w_full[full_sub$rowid]
-          assert_that(nrow(full_sub) == length(w_full_sub))
+          assertthat::assert_that(nrow(full_sub) == length(w_full_sub))
 
           out <- data.frame()
           # Tile the problem
@@ -395,7 +395,7 @@ engine_breg <- function(x,
           }
           prediction <- stk;rm(stk)
           prediction <- raster::mask(prediction, self$get_data("template"))
-
+          try({rm(pred_breg, out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done
           prediction <- NULL

@@ -916,7 +916,7 @@ engine_inlabru <- function(x,
             }
             return(
               pred_cov[,c(x.var,'mean','sd','q0.025','median','q0.975',
-                          'smin','smax','cv','var')]
+                          'smin','smax','cv','var')] %>% as.data.frame()
               )
           },
           # (S)partial effect

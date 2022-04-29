@@ -169,7 +169,7 @@ BiodiversityDistribution <- bdproto(
   },
   # Get offset (print name)
   get_offset = function(self){
-    if(is.Waiver(self$offset)) return( self$offset() )
+    if(is.Waiver(self$offset)) return( self$offset )
     names( self$offset )
   },
   # Remove offsets
@@ -250,5 +250,12 @@ BiodiversityDistribution <- bdproto(
   # Get biodiversity types
   get_biodiversity_types = function(self){
     self$biodiversity$get_types()
+  },
+  # Dummy function for plot and summary
+  plot = function(self){
+    message("No generic plotting implemented!")
+  },
+  summary = function(self){
+    message("No generic summary function implemented! Try print.")
   }
 )

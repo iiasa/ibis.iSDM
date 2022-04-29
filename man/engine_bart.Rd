@@ -31,10 +31,9 @@ are therefore advised to cite if they make heavy use of BART.
 \details{
 Prior distributions can furthermore be set for:
 \itemize{
-\item probability that a tree stops at a node of a given depth
+\item probability that a tree stops at a node of a given depth (Not yet implemented)
 \item probability that a given variable is chosen for a splitting rule
-\item probability of splitting that variable at a particular value
-\strong{(However currently not yet implemented!)}
+\item probability of splitting that variable at a particular value (Not yet implemented)
 }
 }
 \references{

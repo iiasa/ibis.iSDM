@@ -29,9 +29,39 @@ test_that('Check that INLA works', {
 test_that('Train a distribution model with INLA', {
 
   skip_if_not_installed('INLA')
-
+  skip_on_travis()
   skip_on_cran()
 
-  # TODO:
+  # Load data
+  # Background Raster
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  # Get test species
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
+  # Get list of test predictors
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
+  # Load them as rasters
+  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  # Now set them one up step by step
+  x <- distribution(background) %>%
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') %>%
+    engine_inla(
+      max.edge = c(.5, 3),
+      offset = c(0.5, 1),
+      cutoff = 0.5,
+      proj_stepsize = 1
+    )
+  # Train the model
+  mod <- train(x, "test", inference_only = TRUE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+
+  # Expect summary
+  expect_s3_class(summary(mod), "data.frame")
+  expect_s3_class(mod$show_duration(), "difftime")
+  expect_equal(length(mod$show_rasters()), 0) # Now predictions found
+  # Fit with predictions
+  mod <- train(x, "test", inference_only = FALSE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+  expect_equal(length(mod$show_rasters()), 1) # Now predictions found
 
 })

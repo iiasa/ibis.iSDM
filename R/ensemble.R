@@ -9,7 +9,8 @@
 #'
 #' Also returns a coefficient of variation (cv) as output of the ensemble, but note
 #' this should not be interpreted as measure of model uncertainty as it cannot
-#' capture parameter uncertainty of individual model; rather it reflects prediction variation.
+#' capture parameter uncertainty of individual models; rather it reflects variation among predictions which
+#' can be due to many factors including simply differences in model complexity.
 #' @details
 #' Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
@@ -17,13 +18,22 @@
 #' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 #' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 #' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
+#'
+#' In addition to the different ensemble methods, a minimal threshold (\code{min.value}) can be set that needs to be surpassed for averaging.
+#' By default this option is not used (Default: \code{NULL}).
+#'
+#' Note by default only the band in the \code{layer} parameter is composited. If supported by the model
+#' other summary statistics from the posterior (e.g. \code{'sd'}) can be specified.
+#'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
 #' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
 #' @param ... Provided [`DistributionModel`] objects.
 #' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
+#' @param min.value A [`numeric`] stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}).
+#' @param normalize [`logical`] on whether the output of the resemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
 #' coefficient of variation across all models.
 
@@ -35,7 +45,7 @@
 NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
-                    function(..., method = "mean", weights = NULL, layer = "mean") standardGeneric("ensemble"))
+                    function(..., method = "mean", weights = NULL, min.value = NULL,layer = "mean", normalize = FALSE) standardGeneric("ensemble"))
 
 #' @name ensemble
 #' @rdname ensemble
@@ -43,7 +53,7 @@ methods::setGeneric("ensemble",
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
-  function(..., method = "mean", weights = NULL, layer = "mean"){
+  function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean", normalize = FALSE){
     # Collate provided models
     if(!is.list(...)){
       mc <- list(...)
@@ -66,8 +76,10 @@ methods::setMethod(
     )
     assertthat::assert_that(
       is.character(method),
+      is.null(min.value) || is.numeric(min.value),
       is.character(layer),
-      is.null(weights) || is.vector(weights)
+      is.null(weights) || is.vector(weights),
+      is.logical(normalize)
     )
 
     # Check the method
@@ -102,6 +114,9 @@ methods::setMethod(
       out <- raster::stack()
       for(lyr in layer){
         ras <- stack(sapply(ll_ras, function(x) x[[lyr]]))
+
+        # Apply threshold if set. Set to 0 thus reducing the value of the ensembled layer.
+        if(!is.null(min.value)) ras[ras < min.value] <- 0
 
         # Now create the ensemble depending on the option
         if(method == 'mean'){
@@ -156,6 +171,9 @@ methods::setMethod(
       }
 
       assertthat::assert_that(is.Raster(out))
+      # Normalize the output if parameter set
+      if(normalize) out <- predictor_transform(out, option = "norm")
+
       return(out)
   } else if(is.Raster(mods[[1]])) {
     # Check that layer is present in supplied mods
@@ -171,6 +189,10 @@ methods::setMethod(
       ll_ras[[2]] <- raster::resample(ll_ras[[2]], ll_ras[[1]])
     }
     ras <- raster::stack(ll_ras)
+
+    # Apply threshold if set. Set to 0 thus reducing the value of the ensembled layer.
+    if(!is.null(min.value)) ras[ras < min.value] <- 0
+
     # Now ensemble per layer entry
     out <- raster::stack()
     for(lyr in layer){
@@ -214,6 +236,8 @@ methods::setMethod(
     }
 
     assertthat::assert_that(is.Raster(out))
+    # Normalize the output if parameter set
+    if(normalize) out <- predictor_transform(out, option = "norm")
     return(out)
   } else {
     # Scenario objects
@@ -260,6 +284,8 @@ methods::setMethod(
     out <- out |> stars:::st_set_dimensions(names = c("x", "y", "band"))
     # Also calculate coefficient of variation across predictions
     assertthat::assert_that(inherits(out, "stars"))
+    # Normalize the output if parameter set
+    if(normalize) out <- predictor_transform(out, option = "norm")
     return(out)
     }
   }

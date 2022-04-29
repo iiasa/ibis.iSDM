@@ -10,7 +10,7 @@ train(
   x,
   runname,
   rm_corPred = FALSE,
-  varsel = "reg",
+  varsel = "none",
   inference_only = FALSE,
   only_linear = TRUE,
   bias_variable = NULL,

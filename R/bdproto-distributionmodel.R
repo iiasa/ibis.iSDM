@@ -270,6 +270,10 @@ DistributionModel <- bdproto(
       self$partial(self$get_data(x), x.vars = NULL)
     }
   },
+  # Get equation
+  get_equation = function(self){
+    self$get_data("fit_best_equation")
+  },
   # Get specific fit from this Model
   get_data = function(self, x) {
     if (!x %in% names(self$fits))

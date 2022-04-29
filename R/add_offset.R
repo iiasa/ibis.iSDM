@@ -206,6 +206,7 @@ methods::setMethod(
   }
 )
 
+# ---- Add a range as offset ---- #
 #' Specify a expert-based species range as offset
 #'
 #' @description

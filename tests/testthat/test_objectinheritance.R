@@ -36,24 +36,24 @@ test_that('Check that objects are properly inherited', {
   expect_true(is.Waiver(x$predictors))
 
   # Latent effect check
-  x %>% add_latent_spatial(priors = NULL)
+  x %>% add_latent_spatial(method = "spde",priors = NULL)
   expect_true(is.Waiver(x$latentfactors))
 
   # Engine
   x %>% engine_gdb(boosting_iterations = 500)
   expect_true(is.Waiver(x$engine))
-  x %>% engine_inla()
+  x %>% engine_stan()
   expect_true(is.Waiver(x$engine))
 
   # Priors
   x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal')))
   expect_true(is.Waiver(x$priors))
-  x %>% add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
+  x %>% add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
   # Two different priors
   x %>%
     add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal'))) %>%
-    add_latent_spatial(priors = priors(INLAPrior('spde','prior.range')))
+    add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
 
   # Check variable removal

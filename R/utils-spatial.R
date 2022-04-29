@@ -819,7 +819,7 @@ predictor_derivate <- function(env, option, ...){
 #' while the remainder is left at the original values.
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
-#' @param nkots The number of knots to be used for the transformation (Default: \code{nkots}).
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @keywords utils, internal
 #' @concept Concept taken from the [maxnet] package.
 #' @returns A hinge transformed [`data.frame`].
@@ -827,7 +827,7 @@ predictor_derivate <- function(env, option, ...){
 makeHinge <- function(v, n, nknots = 4){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
-                          is.numeric(nkots))
+                          is.numeric(nknots))
   # Function to create hingeval
   hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
   # Get stats
@@ -856,7 +856,7 @@ makeHinge <- function(v, n, nknots = 4){
 #' while the remainder is set to 1.
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
-#' @param nkots The number of knots to be used for the transformation (Default: \code{nkots}).
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @keywords utils, internal
 #' @concept Concept taken from the [maxnet] package.
 #' @returns A threshold transformed [`data.frame`].

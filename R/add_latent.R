@@ -3,22 +3,24 @@ NULL
 
 #' Add latent spatial effect to the model equation
 #'
-#' @description Adding latent spatial error terms, spatial trends or other autocovariates
-#' to a model can account for spatial dependence in response or covariates
+#' @description Adding latent spatial error terms, spatial trends or other covariates
+#' to a model can account for spatial dependence in response or covariates.
 #' @details There are several different options which depend on the engine used. In case a
 #' unsupported method for an engine is chosen this is modified to the next similar method
 #' Available are:
-#' * "spde" - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
+#' * \code{"spde"} - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
 #' SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
 #' Examining the spatial distribution of the spatial error can reveal which covariates might be missing.
 #' For example, if elevation is positively correlated with the response variable, but is not included in the model,
 #' we could see a higher posterior mean in areas with higher elevation.
-#' * "car" - conditional autocorrelative errors (CAR) for [`INLA-engine`]
-#' * "poly"- spatial trend correction by adding coordinations as polynominals. Available for all Engines.
+#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]
+#' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
+#' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
+#' to the nearest other grid cell with values. Applied across all datasets in the [`BiodiversityDistribution-class`]) object. .Available for all Engines.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param method A [`character`] describing what kind of spatial effect is to be added to the model.
-#' @param priors A [`Prior-List`] object supplied to the latent effect. NULL equating default priors.
+#' @param method A [`character`] describing what kind of spatial effect is to be added to the model. See details.
+#' @param priors A [`Prior-List`] object supplied to the latent effect. Relevant only for [`engine_inla`] and \code{NULL} equates the use of default priors.
 #' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
 #' for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
@@ -29,7 +31,7 @@ NULL
 #'
 #' @examples
 #' \dontrun{
-#'  distribution(background) %>% add_latent_spatial()
+#'  distribution(background) %>% add_latent_spatial(method = "poly")
 #' }
 #' @name add_latent_spatial
 NULL
@@ -57,7 +59,7 @@ methods::setMethod(
                             )
 
     # Match the spatial method
-    method <- match.arg(method, c('spde', 'car', 'poly'), several.ok = FALSE)
+    method <- match.arg(method, c('spde', 'car', 'poly', 'nnd'), several.ok = FALSE)
 
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding latent spatial terms...')
