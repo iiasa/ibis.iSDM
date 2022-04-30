@@ -1014,9 +1014,9 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
 
 #' Clean up raster layer from disk
 #'
-#' Completely deletes for instance a temporary created raster file
-#' @param A [`raster`] object
-#' @param verbose Print progress (Default: FALSE)
+#' Completely deletes for instance a temporary created raster file.
+#' @param A [`raster`] object.
+#' @param verbose Print progress (Default: \code{FALSE})
 #' @keywords utils
 clean_rasterfile <- function(x, verbose = FALSE)
 {

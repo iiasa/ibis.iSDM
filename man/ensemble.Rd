@@ -13,6 +13,8 @@
 
 \item{weights}{(\emph{Optional}) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).}
 
+\item{min.value}{A \code{\link{numeric}} stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).}
+
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}).}
 
 \item{normalize}{\code{\link{logical}} on whether the output of the resemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
@@ -31,7 +33,8 @@ the standard deviation \emph{sd}.
 
 Also returns a coefficient of variation (cv) as output of the ensemble, but note
 this should not be interpreted as measure of model uncertainty as it cannot
-capture parameter uncertainty of individual model; rather it reflects prediction variation.
+capture parameter uncertainty of individual models; rather it reflects variation among predictions which
+can be due to many factors including simply differences in model complexity.
 }
 \details{
 Possible options for creating an ensemble includes:
@@ -42,6 +45,12 @@ Possible options for creating an ensemble includes:
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 }
+
+In addition to the different ensemble methods, a minimal threshold (\code{min.value}) can be set that needs to be surpassed for averaging.
+By default this option is not used (Default: \code{NULL}).
+
+Note by default only the band in the \code{layer} parameter is composited. If supported by the model
+other summary statistics from the posterior (e.g. \code{'sd'}) can be specified.
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.

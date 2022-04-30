@@ -31,12 +31,12 @@ dispersal distance, connectivity between identified patches or limitations on sp
 Currently this method functions as a wrapper to support the definition of further modelling constraints.
 Supported are the options for dispersal and connectivity constrains:
 \itemize{
-\item sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep.
-\item sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin.
-\item kissmig - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
-\item migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
-\item hardbarrier - Defines a hard barrier to any dispersal events.
-\item nichelimit - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+\item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
+\item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
+\item \code{hardbarrier} - Defines a hard barrier to any dispersal events.
+\item \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
 can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
 }
 
@@ -45,9 +45,9 @@ can be found in Bateman et al. (2013).
 }
 \references{
 \itemize{
-\item Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005
 \item Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
 \item Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
+\item Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 }
 }
 \seealso{

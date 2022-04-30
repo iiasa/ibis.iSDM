@@ -96,7 +96,7 @@ DistributionModel <- bdproto(
       #   '\n     ', name_atomic(vi$names)
       # ))
     } else if( inherits(self, 'XGBOOST-Model') ) {
-      vi <- xgboost::xgb.importance(model = self$get_data('fit_best'))
+      vi <- xgboost::xgb.importance(model = self$get_data('fit_best'),)
 
       message(paste0(
         'Trained ',class(self)[1],' (',self$show(),')',
@@ -212,8 +212,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BREG-Model')){
       posterior::summarise_draws(self$get_data(x)$beta)
     } else if(inherits(self, "XGBOOST-Model")){
-      xgboost::xgb.importance(model = self$get_data('fit_best'))
-      # xgboost::xgb.ggplot.importance(o)
+      xgboost::xgb.importance(model = self$get_data(x))
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -264,8 +263,14 @@ DistributionModel <- bdproto(
         BoomSpikeSlab::plot.lm.spike(obj, y = what)
       }
     } else if(inherits(self, "XGBOOST-Model")){
-      obj <- self$get_data(x)
-      xgboost::xgb.plot.multi.trees(obj)
+      # Check whether linear model was fitted, otherwise plot tree
+      if( self$settings$get("only_linear") ){
+        vi <- self$summary(x)
+        xgboost::xgb.ggplot.importance(vi)
+      } else {
+        obj <- self$get_data(x)
+        xgboost::xgb.plot.multi.trees(obj)
+      }
     } else {
       self$partial(self$get_data(x), x.vars = NULL)
     }

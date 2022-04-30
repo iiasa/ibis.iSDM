@@ -2,11 +2,12 @@
 title: "Comparison of different engines"
 author: "Martin Jung"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-fig_width: 8 
-fig_height: 6 
+output: 
+  rmarkdown::html_vignette:
+    toc: false
+fontsize: 11pt
 vignette: >
-  %\VignetteIndexEntry{Train a basic model}
+  %\VignetteIndexEntry{Comparison of different engines}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

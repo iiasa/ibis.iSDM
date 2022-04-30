@@ -1,10 +1,11 @@
-#' Generic function to write outputs
+#' Generic function to write spatial outputs
 #'
 #' @description
-#' The `write_output` function is a generic wrapper to writing any output files created with
+#' The `write_output` function is a generic wrapper to writing any output files (e.g. projections) created with
 #' the [`ibis.iSDM-package`]. It is possible to write outputs of fitted [`DistributionModel`],
 #' [`BiodiversityScenario`] or individual [`Raster`] or [`stars`] objects. In case a [`data.frame`]
 #' is supplied, the output is written as csv file.
+#' **For creating summaries of distribution and scenario parameters and performance, see `write_summary()`**
 #' @note
 #' By default output files will be overwritten if already existing!
 #' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`Raster`] or [`stars`] object.
@@ -42,13 +43,14 @@ methods::setMethod(
       is.character(fname),
       is.character(dt)
     )
+
+    if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
+
   # This function will only capture the distribution model object and will save them separately
   if(any(class(mod) %in% getOption("ibis.engines")) ){
     # FIXME: If errors occur, check harmonization of saving among engines.
-    if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
     mod$save(fname = fname)
   } else if(is.Raster(mod)){
-      if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
       if(raster::extension(fname) %in% c('.tif', '.TIF')) {
         writeGeoTiff(file = mod, fname = fname, dt = dt)
       } else if(raster::extension(fname) %in% c('.nc', '.NC', '.ncdf', '.NCDF')){
@@ -57,13 +59,11 @@ methods::setMethod(
         stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
       }
   } else if(is.data.frame(mod)){
-    if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
     write.csv(x = mod,file = fname,...)
   } else {
     # Check that a save function exists for object
     assertthat::assert_that("save" %in%names(mod),
                             msg = "No method to save the output could be found!")
-    if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
     # Try a generic save
     mod$save(fname = fname)
   }
@@ -229,3 +229,105 @@ writeNetCDF <- function(file, fname,
   # ncdf4::ncvar_put(ncFile, "Time", dtInts)
   # ncdf4::nc_close(ncFile)
 }
+
+# ------------------------- #
+#### Write summary methods ####
+
+#' Generic function to write summary outputs from created models.
+#'
+#' @description
+#' The `write_summary` function is a wrapper function to create summaries from fitted [`DistributionModel`] or
+#' [`BiodiversityScenario`] objects. This function will extract parameters and statistics about the used data
+#' from the input object and writes the output as either `rds` or `rdata` file. Alternative, more open file formats
+#' are under consideration.
+#' @note
+#' No predictions or tabular data is saved through this function.
+#' Use `write_output()` to save those.
+#' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
+#' @param fname A [`character`] depicting an output filename.
+#' The suffix determines the file type of the output (Options: \code{'rds'}, \code('rdata')).
+#' @param ... Any other arguments passed on the individual functions.
+#' @returns No R-output is created. A file is written to the target direction.
+#' @examples \dontrun{
+#' x <- distribution(background) %>%
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
+#'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
+#' write_summary(x, "testmodel.rds")
+#' }
+
+#' @name write_summary
+#' @aliases write_summary
+#' @keywords utils
+#' @exportMethod write_summary
+#' @export
+NULL
+methods::setGeneric("write_summary",
+                    signature = methods::signature("mod"),
+                    function(mod, fname, ...) standardGeneric("write_summary"))
+
+#' @name write_summary
+#' @rdname write_summary
+#' @usage \S4method{write_summary}{ANY, character}(mod, fname)
+methods::setMethod(
+  "write_summary",
+  methods::signature(mod = "ANY"),
+  function(mod, fname, ...) {
+    assertthat::assert_that(
+      !missing(mod),
+      is.character(fname)
+    )
+    assertthat::assert_that(
+      inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
+      msg = "Only objects created through `train()` or `project()` are supported!"
+    )
+
+    # Get file extension
+    ext <- tolower( tools::file_ext(fname) )
+    if(ext == "") ext <- "rds" # Assign rds as default
+    ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
+    fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
+    if(file.exists(fname) && getOption('ibis.setupmessages')) myLog('[Output]','yellow','Overwriting existing file...')
+
+    # --- #
+    # Gather the statistics and parameters from the provided file
+    output <- list()
+    if(inherits(mod, "DistributionModel")){
+      # FIXME: Further options to be implemented
+      # Ideally more telling and not just model params
+      # Model input summary in a tibble
+      # Model parameters in a tibble
+      # Model summary in a tibble and formula
+      # The log file if set
+
+      # Get the equation
+      output[["equation"]] <- mod$get_equation()
+
+      # Collect settings and parameters if existing
+      if( !is.Waiver(mod$get_data("params")) ){
+        output[["params"]] <- mod$get_data("params")
+      }
+      if( "settings" %in% names(mod) ){
+        output[["settings"]] <- mod$settings$data
+      }
+    } else if(inherits(mod, "BiodiversityScenario")){
+      stop("TBD")
+    }
+
+    assertthat::assert_that(
+      is.list(output),
+      length(output)>0
+    )
+    # --- #
+    # Write the output
+    if(ext == "rds"){
+      saveRDS(output, fname)
+    } else if(ext == "rdata") {
+      save(output, file = fname)
+    } else {
+      message("No compatible file format found. No summary output file ignored created!")
+    }
+    rm(output)
+    invisible()
+  }
+)

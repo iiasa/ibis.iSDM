@@ -7,11 +7,11 @@
 clean_rasterfile(x, verbose = FALSE)
 }
 \arguments{
-\item{verbose}{Print progress (Default: FALSE)}
+\item{verbose}{Print progress (Default: \code{FALSE})}
 
-\item{A}{\code{\link{raster}} object}
+\item{A}{\code{\link{raster}} object.}
 }
 \description{
-Completely deletes for instance a temporary created raster file
+Completely deletes for instance a temporary created raster file.
 }
 \keyword{utils}

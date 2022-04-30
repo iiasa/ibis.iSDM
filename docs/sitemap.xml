@@ -10,13 +10,22 @@
     <loc>https://iiasa.github.io/ibis.iSDM/articles/02_integrate_data.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_biodiversity_projections.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/03_model_assessment.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_engine_comparison.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/05_engine_comparison.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_package_comparison.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/06_package_comparison.html</loc>
@@ -85,10 +94,16 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_bias.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_elevation.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_offset_range.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_predictors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_predictor_elevationpref.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_predictor_range.html</loc>
@@ -104,6 +119,12 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/as.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BARTPrior.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/BARTPriors.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/bbox2wkt.html</loc>

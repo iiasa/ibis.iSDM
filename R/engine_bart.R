@@ -402,19 +402,21 @@ engine_bart <- function(x,
             ms$cv <- ms$mean / ms$sd
             rm(pred_bart)
           } else {
+            check_package("foreach")
+
             full$rowid <- 1:nrow(full)
 
             # Tile the problem
-            splits <- cut(1:nrow(full), nrow(full) / 5000 )
+            splits <- cut(1:nrow(full), nrow(full) / min(nrow(full) / 4, 5000) )
 
-            doParallel::registerDoParallel(cores = getOption("ibis.nthread")) # getOption("ibis.nthread")
+            # Operating system dependent use
             ms <- foreach::foreach(s = unique(splits),
                              .inorder = TRUE,
                              .combine = rbind,
                              .errorhandling = "stop",
                              .multicombine = TRUE,
                              .export = c("splits", "fit_bart", "full", "model", "params"),
-                             .packages = c("dbarts", "matrixStats")) %dopar% {
+                             .packages = c("dbarts", "matrixStats")) %do% {
                                i <- which(splits == s)
 
                                pred_bart <- dbarts:::predict.bart(object = fit_bart,
@@ -434,7 +436,8 @@ engine_bart <- function(x,
                                rm(pred_bart)
                                return( ms )
                              }
-          }
+
+          } # End of processing
           assertthat::assert_that(nrow(ms)>0,
                                   nrow(ms) == nrow(full))
 
@@ -465,6 +468,8 @@ engine_bart <- function(x,
           settings = settings,
           fits = list(
             "fit_best" = fit_bart,
+            "params" = params,
+            "fit_best_equation" = equation,
             "prediction" = prediction
           ),
           # Partial effects

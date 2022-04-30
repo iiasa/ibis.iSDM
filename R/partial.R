@@ -16,6 +16,7 @@ NULL
 #' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
 #' @return A [data.frame] with the created partial response.
 #' @keywords partial
+#' @export
 #' @name partial
 methods::setGeneric(
   "partial",
@@ -67,6 +68,7 @@ partial.DistributionModel <- function(x, ...) x$partial(...)
 #' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
 #' @returns A [RasterLayer] containing the mapped partial response of the variable.
 #' @keywords partial
+#' @export
 #' @name spartial
 methods::setGeneric(
   "spartial",
@@ -100,4 +102,3 @@ methods::setMethod(
 #' @keywords partial
 #' @export
 spartial.DistributionModel <- function(x, ...) x$spartial(...)
-

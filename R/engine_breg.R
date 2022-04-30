@@ -244,7 +244,7 @@ engine_breg <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
         # Verbosity
@@ -349,7 +349,7 @@ engine_breg <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
-          # Messager
+          # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
           # Make a prediction, but do in parallel so as to not overuse memory
@@ -383,6 +383,7 @@ engine_breg <- function(x,
             names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
             preds$cv <- preds$mean / preds$sd
             out <- rbind(out, preds)
+            rm(preds, pred_breg)
           }
 
           # Fill output with summaries of the posterior
@@ -395,7 +396,7 @@ engine_breg <- function(x,
           }
           prediction <- stk;rm(stk)
           prediction <- raster::mask(prediction, self$get_data("template"))
-          try({rm(pred_breg, out, full, full_sub)},silent = TRUE)
+          try({rm(out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done
           prediction <- NULL

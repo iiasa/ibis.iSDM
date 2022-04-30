@@ -12,7 +12,7 @@ Most constrains require pre-calculated thresholds to present in the Biodiversity
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -101,12 +101,12 @@ should be performed.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Currently this method functions as a wrapper to support the definition of further modelling constraints.
-Supported are the options for dispersal and connectivity constrains:</p><ul><li><p>sdd_fixed - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
-<li><p>sdd_nexpkernel - Applies a dispersal distance using a negative exponential kernel from its origin.</p></li>
-<li><p>kissmig - Applies the kissmig stochastic dispersal model. Requires kissmig package. Applied at each modelling time step.</p></li>
-<li><p>migclim - Applies the dispersal algorithm MigClim to the modelled objects. Requires MigClim package.</p></li>
-<li><p>hardbarrier - Defines a hard barrier to any dispersal events.</p></li>
-<li><p>nichelimit - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+Supported are the options for dispersal and connectivity constrains:</p><ul><li><p><code>sdd_fixed</code> - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
+<li><p><code>sdd_nexpkernel</code> - Applies a dispersal distance using a negative exponential kernel from its origin.</p></li>
+<li><p><code>kissmig</code> - Applies the kissmig stochastic dispersal model. Requires kissmig package. Applied at each modelling time step.</p></li>
+<li><p><code>migclim</code> - Applies the dispersal algorithm MigClim to the modelled objects. Requires MigClim package.</p></li>
+<li><p><code>hardbarrier</code> - Defines a hard barrier to any dispersal events.</p></li>
+<li><p><code>nichelimit</code> - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
 can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.</p></li>
 </ul><p>A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).</p>
@@ -114,9 +114,9 @@ can be found in Bateman et al. (2013).</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Evans, M.E.K., Merow, C., Record, S., McMahon, S.M., Enquist, B.J., 2016. Towards Process-based Range Modeling of Many Species. Trends Ecol. Evol. 31, 860–871. https://doi.org/10.1016/j.tree.2016.08.005</p></li>
-<li><p>Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., &amp; VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.</p></li>
+<ul><li><p>Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., &amp; VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.</p></li>
 <li><p>Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.</p></li>
+<li><p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -137,7 +137,7 @@ can be found in Bateman et al. (2013).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer></div>

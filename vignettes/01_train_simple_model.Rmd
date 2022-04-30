@@ -2,11 +2,16 @@
 title: "Train a basic model"
 author: "Martin Jung"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+fontsize: 11pt
 vignette: >
   %\VignetteIndexEntry{Train a basic model}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -14,6 +19,12 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+# Define variables for vignette figures and code execution
+h <- 5.5
+w <- 5.5
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 ```
 
 ### Load package and make a basic model
@@ -30,24 +41,25 @@ There are ways to convert for instance presence-only
 
 --- 
 
-```{r Load the package,echo=FALSE,message=FALSE,eval=TRUE}
+```{r Load the package, message=FALSE, eval=TRUE}
 # Load the package
-devtools::load_all(".")
+library(ibis.iSDM)
+library(raster)
 library(assertthat)
 
 ```
 
 
-Creating a model in the ibis.iSDM package is relatively straight forward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a  simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
+Creating a model in the `ibis.iSDM` package is relatively straight forward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
 So first lets load the data:
 
 ```{r Load data}
 # Background layer
-background <- raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
-virtual_species <- sf::st_read(system.file("inst/extdata/input_data.gpkg",package = "ibis.iSDM"), "points") 
+virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points") 
 # Predictors
-predictors <- raster::stack(list.files(system.file("inst/extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
+predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 # Make use only of a few of them
 predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
                                             "CLC3_112_mean_50km","CLC3_132_mean_50km",
@@ -108,7 +120,7 @@ mod <- distribution(background) %>%
 Also very helpful to know is that this object contains a number of helper functions that allow easy summary or visualization of the contained data. 
 For example, it is possible to plot and obtain any of the data added to this object.
 
-```{r}
+```{r, fig.width = w, fig.height = h}
 # Make visualization of the contained biodiversity data
 plot(mod$biodiversity)
 
@@ -138,7 +150,7 @@ As before the created distribution model object can be visualized and interacted
 * `plot()` makes a visualization of prediction over the background
 * `effects()` visualizes the effects, usually the default plot through the package used to fit the model.
 
-```{r Plot the model output}
+```{r Plot the model output, fig.width = 10, fig.height = 8}
 # Plot the mean of the posterior predictions
 plot(fit, "mean")
 # Print out some summary statistics
@@ -152,7 +164,7 @@ effects(fit)
 See the reference and help pages for further options including calculating a `threshold()`, `partial()` or `similarity()` estimate of the used data. 
 
 
-```{r partial effect}
+```{r partial effect, fig.width = w, fig.height = h}
 # To calculate a partial effect for a given variable
 o <- partial(fit, x.var = "CLC3_312_mean_50km", plot = T)
 # The object o contains the data underlying this figure
@@ -163,7 +175,7 @@ plot(s[[1]], col = rainbow(10), main = "Partial effect of forest on the relative
 
 ```
 
-```{r Example for model-based thresholding}
+```{r Example for model-based thresholding, fig.width = w, fig.height = h}
 
 # Calculate a threshold based on a 50% percentile criterion
 fit <- threshold(fit, method = "percentile", value = 0.5)
@@ -181,4 +193,68 @@ fit$plot_threshold()
 
 ```
 
-For more options for any of the functions please see the help pages!
+**For more options for any of the functions please see the help pages!**
+
+### Constrain a model in prediction space
+
+Species distribution models quite often extrapolate to areas in which the species are unlikely to persist and thus are more likely to predict false presences than false absences. This "overprediction" can be caused by multiple factors from true biological constraints (e.g. dispersal), to the used algorithm trying to be clever by overfitting towards complex relationships (In the machine learning literature this problem is commonly known as the **bias vs variance** tradeoff).
+
+One option to counter this to some extent in SDMs is to add spatial constraints or `spatial latent effects`. The underlying assumption here is that distances in geographic space can to some extent approximate unknown or unquantified factors that determine a species range. Other options for constrains is to integrate additional data sources and add parameter constraints (see [`integrate_data`] vignette).
+
+Currently the `ibis.iSDM` package supports the addition of only spatial latent effects via `add_latent_spatial()`. See the help file for more information.
+
+
+```{r Train models with spatial constrains, fig.width = w, fig.height = h}
+# We are going to use the xgboost algorithm as engine below
+library(xgboost)
+
+# Load the predictors again
+predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
+predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
+                                            "CLC3_112_mean_50km","CLC3_132_mean_50km",
+                                            "CLC3_211_mean_50km","CLC3_312_mean_50km",
+                                            "elevation_mean_50km",
+                                   "koeppen_50km"))
+# One of them (Köppen) is a factor, we will now convert this to a true factor variable
+predictors$koeppen_50km <- raster::ratify(predictors$koeppen_50km)
+
+# Create a distribution modelling pipeline
+x <- distribution(background) %>%
+  add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
+  add_predictors(predictors, transform = 'scale', derivates = "none") |>
+  engine_xgboost(nrounds = 5000)
+
+# Now train 2 models, one without and one with a spatial latent effect
+mod_null <- train(x, runname = 'Normal PPM projection', only_linear = TRUE, verbose = FALSE)
+# And with an added constrain
+# Calculated as nearest neighbour distance (NND) between all input points
+mod_dist <- train(x %>% add_latent_spatial(method = "nnd"),
+                  runname = 'PPM with NND constrain', only_linear = TRUE, verbose = FALSE)
+
+# Compare both
+plot(background, main = "Biodiversity data"); plot(virtual_species['Observed'], add = TRUE)
+plot(mod_null)
+plot(mod_dist)
+
+```
+Another option for constraining the prediction is to place concrete limits on the prediction surface. 
+This can be done by adding a `factor` zone layer to the distribution object. Internally, it is then assessed in which of the 'zones' the biodiversity points fall, discarding all others.
+**Note that this approach effectively also limits the prediction background / output!**
+
+```{r Prediction limits, fig.width = w, fig.height = h}
+# Create again a distribution object, but this time with limits (use the köppen layer from above)
+x <- distribution(background, limits = predictors$koeppen_50km) %>%
+  add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
+  add_predictors(predictors, transform = 'scale', derivates = "none") |>
+  # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
+  rm_predictors("koeppen_50km") %>% 
+  engine_xgboost(nrounds = 5000)
+
+# Spatially limited prediction
+mod_limited <- train(x, runname = 'Limited prediction background', only_linear = TRUE, verbose = FALSE)
+
+# Compare the output
+plot(mod_limited)
+
+```
+

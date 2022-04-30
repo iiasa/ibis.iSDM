@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_output.R
 \name{write_output}
 \alias{write_output}
-\title{Generic function to write outputs}
+\title{Generic function to write spatial outputs}
 \usage{
 \S4method{write_output}{ANY, character, character}(mod, fname, dt)
 
@@ -27,10 +27,11 @@
 No R-output is created. A file is written to the target direction.
 }
 \description{
-The \code{write_output} function is a generic wrapper to writing any output files created with
+The \code{write_output} function is a generic wrapper to writing any output files (e.g. projections) created with
 the \code{\link{ibis.iSDM-package}}. It is possible to write outputs of fitted \code{\link{DistributionModel}},
 \code{\link{BiodiversityScenario}} or individual \code{\link{Raster}} or \code{\link{stars}} objects. In case a \code{\link{data.frame}}
 is supplied, the output is written as csv file.
+\strong{For creating summaries of distribution and scenario parameters and performance, see \code{write_summary()}}
 }
 \note{
 By default output files will be overwritten if already existing!

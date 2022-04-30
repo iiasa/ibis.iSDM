@@ -6,7 +6,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -78,6 +78,16 @@
         <dd>Create distribution modelling procedure</dd>
       </dl><dl><dt>
           
+          <code><a href="BARTPrior.html">BARTPrior()</a></code> 
+        </dt>
+        <dd>Create a tree-based split probability prior for BART</dd>
+      </dl><dl><dt>
+          
+          <code><a href="BARTPriors.html">BARTPriors()</a></code> 
+        </dt>
+        <dd>Helper function when multiple variables are supplied</dd>
+      </dl><dl><dt>
+          
           <code><a href="BREGPrior.html">BREGPrior()</a></code> 
         </dt>
         <dd>Create a new spike and slab prior for Bayesian generalized linear models</dd>
@@ -133,7 +143,7 @@
         <dd>Creates a new PriorList object</dd>
       </dl><dl><dt>
           
-          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
+          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
         </dt>
         <dd>Specify settings for pseudo-absence sampling from a background</dd>
       </dl><dl><dt>
@@ -219,6 +229,11 @@
         <dd>Specify a spatial explicit offset as bias</dd>
       </dl><dl><dt>
           
+          <code><a href="add_offset_elevation.html">add_offset_elevation()</a></code> 
+        </dt>
+        <dd>Specify elevational preferences as offset</dd>
+      </dl><dl><dt>
+          
           <code><a href="add_offset_range.html">add_offset_range()</a></code> 
         </dt>
         <dd>Specify a expert-based species range as offset</dd>
@@ -227,6 +242,11 @@
           <code><a href="add_predictors.html">add_predictors()</a></code> 
         </dt>
         <dd>Add predictors to a Biodiversity distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_predictor_elevationpref.html">add_predictor_elevationpref()</a></code> 
+        </dt>
+        <dd>Create lower and upper limits for an elevational range and add them as separate predictors</dd>
       </dl><dl><dt>
           
           <code><a href="add_predictor_range.html">add_predictor_range()</a></code> 
@@ -664,7 +684,7 @@ For instance those previously selected</dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer></div>

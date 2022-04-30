@@ -22,6 +22,7 @@ Imports:
     ncdf4,
     parallel,
     doParallel,
+    foreach,
     future (>= 1.23.0),
     rgeos (>= 0.5-5),
     proto (>= 1.0.0),

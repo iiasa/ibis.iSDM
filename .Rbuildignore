@@ -20,3 +20,4 @@ configure.ac
 ^_pkgdown\.yml$
 ^docs$
 ^\.github$
+vignettes/

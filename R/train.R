@@ -205,6 +205,32 @@ methods::setMethod(
             model$predictors_object$set_data(val, new[[val]] )
           }
           rm(pred, new)
+        } else if(m == "nnd") {
+          # Nearest neighbour
+          biodiversity_ids <- as.character( x$biodiversity$get_ids() )
+          cc <- raster::stack()
+          for(id in biodiversity_ids) {
+            # Get presence points
+            o <- guess_sf( x$biodiversity$get_data(id) )
+            o <- subset(o, x$biodiversity$get_columns_occ()[[id]] > 0)
+            # Calculate point distance
+            ras <- raster::distanceFromPoints(emptyraster( model$predictors_object$get_data() ),
+                                              sf::st_coordinates( o ))
+            ras <- raster::mask(ras, model$background)
+            names(ras) <- paste0("nearestpoint_", which(biodiversity_ids == id))
+            cc <- raster::addLayer(cc, ras)
+            rm(ras, o )
+          }
+          # Add to predictor objects, names, types and the object
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(cc) )
+          model[['predictors_names']] <- c( model[['predictors_names']], names(cc) )
+          model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
+                                                          data.frame(predictors = names(cc),
+                                                                     type = "numeric" )
+                                                          )
+          model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, cc)
+          rm(cc, biodiversity_ids)
+
         } else {
           # Calculate the spatial model
           x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
@@ -430,6 +456,8 @@ methods::setMethod(
         pred_ov <- raster::mask( pred_ov, model$background )
         # Convert Predictors to data.frame
         model[['predictors']] <- raster::as.data.frame(pred_ov, xy = TRUE)
+        # model[['predictors_object']]$data <- pred_ov # This is correct, but results in some oddities
+        rm(pred_ov)
       } else {
         model$predictors[which( is.na(
           point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
@@ -1108,10 +1136,13 @@ methods::setMethod(
 
   if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
+  # Clip to limits again to be sure
+  if(!is.Waiver(x$limits)) out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+
   # Stop logging if specified
   if(!is.Waiver(x$log)) x$log$close()
 
-  # return output object
+  # Return created object
   return(out)
   }
 )

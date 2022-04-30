@@ -2,11 +2,12 @@
 title: "Capabilities compared to other SDM packages"
 author: "Martin Jung"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-fig_width: 8 
-fig_height: 6 
+output: 
+  rmarkdown::html_vignette:
+    toc: false
+fontsize: 11pt
 vignette: >
-  %\VignetteIndexEntry{Train a basic model}
+  %\VignetteIndexEntry{Capabilities compared to other SDM packages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
