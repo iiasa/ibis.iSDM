@@ -10,7 +10,7 @@
 \item{mod}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
 
 \item{fname}{A \code{\link{character}} depicting an output filename.
-The suffix determines the file type of the output (Options: \code{'rds'}, \code('rdata')).}
+The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).}
 
 \item{...}{Any other arguments passed on the individual functions.}
 }
@@ -18,14 +18,14 @@ The suffix determines the file type of the output (Options: \code{'rds'}, \code(
 No R-output is created. A file is written to the target direction.
 }
 \description{
-The \code{write_summary} function is a wrapper function to create summaries from fitted \code{\link{DistributionModel}} or
+The \code{\link{write_summary}} function is a wrapper function to create summaries from fitted \code{\link{DistributionModel}} or
 \code{\link{BiodiversityScenario}} objects. This function will extract parameters and statistics about the used data
-from the input object and writes the output as either \code{rds} or \code{rdata} file. Alternative, more open file formats
+from the input object and writes the output as either \code{'rds'} or \code{'rdata'} file. Alternative, more open file formats
 are under consideration.
 }
 \note{
 No predictions or tabular data is saved through this function.
-Use \code{write_output()} to save those.
+Use \code{\link[=write_output]{write_output()}} to save those.
 }
 \examples{
 \dontrun{

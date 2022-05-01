@@ -236,16 +236,16 @@ writeNetCDF <- function(file, fname,
 #' Generic function to write summary outputs from created models.
 #'
 #' @description
-#' The `write_summary` function is a wrapper function to create summaries from fitted [`DistributionModel`] or
+#' The [`write_summary`] function is a wrapper function to create summaries from fitted [`DistributionModel`] or
 #' [`BiodiversityScenario`] objects. This function will extract parameters and statistics about the used data
-#' from the input object and writes the output as either `rds` or `rdata` file. Alternative, more open file formats
+#' from the input object and writes the output as either \code{'rds'} or \code{'rdata'} file. Alternative, more open file formats
 #' are under consideration.
 #' @note
 #' No predictions or tabular data is saved through this function.
-#' Use `write_output()` to save those.
+#' Use [`write_output()`] to save those.
 #' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
 #' @param fname A [`character`] depicting an output filename.
-#' The suffix determines the file type of the output (Options: \code{'rds'}, \code('rdata')).
+#' The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -255,10 +255,10 @@ writeNetCDF <- function(file, fname,
 #'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
 #' write_summary(x, "testmodel.rds")
 #' }
+#' @keywords utils
 
 #' @name write_summary
 #' @aliases write_summary
-#' @keywords utils
 #' @exportMethod write_summary
 #' @export
 NULL
