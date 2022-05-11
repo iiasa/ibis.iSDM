@@ -26,6 +26,7 @@ NULL
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
 #' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
+#' @importFrom foreach %do% %dopar%
 #' @family engine
 #' @name engine_bart
 NULL
@@ -463,7 +464,7 @@ engine_bart <- function(x,
         out <- bdproto(
           "BART-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

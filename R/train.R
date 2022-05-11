@@ -175,6 +175,7 @@ methods::setMethod(
 
     # Calculate latent variables if set
     if(!is.Waiver(x$latentfactors)){
+      model[["latent"]] <- attr(x$latentfactors, "method") # Save type for the record
       # Get the method and check whether it is supported by the engine
       m <- attr(x$get_latent(),'method')
       if(x$get_engine() %notin% c("<INLA>", "<INLABRU>") & m == 'spde'){
@@ -236,7 +237,7 @@ methods::setMethod(
           x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
         }
       }
-    }
+    } else { model[["latent"]] <- new_waiver() }# End of latent factor loop
 
     # Set offset if existing
     if(!is.Waiver(x$offset)){

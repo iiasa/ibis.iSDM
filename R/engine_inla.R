@@ -700,7 +700,7 @@ engine_inla <- function(x,
         out <- bdproto(
               "INLA-Model",
               DistributionModel,
-              id = new_id(),
+              id = model$id,
               model = model,
               settings = settings,
               fits = list(

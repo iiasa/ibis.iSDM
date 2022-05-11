@@ -46,9 +46,21 @@ PredictorDataset <- bdproto(
         out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
         cbind(raster::coordinates(self$data), out ) # Attach coordinates and return
       } else {
-        raster::as.data.frame(self$data, xy = TRUE,na.rm = na.rm, ...)
+        raster::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)
       }
     } else self$data
+  },
+  # Get time dimension
+  get_time = function(self, ...){
+    # Get data
+    d <- self$get_data()
+    if(is.Waiver(d)) return(new_waiver())
+    if(!inherits(d, 'stars')){
+      # Try and get a z dimension from the raster object
+      raster::getZ(d)
+    } else {
+      stars::st_get_dimension_values(d, "time")
+    }
   },
   # Get Projection
   get_projection = function(self){
@@ -89,16 +101,27 @@ PredictorDataset <- bdproto(
   },
   # Collect info statistics with optional decimals
   summary = function(self, digits = 2) {
+    # Get data
+    d <- self$get_data()
+    if(is.Waiver(d)) return(NULL)
     # Need special handling if there any factors
     if(any(is.factor(self$get_data()))){
       out <- self$get_data()[] |> as.data.frame()
       out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
       summary(out, digits = digits)
     } else {
-      round(
-        raster::summary( self$get_data() ), digits = digits
-      )
+      if(inherits(d, 'stars')){
+        round(
+          summary(stars:::as.data.frame.stars(d)), digits = digits
+        )
+      } else {
+        # Assume raster
+        round(
+          raster::summary( d ), digits = digits
+        )
+      }
     }
+    rm(d)
   },
   # Number of Predictors in object
   length = function(self) {

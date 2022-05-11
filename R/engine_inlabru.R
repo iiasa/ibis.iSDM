@@ -745,15 +745,17 @@ engine_inlabru <- function(x,
               object = fit_bru,
               num.threads = ifelse(getOption("ibis.runparallel"), getOption("ibis.nthread"), NULL),
               data = preds,
+              probs = c(0.05, 0.5, 0.95),
               formula = pfo,
               n.samples = 1000 # Pass as parameter?
             )
           )
+          pred_bru$cv <- pred_bru$mean / pred_bru$sd
           # Get only the predicted variables of interest
           prediction <- raster::stack(
-            pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # FIXME: Columns need to be adapted if quantiles are changed
+            pred_bru[,c("mean","sd","q0.05", "median", "q0.95", "cv")]
           )
-          names(prediction) <- c("mean", "sd", "q025", "q50", "q975", "cv")
+          names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
 
         } else {
           prediction <- NULL
@@ -766,7 +768,7 @@ engine_inlabru <- function(x,
         out <- bdproto(
           "INLABRU-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

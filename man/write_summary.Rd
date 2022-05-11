@@ -12,6 +12,9 @@
 \item{fname}{A \code{\link{character}} depicting an output filename.
 The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).}
 
+\item{partial}{A \code{\link{logical}} value determining whether partial variable contributions should be calculated and added
+to the model summary. \strong{Note that this can be rather slow} (Default: \code{FALSE}).}
+
 \item{...}{Any other arguments passed on the individual functions.}
 }
 \value{

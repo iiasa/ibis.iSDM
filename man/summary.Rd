@@ -5,6 +5,7 @@
 \alias{summary.distribution}
 \alias{summary.DistributionModel}
 \alias{summary.PredictorDataset}
+\alias{summary.BiodiversityScenario}
 \title{Summarises a trained model or predictor object}
 \usage{
 \method{summary}{distribution}(x)
@@ -12,6 +13,8 @@
 \method{summary}{DistributionModel}(x)
 
 \method{summary}{PredictorDataset}(x)
+
+\method{summary}{BiodiversityScenario}(x)
 }
 \arguments{
 \item{x}{Any prepared object.}

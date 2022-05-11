@@ -5,7 +5,9 @@ development:
 
 template:
   bootstrap: 5
-  bootswatch: materia
+  bootswatch: lux
+  bslib:
+    pkgdown-nav-height: 80px
   opengraph:
     twitter:
       creator: "@Martin_Ecology"

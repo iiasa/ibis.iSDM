@@ -280,7 +280,7 @@ DistributionModel <- bdproto(
     self$get_data("fit_best_equation")
   },
   # Get specific fit from this Model
-  get_data = function(self, x) {
+  get_data = function(self, x = "prediction") {
     if (!x %in% names(self$fits))
       return(new_waiver())
     return(self$fits[[x]])

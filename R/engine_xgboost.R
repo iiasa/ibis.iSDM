@@ -546,7 +546,7 @@ engine_xgboost <- function(x,
         out <- bdproto(
           "XGBOOST-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

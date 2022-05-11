@@ -148,28 +148,6 @@ BiodiversityScenario <- bdproto(
   get_scenarios = function(self, what = "scenarios"){
     return(self[[what]])
   },
-  # Calculate slopes
-  calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
-    if(is.Waiver(self$get_scenarios())) return( new_waiver() )
-    assertthat::assert_that(what %in% attributes(self$get_scenarios())$names )
-
-    oo <- self$get_scenarios()[what]
-    tt <- as.numeric( stars::st_get_dimension_values(self$scenarios, 3) )
-    # Calc pixel-wise linear slope
-    out <- stars::st_apply(
-      oo,
-      1:2,
-      function(x) {
-        if (anyNA(x))
-          NA_real_
-        else
-          lm.fit(cbind(1, tt), x)$coefficients[2]
-      }
-    )
-    names(out) <- 'linear_coefficient'
-    if(plot) stars:::plot.stars(out, breaks = "equal", col = ibis_colours$divg_bluered)
-    return(out)
-  },
   # Plot the prediction
   plot = function(self, what = "suitability",...){
     # FIXME: More plotting options would be good
@@ -240,6 +218,135 @@ BiodiversityScenario <- bdproto(
       gganimate::anim_save(animation = g, fname)
     } else { g }
   },
+  # Summarize the change in thresholded layer between timesteps
+  summary = function(self, plot = FALSE){
+    # Check that baseline and scenario thresholds are all there
+    assertthat::assert_that(
+      !is.Waiver(self$get_scenarios()),
+      'threshold' %in% attributes(self$get_scenarios())$names,
+      msg = "This function summarizes thresholds which need to be calculated first."
+    )
+    if( 'threshold' %in% attributes(self$get_scenarios())$names ){
+      # TODO: Try and get rid of dplyr dependency. Currently too much work to not use it
+      check_package("dplyr")
+      # Get the scenario predictions and from there the thresholds
+      scenario <- self$get_scenarios()['threshold']
+      st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
+      time <- stars::st_get_dimension_values(scenario,which = 'band')
+      # HACK: Add area to stars
+      ar <- stars:::st_area.stars(scenario)
+      ar_unit <- units::deparse_unit(ar$area)
+      new <- as(scenario,"Raster") * as(ar, "Raster")
+      new <- raster::setZ(new, time)
+      # Convert to scenarios to data.frame
+      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., complete.cases(.))
+      names(df)[4] <- "area"
+      # --- #
+      # Now calculate from this data.frame several metrics related to the area and change in area
+      df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
+        dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
+        dplyr::mutate(area = dplyr::if_else(is.na(area), 0, area)) %>% # Convert missing data to 0
+        dplyr::arrange(id, band)
+      df$area <- units::as_units(df$area, units::as_units(ar_unit))  # Set Units
+      # Convert to km2 and remove units as this causes issues with dplyr
+      df$area <- units::set_units(df$area, "km2") %>% units::drop_units()
+
+      # Total amount of area occupied for a given time step
+      out <- df %>% dplyr::group_by(band) %>% dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
+      out$totarea <- raster::cellStats((new[[1]]>=0) * as(ar, "Raster"), "sum")
+      if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
+        out$totarea <- out$totarea / 1e6
+        out <- dplyr::rename(out, totarea_km2 = totarea)
+      }
+
+      # Total amount of area lost / gained / stable since previous time step
+      totchange_occ <- df %>%
+          dplyr::group_by(id) %>%
+          dplyr::mutate(change = (area - dplyr::lag(area)) ) %>% dplyr::ungroup() %>%
+          subset(., complete.cases(.))
+      o <- totchange_occ %>% dplyr::group_by(band) %>%
+        dplyr::summarise(totchange_stable_km2 = sum(area[change == 0]),
+                         totchange_gain_km2 = sum(change[change > 0]),
+                         totchange_loss_km2 = sum(change[change < 0]))
+      out <- out %>% dplyr::left_join(o, by = "band")
+
+      # Aggregate
+      # df <- tapply(df$area, df$band, function(x) sum(x, na.rm = TRUE))
+      # df <- units::as_units(df, units::as_units(ar_unit))  # Set Units
+    } else {
+      #TODO: Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
+      # Get the scenario predictions and from there the thresholds
+      scenario <- self$get_scenarios()['suitability']
+      st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
+      time <- stars::st_get_dimension_values(scenario,which = 'band')
+      # Convert to scenarios to data.frame
+      df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
+      # Add grid cell grouping
+      df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
+        dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
+        dplyr::arrange(id, band)
+
+      # Summarize the overall moments
+      out <- df %>%
+        dplyr::filter(suitability > 0) %>%
+        dplyr::group_by(band) %>%
+        dplyr::summarise(suitability_mean = mean(suitability, na.rm = TRUE),
+                         suitability_q25 = quantile(suitability, .25),
+                         suitability_q50 = quantile(suitability, .5),
+                         suitability_q75 = quantile(suitability, .75))
+      # Total amount of area lost / gained / stable since previous time step
+      totchange_occ <- df %>%
+        dplyr::group_by(id) %>%
+        dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup() %>%
+      o <- totchange_occ %>% dplyr::group_by(band) %>%
+        dplyr::summarise(totchange_gain = mean(change[change > 0]),
+                         totchange_loss = mean(change[change < 0]))
+      out <- out %>% dplyr::left_join(o, by = "band")
+    }
+
+    if(plot){
+      if( 'threshold' %in% attributes(self$get_scenarios())$names ){
+        ggplot2::ggplot(out,
+                        ggplot2::aes(x = time, y = as.numeric(area_km2))) +
+          ggplot2::theme_classic(base_size = 18) +
+          ggplot2::geom_line(size = 2) +
+          ggplot2::labs(x = "Time", y = expression(Area(km^2)))
+      } else {
+        ggplot2::ggplot(out,
+                        ggplot2::aes(x = time,
+                                     y = suitability_q50,
+                                     ymin = suitability_q25,
+                                     ymax = suitability_q75)) +
+          ggplot2::theme_classic(base_size = 18) +
+          ggplot2::geom_ribbon(fill = "grey80") +
+          ggplot2::geom_line(size = 2) +
+          ggplot2::labs(x = "Time", y = "Suitability (quantiles)")
+      }
+    }
+    return(out)
+  },
+  # Calculate slopes
+  calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
+    if(is.Waiver(self$get_scenarios())) return( new_waiver() )
+    assertthat::assert_that(what %in% attributes(self$get_scenarios())$names )
+
+    oo <- self$get_scenarios()[what]
+    tt <- as.numeric( stars::st_get_dimension_values(self$scenarios, 3) )
+    # Calc pixel-wise linear slope
+    out <- stars::st_apply(
+      oo,
+      1:2,
+      function(x) {
+        if (anyNA(x))
+          NA_real_
+        else
+          lm.fit(cbind(1, tt), x)$coefficients[2]
+      }
+    )
+    names(out) <- 'linear_coefficient'
+    if(plot) stars:::plot.stars(out, breaks = "equal", col = ibis_colours$divg_bluered)
+    return(out)
+  },
   #Plot relative change between baseline and projected thresholds
   plot_relative_change = function(self, position = NULL, variable = 'mean'){
     # Default position is the last one
@@ -300,40 +407,6 @@ BiodiversityScenario <- bdproto(
       ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
     # Return
     return(diff_f)
-  },
-  # Summarize the change in thresholded layer between timesteps
-  summarize_relative_change = function(self, plot = TRUE){
-    # Check that baseline and scenario thresholds are all there
-    assertthat::assert_that(
-      !is.Waiver(self$get_scenarios()),
-      'threshold' %in% attributes(self$get_scenarios())$names,
-      msg = "This function summarizes thresholds which need to be calculated first."
-    )
-    # Get the scenario predictions and from there the thresholds
-    scenario <- self$get_scenarios()['threshold']
-    st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
-    time <- stars::st_get_dimension_values(scenario,which = 'band')
-    # Add area to stars (hacky) # FIXME?
-    ar <- stars:::st_area.stars(scenario)
-    ar_unit <- units::deparse_unit(ar$area)
-    new <- as(scenario,"Raster") * as(ar, "Raster")
-    new <- raster::setZ(new, time)
-    # Convert to scenarios to data.frame
-    df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., complete.cases(.))
-    names(df)[4] <- "area"
-    # Aggregate
-    df <- tapply(df$area, df$band, function(x) sum(x, na.rm = TRUE))
-    df <- units::as_units(df,units::as_units(ar_unit))  # Set Units
-    out <- data.frame(time = time, area = units::set_units(df,'km^2'))
-
-    if(plot){
-      ggplot2::ggplot(out,
-                      ggplot2::aes(x = time, y = as.numeric(area))) +
-        ggplot2::theme_classic(base_size = 18) +
-        ggplot2::geom_line(size = 2) +
-        ggplot2::labs(x = "Time", y = expression(Area(km^2)))
-    }
-    return(out)
   },
   # Save object
   save = function(self, fname, type = 'tif', dt = 'FLT4S'){

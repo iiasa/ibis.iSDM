@@ -32,3 +32,9 @@ summary.DistributionModel <- function(x) x$summary()
 #' @keywords summary
 #' @export
 summary.PredictorDataset <- function(x) x$summary()
+
+#' @rdname summary
+#' @method summary BiodiversityScenario
+#' @keywords summary
+#' @export
+summary.BiodiversityScenario <- function(x) x$summary()

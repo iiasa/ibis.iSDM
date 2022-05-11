@@ -246,6 +246,8 @@ writeNetCDF <- function(file, fname,
 #' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
 #' @param fname A [`character`] depicting an output filename.
 #' The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).
+#' @param partial A [`logical`] value determining whether partial variable contributions should be calculated and added
+#' to the model summary. **Note that this can be rather slow** (Default: \code{FALSE}).
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -264,7 +266,7 @@ writeNetCDF <- function(file, fname,
 NULL
 methods::setGeneric("write_summary",
                     signature = methods::signature("mod"),
-                    function(mod, fname, ...) standardGeneric("write_summary"))
+                    function(mod, fname, partial = FALSE, ...) standardGeneric("write_summary"))
 
 #' @name write_summary
 #' @rdname write_summary
@@ -272,10 +274,11 @@ methods::setGeneric("write_summary",
 methods::setMethod(
   "write_summary",
   methods::signature(mod = "ANY"),
-  function(mod, fname, ...) {
+  function(mod, fname, partial = FALSE, ...) {
     assertthat::assert_that(
       !missing(mod),
-      is.character(fname)
+      is.character(fname),
+      is.logical(partial)
     )
     assertthat::assert_that(
       inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
@@ -288,32 +291,105 @@ methods::setMethod(
     ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
     fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
     if(file.exists(fname) && getOption('ibis.setupmessages')) myLog('[Output]','yellow','Overwriting existing file...')
-
+    assertthat::assert_that(assertthat::is.writeable(dirname(fname)))
     # --- #
     # Gather the statistics and parameters from the provided file
     output <- list()
     if(inherits(mod, "DistributionModel")){
-      # FIXME: Further options to be implemented
-      # Ideally more telling and not just model params
+
+      # Summarize the model object
+      model <- mod$model
+
       # Model input summary in a tibble
+      output[["input"]][["extent"]] <- as.matrix( extent( model$background ) )
+      output[["input"]][["predictors"]] <- model$predictors_types
+      if(!is.Waiver(model$offset)) output[["input"]][["offset"]] <- names(model$offset) else output[["input"]][["offset"]] <- NA
+      if(!is.Waiver(model$priors)){
+        output[["input"]][["priors"]] <- model$priors$varnames()
+      } else output[["input"]][["priors"]] <- NA
+
+      # Go over biodiversity datasets
+      o <- data.frame()
+      for(i in 1:length(model$biodiversity)){
+        o <- rbind(o,
+                     data.frame(id = names(model$biodiversity)[i],
+                                name = model$biodiversity[[i]]$name,
+                                type = model$biodiversity[[i]]$type,
+                                family = model$biodiversity[[i]]$family,
+                                equation = deparse1(model$biodiversity[[i]]$equation),
+                                obs_pres = sum( model$biodiversity[[i]]$observations$observed > 0 ),
+                                obs_abs = sum( model$biodiversity[[i]]$observations$observed == 0 ),
+                                n_predictors = length( model$biodiversity[[i]]$predictors_names )
+                       )
+                   )
+      }
+      output[["input"]][["biodiversity"]] <- o
+
       # Model parameters in a tibble
-      # Model summary in a tibble and formula
-      # The log file if set
-
-      # Get the equation
-      output[["equation"]] <- mod$get_equation()
-
+      output[["params"]][["id"]] <- as.character(model$id)
+      output[["params"]][["runname"]] <- as.character(model$runname)
+      output[["params"]][["algorithm"]] <- class(mod)[1]
+      output[["params"]][["equation"]] <- mod$get_equation()
       # Collect settings and parameters if existing
       if( !is.Waiver(mod$get_data("params")) ){
-        output[["params"]] <- mod$get_data("params")
+        output[["params"]][["params"]] <- mod$get_data("params")
       }
       if( "settings" %in% names(mod) ){
-        output[["settings"]] <- mod$settings$data
+        output[["params"]][["settings"]] <- mod$settings$data
       }
-    } else if(inherits(mod, "BiodiversityScenario")){
-      stop("TBD")
-    }
 
+      # Model summary in a tibble and formula
+      output[["output"]][["summary"]] <- mod$summary()
+      if(!is.Waiver(mod$get_data("prediction") )){
+        output[["output"]][["resolution"]] <- raster::res( mod$get_data("prediction") )
+        output[["output"]][["prediction"]] <- names( mod$get_data("prediction") )
+      } else {
+        output[["output"]][["resolution"]] <- NA
+        output[["output"]][["prediction"]] <- NA
+      }
+      # Calculate partial estimates if set
+      if(partial){
+        if(getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Calculating partial variable contributions...'))
+        message("Not yet added") # TODO:
+        output[["output"]][["partial"]] <- NA
+      } else {
+        output[["output"]][["partial"]] <- NA
+      }
+
+    } else if(inherits(mod, "BiodiversityScenario")){
+      # Summarize the model object
+      model <- mod$get_model()
+
+      # Model input summary in a tibble
+      output[["input"]][["extent"]] <- as.matrix( raster::extent( model$model$background ) )
+      output[["input"]][["predictors"]] <- mod$predictors$get_names()
+      output[["input"]][["timerange"]] <- mod$get_timeperiod()
+      output[["input"]][["predictor_time"]] <- mod$predictors$get_time()
+      # Collect settings and parameters if existing
+      if( !is.Waiver(mod$get_data("constraints")) ){
+        output[["input"]][["constraints"]] <- mod$get_constraints()
+      }
+
+      # Model parameters in a tibble
+      output[["params"]][["id"]] <- as.character(mod$modelid)
+      output[["params"]][["runname"]] <- as.character(model$model$runname)
+      output[["params"]][["algorithm"]] <- class(model)[1]
+      output[["params"]][["equation"]] <- mod$get_equation()
+      if( "settings" %in% names(mod) ){
+        output[["params"]][["settings"]] <- model$settings$data
+      }
+
+      # Model summary in a tibble and formula
+      output[["output"]][["summary"]] <- mod$summary(plot = FALSE)
+      if(!is.Waiver(mod$get_scenarios() )){
+        sc_dim <- stars::st_dimensions(mod$get_scenarios())
+        output[["output"]][["resolution"]] <- abs( c(x = sc_dim$x$delta, y = sc_dim$y$delta) )
+        output[["output"]][["prediction"]] <- names(mod$get_scenarios())
+      } else {
+        output[["output"]][["resolution"]] <- NA
+        output[["output"]][["prediction"]] <- NA
+      }
+    }
     assertthat::assert_that(
       is.list(output),
       length(output)>0

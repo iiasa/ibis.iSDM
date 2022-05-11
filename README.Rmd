@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 <!-- <a href='https://github.com/iiasa/rN2000'><img src="man/figures/logo.png" align="right"height=140/></a> --->  
 <!-- https://shields.io/  For Badges later -->
 
+![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
+
 The ibis.iSDM package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an introduction to iSDMs.
 
 ## Installation

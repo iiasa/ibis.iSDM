@@ -398,7 +398,7 @@ engine_gdb <- function(x,
         out <- bdproto(
           "GDB-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

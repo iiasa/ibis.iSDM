@@ -548,7 +548,7 @@ engine_stan <- function(x,
         out <- bdproto(
           "STAN-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

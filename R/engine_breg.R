@@ -409,7 +409,7 @@ engine_breg <- function(x,
         out <- bdproto(
           "BREG-Model",
           DistributionModel,
-          id = new_id(),
+          id = model$id,
           model = model,
           settings = settings,
           fits = list(

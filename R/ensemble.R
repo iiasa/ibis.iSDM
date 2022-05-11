@@ -54,10 +54,14 @@ methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
   function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean", normalize = FALSE){
-    # Collate provided models
-    if(!is.list(...)){
+    if(length(list(...))>1) {
       mc <- list(...)
-    } else mc <- c(...)
+    } else {
+      # Collate provided models
+      if(!is.list(...)){
+        mc <- list(...)
+      } else mc <- c(...)
+    }
 
     # Get all those that are DistributionModels
     mods <- mc[ sapply(mc, function(x) inherits(x, "DistributionModel") ) ]
@@ -150,6 +154,8 @@ methods::setMethod(
           )
           # Also get SD prediction from models
           ras_sd <- raster::stack( sapply(mods, function(x) x$get_data('prediction')[['sd']]))
+          # Normalize the sds for each
+          ras_sd <- predictor_transform(ras_sd, option = "norm")
           # Get the id of the layer where standard deviation is lower
           min_sd <- raster::whiches.min(ras_sd)
           new <- emptyraster(ras)
