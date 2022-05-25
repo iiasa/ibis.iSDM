@@ -219,6 +219,7 @@ methods::setMethod(
 
     } else if(method == "percentile"){
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      pointVals <- subset(pointVals, complete.cases(pointVals)) # Remove any NA or NAN data here
       # percentile training threshold
       if(is.null(value)) value <- 0.1 # If value is not set, use 10%
       if(length(pointVals) < 10) {

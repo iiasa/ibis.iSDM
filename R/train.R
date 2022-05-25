@@ -334,7 +334,7 @@ methods::setMethod(
       )
 
       # Check whether predictors should be refined and do so
-      if(settings$get('rm_corPred') && model[['predictors_names']] != 'dummy'){
+      if(settings$get('rm_corPred') && ('dummy' %in% model[['predictors_names']])){
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Removing highly correlated variables...')
         test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
 
@@ -446,7 +446,9 @@ methods::setMethod(
       zones <- subset(x$limits, limit %in% unique(zones$limit) )
 
       # Now clip all predictors and background to this
-      model$background <- suppressMessages(suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) )) %>%
+      model$background <- suppressMessages(
+        suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) )) %>%
+        sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
         sf::st_cast("MULTIPOLYGON")
 
       # Extract predictors and offsets again if set
