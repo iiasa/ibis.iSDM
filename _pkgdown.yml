@@ -5,7 +5,7 @@ development:
 
 template:
   bootstrap: 5
-  bootswatch: lux
+  bootswatch: yeti
   bslib:
     pkgdown-nav-height: 80px
   opengraph:
@@ -37,14 +37,12 @@ navbar:
           href: articles/01_train_simple_model.html
         - text: 2. Integrate data
           href: articles/02_integrate_data.html
-        - text: 3. Model assessment
-          href: articles/03_model_assessment.html
-        - text: 4. Biodiversity projections
-          href: articles/04_biodiversity_projections.html
-        - text: 5. Engine comparison
-          href: articles/05_engine_comparison.html
-        - text: 6. Other packages
-          href: articles/06_package_comparison.html
+        - text: 3. Biodiversity projections
+          href: articles/03_biodiversity_projections.html
+        - text: 4. Engine comparison
+          href: articles/04_engine_comparison.html
+        - text: 5. Other packages
+          href: articles/05_package_comparison.html
     faq:
       text: FAQ
       href: articles/frequently-asked-questions.html

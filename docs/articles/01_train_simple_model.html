@@ -53,10 +53,9 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -96,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-05-01</h4>
+            <h4 data-toc-skip class="date">2022-05-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/01_train_simple_model.Rmd" class="external-link"><code>vignettes/01_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>01_train_simple_model.Rmd</code></div>
@@ -150,7 +149,7 @@ predictors available for modelling. So first lets load the data:</p>
 <span class="co"># Load virtual species points</span>
 <span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/input_data.gpkg"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"points"</span><span class="op">)</span> 
 <span class="co">#&gt; Reading layer `points' from data source </span>
-<span class="co">#&gt;   `C:\Users\Martin\AppData\Local\Temp\RtmpA9XJ51\temp_libpath2cbc41623236\ibis.iSDM\extdata\input_data.gpkg' </span>
+<span class="co">#&gt;   `C:\Users\Martin\AppData\Local\R\win-library\4.2\ibis.iSDM\extdata\input_data.gpkg' </span>
 <span class="co">#&gt;   using driver `GPKG'</span>
 <span class="co">#&gt; Simple feature collection with 208 features and 5 fields</span>
 <span class="co">#&gt; Geometry type: POINT</span>
@@ -176,7 +175,7 @@ package is advised.</p>
 <span class="co"># First we define a distribution object using the background layer</span>
 <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span>
 <span class="co">#&gt; Loading required namespace: rgeos</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:13:38 | Creating distribution object...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:25:38 | Creating distribution object...</span></span>
 
 <span class="co"># Then lets add species data to it. </span>
 <span class="co"># This data needs to be in sf format and key information is that</span>
@@ -185,7 +184,7 @@ package is advised.</p>
 <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">virtual_species</span>,
                                       name <span class="op">=</span> <span class="st">"Virtual test species"</span>,
                                       field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:13:38 | Adding poipo dataset...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:25:38 | Adding poipo dataset...</span></span>
 
 <span class="co"># Then lets add predictor information</span>
 <span class="co"># Here we are interested in basic transformations (scaling), but derivates (like quadratic)</span>
@@ -193,8 +192,8 @@ package is advised.</p>
 <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">mod</span>, 
                       env <span class="op">=</span> <span class="va">predictors</span>,
                       transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:13:39 | Adding predictors...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:13:39 | Transforming predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:25:38 | Adding predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:25:38 | Transforming predictors...</span></span>
 
 <span class="co"># Finally define the engine for the model</span>
 <span class="co"># This uses the default data currently backed in the model,</span>
@@ -278,12 +277,12 @@ data types.</p>
              runname <span class="op">=</span>  <span class="st">"Test INLA run"</span>,
              verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># Don't be chatty</span>
              <span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:14:10 | Collecting input parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:14:10 | Adding engine-specific parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:14:10 | Engine setup.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:14:11 | Starting fitting.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:14:22 | Starting prediction.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-01 12:14:51 | Completed after 40.59 secs</span></span></code></pre></div>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:26:09 | Collecting input parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:26:09 | Adding engine-specific parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:26:09 | Engine setup.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:26:10 | Starting fitting.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:26:20 | Starting prediction.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-29 09:26:53 | Completed after 44.59 secs</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="summarizing-and-plotting-the-fitted-distribution-object">Summarizing and plotting the fitted distribution object<a class="anchor" aria-label="anchor" href="#summarizing-and-plotting-the-fitted-distribution-object"></a>
@@ -337,11 +336,11 @@ calculating a <code><a href="../reference/threshold.html">threshold()</a></code>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The object o contains the data underlying this figure</span>
 
-<span class="co"># Similarly the patial effect can be visualized spatially as 'spartial'</span>
+<span class="co"># Similarly the partial effect can be visualized spatially as 'spartial'</span>
 <span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spartial.html">spartial</a></span><span class="op">(</span><span class="va">fit</span>, x.var <span class="op">=</span> <span class="st">"CLC3_312_mean_50km"</span><span class="op">)</span>
 <span class="co">#&gt; Warning in points2grid(points, tolerance, round): grid has empty column/rows in</span>
 <span class="co">#&gt; dimension 1</span>
-<span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">s</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Partial effect of forest on the relative reporting rate"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">s</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Marginal effect of forest on the relative reporting rate"</span><span class="op">)</span></code></pre></div>
 <p><img src="01_train_simple_model_files/figure-html/partial%20effect-2.png" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -371,6 +370,77 @@ calculating a <code><a href="../reference/threshold.html">threshold()</a></code>
 pages!</strong></p>
 </div>
 <div class="section level3">
+<h3 id="validation-of-model-predictions">Validation of model predictions<a class="anchor" aria-label="anchor" href="#validation-of-model-predictions"></a>
+</h3>
+<p>The ibis.iSDM package provides a convenience function to obtain
+validation results for the fitted models. Validation can be done both
+for continious and discrete predictions, where the latter requires a
+computed threshold fits (see above).</p>
+<p>Here we will ‘validate’ the fitted model using the data used for
+model fitting. For any scientific paper we recommend to implement a
+cross-validation scheme to obtain withheld data or use independently
+gathered data.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># By Default validation statistics are continuous and evaluate the predicted estimates against the number of records per grid cell.</span>
+<span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2022-05-29 09:27:10 | Calculating validation statistics</span></span>
+<span class="co">#&gt;                                modelid                 name     method</span>
+<span class="co">#&gt; 1 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt; 2 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt; 3 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt; 4 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt; 5 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt; 6 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species continuous</span>
+<span class="co">#&gt;       metric       value</span>
+<span class="co">#&gt; 1          n 207.0000000</span>
+<span class="co">#&gt; 2       rmse   0.6311476</span>
+<span class="co">#&gt; 3        mae   0.5349514</span>
+<span class="co">#&gt; 4    logloss   1.4597407</span>
+<span class="co">#&gt; 5   normgini         NaN</span>
+<span class="co">#&gt; 6 cont.boyce   0.9910000</span>
+
+<span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates</span>
+<span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>
+<span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2022-05-29 09:27:12 | Calculating validation statistics</span></span>
+<span class="co">#&gt; <span style="color: #BBBB00;">[Validation] 2022-05-29 09:27:12 | No absence data found for threshold. Generating random points.</span></span>
+<span class="co">#&gt;                                 modelid                 name   method</span>
+<span class="co">#&gt; 1  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 2  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 3  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 4  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 5  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 6  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 7  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 8  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 9  e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 10 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 11 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 12 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt; 13 e0270c9e-a39d-49ff-b747-b41704f6ae53 Virtual test species discrete</span>
+<span class="co">#&gt;                 metric       value</span>
+<span class="co">#&gt; 1                    n 567.0000000</span>
+<span class="co">#&gt; 2                  auc   0.7536232</span>
+<span class="co">#&gt; 3     overall.accuracy   0.8201058</span>
+<span class="co">#&gt; 4  true.presence.ratio   0.5072464</span>
+<span class="co">#&gt; 5            precision   1.0000000</span>
+<span class="co">#&gt; 6          sensitivity   0.5072464</span>
+<span class="co">#&gt; 7          specificity   1.0000000</span>
+<span class="co">#&gt; 8                  tss   0.5072464</span>
+<span class="co">#&gt; 9                   f1   0.6730769</span>
+<span class="co">#&gt; 10             logloss          NA</span>
+<span class="co">#&gt; 11   expected.accuracy   0.5849500</span>
+<span class="co">#&gt; 12               kappa   0.5665722</span>
+<span class="co">#&gt; 13         brier.score   0.1798942</span></code></pre></div>
+<p>Validating integrated SDMs, particular those fitted with multiple
+likelihoods is challenging and something that has not yet fully been
+explored in the scientific literature. For example strong priors can
+substantially improve by modifying the response functions in the model,
+but are challenging to validate if the validation data has similar
+biases as the training data.</p>
+</div>
+<div class="section level3">
 <h3 id="constrain-a-model-in-prediction-space">Constrain a model in prediction space<a class="anchor" aria-label="anchor" href="#constrain-a-model-in-prediction-space"></a>
 </h3>
 <p>Species distribution models quite often extrapolate to areas in which
@@ -390,7 +460,7 @@ vignette).</p>
 <p>Currently the <code>ibis.iSDM</code> package supports the addition of
 only spatial latent effects via <code><a href="../reference/add_latent_spatial.html">add_latent_spatial()</a></code>. See
 the help file for more information.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># We are going to use the xgboost algorithm as engine below</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span>
 
@@ -409,50 +479,50 @@ the help file for more information.</p>
   <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>nrounds <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:15:11 | Creating distribution object...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:15:11 | Adding poipo dataset...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:15:11 | Adding predictors...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:15:11 | Transforming predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:27:20 | Creating distribution object...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:27:20 | Adding poipo dataset...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:27:21 | Adding predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:27:21 | Transforming predictors...</span></span>
 
 <span class="co"># Now train 2 models, one without and one with a spatial latent effect</span>
 <span class="va">mod_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Normal PPM projection'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:15 | Collecting input parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:16 | Adding engine-specific parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:16 | Engine setup.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:16 | Starting fitting...</span></span>
-<span class="co">#&gt; [12:15:16] WARNING: amalgamation/../src/learner.cc:627: </span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:27 | Collecting input parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:27 | Adding engine-specific parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:27 | Engine setup.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:28 | Starting fitting...</span></span>
+<span class="co">#&gt; [09:27:28] WARNING: amalgamation/../src/learner.cc:627: </span>
 <span class="co">#&gt; Parameters: { "colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample" } might not be used.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span>
 <span class="co">#&gt;   then being mistakenly passed down to XGBoost core, or some parameter actually being used</span>
 <span class="co">#&gt;   but getting flagged wrongly here. Please open an issue if you find any such cases.</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:36 | Starting prediction...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-01 12:15:36 | Completed after 20.72 secs</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:50 | Starting prediction...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-29 09:27:51 | Completed after 23.66 secs</span></span>
 <span class="co"># And with an added constrain</span>
 <span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span>
 <span class="va">mod_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_latent_spatial.html">add_latent_spatial</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nnd"</span><span class="op">)</span>,
                   runname <span class="op">=</span> <span class="st">'PPM with NND constrain'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:15:36 | Adding latent spatial terms...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:36 | Collecting input parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:42 | Adding engine-specific parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:43 | Engine setup.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:15:44 | Starting fitting...</span></span>
-<span class="co">#&gt; [12:15:44] WARNING: amalgamation/../src/learner.cc:627: </span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:27:51 | Adding latent spatial terms...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:51 | Collecting input parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:57 | Adding engine-specific parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:57 | Engine setup.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:27:59 | Starting fitting...</span></span>
+<span class="co">#&gt; [09:27:59] WARNING: amalgamation/../src/learner.cc:627: </span>
 <span class="co">#&gt; Parameters: { "colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample" } might not be used.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span>
 <span class="co">#&gt;   then being mistakenly passed down to XGBoost core, or some parameter actually being used</span>
 <span class="co">#&gt;   but getting flagged wrongly here. Please open an issue if you find any such cases.</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:05 | Starting prediction...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-01 12:16:05 | Completed after 28.5 secs</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:23 | Starting prediction...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-29 09:28:23 | Completed after 31.8 secs</span></span>
 
 <span class="co"># Compare both</span>
 <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">background</span>, main <span class="op">=</span> <span class="st">"Biodiversity data"</span><span class="op">)</span>; <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p><img src="01_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_null</span><span class="op">)</span></code></pre></div>
 <p><img src="01_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-2.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_dist</span><span class="op">)</span></code></pre></div>
 <p><img src="01_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-3.png" width="528" style="display: block; margin: auto;">
 Another option for constraining the prediction is to place concrete
@@ -461,7 +531,7 @@ limits on the prediction surface. This can be done by adding a
 it is then assessed in which of the ‘zones’ the biodiversity points
 fall, discarding all others. <strong>Note that this approach effectively
 also limits the prediction background / output!</strong></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Create again a distribution object, but this time with limits (use the köppen layer from above)</span>
 <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span>, limits <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> |&gt;
@@ -469,25 +539,28 @@ also limits the prediction background / output!</strong></p>
   <span class="co"># Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors</span>
   <span class="fu"><a href="../reference/rm_predictors.html">rm_predictors</a></span><span class="op">(</span><span class="st">"koeppen_50km"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>nrounds <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:16:10 | Creating distribution object...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:16:14 | Adding poipo dataset...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:16:15 | Adding predictors...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-01 12:16:15 | Transforming predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:28:29 | Creating distribution object...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:28:33 | Adding poipo dataset...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:28:33 | Adding predictors...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-05-29 09:28:33 | Transforming predictors...</span></span>
 
 <span class="co"># Spatially limited prediction</span>
 <span class="va">mod_limited</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Limited prediction background'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:19 | Collecting input parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:19 | Adding engine-specific parameters.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:19 | Engine setup.</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:20 | Starting fitting...</span></span>
-<span class="co">#&gt; [12:16:20] WARNING: amalgamation/../src/learner.cc:627: </span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:38 | Collecting input parameters.</span></span>
+<span class="co">#&gt; Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =</span>
+<span class="co">#&gt; endCapStyle, : st_buffer does not correctly buffer longitude/latitude data</span>
+<span class="co">#&gt; dist is assumed to be in decimal degrees (arc_degrees).</span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:38 | Adding engine-specific parameters.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:38 | Engine setup.</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:39 | Starting fitting...</span></span>
+<span class="co">#&gt; [09:28:39] WARNING: amalgamation/../src/learner.cc:627: </span>
 <span class="co">#&gt; Parameters: { "colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample" } might not be used.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span>
 <span class="co">#&gt;   then being mistakenly passed down to XGBoost core, or some parameter actually being used</span>
 <span class="co">#&gt;   but getting flagged wrongly here. Please open an issue if you find any such cases.</span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-01 12:16:37 | Starting prediction...</span></span>
-<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-01 12:16:37 | Completed after 18.55 secs</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-05-29 09:28:57 | Starting prediction...</span></span>
+<span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-05-29 09:28:57 | Completed after 19 secs</span></span>
 
 <span class="co"># Compare the output</span>
 <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_limited</span><span class="op">)</span></code></pre></div>

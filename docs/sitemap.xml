@@ -13,25 +13,10 @@
     <loc>https://iiasa.github.io/ibis.iSDM/articles/03_biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_model_assessment.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/04_engine_comparison.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_engine_comparison.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/05_package_comparison.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/06_package_comparison.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/comparison.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/contributing.html</loc>
@@ -149,9 +134,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/create_pseudoabsence.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/distribution.html</loc>
@@ -347,12 +329,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/wrap_stanmodel.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/writeGeoTiff.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/writeNetCDF.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/write_output.html</loc>

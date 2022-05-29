@@ -16,6 +16,61 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Showcase joint estimation and addition of other datasource
+# Integration in ibis.iSDM
 
-<tbd>
+As 'integration' in the context of SDMs we generally refer to as any approach where additional observational data or parameters find their way into model estimation. The purpose behind the integration can be:
+
+* to correct for certain biases (spatial, environmental) in the primary dataset, taking advantage of different types of biodiversity sampling schemes.
+* nudge data-driven algorithms towards estimates that are informed by domain knowledge (through offsets or priors)
+* to provide a more wholesome estimate of the distribution of a species distribution by relying on multiple sources of evidence
+
+There are thus multiple types of integration ranging from the consideration of (external) predictions and expert information in the model estimation and we recommend to have a look at [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an overview.
+
+The Package comparison page and the examples below provide some insight into what is currently possible with regards to data integration in ibis.iSDM.
+Of course it is equally possible to 'integrate' not only observational data and parameters, but link entire models with ibis.iSDM outputs. More on this in the scenario help page.
+
+
+```{r Load the package, message=FALSE, eval=TRUE}
+# Load the package
+library(ibis.iSDM)
+library(raster)
+library(assertthat)
+```
+
+Load some test data for this exercise.
+
+```{r Load data}
+# Background layer
+background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
+# Load virtual species points
+virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points") 
+virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'range',quiet = TRUE)
+
+# Predictors
+predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
+# Make use only of a few of them
+predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
+                                            "CLC3_112_mean_50km","CLC3_132_mean_50km",
+                                            "CLC3_211_mean_50km","CLC3_312_mean_50km",
+                                            "elevation_mean_50km"))
+
+```
+
+
+## Predictors
+
+Functions to add predictors
+
+The inclusion of previous predictions is also the default option for engines that do not support 
+
+## Priors
+
+Priors across datasets
+
+## Offsets
+
+## Ensembles
+
+## Joint likelihood
+
+A approach in Stan is under way

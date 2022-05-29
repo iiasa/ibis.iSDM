@@ -155,11 +155,19 @@ methods::setMethod(
 
     # Get overall Predictor data
     if(is.Waiver(x$get_predictor_names())) {
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
       # Dummy covariate of background raster
-      dummy <- as.data.frame( raster::raster(extent(x$background),nrow=100,ncol=100,val=1), xy = TRUE );names(dummy)[3] <- 'dummy'
-      model[['predictors']] <- dummy
+      # Check if the engine has a template and if so use that one
+      if(is.Raster(x$engine$get_data("template"))){
+        dummy <- emptyraster(x$engine$get_data("template"));names(dummy) <- "dummy"
+        dummy[] <- 1 ; dummy <- raster::mask(dummy, x$background)
+      } else {
+        dummy <- raster::raster(extent(x$background),nrow=100,ncol=100,val=1);names(dummy) <- 'dummy'
+      }
+      model[['predictors']] <- as.data.frame(dummy, xy = TRUE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
+      model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
     } else {
       # Convert Predictors to data.frame
       model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
@@ -300,7 +308,7 @@ methods::setMethod(
 
       # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
       env <- get_rastervalue(coords = guess_sf(model$biodiversity[[id]]$observations),
-                             env = x$predictors$get_data(df = FALSE),
+                             env = model$predictors_object$get_data(df = FALSE),
                              rm.na = FALSE)
 
       # Remove missing values as several engines can't deal with those easily
@@ -374,11 +382,11 @@ methods::setMethod(
           if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
 
           obs <- aggregate_observations2grid(df = model[['biodiversity']][[id]]$observations,
-                                              template = bg,field_occurrence = "observed")
+                                              template = bg, field_occurrence = "observed")
 
           envs <- get_rastervalue(
             coords = obs[,c('x','y')],
-            env = x$predictors$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
+            env = model$predictors_object$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
             rm.na = TRUE
           )
         } else {

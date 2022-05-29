@@ -53,10 +53,9 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -96,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-05-01</h4>
+            <h4 data-toc-skip class="date">2022-05-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/02_integrate_data.Rmd" class="external-link"><code>vignettes/02_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>02_integrate_data.Rmd</code></div>
@@ -105,9 +104,84 @@ Jung</h4>
     
     
 <div class="section level2">
-<h2 id="showcase-joint-estimation-and-addition-of-other-datasource">Showcase joint estimation and addition of other datasource<a class="anchor" aria-label="anchor" href="#showcase-joint-estimation-and-addition-of-other-datasource"></a>
+<h2 id="integration-in-ibis-isdm">Integration in ibis.iSDM<a class="anchor" aria-label="anchor" href="#integration-in-ibis-isdm"></a>
 </h2>
-<p><tbd></tbd></p>
+<p>As ‘integration’ in the context of SDMs we generally refer to as any
+approach where additional observational data or parameters find their
+way into model estimation. The purpose behind the integration can
+be:</p>
+<ul>
+<li>to correct for certain biases (spatial, environmental) in the
+primary dataset, taking advantage of different types of biodiversity
+sampling schemes.</li>
+<li>nudge data-driven algorithms towards estimates that are informed by
+domain knowledge (through offsets or priors)</li>
+<li>to provide a more wholesome estimate of the distribution of a
+species distribution by relying on multiple sources of evidence</li>
+</ul>
+<p>There are thus multiple types of integration ranging from the
+consideration of (external) predictions and expert information in the
+model estimation and we recommend to have a look at <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher
+et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac
+et al. (2020)</a> for an overview.</p>
+<p>The Package comparison page and the examples below provide some
+insight into what is currently possible with regards to data integration
+in ibis.iSDM. Of course it is equally possible to ‘integrate’ not only
+observational data and parameters, but link entire models with ibis.iSDM
+outputs. More on this in the scenario help page.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Load the package</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iiasa/ibis.iSDM" class="external-link">ibis.iSDM</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">assertthat</span><span class="op">)</span></code></pre></div>
+<p>Load some test data for this exercise.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Background layer</span>
+<span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># Load virtual species points</span>
+<span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/input_data.gpkg"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"points"</span><span class="op">)</span> 
+<span class="co">#&gt; Reading layer `points' from data source </span>
+<span class="co">#&gt;   `C:\Users\Martin\AppData\Local\R\win-library\4.2\ibis.iSDM\extdata\input_data.gpkg' </span>
+<span class="co">#&gt;   using driver `GPKG'</span>
+<span class="co">#&gt; Simple feature collection with 208 features and 5 fields</span>
+<span class="co">#&gt; Geometry type: POINT</span>
+<span class="co">#&gt; Dimension:     XY</span>
+<span class="co">#&gt; Bounding box:  xmin: 4.109162 ymin: 48.7885 xmax: 24.47594 ymax: 64.69323</span>
+<span class="co">#&gt; Geodetic CRS:  WGS 84</span>
+<span class="va">virtual_range</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/input_data.gpkg'</span>, package<span class="op">=</span><span class="st">'ibis.iSDM'</span><span class="op">)</span>, <span class="st">'range'</span>,quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># Predictors</span>
+<span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/stack.html" class="external-link">stack</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># Make use only of a few of them</span>
+<span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,
+                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,
+                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,
+                                            <span class="st">"elevation_mean_50km"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="section level3">
+<h3 id="predictors">Predictors<a class="anchor" aria-label="anchor" href="#predictors"></a>
+</h3>
+<p>Functions to add predictors</p>
+<p>The inclusion of previous predictions is also the default option for
+engines that do not support</p>
+</div>
+<div class="section level3">
+<h3 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a>
+</h3>
+<p>Priors across datasets</p>
+</div>
+<div class="section level3">
+<h3 id="offsets">Offsets<a class="anchor" aria-label="anchor" href="#offsets"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="ensembles">Ensembles<a class="anchor" aria-label="anchor" href="#ensembles"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="joint-likelihood">Joint likelihood<a class="anchor" aria-label="anchor" href="#joint-likelihood"></a>
+</h3>
+<p>A approach in Stan is under way</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

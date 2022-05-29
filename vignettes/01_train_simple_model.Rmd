@@ -45,7 +45,6 @@ There are ways to convert for instance presence-only
 # Load the package
 library(ibis.iSDM)
 library(raster)
-library(rgdal)
 library(assertthat)
 ```
 
@@ -169,9 +168,9 @@ See the reference and help pages for further options including calculating a `th
 o <- partial(fit, x.var = "CLC3_312_mean_50km", plot = T)
 # The object o contains the data underlying this figure
 
-# Similarly the patial effect can be visualized spatially as 'spartial'
+# Similarly the partial effect can be visualized spatially as 'spartial'
 s <- spartial(fit, x.var = "CLC3_312_mean_50km")
-plot(s[[1]], col = rainbow(10), main = "Partial effect of forest on the relative reporting rate")
+plot(s[[1]], col = rainbow(10), main = "Marginal effect of forest on the relative reporting rate")
 
 ```
 
@@ -194,6 +193,25 @@ fit$plot_threshold()
 ```
 
 **For more options for any of the functions please see the help pages!**
+
+### Validation of model predictions
+
+The ibis.iSDM package provides a convenience function to obtain validation results for the fitted models. Validation can be done both for continious and discrete predictions, where the latter requires a computed threshold fits (see above).
+
+Here we will 'validate' the fitted model using the data used for model fitting. For any scientific paper we recommend to implement a cross-validation scheme to obtain withheld data or use independently gathered data.
+
+```{r}
+# By Default validation statistics are continuous and evaluate the predicted estimates against the number of records per grid cell.
+fit$rm_threshold()
+validate(fit, method = "cont")
+
+# If the prediction is first thresholded, we can calculate discrete validation estimates
+fit <- threshold(fit, method = "percentile", value = 0.5)
+validate(fit, method = "disc")
+
+```
+
+Validating integrated SDMs, particular those fitted with multiple likelihoods is challenging and something that has not yet fully been explored in the scientific literature. For example strong priors can substantially improve by modifying the response functions in the model, but are challenging to validate if the validation data has similar biases as the training data.
 
 ### Constrain a model in prediction space
 

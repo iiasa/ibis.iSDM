@@ -137,9 +137,23 @@ methods::setMethod(
     for(dataset in unique(df$name)){
       # Subset to name
       df2 <- subset.data.frame(df, name == dataset)
+
+      # Check that absence points are present, otherwise add some.
+      # Reason is that some engine such as inlabru don't save their integration points
+      if( length(unique(df2$observed))==1 && method == "discrete"){
+        if(getOption('ibis.setupmessages')) myLog('[Validation]','yellow','No absence data found for threshold. Generating random points.')
+        o <- sf::st_as_sf( raster::sampleRandom(threshold, size = nrow(df2)*2, sp = TRUE) )
+        o <- o[o[[1]]==0,]
+        abs <- list(); abs[[point_column]] <- o[[1]]
+        abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
+        abs[["pred"]] <- raster::extract(prediction, o); abs[["pred_tr"]] <- o[[1]]
+        df2 <- rbind(df2, as.data.frame(abs))
+      }
       # Validate the threshold
-      out <- .validatethreshold(df2 = df2, point_column = point_column, mod = mod,
+      out <- try({.validatethreshold(df2 = df2, point_column = point_column, mod = mod,
                                 name = dataset, method = method, id = as.character(mod$id))
+      })
+      if(inherits(out, "try-error")) return(NULL)
       results <- rbind.data.frame(results, out)
     }
     # Return result

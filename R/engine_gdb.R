@@ -330,35 +330,38 @@ engine_gdb <- function(x,
           }
         }
 
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
-        # 5 fold Cross validation to prevent overfitting
-        if(getOption("ibis.runparallel")){
-          grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
-          cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+        if(settings$get('varsel') == "reg"){
 
-          # Start cluster
-          # cl <- parallel::makeCluster( getOption('ibis.nthread') )
-          try({cvm <- mboost::cvrisk(fit_gdb,
-                                     folds = cvf, grid = grs,
-                                     papply = parallel::mclapply,
-                                     mc.cores = getOption("ibis.nthread"))
-          }, silent = TRUE)
-          # parallel::stopCluster(cl)
-          rm(cvf, grs)
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
+          # 5 fold Cross validation to prevent overfitting
+          if(getOption("ibis.runparallel")){
+            grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
+            cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
 
-        } else {
-          grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
-          cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
-          try({cvm <- mboost::cvrisk(fit_gdb,
-                                     folds = cvf, grid = grs,
-                                     papply = pbapply::pblapply )
-          }, silent = TRUE)
-          rm(cvf, grs)
-        }
-        # Check whether crossvalidation has run through successfully
-        if(exists('cvm') && mstop(cvm) > 0){
-          # Set the model to the optimal mstop to limit overfitting
-          fit_gdb[mstop(cvm)]
+            # Start cluster
+            # cl <- parallel::makeCluster( getOption('ibis.nthread') )
+            try({cvm <- mboost::cvrisk(fit_gdb,
+                                       folds = cvf, grid = grs,
+                                       papply = parallel::mclapply,
+                                       mc.cores = getOption("ibis.nthread"))
+            }, silent = TRUE)
+            # parallel::stopCluster(cl)
+            rm(cvf, grs)
+
+          } else {
+            grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
+            cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+            try({cvm <- mboost::cvrisk(fit_gdb,
+                                       folds = cvf, grid = grs,
+                                       papply = pbapply::pblapply )
+            }, silent = TRUE)
+            rm(cvf, grs)
+          }
+          # Check whether crossvalidation has run through successfully
+          if(exists('cvm') && mstop(cvm) > 0){
+            # Set the model to the optimal mstop to limit overfitting
+            fit_gdb[mstop(cvm)]
+          } else {cvm <- new_waiver()}
         } else {
           cvm <- new_waiver()
         }

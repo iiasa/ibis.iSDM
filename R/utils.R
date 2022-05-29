@@ -645,34 +645,39 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
   }
 }
 
-#' Specify settings for pseudo-absence sampling from a background
+#' Specify settings for absence point sampling over the model background
 #'
 #' @description
-#' This function defines the settings for pseudo-absence background sampling. For many
-#' engines background points are necessary to model poisson (or binomial) distributed data.
+#' This function defines the settings for pseudo-absence sampling of the background. For many
+#' engines such points are necessary to model poisson (or binomial) distributed data. Specifically
+#' we call absence points for binomial (bernoulli really) distributed responses \code{'pseudo-absence'} and
+#' absence data for Poisson responses \code{'background'} points. For more details read Renner et al. (2015).
+#'
+#' The function \code{'add_pseudoabsence'} allows to add absence points to any [`sf`] object.
 #' @details
 #' Mandatory and possible parameters are:
 #'
-#' * \code{background} Specifies the extent over which background points are to be sampled.
-#' * \code{nrpoints} The number of background points to be used.
-#' * \code{method} The specific method on how pseudo-absence points should be generated. Available options
-#' are \code{'random'} (Default), \code{'buffer'} to generate only within a buffer of existing points, or \code{'mcp'} to only generate within the
-#' for a minimum convex polygon of provided points so that absence points are only sampled outside of it.
+#' * \code{background} Specifies the extent over which absence points are to be sampled.
+#' * \code{nrpoints} The number of points to be generated.
+#' * \code{method} The specific method on how absence points should be generated. Available options
+#' are \code{'random'} (Default), \code{'buffer'} to generate only within a buffered distance of existing points, or \code{'mcp'} to only generate them
+#' within or outside a minimum convex polygon of the presence points. The parameter \code{mcp_inside} supports inside vs outside generation.
 #' * \code{buffer_distance} The numeric value indicating the distance from presence points where absence points are to be created.
 #' * \code{min_ratio} The minimum ratio of absence points relative presence points. Ensures a minimum number of
-#' absence points.
-#' * \code{bias} An optional bias layer over which points should preferentially be sampled.
+#' absence points. For instance setting this value to \code{1} generates an equal amount of absence points relative to presence points.
+#' * \code{bias} An optional bias layer over which points should preferentially be sampled. Points are preferentially generated in
+#' areas with larger bias.
 #' @param background A [`RasterLayer`] or [`sf`] object over which background points can be sampled. Default is
-#' \code{NULL} is the default and the background is then added when the sampling is first called.
+#' \code{NULL} (Default) and the background is then added when the sampling is first called.
 #' @param nrpoints A [`numeric`] given the number of background points to be created (Default: \code{10 000}).
-#' @param method [`character`] denoting how the sampling should be done. For details for options (Default: \code{"random"}).
+#' @param method [`character`] denoting how the sampling should be done. See details for options (Default: \code{"random"}).
 #' @param buffer_distance [`numeric`] A distance from the observations in which pseudo-absence points are not to be generated.
-#' The units in \code{m}.
-#' @param mcp_inside A [`logical`] value of whether absence points should be sampled inside (Default) or outside the
-#' minimum convex polygon when this is chosen (parameter \code{method = "mcp"}).
-#' @param min_ratio A [`numeric`] with the minimum Ratio of background points relative to presence points.
+#' Note that units follow the units of the projection (e.g. \code{m} or \code{°}).
+#' @param mcp_inside A [`logical`] value of whether absence points should be sampled outside (Default) or inside the
+#' minimum convex polygon provided this method is chosen (parameter \code{method = "mcp"}).
+#' @param min_ratio A [`numeric`] with the minimum ratio of background points relative to presence points.
 #' Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).
-#' @param bias A [`RasterLayer`] with the same extent and projection and background. Background points will
+#' @param bias A [`RasterLayer`] with the same extent and projection and background. Absence points will
 #' be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).
 #' @param ... Any other settings to be added to the pseudoabs settings.
 #' @examples
@@ -680,6 +685,8 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
 #' # It is also possible to match the number of presence-absence points directly.
 #' pseudoabs_settings(nrpoints = 0, min_ratio = 1)
 #' }
+#' @references
+#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
 #' @name pseudoabs_settings
 #' @aliases pseudoabs_settings
 #' @keywords train
@@ -689,7 +696,7 @@ NULL
 methods::setGeneric("pseudoabs_settings",
                     signature = methods::signature("background"),
                     function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
-                             method = "random", buffer_distance = 10000, mcp_inside = TRUE,
+                             method = "random", buffer_distance = 10000, mcp_inside = FALSE,
                              bias = NULL, ...) standardGeneric("pseudoabs_settings"))
 
 #' @name pseudoabs_settings
@@ -699,7 +706,7 @@ methods::setMethod(
   "pseudoabs_settings",
   methods::signature(background = "ANY"),
   function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
-           method = "random", buffer_distance = 10000, mcp_inside = TRUE,
+           method = "random", buffer_distance = 10000, mcp_inside = FALSE,
            bias = NULL, ...){
     # Check inputs
     assertthat::assert_that(
@@ -718,6 +725,7 @@ methods::setMethod(
     # Set all options
     settings$set('nrpoints', nrpoints)
     settings$set('min_ratio', min_ratio)
+    settings$set('mcp_inside', mcp_inside)
     settings$set('method', method)
     settings$set('buffer_distance', buffer_distance)
     settings$set('bias', bias)
@@ -854,29 +862,34 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     }
   } else if(method == "buffer"){
     assertthat::assert_that(is.numeric(buffer_distance),msg = "Buffer distance parameter not numeric!")
-    bg2 <- bg1; bg2[bg2 == 0] <- NA
-    # Calculate distance to all cells that are NA
-    dis <- raster::distance(bg2)
-    # Set values lower than XX to NA
-    dis[dis <= buffer_distance] <- NA
-    dis <- raster::mask(dis, background)
-    dis[dis > 0] <- 0
+    # Get units of projection and print for
+    un <- sf:::crs_parameters(sf::st_crs(df))$ud_unit
+    if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance ,units::deparse_unit(un),' buffer'))
+    # Calculate buffer
+    buf <- sf::st_buffer(x = df, dist = buffer_distance)
+    if("fasterize" %in% installed.packages()[,1]){
+      buf <- fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)
+    } else {
+      buf <- raster::rasterize(buf, emptyraster(template), field = 1)
+    }
+    bg2 <- raster::mask(template, buf, inverse = TRUE, updatevalue = 0)
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(dis[]==0)]
+      prob_bias <- bias[which(bg2[]==1)]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(dis[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
+      abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
       # raster::sampleStratified(bg1, nrpoints)[,1]
-      abs <- sample(which(dis[]==0), size = nrpoints, replace = TRUE)
+      abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE)
     }
-    rm(dis)
+    rm(bg2, buf)
   } else if(method == "mcp"){
     # Idea is to draw a MCP polygon around all points and sample background points only outside of it.
     pol <- sf::st_as_sf( sf::st_convex_hull(sf::st_union(df)) )
     # Now mask out this area from the background
-    inside <- settings$get("mcp_inside"); assertthat::assert_that(is.logical(inside), "MCP inside / outside parameter has to be set.")
+    inside <- settings$get("mcp_inside")
+    assertthat::assert_that(is.logical(inside), msg = "MCP inside / outside parameter has to be set.")
     bg2 <- raster::mask(bg1, mask = pol, inverse = !inside)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
@@ -884,7 +897,6 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
       abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      # raster::sampleStratified(bg1, nrpoints)[,1]
       abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE)
     }
     rm(bg2)

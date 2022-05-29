@@ -610,12 +610,14 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' * \code{'pca'} This option runs a principal component decomposition of all predictors (via [`prcomp()`]).
 #' It returns new predictors resembling all components in order of the most important ones. Can be useful to
 #' reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
+#' The parameter \code{'pca.var'} can be modified to specify the minimum variance to be covered by the axes.
 #' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
 #' Identified outliers are by default set to \code{NA}.
 #' @param env A [`Raster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},
 #' \code{'scale'}, \code{'norm'}, \code{'pca'}, \code{'revjack'}). See Details.
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
+#' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).
 #' @returns Returns a adjusted [`Raster`] object of identical resolution.
 #' @examples
 #' \dontrun{
@@ -624,12 +626,13 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' }
 #' @keywords utils
 #' @export
-predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
+predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, ...){
    assertthat::assert_that(
      inherits(env,'Raster') || inherits(env, 'stars'),
      is.character(option),
      base::length(option) == 1,   # TODO: incorporate possibility of doing multiple options at once and in the order they are supplied?
-     is.numeric(windsor_props) & length(windsor_props)==2
+     is.numeric(windsor_props) & length(windsor_props)==2,
+     is.numeric(pca.var)
    )
   # Match option
   option <- match.arg(option, c('none','pca', 'scale', 'norm','windsor', 'revjack'), several.ok = FALSE)
@@ -724,11 +727,16 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), ...){
       pca$center <- covMat$mean
       pca$n.obs <- raster::ncell(env)
 
-      # FIXME: Allow parallel processing for rather large files and check how many nodes are available
+      # Check how many components are requested:
+      if(pca.var<1){
+        sums <- loadings( summary(pca) )[]
+        props <- cumsum(colSums(sums^2) / nrow(sums)) # Cumulative explained variance
+        nComp <- length( which(props <= pca.var) )
+      }
       # Predict principle components
       out <- raster::predict(env, pca,na.rm = TRUE, index = 1:nComp)
-
       names(out) <- paste0("PC", 1:nComp)
+
       return(out)
     } else {
       # TODO:

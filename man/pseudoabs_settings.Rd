@@ -2,54 +2,64 @@
 % Please edit documentation in R/utils.R
 \name{pseudoabs_settings}
 \alias{pseudoabs_settings}
-\title{Specify settings for pseudo-absence sampling from a background}
+\title{Specify settings for absence point sampling over the model background}
 \usage{
 \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, ANY}(background, nrpoints, min_ratio, method, buffer_distance, mcp_inside, bias)
 }
 \arguments{
 \item{background}{A \code{\link{RasterLayer}} or \code{\link{sf}} object over which background points can be sampled. Default is
-\code{NULL} is the default and the background is then added when the sampling is first called.}
+\code{NULL} (Default) and the background is then added when the sampling is first called.}
 
 \item{nrpoints}{A \code{\link{numeric}} given the number of background points to be created (Default: \code{10 000}).}
 
-\item{min_ratio}{A \code{\link{numeric}} with the minimum Ratio of background points relative to presence points.
+\item{min_ratio}{A \code{\link{numeric}} with the minimum ratio of background points relative to presence points.
 Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).}
 
-\item{method}{\code{\link{character}} denoting how the sampling should be done. For details for options (Default: \code{"random"}).}
+\item{method}{\code{\link{character}} denoting how the sampling should be done. See details for options (Default: \code{"random"}).}
 
 \item{buffer_distance}{\code{\link{numeric}} A distance from the observations in which pseudo-absence points are not to be generated.
-The units in \code{m}.}
+Note that units follow the units of the projection (e.g. \code{m} or \code{°}).}
 
-\item{mcp_inside}{A \code{\link{logical}} value of whether absence points should be sampled inside (Default) or outside the
-minimum convex polygon when this is chosen (parameter \code{method = "mcp"}).}
+\item{mcp_inside}{A \code{\link{logical}} value of whether absence points should be sampled outside (Default) or inside the
+minimum convex polygon provided this method is chosen (parameter \code{method = "mcp"}).}
 
-\item{bias}{A \code{\link{RasterLayer}} with the same extent and projection and background. Background points will
+\item{bias}{A \code{\link{RasterLayer}} with the same extent and projection and background. Absence points will
 be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
 }
 \description{
-This function defines the settings for pseudo-absence background sampling. For many
-engines background points are necessary to model poisson (or binomial) distributed data.
+This function defines the settings for pseudo-absence sampling of the background. For many
+engines such points are necessary to model poisson (or binomial) distributed data. Specifically
+we call absence points for binomial (bernoulli really) distributed responses \code{'pseudo-absence'} and
+absence data for Poisson responses \code{'background'} points. For more details read Renner et al. (2015).
+
+The function \code{'add_pseudoabsence'} allows to add absence points to any \code{\link{sf}} object.
 }
 \details{
 Mandatory and possible parameters are:
 \itemize{
-\item \code{background} Specifies the extent over which background points are to be sampled.
-\item \code{nrpoints} The number of background points to be used.
-\item \code{method} The specific method on how pseudo-absence points should be generated. Available options
-are \code{'random'} (Default), \code{'buffer'} to generate only within a buffer of existing points, or \code{'mcp'} to only generate within the
-for a minimum convex polygon of provided points so that absence points are only sampled outside of it.
+\item \code{background} Specifies the extent over which absence points are to be sampled.
+\item \code{nrpoints} The number of points to be generated.
+\item \code{method} The specific method on how absence points should be generated. Available options
+are \code{'random'} (Default), \code{'buffer'} to generate only within a buffered distance of existing points, or \code{'mcp'} to only generate them
+within or outside a minimum convex polygon of the presence points. The parameter \code{mcp_inside} supports inside vs outside generation.
 \item \code{buffer_distance} The numeric value indicating the distance from presence points where absence points are to be created.
 \item \code{min_ratio} The minimum ratio of absence points relative presence points. Ensures a minimum number of
-absence points.
-\item \code{bias} An optional bias layer over which points should preferentially be sampled.
+absence points. For instance setting this value to \code{1} generates an equal amount of absence points relative to presence points.
+\item \code{bias} An optional bias layer over which points should preferentially be sampled. Points are preferentially generated in
+areas with larger bias.
 }
 }
 \examples{
 \dontrun{
 # It is also possible to match the number of presence-absence points directly.
 pseudoabs_settings(nrpoints = 0, min_ratio = 1)
+}
+}
+\references{
+\itemize{
+\item Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
 }
 }
 \keyword{train}

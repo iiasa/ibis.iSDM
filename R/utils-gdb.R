@@ -32,6 +32,42 @@ predict_gdbclass <- function(fit, nd, template){
   return(prediction)
 }
 
+#' Sanitize mboost summary output
+#'
+#' @description
+#' Extracts the coefficients and selection frequencies from a [`mboost`] model.
+#' @param obj A fitted [`mboost`] object.
+#' @noRd
+#' @keywords internal
+clean_mboost_summary <- function(obj){
+  assertthat::assert_that(
+    inherits(obj, "mboost")
+  )
+
+  # Get Variable importance
+  vi <- mboost::varimp( obj )
+  vi <- sort( vi[which(vi>0)],decreasing = TRUE )
+
+  # Get coefficients
+  co <- mboost:::extract(obj, "coefficient")
+  co <- co[names(vi)]
+  assertthat::assert_that(all(names(vi) == names(co)))
+  # Calculate coefficient. If smooth, calculate mean of the differential between knots
+  co <- sapply(co, function(x) {
+    if(length(x)>2){
+      mean(diff(x))
+    } else x[2]
+  })
+
+  # Construct tibble
+  out <- tibble::tibble(
+    variable = names(vi),
+    varimp = vi,
+    coef = co
+  )
+  return(out)
+}
+
 #' Check training predictor complexity
 #'
 #' @description
@@ -69,7 +105,7 @@ rm_insufficient_covs <- function(model, tr = 5){
 
   # Get the factor variables in it as well
   if(length(vars_fac)>0){
-    vars_uniques <- apply(model$predictors[,vars_fac], 2, function(x) length(unique(x,na.rm = TRUE)) )
+    vars_uniques <- apply(model$predictors[vars_fac], 2, function(x) length(unique(x,na.rm = TRUE)) )
     # Get all factor variables with at least 2 levels
     sufficient_fac <- which(vars_uniques >= 2)
     if(length(sufficient_fac)>0){

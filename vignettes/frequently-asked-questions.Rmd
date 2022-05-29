@@ -1,4 +1,7 @@
 ---
+title: "Frequently Asked Questions (FAQ)"
+author: "Martin Jung"
+date: "`r Sys.Date()`"
 output:
   rmarkdown::github_document:
     html_preview: no

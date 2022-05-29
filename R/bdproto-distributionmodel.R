@@ -200,7 +200,7 @@ DistributionModel <- bdproto(
   summary = function(self, x = 'fit_best'){
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
-      mboost:::summary.mboost(self$get_data(x))
+      clean_mboost_summary( self$get_data(x) )
     } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
       tidy_inla_summary(self$get_data(x))
     } else if(inherits(self, 'BART-Model')){

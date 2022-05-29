@@ -1,7 +1,12 @@
 ---
-output:
-  rmarkdown::github_document:
-    html_preview: no
+title: "Contributing"
+author: "Martin Jung"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Contributing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 # Contributing to development of the  _ibis.iSDM_ R-package

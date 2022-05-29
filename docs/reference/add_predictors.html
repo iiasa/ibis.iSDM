@@ -28,10 +28,9 @@ objects."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/l
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -102,7 +101,7 @@ objects.</p>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
 <dt>env</dt>
-<dd><p>A <code>RasterStack</code>, <code>RasterLayer</code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">RasterStack</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">RasterLayer</a></code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
 <dt>names</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> of character names describing the environmental stack in case they should be renamed.</p></dd>
 <dt>transform</dt>
@@ -136,7 +135,7 @@ Both transformations and derivates can also be combined.
 Available options for transformation are:</p><ul><li><p><code>'none'</code> - Leaves the provided predictors in the original scale.</p></li>
 <li><p><code>'pca'</code> - Converts the predictors to principal components. Note that this
 results in a renaming of the variables to principal component axes!</p></li>
-<li><p><code>'scale'</code> - Transforms all predictors by applying <a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a> on them.</p></li>
+<li><p><code>'scale'</code> - Transforms all predictors by applying <a href="https://rdrr.io/pkg/raster/man/scale.html" class="external-link">scale</a> on them.</p></li>
 <li><p><code>'norm'</code> - Normalizes all predictors by transforming them to a scale from 0 to 1.</p></li>
 <li><p><code>'windsor'</code> - Applies a windsorization to the target predictors. By default
 this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove

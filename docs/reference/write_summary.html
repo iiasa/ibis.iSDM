@@ -32,10 +32,9 @@ are under consideration."><meta property="og:image" content="https://iiasa.githu
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -88,6 +87,9 @@ are under consideration.</p>
 <dt>fname</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> depicting an output filename.
 The suffix determines the file type of the output (Options: <code>'rds'</code>, <code>'rdata'</code>).</p></dd>
+<dt>partial</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value determining whether partial variable contributions should be calculated and added
+to the model summary. <strong>Note that this can be rather slow</strong> (Default: <code>FALSE</code>).</p></dd>
 <dt>...</dt>
 <dd><p>Any other arguments passed on the individual functions.</p></dd>
 </dl></div>

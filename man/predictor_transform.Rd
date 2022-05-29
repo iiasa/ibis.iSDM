@@ -4,7 +4,13 @@
 \alias{predictor_transform}
 \title{Spatial adjustment of environmental predictors and raster stacks}
 \usage{
-predictor_transform(env, option, windsor_props = c(0.05, 0.95), ...)
+predictor_transform(
+  env,
+  option,
+  windsor_props = c(0.05, 0.95),
+  pca.var = 0.8,
+  ...
+)
 }
 \arguments{
 \item{env}{A \code{\link{Raster}} object.}
@@ -13,6 +19,8 @@ predictor_transform(env, option, windsor_props = c(0.05, 0.95), ...)
 \code{'scale'}, \code{'norm'}, \code{'pca'}, \code{'revjack'}). See Details.}
 
 \item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).}
+
+\item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).}
 }
 \value{
 Returns a adjusted \code{\link{Raster}} object of identical resolution.
@@ -32,6 +40,7 @@ A sensible default to for most model fitting.
 \item \code{'pca'} This option runs a principal component decomposition of all predictors (via \code{\link[=prcomp]{prcomp()}}).
 It returns new predictors resembling all components in order of the most important ones. Can be useful to
 reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
+The parameter \code{'pca.var'} can be modified to specify the minimum variance to be covered by the axes.
 \item \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
 Identified outliers are by default set to \code{NA}.
 }

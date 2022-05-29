@@ -753,7 +753,7 @@ engine_inlabru <- function(x,
           pred_bru$cv <- pred_bru$mean / pred_bru$sd
           # Get only the predicted variables of interest
           prediction <- raster::stack(
-            pred_bru[,c("mean","sd","q0.05", "median", "q0.95", "cv")]
+            pred_bru[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
           )
           names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
 
@@ -841,12 +841,14 @@ engine_inlabru <- function(x,
                 object = mod,
                 data = newdata,
                 formula = form,
+                probs = c(0.05,0.5,0.95),
                 n.samples = n.samples
               )
             )
+            out$cv <- out$mean / out$sd
             # Get only the predicted variables of interest
             out <- raster::stack(
-              out[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+              out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
             )
 
             # Return result
@@ -900,16 +902,18 @@ engine_inlabru <- function(x,
             pred_cov <- inlabru:::predict.bru(mod,
                                 df_partial,
                                 as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
-                                n.samples = 100
+                                n.samples = 100,
+                                probs = c(0.05,0.5,0.95)
                                 )
+            pred_cov$cv <- pred_cov$mean / pred_cov$sd
 
             # Do plot and return result
             if(plot){
               o <- pred_cov
               names(o)[grep(x.var, names(o))] <- "partial_effect"
               pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
-                                                     ymin = q0.025,
-                                                     ymax = q0.975) ) +
+                                                     ymin = q0.05,
+                                                     ymax = q0.95) ) +
                 ggplot2::theme_classic() +
                 ggplot2::geom_ribbon(fill = "grey90") +
                 ggplot2::geom_line() +
@@ -917,8 +921,7 @@ engine_inlabru <- function(x,
               print(pm)
             }
             return(
-              pred_cov[,c(x.var,'mean','sd','q0.025','median','q0.975',
-                          'smin','smax','cv','var')] %>% as.data.frame()
+              pred_cov[,c(x.var,'mean','sd','q0.05','q0.5','q0.95','cv')] %>% as.data.frame()
               )
           },
           # (S)partial effect
@@ -962,8 +965,10 @@ engine_inlabru <- function(x,
             pred_cov <- inlabru:::predict.bru(mod,
                                               df_partial,
                                               as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
-                                              n.samples = 100
+                                              n.samples = 100,
+                                              probs = c(0.05,0.5,0.95)
             )
+            pred_cov$cv <- pred_cov$mean / pred_cov$sd
 
             # Do plot and return result
             if(plot){
@@ -976,7 +981,7 @@ engine_inlabru <- function(x,
             }
             return(
               raster::stack(
-                pred_cov[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+                pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
               )
             )
           },
