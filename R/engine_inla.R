@@ -94,6 +94,9 @@ engine_inla <- function(x,
 
     # --- #
     # Create the mesh
+    # Parameters could be also derived from rule of thumbs
+    # such as the differential of the range of coordinates divided by 1/10 of the range.
+
     # A good mesh needs to have triangles as regular as possible in size and shape: equilateral
     suppressWarnings(
       mesh <- INLA::inla.mesh.2d(

@@ -965,6 +965,8 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
   if(inherits(df, 'sf')) df <- df %>% sf::st_drop_geometry()
   # Get cell ids
   ce <- raster::cellFromXY(pres, df[,c("x","y")])
+  # Remove any NA if present
+  if(anyNA(ce)) ce <- subset(ce, complete.cases(ce))
   # Get new presence data
   obs <- cbind(
     data.frame(observed = raster::values(pres)[ce],
