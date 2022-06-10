@@ -19,7 +19,6 @@ NULL
 #' }
 #' @return None.
 #' @keywords partial
-#' @references
 #' @name effects
 NULL
 

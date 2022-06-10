@@ -20,6 +20,10 @@ This function simply allows to add priors to an existing \link{distribution} obj
 The supplied priors must be a \code{\linkS4class{PriorList}} object created through
 calling \link{priors}.
 }
+\note{
+Alternatively priors to environmental predictors can also directly added as parameter
+via \link{add_predictors}
+}
 \examples{
 \dontrun{
  x <- distribution(background)

@@ -33,7 +33,7 @@
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
 #' @param min.value A [`numeric`] stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}).
-#' @param normalize [`logical`] on whether the output of the resemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
 #' coefficient of variation across all models.
 
@@ -119,6 +119,9 @@ methods::setMethod(
       for(lyr in layer){
         ras <- stack(sapply(ll_ras, function(x) x[[lyr]]))
 
+        # If normalize before running an ensemble if parameter set
+        if(normalize) ras <- predictor_transform(ras, option = "norm")
+
         # Apply threshold if set. Set to 0 thus reducing the value of the ensembled layer.
         if(!is.null(min.value)) ras[ras < min.value] <- 0
 
@@ -177,8 +180,6 @@ methods::setMethod(
       }
 
       assertthat::assert_that(is.Raster(out))
-      # Normalize the output if parameter set
-      if(normalize) out <- predictor_transform(out, option = "norm")
 
       return(out)
   } else if(is.Raster(mods[[1]])) {
@@ -187,6 +188,8 @@ methods::setMethod(
       all( sapply(mods, function(x) layer %in% names(x) ) ),
       msg = paste("Layer", text_red(layer), "not found in supplied objects!")
     )
+    # TODO:
+    if(length(layer)>1) stop("Not implemented yet")
     # Get prediction stacks from all mods
     ll_ras <- sapply(mods, function(x) x[[layer]])
     # Ensure that the layers have the same resolution, otherwise align
@@ -195,6 +198,8 @@ methods::setMethod(
       ll_ras[[2]] <- raster::resample(ll_ras[[2]], ll_ras[[1]])
     }
     ras <- raster::stack(ll_ras)
+    # If normalize before running an ensemble if parameter set
+    if(normalize) ras <- predictor_transform(ras, option = "norm")
 
     # Apply threshold if set. Set to 0 thus reducing the value of the ensembled layer.
     if(!is.null(min.value)) ras[ras < min.value] <- 0
@@ -202,6 +207,7 @@ methods::setMethod(
     # Now ensemble per layer entry
     out <- raster::stack()
     for(lyr in layer){
+
       # Now create the ensemble depending on the option
       if(method == 'mean'){
         new <- mean( ras, na.rm = TRUE)
@@ -242,8 +248,6 @@ methods::setMethod(
     }
 
     assertthat::assert_that(is.Raster(out))
-    # Normalize the output if parameter set
-    if(normalize) out <- predictor_transform(out, option = "norm")
     return(out)
   } else {
     # Scenario objects
@@ -264,6 +268,14 @@ methods::setMethod(
     ) |> as.data.frame()
     # Get dimensions
     lmat_dim <- stars:::st_dimensions(mods[[1]]$get_scenarios())
+
+    # If normalize before running an ensemble if parameter set
+    if(normalize) {
+      lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                   1, function(x) {
+                     (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE) )
+                   })
+    }
 
     # Now create the ensemble depending on the option
     if(method == 'mean'){
@@ -290,8 +302,6 @@ methods::setMethod(
     out <- out |> stars:::st_set_dimensions(names = c("x", "y", "band"))
     # Also calculate coefficient of variation across predictions
     assertthat::assert_that(inherits(out, "stars"))
-    # Normalize the output if parameter set
-    if(normalize) out <- predictor_transform(out, option = "norm")
     return(out)
     }
   }

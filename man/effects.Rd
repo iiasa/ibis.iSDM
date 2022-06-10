@@ -30,7 +30,4 @@ this function will attempt to generate \link{partial} dependency plots instead.
 mod$effects()
 }
 }
-\references{
-
-}
 \keyword{partial}
