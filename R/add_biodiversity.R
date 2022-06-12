@@ -29,6 +29,7 @@ NULL
 #' @seealso
 #' See other functions for adding biodiversity data, e.g. [add_biodiversity]
 #' @family add_biodiversity
+#' @keywords biodiversity
 #' @examples
 #' \dontrun{
 #'  background <- raster::raster("inst/extdata/europegrid_50km.tif")
@@ -79,6 +80,10 @@ methods::setMethod(
       suppressMessages( poipo <- point_in_polygon(poly = x$background, points = poipo) )
     }
 
+    # Check whether there are any absence point, if so stop with error
+    assertthat::assert_that(!any(poipo[[field_occurrence]] == 0),
+                            msg = "Absence points found. Potentially this data needs to be added as presence-absence instead?")
+
     # Convert formula if necessary
     formula <- to_formula(formula)
 
@@ -126,6 +131,7 @@ methods::setMethod(
 #' does not support generalised linear regressions (e.g. [engine_bart])
 #'
 #' @family add_biodiversity
+#' @keywords biodiversity
 #' @section Notes:
 #' @references Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' @references Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
@@ -237,6 +243,7 @@ methods::setMethod(
 #'
 #' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
+#' @keywords biodiversity
 #'
 #' @examples
 #' \dontrun{
@@ -384,6 +391,7 @@ methods::setMethod(
 #'
 #' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
+#' @keywords biodiversity
 #'
 #' @examples
 #' \dontrun{

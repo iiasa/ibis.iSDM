@@ -1,3 +1,107 @@
+#' Built formula for GDB model
+#'
+#' @description
+#' This function built a formula for a `engine_gdb()` model.
+#' @param model A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @param x A [`BiodiversityDistribution`] object.
+#' @param id The id for the species formula.
+#' @param settings A [`Settings`] object.
+#' @author Martin Jung
+#' @note Function is not meant to be run outside the train() call.
+#' @keywords internal
+#' @noRd
+built_formula_gdb <- function(model, id, x, settings){
+  assertthat::assert_that(
+    is.list(model),
+    length(model) > 0,
+    assertthat::has_name(model, "predictors"),
+    inherits(x, "BiodiversityDistribution"),
+    inherits(settings, 'Settings'),
+    is.character(id) || is.Id(id),
+    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+  )
+  # Get object for id
+  obj <- model$biodiversity[[id]]
+  # Extract basic stats from the model object
+  types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
+  fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
+  bionames = sapply(model$biodiversity, function(x) x$name)
+  ids <- names(model$biodiversity)
+  priors <- model$priors
+
+  # Default equation found
+  if(obj$equation == '<Default>' || is.Waiver(obj$equation)){
+    # Construct formula with all variables
+    form <- "observed ~ "
+
+    # Use only variables that have sufficient covariate range for training
+    # Finally check that a minimum of unique numbers are present in the predictor range and if not, remove them
+    covariates <- rm_insufficient_covs(model = obj, tr = 5)
+
+    if(!is.Waiver(priors)){
+      # Loop through all provided GDB priors
+      supplied_priors <- as.vector(priors$varnames())
+      for(v in supplied_priors){
+        if(v %notin% covariates) next() # In case the variable has been removed
+        # First add linear effects
+        form <- paste(form, paste0('bmono(', v,
+                                   ', constraint = \'', priors$get(v) ,'\'',
+                                   ')', collapse = ' + ' ), ' + ' )
+      }
+      # Add linear and smooth effects for all missing ones
+      miss <- covariates[covariates %notin% supplied_priors]
+      if(length(miss)>0){
+        # Add linear predictors
+        form <- paste(form, paste0('bols(',miss,')', collapse = ' + '))
+        if(is.Waiver( settings$get('only_linear'))){
+          # And smooth effects for all numeric data
+          miss <- miss[ miss %in% obj$predictors_types$predictors[which(obj$predictors_types$type=="numeric")] ]
+          form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
+                                            collapse = ' + '
+          ))
+        }
+      }
+    } else {
+      # Add linear predictors
+      form <- paste(form, paste0('bols(',covariates,')',collapse = ' + '))
+      if(settings$get('only_linear') == FALSE){
+        # And smooth effects
+        form <- paste(form, ' + ', paste0('bbs(',
+                                          covariates[which(covariates %in% obj$predictors_types$predictors[obj$predictors_types$type=="numeric"] )],', knots = 4)',
+                                          collapse = ' + '
+        ))
+      }
+      # Add also random effect if there are any factors? THIS currently crashes when there are too few factors
+      # if(any(model$predictors_types$type=="factor")){
+      #   form <- paste(form, ' + ' ,paste0('brandom(',
+      #                              model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'factor')],
+      #                              ')',collapse = " + "))
+      # }
+    }
+    # Convert to formula
+    form <- to_formula(form)
+    # Add offset if specified
+    if(!is.Waiver(model$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+    if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+      # Update with spatial term
+      form <- update.formula(form, paste0(" ~ . + ",
+                                          x$engine$get_equation_latent_spatial())
+      )
+    }
+  } else{
+    # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    form <- to_formula(obj$equation)
+    # Update formula to weights if forgotten
+    if(obj$family=='poisson') form <- update.formula(form, 'observed ~ .')
+    assertthat::assert_that(
+      all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
+    )
+  }
+
+  return(form)
+}
+
 #' Use a fitted model for creating a new class prediction in raster form
 #'
 #' @param fit A fitted [`mboost`] model with [`binomial`] distribution

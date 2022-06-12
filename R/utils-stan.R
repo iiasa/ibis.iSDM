@@ -52,7 +52,7 @@ ilink <- function(x, link = "log"){
 #'
 #' @param install A [`logical`] factor to indicate whether [cmdstanr] should be directly installed (Default: \code{TRUE}).
 #' @param ask [`logical`] whether the cmdstanr package is to be installed (Default: \code{FALSE}).
-#' @keywords stan, utils
+#' @keywords stan, utils, internal
 stan_check_cmd <- function(install = TRUE, ask = FALSE){
   assertthat::assert_that(
     is.logical(install), is.logical(ask)

@@ -124,20 +124,33 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>obj</dt>
 <dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code>Raster</code> object.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>A specifc method for thresholding. See details for available options.</p></dd>
+
+
 <dt>value</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value for thresholding if method is fixed (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>poi</dt>
 <dd><p>A <code>sf</code> object containing observational data used for model training.</p></dd>
+
+
 <dt>truncate</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> indication whether truncated thresholds should be used (Default: <code>FALSE</code>). See Muscatello et al. (2021).</p></dd>
+
+
 <dt>return_threshold</dt>
 <dd><p>Should threshold value be returned instead (Default: <code>FALSE</code>)</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A RasterLayer if used with a Raster object as input.
+    
+
+<p>A RasterLayer if used with a Raster object as input.
 Otherwise the threshold is added to the respective <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p>
     </div>
     <div class="section level2">
@@ -186,7 +199,7 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

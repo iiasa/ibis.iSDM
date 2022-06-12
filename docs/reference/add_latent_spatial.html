@@ -86,15 +86,24 @@ to a model can account for spatial dependence in response or covariates.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> describing what kind of spatial effect is to be added to the model. See details.</p></dd>
+
+
 <dt>priors</dt>
 <dd><p>A <code>Prior-List</code> object supplied to the latent effect. Relevant only for <code><a href="engine_inla.html">engine_inla</a></code> and <code>NULL</code> equates the use of default priors.</p></dd>
+
+
 <dt>separate_spde</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> parameter indicating whether, in the case of SPDE effects, separate effects
 for each likelihood are being fitted. Default (<code>FALSE</code>) uses a copy of the first added likelihood.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other parameters passed down</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -133,7 +142,7 @@ to the nearest other grid cell with values. Applied across all datasets in the <
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

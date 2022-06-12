@@ -111,27 +111,48 @@ allowing full integrated inference.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>optional_mesh</dt>
 <dd><p>A directly supplied <code>INLA</code> mesh (Default: <code>NULL</code>)</p></dd>
+
+
 <dt>max.edge</dt>
 <dd><p>The largest allowed triangle edge length, must be in the same scale units as the coordinates.</p></dd>
+
+
 <dt>offset</dt>
 <dd><p>interpreted as a numeric factor relative to the approximate data diameter.</p></dd>
+
+
 <dt>cutoff</dt>
 <dd><p>The minimum allowed distance between points on the mesh.</p></dd>
+
+
 <dt>proj_stepsize</dt>
 <dd><p>The stepsize in coordinate units between cells of the projection grid (Default: <code>NULL</code>)</p></dd>
+
+
 <dt>strategy</dt>
 <dd><p>Which aproximation to use for the joint posterior. Options are <code>"auto"</code>, <code>"adaptative"</code>,
 <code>"gaussian"</code>, <code>"simplified.laplace"</code> &amp; <code>"laplace"</code>.</p></dd>
+
+
 <dt>int.strategy</dt>
 <dd><p>Integration strategy. Options are <code>"auto"</code>,<code>"grid"</code>, <code>"eb"</code> &amp; <code>"ccd"</code>.</p></dd>
+
+
 <dt>area</dt>
 <dd><p>Accepts a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the type of area calculation to be done on the mesh (Default: <code>'gpc2'</code>).</p></dd>
+
+
 <dt>timeout</dt>
 <dd><p>Specify a timeout for INLA models in sec. Afterwards it passed.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other variables</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -165,7 +186,7 @@ Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

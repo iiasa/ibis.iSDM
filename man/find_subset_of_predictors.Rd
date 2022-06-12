@@ -43,4 +43,5 @@ in Zhu et al. (2021) and Zhu et al. (2020).
 \item A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
 }
 }
-\keyword{utils}
+\keyword{internal}
+\keyword{utils,}

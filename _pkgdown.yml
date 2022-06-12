@@ -5,7 +5,7 @@ development:
 
 template:
   bootstrap: 5
-  bootswatch: yeti
+  bootswatch: zephyr
   bslib:
     pkgdown-nav-height: 80px
   opengraph:
@@ -58,6 +58,8 @@ reference:
     contents:
         - distribution
         - has_keyword("priors")
+        - has_concept("priors")
+        - matches("Prior")
         - priors
         - pseudoabs_settings
         - train
@@ -86,6 +88,8 @@ reference:
   - title: Model summary and validation
     desc: Key functions to summarize, validate or extract information from trained models.
     contents:
+      - plot
+      - print
       - summary
       - validate
       - similarity
@@ -100,8 +104,8 @@ reference:
     contents:
       - is_comparable_raster
       - explode_factorized_raster
+      - find_correlated_predictors
       - posterior_predict_stanfit
-      - run_stan
       - intersecting_extents
       - point_in_polygon
       - bbox2wkt
@@ -109,10 +113,14 @@ reference:
       - alignRasters
       - emptyraster
       - get_ngbvalue
+      - get_rastervalue
       - predictor_transform
       - predictor_derivate
       - clean_rasterfile
-      - write_output
+      - run_stan
+      - wrap_stanmodel
+      - ibis_options
+      - starts_with("write_")
       - has_keyword("utils")
 
   - title: Class definitions and methods
@@ -137,4 +145,10 @@ reference:
   - title: Miscellaneous functions
     desc: Other functions only relevant for development
     contents:
-      - has_keyword("misc")
+      - as.Id
+      - is.Id
+      - myLog
+      - new_id
+      - new_waiver
+      - ibis_future
+

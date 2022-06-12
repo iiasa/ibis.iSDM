@@ -1,3 +1,240 @@
+#' Built formula for INLA model
+#'
+#' @description
+#' This function built a formula for a `engine_inla()` model.
+#' @param model A [`list()`] object containing the prepared model data.
+#' @param id The id for the species formula.
+#' @param x A [`BiodiversityDistribution`] object.
+#' @param settings A [`Settings`] object.
+#' @author Martin Jung
+#' @note Function is not meant to be run outside the train() call.
+#' @keywords internal
+#' @noRd
+built_formula_inla <- function(model, id, x, settings){
+  assertthat::assert_that(
+    is.list(model),
+    length(model) > 0,
+    assertthat::has_name(model, "biodiversity"),
+    assertthat::has_name(model, "predictors_names"),
+    inherits(x, "BiodiversityDistribution"),
+    inherits(settings, 'Settings'),
+    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+  )
+  # Get object from model
+  obj <- model$biodiversity[[id]]
+
+  # Extract basic stats from the model object
+  types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
+  fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
+  bionames = sapply(model$biodiversity, function(x) x$name)
+  ids <- names(model$biodiversity)
+  priors <- model$priors
+
+  if(x$get_engine() == "<INLA>"){
+    # Default equation found
+    if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
+      # Check potential for rw1 fits
+      if(settings$get('only_linear') == FALSE){
+        # Get Numeric variables
+        vf <- obj$predictors_types$predictors[obj$predictors_types$type=="numeric"]
+        var_rw1 <- vf
+        # Set remaining variables to linear, especially if they are factors
+        var_lin <- c()
+        if(any(obj$predictors_types$type=="factor")){
+          vf <- obj$predictors_types$predictors[obj$predictors_types$type=="factor"]
+          var_lin <- c(var_lin, names(explode_factor(obj$predictors[[vf]], vf)) )
+        } else {
+          var_lin <- obj[['predictors_names']][which( obj[['predictors_names']] %notin% var_rw1 )]
+        }
+      } else {
+        var_rw1 <- c()
+        # Set remaining variables to linear
+        var_lin <- obj$predictors_types$predictors[obj$predictors_types$type=="numeric"]
+        # If any factors are present, split them and add too
+        if(any( obj$predictors_types$type=="factor")){
+          vf <- obj$predictors_types$predictors[ obj$predictors_types$type=="factor"]
+          var_lin <- c(var_lin, names(explode_factor( obj$predictors[[vf]], vf)) )
+        }
+      }
+
+      # Construct formula with all variables
+      form <- paste('observed', '~ 0 + ', # MJ 11/6/22 Removed manual Intersecpt
+                    ifelse(length(types) > 1 && obj$use_intercept, # Check whether a single intercept model is to be constructed
+                           paste(' + ',paste0('Intercept_',
+                                              make.names(tolower( bionames )), '_', types
+                                              # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                              # sapply( model$biodiversity, function(x) x$type ),
+                           )#collapse = ' + ')
+                           ),
+                           ""
+                    )
+      )
+      # Check whether priors have been specified and if yes, use those
+      if(!is.Waiver(priors)){
+        # Loop through all provided INLA priors
+        supplied_priors <- priors$ids()
+
+        for(v in supplied_priors){
+          # Prior variable name
+          vn <- as.character( priors$varnames()[v] )
+          if(vn == 'spde') next()
+          # Prior variable type
+          vt <- as.character( priors$types()[v] )
+          # FIXME: This currently only work with normal, e.g. the type of the prior is ignored
+          if(vt == 'clinear'){
+            # Constrained linear effect
+            form <- paste(form, '+', paste0('f(', vn, ', model = \'clinear\', ',
+                                            'range = c(', priors$get(vn)[1],',', priors$get(vn)[2],') )',
+                                            collapse = ' + ' ) )
+          } else if(vt == 'normal') {
+            # Add linear effects
+            form <- paste(form, '+', paste0('f(', vn, ', model = \'linear\', ',
+                                            'mean.linear = ', priors$get(vn)[1],', ',
+                                            'prec.linear = ', priors$get(vn)[2],')',
+                                            collapse = ' + ' ) )
+          } else if(vt == 'pc.prec' || vt == 'loggamma'){
+            # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+            # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+            form <- paste0(form, '+', paste0('f(INLA::inla.group(', vn, '), model = \'rw1\', ',
+                                             # 'scale.model = TRUE,',
+                                             'hyper = list(theta = list(prior = ',vt,', param = c(',priors$get(vn)[1],',',priors$get(vn)[2],')) )
+                                                 )',collapse = ' + ')
+            )
+          }
+        }
+        # Add linear for those missed ones
+        miss <- c(var_lin, var_rw1)[c(var_lin, var_rw1) %notin% priors$varnames()]
+        if(length(miss)>0){
+          if(any(miss %in% var_lin)){
+            # Add linear predictors without priors
+            form <- paste(form, ' + ',
+                          paste('f(', miss[which(miss %in% var_lin)],', model = \'linear\')', collapse = ' + ')
+            )
+          }
+          if(length(var_rw1)>0 & (any(miss %in% var_rw1))){
+            # Random walk where feasible and not already included
+            form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', miss[which(miss %in% var_rw1)],'),',
+                                                                           # 'scale.model = TRUE, ',
+                                                                           # Add RW effects with pc priors. PC priors is on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+                                                                           # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                           'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                           'model = \'rw1\')', collapse = ' + ' ) )
+          }
+        }
+      } else {
+        # No priors specified, simply add variables with default
+        # Linear for those with few observations
+        if(length(var_lin)>0){
+          form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+        }
+        # Random walk where feasible
+        if(length(var_rw1)>0){
+          form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', var_rw1,'),',
+                                                                         # 'scale.model = TRUE,',
+                                                                         # Add RW effects with pc priors. PC priors is on the KL distance
+                                                                         # (difference between probability distributions), P(sigma >2)=0.05
+                                                                         # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                                                                         'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                                                                         'model = \'rw1\')', collapse = ' + ' ) )
+        }
+      }
+      form <- to_formula(form) # Convert to formula
+      # Add offset if specified
+      if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+      if( length( grep('Spatial', x$get_latent() ) ) > 0 ){
+        if(attr(x$get_latent(), "method") != "poly"){
+          # Update with spatial term
+          form <- update.formula(form, paste0(" ~ . + ",
+                                              x$engine$get_equation_latent_spatial(
+                                                method = attr(x$get_latent(),'method'),
+                                                vars = which(ids == id),
+                                                separate_spde = attr(x$get_latent(),'separate_spde')
+                                              )
+            )
+          )
+        }
+      }
+    } else{
+      # If custom supplied formula, check that variable names match supplied predictors
+      # FIXME: check that this works
+      form <- to_formula( obj$equation )
+    }
+  # -------------------- INLABRU ----------------
+  } else if(x$get_engine() == "<INLABRU>"){
+
+    # Default equation found (e.g. no separate specification of effects)
+    if(obj$equation=='<Default>'){
+      # Check whether to use dataset specific intercepts
+      if(length(types)>1 && obj$use_intercept){
+        ii <- paste0('+ Intercept_',
+                     make.names(tolower(bionames)),'_',types
+                     # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                     # sapply( model$biodiversity, function(x) x$type ),
+        )
+      } else ii <- ""
+      # Go through each variable and build formula for likelihood
+      form <- to_formula(paste("observed ~ ", "Intercept +",
+                               paste(obj$predictors_names, collapse = " + "),
+                               # Check whether a single dataset is provided, otherwise add other intercepts
+                               ii,
+                               # # If multiple datasets, remove intercept
+                               ifelse(length(ids) > 1, "-1", ""),
+                               collapse = " ")
+      )
+
+      # Add offset if specified
+      # TODO: Not quite sure if this formulation works for inlabru predictor expressions
+      if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+      if( length( grep('Spatial', x$get_latent() ) ) > 0 ){
+        if(attr(x$get_latent(), "method") != "poly"){
+          # Update with spatial term
+          form <- update.formula(form, paste0(" ~ . + ",
+                                              # For SPDE components, simply add spatial.field
+                                              paste0("spatial.field", which(ids == id))
+            )
+          )
+        }
+      }
+    } else {
+      # If custom likelihood formula is provided, check that variable names match supplied predictors
+      form <- obj$equation
+      assertthat::assert_that(
+        all( all.vars(form) %in% c('observed', obj$predictors_names) )
+      )
+
+      # Convert to formula to be safe
+      form <- to_formula( obj$equation )
+      # Add generic Intercept if not set in formula
+      if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
+      # If length of ids is larger than 1, add dataset specific intercept too
+      # Check whether to use dataset specific intercepts
+      if(length(types)>1 && obj$use_intercept){
+        form <- update.formula(form,
+                               paste0(". ~ . + ",
+                                      paste0('Intercept_',
+                                             make.names(tolower( bionames )), '_', types)
+                                             # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                             # sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                                      )
+        )
+      }
+
+      if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        if(attr(x$get_latent(), "method") != "poly"){
+          # Update with spatial term
+          form <- update.formula(form, paste0(" ~ . + ",
+                                              # For SPDE components, simply add spatial.field
+                                              paste0("spatial.field",which(ids == id))
+            )
+          )
+        }
+      }
+
+    }
+  }
+  return(form)
+}
+
 #' Calculate area of each voronoi polygon in a INLA mesh
 #'
 #' @param mesh [`inla.mesh`] mesh object
@@ -1019,7 +1256,8 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
 tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(
     inherits(m,'inla'),
-    is.character(what),length(what)==1,
+    is.character(what),
+    length(what)==1,
     what %in% c('fixed','fitted','random','spde2')
   )
 

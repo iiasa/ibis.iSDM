@@ -992,6 +992,7 @@ fill_rasters <- function(post, background){
 #' @param weights Set by default to the inverse of the number of coordinates.
 #' @returns A data.frame with transformed coordinates.
 #' @keywords utils
+#' @keywords internal
 #' @references Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
 polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
   assertthat::assert_that(

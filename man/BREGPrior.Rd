@@ -30,7 +30,8 @@ Poisson and binomial (bernoulli) distributed errors.
 Two types of priors can be provided on a variable:
 \itemize{
 \item \code{"coefficient"} Allows to specify Gaussian priors on the coefficient mean for the model.
-To do do provide an estimate to hyper.
+To do so provide an estimate to hyper. Note that variables with such a prior can still be regularized
+out.
 \item \code{"inclusion.probability"} A \code{\link{vector}} giving the prior probability of inclusion for the
 specified variable. This can be useful when prior information on preference is known but not the
 strength of it.

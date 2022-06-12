@@ -86,3 +86,4 @@ Other add_biodiversity:
 \code{\link{add_biodiversity_polpa}()}
 }
 \concept{add_biodiversity}
+\keyword{biodiversity}

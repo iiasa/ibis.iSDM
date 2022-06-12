@@ -86,23 +86,31 @@ probability for a subset of the coefficients.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>iter</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of MCMC iterations to run (Default: <code>10000</code>).</p></dd>
+
+
 <dt>type</dt>
 <dd><p>The mode used for creating posterior predictions. Either making <code>"link"</code> or <code>"response"</code> (Default: <code>"response"</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other none specified parameters passed on to the model.</p></dd>
+
+
 <dt>nthreads</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of CPU-threads to use for data augmentation.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This engine provides efficient Bayesian predictions through the <span class="pkg">Boom</span> R-package. However note
 that not all link and models functions are supported and certain functionalities such as offsets are generally
 not available.
-This engines allows the estimation of linear and non-linear effects via the <code>"only_linear"</code> parameter
-specified in <a href="train.html">train</a>. If set to <code>FALSE</code>, non-linearity will be approximated through a combination of
-B- and I-Splines.</p>
+This engines allows the estimation of linear and non-linear effects via the <code>"only_linear"</code> option
+specified in <a href="train.html">train</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -130,7 +138,7 @@ B- and I-Splines.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

@@ -9,7 +9,7 @@ NULL
 #' @param lhs, rhs An object and a function.
 #' @seealso [magrittr::%>%()], [tee()].
 #' @return An object.
-#' @keywords misc
+#' @keywords internal
 #' @examples
 #' # set seed for reproducibility
 #' set.seed(500)

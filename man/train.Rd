@@ -13,6 +13,7 @@ train(
   varsel = "none",
   inference_only = FALSE,
   only_linear = TRUE,
+  method_integration = "predictor",
   bias_variable = NULL,
   bias_value = NULL,
   verbose = FALSE,
@@ -27,7 +28,7 @@ train(
 \item{runname}{A \code{\link{character}} name of the trained run.}
 
 \item{rm_corPred}{Remove highly correlated predictors (Default: \code{FALSE}). This option
-removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's r = \code{>0.7}).}
+removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's \code{r >= 0.7}).}
 
 \item{varsel}{Perform a variable selection on the set of predictors either prior to building the model
 or via variable selection / regularization of the model. Available options are:
@@ -50,6 +51,23 @@ on the \link{engine} setting this option to \code{FALSE} will result in non-line
 between observations and covariates, often increasing processing time (Default: \code{TRUE}).
 How non-linearity is captured depends on the used \link{engine}.}
 
+\item{method_integration}{A \code{\link{character}} with the type of integration that should be applied if more
+than one \code{\linkS4class{BiodiversityDataset}} object is provided in \code{x}. Particular relevant for engines
+that do not support the integration of more than one dataset. Integration methods are generally sensitive
+to the order in which they have been added to the  \code{\link{BiodiversityDistribution}} object.
+Available options are:
+\link{*} \code{"predictor"} The predicted output of the first (or previously fitted) models are
+added to the predictor stack and thus are predictors for subsequent models (Default).
+\link{*} \code{"offset"} The predicted output of the first (or previously fitted) models are
+added as spatial offsets to subsequent models. Offsets are back-transformed depending
+on the model family. This option might not be supported for every \code{\link{engine}}.
+\link{*} \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
+are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
+partialied out during prediction. Here the first dataset added determines the reference level
+(see Leung et al. 2019 for a description).
+
+\strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}
+
 \item{bias_variable}{A \code{\link{vector}} with names of variables to be set to \emph{bias_value} (Default: \code{NULL}).
 This option can for instance be used to 'partial' out certain biases after predictions have been made.
 See Examples.}
@@ -64,23 +82,34 @@ A \link{DistributionModel} object.
 }
 \description{
 This function trains a \code{\link[=distribution]{distribution()}} model with the specified engine and
-furthermore has some generic parameters that apply to all engines (regardless of type).
+furthermore has some generic options that apply to all engines (regardless of type).
+See Details with regards to such options.
 
 Users are advised to check the help files for individual \link{engine}s for advice on how
 the estimation is being done.
 }
 \details{
+This function acts as a generic training function that - based on the provided \code{\linkS4class{BiodiversityDistribution}}
+object creates a new distribution model.
 The resulting object contains both a \code{\link{fit_best}} object of the estimated model and, if \code{inference_only} is \code{FALSE}
 a \link{RasterLayer} object named \code{\link{prediction}} that contains the spatial prediction of the model.
 These objects can be requested via \code{object$get_data("fit_best")}.
 
-Note that several engines do not support fully integrated likelihood models (such \link{engine_gdb} or
-\link{engine_xgboost}) for example. In this case the estimation strategy for multiple added biodiversity datasets
-(e.g. more than 1) is to fit recurrent models in sequence, where
-the \code{nth'} spatial projection is provided as input to the \code{nth'+1} dataset.
-See also Miller et al. (2019) in the references for more details on this strategy. Of course,
+Available options in this function include:
+\link{*} \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
+prior to fitting.
+\link{*} \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
+alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
+runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
+variables.
+\link{*} \code{"method_integration"} Only relevant if more than one \code{\link{BiodiversityDataset}} is supplied and when
+the engine does not support joint integration of likelihoods.
+See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 if users want more control about this aspect, another option is to fit separate models
 and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
+\link{*} \code{"bias_variable"} and \code{"bias_value"} Specifying a variable and value here performs a model-based
+control of a certain bias variable (e.g. accessibility) with the variable in question being partialed out during
+the prediction step.
 }
 \examples{
 \dontrun{
@@ -93,7 +122,7 @@ and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensembl
         # Use stan for estimation
         engine_stan(chains = 2, iter = 1000, warmup = 500)
  # Train the model
- mod <- train(x, only_linear = TRUE, varsel = 'reg')
+ mod <- train(x, only_linear = TRUE, varsel = 'none')
  mod
 }
 }
@@ -101,8 +130,9 @@ and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensembl
 \itemize{
 \item Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
 \item Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
+\item Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for countrywide α‐diversity and species distributions: illustration using >6,000 plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
 }
 }
 \seealso{
-\link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla}, \link{engine_inlabru}, \link{engine_breg}
+\link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla}, \link{engine_inlabru}, \link{engine_breg}, \link{engine_stan}
 }

@@ -1,3 +1,40 @@
+#' Built formula for BART model
+#'
+#' @description
+#' This function built a formula for a `engine_bart()` model.
+#' @param obj A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @author Martin Jung
+#' @note Function is not meant to be run outside the train() call.
+#' @keywords internal
+#' @noRd
+built_formula_bart <- function(obj){
+  assertthat::assert_that(
+    is.list(obj),
+    length(obj) > 0,
+    assertthat::has_name(obj, "observations"),
+    assertthat::has_name(obj, "equation"),
+    assertthat::has_name(obj, "predictors_names"),
+    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+  )
+
+  # Default equation found
+  if(is.Waiver(obj$equation) || obj$equation == '<Default>'){
+    # Construct formula with all variables
+    form <- paste( 'observed' ,
+                   ifelse(obj$family=='poisson', '/w', ''), '~ ',
+                   paste(obj$predictors_names, collapse = " + "))
+    # Convert to formula
+    form <- to_formula(form)
+  } else {
+    # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+    form <- to_formula(obj$equation)
+    assertthat::assert_that(
+      all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+    )
+  }
+  return(form)
+}
+
 #' Variable importance for dbarts models
 #'
 #' Variable importance measured in the proportion of total branches used for a given variable. Explicitly dropped variables are included as 0

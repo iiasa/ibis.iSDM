@@ -237,6 +237,16 @@ engine_gdb <- function(x,
           # If family is not poisson, assume factor distribution for response
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
 
+          # Add offset if existent
+          if(!is.Waiver(model$offset)){
+            ofs <- get_rastervalue(coords = model$biodiversity[[1]]$observations[,c('x','y')],
+                                   env = model$offset_object,
+                                   rm.na = FALSE)
+            # Rename to spatial offset
+            names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
+            model$biodiversity[[1]]$offset <- ofs
+          }
+
           model$biodiversity[[1]]$expect <- w
         }
 

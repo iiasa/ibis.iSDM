@@ -88,24 +88,39 @@ absence data for Poisson responses <code>'background'</code> points. For more de
     <dl><dt>background</dt>
 <dd><p>A <code>RasterLayer</code> or <code>sf</code> object over which background points can be sampled. Default is
 <code>NULL</code> (Default) and the background is then added when the sampling is first called.</p></dd>
+
+
 <dt>nrpoints</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> given the number of background points to be created (Default: <code>10 000</code>).</p></dd>
+
+
 <dt>min_ratio</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the minimum ratio of background points relative to presence points.
 Usually ignored unless the ratio exceeds the <code>nrpoints</code> parameters (Default: <code>0.25</code>).</p></dd>
+
+
 <dt>method</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting how the sampling should be done. See details for options (Default: <code>"random"</code>).</p></dd>
+
+
 <dt>buffer_distance</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A distance from the observations in which pseudo-absence points are not to be generated.
 Note that units follow the units of the projection (e.g. <code>m</code> or <code>°</code>).</p></dd>
+
+
 <dt>mcp_inside</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value of whether absence points should be sampled outside (Default) or inside the
 minimum convex polygon provided this method is chosen (parameter <code>method = "mcp"</code>).</p></dd>
+
+
 <dt>bias</dt>
 <dd><p>A <code>RasterLayer</code> with the same extent and projection and background. Absence points will
 be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Any other settings to be added to the pseudoabs settings.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -143,7 +158,7 @@ areas with larger bias.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

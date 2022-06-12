@@ -1,5 +1,5 @@
 pandoc: 2.17.1.1
-pkgdown: 2.0.3
+pkgdown: 2.0.4
 pkgdown_sha: ~
 articles:
   01_train_simple_model: 01_train_simple_model.html
@@ -9,7 +9,7 @@ articles:
   05_package_comparison: 05_package_comparison.html
   contributing: contributing.html
   frequently-asked-questions: frequently-asked-questions.html
-last_built: 2022-05-29T07:23Z
+last_built: 2022-06-12T20:23Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles

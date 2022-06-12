@@ -284,7 +284,7 @@ engine_bart <- function(x,
             if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Offsets are not supported for poisson models. Trying to modify weights.')
             w <- w + model$biodiversity[[1]]$offset[,"spatial_offset"]
             # Check and correct for issues
-            if(any(w < 0,na.rm = TRUE)) {
+            if(any(w < 0, na.rm = TRUE)) {
               w <- scales::rescale(w, to = c(1e-6, 1))
             }
             if(anyNA(w)){
@@ -387,9 +387,13 @@ engine_bart <- function(x,
           params <- self$get_data("params")
           # Make a prediction
           if(!getOption("ibis.runparallel")){
+            # Get offset if existing
+            if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
+
             pred_bart <- dbarts:::predict.bart(object = fit_bart,
                                                newdata = full[,model$biodiversity[[1]]$predictors_names],
-                                               type = params$type
+                                               type = params$type,
+                                               offset = of
             )
             # Summarize quantiles and sd from posterior
             ms <- as.data.frame(
@@ -410,19 +414,23 @@ engine_bart <- function(x,
             # Tile the problem
             splits <- cut(1:nrow(full), nrow(full) / min(nrow(full) / 4, 5000) )
 
+            # Get offset if existing
+            if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
+
             # Operating system dependent use
             ms <- foreach::foreach(s = unique(splits),
                              .inorder = TRUE,
                              .combine = rbind,
                              .errorhandling = "stop",
                              .multicombine = TRUE,
-                             .export = c("splits", "fit_bart", "full", "model", "params"),
+                             .export = c("splits", "fit_bart", "full", "model", "params", "of"),
                              .packages = c("dbarts", "matrixStats")) %do% {
                                i <- which(splits == s)
 
                                pred_bart <- dbarts:::predict.bart(object = fit_bart,
                                                                   newdata = full[i, model$biodiversity[[1]]$predictors_names],
-                                                                  type = params$type
+                                                                  type = params$type,
+                                                                  offset = of[i]
                                )
                                # Summarize quantiles and sd from posterior
                                ms <- as.data.frame(
@@ -450,6 +458,7 @@ engine_bart <- function(x,
             prediction <- raster::addLayer(prediction, prediction2)
             rm(prediction2)
           }
+          # plot(prediction$mean, col = ibis_colours$sdm_colour)
           try({rm(ms, full)},silent = TRUE)
         } else {
           # No prediction done

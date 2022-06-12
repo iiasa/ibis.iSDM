@@ -336,12 +336,19 @@ engine_xgboost <- function(x,
         }
 
         if(!is.Waiver(model$offset) ){
-          # For the offset we simply add the (log-transformed) offset to the existing
-          # Add exp at the end to backtransform
-          of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
-          # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
-          of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
-          # Add offset to full prediction and load vector
+          # Set offset to 1 (log(0)) in case nothing is found
+          if(is.null(xgboost::getinfo(df_train, "base_margin"))) {
+            of_train <- rep(1, nrow(model$biodiversity[[1]]$observations[,c("x","y")]))
+            of_pred <- rep(1, nrow(model$offset))
+          } else {
+            # For the offset we simply add the (log-transformed) offset to the existing
+            # Add exp at the end to backtransform
+            of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
+            # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
+            of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
+
+          }
+          # -- Add offset to full prediction and load vector --
 
           # Respecify offset
           # (Set NA to 1 so that log(1) == 0)
@@ -494,12 +501,17 @@ engine_xgboost <- function(x,
             print_every_n = 100,
             nrounds = nrounds, nfold = 5,
             showsd = TRUE,      # standard deviation of loss across folds
-            stratified = TRUE,  # sample is unbalanced; use stratified samplin
+            stratified = TRUE,  # sample is unbalanced; use stratified sampling
             maximize = FALSE,
             early_stopping_rounds = 10
           )
           # Set new number of rounds
           nround <- fit_cv$best_iteration
+        }
+
+        # Remove unneeded parameters
+        if(settings$get('only_linear') && params$booster == "gblinear"){
+          params[c("colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample")] <- NULL
         }
 
         # Fit the model.

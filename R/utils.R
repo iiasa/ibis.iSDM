@@ -583,7 +583,7 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
 #' @references
 #' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
 #' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
-#' @keywords utils
+#' @keywords utils, internal
 #' @returns vector of variable names to exclude
 find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", lambda = 0,
                                        weight = NULL, keep = NULL){

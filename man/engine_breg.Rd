@@ -32,9 +32,8 @@ probability for a subset of the coefficients.
 This engine provides efficient Bayesian predictions through the \pkg{Boom} R-package. However note
 that not all link and models functions are supported and certain functionalities such as offsets are generally
 not available.
-This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} parameter
-specified in \link{train}. If set to \code{FALSE}, non-linearity will be approximated through a combination of
-B- and I-Splines.
+This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} option
+specified in \link{train}.
 }
 \references{
 \itemize{

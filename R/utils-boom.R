@@ -1,3 +1,42 @@
+#' Built formula for BREG model
+#'
+#' @description
+#' This function built a formula for a `engine_breg()` model.
+#' @param obj A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @author Martin Jung
+#' @note Function is not meant to be run outside the train() call.
+#' @keywords internal
+#' @noRd
+built_formula_breg <- function(obj){
+  assertthat::assert_that(
+    is.list(obj),
+    length(obj) > 0,
+    assertthat::has_name(obj, "observations"),
+    assertthat::has_name(obj, "equation"),
+    assertthat::has_name(obj, "predictors_names"),
+    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+  )
+
+  # Default equation found
+  if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
+    # Construct formula with all variables
+    form <- paste( 'observed' , ' ~ ')
+    # Add linear predictors
+    form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
+    # Convert to formula
+    form <- to_formula(form)
+  } else{
+    # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    form <- to_formula(obj$equation)
+    assertthat::assert_that(
+      all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
+    )
+  }
+
+  return(form)
+}
+
 #' Setup a prior for `Boom` engine model
 #'
 #' @description

@@ -11,9 +11,8 @@ NULL
 #' This engine provides efficient Bayesian predictions through the \pkg{Boom} R-package. However note
 #' that not all link and models functions are supported and certain functionalities such as offsets are generally
 #' not available.
-#' This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} parameter
-#' specified in [train]. If set to \code{FALSE}, non-linearity will be approximated through a combination of
-#' B- and I-Splines.
+#' This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} option
+#' specified in [train].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param iter [`numeric`] on the number of MCMC iterations to run (Default: \code{10000}).
 #' @param nthreads [`numeric`] on the number of CPU-threads to use for data augmentation.
@@ -141,6 +140,11 @@ engine_breg <- function(x,
         # Expand predictors if specified in settings
         if(settings$get('only_linear') == FALSE){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Non-linear estimation not added to engine. Suggest to create variable derivatives externally.')
+        }
+
+        # Check if offset present and fam binomial, Raise warning
+        if(fam == "binomial" && !is.Waiver(model$offset)){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Binomial models fitted with BREG do not support offsets. Offsets were ignored!')
         }
         # -- #
 
@@ -356,7 +360,7 @@ engine_breg <- function(x,
           full$rowid <- 1:nrow(full)
           full_sub <- subset(full, complete.cases(full))
           w_full_sub <- w_full[full_sub$rowid]
-          assertthat::assert_that(nrow(full_sub) == length(w_full_sub))
+          assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
           out <- data.frame()
           # Tile the problem

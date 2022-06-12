@@ -14,5 +14,6 @@ stan_check_cmd(install = TRUE, ask = FALSE)
 \description{
 Checks whether cmdstanr is available and otherwise tries to install it
 }
+\keyword{internal}
 \keyword{stan,}
-\keyword{utils}
+\keyword{utils,}
