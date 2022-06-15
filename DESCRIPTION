@@ -30,6 +30,7 @@ Imports:
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
     rgeos (>= 0.5-5),
+    rgdal (>= 1.5-32),
     sf (>= 0.9),
     stars (>= 0.5),
     testthat (>= 3.0.0),

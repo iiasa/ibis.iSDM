@@ -1,3 +1,3 @@
 library(testthat)
-
-test_check("ibis")
+library(ibis.iSDM)
+test_check("ibis.iSDM")

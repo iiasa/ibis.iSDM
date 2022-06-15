@@ -177,6 +177,12 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
     is.numeric(varNA)
   )
   if(!assertthat::has_extension(fname,"tif")) fname <- paste0(fname,".tif")
+
+  # Check if layer is factor and deratify if so (causes error otherwise)
+  if(is.factor(file)){
+    file <- raster::deratify(file, complete = TRUE)
+  }
+
   # Save output
   writeRaster(file, fname,
               format='GTiff',

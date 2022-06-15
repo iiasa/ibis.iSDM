@@ -41,10 +41,11 @@ There are ways to convert for instance presence-only
 
 --- 
 
-```{r Load the package, message=FALSE, eval=TRUE}
+```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
 # Load the package
 library(ibis.iSDM)
 library(raster)
+library(rgdal)
 library(assertthat)
 ```
 
