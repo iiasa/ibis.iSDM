@@ -42,6 +42,9 @@ There are ways to convert for instance presence-only
 --- 
 
 ```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
+# Install for this purpose
+install.packages("inlabru")
+install.packages("xgboost")
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
