@@ -35,6 +35,7 @@ Imports:
     stars (>= 0.5),
     testthat (>= 3.0.0),
     tibble (>= 2.0.0),
+    uuid,
     posterior
 Depends:
     R(>= 4.0.0)

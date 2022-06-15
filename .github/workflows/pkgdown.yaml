@@ -26,6 +26,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
           extra-packages: pkgdown
+          extra-repositories: "https://inla.r-inla-download.org/R/testing"
           needs: website
 
       - name: Deploy package

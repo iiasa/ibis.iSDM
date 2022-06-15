@@ -44,8 +44,11 @@ There are ways to convert for instance presence-only
 ```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
 # Load the package
 library(ibis.iSDM)
+library(inlabru)
+library(xgboost)
 library(raster)
 library(rgdal)
+library(uuid)
 library(assertthat)
 ```
 
@@ -225,7 +228,6 @@ Currently the `ibis.iSDM` package supports the addition of only spatial latent e
 
 ```{r Train models with spatial constrains, fig.width = w, fig.height = h}
 # We are going to use the xgboost algorithm as engine below
-library(xgboost)
 
 # Load the predictors again
 predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
