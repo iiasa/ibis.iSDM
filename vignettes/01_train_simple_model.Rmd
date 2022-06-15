@@ -46,6 +46,7 @@ There are ways to convert for instance presence-only
 library(ibis.iSDM)
 library(raster)
 library(rgdal)
+library(uuid)
 library(assertthat)
 ```
 
