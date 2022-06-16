@@ -129,7 +129,7 @@ methods::setMethod(
         if(method == 'mean'){
           new <- mean( ras, na.rm = TRUE)
         } else if(method == 'median'){
-          new <- median( ras, na.rm = TRUE)
+          new <- raster::calc(ras, fun = median, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){

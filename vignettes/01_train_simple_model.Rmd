@@ -43,6 +43,7 @@ There are ways to convert for instance presence-only
 
 ```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
 # Install for this purpose
+install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 install.packages("inlabru")
 install.packages("xgboost")
 # Load the package
@@ -112,7 +113,7 @@ The `print` call at the end now shows some summary statistics contained in this 
 
 Of course all of these steps can also be done in "pipe" using the ` %>% ` or `|>` syntax.
 
-```{r, eval=FALSE,warning=FALSE,message=FALSE}
+```{r, eval=TRUE, warning=FALSE}
 
 mod <- distribution(background) %>% 
        add_biodiversity_poipo(virtual_species,

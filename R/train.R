@@ -251,10 +251,10 @@ methods::setMethod(
           for(id in biodiversity_ids) {
             # Get presence points
             o <- guess_sf( x$biodiversity$get_data(id) )
-            o <- subset(o, x$biodiversity$get_columns_occ()[[id]] > 0)
+            o <- o[ which( o[[x$biodiversity$get_columns_occ()[[id]]]] > 0 ), ]
             # Calculate point distance
             ras <- raster::distanceFromPoints(emptyraster( model$predictors_object$get_data() ),
-                                              sf::st_coordinates( o ))
+                                              sf::st_coordinates( o )[,1:2])
             ras <- raster::mask(ras, model$background)
             names(ras) <- paste0("nearestpoint_", which(biodiversity_ids == id))
             cc <- raster::addLayer(cc, ras)
@@ -267,7 +267,9 @@ methods::setMethod(
                                                           data.frame(predictors = names(cc),
                                                                      type = "numeric" )
                                                           )
-          model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, cc)
+          if( !all(names(cc) %in% model[['predictors_object']]$get_names()) ){
+            model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, cc)
+          }
           rm(cc, biodiversity_ids)
 
         } else {
@@ -989,6 +991,8 @@ methods::setMethod(
     }
   # End of BREG engine
   } else { stop('Specified Engine not implemented yet.') }
+
+  if(is.null(out)) return(NULL)
 
   if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 

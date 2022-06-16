@@ -237,6 +237,42 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
         }
 
+        # Check for factors and split them up
+        train_cov <- model$biodiversity[[1]]$predictors[,model$biodiversity[[1]]$predictors_names]
+        # Check if there any factors, if yes split up
+        if(any(model$biodiversity[[1]]$predictors_types$type=='factor')){
+          vf <- model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == "factor")]
+          # Get factors
+          z <- explode_factor(train_cov[[vf]], name = vf)
+          # Remove variables from train_cov and append
+          train_cov[[vf]] <- NULL
+          train_cov <- cbind(train_cov, z)
+          model$biodiversity[[1]]$predictors <- train_cov # Save new in model object
+          model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
+
+          # Also update the formula
+          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
+          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
+        }
+
+        # Prediction container
+        pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
+        if(any(model$predictors_types$type=='factor')){
+          vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
+          # Get factors
+          z <- explode_factor(pred_cov[[vf]], name = vf)
+          # Remove variables from train_cov and append
+          pred_cov[[vf]] <- NULL
+          pred_cov <- cbind(pred_cov, z)
+          pred_cov <- pred_cov[,colnames(train_cov)]
+          model$predictors <- pred_cov# Save new in model object
+          model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
+          model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
+          model$predictors_names <- colnames(pred_cov)
+          assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
+        }
+        rm(train_cov, pred_cov)
+
         # Instead of invisible return the model object
         return( model )
       },

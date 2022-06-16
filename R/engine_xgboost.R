@@ -157,6 +157,7 @@ engine_xgboost <- function(x,
                       "binomial" = "binary:logistic",
                       model$biodiversity[[1]]$family
         )
+
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "count:poisson" && model$biodiversity[[1]]$type == "poipo"){
           # Get background layer
