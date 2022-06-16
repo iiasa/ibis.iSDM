@@ -66,7 +66,7 @@ methods::setMethod(
 
     # If priors have been set, save them in distribution object
     if(!is.null(priors) & method == 'spde') {
-      assertthat::assert_that(priors$varnames() == 'spde' && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
+      assertthat::assert_that(any(priors$varnames() == 'spde') && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
                               msg = 'Priors for spatial latent effect misspeficied (required for spde | prior.range/prior.sigma)'  )
       # Add priors
       x <- x$set_priors(priors)

@@ -570,7 +570,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
     coords_sub <- coords[which(check_again),]
     try({ex_sub <- raster::extract(x = env,
                                y = coords_sub,
-                               method = "bilinear",
+                               method = "simple",
                                small = TRUE,
                                df = TRUE)},silent = FALSE)
     if(class(ex_sub) == "try-error") stop(paste("Raster extraction failed: ", ex_sub))
