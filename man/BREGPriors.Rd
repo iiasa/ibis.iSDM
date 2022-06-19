@@ -9,7 +9,7 @@ BREGPriors(variable, hyper = NULL, ip = NULL)
 \S4method{BREGPriors}{character}(variable)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors.}
 
 \item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients.}
 

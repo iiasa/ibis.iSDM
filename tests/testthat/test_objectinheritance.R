@@ -31,6 +31,10 @@ test_that('Check that objects are properly inherited', {
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
 
+  # Offsets
+  x %>% add_offset_range(virtual_range)
+  expect_s3_class(x$offset, "Waiver")
+
   # Call predictors
   add_predictors(x, predictors, transform = 'none',derivates = 'none',priors = NULL)
   expect_true(is.Waiver(x$predictors))

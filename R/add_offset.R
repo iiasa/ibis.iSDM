@@ -338,7 +338,11 @@ methods::setMethod(
 
     # Rasterize the range
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(layer, temp, field = NULL, background = NA)
+      ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL, background = NA) })
+      if(inherits(ras_range,"try-error")){
+        myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
+        ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
+      }
     } else {
       ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
     }

@@ -9,7 +9,7 @@ GDBPrior(variable, hyper = "increasing", ...)
 \S4method{GDBPrior}{character}(variable)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
 \code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.}
@@ -17,10 +17,18 @@ GDBPrior(variable, hyper = "increasing", ...)
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Function to include prior information as monotonic constrain to a gradient descent boosting model
+Monotonic constrains for gradient descent boosting models do not work in the same way as other priors
+where a specific coefficient or magnitude of importance is specified.
+Rather monotonic constraints \strong{enforce} a specific directionality of regression coefficients so that
+for instance a coefficient has to be positive.
+\strong{Important:} Specifying a monotonic constrain does not guarantee that the variable is retained in the
+model if model regularization is applied!
 }
 \details{
 TBD
+}
+\note{
+Similar priors can also be defined for the \code{\link{engine_xgboost}} via \code{\linkS4class{XGBPrior}}.
 }
 \references{
 \itemize{
@@ -28,7 +36,7 @@ TBD
 }
 }
 \seealso{
-\code{\linkS4class{Prior}}.
+\code{\linkS4class{Prior}}, \code{\linkS4class{XGBPrior}}
 
 Other prior: 
 \code{\link{BARTPriors}()},

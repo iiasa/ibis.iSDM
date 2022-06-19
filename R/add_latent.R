@@ -3,20 +3,34 @@ NULL
 
 #' Add latent spatial effect to the model equation
 #'
-#' @description Adding latent spatial error terms, spatial trends or other covariates
-#' to a model can account for spatial dependence in response or covariates.
-#' @details There are several different options which depend on the engine used. In case a
+#' @description
+#' In general we understand under latent spatial effects the occurrence of spatial dependency in the observations, which
+#' might either be caused by spatial biases, similarities in the underlying sampling processes or unmeasured latent
+#' covariates, e.g. those that have not been quantified.
+#'
+#' This package supports a range of different spatial effects, however they differ from another by their impact on
+#' the estimated prediction. Some effects simply add the spatial dependence as covariate, others make use
+#' of spatial random effects to account for spatial dependence in the predictions. By default these effects are
+#' added to each dataset as covariate or shared spatial field (e.g. SPDE). See details for an
+#' explanation of the available options.
+#'
+#' @details
+#' There are several different options some of which depend on the engine used. In case a
 #' unsupported method for an engine is chosen this is modified to the next similar method
+#'
 #' Available are:
-#' * \code{"spde"} - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
+#'
+#' [*] \code{"spde"} - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
 #' SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
-#' Examining the spatial distribution of the spatial error can reveal which covariates might be missing.
-#' For example, if elevation is positively correlated with the response variable, but is not included in the model,
-#' we could see a higher posterior mean in areas with higher elevation.
-#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]
+#' Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
+#' if elevation is positively correlated with the response variable, but is not included in the model,
+#' we could see a higher posterior mean in areas with higher elevation. Note that calculations of
+#' SPDE's can be computationally costly.
+#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]. Not yet implemented in full.
 #' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 #' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
-#' to the nearest other grid cell with values. Applied across all datasets in the [`BiodiversityDistribution-class`]) object. .Available for all Engines.
+#' to the nearest other grid cell with values. Applied across all datasets in the [`BiodiversityDistribution-class`]) object.
+#' Available for all Engines.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model. See details.

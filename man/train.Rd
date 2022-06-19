@@ -63,7 +63,7 @@ added as spatial offsets to subsequent models. Offsets are back-transformed depe
 on the model family. This option might not be supported for every \code{\link{engine}}.
 \link{*} \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
-partialied out during prediction. Here the first dataset added determines the reference level
+partialed out during prediction. Here the first dataset added determines the reference level
 (see Leung et al. 2019 for a description).
 
 \strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}

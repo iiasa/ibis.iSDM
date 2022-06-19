@@ -30,17 +30,18 @@ be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).
 }
 \description{
 This function defines the settings for pseudo-absence sampling of the background. For many
-engines such points are necessary to model poisson (or binomial) distributed data. Specifically
-we call absence points for binomial (bernoulli really) distributed responses \code{'pseudo-absence'} and
+engines such points are necessary to model Poisson (or Binomial) distributed data. Specifically
+we call absence points for Binomial (Bernoulli really) distributed responses \code{'pseudo-absence'} and
 absence data for Poisson responses \code{'background'} points. For more details read Renner et al. (2015).
 
-The function \code{'add_pseudoabsence'} allows to add absence points to any \code{\link{sf}} object.
+The function \code{'add_pseudoabsence'} allows to add absence points to any \code{\link{sf}} object. See \strong{Details} for
+additional parameter description and examples on how to 'turn' a presence-only dataset into a presence-(pseudo-)absence.
 }
 \details{
-Mandatory and possible parameters are:
+Possible parameters are:
 \itemize{
 \item \code{background} Specifies the extent over which absence points are to be sampled.
-\item \code{nrpoints} The number of points to be generated.
+\item \code{nrpoints} The number of points to be generated. Has to be larger than \code{0}.
 \item \code{method} The specific method on how absence points should be generated. Available options
 are \code{'random'} (Default), \code{'buffer'} to generate only within a buffered distance of existing points, or \code{'mcp'} to only generate them
 within or outside a minimum convex polygon of the presence points. The parameter \code{mcp_inside} supports inside vs outside generation.
@@ -53,8 +54,15 @@ areas with larger bias.
 }
 \examples{
 \dontrun{
-# It is also possible to match the number of presence-absence points directly.
-pseudoabs_settings(nrpoints = 0, min_ratio = 1)
+# This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points
+ass <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', mcp_inside = FALSE)
+
+# This setting would match the number of presence-absence points directly.
+ass <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
+
+# These settings can then be used to add pseudo-absence data to a presence-only dataset
+all_my_points <- add_pseudoabsence(df = virtual_points, field_occurrence = 'Observed',
+                                     template = background, settings = ass)
 }
 }
 \references{

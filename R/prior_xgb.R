@@ -6,14 +6,16 @@ NULL
 #' @description
 #' Function to include prior information as monotonic constrain to a
 #' extreme gradient descent boosting model [engine_xgboost].
-#' Note that monotonic priors enforce directionality in direction of certain variables.
+#' Monotonic priors enforce directionality in direction of certain variables, however
+#' specifying a monotonic constrain does not guarantee that the variable is not regularized out
+#' during model fitting.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
-#' @seealso [`Prior-class`].
+#' @seealso [`Prior-class`] and [`GDBPrior-class`].
 #' @family prior
 #' @keywords priors
 #' @aliases XGBPrior

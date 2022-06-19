@@ -127,7 +127,8 @@ test_that('Add and modify priors to existing object', {
   # Define a model
   x <- distribution(background) %>%
     add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') %>%
+    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]],
+                   transform = 'none',derivates = 'none') %>%
     engine_inla(
       max.edge = c(.5, 3),
       offset = c(0.5, 1),
@@ -142,4 +143,12 @@ test_that('Add and modify priors to existing object', {
 
   expect_s3_class( x$get_priors(), 'PriorList')
   expect_vector(x$get_prior_variables(), "CLC3_132_mean_50km" )
+
+  # Remove priors from it
+  x %>% rm_priors()
+  expect_s3_class( x$get_priors(), 'PriorList')
+  x <- x %>% rm_priors()
+  expect_s3_class(x$priors,'Waiver')
+  expect_s3_class(x$get_priors(),'Waiver')
+  expect_null(x$rm_priors())
 })

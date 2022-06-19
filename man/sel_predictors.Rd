@@ -2,8 +2,7 @@
 % Please edit documentation in R/add_predictors.R
 \name{sel_predictors}
 \alias{sel_predictors}
-\title{Select specific predictors from a distribution object
-For instance those previously selected}
+\title{Select specific predictors from a \link{distribution} object}
 \usage{
 sel_predictors(x, names)
 
@@ -12,9 +11,17 @@ sel_predictors(x, names)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack}
+\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack.}
 }
 \description{
-Select specific predictors from a distribution object
-For instance those previously selected
+This function allows - out of a \code{\link{character}} vector with the names
+of an already added \code{\linkS4class{PredictorDataset}} object - to select a particular set of predictors.
+See Examples.
+}
+\examples{
+\dontrun{
+distribution(background) \%>\%
+ add_predictors(my_covariates) \%>\%
+ sel_predictors(names = c("Forest", "Elevation"))
+}
 }

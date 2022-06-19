@@ -65,7 +65,7 @@ NULL
 #' on the model family. This option might not be supported for every [`engine`].
 #' [*] \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 #' are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
-#' partialied out during prediction. Here the first dataset added determines the reference level
+#' partialed out during prediction. Here the first dataset added determines the reference level
 #' (see Leung et al. 2019 for a description).
 #'
 #' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
@@ -107,7 +107,7 @@ NULL
 #' @export
 methods::setGeneric(
   "train",
-  signature = methods::signature("x", "runname","rm_corPred","varsel"),
+  signature = methods::signature("x"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
@@ -117,10 +117,12 @@ methods::setGeneric(
 #' @usage \S4method{train}{BiodiversityDistribution}(x)
 methods::setMethod(
   "train",
-  methods::signature(x = "BiodiversityDistribution", runname = "character"),
+  methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
+    if(missing(runname)) runname <- "Unnamed run"
+
     # Make load checks
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
@@ -272,9 +274,6 @@ methods::setMethod(
           }
           rm(cc, biodiversity_ids)
 
-        } else {
-          # Calculate the spatial model
-          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
         }
       }
     } else { model[["latent"]] <- new_waiver() }# End of latent factor loop
@@ -283,7 +282,10 @@ methods::setMethod(
     if(!is.Waiver(x$offset)){
       # Aggregate offset if necessary
       if(raster::nlayers(x$offset)>1){
+        # As log(x) + log(y) == log( x * y )
         ras_of <- sum(x$offset, na.rm = TRUE)
+        # Normalize the result
+        ras_of <- predictor_transform(ras_of, option = "norm")
         names(ras_of) <- "spatial_offset"
       } else {
         ras_of <- x$offset
@@ -528,6 +530,18 @@ methods::setMethod(
     #### INLA Engine ####
     if( inherits(x$engine,'INLA-Engine') ){
 
+      # Create the mesh if not already present
+      x$engine$create_mesh(model = model)
+      assertthat::assert_that(inherits(x$engine$get_data("mesh"), "inla.mesh"),
+                              msg = "Something went wrong during mesh creation...")
+
+      # If set specify a SPDE effect
+      if((!is.Waiver(x$latentfactors))){
+        if(attr(x$get_latent(),'method') == "spde"){
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
+        }
+      }
+
       # Process per supplied dataset
       for(id in ids) {
 
@@ -542,9 +556,7 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
       }
-
       # Run the engine setup script
-      # FIXME: Do some checks on whether an observation falls into the mesh?
       model <- x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
@@ -553,6 +565,18 @@ methods::setMethod(
       # ----------------------------------------------------------- #
       #### INLABRU Engine ####
     } else if( inherits(x$engine,'INLABRU-Engine') ){
+
+      # Create the mesh if not already present
+      x$engine$create_mesh(model = model)
+      assertthat::assert_that(inherits(x$engine$get_data("mesh"), "inla.mesh"),
+                              msg = "Something went wrong during mesh creation...")
+
+      # If set specify a SPDE effect
+      if((!is.Waiver(x$latentfactors))){
+        if(attr(x$get_latent(),'method') == "spde"){
+          x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
+        }
+      }
 
       # Process per supplied dataset
       for(id in ids) {

@@ -14,37 +14,66 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+# Define variables for vignette figures and code execution
+h <- 5.5
+w <- 5.5
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 ```
 
-# Integration in ibis.iSDM
-
-As 'integration' in the context of SDMs we generally refer to as any approach where additional observational data or parameters find their way into model estimation. The purpose behind the integration can be:
+One of the key ambitions of the `ibis.iSDM` R-package is to provide a comprehensive framework for model-based integration of different biodiversity datasets and parameters. As 'integration' in the context of SDMs we generally refer to as any approach where additional observational data or parameters find their way into model estimation. The purpose behind the integration can be:
 
 * to correct for certain biases (spatial, environmental) in the primary dataset, taking advantage of different types of biodiversity sampling schemes.
-* nudge data-driven algorithms towards estimates that are informed by domain knowledge (through offsets or priors)
-* to provide a more wholesome estimate of the distribution of a species distribution by relying on multiple sources of evidence
+* nudge data-driven algorithms towards estimates that are informed by domain knowledge (through offsets or priors) rather than letting the algorithm making naive uniformly distributed guesses.
+* to provide a more wholesome estimate of the distribution of a species distribution by relying on multiple sources of evidence. Particular when there are multiple surveys that complement each other.
 
-There are thus multiple types of integration ranging from the consideration of (external) predictions and expert information in the model estimation and we recommend to have a look at [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an overview.
+There are thus multiple types of integration and we recommend to have a look at [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an overview.
 
-The Package comparison page and the examples below provide some insight into what is currently possible with regards to data integration in ibis.iSDM.
+The [Package comparison page](05_package_comparison.html) and the examples below provide some insight into what is currently possible with regards to data integration in the ibis.iSDM R-package. Additional methods, priors and engines are planned.
 Of course it is equally possible to 'integrate' not only observational data and parameters, but link entire models with ibis.iSDM outputs. More on this in the scenario help page.
 
+```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+# Install for this vignette if not present
+# Function to check for installed packages and install them if they are not installed
+install <- function(packages){
+  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
+  if (length(new.packages)) 
+    install.packages(new.packages, dependencies = TRUE)
+  sapply(packages, require, character.only = TRUE)
+}
+if(!("INLA" %in% installed.packages()[, "Package"])){
+  install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
+}
+invisible( install(c("inlabru", "xgboost")) )
+```
 
+## Load relevant packages and testing data
 ```{r Load the package, message=FALSE, eval=TRUE}
 # Load the package
 library(ibis.iSDM)
+library(inlabru)
+library(xgboost)
 library(raster)
 library(assertthat)
 ```
 
-Load some test data for this exercise.
+Lets load some of the prepared test data for this exercise. This time we are going to make use of 
+several datasets.
 
 ```{r Load data}
 # Background layer
 background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
-virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points") 
-virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'range',quiet = TRUE)
+virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points", quiet = TRUE) 
+virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'range', quiet = TRUE)
+
+# In addition we will use the species data to generate a presence-absence dataset with pseudo-absence points.
+# Here we first specify the settings to use:
+ass <- pseudoabs_settings(background = background, nrpoints = 200,
+                          method =  "random")
+virtual_pseudoabs <- add_pseudoabsence(df = virtual_species, field_occurrence = "Observed",
+                                       settings = ass)
 
 # Predictors
 predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
@@ -56,21 +85,208 @@ predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_me
 
 ```
 
+We can define a generic model to use for any of the sections below.
 
-## Predictors
+```{r, eval = TRUE}
+# First define a generic model and engine using the available predictors
+basemodel <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      engine_inlabru() 
+```
 
-Functions to add predictors
+## Integration through predictors
 
-The inclusion of previous predictions is also the default option for engines that do not support 
+The most simple way of integrating prior observations into species distribution models is to add them as covariate. This is based on the assumption that for instance an expert-drawn range map can be useful in predicting where species exist might or might not find suitable habitat (see for instance [Domisch et al. 2016](http://doi.wiley.com/10.1111/ecog.01925)). A benefit of this approach is that predictors can be easily added to all kinds of `engines` in the ibis.ISDM package and also used for scenarios.
 
-## Priors
+```{r, eval = TRUE}
 
-Priors across datasets
+# Here we simply add the range as predictor with a distance transform
+mod1 <- basemodel %>% 
+  add_predictor_range(virtual_range, method = "distance")
 
-## Offsets
+# We can see that the range has been added to the predictors object
+# 'distance_range'
+mod1$get_predictor_names()
+plot( mod1$predictors$get_data()[["distance_range"]] )
 
-## Ensembles
+```
+Expert-ranges can currently be added as simple `binary` or `distance` transform. For the latter more options are available in the `bossMaps` R-package as described in [Merow et al. 2017](http://doi.wiley.com/10.1111/geb.12539).
 
-## Joint likelihood
+Another option that has been added is the possibility to add thresholded masks based on some elevational (or other) limits. The idea here is to generate two layers, one with areas between a lower and an upper range and one above the upper range. Regression against such thresholded layers can thus approximate the lower and upper bounds.
+For instance suppose a species is known to occur between 300 and 800m above sea level, this can be added as follows:
 
-A approach in Stan is under way
+```{r eval=TRUE}
+# Specification 
+basemodel <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      engine_inlabru() 
+
+mod1 <- basemodel %>% 
+  add_predictor_elevationpref(layer = predictors$elevation_mean_50km,
+                              lower = 300, upper = 800)
+
+# Plot the threshold for an upper
+plot( mod1$predictors$get_data()[[c("elev_low", "elev_high")]] )
+
+```
+
+---
+
+## Integration through offsets
+
+Apart from including spatial-explicit prior biodiversity knowledge as predictors in a SDM model, there is - particular for Poisson Process Models (PPM) - also a different approach, that is to include the variable as offset in the prediction. Doing so affects the tells the respective engine to change intercepts and coefficients based on an already provided coefficient.
+Offsets can be specified as addition or as nuisance to existing model, for instance either by adding an expert-delienated range as offset or by factoring out the spatial bias of their occurrence. Multiple offsets can be specified for any given PPM by simply multiplying them. A comprehensive overview can be found in [Merow et al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
+
+```{r}
+
+# Specification 
+mod1 <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+      add_offset_range(virtual_range) %>% 
+      engine_xgboost() %>% 
+  # Train
+  train(runname = "Prediction with range offset",only_linear = TRUE)
+
+plot(mod1)
+
+```
+
+There are other ways to add offsets to the model object, either directly (`add_offset()`) as an externally calculated RasterLayer for instance with the "BossMaps" R-package, to calculate as range (`add_offset_range()`) or elevation (`add_offset_elevation()`) offset, or also as biased offset (`add_offset_bias()`) in which case the offset is removed from the prediction.
+
+---
+
+## Integration with priors
+
+A different type of integration is also possible through the use of priors which are usually set either on 
+fixed or random effects. In a Bayesian sense a prior is generally understood as some form of uncertain quantity that is meant to reflect the direction and/or magnitude of model parameters and is usually known a-priori to any inference or prediction. Since the ibis.iSDM package supports a variety of engines and not all of them are Bayesian in a strict sense (such as `engine_gdb` or `engine_xgboost`), the specification of priors differs depending on the engine in question. 
+
+Generally [`Prior-class`] objects can be grouped into:
+* Probabilistic priors with estimates placed on for example the mean ($\mu$) and standard deviation ($\sigma$) or precision in the case of [`engine_inla`].
+* Monotonic constraints on the direction of a coefficient in the model. Useful to incorporate for instance prior ecological knowledge on that a certain response function has to be positive.
+* More complex priors specified on random spatial effects such as penalized complexity priors used for SPDE effects in [`add_latent_spatial()`]. 
+* Probabilistic priors on the inclusion probability of a certain variable such as to what certainty the variable should or should not be included in a regularized outcome.
+
+Prior specifications are specific to each engine and more information can be found on the individual help pages of the `priors()` function.
+
+```{r Specification of priors, eval = TRUE, fig.width = w, fig.height = h}
+
+# Set a clean base model with biodiversity data
+x <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+      engine_inlabru()
+
+# Make a first model
+mod1 <- train(x, only_linear = TRUE)
+
+# Now assume we now that the species occurs more likely in intensively farmed land. 
+# We can use this information to construct a prior for the linear coefficient.
+p <- INLAPrior(variable = "CLC3_211_mean_50km",
+               type = "normal",
+               hyper = c(2, 1000) # Precision priors, thus larger sigmas indicate higher precision
+               )
+# Single/Multiple priors need to be passed to `priors` and then added to the model object.
+pp <- priors(p)
+# The variables and values in this object can be queried as well
+pp$varnames()
+
+# Priors can then be added via 
+mod2 <- train(x %>% add_priors(pp), only_linear = TRUE)
+# Or alternatively directly as parameter via add_predictors,
+# e.g. add_predictors(env = predictors, priors = pp)
+
+# Compare the difference in effects
+p1 <- partial(mod1, pp$varnames(), plot = TRUE)
+p2 <- partial(mod2, pp$varnames(), plot = TRUE)
+
+```
+
+---
+
+## Integration with ensembles
+
+Another very straight forward way for model-based integration is to simply fit two separate models each with a different biodiversity dataset and then create an ensemble from them. This approach also works across different engines and a variety of data types (in some cases requiring normalization given the difference in units).
+
+```{r Model ensembles}
+# Create and fit two models
+mod1 <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      engine_xgboost(nrounds = 5000) %>% 
+      # Add dataset 1 
+      add_biodiversity_poipo(poipo = virtual_species, name = "Dataset1",field_occurrence = "Observed") %>% 
+      train(runname = "Test1", only_linear = TRUE)
+
+mod2 <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+      engine_xgboost(nrounds = 5000) %>% 
+      # Add dataset 2, Here we simple simulate presence-only points from a range
+      add_biodiversity_polpo(virtual_range, name = "Dataset2",field_occurrence = "Observed",
+                             simulate = TRUE,simulate_points = 300) %>% 
+      train(runname = "Test1", only_linear = TRUE)
+
+# Show outputs of each model individually and combined
+plot(mod1)
+plot(mod2)
+
+# Now create an ensemble:
+# Although not strictly necessary here sinc everything else is equal, we are going to normalize
+# both layers for the ensemble
+e <- ensemble(mod1, mod2, method = "mean", normalize = TRUE)
+
+# The ensemble contains the mean and the coefficient of variation across all objects
+plot(e)
+
+```
+
+---
+
+## Combined and joint likelihood estimation
+
+In the examples above we always added only a single biodiversity data source to a model to be trained, but what if we add multiple different ones?
+As outlined by [Isaac et al. 2020](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) joint, model-based integration of different datasources allows to borrow strengths of different datasets (quantity, quality) and can help in supposedly more accurate parameter estimations and help to control for biases. 
+
+Depending on the engine, the ibis.iSDM package currently supports either combined or joint estimation of several datasets.
+
+#### Combined integration ####
+
+By default all engines that do not support any joint estimation (see below) will make use of a combined integration, for which there are currently three different options:
+
+* "predictor": The predicted output of the first (or previously fitted) models are added to the predictor stack and thus are predictors for subsequent models (Default).
+* "offset": The predicted output of the first (or previously fitted) models are added as spatial offsets to subsequent models. Offsets are back-transformed depending on the model family.
+* "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset). 
+
+All of these can be specified as parameter in `train()`.
+
+** Note that for "predictor" and "offset" models are trained in the sequence to which datasets have been added! **
+
+```{r Combined integration}
+# Specification 
+mod1 <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+    # A presence only dataset
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+    # A Presence absence dataset
+      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") %>% 
+      engine_xgboost() %>% 
+  # Train
+  train(runname = "Combined prediction",only_linear = TRUE,
+        method_integration = "predictor")
+
+# The resulting object contains only the final prediction, e.g. that of the presence-absence model
+plot(mod1)
+
+```
+
+#### Joint likelihood estimation
+
+**To be written**
+
+See the [Engine comparison](04_engine_comparison.html) for an overview on which engines support this level of integration.
+
+```{r, warning=FALSE, message=FALSE}
+
+# Define a model
+
+```
+

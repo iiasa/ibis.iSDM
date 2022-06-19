@@ -10,14 +10,15 @@
 engine_inlabru(
   x,
   optional_mesh = NULL,
-  max.edge = c(1, 5),
-  offset = c(1, 1),
-  cutoff = 1,
+  max.edge = NULL,
+  offset = NULL,
+  cutoff = NULL,
   proj_stepsize = NULL,
   strategy = "auto",
-  int.strategy = "auto",
+  int.strategy = "eb",
   area = "gpc2",
   timeout = NULL,
+  type = "response",
   ...
 )
 }
@@ -26,22 +27,27 @@ engine_inlabru(
 
 \item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
 
-\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.}
+\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+Default is an educated guess (Default: \code{NULL}).}
 
-\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.}
+\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.
+Default is an educated guess (Default: \code{NULL}).}
 
-\item{cutoff}{The minimum allowed distance between points on the mesh.}
+\item{cutoff}{The minimum allowed distance between points on the mesh.
+Default is an educated guess (Default: \code{NULL}).}
 
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})}
 
-\item{strategy}{Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
+\item{strategy}{Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
 \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.}
 
-\item{int.strategy}{Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.}
+\item{int.strategy}{Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.}
 
 \item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).}
 
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
+
+\item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other variables}
 }
@@ -56,8 +62,22 @@ Since more recent versions \link{inlabru} also supports the addition of multiple
 allowing full integrated inference.
 }
 \details{
-If a mesh has already been pre-computed it can be supplied to \link{engine_inlabru} via the \code{optional_mesh}
-parameter.
+All \code{INLA} engines require the specification of a mesh that needs to be provided to the
+\code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
+data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+
+\link{*}  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+Lower bounds affect the density of triangles
+\link{*} \code{"offset"}: The automatic extension distance of the mesh
+If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
+i.e., a value of -0.10 will add a 10\% of the data diameter as outer extension.
+\link{*} \code{"cutoff"}: The minimum allowed distance between points,
+it means that points at a closer distance than the supplied value are replaced by a single vertex.
+it is critical when there are some points very close to each other, either for point locations or in the
+domain boundary.
+\link{*} \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
+created.
+
 Priors can be set via \link{INLAPrior}.
 }
 \references{

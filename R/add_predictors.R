@@ -120,8 +120,8 @@ methods::setMethod(
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(env),
-                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
-                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
+                            all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm') ),
+                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
@@ -308,13 +308,27 @@ methods::setMethod(
 # Add species ranges as predictor ----
 #' Add a range of a species as predictor to a distribution object
 #'
-#' As options allow specifying including the range either as binary or distance
+#' @description
+#' This function allows to add a species range which is usually drawn by experts in a separate process
+#' as spatial explicit prior. Both [`sf`] and [`Raster`]-objects are supported as input.
+#'
+#' Users are advised to look at the [`bossMaps`] R-package presented as part of Merow et al. (2017),
+#' which allows flexible calculation of non-linear distance transforms from the boundary of the range.
+#' Outputs of this package could be added directly to this function.
+#' **Note that this function adds the range as predictor and not as offset. For this purpose a separate function [`add_offset_range()`] exists.**
+#'
+#' Additional options allow to include the range either as \code{"binary"} or as \code{"distance"} transformed
+#' predictor. The difference being that the range is either directly included as presence-only predictor or
+#' alternatively with a linear distance transform from the range boundary. The parameter
+#' \code{"distance_max"} can be specified to constrain this distance transform.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`sf`] object with the range for the target feature
+#' @param layer A [`sf`] or [`Raster`] object with the range for the target feature.
 #' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
 #' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
+#' @references
+#' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
 #' @name add_predictor_range
 NULL
 
@@ -443,8 +457,18 @@ methods::setMethod(
 
 #' Remove specific predictors from a [distribution] object
 #'
+#' @description
+#' Remove a particular variable from an [distribution] object with a
+#' [`PredictorDataset-class`].
+#' See Examples.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`vector`] A Vector of character names describing the environmental stack
+#' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @examples
+#' \dontrun{
+#' distribution(background) %>%
+#'  add_predictors(my_covariates) %>%
+#'  rm_predictors(names = "Urban")
+#' }
 #' @name rm_predictors
 NULL
 
@@ -479,11 +503,21 @@ methods::setMethod(
   }
 )
 
-#' Select specific predictors from a distribution object
-#' For instance those previously selected
+#' Select specific predictors from a [distribution] object
+#'
+#' @description
+#' This function allows - out of a [`character`] vector with the names
+#' of an already added [`PredictorDataset-class`] object - to select a particular set of predictors.
+#' See Examples.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`vector`] A Vector of character names describing the environmental stack
+#' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @examples
+#' \dontrun{
+#' distribution(background) %>%
+#'  add_predictors(my_covariates) %>%
+#'  sel_predictors(names = c("Forest", "Elevation"))
+#' }
 #' @name sel_predictors
 NULL
 

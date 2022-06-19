@@ -58,13 +58,13 @@ built_formula_inla <- function(model, id, x, settings){
       }
 
       # Construct formula with all variables
-      form <- paste('observed', '~ 0 + ', # MJ 11/6/22 Removed manual Intersecpt
+      form <- paste('observed', '~ 0 ',
                     ifelse(length(types) > 1 && obj$use_intercept, # Check whether a single intercept model is to be constructed
-                           paste(' + ',paste0('Intercept_',
-                                              make.names(tolower( bionames )), '_', types
+                           paste(' + Intercept + ',paste0('Intercept_',
+                                              make.names(tolower( bionames )), '_', types,
                                               # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                               # sapply( model$biodiversity, function(x) x$type ),
-                           )#collapse = ' + ')
+                           collapse = ' + ')
                            ),
                            ""
                     )
@@ -166,19 +166,19 @@ built_formula_inla <- function(model, id, x, settings){
     if(obj$equation=='<Default>'){
       # Check whether to use dataset specific intercepts
       if(length(types)>1 && obj$use_intercept){
-        ii <- paste0('+ Intercept_',
-                     make.names(tolower(bionames)),'_',types
+        ii <- paste0('Intercept_',
+                     make.names(tolower(bionames)),'_',types,
                      # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                      # sapply( model$biodiversity, function(x) x$type ),
+                     collapse = " + "
         )
-      } else ii <- ""
+      } else {ii <- ""}
       # Go through each variable and build formula for likelihood
       form <- to_formula(paste("observed ~ ", "Intercept +",
                                paste(obj$predictors_names, collapse = " + "),
                                # Check whether a single dataset is provided, otherwise add other intercepts
-                               ii,
                                # # If multiple datasets, remove intercept
-                               ifelse(length(ids) > 1, "-1", ""),
+                               ifelse(length(ids) > 1, paste0("-1 + ", ii), ""),
                                collapse = " ")
       )
 

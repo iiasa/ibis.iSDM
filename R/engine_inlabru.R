@@ -12,20 +12,38 @@ NULL
 #' Since more recent versions [inlabru] also supports the addition of multiple likelihoods, therefore
 #' allowing full integrated inference.
 #' @details
-#' If a mesh has already been pre-computed it can be supplied to [engine_inlabru] via the \code{optional_mesh}
-#' parameter.
+#' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
+#' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
+#' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+#'
+#' [*]  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' Lower bounds affect the density of triangles
+#' [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
+#' i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
+#' [*] \code{"cutoff"}: The minimum allowed distance between points,
+#' it means that points at a closer distance than the supplied value are replaced by a single vertex.
+#' it is critical when there are some points very close to each other, either for point locations or in the
+#' domain boundary.
+#' [*] \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
+#' created.
+#'
 #' Priors can be set via [INLAPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+#' Default is an educated guess (Default: \code{NULL}).
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter.
+#' Default is an educated guess (Default: \code{NULL}).
 #' @param cutoff The minimum allowed distance between points on the mesh.
+#' Default is an educated guess (Default: \code{NULL}).
 #' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
-#' @param strategy Which aproximation to use for the joint posterior. Options are \code{"auto"}, \code{"adaptative"},
+#' @param strategy Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
 #'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
-#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} & \code{"ccd"}.
+#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
 #' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
+#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other variables
 #' @references
 #' * Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
@@ -38,14 +56,15 @@ NULL
 #' @export
 engine_inlabru <- function(x,
                         optional_mesh = NULL,
-                        max.edge = c(1,5),
-                        offset = c(1,1),
-                        cutoff = 1,
+                        max.edge = NULL,
+                        offset = NULL,
+                        cutoff = NULL,
                         proj_stepsize = NULL,
                         strategy = "auto",
-                        int.strategy = "auto",
+                        int.strategy = "eb",
                         area = "gpc2",
                         timeout = NULL,
+                        type = "response",
                         ...) {
 
   # Check whether INLA package is available
@@ -54,19 +73,18 @@ engine_inlabru <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
-  # TODO:
-  # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           inherits(optional_mesh,'inla.mesh') || is.null(optional_mesh),
-                          is.vector(max.edge),
-                          is.vector(offset) || is.numeric(offset),
+                          is.vector(max.edge) || is.null(max.edge),
+                          (is.vector(offset) || is.numeric(offset)) || is.null(offset),
+                          is.numeric(cutoff) || is.null(cutoff),
                           is.null(timeout) || is.numeric(timeout),
-                          is.numeric(cutoff),
                           is.character(strategy),
                           is.character(int.strategy),
                           is.character(area),
+                          is.character(type),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
   )
 
@@ -74,13 +92,11 @@ engine_inlabru <- function(x,
   strategy <- match.arg(strategy, c('auto', 'gaussian', 'simplified.laplace', 'laplace', 'adaptive'), several.ok = FALSE)
   int.strategy <- match.arg(int.strategy, c('auto', 'ccd', 'grid', 'eb'), several.ok = FALSE)
   area <- match.arg(area, c("gpc", "gpc2", "km"), several.ok = FALSE)
+  type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
 
   # Set inlabru options for strategies. These are set globally
   inlabru::bru_options_set(control.inla = list(strategy = strategy,
                                                int.strategy = int.strategy))
-
-  # Convert the study region
-  region.poly <- as(sf::st_geometry(x$background), "Spatial")
 
   # Set the projection mesh
   if(inherits(optional_mesh,'inla.mesh')) {
@@ -88,51 +104,34 @@ engine_inlabru <- function(x,
     mesh <- optional_mesh
     # Security check for projection and if not set, use the one from background
     if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
-  } else {
-    # Create a new mesh
-    # Convert to boundary object for later
-    suppressWarnings(
-      bdry <- INLA::inla.sp2segment(
-        sp = region.poly,
-        join = TRUE,
-        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
-      )
-    )
-    bdry$loc <- INLA::inla.mesh.map(bdry$loc)
 
-    # --- #
-    # Create the mesh
-    # A good mesh needs to have triangles as regular as possible in size and shape: equilateral
-    suppressWarnings(
-      mesh <- INLA::inla.mesh.2d(
-        # Boundary object
-        boundary = bdry,
-        # The largest allowed triangle edge length, must be in the same scale units as the coordinates
-        # Lower bounds affect the density of triangles
-        max.edge = max.edge,
-        # The automatic extension distance.
-        # If positive: same scale units.
-        # If negative, interpreted as a factor relative to the approximate data diameter;
-        #   i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
-        offset = offset,
-        # The minimum allowed distance between points,
-        # it means that points at a closer distance than the supplied value are replaced by a single vertex.
-        # it is critical when there are some points very close to each other,
-        #   either for point locations or in the domain boundary.
-        cutoff = cutoff,
-        # Define the CRS
-        crs = bdry$crs
-      )
+    # Convert the study region
+    region.poly <- as(sf::st_geometry(x$background), "Spatial")
+
+    # Calculate area
+    ar <- suppressWarnings(
+      mesh_area(mesh = mesh, region.poly = region.poly, variant = area)
     )
+  } else {
+    mesh <- new_waiver()
+    ar <- new_waiver()
   }
+
+  # Collate other parameters in a specific object
+  params <- list(
+    max.edge = max.edge,
+    offset = offset,
+    cutoff = cutoff,
+    proj_stepsize = proj_stepsize,
+    type = type,
+    area = area,
+    strategy = strategy,
+    int.strategy = int.strategy,
+    ...
+  )
 
   # If time out is specified
   if(!is.null(timeout)) INLA::inla.setOption(fmesher.timeout = timeout)
-
-  # Calculate area in km²
-  ar <- suppressWarnings(
-    mesh_area(mesh = mesh,region.poly = region.poly, variant = area, relative = FALSE)
-  )
 
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
@@ -146,10 +145,104 @@ engine_inlabru <- function(x,
       data = list(
         'mesh' = mesh,
         'mesh.area' = ar,
-        'proj_stepsize' = proj_stepsize
+        'proj_stepsize' = proj_stepsize,
+        'params' = params
       ),
+      # Function to create a mesh
+      create_mesh = function(self, model){
+        assertthat::assert_that(is.list(model),
+                                "background" %in% names(model))
+        # Check if mesh is already present, if so use it
+        if(!is.Waiver(self$get_data("mesh"))) return()
+        # Create a new mesh based on the available data
+
+        # Get parameters
+        params <- self$get_data("params")
+
+        # Convert the study region
+        region.poly <- as(sf::st_geometry(model$background), "Spatial")
+
+        # Convert to boundary object for later
+        suppressWarnings(
+          bdry <- INLA::inla.sp2segment(
+            sp = region.poly,
+            join = TRUE,
+            crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
+          )
+        )
+        bdry$loc <- INLA::inla.mesh.map(bdry$loc)
+
+        # Try and infer mesh parameters if not set
+
+        # Get all coordinates of observations
+        locs <- do.call("rbind",
+                        lapply(model$biodiversity, function(x){
+                          o <- sf::st_coordinates( guess_sf( x$observations )[,1:2])
+                          o <- as.matrix(o)
+                          colnames(o) <- c("x", "y")
+                          return(o)
+                        }
+                        )
+        ) %>% unique()
+        assertthat::assert_that(
+          nrow(locs)>0,
+          ncol(locs)==2
+        )
+
+        if(is.null(params$max.edge)){
+          # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
+          max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
+          params$max.edge <- max.edge
+        }
+        if(is.null(params$offset)){
+          # Check whether the coordinate system is longlat
+          if( sf::st_is_longlat(bdry$crs) ){
+            # Specify offset as 1/100 of the boundary distance
+            offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                         diff(range(bdry$loc[,1]))*0.01)
+          } else {
+            offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                         diff(range(bdry$loc[,1]))*0.01)
+          }
+          params$offset <- offset
+        }
+        if(is.null(params$cutoff)){
+          # Specify as minimum distance between y coordinates
+          # Thus capturing most points on this level
+          # otherwise set to default
+          val <- min(abs(diff(locs[,2])))
+          cutoff <- ifelse(val == 0, 1e-12, val)
+          params$cutoff <- cutoff
+        }
+
+        suppressWarnings(
+          mesh <- INLA::inla.mesh.2d(
+            # Point localities
+            loc = locs,
+            # Boundary object
+            boundary = bdry,
+            # Mesh Parameters
+            max.edge = params$max.edge,
+            offset = params$offset,
+            cutoff = params$cutoff,
+            # Define the CRS
+            crs = bdry$crs
+          )
+        )
+        # Calculate area
+        ar <- suppressWarnings(
+          mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+        )
+
+        # Now set the output
+        self$set_data("mesh", mesh)
+        self$set_data("mesh.area", ar)
+
+        invisible()
+      },
       # Generic plotting function for the mesh
       plot = function(self, assess = FALSE){
+        if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
         if(assess){
           # For an INLA mesh assessment
           out <- INLA:::inla.mesh.assessment(
@@ -438,7 +531,7 @@ engine_inlabru <- function(x,
             # Specify priors if set
             if(!is.Waiver(model$priors)){
               # If a prior has been specified
-              if(model$priors$varnames() == model$predictors_types$predictors[i]){
+              if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
                 vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
                 pp <- paste0(c(
                   ', mean.linear = ', model$priors$get(vn)[1],', ',
@@ -463,6 +556,7 @@ engine_inlabru <- function(x,
             )
           }
         }
+
         # Add spatial effect if set
         if("latentspatial" %in% self$list_data() ){
           spde <- self$get_data("latentspatial")
@@ -498,7 +592,10 @@ engine_inlabru <- function(x,
 
         # Set any other bru options via verbosity of fitting
         inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
-        # inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95)) # FIXME: Works. But inlabru quantile summary functions do not (yet).
+        # Newer inlabru versions support quantiles
+        if(utils::packageVersion("inlabru") > '2.5.2'){
+          inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95))
+        }
         invisible()
       },
       train = function(self, model, settings) {
@@ -516,6 +613,9 @@ engine_inlabru <- function(x,
 
         # Get components
         comp <- self$get_data("components")
+
+        # Get params
+        params <- self$get_data("params")
 
         # Recreate non-linear variables in case they are set
         if(settings$get('only_linear') == FALSE){
@@ -669,6 +769,8 @@ engine_inlabru <- function(x,
                                   likelihoods,
                                   options = options)
         }, silent = FALSE)
+
+        # Security checks
         if(!exists("fit_bru")){
           stop('Model did not converge. Try to simplify structure and check priors!')
         }
@@ -678,12 +780,13 @@ engine_inlabru <- function(x,
           # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
 
+          covs <- model$predictors_object$get_data(df = FALSE)
+          covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
           # Build coordinates
           suppressWarnings(
             preds <- inla_predpoints(mesh = self$get_data('mesh'),
                                      background = model$background,
-                                     cov = model$predictors_object$get_data(df = FALSE),
-                                     # cov = model$predictors[, c('x','y', names(model$predictors)[which(names(model$predictors) %in% fit_bru$names.fixed)])],
+                                     cov = covs,
                                      proj_stepsize = self$get_data('proj_stepsize'),
                                      spatial = TRUE
             )
@@ -698,8 +801,12 @@ engine_inlabru <- function(x,
           }
           # --- #
           # Define formula
-          # Transformation to use
-          fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+          if(params$type == "response"){
+            # Transformation to use for prediction scale
+            fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+          } else {
+            fun <- "" # Linear predictor
+          }
 
           # Get variables for inlabru
           if(length(model$biodiversity)>1){
@@ -752,10 +859,18 @@ engine_inlabru <- function(x,
           )
           pred_bru$cv <- pred_bru$mean / pred_bru$sd
           # Get only the predicted variables of interest
-          prediction <- raster::stack(
-            pred_bru[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
-          )
-          names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+          if(utils::packageVersion("inlabru") <= '2.5.2'){
+            # Older version where probs are ignored
+            prediction <- raster::stack(
+              pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+            )
+            names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
+          } else {
+            prediction <- raster::stack(
+              pred_bru[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
+            )
+            names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+          }
 
         } else {
           prediction <- NULL
@@ -907,22 +1022,29 @@ engine_inlabru <- function(x,
                                 )
             pred_cov$cv <- pred_cov$mean / pred_cov$sd
 
+            o <- pred_cov
+            names(o)[grep(x.var, names(o))] <- "partial_effect"
+            if(utils::packageVersion("inlabru") <= '2.5.2'){
+              # Older version where probs are ignored
+              o <- subset(o, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
+              names(o) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
+            } else {
+              o <- subset(o, select = c("partial_effect", "mean", "sd", "q50", "q0.05", "q0.95", "cv"))
+              names(o) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
+            }
+
             # Do plot and return result
             if(plot){
-              o <- pred_cov
-              names(o)[grep(x.var, names(o))] <- "partial_effect"
-              pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
-                                                     ymin = q0.05,
-                                                     ymax = q0.95) ) +
+              pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = median,
+                                                     ymin = lower,
+                                                     ymax = upper) ) +
                 ggplot2::theme_classic() +
                 ggplot2::geom_ribbon(fill = "grey90") +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = x.var, y = "Partial effect")
               print(pm)
             }
-            return(
-              pred_cov[,c(x.var,'mean','sd','q0.05','q0.5','q0.95','cv')] %>% as.data.frame()
-              )
+            return(o %>% as.data.frame() )
           },
           # (S)partial effect
           spartial = function(self, x.var, constant = NULL, plot = TRUE){
@@ -979,18 +1101,31 @@ engine_inlabru <- function(x,
                 ggplot2::scale_fill_gradientn(colours = ibis_colours$divg_bluegreen) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
             }
-            return(
-              raster::stack(
-                pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
+
+            # Depending on the package version return out
+            if(utils::packageVersion("inlabru") <= '2.5.2'){
+              # Older version where probs are ignored
+              return(
+                raster::stack(
+                  pred_cov[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+                )
               )
-            )
+            } else {
+              return(
+                raster::stack(
+                  pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
+                )
+              )
+            }
           },
           # Function to plot SPDE if existing
-          plot_spatial = function(self, spat = NULL, what = "spatial.field", ...){
+          plot_spatial = function(self, spat = NULL, type = "response", what = "spatial.field1", ...){
             # Get mesh, domain and model
             mesh <- self$get_data("mesh")
             domain <- as(self$model$background, "Spatial")
             mod <- self$get_data('fit_best')
+            type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
+
             assertthat::assert_that(!is.null(mod$model.random),
                                     msg = "No spatial latent was estimated in the model!")
 
@@ -1001,15 +1136,25 @@ engine_inlabru <- function(x,
                                       'model' %in% names(self),
                                       is.character(what)
               )
+              # Check whether random variable exists, otherwise raise warning
+              if(what %in% names(mod$summary.random)){
+                stop(paste0(
+                  "Spatial random effect not found. Set 'what' to one of these: ",
+                  paste0(names(mod$summary.random),collapse = " | ")
+                ))
+              }
 
               # Predict the spatial intensity surface
               if(is.null(spat)){
                 spat <- inlabru::pixels(mesh, mask = domain)
               }
+              # FIXME: Does not work for other link functions
+              if(type == "response") fun <- 'exp' else fun <- ''
+
               suppressWarnings(
                 lambda <- inlabru:::predict.bru(mod,
                                                 spat,
-                                                as.formula(paste0("~ exp(",what," + Intercept)"))
+                                                as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
                                                 )
               )
 

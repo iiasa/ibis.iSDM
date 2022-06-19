@@ -153,7 +153,10 @@ DistributionModel <- bdproto(
     if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
       assertthat::assert_that(is.Raster(pred))
-      # Match arguement
+      # Check if median is requested but not present, change to q50
+      if(what == "median" && !(what %in% names(pred))) { what <- "q50" }
+
+      # Match argument
       what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       raster::plot(pred[[what]],

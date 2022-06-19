@@ -8,11 +8,13 @@ engine_inla(
   x,
   optional_mesh = NULL,
   optional_projstk = NULL,
-  max.edge = c(1, 5),
-  offset = c(1, 1),
-  cutoff = 1,
+  max.edge = NULL,
+  offset = NULL,
+  cutoff = NULL,
   proj_stepsize = NULL,
   timeout = NULL,
+  strategy = "auto",
+  int.strategy = "eb",
   barrier = FALSE,
   type = "response",
   area = "gpc2",
@@ -26,19 +28,29 @@ engine_inla(
 
 \item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})}
 
-\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates}
+\item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+Default is an educated guess (Default: \code{NULL}).}
 
-\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.}
+\item{offset}{interpreted as a numeric factor relative to the approximate data diameter.
+Default is an educated guess (Default: \code{NULL}).}
 
-\item{cutoff}{The minimum allowed distance between points on the mesh.}
+\item{cutoff}{The minimum allowed distance between points on the mesh.
+Default is an educated guess (Default: \code{NULL}).}
 
-\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})}
+\item{proj_stepsize}{The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL}).}
 
 \item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
+\item{strategy}{Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
+\code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.}
+
+\item{int.strategy}{Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
+See also https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls}
+
 \item{barrier}{Should a barrier model be added to the model?}
 
-\item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions.
+Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).}
 
@@ -57,8 +69,29 @@ Allows a full Bayesian analysis of linear and additive models using Integrated N
 Engine has been largely superceded by the \link{engine_bru} package and users are advised to us this one,
 unless specific options are required.
 }
+\details{
+All \code{INLA} engines require the specification of a mesh that needs to be provided to the
+\code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
+data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+
+\link{*}  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+Lower bounds affect the density of triangles
+\link{*} \code{"offset"}: The automatic extension distance of the mesh
+If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
+i.e., a value of -0.10 will add a 10\% of the data diameter as outer extension.
+\link{*} \code{"cutoff"}: The minimum allowed distance between points,
+it means that points at a closer distance than the supplied value are replaced by a single vertex.
+it is critical when there are some points very close to each other, either for point locations or in the
+domain boundary.
+\link{*} \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
+created.
+
+Priors can be set via \link{INLAPrior}.
+}
 \references{
 \itemize{
+\item Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
+\item Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
 \item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 }
 }

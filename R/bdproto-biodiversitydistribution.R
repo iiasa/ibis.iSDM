@@ -233,14 +233,13 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$priors)) {return(NULL)}
     # Delete selected priors
     if(is.null(names)){
-      self$priors <- new_waiver()
+      priors <- new_waiver()
     } else {
       priors <- self$priors
       ids <- priors$ids()[which( priors$varnames() %in% names)]
       for(id in ids) priors$rm(id)
-      self$priors <- priors
     }
-    invisible()
+    bdproto(NULL, self, priors = priors )
   },
   # Show number of biodiversity records
   show_biodiversity_length = function(self){

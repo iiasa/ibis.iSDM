@@ -3,16 +3,24 @@ NULL
 
 #' Create a new monotonic prior
 #'
-#' Function to include prior information as monotonic constrain to a gradient descent boosting model
+#' @description
+#' Monotonic constrains for gradient descent boosting models do not work in the same way as other priors
+#' where a specific coefficient or magnitude of importance is specified.
+#' Rather monotonic constraints **enforce** a specific directionality of regression coefficients so that
+#' for instance a coefficient has to be positive.
+#' __Important:__ Specifying a monotonic constrain does not guarantee that the variable is retained in the
+#' model if model regularization is applied!
+#' @note
+#' Similar priors can also be defined for the [`engine_xgboost`] via [`XGBPrior-class`].
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects.
+#' @param variable A [`character`] matched against existing predictors variables.
 #' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'},
 #'  \code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.
 #' @param ... Variables passed on to prior object.
 #' @details TBD
 #' @references
 #' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
-#' @seealso [`Prior-class`].
+#' @seealso [`Prior-class`], [`XGBPrior-class`]
 #' @keywords priors
 #' @family prior
 #' @aliases GDBPrior

@@ -9,7 +9,7 @@ GDBPriors(variable, hyper = "increasing", ...)
 \S4method{GDBPriors}{character}(variable)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
 \code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.}

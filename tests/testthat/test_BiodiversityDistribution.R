@@ -2,6 +2,10 @@
 test_that('Setting up a distribution model',{
   testthat::skip_on_cran()
 
+  library(raster)
+  library(sf)
+  library(rgeos)
+
   options("ibis.setupmessages" = FALSE)
   # Background Raster
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
@@ -12,6 +16,9 @@ test_that('Setting up a distribution model',{
   ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM'),full.names = T)
   # Load them as rasters
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  expect_equal(nrow(virtual_points), 208)
+  expect_equal(ncell(predictors), 7313)
 
   # Now set them one up step by step
   x <- distribution(background)
@@ -32,15 +39,17 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  x <- x %>% add_offset_range(virtual_range)
+  suppressWarnings(x <- x %>% add_offset_range(virtual_range))
   expect_equal(x$get_offset(),'range_distance')
   expect_s4_class(x$offset,'Raster')
+
   # remove again
   x <- x$rm_offset()
   expect_true(is.Waiver( x$get_offset() ) )
 
   # Add Predictors
   x <- x %>% add_predictors(predictors)
+  expect_s3_class(x$predictors, "PredictorDataset")
   expect_equal(x$predictors$length(),14)
   expect_true(is.vector(x$get_predictor_names()))
   # Try removing one
@@ -61,15 +70,13 @@ test_that('Setting up a distribution model',{
   testthat::expect_equal(x$predictors$length(),84)
 
   x <- x %>% engine_inla()
-  expect_s3_class(x$engine$data$mesh,'inla.mesh')
+  # Mesh is not created yet
+  expect_s3_class(x$engine$get_data("mesh"),'Waiver')
   expect_equal(x$engine$name,'<INLA>')
   expect_error(x$engine$calc_stack_poipo()) # Nothing to train on
 
   expect_s3_class(x$get_priors(),'Waiver')
   expect_null(x$get_limits())
-
-  expect_type(x$engine$get_data('mesh.area'),'double')
-  expect_gt(sum(x$engine$get_data('mesh.area')),800)
 
   # Add latent effect and see whether the attributes is changed
   y <- x %>% add_latent_spatial(method = "spde")
@@ -83,18 +90,21 @@ test_that('Setting up a distribution model',{
   expect_s3_class(x$get_limits(), "sf")
 
   y <- x %>% engine_bart()
-  expect_equal( y$engine$name, "<BART>")
+  expect_equal( y$get_engine(), "<BART>")
   y <- x %>% engine_breg()
-  expect_equal( y$engine$name, "<BREG>")
+  expect_equal( y$get_engine(), "<BREG>")
   y <- x %>% engine_gdb()
-  expect_equal( y$engine$name, "<GDB>")
+  expect_equal( y$get_engine(), "<GDB>")
   y <- x %>% engine_inla()
-  expect_equal( y$engine$name, "<INLA>")
+  expect_equal( y$get_engine(), "<INLA>")
   y <- x %>% engine_inlabru()
-  expect_equal( y$engine$name, "<INLABRU>")
+  expect_equal( y$get_engine(), "<INLABRU>")
   y <- x %>% engine_stan()
-  expect_equal( y$engine$name, "<STAN>")
+  expect_equal( y$get_engine(), "<STAN>")
   y <- x %>% engine_xgboost()
-  expect_equal( y$engine$name, "<XGBOOST>")
+  expect_equal( y$get_engine(), "<XGBOOST>")
+
+  # Normal x should still be none
+  expect_equal( x$get_engine(), "None")
 
 })

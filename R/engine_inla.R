@@ -8,16 +8,42 @@ NULL
 #' Engine has been largely superceded by the [engine_bru] package and users are advised to us this one,
 #' unless specific options are required.
 #'
+#' @details
+#' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
+#' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
+#' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+#'
+#' [*]  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' Lower bounds affect the density of triangles
+#' [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
+#' i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
+#' [*] \code{"cutoff"}: The minimum allowed distance between points,
+#' it means that points at a closer distance than the supplied value are replaced by a single vertex.
+#' it is critical when there are some points very close to each other, either for point locations or in the
+#' domain boundary.
+#' [*] \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
+#' created.
+#'
+#' Priors can be set via [INLAPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
-#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+#' Default is an educated guess (Default: \code{NULL}).
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter.
+#' Default is an educated guess (Default: \code{NULL}).
 #' @param cutoff The minimum allowed distance between points on the mesh.
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
+#' Default is an educated guess (Default: \code{NULL}).
+#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL}).
 #' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
+#' @param strategy Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
+#'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
+#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
+#' See also https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
 #' @param barrier Should a barrier model be added to the model?
-#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#' @param type The mode used for creating posterior predictions.
+#' Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
 #' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
 #' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: \code{FALSE}) **Not yet implemented**
 #' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
@@ -25,6 +51,8 @@ NULL
 #' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet implemented**
 #' @param ... Other variables
 #' @references
+#' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
+#' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' @family engine
 #' @name engine_inla
@@ -34,11 +62,13 @@ NULL
 engine_inla <- function(x,
                         optional_mesh = NULL,
                         optional_projstk = NULL,
-                        max.edge = c(1,5),
-                        offset = c(1,1),
-                        cutoff = 1,
+                        max.edge = NULL,
+                        offset = NULL,
+                        cutoff = NULL,
                         proj_stepsize = NULL,
                         timeout = NULL,
+                        strategy = "auto",
+                        int.strategy = "eb",
                         barrier = FALSE,
                         type = "response",
                         area = "gpc2",
@@ -54,71 +84,44 @@ engine_inla <- function(x,
 
   # myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
 
-  # TODO:
-  # Find a better way to pass on parameters such as those related to the mesh size...
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           inherits(optional_mesh,'inla.mesh') || is.null(optional_mesh),
                           is.list(optional_projstk) || is.null(optional_projstk),
-                          is.vector(max.edge),
-                          is.vector(offset) || is.numeric(offset),
+                          is.vector(max.edge) || is.null(max.edge),
+                          (is.vector(offset) || is.numeric(offset)) || is.null(offset),
+                          is.numeric(cutoff) || is.null(cutoff),
                           is.null(timeout) || is.numeric(timeout),
-                          is.numeric(cutoff),
                           is.character(type),
                           is.character(area),
+                          is.character(strategy),
+                          is.character(int.strategy),
                           is.null(proj_stepsize) || is.numeric(proj_stepsize)
                           )
   type <- match.arg(type, c("predictor", "response"), several.ok = FALSE)
   area <- match.arg(area, c("gpc", "gpc2", "km"), several.ok = FALSE)
-  # Convert the study region
-  region.poly <- as(sf::st_geometry(x$background), "Spatial")
+  # Check strategy settings
+  strategy <- match.arg(strategy, c("auto", "adaptative", "gaussian", "simplified.laplace", "laplace"), several.ok = FALSE)
+  int.strategy <- match.arg(int.strategy, c("auto", "grid", "eb", "ccd"), several.ok = FALSE)
 
   # Set the projection mesh
   if(inherits(optional_mesh,'inla.mesh')) {
     # Load a provided on
     mesh <- optional_mesh
+    # Convert the study region
+    region.poly <- as(sf::st_geometry(x$background), "Spatial")
+
     # Security check for projection and if not set, use the one from background
     if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
+
+    # Calculate area
+    ar <- suppressWarnings(
+      mesh_area(mesh = mesh, region.poly = region.poly, variant = area)
+    )
   } else {
-    # Create a new mesh
-    # Convert to boundary object for later
-    suppressWarnings(
-      bdry <- INLA::inla.sp2segment(
-        sp = region.poly,
-        join = TRUE,
-        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
-      )
-    )
-    bdry$loc <- INLA::inla.mesh.map(bdry$loc)
-
-    # --- #
-    # Create the mesh
-    # Parameters could be also derived from rule of thumbs
-    # such as the differential of the range of coordinates divided by 1/10 of the range.
-
-    # A good mesh needs to have triangles as regular as possible in size and shape: equilateral
-    suppressWarnings(
-      mesh <- INLA::inla.mesh.2d(
-        # Boundary object
-        boundary = bdry,
-        # The largest allowed triangle edge length, must be in the same scale units as the coordinates
-        # Lower bounds affect the density of triangles
-        max.edge = max.edge,
-        # The automatic extension distance.
-        # If positive: same scale units.
-        # If negative, interpreted as a factor relative to the approximate data diameter;
-        #   i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
-        offset = offset,
-        # The minimum allowed distance between points,
-        # it means that points at a closer distance than the supplied value are replaced by a single vertex.
-        # it is critical when there are some points very close to each other,
-        #   either for point locations or in the domain boundary.
-        cutoff = cutoff,
-        # Define the CRS
-        crs = bdry$crs
-      )
-    )
+    mesh <- new_waiver()
+    ar <- new_waiver()
   }
 
   # If time out is specified
@@ -126,18 +129,21 @@ engine_inla <- function(x,
 
   # Get barrier from the region polygon
   # TODO: Add this in addition to spatial field below, possibly specify an option to calculate this
-  if(barrier){
+  if(barrier && !is.Waiver(mesh)){
     mesh_bar <- mesh_barrier(mesh, region.poly)
   } else { mesh_bar <- new_waiver() }
 
-  # Calculate area
-  ar <- suppressWarnings(
-    mesh_area(mesh = mesh, region.poly = region.poly, variant = area)
-  )
-
-  # Create
+  # --- #
+  # Create other parameters object
   params <- list(
+    max.edge = max.edge,
+    offset = offset,
+    cutoff = cutoff,
+    proj_stepsize = proj_stepsize,
     type = type,
+    area = area,
+    strategy = strategy,
+    int.strategy = int.strategy,
     ...
   )
 
@@ -154,12 +160,105 @@ engine_inla <- function(x,
         'mesh' = mesh,
         'mesh.area' = ar,
         'mesh.bar' = mesh_bar,
-        'proj_stepsize' = proj_stepsize,
         'stk_pred' = optional_projstk,
         'params' = params
       ),
+      # Function to create a mesh
+      create_mesh = function(self, model){
+        assertthat::assert_that(is.list(model),
+                                "background" %in% names(model))
+        # Check if mesh is already present, if so use it
+        if(!is.Waiver(self$get_data("mesh"))) return()
+        # Create a new mesh based on the available data
+
+        # Get parameters
+        params <- self$get_data("params")
+
+        # Convert the study region
+        region.poly <- as(sf::st_geometry(model$background), "Spatial")
+
+        # Convert to boundary object for later
+        suppressWarnings(
+          bdry <- INLA::inla.sp2segment(
+            sp = region.poly,
+            join = TRUE,
+            crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
+          )
+        )
+        bdry$loc <- INLA::inla.mesh.map(bdry$loc)
+
+        # Try and infer mesh parameters if not set
+
+        # Get all coordinates of observations
+        locs <- do.call("rbind",
+          lapply(model$biodiversity, function(x){
+            o <- sf::st_coordinates( guess_sf( x$observations )[,1:2])
+            o <- as.matrix(o)
+            colnames(o) <- c("x", "y")
+            return(o)
+            }
+          )
+        ) %>% unique()
+        assertthat::assert_that(
+          nrow(locs)>0,
+          ncol(locs)==2
+        )
+
+        if(is.null(params$max.edge)){
+          # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
+          max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
+          params$max.edge <- max.edge
+        }
+        if(is.null(params$offset)){
+          # Check whether the coordinate system is longlat
+          if( sf::st_is_longlat(bdry$crs) ){
+            # Specify offset as 1/100 of the boundary distance
+            offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                         diff(range(bdry$loc[,1]))*0.01)
+          } else {
+            offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                         diff(range(bdry$loc[,1]))*0.01)
+          }
+          params$offset <- offset
+        }
+        if(is.null(params$cutoff)){
+          # Specify as minimum distance between y coordinates
+          # Thus capturing most points on this level
+          # otherwise set to default
+          val <- min(abs(diff(locs[,2])))
+          cutoff <- ifelse(val == 0, 1e-12, val)
+          params$cutoff <- cutoff
+        }
+
+        suppressWarnings(
+          mesh <- INLA::inla.mesh.2d(
+            # Point localities
+            loc = locs,
+            # Boundary object
+            boundary = bdry,
+            # Mesh Parameters
+            max.edge = params$max.edge,
+            offset = params$offset,
+            cutoff = params$cutoff,
+            # Define the CRS
+            crs = bdry$crs
+          )
+        )
+        # Calculate area
+        ar <- suppressWarnings(
+          mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+        )
+
+        # Now set the output
+        self$set_data("mesh", mesh)
+        self$set_data("mesh.area", ar)
+
+        invisible()
+      },
       # Generic plotting function for the mesh
       plot = function(self, assess = FALSE){
+        if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
+
         if(assess){
           # For an INLA mesh assessment
           out <- INLA:::inla.mesh.assessment(
@@ -390,10 +489,12 @@ engine_inla <- function(x,
         if(!is.Waiver(model$offset)) offset <- subset(model[['offset']],select = "spatial_offset") else offset <- NULL
 
         # Projection stepsize
-        if(is.null( self$get_data('proj_stepsize') )){
+        params <- self$get_data('params')
+        if(is.null( params$proj_stepsize )){
           # Set to stepsize equivalent of the resolution of the grid
           val <- max(diff(model[['predictors']]$x)) # TODO: Check that it works when dummy variable is used
-          self$set_data('proj_stepsize', val )
+          params$proj_stepsize <- val
+          self$set_data('params', params )
           rm(val)
         }
 
@@ -493,7 +594,7 @@ engine_inla <- function(x,
             model      = model,
             mesh       = self$get_data('mesh'),
             mesh.area  = self$get_data('mesh.area'),
-            res        = self$get_data('proj_stepsize'),
+            res        = self$get_data('params')$proj_stepsize,
             type       = model$biodiversity[[id]]$type,
             spde       = spde,
             settings   = settings,
@@ -535,6 +636,9 @@ engine_inla <- function(x,
         # Get full stack and projection grid
         stk_full <- self$get_data('stk_full')
         predcoords <- self$get_data('stk_pred')$predcoords
+
+        # Get parameters
+        params <- self$get_data("params")
 
         # Get families and links
         fam <- unique( as.character( sapply(model$biodiversity, function(x) x$family) ) )
@@ -604,10 +708,8 @@ engine_inla <- function(x,
                           control.compute = list(cpo = FALSE, waic = TRUE, config = TRUE), #model diagnostics and config = TRUE gives you the GMRF
                           # control.fixed = list(mean = 0),# prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
                           verbose = settings$get(what='verbose'), # To see the log of the model runs
-                          control.inla = INLA::control.inla(int.strategy = "auto"), # Empirical bayes runs faster
-                          #              strategy = 'simplified.laplace'
-                          #              # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
-                          # ), # To make it run faster...
+                          control.inla = INLA::control.inla(strategy = params$strategy,
+                                                            int.strategy = params$int.strategy),
                           num.threads = getOption('ibis.nthread')
         )
 
@@ -632,22 +734,19 @@ engine_inla <- function(x,
                                  verbose = settings$get(what='verbose'), # To see the log of the model runs
                                  # control.results = list(return.marginals.random = FALSE,
                                  #                        return.marginals.predictor = FALSE), # Don't predict marginals to save speed
-                                 # MJ: 15/6 -> Removed thetas as those cause SPDE convergence issues making the whole estimation slower
                                  # control.fixed = INLA::control.fixed(mean = 0),#, prec = list( initial = log(0.000001), fixed = TRUE)), # Added to see whether this changes GMRFlib convergence issues
-                                 INLA::control.inla(int.strategy = "eb"), # Empirical bayes is generally faster
-                                 #                    strategy = 'simplified.laplace'
-                                 #                    # https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
-                                 # ),
+                                 control.inla = INLA::control.inla(strategy = params$strategy,
+                                                                   int.strategy = params$int.strategy),
                                  num.threads = getOption('ibis.nthread')
             )
           },silent = FALSE)
           if(class(fit_pred)=='try-error') { print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!') }
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
-          # Only difference between linear.predictor and fitted.values is that
-          # fitted.values applies the (inverse of the) link function,
+          # Which type of prediction (linear predictor or response scale)
+          # The difference between both is that response applies the (inverse of the) link function,
           # so it doesn't include the observation distribution part (measurement noise) of posterior predictions.
-          if(self$get_data("params")$type == "predictor"){
+          if(params$type == "predictor"){
             post <- fit_pred$summary.linear.predictor[index.pred, ]
           } else {
             post <- fit_pred$summary.fitted.values[index.pred, ]
@@ -655,7 +754,7 @@ engine_inla <- function(x,
           assertthat::assert_that(nrow(post)>0,
                                   nrow(post) == nrow(predcoords) ) # Check with cells in projection
           # Back-transform for predictor
-          if(self$get_data("params")$type == "predictor"){
+          if(params$type == "predictor"){
               if(length(fam)==1){
                 if(fam == 'poisson') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- exp( post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] )
                 if(fam == 'binomial') post[,c('mean','0.05quant','0.5quant','0.95quant','mode')] <- logistic(post[,c('mean','0.05quant','0.5quant','0.95quant','mode')])
@@ -812,16 +911,18 @@ engine_inla <- function(x,
                 # Plot and return result
               },
               # Function to plot SPDE if existing
-              plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, ...){
-                assertthat::assert_that(is.vector(dim))
+              plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, what = "spatial.field1", ...){
+                assertthat::assert_that(is.vector(dim),
+                                        is.character(what))
+
                 if( length( self$fits$fit_best$size.spde2.blc ) == 1)
                 {
                   # Get spatial projections from model
                   # FIXME: Potentially make the plotting of this more flexible
                   gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
                   g.mean <- INLA::inla.mesh.project(gproj,
-                                                    self$get_data('fit_best')$summary.random$spatial.field$mean)
-                  g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random$spatial.field$sd)
+                                                    self$get_data('fit_best')$summary.random[[what]]$mean)
+                  g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random[[what]]$sd)
 
                   # Convert to rasters
                   g.mean <- t(g.mean)
@@ -852,7 +953,7 @@ engine_inla <- function(x,
                     # Get SPDE results
                     spde_results <- INLA::inla.spde2.result(
                       inla = self$get_data('fit_best'),
-                      name = 'spatial.field',
+                      name = what,
                       spde = self$get_data('spde'),
                       do.transfer = TRUE)
 

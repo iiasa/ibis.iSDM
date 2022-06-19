@@ -127,14 +127,16 @@ methods::setMethod(
 #'
 #' @details Opposed to presence-only data, presence-absence biodiversity records usually originate from
 #' structured biodiversity surveys where the absence of a species in a given region was specifically
-#' assessed. #' By default, the cloglog link function is used in a logistic regression setup unless the specific [engine]
+#' assessed.
+#' By default, the cloglog link function is used in a logistic regression setup unless the specific [engine]
 #' does not support generalised linear regressions (e.g. [engine_bart])
 #'
 #' @family add_biodiversity
 #' @keywords biodiversity
 #' @section Notes:
-#' @references Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
-#' @references Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+#' @references
+#' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+#' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 #'
 #' @examples
 #' \dontrun{

@@ -118,6 +118,6 @@ methods::setMethod(
     )
     x <- x$rm_priors(names)
     # Return x with newly added priors
-    x
+    return(x)
   }
 )

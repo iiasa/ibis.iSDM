@@ -18,7 +18,9 @@ XGBPrior(variable, hyper = "increasing", ...)
 \description{
 Function to include prior information as monotonic constrain to a
 extreme gradient descent boosting model \link{engine_xgboost}.
-Note that monotonic priors enforce directionality in direction of certain variables.
+Monotonic priors enforce directionality in direction of certain variables, however
+specifying a monotonic constrain does not guarantee that the variable is not regularized out
+during model fitting.
 }
 \references{
 \itemize{
@@ -26,7 +28,7 @@ Note that monotonic priors enforce directionality in direction of certain variab
 }
 }
 \seealso{
-\code{\linkS4class{Prior}}.
+\code{\linkS4class{Prior}} and \code{\linkS4class{GDBPrior}}.
 
 Other prior: 
 \code{\link{BARTPriors}()},

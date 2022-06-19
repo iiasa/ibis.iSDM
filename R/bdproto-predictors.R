@@ -81,9 +81,10 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(assertthat::is.string(x),
                             is.Raster(value),
                             is_comparable_raster(self$get_data(), value))
-    self$data <- addLayer(self$get_data(),value)
+    self$data <- addLayer(self$get_data(), value)
+    # FIXME: This creates duplicates as of now.
     invisible()
-  },
+},
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
     assertthat::assert_that(is.vector(x) || is.character(x),

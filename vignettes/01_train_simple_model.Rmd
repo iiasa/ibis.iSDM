@@ -27,8 +27,6 @@ is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
 knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 ```
 
-### Load package and make a basic model
-
 The examples below demonstrate how to fit a basic model with the ibis.iSDM package using a variety of engines. 
 The ibis.iSDM package loosely follows the **tidyverse** strategy where a model is built by adding different components via pipes. Every model needs to have a minimum of at least 3 components:
 
@@ -41,11 +39,25 @@ There are ways to convert for instance presence-only
 
 --- 
 
+### Load package and make a basic model
+
+```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+# Install for this vignette if not present
+# Function to check for installed packages and install them if they are not installed
+install <- function(packages){
+  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
+  if (length(new.packages)) 
+    install.packages(new.packages, dependencies = TRUE)
+  sapply(packages, require, character.only = TRUE)
+}
+if(!("INLA" %in% installed.packages()[, "Package"])){
+  install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
+}
+install(c("inlabru", "xgboost"))
+```
+
+
 ```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
-# Install for this purpose
-install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
-install.packages("inlabru")
-install.packages("xgboost")
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
@@ -60,7 +72,7 @@ library(assertthat)
 Creating a model in the `ibis.iSDM` package is relatively straight forward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
 So first lets load the data:
 
-```{r Load data}
+```{r Load data, message=FALSE}
 # Background layer
 background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
@@ -101,8 +113,7 @@ mod <- add_predictors(mod,
 
 # Finally define the engine for the model
 # This uses the default data currently backed in the model,
-# but any other data might require an adaptation of the mesh parameters used
-# by the engine.
+# !Note that any other data might require an adaptation of the default mesh parameters used by the engine!
 mod <- engine_inlabru(mod)
 
 # Print out the object to see the information that is now stored within
@@ -114,6 +125,7 @@ The `print` call at the end now shows some summary statistics contained in this 
 Of course all of these steps can also be done in "pipe" using the ` %>% ` or `|>` syntax.
 
 ```{r, eval=TRUE, warning=FALSE}
+print("Create model")
 
 mod <- distribution(background) %>% 
        add_biodiversity_poipo(virtual_species,
@@ -138,7 +150,8 @@ names(mod)
 
 Now finally the model can be estimated using the supplied engine. The `train` function has many available parameters that affect how the model is being fitted. Unless not possible, the default way is fitting a linear model based on the provided engine and biodiversity data types.
 
-```{r}
+```{r eval = TRUE}
+print("Fit model")
 
 # Finally train
 fit <- train(mod,
@@ -160,6 +173,7 @@ As before the created distribution model object can be visualized and interacted
 ```{r Plot the model output, fig.width = 10, fig.height = 8}
 # Plot the mean of the posterior predictions
 plot(fit, "mean")
+
 # Print out some summary statistics
 summary(fit)
 
@@ -220,6 +234,7 @@ validate(fit, method = "disc")
 ```
 
 Validating integrated SDMs, particular those fitted with multiple likelihoods is challenging and something that has not yet fully been explored in the scientific literature. For example strong priors can substantially improve by modifying the response functions in the model, but are challenging to validate if the validation data has similar biases as the training data.
+One way such SDMs can be validated is through spatial block validation, where however care needs to be taken on which datasets are part of which block.
 
 ### Constrain a model in prediction space
 
@@ -227,11 +242,11 @@ Species distribution models quite often extrapolate to areas in which the specie
 
 One option to counter this to some extent in SDMs is to add spatial constraints or `spatial latent effects`. The underlying assumption here is that distances in geographic space can to some extent approximate unknown or unquantified factors that determine a species range. Other options for constrains is to integrate additional data sources and add parameter constraints (see [`integrate_data`] vignette).
 
-Currently the `ibis.iSDM` package supports the addition of only spatial latent effects via `add_latent_spatial()`. See the help file for more information.
-
+Currently the `ibis.iSDM` package supports the addition of only spatial latent effects via `add_latent_spatial()`. See the help file for more information. Note that not every spatial term accounts for spatial autocorrelation, some simply add the distance between observations as predictor (thus assuming that much of the spatial pattern can be explained by commonalities in the sampling process).
 
 ```{r Train models with spatial constrains, fig.width = w, fig.height = h}
-# We are going to use the xgboost algorithm as engine below
+# Here we are going to use the xgboost algorithm instead and set as engine below.
+# We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.
 
 # Load the predictors again
 predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
@@ -247,7 +262,7 @@ predictors$koeppen_50km <- raster::ratify(predictors$koeppen_50km)
 x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
-  engine_xgboost(nrounds = 5000)
+  engine_xgboost(nrounds = 3000)
 
 # Now train 2 models, one without and one with a spatial latent effect
 mod_null <- train(x, runname = 'Normal PPM projection', only_linear = TRUE, verbose = FALSE)
@@ -262,18 +277,20 @@ plot(mod_null)
 plot(mod_dist)
 
 ```
-Another option for constraining the prediction is to place concrete limits on the prediction surface. 
-This can be done by adding a `factor` zone layer to the distribution object. Internally, it is then assessed in which of the 'zones' the biodiversity points fall, discarding all others.
+Another option for constraining a prediction is to place concrete limits on the prediction surface. 
+This can be done by adding a `factor` zone layer to the distribution object. Internally, it is then assessed in which of the 'zones' any biodiversity observations fall, discarding all others from the prediction. 
+This approach can be particular suitable for current and future projections at larger scale using for instance a biome layer as stratification. It assumes that it is rather unlikely that species distributions shift to different biomes entirely, for instance because of dispersal or eco-evolutionary constraints.
 **Note that this approach effectively also limits the prediction background / output!**
 
 ```{r Prediction limits, fig.width = w, fig.height = h}
-# Create again a distribution object, but this time with limits (use the köppen layer from above)
+# Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)
+# The zones layer must be a factor layer (e.g. is.factor(layer) )
 x <- distribution(background, limits = predictors$koeppen_50km) %>%
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") %>% 
-  engine_xgboost(nrounds = 5000)
+  engine_xgboost(nrounds = 3000)
 
 # Spatially limited prediction
 mod_limited <- train(x, runname = 'Limited prediction background', only_linear = TRUE, verbose = FALSE)

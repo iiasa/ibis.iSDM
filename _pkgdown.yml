@@ -147,6 +147,8 @@ reference:
     contents:
       - as.Id
       - is.Id
+      - has_keyword("misc")
+      - print
       - myLog
       - new_id
       - new_waiver
