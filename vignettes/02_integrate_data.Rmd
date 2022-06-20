@@ -107,8 +107,6 @@ mod1 <- basemodel %>%
 # We can see that the range has been added to the predictors object
 # 'distance_range'
 mod1$get_predictor_names()
-plot( mod1$predictors$get_data()[["distance_range"]] )
-
 ```
 Expert-ranges can currently be added as simple `binary` or `distance` transform. For the latter more options are available in the `bossMaps` R-package as described in [Merow et al. 2017](http://doi.wiley.com/10.1111/geb.12539).
 

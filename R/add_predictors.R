@@ -171,12 +171,12 @@ methods::setMethod(
             o <- raster::addLayer(o, explode_factorized_raster(layer))
           }
           env_f <- o;rm(o)
+          # Joining back to full raster stack
+          env <- raster::stack(env, env_f);rm(env_f)
         }
-        # Joing back to full raster stack
-        env <- raster::stack(env, env_f);rm(env_f)
         has_factors <- FALSE # Set to false since factors have been exploded.
       } else { has_factors <- TRUE }
-    } else {has_factors <- FALSE}
+    } else { has_factors <- FALSE }
 
     # Standardization and scaling
     if('none' %notin% transform){
@@ -194,8 +194,11 @@ methods::setMethod(
       env <- raster::addLayer(env, new_env)
     }
 
-    # Add factors back in if there are any
-    if(has_factors) env <- raster::addLayer(env, env_f)
+    # Add factors back in if there are any.
+    # This is to avoid that they are transformed or similar
+    if(has_factors){
+      env <- raster::addLayer(env, env_f)
+    }
     attr(env, 'has_factors') <- has_factors
 
     # Assign an attribute to this object to keep track of it
@@ -205,9 +208,9 @@ methods::setMethod(
     if(bgmask){
       env <- raster::mask(env, mask = x$background)
       # Reratify, work somehow only on stacks
-      if(has_factors){
+      if(has_factors && any(is.factor(env)) ){
         new_env <- raster::stack(env)
-        new_env[[which(is.factor(env))]] <- ratify(env[[which(is.factor(env))]])
+        new_env[[which(is.factor(env))]] <- raster::ratify(env[[which(is.factor(env))]])
         env <- new_env;rm(new_env)
       } else env <- raster::stack(env)
     }
