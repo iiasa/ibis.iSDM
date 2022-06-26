@@ -6,7 +6,7 @@
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)
 
-\S4method{XGBPrior}{character}(variable)
+\S4method{XGBPrior}{character, character}(variable, hyper)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
@@ -43,6 +43,7 @@ Other prior:
 \code{\link{STANPrior}()},
 \code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
+\code{\link{get_priors}()},
 \code{\link{priors}()},
 \code{\link{rm_priors}()}
 }

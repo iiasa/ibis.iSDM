@@ -543,6 +543,13 @@ engine_bart <- function(x,
             # Also return spatial
             return(p)
           },
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            cofs <- self$summary()
+            cofs$Sigma <- NA
+            names(cofs) <- c("Feature", "Weights")
+            return(cofs)
+          },
           # Engine-specific projection function
           project = function(self, newdata, summary = 'mean'){
             assertthat::assert_that(!missing(newdata),

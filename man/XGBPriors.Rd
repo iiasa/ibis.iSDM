@@ -33,6 +33,7 @@ Other prior:
 \code{\link{STANPrior}()},
 \code{\link{XGBPrior}()},
 \code{\link{add_priors}()},
+\code{\link{get_priors}()},
 \code{\link{priors}()},
 \code{\link{rm_priors}()}
 }

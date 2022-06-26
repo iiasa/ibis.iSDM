@@ -73,10 +73,10 @@ PriorList <- bdproto(
     # If type is specified
     if(!is.null(type)){
       # Return the id of the combination
-      if((variable %in% vn) && (type %in% vt) ) return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] ) else return(NULL)
+      if(all(variable %in% vn) && (type %in% vt) ) return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] ) else return(NULL)
     } else {
       # Simply match against variable names and return id
-      if(!variable %in% vn) return(NULL)
+      if(!all(variable %in% vn)) return(NULL)
       return( names(vn)[match(variable, vn,nomatch = 0)] )
     }
   },

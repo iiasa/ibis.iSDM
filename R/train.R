@@ -67,6 +67,8 @@ NULL
 #' are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 #' partialed out during prediction. Here the first dataset added determines the reference level
 #' (see Leung et al. 2019 for a description).
+#' [*] \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
+#' Might not work with any engine!
 #'
 #' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
@@ -151,7 +153,7 @@ methods::setMethod(
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
-    method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction"), several.ok = FALSE)
+    method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior"), several.ok = FALSE)
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -626,7 +628,15 @@ methods::setMethod(
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
-        if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
+        if(id != ids[length(ids)] && method_integration == "prior") {
+          # No need to make predictions if we use priors only
+          settings2$set('inference_only', TRUE)
+        } else if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
+        }
         out <- x$engine$train(model2, settings2)
         rm(model2)
         # Add Prediction of model to next object if multiple are supplied
@@ -686,6 +696,10 @@ methods::setMethod(
               rm(news)
             }
             rm(new)
+          } else if(method_integration == "prior"){
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
           }
         } # End of multiple ids
       }
@@ -713,7 +727,15 @@ methods::setMethod(
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
-        if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
+        if(id != ids[length(ids)] && method_integration == "prior") {
+          # No need to make predictions if we use priors only
+          settings2$set('inference_only', TRUE)
+        } else if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
+        }
         out <- x$engine$train(model2, settings2)
         rm(model2)
 
@@ -774,6 +796,10 @@ methods::setMethod(
               rm(news)
             }
             rm(new)
+          } else if(method_integration == "prior"){
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
           }
         }
       }
@@ -801,7 +827,15 @@ methods::setMethod(
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
-        if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
+        if(id != ids[length(ids)] && method_integration == "prior") {
+          # No need to make predictions if we use priors only
+          settings2$set('inference_only', TRUE)
+        } else if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
+        }
         out <- x$engine$train(model2, settings2)
         rm(model2)
 
@@ -864,6 +898,10 @@ methods::setMethod(
               rm(news)
             }
             rm(new)
+          } else if(method_integration == "prior"){
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
           }
         } # End of multiple likelihood function
 
@@ -930,7 +968,6 @@ methods::setMethod(
     } else if (inherits(x$engine,"BREG-Engine") ){
     # ----------------------------------------------------------- #
     #### BREG Engine ####
-
     assertthat::assert_that(
       !(method_integration == "offset" && any(types == "poipa")),
       msg = "Due to engine limitations BREG models do not support offsets for integration!"
@@ -949,7 +986,15 @@ methods::setMethod(
 
       # Now train the model and create a predicted distribution model
       settings2 <- settings
-      if(id != ids[length(ids)]) settings2$set('inference_only', FALSE)
+      if(id != ids[length(ids)] && method_integration == "prior") {
+        # No need to make predictions if we use priors only
+        settings2$set('inference_only', TRUE)
+      } else if(id != ids[length(ids)]){
+        # For predictors and offsets
+        settings2$set('inference_only', FALSE)
+      } else {
+        settings2$set('inference_only', inference_only)
+      }
       out <- x$engine$train(model2, settings2)
 
       # Add Prediction of model to next object if multiple are supplied
@@ -1009,6 +1054,10 @@ methods::setMethod(
             rm(news)
           }
           rm(new)
+        } else if(method_integration == "prior"){
+          # Use the previous model to define and set priors
+          po <- get_priors(out, x$engine$name)
+          model$priors <- po
         }
 
         } # End of multiple ides

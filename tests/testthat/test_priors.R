@@ -17,6 +17,9 @@ test_that('Create and add priors', {
   # Check empty priors
   expect_error(priors( INLAPrior(variable = '', type = 'normal') ))
 
+  # Linear not supported anymore
+  expect_error(INLAPrior(variable = "test",type = "linear"))
+
   # Now add another prior
   new <- INLAPrior(variable = 'forest', type = 'normal', hyper = c(2, 0.5))
 
@@ -105,6 +108,13 @@ test_that('Create and add priors', {
   pg <- priors(GDBPrior('bias','positive'))
   expect_equal(pg$length(),1)
   expect_equal(pg$get('bias'),'positive')
+
+  # --- #
+  # Add INLA priors of different types
+  pp1 <- INLAPrior(variable = "bias",type = "normal",hyper = c(0,1))
+  pp2 <- INLAPrior(variable = "bias",type = "gaussian",hyper = c(0,1))
+  expect_warning(pp <- priors(pp1,pp2))
+  expect_equal(pp$length(), 1)
 })
 
 test_that('Add and modify priors to existing object', {

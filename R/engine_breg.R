@@ -320,7 +320,7 @@ engine_breg <- function(x,
           # Define a family specific Boom prior
           pp <- setup_prior_boom(form = form,
                                  data = df,
-                                 prior = model$priors,
+                                 priors = model$priors,
                                  family = fam,
                                  exposure = w
                                  )
@@ -623,6 +623,18 @@ engine_breg <- function(x,
               plot(prediction, col = ibis_colours$viridis_orig)
             }
             return(prediction)
+          },
+          # Get coefficients from breg
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            obj <- self$get_data("fit_best")
+            cofs <- posterior::summarise_draws(obj$beta)
+            cofs <- subset(cofs, select = c("variable", "mean", "sd"))
+            names(cofs) <- c("Feature", "Beta", "Sigma")
+            # Remove intercept(s)
+            int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+            if(length(int)>0) cofs <- cofs[-int,]
+            return(cofs)
           },
           # Engine-specific projection function
           project = function(self, newdata, type = NULL){

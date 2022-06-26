@@ -74,8 +74,10 @@ methods::setMethod(
                             is.null(value) || is.numeric(value),
                             is.logical(truncate)
     )
-    # Get raster
+    # Get prediction raster
     ras <- obj$get_data('prediction')
+    # Get model object
+    model <- obj$model
 
     # Check that the object actually contains a prediction
     assertthat::assert_that(
@@ -103,24 +105,25 @@ methods::setMethod(
     if((!any(poi$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(poi$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- raster::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
-      abs <- create_pseudoabsence(
-        env = obj$model$predictors,
-        presence = poi,
-        bias = obj$settings$get('bias_variable'),
-        template = bg,
-        npoints = ifelse(ncell(bg)<10000,ncell(bg),10000),
-        replace = TRUE
-      )
+      abs <- add_pseudoabsence(df = poi,
+                                   field_occurrence = 'observed',
+                                   template = bg,
+                                   # Assuming that settings are comparable among objects
+                                   settings = model$biodiversity[[1]]$pseudoabsence_settings
+                                   )
+
       abs <- subset(abs, select = c('x','y'));abs$observed <- 0
       abs <- guess_sf(abs)
       abs$name <- 'Background point'; abs$type <- "generated"
       suppressWarnings(
         abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
       )
+      poi <- subset(poi, select = c("observed", "name", "type","geometry"))
+      abs <- subset(abs, select = c("observed", "name", "type","geometry"))
       poi <- rbind(poi, abs);rm(abs)
     }
     # Convert to sf
-    poi <- sf::st_as_sf( poi, coords = c('x','y'), crs = sf::st_crs(obj$get_data('prediction')))
+    if(!inherits(poi,"sf")){ poi <- guess_sf(poi) }
 
     # Now self call threshold
     out <- threshold(ras, method = method, value = value, poi = poi, truncate = truncate,...)

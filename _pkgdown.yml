@@ -71,6 +71,8 @@ reference:
       - starts_with("set_")
       - starts_with("sel_")
       - starts_with("rm_")
+      - starts_with("get_")
+
 
   - title: Engines
     desc: Statistical models used for estimation of species distributions.

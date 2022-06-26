@@ -4,27 +4,36 @@ NULL
 #' Create a new INLA prior
 #'
 #' @description
-#' For any fixed and random effect Inla supports a range of different priors of exponential distributions.
-#' Unfortunately it does not support popular priors related to parameter regularization such as
-#' Laplace or Horseshoe priors, which limits the capability of [`engine_inla`] for regularization.
+#' For any fixed and random effect INLA supports a range of different priors of exponential distributions.
 #'
-#' Currently this package only implements priors related to \code{"linear"} coefficients
-#' that can be added to environmental predictors.
+#' Currently supported for INLA in ibis.iSDM are the following priors that can be specified via \code{"type"}:
 #'
-#' In addition it is also supports to specification of penalized complexity priors which can be added
-#' to a SPDE spatial random effect added via [`add_latent_spatial()`].
+#' [*] \code{"normal"} or \code{"gaussian"}: Priors on normal distributed and set to specified variable. Required parameters
+#'  are a mean and a precision estimate provided to \code{"hyper"}. Note that precision is not equivalent
+#'  (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of \code{0}
+#'  and a precision of \code{0.001}.
+#'
+#' [*] \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
+#' so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
+#' negative, positive or infinite.
+#'
+#' [*] \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
+#' penalized complexity priors which can be added to a SPDE spatial random effect added via [`add_latent_spatial()`].
 #' Here the range of the penalized complexity prior can be specified through \code{'prior.range'} and
 #' the uncertainty via \code{'prior.sigma'} both supplied to the options 'type' and 'hyper'.
+#'
 #' Other priors available in INLA \code{ names(INLA::inla.models()$prior) ) } might also work, but have not
 #' been tested!
+#' @note
+#' Compared to other engines INLA does unfortunately does not support priors related to
+#' more stringent parameter regularization such as Laplace or Horseshoe priors,
+#' which limits the capability of [`engine_inla`] for regularization. That
+#' being said many of the default priors act already regularizing to some degree.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters. First entry is treated as mean, the second as precision.
-#' Note that precision is not equivalent (rather the inverse) to typical standard deviation specified in Gaussian priors.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters. See description. Multiple entries can be supplied.
 #' @param ... Variables passed on to prior object.
-#' @note
-#' Currently only linear (\code{'linear'}) and constrained \code{'clinear'} linear priors are supported.
 #' @references
 #' * Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
 #' * Simpson, D., Rue, H., Riebler, A., Martins, T. G., & Sørbye, S. H. (2017). Penalising model component complexity: A principled, practical approach to constructing priors. Statistical science, 32(1), 1-28.
@@ -42,16 +51,15 @@ NULL
 methods::setGeneric(
   "INLAPrior",
   signature = methods::signature("variable", "type"),
-  function(variable, type = "linear", hyper = c(0, 0.001), ...) standardGeneric("INLAPrior"))
+  function(variable, type = "normal", hyper = c(0, 0.001), ...) standardGeneric("INLAPrior"))
 
-# TODO: Consider other INLA priors as well as they become relevant for the modelling, `names(INLA::inla.models()$prior)`
 #' @name INLAPrior
 #' @rdname INLAPrior
 #' @usage \S4method{INLAPrior}{character, character}(variable, type)
 methods::setMethod(
   "INLAPrior",
   methods::signature(variable = "character", type = "character"),
-  function(variable, type = "linear", hyper = c(0, 0.001), ... ) {
+  function(variable, type = "normal", hyper = c(0, 0.001), ... ) {
     assertthat::assert_that(!missing(variable), !missing(type),
                             msg = 'Variable or type unset.')
     assertthat::assert_that(
@@ -60,19 +68,9 @@ methods::setMethod(
       is.vector(hyper), length(hyper) == 2,
       all(is.numeric(hyper))
     )
-    # FIXME: Further checks for mean and precision and whether they are in realistic bounds
-    # assertthat::assert_that(
-    #   all(hyper > -1e2) && all(hyper < 1e2), # Check bounds
-    #   msg = 'Potentially unrealistic priors specified.'
-    # )
+
     # Match supplied type in case someone has been lazy
     type <- match.arg(type, c('clinear','prior.range','prior.sigma',names(INLA::inla.models()$prior) ), several.ok = FALSE)
-
-    # Check bounds for clinear being correct
-    if(type=='clinear') assertthat::assert_that( hyper[1] < hyper[2])
-
-    # Rename prior?
-    # FIXME: This assumes that values have been supplied in this order. Implement checks
 
     # Other supplied arguments
     #args <- as.list(match.call())

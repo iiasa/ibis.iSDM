@@ -441,9 +441,6 @@ methods::setMethod(
     assertthat::assert_that(length(unique(polpa[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column.")
 
-    # Messenger
-    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpa dataset...")
-
     # Simulate presence absence points rather than using the range directly
     if(simulate){
       # Simulation strategy
@@ -506,6 +503,9 @@ methods::setMethod(
       add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
                              field_occurrence = field_occurrence, formula = formula, family = family, link = link, ... )
     } else {
+
+      # Messenger
+      if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpa dataset...")
 
       # If no points are simulated, ensure that the polygon has objects with at least 2 factor levels
       assertthat::assert_that(

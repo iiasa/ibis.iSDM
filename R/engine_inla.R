@@ -910,6 +910,17 @@ engine_inla <- function(x,
 
                 # Plot and return result
               },
+              # Get coefficients
+              get_coefficients = function(self){
+                # Returns a vector of the coefficients with direction/importance
+                cofs <- self$summary()
+                cofs <- subset(cofs, select = c("variable", "mean", "sd"))
+                names(cofs) <- c("Feature", "Beta", "Sigma")
+                # Remove intercept(s)
+                int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+                if(length(int)>0) cofs <- cofs[-int,]
+                return(cofs)
+              },
               # Function to plot SPDE if existing
               plot_spatial = function(self, dim = c(300,300), kappa_cor = FALSE, what = "spatial.field1", ...){
                 assertthat::assert_that(is.vector(dim),

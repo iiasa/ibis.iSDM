@@ -103,7 +103,7 @@ objects.</p>
 
 
 <dt>env</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">RasterStack</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/Raster-classes.html" class="external-link">RasterLayer</a></code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
+<dd><p>A <code>RasterStack</code>, <code>RasterLayer</code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
 
 
 <dt>names</dt>
@@ -154,7 +154,7 @@ Both transformations and derivates can also be combined.
 Available options for transformation are:</p><ul><li><p><code>'none'</code> - Leaves the provided predictors in the original scale.</p></li>
 <li><p><code>'pca'</code> - Converts the predictors to principal components. Note that this
 results in a renaming of the variables to principal component axes!</p></li>
-<li><p><code>'scale'</code> - Transforms all predictors by applying <a href="https://rdrr.io/pkg/raster/man/scale.html" class="external-link">scale</a> on them.</p></li>
+<li><p><code>'scale'</code> - Transforms all predictors by applying <a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a> on them.</p></li>
 <li><p><code>'norm'</code> - Normalizes all predictors by transforming them to a scale from 0 to 1.</p></li>
 <li><p><code>'windsor'</code> - Applies a windsorization to the target predictors. By default
 this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove

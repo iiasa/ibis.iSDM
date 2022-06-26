@@ -93,14 +93,16 @@ methods::setMethod(
         unique(sf::st_geometry_type(point)) %in% c('POINT', 'MULTIPOINT'),
         # Check that the point data has presence-absence information
         hasName(point, point_column),
-        !is.na(sf::st_crs(point)$proj),
-        length( unique( point[[point_column]] ) ) >1
+        !is.na(sf::st_crs(point)$proj)
       )
       # If sf is different, reproject to prediction
       if(sf::st_crs(point)!= sf::st_crs(prediction)){
         point <- sf::st_transform(point, crs = sf::st_crs(prediction) )
       }
       if(!hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
+      if(!hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
+      # Ensure comparable columns
+      point <- subset(point, select = c(point_column, "name", "type", "geometry"))
     } else {
       # TODO: Think about how to do validation with non-point data
       # Get all point datasets and combine them
@@ -140,13 +142,14 @@ methods::setMethod(
 
       # Check that absence points are present, otherwise add some.
       # Reason is that some engine such as inlabru don't save their integration points
-      if( length(unique(df2$observed))==1 && method == "discrete"){
+      if( all(unique(df2$observed) == 1) && method == "discrete"){
         if(getOption('ibis.setupmessages')) myLog('[Validation]','yellow','No absence data found for threshold. Generating random points.')
         o <- sf::st_as_sf( raster::sampleRandom(threshold, size = nrow(df2)*2, sp = TRUE) )
         o <- o[o[[1]]==0,]
         abs <- list(); abs[[point_column]] <- o[[1]]
         abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
         abs[["pred"]] <- raster::extract(prediction, o); abs[["pred_tr"]] <- o[[1]]
+
         df2 <- rbind(df2, as.data.frame(abs))
       }
       # Validate the threshold

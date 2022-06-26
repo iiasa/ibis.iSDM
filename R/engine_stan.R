@@ -554,7 +554,7 @@ engine_stan <- function(x,
           fits = list(
             "fit_best" = fit_stan,
             "prediction" = prediction,
-            "sm_code" = self$get_data("sm_code")
+            "sm_code" = self$get_data("stancode")
           ),
           # Project function
           project = function(self, newdata, offset = NULL, type = NULL){
@@ -717,6 +717,17 @@ engine_stan <- function(x,
               plot(prediction[[c("mean","sd")]], col = ibis_colours$viridis_orig)
             }
             return(prediction)
+          },
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            cofs <- self$summary()
+            if(nrow(cofs)==0) return(NULL)
+            cofs <- subset(cofs, select = c("parameter", "mean", "sd"))
+            names(cofs) <- c("Feature", "Beta", "Sigma")
+            # Remove intercept(s)
+            int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+            if(length(int)>0) cofs <- cofs[-int,]
+            return(cofs)
           },
           # Spatial latent effect
           plot_spatial = function(self, plot = TRUE){

@@ -65,6 +65,8 @@ on the model family. This option might not be supported for every \code{\link{en
 are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 partialed out during prediction. Here the first dataset added determines the reference level
 (see Leung et al. 2019 for a description).
+\link{*} \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
+Might not work with any engine!
 
 \strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}
 

@@ -563,6 +563,18 @@ engine_gdb <- function(x,
             }
             return(temp)
           },
+          # Get coefficients
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            cofs <- self$summary()
+            if(nrow(cofs)==0) return(NULL)
+            # Sanitize and remove base learners from object
+            cofs$variable <- gsub('bols\\(|bbs\\(|bmono\\(', '', cofs$variable)
+            cofs$variable <- sapply(strsplit(cofs$variable, ","), function(z) z[[1]])
+            cofs$variable <- gsub('\\)', '', cofs$variable)
+            names(cofs) <- c("Feature", "Weights", "Beta")
+            return(cofs)
+          },
           # Spatial latent effect
           plot_spatial = function(self, plot = TRUE){
             assertthat::assert_that('fit_best' %in% names(self$fits) )
