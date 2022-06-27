@@ -73,31 +73,34 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
   # Conservatively just assume the priors are relevant (Default is 1)
   esize <- priors$length()
 
+  # Get variable names
+  vars <- priors$varnames()
+
   # Optional coefficient estimates
-  if(any(is.numeric( priors$get(priors$varnames()) ))){
-    # If any are set, define optional coefficient estimates
-    co <- vector(length = ncol(mm));co[] <- 0;names(co) <- colnames(mm)
-    co["(Intercept)"] <- mean( mean(data[["observed"]]) )
-    for(val in priors$varnames()){
-      co[val] <- priors$get(val, what = "value")
-    }
-  } else { co <- NULL}
+  # If any are set, define optional coefficient estimates
+  co <- vector(length = ncol(mm));co[] <- 0;names(co) <- colnames(mm)
+  co["(Intercept)"] <- mean( mean(data[["observed"]]) )
+  for(val in vars){
+    z <- priors$get(val, what = "value")
+    if(is.null(z)) next()
+    co[val] <- z
+  }
 
   # Option inclusion probabilities
-  if(any(is.numeric( priors$get(priors$varnames(), what = "prob") ))){
-    # Probabily of inclusion for each variable
-    if(esize < (ncol(mm)) ) {
-      #Specify default as each having equal probability
-      co.ip <- rep(esize/ncol(mm), ncol(mm))
-    } else {
-      co.ip <- rep(1, ncol(mm))
-    }
-    names(co.ip) <- colnames(mm)
-    # Now set priors for those where set
-    for(val in priors$varnames()){
-      co.ip[val] <- priors$get(val, what = "prob")
-    }
-  } else { co.ip <- NULL}
+  # Probability of inclusion for each variable
+  if(esize < (ncol(mm)) ) {
+    #Specify default as each having equal probability
+    co.ip <- rep(esize/ncol(mm), ncol(mm))
+  } else {
+    co.ip <- rep(1, ncol(mm))
+  }
+  names(co.ip) <- colnames(mm)
+  # Now set priors for those where set
+  for(val in vars){
+    z <- priors$get(val, what = "prob")
+    if(is.null(z)) next()
+    co.ip[val] <- z
+  }
 
   # Create priors depending on input family
   if(family == "poisson"){

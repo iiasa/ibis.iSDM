@@ -160,9 +160,13 @@ A different type of integration is also possible through the use of priors which
 fixed or random effects. In a Bayesian sense a prior is generally understood as some form of uncertain quantity that is meant to reflect the direction and/or magnitude of model parameters and is usually known a-priori to any inference or prediction. Since the ibis.iSDM package supports a variety of engines and not all of them are Bayesian in a strict sense (such as `engine_gdb` or `engine_xgboost`), the specification of priors differs depending on the engine in question. 
 
 Generally [`Prior-class`] objects can be grouped into:
+
 * Probabilistic priors with estimates placed on for example the mean ($\mu$) and standard deviation ($\sigma$) or precision in the case of [`engine_inla`].
+
 * Monotonic constraints on the direction of a coefficient in the model. Useful to incorporate for instance prior ecological knowledge on that a certain response function has to be positive.
+
 * More complex priors specified on random spatial effects such as penalized complexity priors used for SPDE effects in [`add_latent_spatial()`]. 
+
 * Probabilistic priors on the inclusion probability of a certain variable such as to what certainty the variable should or should not be included in a regularized outcome.
 
 Prior specifications are specific to each engine and more information can be found on the individual help pages of the `priors()` function.
@@ -199,6 +203,8 @@ p1 <- partial(mod1, pp$varnames(), plot = TRUE)
 p2 <- partial(mod2, pp$varnames(), plot = TRUE)
 
 ```
+
+There is also now a convenience function that allows to extractt coefficients or weights from an existing model when can then be passed to another model or engine (`get_priors()`). Required is only that a fitted model is provided as well as a target engine for which coefficients are to be created.
 
 ---
 
@@ -251,12 +257,17 @@ Depending on the engine, the ibis.iSDM package currently supports either combine
 By default all engines that do not support any joint estimation (see below) will make use of a combined integration, for which there are currently three different options:
 
 * "predictor": The predicted output of the first (or previously fitted) models are added to the predictor stack and thus are predictors for subsequent models (Default).
+
 * "offset": The predicted output of the first (or previously fitted) models are added as spatial offsets to subsequent models. Offsets are back-transformed depending on the model family.
-* "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset). 
+
+* "prior": In this option we only make use of the coefficients from a previous model to define priors to be used in the next model. Might not work with any engine!
+
+* "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset). This subsequently only works if one fits a model with multiple datasets on the same response (e.g. Bernoulli distributed).
+
 
 All of these can be specified as parameter in `train()`.
 
-** Note that for "predictor" and "offset" models are trained in the sequence to which datasets have been added! **
+<b>Note that for "predictor" and "offset" models are trained in the sequence to which datasets have been added!</b>
 
 ```{r Combined integration}
 # Specification 

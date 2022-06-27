@@ -39,7 +39,8 @@ Settings <- bdproto(
   # Computation duration convenience function
   duration = function(self){
     assertthat::assert_that('start.time' %in% names(self$data),
-                            'end.time' %in% names(self$data))
+                            'end.time' %in% names(self$data),
+                            msg = "Model duration not computed or model not fitted!")
     return(
       self$data$end.time - self$data$start.time
       )
@@ -52,9 +53,17 @@ Settings <- bdproto(
     } else { return(new_waiver()) }
   },
   # Set setting
-  set = function(self, what, x){
+  set = function(self, what, x, copy = FALSE){
     assertthat::assert_that(is.character(what))
-    self$data[[what]] <- x
-    invisible()
+    # Get biodiversity dataset collection
+    ff <- self$data
+    # Set the object
+    ff[[what]] <- x
+    if(copy){
+      # If the object is an actual copy of the original one
+      bdproto(NULL, self, data = ff )
+    } else {
+      self$data <- ff
+    }
   }
 )

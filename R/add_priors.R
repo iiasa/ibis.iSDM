@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R bdproto-priorlist.R
+#' @include utils.R bdproto.R bdproto-prior.R bdproto-priorlist.R bdproto-distributionmodel.R
 NULL
 
 #' Add priors to an existing distribution object
@@ -121,3 +121,182 @@ methods::setMethod(
     return(x)
   }
 )
+
+#### Get priors from model - ####
+
+#' Create priors from an existing distribution model
+#'
+#' @description
+#' Often it can make sense to fit an additional model to get a grasp on the range of
+#' values that "beta" parameters can take. This function takes an existing [`BiodiversityDistribution-class`] object
+#' and creates [`PriorList-class`] object from them. The resulting object can be used to add for instance [priors]
+#' to a new model.
+#' @note
+#' Not all engines support priors in similar ways. See the vignettes and help pages on that topic!
+#' @param mod A fitted [`DistributionModel-class`] object. If instead a [`BiodiversityDistribution-class`] object
+#' is passed to this function, it simply returns the contained priors used for estimation (if any).
+#' @param target_engine A [`character`] for which the priors should be created.
+#' @param ... Other parameters passed down.
+#' @family prior
+#' @aliases get_priors
+#' @examples
+#' \dontrun{
+#'  mod <- distribution(background) %>%
+#'     add_predictors(covariates) %>%
+#'     add_biodiversity_poipo(points) %>%
+#'     engine_inlabru() %>%
+#'     train()
+#'  get_priors(mod, target_engine = "BART")
+#' }
+#' @name get_priors
+NULL
+
+#' @name get_priors
+#' @rdname get_priors
+#' @exportMethod get_priors
+#' @export
+methods::setGeneric(
+  "get_priors",
+  signature = methods::signature("mod", "target_engine"),
+  function(mod, target_engine, ...) standardGeneric("get_priors"))
+
+#' @name get_priors
+#' @rdname get_priors
+#' @usage \S4method{get_priors}{ANY, character}(mod, target_engine)
+methods::setMethod(
+  "get_priors",
+  methods::signature(mod = "ANY", target_engine = "character"),
+  function(mod, target_engine, ...) {
+    assertthat::assert_that(inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityDistribution-class"),
+                            is.character(target_engine)
+    )
+    if(inherits(mod, "BiodiversityDistribution-class")){ return( mod$model$priors ) }
+    check_package("scales")
+    # Catch character for engines
+    target_engine <- match.arg(toupper(target_engine), choices = c("BART", "<BART>",
+                                                                   "GDB", "<GDB>",
+                                                                   "INLA", "<INLA>",
+                                                                   "BART", "<BART>",
+                                                                   "STAN", "<STAN>",
+                                                                   "BREG", "<BREG>",
+                                                                   "XGBOOST","<XGBOOST>"), several.ok = FALSE)
+
+    # Get the coefficients
+    cofs <- mod$get_coefficients()
+    if(nrow(cofs)==0) return(NULL) # Something went wrong here
+
+    # Check type of coefficients
+    has_weights <- length( grep("weight", names(cofs),ignore.case = TRUE) ) > 0
+    has_beta <- length( grep("beta", names(cofs),ignore.case = TRUE) ) > 0
+    has_sigma <- length( grep("sigma", names(cofs),ignore.case = TRUE) ) > 0
+
+    # Now depending on the target engine, and formulate priors for the target engine
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Create prior object from coefficients.')
+
+    pl <- list()
+    for(i in 1:nrow(cofs)){
+      sub <- cofs[i,]
+
+      # --- BREG ---
+      if(target_engine %in% c("BREG", "<BREG>")){
+        if(has_weights){
+          # Only weights available
+          pl[[i]] <- BREGPrior(variable = sub$Feature,
+                               # Hyper
+                               hyper = NULL,
+                               ip = sub$Weight
+          )
+        } else {
+          # Has beta coefficients
+          # Also sigma? If so, alter inclusion probability for sellner-Prior  ?
+          pl[[i]] <- BREGPrior(variable = sub$Feature,
+                               # Hyper
+                               hyper = sub$Beta,
+                               ip = NULL
+          )
+        }
+      }
+      # --- BART ---
+      if(target_engine %in% c("BART", "<BART>")){
+        if(has_weights){
+          pl[[i]] <- BARTPrior(variable = sub$Feature,
+                               hyper = scales::rescale(cofs$Weights, to = c(1e-2, 1))[i] )
+        } else {
+          # Beta coefficients, convert them to absolute, log-transform and then scale
+          val <- scales::rescale( log(abs(cofs$Beta)), to = c(1e-02, 1))[i]
+          pl[[i]] <- BARTPrior(variable = sub$Feature,
+                               hyper = val )
+        }
+      }
+      # --- GDB ---
+      if(target_engine %in% c("GDB", "<GDB>")){
+        if(has_beta){
+          pl[[i]] <- GDBPrior(variable = sub$Feature,
+                              hyper = ifelse(sub$Beta >0, "increasing", "decreasing"))
+        } else {
+          # Unfortunately can't set any priors based on weights alone, thus set to none
+          pl[[i]] <- GDBPrior(variable = sub$Feature,
+                              hyper = "none")
+        }
+      }
+      # --- XGBOOST ---
+      if(target_engine %in% c("XGBOOST", "<XGBOOST>")){
+        if(has_beta){
+          val <- ifelse(sub$Beta >0,
+                        ifelse(sub$Beta > 0.05, "increasing", "positive"),
+                        ifelse(sub$Beta < -0.05, "decreasing", "negative")
+                        )
+          pl[[i]] <- XGBPrior(variable = sub$Feature, hyper = val)
+        } else {
+          # Unfortunately can't set any priors based on weights alone, thus set to none
+          pl[[i]] <- XGBPrior(variable = sub$Feature,
+                              hyper = "none")
+        }
+      }
+      # --- STAN ---
+      if(target_engine %in% c("STAN", "<STAN>")){
+        if(has_beta && has_sigma){
+          pl[[i]] <- STANPrior(variable = sub$Feature,
+                               type = "gaussian",
+                               hyper = c(sub$Beta, sub$Sigma)
+          )
+        } else if(has_beta && !has_sigma) {
+          pl[[i]] <- STANPrior(variable = sub$Feature,
+                               type = "gaussian",
+                               hyper = c(sub$Beta, 0.05)
+          )
+        }
+      }
+      # --- INLA ---
+      if(target_engine %in% c("INLA", "<INLA>")){
+        if(has_beta && has_sigma){
+          # Specify with precision priors
+          pl[[i]] <- INLAPrior(variable = sub$Feature,
+                               type = "gaussian",
+                               hyper = c(sub$Beta, (sub$Sigma)^-2)
+          )
+        } else if(has_beta && !has_sigma) {
+          # Now sigma. Set to a default
+          pl[[i]] <- INLAPrior(variable = sub$Feature,
+                               type = "gaussian",
+                               hyper = c(sub$Beta, 0.001)
+          )
+        } # INLA not working with weights afaik
+      }
+    }
+
+    # Final checks and conversion
+    assertthat::assert_that(is.list(pl))
+    if(length(pl)>0){
+      op <- priors(pl)
+
+      assertthat::assert_that(
+        inherits(op, "PriorList"),
+        op$length() == nrow(cofs)
+      )
+    } else { op <- NULL }
+
+    return( op )
+  }
+)
+

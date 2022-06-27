@@ -4,7 +4,7 @@
 \alias{INLAPrior}
 \title{Create a new INLA prior}
 \usage{
-INLAPrior(variable, type = "linear", hyper = c(0, 0.001), ...)
+INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)
 
 \S4method{INLAPrior}{character, character}(variable, type)
 }
@@ -13,28 +13,37 @@ INLAPrior(variable, type = "linear", hyper = c(0, 0.001), ...)
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters. First entry is treated as mean, the second as precision.
-Note that precision is not equivalent (rather the inverse) to typical standard deviation specified in Gaussian priors.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters. See description. Multiple entries can be supplied.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-For any fixed and random effect Inla supports a range of different priors of exponential distributions.
-Unfortunately it does not support popular priors related to parameter regularization such as
-Laplace or Horseshoe priors, which limits the capability of \code{\link{engine_inla}} for regularization.
+For any fixed and random effect INLA supports a range of different priors of exponential distributions.
 
-Currently this package only implements priors related to \code{"linear"} coefficients
-that can be added to environmental predictors.
+Currently supported for INLA in ibis.iSDM are the following priors that can be specified via \code{"type"}:
 
-In addition it is also supports to specification of penalized complexity priors which can be added
-to a SPDE spatial random effect added via \code{\link[=add_latent_spatial]{add_latent_spatial()}}.
+\link{*} \code{"normal"} or \code{"gaussian"}: Priors on normal distributed and set to specified variable. Required parameters
+are a mean and a precision estimate provided to \code{"hyper"}. Note that precision is not equivalent
+(rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of \code{0}
+and a precision of \code{0.001}.
+
+\link{*} \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
+so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
+negative, positive or infinite.
+
+\link{*} \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
+penalized complexity priors which can be added to a SPDE spatial random effect added via \code{\link[=add_latent_spatial]{add_latent_spatial()}}.
 Here the range of the penalized complexity prior can be specified through \code{'prior.range'} and
 the uncertainty via \code{'prior.sigma'} both supplied to the options 'type' and 'hyper'.
+
 Other priors available in INLA \code{ names(INLA::inla.models()$prior) ) } might also work, but have not
 been tested!
 }
 \note{
-Currently only linear (\code{'linear'}) and constrained \code{'clinear'} linear priors are supported.
+Compared to other engines INLA does unfortunately does not support priors related to
+more stringent parameter regularization such as Laplace or Horseshoe priors,
+which limits the capability of \code{\link{engine_inla}} for regularization. That
+being said many of the default priors act already regularizing to some degree.
 }
 \references{
 \itemize{
@@ -58,6 +67,7 @@ Other prior:
 \code{\link{XGBPriors}()},
 \code{\link{XGBPrior}()},
 \code{\link{add_priors}()},
+\code{\link{get_priors}()},
 \code{\link{priors}()},
 \code{\link{rm_priors}()}
 }

@@ -514,7 +514,9 @@ engine_xgboost <- function(x,
         if(settings$get('only_linear') && params$booster == "gblinear"){
           params[c("colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample")] <- NULL
         }
-
+        if(settings$get('only_linear') && !is.Waiver(model$priors)){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Monotonic constraints not supported for linear regressor.')
+        }
         # Fit the model.
         # watchlist <- list(train = df_train,test = df_test)
         fit_xgb <- xgboost::xgboost(
@@ -687,6 +689,17 @@ engine_xgboost <- function(x,
             prediction <- raster::mask(prediction, self$get_data('prediction') )
 
             return(prediction)
+          },
+          # Get coefficients
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            obj <- self$get_data('fit_best')
+            # Simply use the weights from the importance estimates
+            cofs <- xgboost:::xgb.importance(model = obj) %>%
+              as.data.frame()
+            cofs$Sigma <- NA
+            names(cofs) <- c("Feature", "Beta", "Sigma")
+            return(cofs)
           },
           # Save the model object
           save = function(self, fname, what = "fit_best"){

@@ -533,10 +533,17 @@ engine_inlabru <- function(x,
               # If a prior has been specified
               if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
                 vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
-                pp <- paste0(c(
-                  ', mean.linear = ', model$priors$get(vn)[1],', ',
-                  'prec.linear = ', model$priors$get(vn)[2],''
-                ),collapse = "" )
+                ty <- model$priors$types()[names(vn)]
+                if(ty %in% c("gaussian", "normal")){
+                  pp <- paste0(c(
+                    ', mean.linear = ', model$priors$get(vn)[1],', ',
+                    'prec.linear = ', model$priors$get(vn)[2],''
+                  ),collapse = "" )
+                } else if(ty == "clinear"){
+                  pp <- paste0("hyper = list(theta = c(prior = \'clinear\', param = c(",
+                               model$priors$get(vn)[1],", ",model$priors$get(vn)[2],")))")
+                  m <- "clinear"
+                }
               } else {pp <- "" }
             } else { pp <- "" }
             if( m!= "linear" ){
@@ -1118,6 +1125,16 @@ engine_inlabru <- function(x,
               )
             }
           },
+          get_coefficients = function(self){
+            # Returns a vector of the coefficients with direction/importance
+            cofs <- self$summary()
+            cofs <- subset(cofs, select = c("variable", "mean", "sd"))
+            names(cofs) <- c("Feature", "Beta", "Sigma")
+            # Remove intercept(s)
+            int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+            if(length(int)>0) cofs <- cofs[-int,]
+            return(cofs)
+          },
           # Function to plot SPDE if existing
           plot_spatial = function(self, spat = NULL, type = "response", what = "spatial.field1", ...){
             # Get mesh, domain and model
@@ -1137,7 +1154,7 @@ engine_inlabru <- function(x,
                                       is.character(what)
               )
               # Check whether random variable exists, otherwise raise warning
-              if(what %in% names(mod$summary.random)){
+              if(!(what %in% names(mod$summary.random))){
                 stop(paste0(
                   "Spatial random effect not found. Set 'what' to one of these: ",
                   paste0(names(mod$summary.random),collapse = " | ")

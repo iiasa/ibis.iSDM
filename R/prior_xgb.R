@@ -28,15 +28,15 @@ NULL
 #' @export
 methods::setGeneric(
   "XGBPrior",
-  signature = methods::signature("variable"),
+  signature = methods::signature("variable", "hyper"),
   function(variable, hyper = 'increasing', ...) standardGeneric("XGBPrior"))
 
 #' @name XGBPrior
 #' @rdname XGBPrior
-#' @usage \S4method{XGBPrior}{character}(variable)
+#' @usage \S4method{XGBPrior}{character, character}(variable, hyper)
 methods::setMethod(
   "XGBPrior",
-  methods::signature(variable = "character"),
+  methods::signature(variable = "character", hyper = "character"),
   function(variable, hyper = 'increasing', ... ) {
     assertthat::assert_that(!missing(variable),!missing(hyper),
                             msg = 'Variable or constrain unset.')

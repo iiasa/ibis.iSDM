@@ -68,6 +68,8 @@ methods::setMethod(
     # Assess duplicates of priors in order they appear in the list
     vars <- vapply(ll, function(z) z$variable, character(1))
     types <- sapply(ll, function(z) z$type)
+    # Replace any gaussian with normal
+    if(any(types == "gaussian")) types[which(types=="gaussian")] <- "normal"
     # Remove SPDE
     if(any(duplicated(cbind(vars,types)))){
       ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]

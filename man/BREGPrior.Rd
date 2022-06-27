@@ -73,6 +73,7 @@ Other prior:
 \code{\link{XGBPriors}()},
 \code{\link{XGBPrior}()},
 \code{\link{add_priors}()},
+\code{\link{get_priors}()},
 \code{\link{priors}()},
 \code{\link{rm_priors}()}
 }

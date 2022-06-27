@@ -86,15 +86,26 @@ DistributionModel <- bdproto(
                "")
       ))
     } else if( inherits(self, 'STAN-Model') ) {
-      # Calculate variable importance from the posterior trees
-      summary(self$get_data('fit_best'))$summary |> as.data.frame() |>
-        tibble::rownames_to_column(var = "parameter") |> tibble::as_tibble(rownames = NULL)
+      # Calculate variable importance from the posterior
+      vi <- rstan::summary(self$get_data('fit_best'))$summary |> as.data.frame() |>
+        tibble::rownames_to_column(var = "parameter") |> as.data.frame()
+      # Get beta coefficients only
+      vi <- vi[grep("beta", vi$parameter,ignore.case = TRUE),]
 
-      # message(paste0(
-      #   'Trained ',class(self)[1],' (',self$show(),')',
-      #   '\n  \033[2mStrongest effects:\033[22m',
-      #   '\n     ', name_atomic(vi$names)
-      # ))
+      # Get variable names from model object
+      # FIXME: This might not work for all possible modelling objects. For instance
+      model <- self$model
+      assertthat::assert_that(nrow(vi) == length(model$predictors_names),
+                              length(vi$parameter) == length(model$predictors_names))
+      vi$parameter <- model$predictors_names
+
+      vi <- vi[order(abs(vi$mean),decreasing = TRUE),]
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest summary effects:\033[22m',
+        '\n     \033[34mPositive:\033[39m ', name_atomic(vi$parameter[vi$mean>0]),
+        '\n     \033[31mNegative:\033[39m ', name_atomic(vi$parameter[vi$mean<0])
+      ))
     } else if( inherits(self, 'XGBOOST-Model') ) {
       vi <- xgboost::xgb.importance(model = self$get_data('fit_best'),)
 
@@ -200,22 +211,31 @@ DistributionModel <- bdproto(
     if(!is.Waiver(self$settings)) self$settings$duration()
   },
   # Get effects or importance tables from model
-  summary = function(self, x = 'fit_best'){
+  summary = function(self, obj = 'fit_best'){
     # Distinguishing between model types
     if(inherits(self, 'GDB-Model')){
-      clean_mboost_summary( self$get_data(x) )
+      clean_mboost_summary( self$get_data(obj) )
     } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
-      tidy_inla_summary(self$get_data(x))
+      tidy_inla_summary(self$get_data(obj))
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
-      varimp.bart(self$get_data(x)) %>% tibble::remove_rownames()
+      varimp.bart(self$get_data(obj)) %>% tibble::remove_rownames()
     } else if(inherits(self, 'STAN-Model')){
-      summary(self$get_data(x))
+      vi <- rstan::summary(self$get_data(obj))$summary |> as.data.frame() |>
+        tibble::rownames_to_column(var = "parameter") |> as.data.frame()
+      # Get beta coefficients only
+      vi <- vi[grep("beta", vi$parameter,ignore.case = TRUE),]
+      # FIXME: This might not work for all possible modelling objects. For instance
+      model <- self$model
+      assertthat::assert_that(nrow(vi) == length(model$predictors_names),
+                              length(vi$parameter) == length(model$predictors_names))
+      vi$parameter <- model$predictors_names
+      vi
     } else if(inherits(self, 'BREG-Model')){
-      posterior::summarise_draws(self$get_data(x)$beta)
+      posterior::summarise_draws(self$get_data(obj)$beta)
     } else if(inherits(self, "XGBOOST-Model")){
-      xgboost::xgb.importance(model = self$get_data(x))
+      xgboost::xgb.importance(model = self$get_data(obj))
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -245,7 +265,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'STAN-Model')) {
       # Get true beta parameters
       ra <- grep("beta", names(self$get_data(x)),value = TRUE) # Get range
-      rstan::stan_plot(self$fits$fit_best,pars = ra)
+      rstan::stan_plot(self$get_data(x), pars = ra)
     } else if(inherits(self, 'INLABRU-Model')) {
       # Use inlabru effect plot
       ggplot2::ggplot() +

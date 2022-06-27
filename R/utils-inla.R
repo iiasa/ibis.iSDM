@@ -80,13 +80,12 @@ built_formula_inla <- function(model, id, x, settings){
           if(vn == 'spde') next()
           # Prior variable type
           vt <- as.character( priors$types()[v] )
-          # FIXME: This currently only work with normal, e.g. the type of the prior is ignored
           if(vt == 'clinear'){
             # Constrained linear effect
             form <- paste(form, '+', paste0('f(', vn, ', model = \'clinear\', ',
                                             'range = c(', priors$get(vn)[1],',', priors$get(vn)[2],') )',
                                             collapse = ' + ' ) )
-          } else if(vt == 'normal') {
+          } else if(vt %in% c('normal','gaussian')) {
             # Add linear effects
             form <- paste(form, '+', paste0('f(', vn, ', model = \'linear\', ',
                                             'mean.linear = ', priors$get(vn)[1],', ',
