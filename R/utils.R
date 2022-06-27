@@ -830,7 +830,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   buffer_distance <- settings$get('buffer_distance')
 
   # If the nr of points is 0, set it equal to the number of min_ratio or presented presence points
-  if(nrpoints == 0) nrpoints <- round( nrow(df) * min_ratio )
+  nrpoints <- max(nrpoints, round( nrow(df) * min_ratio ))
   if(nrpoints > raster::ncell(background)) nrpoints <- raster::ncell(background)
 
   if(!is.Waiver(settings$get("bias"))){

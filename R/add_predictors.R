@@ -289,8 +289,18 @@ methods::setMethod(
     ras1[layer < lower] <- 0; ras1[ras1 > lower] <- 1
     ras2 <- layer
     ras2[ras2 < upper] <- 0; ras2[ras2 > 0] <- 1
-    o <- raster::stack(ras1, ras2)
-    names(o) <- c('elev_low', 'elev_high')
+    # If the minimum of those layers have equal min and max
+    if(raster::cellStats(ras1, "min") == raster::cellStats(ras1, "max")){
+      o <- ras2
+      # Ensure that all layers have a minimum and a maximum
+      o[is.na(o)] <- 0; o <- raster::mask(o, x$background)
+      names(o) <- c('elev_high')
+    } else {
+      o <- raster::stack(ras1, ras2)
+      # Ensure that all layers have a minimum and a maximum
+      o[is.na(o)] <- 0; o <- raster::mask(o, x$background)
+      names(o) <- c('elev_low', 'elev_high')
+    }
     rm(ras1,ras2)
 
     # Add as predictor
