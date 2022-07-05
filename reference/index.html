@@ -6,7 +6,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -26,10 +26,9 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -138,6 +137,21 @@
         <dd>Helper function when multiple variables are supplied</dd>
       </dl><dl><dt>
           
+          <code><a href="Prior-class.html">Prior-class</a></code> 
+        </dt>
+        <dd>Base Prior class</dd>
+      </dl><dl><dt>
+          
+          <code><a href="PriorList-class.html">PriorList-class</a></code> 
+        </dt>
+        <dd>List of Priors supplied to an class</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.html">print(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDistribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Prior&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Settings&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Log&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;tbl_df&gt;</i>)</a></code> 
+        </dt>
+        <dd>Print</dd>
+      </dl><dl><dt>
+          
           <code><a href="priors.html">priors()</a></code> 
         </dt>
         <dd>Creates a new PriorList object</dd>
@@ -145,7 +159,7 @@
           
           <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
         </dt>
-        <dd>Specify settings for pseudo-absence sampling from a background</dd>
+        <dd>Specify settings for absence point sampling over the model background</dd>
       </dl><dl><dt>
           
           <code><a href="train.html">train()</a></code> 
@@ -271,8 +285,7 @@
           
           <code><a href="sel_predictors.html">sel_predictors()</a></code> 
         </dt>
-        <dd>Select specific predictors from a distribution object
-For instance those previously selected</dd>
+        <dd>Select specific predictors from a <a href="https://rdrr.io/r/stats/Distributions.html" class="external-link">distribution</a> object</dd>
       </dl><dl><dt>
           
           <code><a href="rm_predictors.html">rm_predictors()</a></code> 
@@ -283,6 +296,21 @@ For instance those previously selected</dd>
           <code><a href="rm_priors.html">rm_priors()</a></code> 
         </dt>
         <dd>Remove existing priors from an existing distribution object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_ngbvalue.html">get_ngbvalue()</a></code> 
+        </dt>
+        <dd>Function to extract nearest neighbour predictor values of provided points</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_priors.html">get_priors()</a></code> 
+        </dt>
+        <dd>Create priors from an existing distribution model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_rastervalue.html">get_rastervalue()</a></code> 
+        </dt>
+        <dd>Function to extract directly the raster value of provided points</dd>
       </dl></div><div class="section level2">
       <h2 id="engines">Engines<a class="anchor" aria-label="anchor" href="#engines"></a></h2>
       
@@ -388,7 +416,17 @@ For instance those previously selected</dd>
 
       <dl><dt>
           
-          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> 
+          <code><a href="plot.html">plot(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> 
+        </dt>
+        <dd>Plot wrappers</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.html">print(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDistribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Prior&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Settings&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Log&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;tbl_df&gt;</i>)</a></code> 
+        </dt>
+        <dd>Print</dd>
+      </dl><dl><dt>
+          
+          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> 
         </dt>
         <dd>Summarises a trained model or predictor object</dd>
       </dl><dl><dt>
@@ -449,14 +487,14 @@ For instance those previously selected</dd>
         <dd>Split raster factor levels to stack</dd>
       </dl><dl><dt>
           
+          <code><a href="find_correlated_predictors.html">find_correlated_predictors()</a></code> 
+        </dt>
+        <dd>Filter a set of correlated predictors to fewer ones</dd>
+      </dl><dl><dt>
+          
           <code><a href="posterior_predict_stanfit.html">posterior_predict_stanfit()</a></code> 
         </dt>
         <dd>Create a posterior prediction from a rstanfit object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="run_stan.html">run_stan()</a></code> 
-        </dt>
-        <dd>Fit cmdstanr model and convert to rstan object</dd>
       </dl><dl><dt>
           
           <code><a href="intersecting_extents.html">intersecting_extents()</a></code> 
@@ -494,6 +532,11 @@ For instance those previously selected</dd>
         <dd>Function to extract nearest neighbour predictor values of provided points</dd>
       </dl><dl><dt>
           
+          <code><a href="get_rastervalue.html">get_rastervalue()</a></code> 
+        </dt>
+        <dd>Function to extract directly the raster value of provided points</dd>
+      </dl><dl><dt>
+          
           <code><a href="predictor_transform.html">predictor_transform()</a></code> 
         </dt>
         <dd>Spatial adjustment of environmental predictors and raster stacks</dd>
@@ -509,24 +552,34 @@ For instance those previously selected</dd>
         <dd>Clean up raster layer from disk</dd>
       </dl><dl><dt>
           
+          <code><a href="run_stan.html">run_stan()</a></code> 
+        </dt>
+        <dd>Fit cmdstanr model and convert to rstan object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="wrap_stanmodel.html">wrap_stanmodel()</a></code> 
+        </dt>
+        <dd>Wrap a list with stan model code</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ibis_options.html">ibis_options()</a></code> 
+        </dt>
+        <dd>Print ibis options</dd>
+      </dl><dl><dt>
+          
           <code><a href="write_output.html">write_output(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterStack&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;data.frame&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
-        <dd>Generic function to write outputs</dd>
+        <dd>Generic function to write spatial outputs</dd>
       </dl><dl><dt>
           
-          <code><a href="find_correlated_predictors.html">find_correlated_predictors()</a></code> 
+          <code><a href="write_stanmodel.html">write_stanmodel()</a></code> 
         </dt>
-        <dd>Filter a set of correlated predictors to fewer ones</dd>
+        <dd>Write a cmdstanr model output to a specific file</dd>
       </dl><dl><dt>
           
-          <code><a href="find_subset_of_predictors.html">find_subset_of_predictors()</a></code> 
+          <code><a href="write_summary.html">write_summary(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
-        <dd>Apply the adaptive best subset selection framework on a set of predictors</dd>
-      </dl><dl><dt>
-          
-          <code><a href="get_rastervalue.html">get_rastervalue()</a></code> 
-        </dt>
-        <dd>Function to extract directly the raster value of provided points</dd>
+        <dd>Generic function to write summary outputs from created models.</dd>
       </dl><dl><dt>
           
           <code><a href="myLog.html">myLog()</a></code> 
@@ -537,21 +590,6 @@ For instance those previously selected</dd>
           <code><a href="polynominal_transform.html">polynominal_transform()</a></code> 
         </dt>
         <dd>Create a polynomial transformation from coordinates</dd>
-      </dl><dl><dt>
-          
-          <code><a href="stan_check_cmd.html">stan_check_cmd()</a></code> 
-        </dt>
-        <dd>Checks whether cmdstanr is available and otherwise tries to install it</dd>
-      </dl><dl><dt>
-          
-          <code><a href="wrap_stanmodel.html">wrap_stanmodel()</a></code> 
-        </dt>
-        <dd>Wrap a list with stan model code</dd>
-      </dl><dl><dt>
-          
-          <code><a href="write_stanmodel.html">write_stanmodel()</a></code> 
-        </dt>
-        <dd>Write a cmdstanr model output to a specific file</dd>
       </dl></div><div class="section level2">
       <h2 id="class-definitions-and-methods">Class definitions and methods<a class="anchor" aria-label="anchor" href="#class-definitions-and-methods"></a></h2>
       
@@ -636,6 +674,11 @@ For instance those previously selected</dd>
         <dd>As Id</dd>
       </dl><dl><dt>
           
+          <code><a href="is.html">is.Id()</a></code> <code><a href="is.html">is.Waiver()</a></code> <code><a href="is.html">is.formula()</a></code> <code><a href="is.html">is.Raster()</a></code> 
+        </dt>
+        <dd>Check whether a provided object is truly of a specific type</dd>
+      </dl><dl><dt>
+          
           <code><a href="ibis_future.html">ibis_future()</a></code> 
         </dt>
         <dd>Options to set up ibis for parallel processing with future</dd>
@@ -644,11 +687,6 @@ For instance those previously selected</dd>
           <code><a href="ibis_options.html">ibis_options()</a></code> 
         </dt>
         <dd>Print ibis options</dd>
-      </dl><dl><dt>
-          
-          <code><a href="is.html">is.Id()</a></code> <code><a href="is.html">is.Waiver()</a></code> <code><a href="is.html">is.formula()</a></code> <code><a href="is.html">is.Raster()</a></code> 
-        </dt>
-        <dd>Check whether a provided object is truly of a specific type</dd>
       </dl><dl><dt>
           
           <code><a href="new_id.html">new_id()</a></code> 
@@ -661,11 +699,6 @@ For instance those previously selected</dd>
         <dd>Waiver</dd>
       </dl><dl><dt>
           
-          <code><a href="pipe.html">%&gt;%</a></code> 
-        </dt>
-        <dd>Pipe operator</dd>
-      </dl><dl><dt>
-          
           <code><a href="plot.html">plot(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> 
         </dt>
         <dd>Plot wrappers</dd>
@@ -674,6 +707,11 @@ For instance those previously selected</dd>
           <code><a href="print.html">print(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDistribution&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDatasetCollection&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Prior&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Engine&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Settings&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Log&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;Id&gt;</i>)</a></code> <code><a href="print.html">print(<i>&lt;tbl_df&gt;</i>)</a></code> 
         </dt>
         <dd>Print</dd>
+      </dl><dl><dt>
+          
+          <code><a href="myLog.html">myLog()</a></code> 
+        </dt>
+        <dd>Custom messaging function for scripts</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
@@ -684,7 +722,7 @@ For instance those previously selected</dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

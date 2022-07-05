@@ -12,7 +12,7 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -32,10 +32,9 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -77,37 +76,50 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span>, <span class="va">ref</span>, ref_type <span class="op">=</span> <span class="st">"poipo"</span>, method <span class="op">=</span> <span class="st">"mess"</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S4 method for BiodiversityDistribution</span>
-<span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>
-
-<span class="co"># S4 method for RasterBrick</span>
-<span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>
-
-<span class="co"># S4 method for RasterStack</span>
-<span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span>, <span class="va">ref</span>, ref_type <span class="op">=</span> <span class="st">"poipo"</span>, method <span class="op">=</span> <span class="st">"mess"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution</span></span>
+<span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for RasterBrick</span></span>
+<span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for RasterStack</span></span>
+<span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>obj</dt>
 <dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>, <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code>Raster</code> object.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>, <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively
 a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> with extracted values (corresponding to those given in <code>obj</code>).</p></dd>
+
+
 <dt>ref_type</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> specifying the type of biodiversity to use when obj is a <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>A specifc method for similarity calculation. Currently supported: <code>'mess'</code>, <code>'nt'</code>.</p></dd>
+
+
 <dt>full</dt>
 <dd><p>should similarity values be returned for all variables (Default: <code>FALSE</code>)?</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>Should the result be plotted? Otherwise return the output list (Default: <code>TRUE</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>This function returns a list containing:</p><ul><li><p><code>similarity</code>: a <code>RasterStack</code> giving the environmental similarities for
+    
+
+<p>This function returns a list containing:</p><ul><li><p><code>similarity</code>: a <code>RasterStack</code> giving the environmental similarities for
 each variable in <code>x</code> (only included when <code>full=TRUE</code>);</p></li>
 <li><p><code>mis</code>: a <code>Raster</code> layer giving the minimum similarity value
 across all variables for each location (i.e. the MESS);</p></li>
@@ -137,11 +149,11 @@ of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mes
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"> <span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu">similarity</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># Where x is a distribution or Raster object</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"> <span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span> <span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot.html">plot</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">similarity</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># Where x is a distribution or Raster object</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -153,7 +165,7 @@ of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mes
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

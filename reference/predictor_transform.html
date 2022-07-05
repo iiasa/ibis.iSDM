@@ -10,7 +10,7 @@ This function works both with Raster as well as with stars objects."><meta name=
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -30,10 +30,9 @@ This function works both with Raster as well as with stars objects."><meta name=
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -74,42 +73,60 @@ This function works both with <code>Raster</code> as well as with <code><a href=
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">predictor_transform</span><span class="op">(</span><span class="va">env</span>, <span class="va">option</span>, windsor_props <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictor_transform</span><span class="op">(</span></span>
+<span>  <span class="va">env</span>,</span>
+<span>  <span class="va">option</span>,</span>
+<span>  windsor_props <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  pca.var <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>env</dt>
 <dd><p>A <code>Raster</code> object.</p></dd>
+
+
 <dt>option</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be preprocessed in any way (Options: <code>'none'</code>,
 <code>'scale'</code>, <code>'norm'</code>, <code>'pca'</code>, <code>'revjack'</code>). See Details.</p></dd>
+
+
 <dt>windsor_props</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> vector specifying the proportions to be clipped for windsorization (Default: <code>c(.05,.95)</code>).</p></dd>
+
+
+<dt>pca.var</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value between <code>&gt;0</code> and <code>1</code> stating the minimum amount of variance to be covered (Default: <code>0.8</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a adjusted <code>Raster</code> object of identical resolution.</p>
+    
+
+<p>Returns a adjusted <code>Raster</code> object of identical resolution.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Available options are:</p><ul><li><p><code>'none'</code> The original layer(s) are returned.</p></li>
-<li><p><code>'scale'</code> This run the <code><a href="https://rdrr.io/pkg/raster/man/scale.html" class="external-link">scale()</a></code> function with default settings (1 Standard deviation) across all predictors.
+<li><p><code>'scale'</code> This run the <code><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale()</a></code> function with default settings (1 Standard deviation) across all predictors.
 A sensible default to for most model fitting.</p></li>
 <li><p><code>'norm'</code> This normalizes all predictors to a range from <code>0-1</code>.</p></li>
 <li><p><code>'pca'</code> This option runs a principal component decomposition of all predictors (via <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code>).
 It returns new predictors resembling all components in order of the most important ones. Can be useful to
-reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.</p></li>
+reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
+The parameter <code>'pca.var'</code> can be modified to specify the minimum variance to be covered by the axes.</p></li>
 <li><p><code>'revjack'</code> Removes outliers from the supplied stack via a reverse jackknife procedure.
 Identified outliers are by default set to <code>NA</code>.</p></li>
 </ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Where x is a rasterstack</span></span>
-<span class="r-in"><span class="va">new_x</span> <span class="op">&lt;-</span> <span class="fu">predictor_transform</span><span class="op">(</span><span class="va">x</span>, option <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Where x is a rasterstack</span></span></span>
+<span class="r-in"><span><span class="va">new_x</span> <span class="op">&lt;-</span> <span class="fu">predictor_transform</span><span class="op">(</span><span class="va">x</span>, option <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -121,7 +138,7 @@ Identified outliers are by default set to <code>NA</code>.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

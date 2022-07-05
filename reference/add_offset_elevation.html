@@ -8,7 +8,7 @@ The code here was adapted from the Supporting materials script."><meta name="twi
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -28,10 +28,9 @@ The code here was adapted from the Supporting materials script."><meta name="twi
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -71,27 +70,36 @@ The code here was adapted from the Supporting materials script.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span>, rate <span class="op">=</span> <span class="fl">0.0089</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="co"># S4 method for BiodiversityDistribution, raster, numeric</span>
-<span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span>, rate <span class="op">=</span> <span class="fl">0.0089</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution, raster, numeric</span></span>
+<span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>elev</dt>
 <dd><p>A <code>RasterLayer</code> with the elevation for a given background.</p></dd>
+
+
 <dt>pref</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> vector of length <code>2</code> giving the lower and upper bound of known elevational preferences.
 Can be set to <code>Inf</code> if unknown.</p></dd>
+
+
 <dt>rate</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> for the rate used in the offset (Default: <code>.0089</code>). This parameter specifies the
 decay to near zero probability at elevation above and below the expert limits.</p></dd>
+
+
 <dt>add</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> specifying whether new offset is to be added. Setting
 this parameter to <code>FALSE</code> replaces the current offsets with the new one (Default: <code>TRUE</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -125,7 +133,7 @@ this function also mean-centers the output as recommended by Ellis-Soto et al.</
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

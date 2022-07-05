@@ -20,7 +20,7 @@ are therefore advised to cite if they make heavy use of BART."><meta name="twitt
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -40,10 +40,9 @@ are therefore advised to cite if they make heavy use of BART."><meta name="twitt
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -89,28 +88,36 @@ are therefore advised to cite if they make heavy use of BART.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_bart</span><span class="op">(</span><span class="va">x</span>, nburn <span class="op">=</span> <span class="fl">250</span>, ntree <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">4</span>, type <span class="op">=</span> <span class="st">"response"</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">engine_bart</span><span class="op">(</span><span class="va">x</span>, nburn <span class="op">=</span> <span class="fl">250</span>, ntree <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">4</span>, type <span class="op">=</span> <span class="st">"response"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>nburn</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the burn in samples.</p></dd>
+
+
 <dt>ntree</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the number of trees to be used in the sum-of-trees formulation.</p></dd>
+
+
 <dt>chains</dt>
 <dd><p>A number of the number of chains to be used (Default: <code>4</code>)</p></dd>
+
+
 <dt>type</dt>
 <dd><p>The mode used for creating posterior predictions. Either <code>"link"</code> or <code>"response"</code> (Default: <code>"response"</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Prior distributions can furthermore be set for:</p><ul><li><p>probability that a tree stops at a node of a given depth</p></li>
+    <p>Prior distributions can furthermore be set for:</p><ul><li><p>probability that a tree stops at a node of a given depth (Not yet implemented)</p></li>
 <li><p>probability that a given variable is chosen for a splitting rule</p></li>
-<li><p>probability of splitting that variable at a particular value
-<strong>(However currently not yet implemented!)</strong></p></li>
+<li><p>probability of splitting that variable at a particular value (Not yet implemented)</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -139,7 +146,7 @@ are therefore advised to cite if they make heavy use of BART.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

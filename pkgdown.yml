@@ -1,16 +1,15 @@
 pandoc: 2.7.3
-pkgdown: 2.0.2
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   01_train_simple_model: 01_train_simple_model.html
   02_integrate_data: 02_integrate_data.html
-  03_model_assessment: 03_model_assessment.html
-  04_biodiversity_projections: 04_biodiversity_projections.html
-  05_engine_comparison: 05_engine_comparison.html
-  06_package_comparison: 06_package_comparison.html
+  03_biodiversity_projections: 03_biodiversity_projections.html
+  04_engine_comparison: 04_engine_comparison.html
+  05_package_comparison: 05_package_comparison.html
   contributing: contributing.html
   frequently-asked-questions: frequently-asked-questions.html
-last_built: 2022-04-12T18:44Z
+last_built: 2022-07-05T09:28Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles

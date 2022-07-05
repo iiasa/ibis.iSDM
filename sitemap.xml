@@ -13,16 +13,13 @@
     <loc>https://iiasa.github.io/ibis.iSDM/articles/02_integrate_data.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_model_assessment.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_engine_comparison.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_engine_comparison.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/06_package_comparison.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_package_comparison.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/contributing.html</loc>
@@ -232,6 +229,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_ngbvalue.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/get_priors.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_rastervalue.html</loc>
   </url>
   <url>
@@ -344,5 +344,8 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/write_stanmodel.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/write_summary.html</loc>
   </url>
 </urlset>

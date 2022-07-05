@@ -18,7 +18,7 @@ splines are added to the estimation, thus providing a non-linear additive infere
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -38,10 +38,9 @@ splines are added to the estimation, thus providing a non-linear additive infere
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -86,31 +85,42 @@ splines are added to the estimation, thus providing a non-linear additive infere
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_gdb</span><span class="op">(</span>
-  <span class="va">x</span>,
-  boosting_iterations <span class="op">=</span> <span class="fl">1000</span>,
-  learning_rate <span class="op">=</span> <span class="fl">0.1</span>,
-  empirical_risk <span class="op">=</span> <span class="st">"inbag"</span>,
-  type <span class="op">=</span> <span class="st">"response"</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">engine_gdb</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  boosting_iterations <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  learning_rate <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  empirical_risk <span class="op">=</span> <span class="st">"inbag"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"response"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>boosting_iterations</dt>
 <dd><p>An <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></code> giving the number of boosting iterations</p></dd>
+
+
 <dt>learning_rate</dt>
 <dd><p>A bounded <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value between <code>0</code> and <code>1</code> defining the shrinkage parameter.</p></dd>
+
+
 <dt>empirical_risk</dt>
 <dd><p>method for empirical risk calculation.
 Available options are <code>'inbag'</code>, <code>'oobag'</code> and <code>'none'</code>. (Default: <code>'inbag'</code>).</p></dd>
+
+
 <dt>type</dt>
 <dd><p>The mode used for creating posterior predictions. Either making <code>"link"</code>, <code>"response"</code> or <code>"class"</code> (Default: <code>"response"</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other variables or control parameters</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -149,7 +159,7 @@ via <a href="GDBPrior.html">GDBPrior</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

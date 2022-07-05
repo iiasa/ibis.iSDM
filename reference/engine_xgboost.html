@@ -14,7 +14,7 @@ xgboost::xgb.train help file and https://xgboost.readthedocs.io."><meta name="tw
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -34,10 +34,9 @@ xgboost::xgb.train help file and https://xgboost.readthedocs.io."><meta name="tw
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -80,52 +79,75 @@ and classification tasks. For a full list of options users are advised to have a
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_xgboost</span><span class="op">(</span>
-  <span class="va">x</span>,
-  booster <span class="op">=</span> <span class="st">"gbtree"</span>,
-  learning_rate <span class="op">=</span> <span class="fl">0.001</span>,
-  nrounds <span class="op">=</span> <span class="fl">10000</span>,
-  gamma <span class="op">=</span> <span class="fl">6</span>,
-  reg_lambda <span class="op">=</span> <span class="fl">0</span>,
-  reg_alpha <span class="op">=</span> <span class="fl">0</span>,
-  max_depth <span class="op">=</span> <span class="fl">2</span>,
-  subsample <span class="op">=</span> <span class="fl">0.75</span>,
-  colsample_bytree <span class="op">=</span> <span class="fl">0.4</span>,
-  min_child_weight <span class="op">=</span> <span class="fl">3</span>,
-  nthread <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">engine_xgboost</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  booster <span class="op">=</span> <span class="st">"gbtree"</span>,</span>
+<span>  learning_rate <span class="op">=</span> <span class="fl">0.001</span>,</span>
+<span>  nrounds <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  gamma <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  reg_lambda <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  reg_alpha <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  max_depth <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  subsample <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  colsample_bytree <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  min_child_weight <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  nthread <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>booster</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the booster to use. Either "gbtree" or "gblinear" (Default: <code>gblinear</code>)</p></dd>
+
+
 <dt>learning_rate</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value indicating the learning rate (eta).
 Lower values generally being better but also computationally more costly. (Default: <code>1e-3</code>)</p></dd>
+
+
 <dt>nrounds</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value giving the the maximum number of boosting iterations for cross-validation.</p></dd>
+
+
 <dt>gamma</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A regularization parameter in the model. Lower values for better estimates (Default: 3)
 Also see reg_lambda parameter for the L2 regularization on the weights</p></dd>
+
+
 <dt>reg_lambda</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L2 regularization term on weights (Default: <code>0</code>).</p></dd>
+
+
 <dt>reg_alpha</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L1 regularization term on weights (Default: <code>0</code>).</p></dd>
+
+
 <dt>max_depth</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> The Maximum depth of a tree (Default: <code>3</code>).</p></dd>
+
+
 <dt>subsample</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> The ratio used for subsampling to prevent overfitting. Also used for creating a random
 tresting dataset (Default: <code>0.75</code>).</p></dd>
+
+
 <dt>colsample_bytree</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Subsample ratio of columns when constructing each tree (Default: <code>0.4</code>).</p></dd>
+
+
 <dt>min_child_weight</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Broadly related to the number of instances necessary for each node (Default: <code>3</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other none specificed parameters.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -159,7 +181,7 @@ ibis this is possible via <code><a href="XGBPrior.html">XGBPrior</a></code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

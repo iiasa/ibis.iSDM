@@ -8,7 +8,7 @@ by cmdstanr. The code was adapted from McElreath rethinking package."><meta name
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -28,10 +28,9 @@ by cmdstanr. The code was adapted from McElreath rethinking package."><meta name
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -71,58 +70,87 @@ by cmdstanr. The code was adapted from McElreath rethinking package.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">run_stan</span><span class="op">(</span>
-  <span class="va">model_code</span>,
-  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,
-  chains <span class="op">=</span> <span class="fl">4</span>,
-  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,
-  threads <span class="op">=</span> <span class="fl">1</span>,
-  iter <span class="op">=</span> <span class="fl">1000</span>,
-  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>adapt_delta <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span>,
-  cpp_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  force <span class="op">=</span> <span class="cn">FALSE</span>,
-  path <span class="op">=</span> <span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,
-  save_warmup <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_stan</span><span class="op">(</span></span>
+<span>  <span class="va">model_code</span>,</span>
+<span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,</span>
+<span>  threads <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>adapt_delta <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  cpp_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  path <span class="op">=</span> <span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  save_warmup <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>model_code</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> pointing to the stan modelling code.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with all the parameters required to run the model_code in stan.</p></dd>
+
+
 <dt>algorithm</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> giving the algorithm to use. Either <code>'sampling'</code> (Default), <code>'optimize'</code> or <code>'variational'</code> for penalized likelihood estimation.</p></dd>
+
+
 <dt>chains</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> indicating the number of chains to use for estimation.</p></dd>
+
+
 <dt>cores</dt>
 <dd><p>Number of threads for sampling. Default set to <code>'getOption("ibis.nthread")'</code>. See <code><a href="ibis_options.html">ibis_options()</a></code>.</p></dd>
+
+
 <dt>threads</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> giving the number of threads to be run per chain. Has to be specified in accordance with cores.</p></dd>
+
+
 <dt>iter</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value giving the number of MCMC samples to generate.</p></dd>
+
+
 <dt>warmup</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> for the number of warm-up samples for MCMC. Default set to 1/2 of iter.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with further control options for stan.</p></dd>
+
+
 <dt>cpp_options</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with options for the Cpp compiling.</p></dd>
+
+
 <dt>force</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> indication whether to force recompile the model (Default: <code>FALSE</code>).</p></dd>
+
+
 <dt>path</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating a path to be made available to the stan compiler.</p></dd>
+
+
 <dt>save_warmup</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag whether to save the warmup samples.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other non-specified parameters.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A rstan object</p>
+    
+
+<p>A rstan object</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -138,7 +166,7 @@ by cmdstanr. The code was adapted from McElreath rethinking package.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

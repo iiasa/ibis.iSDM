@@ -20,7 +20,7 @@ allowing full integrated inference."><meta name="twitter:card" content="summary"
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
@@ -40,10 +40,9 @@ allowing full integrated inference."><meta name="twitter:card" content="summary"
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
-    <a class="dropdown-item" href="../articles/03_model_assessment.html">3. Model assessment</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
+    <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
+    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
@@ -89,19 +88,20 @@ allowing full integrated inference.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_inlabru</span><span class="op">(</span>
-  <span class="va">x</span>,
-  optional_mesh <span class="op">=</span> <span class="cn">NULL</span>,
-  max.edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>,
-  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,
-  cutoff <span class="op">=</span> <span class="fl">1</span>,
-  proj_stepsize <span class="op">=</span> <span class="cn">NULL</span>,
-  strategy <span class="op">=</span> <span class="st">"auto"</span>,
-  int.strategy <span class="op">=</span> <span class="st">"auto"</span>,
-  area <span class="op">=</span> <span class="st">"gpc2"</span>,
-  timeout <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">engine_inlabru</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  optional_mesh <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max.edge <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  offset <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  proj_stepsize <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  strategy <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  int.strategy <span class="op">=</span> <span class="st">"eb"</span>,</span>
+<span>  area <span class="op">=</span> <span class="st">"gpc2"</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"response"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -112,33 +112,73 @@ allowing full integrated inference.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
 <dd><p><code><a href="distribution.html">distribution()</a></code> (i.e. <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></dd>
+
+
 <dt>optional_mesh</dt>
 <dd><p>A directly supplied <code>INLA</code> mesh (Default: <code>NULL</code>)</p></dd>
+
+
 <dt>max.edge</dt>
-<dd><p>The largest allowed triangle edge length, must be in the same scale units as the coordinates.</p></dd>
+<dd><p>The largest allowed triangle edge length, must be in the same scale units as the coordinates.
+Default is an educated guess (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>offset</dt>
-<dd><p>interpreted as a numeric factor relative to the approximate data diameter.</p></dd>
+<dd><p>interpreted as a numeric factor relative to the approximate data diameter.
+Default is an educated guess (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>cutoff</dt>
-<dd><p>The minimum allowed distance between points on the mesh.</p></dd>
+<dd><p>The minimum allowed distance between points on the mesh.
+Default is an educated guess (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>proj_stepsize</dt>
 <dd><p>The stepsize in coordinate units between cells of the projection grid (Default: <code>NULL</code>)</p></dd>
+
+
 <dt>strategy</dt>
-<dd><p>Which aproximation to use for the joint posterior. Options are <code>"auto"</code>, <code>"adaptative"</code>,
+<dd><p>Which approximation to use for the joint posterior. Options are <code>"auto"</code> ("default"), <code>"adaptative"</code>,
 <code>"gaussian"</code>, <code>"simplified.laplace"</code> &amp; <code>"laplace"</code>.</p></dd>
+
+
 <dt>int.strategy</dt>
-<dd><p>Integration strategy. Options are <code>"auto"</code>,<code>"grid"</code>, <code>"eb"</code> &amp; <code>"ccd"</code>.</p></dd>
+<dd><p>Integration strategy. Options are <code>"auto"</code>,<code>"grid"</code>, <code>"eb"</code> ("default") &amp; <code>"ccd"</code>.</p></dd>
+
+
 <dt>area</dt>
 <dd><p>Accepts a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the type of area calculation to be done on the mesh (Default: <code>'gpc2'</code>).</p></dd>
+
+
 <dt>timeout</dt>
 <dd><p>Specify a timeout for INLA models in sec. Afterwards it passed.</p></dd>
+
+
+<dt>type</dt>
+<dd><p>The mode used for creating posterior predictions. Either summarizing the linear <code>"predictor"</code> or <code>"response"</code> (Default: <code>"response"</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other variables</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If a mesh has already been pre-computed it can be supplied to engine_inlabru via the <code>optional_mesh</code>
-parameter.
-Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
+    <p>All <code>INLA</code> engines require the specification of a mesh that needs to be provided to the
+<code>"optional_mesh"</code> parameter. Otherwise the mesh will be created based on best guesses of the
+data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.</p>
+<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a>  <code>"max.edge"</code>: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+Lower bounds affect the density of triangles
+<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"offset"</code>: The automatic extension distance of the mesh
+If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
+i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
+<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"cutoff"</code>: The minimum allowed distance between points,
+it means that points at a closer distance than the supplied value are replaced by a single vertex.
+it is critical when there are some points very close to each other, either for point locations or in the
+domain boundary.
+<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"proj_stepsize"</code>: The stepsize for spatial predictions, which affects the spatial grain of any outputs
+created.</p>
+<p>Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -166,7 +206,7 @@ Priors can be set via <a href="INLAPrior.html">INLAPrior</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>
