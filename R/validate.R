@@ -61,6 +61,9 @@ methods::setMethod(
     # Match method to be sure
     method <- match.arg(method, c('continuous', 'discrete'), several.ok = FALSE)
 
+    # Get settings from model object
+    settings <- mod$settings
+
     # Get prediction and threshold if available
     prediction <- mod$get_data('prediction')[[layer]]
     if( any(grep('threshold', mod$show_rasters())) ){
@@ -82,6 +85,22 @@ methods::setMethod(
         if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
         method <- 'continuous'
       }
+    }
+
+    # Check whether limits were applied and if so, set background to 0 everywhere for validation
+    if(settings$get("has_limits")){
+      temp <- mod$model$predictors_object$get_data()[[1]]; temp[!is.na(temp)] <- 0
+      if(!is.null(threshold)){
+        new <- sum(threshold, temp, na.rm = TRUE); new <- raster::mask(new, temp)
+        attr(new,'truncate') <- attr(threshold,'truncate')
+        if(!attr(threshold,'truncate')) new <- raster::ratify(new)
+        threshold <- new
+        rm(new)
+      }
+      # Same for prediction layer, where missing data are set to 0 for validation
+      prediction <- sum(prediction, temp, na.rm = TRUE)
+      prediction <- raster::mask(prediction, temp)
+      rm(temp)
     }
 
     # Get/check point data

@@ -422,68 +422,81 @@ engine_bart <- function(x,
             }
           }
           params <- self$get_data("params")
+          check_package("foreach")
+
+          full$rowid <- 1:nrow(full)
+
+          # Tile the problem
+          splits <- cut(1:nrow(full), nrow(full) / min(nrow(full) / 4, 5000) )
+
+          # Get offset if existing
+          if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
+
           # Make a prediction
-          if(!getOption("ibis.runparallel")){
-            # Get offset if existing
-            if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
-
-            pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                               newdata = full[,model$biodiversity[[1]]$predictors_names],
-                                               type = params$type,
-                                               offset = of
-            )
-            # Summarize quantiles and sd from posterior
-            ms <- as.data.frame(
-              cbind( apply(pred_bart, 2, mean),
-                     matrixStats::colSds(pred_bart),
-                     matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                     apply(pred_bart, 2, mode)
-              )
-            )
-            names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-            ms$cv <- ms$mean / ms$sd
-            rm(pred_bart)
-          } else {
-            check_package("foreach")
-
-            full$rowid <- 1:nrow(full)
-
-            # Tile the problem
-            splits <- cut(1:nrow(full), nrow(full) / min(nrow(full) / 4, 5000) )
-
-            # Get offset if existing
-            if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
+          if(getOption("ibis.runparallel")){
+            # Run in parallel
+            check_package("doParallel")
+            doParallel::registerDoParallel(cores = getOption("ibis.nthread"))
 
             # Operating system dependent use
             ms <- foreach::foreach(s = unique(splits),
-                             .inorder = TRUE,
-                             .combine = rbind,
-                             .errorhandling = "stop",
-                             .multicombine = TRUE,
-                             .export = c("splits", "fit_bart", "full", "model", "params", "of"),
-                             .packages = c("dbarts", "matrixStats")) %do% {
-                               i <- which(splits == s)
+                                   .inorder = TRUE,
+                                   .combine = rbind,
+                                   .errorhandling = "stop",
+                                   .multicombine = TRUE,
+                                   .export = c("splits", "fit_bart", "full", "model", "params", "of"),
+                                   .packages = c("dbarts", "matrixStats")) %dopar% {
+                                     i <- which(splits == s)
 
-                               pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                                                  newdata = full[i, model$biodiversity[[1]]$predictors_names],
-                                                                  type = params$type,
-                                                                  offset = of[i]
-                               )
-                               # Summarize quantiles and sd from posterior
-                               ms <- as.data.frame(
-                                 cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
-                                        matrixStats::colSds(pred_bart),
-                                        matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                                        apply(pred_bart, 2, mode)
-                                 )
-                               )
-                               names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-                               ms$cv <- ms$mean / ms$sd
-                               rm(pred_bart)
-                               return( ms )
-                             }
+                                     pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                                                        newdata = full[i, model$biodiversity[[1]]$predictors_names],
+                                                                        type = params$type,
+                                                                        offset = of[i]
+                                     )
+                                     # Summarize quantiles and sd from posterior
+                                     ms <- as.data.frame(
+                                       cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                              matrixStats::colSds(pred_bart),
+                                              matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                              apply(pred_bart, 2, mode)
+                                       )
+                                     )
+                                     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                                     ms$cv <- ms$mean / ms$sd
+                                     rm(pred_bart)
+                                     return( ms )
+                                   } # End of processing
 
-          } # End of processing
+          } else {
+            # Operating system dependent use
+            ms <- foreach::foreach(s = unique(splits),
+                                   .inorder = TRUE,
+                                   .combine = rbind,
+                                   .errorhandling = "stop",
+                                   .multicombine = TRUE,
+                                   .export = c("splits", "fit_bart", "full", "model", "params", "of"),
+                                   .packages = c("dbarts", "matrixStats")) %do% {
+                                     i <- which(splits == s)
+
+                                     pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                                                        newdata = full[i, model$biodiversity[[1]]$predictors_names],
+                                                                        type = params$type,
+                                                                        offset = of[i]
+                                     )
+                                     # Summarize quantiles and sd from posterior
+                                     ms <- as.data.frame(
+                                       cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                              matrixStats::colSds(pred_bart),
+                                              matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                              apply(pred_bart, 2, mode)
+                                       )
+                                     )
+                                     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                                     ms$cv <- ms$mean / ms$sd
+                                     rm(pred_bart)
+                                     return( ms )
+                                   } # End of processing
+          }
           assertthat::assert_that(nrow(ms)>0,
                                   nrow(ms) == nrow(full))
 

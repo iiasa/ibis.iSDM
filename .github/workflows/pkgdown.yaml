@@ -23,6 +23,9 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install igraph library
+        run: sudo apt-get install -y libglpk-dev
+
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
           extra-packages: pkgdown

@@ -1070,7 +1070,12 @@ methods::setMethod(
   if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
   # Clip to limits again to be sure
-  if(!is.Waiver(x$limits)) out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+  if(!is.Waiver(x$limits)) {
+    out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+    out$settings$set("has_limits", TRUE)
+  } else {
+    out$settings$set("has_limits", FALSE)
+  }
 
   # Stop logging if specified
   if(!is.Waiver(x$log)) x$log$close()
