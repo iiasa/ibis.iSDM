@@ -11,6 +11,7 @@
 #' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`Raster`] or [`stars`] object.
 #' @param fname A [`character`] depicting an output filename.
 #' @param dt A [`character`] for the output datatype. Following the [`raster::dataType()`] options (Default: \code{'FLT4S'}).
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @param ... Any other arguements passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -29,22 +30,23 @@
 NULL
 methods::setGeneric("write_output",
                     signature = methods::signature("mod"),
-                    function(mod, fname, dt = "FLT4S", ...) standardGeneric("write_output"))
+                    function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) standardGeneric("write_output"))
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{ANY, character, character}(mod, fname, dt)
+#' @usage \S4method{write_output}{ANY, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
   methods::signature("ANY"),
-  function(mod, fname, dt = "FLT4S", ...){
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...){
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
-      is.character(dt)
+      is.character(dt),
+      is.logical(verbose)
     )
 
-    if(getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
 
   # This function will only capture the distribution model object and will save them separately
   if(any(class(mod) %in% getOption("ibis.engines")) ){
@@ -73,15 +75,16 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{BiodiversityScenario, character, character}(mod, fname, dt)
+#' @usage \S4method{write_output}{BiodiversityScenario, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, fname, dt = "FLT4S", ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
-      is.character(dt)
+      is.character(dt),
+      is.logical(verbose)
     )
     # Get outputs
     mod$save(fname = fname, type = tools::file_ext(fname), dt = dt)
@@ -91,16 +94,17 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{RasterLayer, character, character}(mod, fname, dt)
+#' @usage \S4method{write_output}{RasterLayer, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "RasterLayer"),
-  function(mod, fname, dt = "FLT4S", ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.Raster(mod),
       is.character(fname),
-      is.character(dt)
+      is.character(dt),
+      is.logical(verbose)
     )
 
     # Write output depending on type
@@ -117,16 +121,17 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{RasterStack, character, character}(mod, fname, dt)
+#' @usage \S4method{write_output}{RasterStack, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "RasterStack"),
-  function(mod, fname, dt = "FLT4S", ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
     assertthat::assert_that(
       !missing(mod),
       is.Raster(mod),
       is.character(fname),
-      is.character(dt)
+      is.character(dt),
+      is.logical(verbose)
     )
 
     # Write output depending on type
@@ -143,15 +148,16 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{data.frame, character, character}(mod, fname, dt)
+#' @usage \S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "data.frame"),
-  function(mod, fname, dt = "FLT4S", ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
     assertthat::assert_that(
       !missing(mod),
       is.data.frame(mod),
-      is.character(fname)
+      is.character(fname),
+      is.logical(verbose)
     )
 
     # data.frames will be written by default as csv files for consistency
@@ -254,6 +260,7 @@ writeNetCDF <- function(file, fname,
 #' The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).
 #' @param partial A [`logical`] value determining whether partial variable contributions should be calculated and added
 #' to the model summary. **Note that this can be rather slow** (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -272,19 +279,20 @@ writeNetCDF <- function(file, fname,
 NULL
 methods::setGeneric("write_summary",
                     signature = methods::signature("mod"),
-                    function(mod, fname, partial = FALSE, ...) standardGeneric("write_summary"))
+                    function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
 
 #' @name write_summary
 #' @rdname write_summary
-#' @usage \S4method{write_summary}{ANY, character}(mod, fname)
+#' @usage \S4method{write_summary}{ANY, character, logical, logical}(mod, fname, partial, verbose)
 methods::setMethod(
   "write_summary",
   methods::signature(mod = "ANY"),
-  function(mod, fname, partial = FALSE, ...) {
+  function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
-      is.logical(partial)
+      is.logical(partial),
+      is.logical(verbose)
     )
     assertthat::assert_that(
       inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
@@ -296,7 +304,7 @@ methods::setMethod(
     if(ext == "") ext <- "rds" # Assign rds as default
     ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
     fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
-    if(file.exists(fname) && getOption('ibis.setupmessages')) myLog('[Output]','yellow','Overwriting existing file...')
+    if(file.exists(fname) && (verbose && getOption('ibis.setupmessages'))) myLog('[Output]','yellow','Overwriting existing file...')
     assertthat::assert_that(assertthat::is.writeable(dirname(fname)))
     # --- #
     # Gather the statistics and parameters from the provided file
@@ -355,7 +363,7 @@ methods::setMethod(
       }
       # Calculate partial estimates if set
       if(partial){
-        if(getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Calculating partial variable contributions...'))
+        if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Calculating partial variable contributions...'))
         message("Not yet added") # TODO:
         output[["output"]][["partial"]] <- NA
       } else {

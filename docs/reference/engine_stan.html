@@ -85,18 +85,18 @@ build the stan-model.
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">engine_stan</span><span class="op">(</span>
-  <span class="va">x</span>,
-  chains <span class="op">=</span> <span class="fl">4</span>,
-  iter <span class="op">=</span> <span class="fl">2000</span>,
-  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,
-  init <span class="op">=</span> <span class="st">"random"</span>,
-  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,
-  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,
-  control <span class="op">=</span> <span class="cn">NULL</span>,
-  type <span class="op">=</span> <span class="st">"response"</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">engine_stan</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  init <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.nthread"</span><span class="op">)</span>,</span>
+<span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
+<span>  control <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"response"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -183,7 +183,7 @@ approximate inference forms through penalized maximum likelihood estimation (see
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

@@ -2,19 +2,51 @@
 % Please edit documentation in R/utils-spatial.R
 \name{predictor_derivate}
 \alias{predictor_derivate}
-\title{Create spatial derivate of raster stacks}
+\title{Create spatial derivative of raster stacks}
 \usage{
-predictor_derivate(env, option, ...)
+predictor_derivate(env, option, nknots = 4, deriv = NULL, ...)
 }
 \arguments{
-\item{env}{A \code{\link{Raster}} object}
+\item{env}{A \code{\link{Raster}} object.}
 
-\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: 'none','quadratic', 'hinge', 'thresh')}
+\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way
+(Options: 'none','quadratic', 'hinge', 'thresh', 'bin').}
+
+\item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
+
+\item{deriv}{A \code{\link{vector}} with \code{\link{characters}} of specific derivates to create (Default: \code{NULL}).}
 }
 \value{
-Returns the derived adjusted \code{\link{Raster}} objects of identical resolution
+Returns the derived adjusted \code{\link{Raster}} objects of identical resolution.
 }
 \description{
-Create spatial derivate of raster stacks
+This function creates derivatives of existing covariates and returns them in Raster format.
+Derivative variables can in the machine learning literature commonly be understood as one aspect of feature
+engineering. They can be particularly powerful in introducing non-linearities in otherwise linear models,
+for example is often done in the popular Maxent framework.
+}
+\details{
+Available options are:
+\itemize{
+\item \code{'none'} The original layer(s) are returned.
+\item \code{'quadratic'} A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
+\item \code{'hinge'} Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
+and all others to a range of \eqn{[0,1]}. The number of thresholds and thus new derivates is specified
+via the parameter \code{'nknots'} (Default: \code{4}).
+\item \code{'thresh'} A threshold transformation of covariates, which sets all values lower than a set threshold ot
+\code{0} and those larger to \code{1}.
+The number of thresholds and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+\item \code{'bin'} Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
+The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+}
+}
+\examples{
+\dontrun{
+# Create a hinge transformation of one or multiple RasterLayers.
+predictor_derivate(covs, option = "hinge", knots = 4)
+}
+}
+\seealso{
+predictor_derivate
 }
 \keyword{utils}

@@ -4,15 +4,15 @@
 \alias{write_output}
 \title{Generic function to write spatial outputs}
 \usage{
-\S4method{write_output}{ANY, character, character}(mod, fname, dt)
+\S4method{write_output}{ANY, character, character, logical}(mod, fname, dt, verbose)
 
-\S4method{write_output}{BiodiversityScenario, character, character}(mod, fname, dt)
+\S4method{write_output}{BiodiversityScenario, character, character, logical}(mod, fname, dt, verbose)
 
-\S4method{write_output}{RasterLayer, character, character}(mod, fname, dt)
+\S4method{write_output}{RasterLayer, character, character, logical}(mod, fname, dt, verbose)
 
-\S4method{write_output}{RasterStack, character, character}(mod, fname, dt)
+\S4method{write_output}{RasterStack, character, character, logical}(mod, fname, dt, verbose)
 
-\S4method{write_output}{data.frame, character, character}(mod, fname, dt)
+\S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{Raster}} or \code{\link{stars}} object.}
@@ -20,6 +20,8 @@
 \item{fname}{A \code{\link{character}} depicting an output filename.}
 
 \item{dt}{A \code{\link{character}} for the output datatype. Following the \code{\link[raster:dataType]{raster::dataType()}} options (Default: \code{'FLT4S'}).}
+
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 
 \item{...}{Any other arguements passed on the individual functions.}
 }

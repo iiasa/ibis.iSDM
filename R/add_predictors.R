@@ -33,6 +33,7 @@ NULL
 #' * \code{'quad'} - Adds quadratic transformed predictors.
 #' * \code{'thresh'} - Add threshold transformed predictors.
 #' * \code{'hinge'} - Add hinge transformed predictors.
+#' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
@@ -116,12 +117,12 @@ methods::setMethod(
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(env),
-                            all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm') ),
-                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
+                            all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
+                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
@@ -582,20 +583,23 @@ methods::setMethod(
   methods::signature(x = "BiodiversityScenario", env = "stars"),
   function(x, env, names = NULL, transform = 'none', derivates = 'none', harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
-    transform <- match.arg(transform, c('none','pca', 'scale', 'norm') , several.ok = TRUE)
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic') , several.ok = TRUE)
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
 
     assertthat::validate_that(inherits(env,'stars'),msg = 'Projection rasters need to be stars stack!')
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
-                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm') ),
-                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic') ),
+                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
+                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(harmonize_na)
     )
     # Some stars checks
     assertthat::validate_that(length(env) >= 1)
 
-    # Messager
+    # Get model object
+    obj <- x$get_model()
+
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding scenario predictors...')
 
     # Rename attributes if names is specified
@@ -606,7 +610,7 @@ methods::setMethod(
 
     # Harmonize NA values
     if(harmonize_na){
-      stop('Harmonization for stars not yet implemented!') #TODO
+      stop('Missing data harmonization for stars not yet implemented!') #TODO
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
@@ -619,13 +623,21 @@ methods::setMethod(
 
     # # Calculate derivates if set
     if('none' %notin% derivates){
-      stop('Derivate creation for stars not yet implemented!') #TODO
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
-      new_env <- raster::stack()
-      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
-
-      # Add to env
-      env <- addLayer(env, new_env)
+      # Get variable names
+      varn <- obj$get_coefficients()[['Feature']]
+      # Are there any derivates present in the coefficients?
+      if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
+          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+          for(dd in derivates){
+            if(any(grep(dd, varn))){
+              env <- predictor_derivate(env, option = dd, deriv = varn)
+            } else {
+              if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+            }
+          }
+      } else {
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+      }
     }
 
     # Get and format Time period

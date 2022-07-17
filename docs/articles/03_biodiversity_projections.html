@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="ibis.iSDM">
-<title>Construction of biodiversity projections • ibis.iSDM</title>
+<title>Creating biodiversity projections • ibis.iSDM</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Construction of biodiversity projections">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating biodiversity projections">
 <meta property="og:description" content="ibis.iSDM">
 <meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg">
 <meta name="twitter:card" content="summary">
@@ -91,11 +91,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Construction of biodiversity projections</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Creating biodiversity projections</h1>
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-06-26</h4>
+            <h4 data-toc-skip class="date">2022-07-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/03_biodiversity_projections.Rmd" class="external-link"><code>vignettes/03_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>03_biodiversity_projections.Rmd</code></div>
@@ -103,12 +103,350 @@ Jung</h4>
 
     
     
+<p>Besides inferring environmental responses and mapping the
+contemporary distribution of any species (see <a href="01_train_simple_model.html">Train simple Model</a>), species
+distribution models (SDMs) are commonly used to make predictions on how
+biodiversity is expected to change under future conditions. Usually this
+is being done by first training a model on present observations and then
+projecting the resulting <span class="math inline">\(\beta\)</span>
+coefficients to another set of environmental predictors from another
+time period or spatial region.</p>
+<p>The <code>ibis.iSDM</code> R-package provides direct support for
+creating such projections. This requires a previously fitted
+[<code>DistributionModel</code>] and a new set of covariates which match
+in names the covariates on which the fitted model was trained. The key
+functions here are <code><a href="../reference/scenario.html">scenario()</a></code> and <code><a href="../reference/project.html">project()</a></code>
+which are specific to such projections and result in the creation of a
+[<code>BiodiversityScenario</code>] object. For other functions the same
+syntax as for previously trained models applies, e.g. new predictor can
+be added via <code><a href="../reference/add_predictors.html">add_predictors()</a></code> or thresholds applied via
+<code><a href="../reference/threshold.html">threshold()</a></code>. In addition the <code>ibis.iSDM</code>
+R-package allows the specification of a number of constrains on the
+projections, such as for instance dispersal constrains based on the
+expected or simulated chance of individuals dispersing to neighbouring
+grid cells. Such constrains can be added via
+<code><a href="../reference/add_constrain.html">add_constrain()</a></code> (and other constrain functionalities in
+<code>add_constrain_*()</code>).</p>
+<p><strong>Note</strong>: Projecting relative suitability estimates into
+conditions other than the observational records for which the SDM was
+trained comes with a number of assumptions, most importantly that
+relationships between occurrences and environmental conditions are in
+equilibrium and similar biases and conditions apply in the future. See
+<a href="https://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2010.00036.x" class="external-link">Elith
+et al. (2010)</a> and discussion in <a href="http://doi.wiley.com/10.1111/gcb.13251" class="external-link">Zurell et al. (2016)</a>
+for an introduction and comparative overview.</p>
 <div class="section level2">
-<h2 id="biodiversity-projections">Biodiversity projections<a class="anchor" aria-label="anchor" href="#biodiversity-projections"></a>
+<h2 id="load-relevant-packages-and-testing-data">Load relevant packages and testing data<a class="anchor" aria-label="anchor" href="#load-relevant-packages-and-testing-data"></a>
 </h2>
-<p>Different predictor structure</p>
-<p>Introduce constrains</p>
-<p>GLOBIOM scenarios additions</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iiasa/ibis.iSDM" class="external-link">ibis.iSDM</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/stars/" class="external-link">stars</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://cirrus.ucsd.edu/~pierce/ncdf/" class="external-link">ncdf4</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">assertthat</span><span class="op">)</span></span></code></pre></div>
+<p>For the purpose of this example we are loading some testing data on
+species distributions as well as contemporary and future predictors.
+Note the names of predictors used for building a distribution model have
+to be consistent.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Background and biodiversity data</span></span>
+<span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/europegrid_50km.tif'</span>, package<span class="op">=</span><span class="st">'ibis.iSDM'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">virtual_points</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/input_data.gpkg'</span>, package<span class="op">=</span><span class="st">'ibis.iSDM'</span><span class="op">)</span>, <span class="st">'points'</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Note we are loading different predictors than in previous examples</span></span>
+<span><span class="co"># These are in netcdf4 format, a format specific for storing spatial-temporal data including metadata.</span></span>
+<span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors_presfuture/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.nc"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># From those list of predictors are first loading the current ones as raster data</span></span>
+<span><span class="co"># We are loading only data from the very first, contemporary time step for model fitting</span></span>
+<span><span class="va">pred_current</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/stack.html" class="external-link">stack</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">ll</span><span class="op">)</span> <span class="va">pred_current</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/addLayer.html" class="external-link">addLayer</a></span><span class="op">(</span><span class="va">pred_current</span>, <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">i</span>, layer <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html" class="external-link">projection</a></span><span class="op">(</span><span class="va">pred_current</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html" class="external-link">projection</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="co"># Same projection as background</span></span>
+<span></span>
+<span><span class="co"># Get future predictors</span></span>
+<span><span class="co"># These we will load in using the stars package and also ignoring the first time step</span></span>
+<span><span class="va">pred_future</span> <span class="op">&lt;-</span> <span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/read_stars.html" class="external-link">read_stars</a></span><span class="op">(</span><span class="va">ll</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stars</span><span class="fu">:::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/dplyr.html" class="external-link">slice.stars</a></span><span class="op">(</span><span class="st">'Time'</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">86</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">pred_future</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span> <span class="co"># Set projection</span></span>
+<span><span class="co"># Rename future predictors to those of current</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pred_future</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pred_current</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot the test data</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">pred_current</span><span class="op">$</span><span class="va">Secondary.forest.vegetation</span>,</span>
+<span>     col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey20"</span>, <span class="st">"orange"</span>, <span class="st">"lightgreen"</span>, <span class="st">"green"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>,</span>
+<span>     main <span class="op">=</span> <span class="st">"Share of secondary vegetation"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Load%20data-1.png" width="528" style="display: block; margin: auto;">
+## Train model and create a future projection</p>
+<p>We will make use of the data loaded above to (a) first create a
+species distribution model for contemporary conditions and (b) project
+the obtained coefficients into the future using future predictors. For
+guidance on how distribution models are trained, see other vignettes (<a href="01_train_simple_model.html">1</a>).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Train model adding the data loaded above</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_points</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="co"># Note that we scale the predictors here</span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_current</span>, transform <span class="op">=</span> <span class="st">'scale'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>nrounds <span class="op">=</span> <span class="fl">5000</span>, learning_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span> <span class="co"># Slightly increase the learning rate</span></span>
+<span><span class="co">#&gt; Loading required namespace: rgeos</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:31:38 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:31:38 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:31:39 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:31:39 | Transforming predictors...</span></span></span>
+<span></span>
+<span><span class="co"># Train the model</span></span>
+<span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Simple PPM'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-16 19:31:40 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-16 19:31:40 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-16 19:31:40 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-16 19:31:40 | Starting fitting...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-16 19:31:59 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-16 19:32:00 | Completed after 20.09 secs</span></span></span>
+<span></span>
+<span><span class="co"># Add a threshold to this model by maximizing the TSS (using trained data)</span></span>
+<span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">modf</span>, method <span class="op">=</span> <span class="st">'TSS'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># -- #</span></span>
+<span><span class="co"># Now lets create a scenarios object via scenarios</span></span>
+<span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scenario.html">scenario</a></span><span class="op">(</span><span class="va">modf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="co"># Apply the same variable transformations as above. </span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_future</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from the model object.</span></span>
+<span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:32:04 | Adding scenario predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-16 19:32:04 | Transforming predictors...</span></span></span>
+<span></span>
+<span><span class="co"># This creates a scenario object</span></span>
+<span><span class="va">sc</span></span>
+<span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
+<span><span class="co">#&gt;   Used model: XGBOOST-Model</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
+<span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
+<span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
+<span><span class="co"># what is possible with them</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sc</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "get_model"            "threshold"            ".that"               </span></span>
+<span><span class="co">#&gt;  [4] "get_scenarios"        "get_threshold"        "modelobject"         </span></span>
+<span><span class="co">#&gt;  [7] "limits"               "predictors"           "get_constraints"     </span></span>
+<span><span class="co">#&gt; [10] "apply_threshold"      "get_timeperiod"       "modelid"             </span></span>
+<span><span class="co">#&gt; [13] "get_limits"           "scenarios"            "set_predictors"      </span></span>
+<span><span class="co">#&gt; [16] "plot_relative_change" "plot"                 "plot_animation"      </span></span>
+<span><span class="co">#&gt; [19] "summary"              "constraints"          "calc_scenarios_slope"</span></span>
+<span><span class="co">#&gt; [22] "set_constraints"      "plot_migclim"         "print"               </span></span>
+<span><span class="co">#&gt; [25] ".super"               "verify"               "get_predictors"      </span></span>
+<span><span class="co">#&gt; [28] "show"                 "save"                 "get_predictor_names"</span></span></code></pre></div>
+<p>The scenario object can finally be trained via
+<code><a href="../reference/project.html">project()</a></code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sc.fit1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-16 19:32:09 | Starting suitability predictions...</span></span></span>
+<span><span class="co"># Scenarios have been added</span></span>
+<span><span class="va">sc.fit1</span></span>
+<span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
+<span><span class="co">#&gt;   Used model: XGBOOST-Model</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
+<span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="summarizing-and-plotting-the-fitted-projections">Summarizing and plotting the fitted projections<a class="anchor" aria-label="anchor" href="#summarizing-and-plotting-the-fitted-projections"></a>
+</h2>
+<p>As with distribution models there are a number of ways how the
+scenarios can be visualized and interacted with:</p>
+<ul>
+<li>
+<code><a href="../reference/plot.html">plot()</a></code> makes a visualization of the projections over
+all time steps (!)</li>
+<li>
+<code>plot_relative_change()</code> calculates the change in
+suitability area between the first and the last timestep and categorizes
+the result accordingly. Note that SDMs as such cannot directly infer
+colonization or extinction, but only gains or losses of suitable
+habitat!</li>
+<li>
+<code>calc_scenarios_slope()</code> calculates the slope (rate of
+change) across timesteps. Useful for summarizing results</li>
+<li>
+<code><a href="../reference/summary.html">summary()</a></code> creates a summary output of the contained
+scenarios. If a <code><a href="../reference/threshold.html">threshold()</a></code> is specified, this function
+will summarize the amount of area at each timestep.</li>
+<li>
+<code>get_scenarios()</code> gets the created scenarios a
+<code>stars</code> object (plus <em>thresholds</em> if specified).</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Plot all scenarios. With a large number of predictors this figure will be messy...</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">sc.fit1</span><span class="op">)</span> <span class="co"># or sc.fit1$plot()</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-1.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># As an alternative, visualize the linear slope per grid cell and across all time steps</span></span>
+<span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">calc_scenarios_slope</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-2.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Another option is to calculate the relative change between start and finish</span></span>
+<span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">plot_relative_change</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">diff_ff</span> <span class="op">&lt;-</span> <span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_as_stars.html" class="external-link">st_as_stars</a></span><span class="op">(</span><span class="va">o</span>, att <span class="op">=</span> <span class="st">'diff'</span><span class="op">)</span>;<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">diff_ff</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">'Change'</span></span>
+<span></span>
+<span><span class="co"># Use ggplot to visualize the changes</span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/geom_stars.html" class="external-link">geom_stars</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">diff_ff</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_equal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_light</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_y_discrete</a></span><span class="op">(</span>expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey75"</span>,<span class="st">"coral"</span>,<span class="st">"cyan3"</span>,<span class="st">"grey25"</span><span class="op">)</span>,na.value <span class="op">=</span> <span class="st">'transparent'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'Change between 2015 and '</span>, <span class="fl">2100</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-3.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span></span>
+<span><span class="co"># We can also summarize the thresholded data</span></span>
+<span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">area_km2</span><span class="op">~</span><span class="va">band</span>, data <span class="op">=</span> <span class="va">o</span>, type <span class="op">=</span> <span class="st">'b'</span>,</span>
+<span>     main <span class="op">=</span> <span class="st">"Suitable habitat across Time"</span>,</span>
+<span>     ylab <span class="op">=</span> <span class="st">"Amount of area (km2)"</span>, xlab <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-4.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># How does habitat gain and loss change over time?</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">totchange_gain_km2</span><span class="op">~</span><span class="va">band</span>, data <span class="op">=</span> <span class="va">o</span>, type <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span>     main <span class="op">=</span> <span class="st">"Habitat gain and loss"</span>,</span>
+<span>     ylab <span class="op">=</span> <span class="st">"Amount of area (km2)"</span>, xlab <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">o</span><span class="op">$</span><span class="va">totchange_gain_km2</span><span class="op">~</span><span class="va">o</span><span class="op">$</span><span class="va">band</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">o</span><span class="op">$</span><span class="va">totchange_loss_km2</span><span class="op">)</span><span class="op">~</span><span class="va">o</span><span class="op">$</span><span class="va">band</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-5.png" width="528" style="display: block; margin: auto;"></p>
+<p>Finally, scenarios projections can also be saved as specific outputs.
+As before, this is enabled via <code><a href="../reference/write_output.html">write_output()</a></code> and works
+just the same for [<code>BiodiversityScenario</code>] objects, with the
+only difference being that the output can be specified as netCDF-4
+file.</p>
+</div>
+<div class="section level2">
+<h2 id="adding-constrains-to-projections">Adding constrains to projections<a class="anchor" aria-label="anchor" href="#adding-constrains-to-projections"></a>
+</h2>
+<p>In the simple scenario above we use the naive assumption that any,
+depending on the response functions of the fitted distribution model,
+any suitable habitat within the background modelling region is
+potentially reachable by the species. In reality there might however be
+geographic (islands), environmental and biotic constraints on far the
+species can disperse. These can be specified through the constrain
+function [<code><a href="../reference/add_constrain.html">add_constrain()</a></code>] and a variety of constrains is
+currently available, some of which depend on other packages.</p>
+<ul>
+<li>
+<code><a href="../reference/add_constrain.html">add_constrain()</a></code> Generic wrapper to which a specific
+‘method’ can be supplied.</li>
+<li>
+<code><a href="../reference/add_constrain_dispersal.html">add_constrain_dispersal()</a></code> To add a dispersal constrain
+to the projections which is applied after each time step. Supports
+various options with <code>'sdd_fixed'</code> for fixed dispersal
+kernels, <code>'sdd_nexpkernel'</code> for a negative exponential kernel
+or <code>'sdd_kissmig'</code> for applying the kissmig framework.</li>
+<li>
+<code><a href="../reference/add_constrain_MigClim.html">add_constrain_MigClim()</a></code> Use the MigClim package to
+simulate dispersal events between time steps. A number of parameters are
+required here and adding this constrain will also overwrite some default
+plotting capacities (For example via <code>sc$plot_migclim()</code>).
+See also the help file and <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x" class="external-link">Engler
+et al. (2012)</a> for more information.</li>
+<li>
+<code><a href="../reference/add_constrain_connectivity.html">add_constrain_connectivity()</a></code> Add a connectivity
+constrain to the projection. Currently only hard barriers are
+implemented, but in future additional sub-modules are planned to enable
+more options and details here.</li>
+<li>
+<code>add_constrain_adaptability</code> Simple constrains adding
+constrains on the adaptability of species to novel climatic conditions.
+Currently only simple nichelimits are implemented, which ‘cap’
+projections in novel environments to the observed ranges of contemporary
+predictors.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Adding a simple negative exponential kernel to constrain the predictions</span></span>
+<span><span class="va">sc.fit2</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
+<span>   <span class="fu"><a href="../reference/add_constrain.html">add_constrain</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>   <span class="co"># Directly fit the object</span></span>
+<span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-16 19:32:38 | Starting suitability predictions...</span></span></span>
+<span></span>
+<span><span class="co"># Also fit one projection a nichelimit has been added</span></span>
+<span><span class="va">sc.fit3</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
+<span>   <span class="fu"><a href="../reference/add_constrain.html">add_constrain</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>   <span class="fu"><a href="../reference/add_constrain_adaptability.html">add_constrain_adaptability</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nichelimit"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>   <span class="co"># Directly fit the object</span></span>
+<span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-16 19:33:19 | Starting suitability predictions...</span></span></span>
+<span></span>
+<span><span class="co"># Note how constrains are indicated in the scenario object.</span></span>
+<span><span class="va">sc.fit3</span></span>
+<span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
+<span><span class="co">#&gt;   Used model: XGBOOST-Model</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
+<span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
+<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
+<span></span>
+<span><span class="co"># The naive assumption is that there is unlimited dispersal across the whole background</span></span>
+<span><span class="co"># Note how the projection with dispersal constrain results in a considerable smaller amount of suitable habitat.</span></span>
+<span><span class="va">sc.fit1</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># Baseline</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Add%20constrains%20and%20reproject-1.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sc.fit2</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># With dispersal constrain</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Add%20constrains%20and%20reproject-2.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sc.fit3</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># With dispersal limit and nichelimitation (within a standard deviation)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Add%20constrains%20and%20reproject-3.png" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Lets compare the difference in projections compared to the naive one defined earlier. </span></span>
+<span><span class="va">o1</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">o2</span> <span class="op">&lt;-</span> <span class="va">sc.fit2</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">o3</span> <span class="op">&lt;-</span> <span class="va">sc.fit3</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">arlim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">o1</span><span class="op">$</span><span class="va">area_km2</span>, <span class="va">o2</span><span class="op">$</span><span class="va">area_km2</span>, <span class="va">o3</span><span class="op">$</span><span class="va">area_km2</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">o1</span><span class="op">$</span><span class="va">area_km2</span>, <span class="va">o2</span><span class="op">$</span><span class="va">area_km2</span>, <span class="va">o3</span><span class="op">$</span><span class="va">area_km2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">area_km2</span><span class="op">~</span><span class="va">band</span>, data <span class="op">=</span> <span class="va">o1</span>, type <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span>     ylim <span class="op">=</span> <span class="va">arlim</span>,</span>
+<span>     main <span class="op">=</span> <span class="st">"Suitable habitat across Time"</span>,</span>
+<span>     ylab <span class="op">=</span> <span class="st">"Amount of area (km2)"</span>, xlab <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">o1</span><span class="op">$</span><span class="va">area_km2</span><span class="op">~</span><span class="va">o1</span><span class="op">$</span><span class="va">band</span>, col <span class="op">=</span> <span class="st">"black"</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">o2</span><span class="op">$</span><span class="va">area_km2</span><span class="op">~</span><span class="va">o2</span><span class="op">$</span><span class="va">band</span>, col <span class="op">=</span> <span class="st">"black"</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">o3</span><span class="op">$</span><span class="va">area_km2</span><span class="op">~</span><span class="va">o3</span><span class="op">$</span><span class="va">band</span>, col <span class="op">=</span> <span class="st">"black"</span>, lty <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomleft"</span>, </span>
+<span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Unlimited dispersal"</span>, <span class="st">"Constrained dispersal"</span>,</span>
+<span>             <span class="st">"Constrained dispersal and niche limit"</span><span class="op">)</span>, </span>
+<span>  lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  cex <span class="op">=</span> <span class="fl">1.2</span>,</span>
+<span>  bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_biodiversity_projections_files/figure-html/Summarize%20area%20of%20projections-1.png" width="528" style="display: block; margin: auto;"></p>
+<p>Another option for constraining prediction is also by imposing a
+zonal limit (for instance climatically defined) on the projections. This
+has to be done while fitting the SDM for the reference conditions (see
+the example with limits (<a href="01_train_simple_model.html">1</a>) )
+and is considered when doing (future) projections.</p>
+</div>
+<div class="section level2">
+<h2 id="specific-parsers-for-globiom-related-scenarios">Specific parsers for GLOBIOM related scenarios<a class="anchor" aria-label="anchor" href="#specific-parsers-for-globiom-related-scenarios"></a>
+</h2>
+<p><tbd></tbd></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -123,7 +461,7 @@ Jung</h4>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer>

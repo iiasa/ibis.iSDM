@@ -124,6 +124,15 @@ PredictorDataset <- bdproto(
     }
     rm(d)
   },
+  # Has derivates?
+  has_derivates = function(self){
+    if(inherits(self$get_data(),'Raster'))
+     return(
+       length( grep("hinge__|bin__|quad__|thresh__", self$get_names() ) ) > 0
+     )
+    else
+     return( NULL )
+  },
   # Number of Predictors in object
   length = function(self) {
     if(inherits(self$get_data(),'Raster'))

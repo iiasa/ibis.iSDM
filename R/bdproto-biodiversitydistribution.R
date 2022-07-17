@@ -118,6 +118,10 @@ BiodiversityDistribution <- bdproto(
     if(is.Waiver(self$latentfactors)) return('None')
     self$latentfactors
   },
+  # Remove latent
+  rm_latent = function(self){
+    bdproto(NULL, self, latentfactors = new_waiver() )
+  },
   # Get priors
   get_priors = function(self){
     return( self$priors )

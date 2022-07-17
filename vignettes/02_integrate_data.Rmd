@@ -289,13 +289,56 @@ plot(mod1)
 
 #### Joint likelihood estimation
 
-**To be written**
+Some engines, notably [`engine_inla`], [`engine_inlabru`] and [`engine_stan`] support the joint estimation of multiple likelihoods. The algorithmic approach in this package generally follows an approach outlined where any presence-only datasets are modelled through a log-Gaussian Cox process where the expected number of individuals are estimated as a function of area following a Poisson distribution.  
+
+\begin{align*}
+N(A) &\sim {\sf Poisson}\left(\int_{A} \lambda(i)\right) \\
+\end{align*}
+\begin{align*}
+\log(\lambda(s)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{ki} 
+\end{align*}
+
+where $N$ is the number of individuals and $A$ the Area for a given spatial unit $i$, with
+$N(A)$ being an estimate of the relative rate of occurrence per unit area (or ROR). $k$ is an
+increment for $K$ number of predictors. $\lambda$ is the intensity function, $\alpha$ the intercept and
+$\beta$ the parameter coefficients for environmental covariates.
+
+Presence-absence data are estimated as draws from a *Bernoulli* distribution:
+
+\begin{align*}
+Y_{i} &\sim {\sf Bernoulli(p_{i})}, i = 1, 2, ... \\
+\end{align*}
+\begin{align*}
+\log(-\log(1-p_{i})) &= \alpha_{2} + \sum_{k}^{K} \beta_{k}x_{ki} 
+\end{align*}
+
+where $Y$ is the presence-absence of an record as sampled from a *Bernoulli* distribution in a given spatial unit $i$. 
+$\alpha$ being the intercept and $\beta$ the parameter coefficients for environmental covariates.
+
+The Joint likelihood is then estimated by multiplying the two likelihoods from above $\prod_{l}^{L} f(l)$, where $L$ is an individual likelihood, with $\beta_{k}$ being shared parameters between the two likelihoods. Equally it is also possible to add latent spatial effects such as Gaussian fields (approximated through a stochastic partial differential equation (SPDE)) to the model, alowing to share the spatial covariance - or bias - among datasets.
 
 See the [Engine comparison](04_engine_comparison.html) for an overview on which engines support this level of integration.
 
 ```{r, warning=FALSE, message=FALSE}
 
 # Define a model
+mod1 <- distribution(background) %>% 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+    # A presence only dataset
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+    # A Presence absence dataset
+      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") %>% 
+    # Use inlabru for estimation and default parameters.
+    # INLA requires the specification of a mesh which in this example is generated from the data.
+      engine_inlabru() %>% 
+  # Train
+  train(runname = "Combined prediction",only_linear = TRUE,
+        method_integration = "predictor")
 
+# The resulting object contains the combined prediction with shared coefficients among datasets.
+plot(mod1)
+
+# Note how an overall intercept as well as separate intercepts for each dataset are added.
+summary(mod1)
 ```
 

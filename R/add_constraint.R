@@ -376,10 +376,19 @@ methods::setMethod(
 #### Adaptability constraints ####
 
 #' @title Adds an adaptability constrain to a scenario object
+#' @description
+#' Adaptability constrains assume that suitable habitat for species in (future) projections might be unsuitable if
+#' it is outside the range of conditions currently observed for the species.
+#'
+#' Currently only `nichelimit` is implemented, which adds a simple constrain on the predictor parameter space, which
+#' can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
+#' are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
+#' training.
 #' @name add_constrain_adaptability
 #' @aliases add_constrain_adaptability
 #' @inheritParams add_constrain
 #' @param names A [`character`] vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).
+#' @param value A [`numeric`] value in units of standard deviation (Default: \code{1}).
 #' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
 #' Allows incremental widening of the niche space, thus opening constraints.
 #' @family constrain
@@ -389,7 +398,7 @@ methods::setMethod(
 NULL
 methods::setGeneric("add_constrain_adaptability",
                     signature = methods::signature("mod"),
-                    function(mod, method, names = NULL, value = NULL, increment = 0, ...) standardGeneric("add_constrain_adaptability"))
+                    function(mod, method, names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constrain_adaptability"))
 
 #' @name add_constrain_adaptability
 #' @rdname add_constrain_adaptability
@@ -435,6 +444,7 @@ methods::setMethod(
 )
 
 #' Adaptability constrain by applying a limit on extrapolation beyond the niche
+#'
 #' @param newdata A [`data.frame`] with the information about new data layers.
 #' @param model A [`list`] created by the modelling object containing the full predictors and biodiversity predictors.
 #' @param names A [`character`] or \code{NULL} of the names of predictors.
@@ -477,7 +487,7 @@ methods::setMethod(
   rsd <- rsd * (value + (increment*increment_step))
   rr[1,] <- rr[1,] - rsd; rr[2,] <- rr[2,] + rsd
 
-  # Now 'clamb' all predictor values beyond these names to 0, e.g. partial out
+  # Now 'clamp' all predictor values beyond these names to 0, e.g. partial out
   nd <- newdata
   for(n in names){
     # Calc min

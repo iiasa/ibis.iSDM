@@ -24,8 +24,9 @@ NULL
 #' 'background' points. The most common approach for estimation are "Maxent" or poisson-process models (PPM), the
 #' latter of which are used in this package. See Renner et al. 2015 for an overview.
 #'
-#' @references Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
-#' @references Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+#' @references
+#' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+#' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' @seealso
 #' See other functions for adding biodiversity data, e.g. [add_biodiversity]
 #' @family add_biodiversity
@@ -74,6 +75,11 @@ methods::setMethod(
 
     # Messager
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipo dataset...")
+
+    # Transform to background for analysis
+    if(sf::st_crs(x$background) != sf::st_crs(poipo)){
+      poipo <- poipo %>% sf::st_transform(crs = sf::st_crs(x$background))
+    }
 
     if(docheck){
       # Get only those records that fall onto the background data
@@ -179,6 +185,11 @@ methods::setMethod(
     # Messager
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipa dataset...")
 
+    # Transform to background for analysis
+    if(sf::st_crs(x$background) != sf::st_crs(poipa)){
+      poipa <- poipa %>% sf::st_transform(crs = sf::st_crs(x$background))
+    }
+
     if(docheck){
       # Get only those records that fall onto the background data
       suppressMessages( poipa <- point_in_polygon(poly = x$background, points = poipa) )
@@ -226,7 +237,7 @@ methods::setMethod(
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE})
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
-#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL})
+#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
@@ -293,8 +304,13 @@ methods::setMethod(
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column ")
 
-    # Messager
+    # Messenger
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpo dataset...")
+
+    # Transform to background for analysis
+    if(sf::st_crs(x$background) != sf::st_crs(polpo)){
+      polpo <- polpo %>% sf::st_transform(crs = sf::st_crs(x$background))
+    }
 
     # Simulate presence absence points rather than using the range directly
     if(simulate){
@@ -440,6 +456,11 @@ methods::setMethod(
 
     assertthat::assert_that(length(unique(polpa[[field_occurrence]])) <= 2,
                             msg = "More 2 unique values. Specify a column.")
+
+    # Transform to background for analysis
+    if(sf::st_crs(x$background) != sf::st_crs(polpa)){
+      polpa <- polpa %>% sf::st_transform(crs = sf::st_crs(x$background))
+    }
 
     # Simulate presence absence points rather than using the range directly
     if(simulate){

@@ -149,7 +149,7 @@ BiodiversityScenario <- bdproto(
     return(self[[what]])
   },
   # Plot the prediction
-  plot = function(self, what = "suitability",...){
+  plot = function(self, what = "suitability", which = NULL, ...){
     # FIXME: More plotting options would be good
     if(is.Waiver(self$get_scenarios())){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
@@ -158,7 +158,16 @@ BiodiversityScenario <- bdproto(
       # Get unique number of data values. Surely there must be an easier val
       vals <- self$get_scenarios()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique() %>% length()
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
-      stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
+      if(is.null(which)){
+        stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
+      } else {
+        # Assert that which is actually within the dimensions
+        assertthat::assert_that(which <= dim(self$get_scenarios())[3],
+                                msg = "Band selection out of bounds.")
+        obj <- self$get_scenarios()[what,,,which]
+        stars:::plot.stars( obj, breaks = "equal", col = col,
+                            main = paste0(what," for ", stars::st_get_dimension_values(obj, "band") )  )
+      }
     }
   },
   # Plot Migclim results if existing
@@ -348,7 +357,7 @@ BiodiversityScenario <- bdproto(
     return(out)
   },
   #Plot relative change between baseline and projected thresholds
-  plot_relative_change = function(self, position = NULL, variable = 'mean'){
+  plot_relative_change = function(self, position = NULL, variable = 'mean', plot = TRUE){
     # Default position is the last one
     assertthat::assert_that(is.null(position) || is.numeric(position) || is.character(position),
                             is.character(variable))
@@ -390,21 +399,23 @@ BiodiversityScenario <- bdproto(
     levels(diff_f) <- rat
     diff_f <- raster::mask(diff_f, baseline)
 
-    cols <- c("grey75","coral","cyan3","grey25")
-
     # Plot
     # Convert to stars for plotting otherwise
     diff_ff <- stars::st_as_stars(diff_f, att = 'diff');names(diff_ff) <- 'Change'
-    # Use ggplot
-    ggplot2::ggplot() +
-      stars::geom_stars(data = diff_ff) +
-      ggplot2::coord_equal() +
-      ggplot2::theme_light(base_size = 18) +
-      ggplot2::scale_x_discrete(expand=c(0,0)) +
-      ggplot2::scale_y_discrete(expand=c(0,0)) +
-      ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
-      ggplot2::theme(legend.position = "bottom") +
-      ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
+    if(plot){
+      cols <- c("grey75","coral","cyan3","grey25")
+
+      # Use ggplot
+      ggplot2::ggplot() +
+        stars::geom_stars(data = diff_ff) +
+        ggplot2::coord_equal() +
+        ggplot2::theme_light(base_size = 18) +
+        ggplot2::scale_x_discrete(expand=c(0,0)) +
+        ggplot2::scale_y_discrete(expand=c(0,0)) +
+        ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
+        ggplot2::theme(legend.position = "bottom") +
+        ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
+    }
     # Return
     return(diff_f)
   },

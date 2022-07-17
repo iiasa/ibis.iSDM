@@ -353,9 +353,7 @@ methods::setMethod(
           }
           return(y)
         }
-        if(getOption("ibis.runparallel")) raster::beginCluster(n = getOption("ibis.nthread"))
         new_proj <- raster::overlay(proj, fun = impute.loess, unstack = TRUE, forcefun = FALSE)
-        if(getOption("ibis.runparallel")) raster::endCluster()
         # Rename again
         names(new_proj) <- names(proj)
         new_proj <- raster::setZ(new_proj, as.Date(times) )

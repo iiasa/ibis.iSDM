@@ -43,7 +43,7 @@ add_biodiversity_polpo(
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation (Default: \code{100}).}
 
-\item{simulate_weights}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL})}
+\item{simulate_weights}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either
 \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}

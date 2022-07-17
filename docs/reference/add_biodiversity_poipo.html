@@ -70,22 +70,22 @@ distribution object.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_biodiversity_poipo</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">poipo</span>,
-  name <span class="op">=</span> <span class="cn">NULL</span>,
-  field_occurrence <span class="op">=</span> <span class="st">"Observed"</span>,
-  formula <span class="op">=</span> <span class="cn">NULL</span>,
-  family <span class="op">=</span> <span class="st">"poisson"</span>,
-  link <span class="op">=</span> <span class="cn">NULL</span>,
-  separate_intercept <span class="op">=</span> <span class="cn">TRUE</span>,
-  docheck <span class="op">=</span> <span class="cn">TRUE</span>,
-  pseudoabsence_settings <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for BiodiversityDistribution,sf</span>
-<span class="fu">add_biodiversity_poipo</span><span class="op">(</span><span class="va">x</span>, <span class="va">poipo</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_biodiversity_poipo</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">poipo</span>,</span>
+<span>  name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"Observed"</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>  link <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  separate_intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  docheck <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pseudoabsence_settings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution,sf</span></span>
+<span><span class="fu">add_biodiversity_poipo</span><span class="op">(</span><span class="va">x</span>, <span class="va">poipo</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -145,9 +145,10 @@ latter of which are used in this package. See Renner et al. 2015 for an overview
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.</p>
-<p>Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.</p>
-    </div>
+    
+<ul><li><p>Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.</p></li>
+<li><p>Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>See other functions for adding biodiversity data, e.g. add_biodiversity</p>
@@ -159,15 +160,15 @@ latter of which are used in this package. See Renner et al. 2015 for an overview
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"> <span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="st">"inst/extdata/europegrid_50km.tif"</span><span class="op">)</span></span>
-<span class="r-in"> <span class="co"># Load virtual species</span></span>
-<span class="r-in"> <span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="st">"inst/extdata/input_data.gpkg"</span>, <span class="st">"points"</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Define model</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">add_biodiversity_poipo</span><span class="op">(</span><span class="va">virtual_species</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">x</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="st">"inst/extdata/europegrid_50km.tif"</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="co"># Load virtual species</span></span></span>
+<span class="r-in"><span> <span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="st">"inst/extdata/input_data.gpkg"</span>, <span class="st">"points"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Define model</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">add_biodiversity_poipo</span><span class="op">(</span><span class="va">virtual_species</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -179,7 +180,7 @@ latter of which are used in this package. See Renner et al. 2015 for an overview
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>

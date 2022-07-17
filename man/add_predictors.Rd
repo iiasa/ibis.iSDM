@@ -80,6 +80,7 @@ Available options for creating derivates are:
 \item \code{'quad'} - Adds quadratic transformed predictors.
 \item \code{'thresh'} - Add threshold transformed predictors.
 \item \code{'hinge'} - Add hinge transformed predictors.
+\item \code{'bin'} - Add predictors binned by their percentiles.
 }
 }
 \note{

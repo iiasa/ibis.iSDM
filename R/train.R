@@ -492,9 +492,11 @@ methods::setMethod(
 
       # Now clip all predictors and background to this
       model$background <- suppressMessages(
-        suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) )) %>%
+        suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE)  %>%
         sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
         sf::st_cast("MULTIPOLYGON")
+          )
+        )
 
       # Extract predictors and offsets again if set
       if(!is.Waiver(model$predictors_object)){
@@ -502,8 +504,17 @@ methods::setMethod(
         pred_ov <- model$predictors_object$get_data()
         # Make a rasterized mask of the background
         pred_ov <- raster::mask( pred_ov, model$background )
-        # Convert Predictors to data.frame
-        model[['predictors']] <- raster::as.data.frame(pred_ov, xy = TRUE)
+        # Convert Predictors to data.frame, including error catching for raster errors
+        # FIXME: This could be outsourced
+        o <- try({ raster::as.data.frame(pred_ov, xy = TRUE) },silent = TRUE)
+        if(inherits(o, "try-error")){
+          o <- as.data.frame( cbind( raster::coordinates(pred_ov),
+                                     as.matrix( pred_ov )) )
+          if(any(is.factor(pred_ov))){
+            o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+          }
+        }
+        model[['predictors']] <- o
         # model[['predictors_object']]$data <- pred_ov # This is correct, but results in some oddities
         rm(pred_ov)
       } else {

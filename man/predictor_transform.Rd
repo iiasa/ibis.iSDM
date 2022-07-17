@@ -51,4 +51,7 @@ Identified outliers are by default set to \code{NA}.
 new_x <- predictor_transform(x, option = 'scale')
 }
 }
+\seealso{
+predictor_derivate
+}
 \keyword{utils}

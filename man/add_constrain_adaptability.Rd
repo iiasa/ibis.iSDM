@@ -13,11 +13,7 @@
 
 \item{names}{A \code{\link{character}} vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).}
 
-\item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
-fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
-give the number of iteration steps (or within year migration steps).
-For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
-should be performed.}
+\item{value}{A \code{\link{numeric}} value in units of standard deviation (Default: \code{1}).}
 
 \item{increment}{A \code{\link{numeric}} constant that is added to value at every time step (Default: \code{0}).
 Allows incremental widening of the niche space, thus opening constraints.}
@@ -25,7 +21,13 @@ Allows incremental widening of the niche space, thus opening constraints.}
 \item{...}{passed on parameters. See also the specific methods for adding constrains.}
 }
 \description{
-Adds an adaptability constrain to a scenario object
+Adaptability constrains assume that suitable habitat for species in (future) projections might be unsuitable if
+it is outside the range of conditions currently observed for the species.
+
+Currently only \code{nichelimit} is implemented, which adds a simple constrain on the predictor parameter space, which
+can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
+are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
+training.
 }
 \seealso{
 Other constrain: 

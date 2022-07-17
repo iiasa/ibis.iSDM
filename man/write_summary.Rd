@@ -4,7 +4,7 @@
 \alias{write_summary}
 \title{Generic function to write summary outputs from created models.}
 \usage{
-\S4method{write_summary}{ANY, character}(mod, fname)
+\S4method{write_summary}{ANY, character, logical, logical}(mod, fname, partial, verbose)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
@@ -14,6 +14,8 @@ The suffix determines the file type of the output (Options: \code{'rds'}, \code{
 
 \item{partial}{A \code{\link{logical}} value determining whether partial variable contributions should be calculated and added
 to the model summary. \strong{Note that this can be rather slow} (Default: \code{FALSE}).}
+
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 
 \item{...}{Any other arguments passed on the individual functions.}
 }

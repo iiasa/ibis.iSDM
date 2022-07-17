@@ -177,7 +177,9 @@ engine_inlabru <- function(x,
         # Get all coordinates of observations
         locs <- do.call("rbind",
                         lapply(model$biodiversity, function(x){
-                          o <- sf::st_coordinates( guess_sf( x$observations )[,1:2])
+                          z <- x$observations
+                          z <- subset(z, observed > 0)
+                          o <- sf::st_coordinates( guess_sf( z )[,1:2])
                           o <- as.matrix(o)
                           colnames(o) <- c("x", "y")
                           return(o)

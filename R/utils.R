@@ -166,6 +166,23 @@ to_formula <- function(formula){
   return(formula)
 }
 
+#' Hingeval transformation
+#' @param x A [`vector`] with numeric values.
+#' @param min [`numeric`] minimum value for the hinge transformation
+#' @param max [`numeric`] maximum value for the hinge transformation
+#' @keywords internal
+#' @noRd
+hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+
+#' Threshold transformation
+#' @param x A [`vector`] with numeric values.
+#' @param knot [`numeric`] threshold value as cutoff.
+#' @keywords internal
+#' @noRd
+thresholdval <- function(x, knot) {
+    ifelse(x >= knot, 1, 0)
+}
+
 #' Parallel computation of function
 #'
 #' @description

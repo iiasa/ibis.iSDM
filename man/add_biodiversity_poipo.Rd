@@ -67,9 +67,10 @@ x
 }
 }
 \references{
-Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
-
-Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+\itemize{
+\item Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+\item Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+}
 }
 \seealso{
 See other functions for adding biodiversity data, e.g. \link{add_biodiversity}

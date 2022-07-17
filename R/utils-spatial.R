@@ -619,6 +619,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
 #' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).
 #' @returns Returns a adjusted [`Raster`] object of identical resolution.
+#' @seealso predictor_derivate
 #' @examples
 #' \dontrun{
 #' # Where x is a rasterstack
@@ -717,7 +718,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       nComp <- nlayers(env)
       # Construct mask of all cells
       envMask <- !sum(raster::calc(env, is.na))
-      assertthat::assert_that(cellStats(envMask,sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
+      assertthat::assert_that(cellStats(envMask, sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
       env <- raster::mask(env, envMask, maskvalue = 0)
 
       # Sample covariance from stack and fit PCA
@@ -743,6 +744,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       stop("Principal component transformation for stars objects is not yet implemented. Pre-process externally!")
     }
   }
+
   # If stars convert back to stars object
   if(inherits(env, 'stars')){
     # Convert list back to stars
@@ -757,64 +759,218 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     # Final security checks
     assertthat::assert_that(
       raster::nlayers(env) == raster::nlayers(out),
-      is_comparable_raster(out,env)
+      is_comparable_raster(out, env)
     )
     return(out)
   }
 }
 
-#' Create spatial derivate of raster stacks
+#' Create spatial derivative of raster stacks
 #'
-#' @param env A [`Raster`] object
-#' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: 'none','quadratic', 'hinge', 'thresh')
-#' @return Returns the derived adjusted [`Raster`] objects of identical resolution
+#' @description
+#' This function creates derivatives of existing covariates and returns them in Raster format.
+#' Derivative variables can in the machine learning literature commonly be understood as one aspect of feature
+#' engineering. They can be particularly powerful in introducing non-linearities in otherwise linear models,
+#' for example is often done in the popular Maxent framework.
+#' @details
+#' Available options are:
+#' * \code{'none'} The original layer(s) are returned.
+#' * \code{'quadratic'} A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
+#' * \code{'hinge'} Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
+#' and all others to a range of \eqn{[0,1]}. The number of thresholds and thus new derivates is specified
+#' via the parameter \code{'nknots'} (Default: \code{4}).
+#' * \code{'thresh'} A threshold transformation of covariates, which sets all values lower than a set threshold ot
+#' \code{0} and those larger to \code{1}.
+#' The number of thresholds and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+#' * \code{'bin'} Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
+#' The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+#' @param env A [`Raster`] object.
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any way
+#' (Options: 'none','quadratic', 'hinge', 'thresh', 'bin').
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param deriv A [`vector`] with [`characters`] of specific derivates to create (Default: \code{NULL}).
+#' @return Returns the derived adjusted [`Raster`] objects of identical resolution.
+#' @seealso predictor_derivate
+#' @examples
+#' \dontrun{
+#' # Create a hinge transformation of one or multiple RasterLayers.
+#' predictor_derivate(covs, option = "hinge", knots = 4)
+#' }
 #' @keywords utils
 #' @export
-predictor_derivate <- function(env, option, ...){
+predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, ...){
   assertthat::assert_that(
-    inherits(env,'Raster'),
+    inherits(env,'Raster') || inherits(env, "stars"),
     !missing(env),
+    is.numeric(nknots) && nknots > 0,
     is.character(option),
-    option %in% c('none','quadratic', 'hinge', 'thresh')
+    is.null(deriv) || is.character(deriv)
   )
+  # Match argument.
+  option <- match.arg(option, c('none','quadratic', 'hinge', 'thresh', 'bin'), several.ok = FALSE)
+
+  # None, return as is
+  if(option == 'none') return(env)
+
+  # If stars see if we can convert it to a stack
+  if(inherits(env, 'stars')){
+    assertthat::assert_that(!is.null(deriv),msg = "Derivate names could not be found!")
+    # Decompose derivate variable names if set
+    deriv <- grep(paste0(option, "__"), deriv, value = TRUE)
+    if(length(deriv)==0){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Predictors with derivates not found!')
+      return(NULL)
+    }
+    cutoffs <- do.call(rbind,strsplit(deriv, "__")) |> as.data.frame()
+    cutoffs$deriv <- deriv
+
+    lyrs <- names(env) # Names of predictors
+    times <- stars::st_get_dimension_values(env, which = 3) # Time attribute
+    # Create a list to house the results
+    env_list <- list()
+    for(name in cutoffs$deriv){
+      env_list[[name]] <- as(env[cutoffs[which(cutoffs$deriv==name),2]], 'Raster') # Specify original raster
+    }
+    assertthat::assert_that(length(env_list) > 0)
+  } else {cutoffs <- NULL}
 
   # Simple quadratic transformation
   if(option == 'quadratic'){
-    new_env <- calc(env, function(x) I(x^2))
-    names(new_env) <- paste0('quad.', names(env))
+    if(is.Raster(env)){
+      new_env <- raster::calc(env, function(x) I(x^2))
+      names(new_env) <- paste0('quad__', names(env))
+    } else {
+      # Stars processing
+      new_env <- lapply(env_list, function(x) {
+        raster::calc(x, function(z) I(z^2))
+      })
+    }
   }
 
   # Hinge transformation
   # From`maxnet` package
   if(option == 'hinge'){
-    # Build new stacks
-    new_env <- raster::stack()
-    for(val in names(env)){
-      new_env <- raster::addLayer(new_env,
-                              fill_rasters(
-                                makeHinge(env[[val]],n = val,nknots = 4),
-                                           emptyraster(env)
-                                )
-                             )
+    if(is.Raster(env)){
+      # Build new stacks
+      new_env <- raster::stack()
+      for(val in names(env)){
+        o <- makeHinge(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
+        if(is.null(o)) next()
+        new_env <- raster::addLayer(new_env,
+                                    fill_rasters(o, emptyraster(env) )
+        )
+        rm(o)
+      }
+    } else {
+      # Stars object
+      for(val in names(env_list)){
+        # Format cutoffs
+        cu <- cutoffs[which(cutoffs$deriv == val), 3]
+        cu <- strsplit(cu, "_") |> unlist()
+        # Remove any leading points
+        if(any(substr(cu,1, 1)==".")){
+          cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+        }
+        cu <- as.numeric(cu)
+        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
+        for(k in 1:nlayers(env_list[[val]])){
+          o <- emptyraster(env_list[[val]][[k]])
+          o[] <- hingeval(env_list[[val]][[k]][], cu[1], cu[2])
+          env_list[[val]][[k]] <- o
+          rm(o)
+        }
+      }
+      invisible(gc())
     }
   }
 
   # For thresholds
   # Take functionality in maxnet package
   if(option == 'thresh'){
-    new_env <- raster::stack()
-    for(val in names(env)){
-      new_env <- raster::addLayer(new_env,
-                                  fill_rasters(
-                                    makeThresh(env[[val]],n = val,nknots = 4),
-                                    emptyraster(env)
-                                  )
-      )
+    if(is.Raster(env)){
+      new_env <- raster::stack()
+      for(val in names(env)){
+        o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
+        if(is.null(o)) next()
+        new_env <- raster::addLayer(new_env,
+                                    fill_rasters(o, emptyraster(env))
+        )
+        rm(o)
+      }
+    } else {
+      # For stats layers
+      for(val in names(env_list)){
+        # Format cutoffs
+        cu <- cutoffs[which(cutoffs$deriv == val), 3]
+        cu <- strsplit(cu, "_") |> unlist()
+        # Remove any leading points
+        if(any(substr(cu,1, 1)==".")){
+          cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+        }
+        cu <- as.numeric(cu)
+        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
+        for(k in 1:nlayers(env_list[[val]])){
+          o <- emptyraster(env_list[[val]][[k]])
+          o[] <- thresholdval(env_list[[val]][[k]][], cu)
+          env_list[[val]][[k]] <- o
+          rm(o)
+        }
+      }
+      invisible(gc())
     }
-
-
   }
 
+  # For binning, calculate cuts of thresholds
+  if(option == 'bin'){
+    if(is.Raster(env)){
+      new_env <- raster::stack()
+      for(val in names(env)){
+        o <- makeBin(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
+        if(is.null(o)) next()
+        new_env <- raster::addLayer(new_env, o)
+        rm(o)
+      }
+    } else {
+      # For stats layers
+      for(val in names(env_list)){
+        # Format cutoffs
+        cu <- cutoffs[which(cutoffs$deriv == val), 3]
+        cu <- strsplit(cu, "_") |> unlist()
+        # Remove any leading points
+        if(any(substr(cu,1, 1)==".")){
+          cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+        }
+        cu <- as.numeric(cu)
+        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
+        for(k in 1:nlayers(env_list[[val]])){
+          o <- emptyraster(env_list[[val]][[k]])
+          o <- raster::cut(env_list[[val]][[k]], cu)
+          o[is.na(o)] <- 0
+          o <- raster::mask(o, env_list[[val]][[k]] )
+          env_list[[val]][[k]] <- o
+          rm(o)
+        }
+      }
+      invisible(gc())
+    }
+  }
+
+  # If stars convert back to stars object
+  if(inherits(env, 'stars')){
+    # Add the original layers back
+    for(name in names(env)){
+      env_list[[name]] <- as(env[name], 'Raster') # Specify original raster
+    }
+
+    # Convert list back to stars
+    new_env <- do.call(
+      stars:::c.stars,
+      lapply(env_list, function(x) stars::st_as_stars(x))
+    )
+    # Reset names of attributes
+    names(new_env) <- c( cutoffs$deriv, names(env))
+    new_env <- stars::st_set_dimensions(new_env, which = 3, values = times, names = "time")
+  }
   return(new_env)
 }
 
@@ -828,31 +984,38 @@ predictor_derivate <- function(env, option, ...){
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
 #' @keywords utils, internal
 #' @concept Concept taken from the [maxnet] package.
 #' @returns A hinge transformed [`data.frame`].
 #' @noRd
-makeHinge <- function(v, n, nknots = 4){
+makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
-                          is.numeric(nknots))
-  # Function to create hingeval
-  hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
   # Get stats
   v.min <- raster::cellStats(v, min)
   v.max <- raster::cellStats(v, max)
-  k <- seq(v.min, v.max, length = nknots)
+  if(is.null(cutoffs)){
+    k <- seq(v.min, v.max, length = nknots)
+  } else {
+    k <- cutoffs
+  }
+  if(length(k)<=1) return(NULL)
+
   # Hinge up to max
   lh <- outer(v[], utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
   # Hinge starting from min
   rh <- outer(v[], k[-1], function(w, h) hingeval(w, v.min, h))
-  colnames(lh) <- paste("hinge",n, round( utils::head(k, -1), 2),'__', round(v.max, 2),sep = ":")
-  colnames(rh) <- paste("hinge",n, round( v.min, 2),'__', round(k[-1], 2), sep = ":")
+  colnames(lh) <- paste0("hinge__",n,'__', round( utils::head(k, -1), 2),'_', round(v.max, 2))
+  colnames(rh) <- paste0("hinge__",n,'__', round( v.min, 2),'_', round(k[-1], 2))
   o <- as.data.frame(
     cbind(lh, rh)
   )
   # Kick out first (min) and last (max) col as those are perfectly correlated
   o <- o[,-c(1,ncol(o))]
+  attr(o, "deriv.hinge") <- k
   return(o)
 }
 
@@ -865,18 +1028,79 @@ makeHinge <- function(v, n, nknots = 4){
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
 #' @keywords utils, internal
 #' @concept Concept taken from the [maxnet] package.
 #' @returns A threshold transformed [`data.frame`].
 #' @noRd
-makeThresh <- function(v, n, nknots = 4){
-  # Get min max
-  v.min <- raster::cellStats(v,min)
-  v.max <- raster::cellStats(v,max)
-  k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
+makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
+  if(is.null(cutoffs)){
+    # Get min max
+    v.min <- raster::cellStats(v,min)
+    v.max <- raster::cellStats(v,max)
+    k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
+  } else {
+    k <- cutoffs
+  }
+  if(length(k)<=1) return(NULL)
   f <- outer(v[], k, function(w, t) ifelse(w >= t, 1, 0))
-  colnames(f) <- paste("thresh", n, round(k, 2), sep = ":")
-  return(as.data.frame(f))
+  colnames(f) <- paste0("thresh__", n, "__",  round(k, 2))
+  f <- as.data.frame(f)
+  attr(f, "deriv.thresh") <- k
+  return(f)
+}
+
+#' Binned transformation of a given predictor
+#'
+#' @description
+#' This function takes predictor values and 'bins' them into categories based on a
+#' percentile split.
+#' @param v A [`Raster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
+#' @keywords utils, internal
+#' @returns A binned transformed [`data.frame`] with columns representing each bin.
+#' @noRd
+makeBin <- function(v, n, nknots, cutoffs = NULL){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
+  if(is.null(cutoffs)){
+    # Calculate cuts
+    cu <- raster::quantile(v, probs = seq(0, 1, by = 1/nknots) )
+  } else { cu <- cutoffs}
+
+  if(anyDuplicated(cu)){
+    # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
+    cu <- raster::quantile(v, probs = seq(0, 1, by = 1/(nknots*2)) )
+    cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
+    if(length(cu)<=2) return( NULL )
+    if(length(cu) > nknots){
+      cu <- cu[(length(cu)-(nknots)):length(cu)]
+    }
+  }
+  # Make cuts and explode
+  out <- explode_factorized_raster(
+    raster::ratify(
+      raster::cut(v, cu)
+    )
+  )
+  # Format threshold names
+  cu.brk <- as.character(cut(cu[-1], cu))
+  cu.brk <- gsub(",","_",cu.brk)
+  cu.brk <- gsub("\\(|\\]", "", cu.brk)
+  # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
+  names(out) <- paste0("bin__",n, "__", cu.brk )
+  for(i in 1:nlayers(out)){
+    attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
+  }
+  return(out)
 }
 
 #' Homogenize NA values across a set of predictors.
@@ -914,7 +1138,7 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
 
       # Should any fill be conducted?
       if(fill){
-        stop('TBD')
+        stop('Not yet implemented!')
       } else {
         # Otherwise just homogenize NA values across predictors
         if(cellStats(mask_na,'max')>0){
@@ -974,6 +1198,11 @@ fill_rasters <- function(post, background){
   }
   # Assign names
   names(out) <- names(post)
+
+  # Check that derivate attributes if existing are passed
+  if(length( grep("deriv", names(attributes(post)) ))>0){
+    attr(out, grep("deriv", names(attributes(post)),value = TRUE) ) <- attr(post, grep("deriv", names(attributes(post)),value = TRUE) )
+  }
 
   # Final check
   assertthat::assert_that(
@@ -1059,34 +1288,66 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #' Split raster factor levels to stack
 #'
 #'  @description Takes a single raster that is a [`factor`] and creates
-#'  a new [`RasterStack`] that contains the individual levels
-#'  @param ras A [`RasterLayer`] object that is a [`factor`].
+#'  a new [`RasterStack`] that contains the individual levels.
+#'  @param ras A [`RasterLayer`] object that is a [`factor`]. Alternatively a [`RasterStack`] object
+#'  can be supplied in which only factor variables are 'exploded'
 #'  @param name An optional [`character`] name for the [raster].
-#'  @param ... Other parameters (dummy)
+#'  @param ... Other parameters (not used).
 #'  @returns A [`RasterStack`] object
 #'  @keywords utils
 #'  @noRd
 explode_factorized_raster <- function(ras, name = NULL, ...){
-  assertthat::assert_that(inherits(ras, 'RasterLayer'),
-                          is.factor(ras),
+  assertthat::assert_that(is.Raster(ras),
                           is.null(name) || is.character(name))
 
-  # Get name
-  # Create output template
-  temp <- emptyraster(ras)
-  if(is.null(name)) name <- names(ras)
+  # Simply return the input if there are no factors
+  if(!any(is.factor(ras))) return(ras)
 
-  # Extract data
-  o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
+  # If input is a RasterLayer
+  if(inherits(ras, 'RasterLayer')){
+    # Get name
+    # Create output template
+    temp <- emptyraster(ras)
+    if(is.null(name)) name <- names(ras)
 
-  # Make function that converts all factors to split rasters
-  f <- as.data.frame(
-    outer(o[[name]], levels(o[[name]]), function(w, f) ifelse(w == f, 1, 0))
-  )
+    # Extract data
+    o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
 
-  # Fill template rasters
-  out <- fill_rasters(f,temp)
-  names(out) <- paste(name, levels(o[[name]]), sep = ".")
+    # Make function that converts all factors to split rasters
+    f <- as.data.frame(
+      outer(o[[name]], levels(o[[name]]), function(w, f) ifelse(w == f, 1, 0))
+    )
 
+    # Fill template rasters
+    out <- fill_rasters(f,temp)
+    names(out) <- paste(name, levels(o[[name]]), sep = ".")
+
+  } else if(inherits(ras, 'RasterStack') || inherits(ras, 'RasterBrick')){
+    # Alternatively if input is stack
+    fcts <- is.factor(ras)
+
+    # Get non-factor variables
+    out <- ras[[which(!fcts)]]
+    for(k in which(fcts)){
+
+      sub <- ras[[k]]
+
+      temp <- emptyraster(sub)
+      if(is.null(name)) new_name <- names(sub)
+
+      # Extract data
+      o <- data.frame(val = values(sub));names(o) <- new_name;o[[new_name]] <- factor(o[[new_name]])
+
+      # Make function that converts all factors to split rasters
+      f <- as.data.frame(
+        outer(o[[new_name]], levels(o[[new_name]]), function(w, f) ifelse(w == f, 1, 0))
+      )
+
+      # Fill template rasters
+      new <- fill_rasters(f, temp)
+      names(new) <- paste(new_name, levels(o[[new_name]]), sep = ".")
+      out <- raster::addLayer(out, new)
+    }
+  }
   return(out) # Return the result
 }
