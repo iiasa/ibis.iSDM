@@ -32,7 +32,8 @@
 #' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
 #' @param min.value A [`numeric`] stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).
-#' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}).
+#' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
+#' ignore any of the layer names in ensembles of `Raster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
 #' coefficient of variation across all models.
@@ -81,7 +82,7 @@ methods::setMethod(
     assertthat::assert_that(
       is.character(method),
       is.null(min.value) || is.numeric(min.value),
-      is.character(layer),
+      is.null(layer) || is.character(layer),
       is.null(weights) || is.vector(weights),
       is.logical(normalize)
     )
@@ -184,10 +185,12 @@ methods::setMethod(
       return(out)
   } else if(is.Raster(mods[[1]])) {
     # Check that layer is present in supplied mods
-    assertthat::assert_that(
-      all( sapply(mods, function(x) layer %in% names(x) ) ),
-      msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-    )
+    if(!is.null(layer)){
+      assertthat::assert_that(
+        all( sapply(mods, function(x) layer %in% names(x) ) ),
+        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+      )
+    } else { layer <- 1 } # Take the first one
     # TODO:
     if(length(layer)>1) stop("Not implemented yet")
     # Get prediction stacks from all mods

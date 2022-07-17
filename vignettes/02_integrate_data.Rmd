@@ -55,6 +55,7 @@ library(ibis.iSDM)
 library(inlabru)
 library(xgboost)
 library(raster)
+library(igraph)
 library(assertthat)
 ```
 
@@ -100,7 +101,7 @@ The most simple way of integrating prior observations into species distribution 
 
 ```{r, eval = TRUE}
 
-# Here we simply add the range as predictor with a distance transform
+# Here we simply add the range as simple binary predictor
 mod1 <- basemodel %>% 
   add_predictor_range(virtual_range, method = "distance")
 
