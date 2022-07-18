@@ -592,7 +592,7 @@ engine_xgboost <- function(x,
             for(v in x.var){
               p1 <- pdp::partial(mod, pred.var = v, ice = FALSE, center = TRUE,
                                  plot = FALSE, rug = TRUE, train = df)
-              names(p1) <- c("partial", "yhat")
+              names(p1) <- c("partial_effect", "mean")
               p1$variable <- v
               pp <- rbind(pp, p1)
               if(length(x.var) > 1) pb$tick()
@@ -600,7 +600,7 @@ engine_xgboost <- function(x,
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial, y = yhat)) +
+              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = "", y = expression(hat(y))) +

@@ -15,7 +15,8 @@
 
 \item{min.value}{A \code{\link{numeric}} stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).}
 
-\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}).}
+\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
+ignore any of the layer names in ensembles of \code{Raster} objects.}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
 }

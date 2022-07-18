@@ -46,7 +46,8 @@ engine_breg <- function(x,
                           is.character(type),
                           is.numeric(nthread)
   )
-  type <- match.arg(type, choices = c("link", "response"),several.ok = FALSE)
+  type <- match.arg(type, choices = c("predictor","link", "response"),several.ok = FALSE)
+  if(type=="predictor") type <- "link" # Convenience conversion
 
   # Create a background raster
   if(is.Waiver(x$predictors)){

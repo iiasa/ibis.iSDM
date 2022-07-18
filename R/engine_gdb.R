@@ -504,7 +504,7 @@ engine_gdb <- function(x,
                                          which = x.var,
                                          type = self$get_data('params')$type, aggregate = 'sum')
             # Combine with
-            out <- data.frame(partial = pp[,grep(x.var, colnames(pp))] ); out[[x.var]] <- dummy[[x.var]]
+            out <- data.frame(partial_effect = pp[,grep(x.var, colnames(pp))] ); out[[x.var]] <- dummy[[x.var]]
 
             # If plot, make plot, otherwise
             if(plot){

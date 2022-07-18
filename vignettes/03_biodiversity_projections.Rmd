@@ -39,7 +39,7 @@ install <- function(packages){
     install.packages(new.packages, dependencies = TRUE)
   sapply(packages, require, character.only = TRUE)
 }
-invisible( install(c("xgboost", "igraph", "kissmig", "stars", "ncdf4")) )
+invisible( install(c("xgboost", "igraph", "kissmig", "stars", "ncdf4", "ggplot2")) )
 ```
 
 ## Load relevant packages and testing data
@@ -49,11 +49,13 @@ library(ibis.iSDM)
 library(stars)
 library(xgboost)
 library(raster)
+library(igraph)
+library(ggplot2)
 library(ncdf4)
 library(assertthat)
 ```
 
-For the purpose of this example we are loading some testing data on species distributions as well as contemporary and future predictors. Note the names of predictors used for building a distribution model have to be consistent.
+For the purpose of this example we are loading some testing data on species distributions as well as contemporary and future predictors. Note the names of predictors used for building a distribution model have to be consistent with those for creating projections!
 
 ```{r Load data, warning=FALSE, eval = TRUE, fig.width = w, fig.height = h}
 # Background and biodiversity data
@@ -121,7 +123,7 @@ The scenario object can finally be trained via `project()`.
 ```{r Create the scenario}
 sc.fit1 <- sc %>% 
   project()
-# Scenarios have been added
+# Note that an indication of fitted scenarios has been added to the object
 sc.fit1
 ```
 
@@ -161,7 +163,6 @@ ggplot2::ggplot() +
   ggplot2::scale_fill_manual(values = c("grey75","coral","cyan3","grey25"),na.value = 'transparent') +
   ggplot2::theme(legend.position = "bottom") +
   ggplot2::labs(x = "", y = "", title = paste0('Change between 2015 and ', 2100))
-
 
 # We can also summarize the thresholded data
 o <- sc.fit1$summary()

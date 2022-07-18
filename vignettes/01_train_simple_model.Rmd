@@ -290,7 +290,7 @@ x <- distribution(background, limits = predictors$koeppen_50km) %>%
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") %>% 
-  engine_xgboost(nrounds = 3000)
+  engine_xgboost(nrounds = 3000, learning_rate = 0.01)
 
 # Spatially limited prediction
 mod_limited <- train(x, runname = 'Limited prediction background', only_linear = TRUE, verbose = FALSE)
