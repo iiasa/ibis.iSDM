@@ -65,6 +65,8 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param fname A [`character`] specifying the output filename a created figure should be written to.
+#' @param col A [`character`] stating the colour palette to use. Has to be either a predefined value or a
+#' vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
 #' @param ... Other engine specific parameters
 #' @seealso [partial], [plot.DistributionModel]
 #' @note
@@ -78,7 +80,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 methods::setGeneric(
   "bivplot",
   signature = methods::signature("mod"),
-  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, ...) standardGeneric("bivplot"))
+  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, col = "BlueGold",...) standardGeneric("bivplot"))
 
 #' @name bivplot
 #' @rdname bivplot
@@ -86,13 +88,14 @@ methods::setGeneric(
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),
-  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, ...) {
+  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, col = "BlueGold",...) {
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             msg = "The bivplot function currently only works with fitted distribution objects!")
     # Generic checks
     assertthat::assert_that(is.logical(plot),
                             is.character(xvar),
                             is.character(yvar),
+                            is.character(col) || is.vector(col),
                             is.null(fname) || is.character(fname)
     )
     # Check that distribution object has a prediction
@@ -112,8 +115,16 @@ methods::setMethod(
       try({requireNamespace('biscale');attachNamespace("biscale")},silent = TRUE)
     }
 
+    # Check provided colours
+    if(is.character(col)){
+      choices <- c("Bluegill", "BlueGold", "BlueOr", "BlueYl", "Brown",
+                   "Brown2", "DkBlue","DkBlue2", "DkCyan","DkCyan2", "DkViolet",
+                   "DkViolet2", "GrPink","GrPink2", "PinkGrn", "PurpleGrn", "PurpleOr")
+      col <- match.arg(col, choices, several.ok = FALSE)
+    }
+
     # Create dimensions
-    legend <- biscale::bi_legend(pal = "BlueGold",
+    legend <- biscale::bi_legend(pal = col,
                         dim = 3,
                         xlab = paste0("Larger ", xvar),
                         ylab = paste0("Larger ", yvar),
@@ -129,7 +140,7 @@ methods::setMethod(
     map <- ggplot2::ggplot() +
       ggplot2::geom_raster(data = df , ggplot2::aes(x = x, y = y, fill = bi_class)) +
       biscale::bi_theme(base_size = 16) +
-      biscale::bi_scale_fill(pal = "BlueGold", na.value = "transparent") +
+      biscale::bi_scale_fill(pal = col, na.value = "transparent") +
       # coord_quickmap() +
       ggplot2::labs(
         title = paste("Bivariate plot of prediction\n (",mod$model$runname,')'),

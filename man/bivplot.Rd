@@ -4,7 +4,15 @@
 \alias{bivplot}
 \title{Bivariate plot wrapper for distribution objects}
 \usage{
-bivplot(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, ...)
+bivplot(
+  mod,
+  xvar = "mean",
+  yvar = "sd",
+  plot = TRUE,
+  fname = NULL,
+  col = "BlueGold",
+  ...
+)
 
 \S4method{bivplot}{ANY}(mod)
 }
@@ -18,6 +26,9 @@ bivplot(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, ...)
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
 \item{fname}{A \code{\link{character}} specifying the output filename a created figure should be written to.}
+
+\item{col}{A \code{\link{character}} stating the colour palette to use. Has to be either a predefined value or a
+vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
 
 \item{...}{Other engine specific parameters}
 }

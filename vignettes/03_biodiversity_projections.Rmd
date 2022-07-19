@@ -39,7 +39,7 @@ install <- function(packages){
     install.packages(new.packages, dependencies = TRUE)
   sapply(packages, require, character.only = TRUE)
 }
-invisible( install(c("xgboost", "igraph", "kissmig", "stars", "ncdf4", "ggplot2")) )
+invisible( install(c("xgboost", "igraph", "kissmig", "stars", "ncdf4", "ggplot2","cubelyr")) )
 ```
 
 ## Load relevant packages and testing data
@@ -227,7 +227,7 @@ arlim <- c(min(o1$area_km2, o2$area_km2, o3$area_km2),
 
 plot(area_km2~band, data = o1, type = 'n',
      ylim = arlim,
-     main = "Suitable habitat across Time",
+     main = "Suitable habitat projection",
      ylab = "Amount of area (km2)", xlab = "Time")
 lines(o1$area_km2~o1$band, col = "black", lty = 1)
 lines(o2$area_km2~o2$band, col = "black", lty = 2)
