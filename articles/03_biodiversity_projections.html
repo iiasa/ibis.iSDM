@@ -92,7 +92,7 @@
       <img src="" class="logo" alt=""><h1>Creating biodiversity projections</h1>
                         <h4 data-toc-skip class="author">Martin Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-07-19</h4>
+            <h4 data-toc-skip class="date">2022-07-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/03_biodiversity_projections.Rmd" class="external-link"><code>vignettes/03_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>03_biodiversity_projections.Rmd</code></div>
@@ -153,19 +153,19 @@
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_current</span>, transform <span class="op">=</span> <span class="st">'scale'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>nrounds <span class="op">=</span> <span class="fl">5000</span>, learning_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span> <span class="co"># Slightly increase the learning rate</span></span>
 <span><span class="co">#&gt; Loading required namespace: rgeos</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:23 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:23 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:23 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:23 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:03 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:03 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:03 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:03 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Train the model</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Simple PPM'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-19 08:05:24 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-19 08:05:24 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-19 08:05:24 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-19 08:05:24 | Starting fitting...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-19 08:05:30 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-19 08:05:30 | Completed after 6.55 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-22 16:41:04 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-22 16:41:04 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-22 16:41:04 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-22 16:41:04 | Starting fitting...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-22 16:41:10 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-22 16:41:10 | Completed after 6.5 secs</span></span></span>
 <span></span>
 <span><span class="co"># Add a threshold to this model by maximizing the TSS (using trained data)</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">modf</span>, method <span class="op">=</span> <span class="st">'TSS'</span><span class="op">)</span></span>
@@ -177,8 +177,8 @@
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_future</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from the model object.</span></span>
 <span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:32 | Adding scenario predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-19 08:05:32 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:12 | Adding scenario predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-22 16:41:12 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># This creates a scenario object</span></span>
 <span><span class="va">sc</span></span>
@@ -188,7 +188,7 @@
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.04 (TSS)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
 <span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
@@ -208,7 +208,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-19 08:05:35 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-22 16:41:15 | Starting suitability predictions...</span></span></span>
 <span><span class="co"># Note that an indication of fitted scenarios has been added to the object</span></span>
 <span><span class="va">sc.fit1</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
@@ -217,7 +217,7 @@
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.04 (TSS)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
 </div>
@@ -305,7 +305,7 @@
 <span>   <span class="fu"><a href="../reference/add_constrain.html">add_constrain</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-19 08:05:45 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-22 16:41:24 | Starting suitability predictions...</span></span></span>
 <span></span>
 <span><span class="co"># Also fit one projection a nichelimit has been added</span></span>
 <span><span class="va">sc.fit3</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
@@ -313,7 +313,7 @@
 <span>   <span class="fu"><a href="../reference/add_constrain_adaptability.html">add_constrain_adaptability</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nichelimit"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-19 08:05:58 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-22 16:41:37 | Starting suitability predictions...</span></span></span>
 <span></span>
 <span><span class="co"># Note how constrains are indicated in the scenario object.</span></span>
 <span><span class="va">sc.fit3</span></span>
@@ -324,7 +324,7 @@
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
-<span><span class="co">#&gt;   Threshold:      0.05 (TSS)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.04 (TSS)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
 <span></span>

@@ -92,7 +92,7 @@
       <img src="" class="logo" alt=""><h1>Frequently Asked Questions (FAQ)</h1>
                         <h4 data-toc-skip class="author">Martin Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-07-19</h4>
+            <h4 data-toc-skip class="date">2022-07-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/frequently-asked-questions.Rmd" class="external-link"><code>vignettes/frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>frequently-asked-questions.Rmd</code></div>
@@ -236,6 +236,10 @@ Users are advised to use [<code>engine_inlabru</code>] by <strong>default</stron
 <span></span>
 <span><span class="co"># To save the output layer as floating point geoTiff</span></span>
 <span><span class="va">mod</span><span class="op">$</span><span class="fu">save</span><span class="op">(</span><span class="st">"myoutput.tif"</span>, type <span class="op">=</span> <span class="st">"gtif"</span>, dt <span class="op">=</span> <span class="st">"FLT4S"</span><span class="op">)</span></span></code></pre></div>
+</details><details><p><summary><b>Predictions from <code>engine_xgboost</code> look pixelated?</b> </summary> This is usually due to either the number of rounds for estimation being too low or the learning_rate being to high. Try out different options in the parameters of the engine. A good way to check the performance is also to plot the evaluation log and <strong>logloss</strong>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Requires a fitted model</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="st">"fit_best"</span><span class="op">)</span><span class="op">$</span><span class="va">evaluation_log</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3">
