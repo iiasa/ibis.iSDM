@@ -229,6 +229,10 @@ engine_xgboost <- function(x,
                                 bg = bg,
                                 weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
+          assertthat::assert_that(
+            !anyNA(w_full), all(is.finite(log(w_full))),
+            length(w_full) == nrow(model$predictors)
+          )
 
         } else if(fam == "binary:logistic"){
           # calculating the case weights (equal weights)

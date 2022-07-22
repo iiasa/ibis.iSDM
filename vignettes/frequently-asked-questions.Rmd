@@ -244,6 +244,18 @@ mod$save("myoutput.tif", type = "gtif", dt = "FLT4S")
 </details>
 
 
+<details>
+<summary><b>Predictions from `engine_xgboost` look pixelated?</b>
+</summary>
+This is usually due to either the number of rounds for estimation being too low or the learning_rate being to high. Try out different options in the parameters of the engine.
+A good way to check the performance is also to plot the evaluation log and **logloss**.
+```{r, echo=TRUE,eval=FALSE}
+# Requires a fitted model
+plot(fit$get_data("fit_best")$evaluation_log)
+```
+</details>
+
+
 ## Model troubleshooting
 
 <details>

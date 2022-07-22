@@ -15,12 +15,6 @@ is_comparable_raster <- function(x, y) {
                           stopiffalse = FALSE)
 }
 
-# assertthat::on_failure(is_comparable_raster) <- function(call, env) {
-#   paste0(deparse(call$x), " and ", deparse(call$y),  " are not comparable: ",
-#          "they have different spatial resolutions, extents, ",
-#          "coordinate reference systems, or dimensionality (rows / columns)")
-# }
-
 #' Do extents intersect?
 #'
 #' Verify if the extents of two spatial objects intersect or not.
@@ -1350,4 +1344,130 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
     }
   }
   return(out) # Return the result
+}
+
+#' Functionality for geographic and environmental thinning
+#'
+#' @description
+#' For most species distribution modelling approaches it is assumed that occurrence records are unbiased, which
+#' is rarely the case. While model-based control can alleviate some of the effects of sampling bias, it can often be
+#' desirable to account for some sampling biases through spatial thinning (Aiello‐Lammens et al. 2015). This
+#' is an approach based on the assumption that oversampled grid cells contribute little more than bias, rather than
+#' strengthing any environmental responses.
+#' This function provides some methods to apply spatial thinning approaches. Note that this effectively removes
+#' data prior to any estimation and its use should be considered with care (see also Steen et al. 2021).
+#'
+#' @details
+#' Currently implemented thinning methods:
+#'
+#'  [*] \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
+#'  Does not account for any spatial or environmental distance between observations.
+#'  [*] \code{"bias"}: As for random, but here occurrence points are incrementally removed from the dataset, starting
+#'  with the ones that are most biased (parameter \code{"bias"}) first. Thins the observations up to \code{"minpoints"}.
+#'  [*] \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
+#'  each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
+#'  [*] \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
+#'  iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
+#'  be set for this function to work.
+#'  [*] \code{"environmental"}: This approach creates an observation-wide clustering under the assumption that the
+#'  environmental niche has been comprehensively sampled. We then obtain an equal number (\code{"minpoints"}) of
+#'  observations  for clustered zone. This ensures that environmental conditions are approximately covered.
+#'
+#' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
+#' and presence-absence occurrence points equally.
+#' @param background A [`RasterLayer`] object with the background of the study region. Use for assessing point density.
+#' @param env A [`Raster`] object with environmental covaraites. Needed when method is set to \code{"environmental"} (Default: \code{NULL}).
+#' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
+#' @param minpoints A [`numeric`] giving the number of data points at minimum to take (Default: \code{10}).
+#' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations (Default: \code{NULL}).
+#' @param bias A supplied [`RasterLayer`] bias layer for method \code{"bias"} (Default: \code{NULL}).
+#' @param zones A [`RasterLayer`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
+#' @param verbose [`logical`] of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).
+#' @references
+#' * Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., & Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
+#' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.
+#' @keywords utils
+#' @export
+thin_observations <- function(df, background, env = NULL, method = "random", minpoints = 10, mindistance = NULL,
+                              zones = NULL, verbose = TRUE){
+  assertthat::assert_that(
+    inherits(df, "sf") || inherits(df, "data.frame"),
+    nrow(df) > 0,
+    is.Raster(background),
+    is.Raster(env) || is.null(env),
+    is.character(method),
+    is.numeric(minpoints) && minpoints > 0,
+    is.null(mindistance) || is.numeric(mindistance),
+    is.Raster(zones) || is.null(zones)
+  )
+  check_package("dplyr")
+  # Match method
+  method <- match.arg(method, choices = c("random", "spatial", "environmental", "zones"), several.ok = FALSE)
+
+  # Label background with id
+  bg <- background
+  bg[] <- 1:raster::ncell(bg)
+  bg <- raster::mask(bg, background)
+
+  # Take coordinates of supplied data and rasterize
+  coords <- sf::st_coordinates( df )
+  ras <- raster::rasterize(coords, bg) # Get the number of observations per grid cell
+
+  # Bounds for thining
+  totake <- c(lower = minpoints, upper = max(raster::cellStats(ras,"min"), minpoints))
+
+  # -- #
+  if(method == "random"){
+    # For each unique grid cell id, get the minimum value up to a maximum of the points
+    # by sampling at random from the occupied grid cells
+
+    # Output vector
+    sel <- vector()
+
+    ex <- data.frame(id = 1:nrow(coords),
+                     cid = raster::extract(bg, coords)
+    )
+    ex <- subset(ex, complete.cases(ex)) # Don't need missing points
+
+    ex <- dplyr::left_join(ex,
+                           ex %>% dplyr::group_by(cid) %>% dplyr::summarise(N = dplyr::n()),
+                           by = "cid"
+    )
+    # Points to take
+    sel <- append(sel, ex$id[which(ex$N <= min(totake))] )
+
+    # For those where we have more than the minimum, take at random the upper limits of observations
+    ex$oversampled <- ifelse(ex$N >= totake["upper"], 1, 0)
+    # Now sample at random up to the maximum amount. Got tired of doing this outside tidyverse
+    o <- ex %>% dplyr::filter(oversampled == 1) %>%
+      dplyr::group_by(cid) %>%
+      dplyr::slice_sample(n = min(totake))
+    if(nrow(o)>0) sel <- append(sel, o$id)
+    if(anyDuplicated(sel)) sel <- unique(sel)
+    rm(o,ex)
+  } else if(method == "environmental"){
+    # Environmental clustering
+
+  } else if(method == "spatial"){
+    # Spatial thinning
+
+  } else if(method == "zones"){
+    # Thinning by zones
+  }
+
+  # Return subsampled coordinates
+  out <- df[sel,]
+  if(nrow(out)==0) {
+    message("Thinning failed for some reason")
+    return(df)
+  } else {
+    if(verbose){
+      message(paste0(
+        "(", method, ")", " thinning completed! \n",
+        "Original number of records: ", nrow(df), "\n",
+        "Number of retained records: ", nrow(out))
+      )
+    }
+    return(out)
+  }
 }
