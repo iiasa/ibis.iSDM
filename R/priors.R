@@ -49,15 +49,15 @@ methods::setMethod(
     )
 
     if(is.list(x)){
-        ll <- x
-        # Set names of list entries to their id
-        names(ll) <- sapply(ll, function(z) z$id )
-      } else {
+      ll <- x
+      # Set names of list entries to their id
+      names(ll) <- sapply(ll, function(z) z$id )
+    } else {
       # Prior object list
       ll <- list()
       ll[[as.character(x$id)]] <- x
       for(var in dots) ll[[as.character(var$id)]] <- var
-      }
+    }
     # Ensure that names of the list are identical to the prior ids
     assertthat::assert_that(
       all( sapply(ll, function(z) z$id ) %in% names(ll) )
@@ -68,12 +68,21 @@ methods::setMethod(
     # Assess duplicates of priors in order they appear in the list
     vars <- vapply(ll, function(z) z$variable, character(1))
     types <- sapply(ll, function(z) z$type)
-    # Replace any gaussian with normal
+    # Replace any Gaussian with normal
     if(any(types == "gaussian")) types[which(types=="gaussian")] <- "normal"
-    # Remove SPDE
-    if(any(duplicated(cbind(vars,types)))){
-      ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]
-      warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
+
+    # Remove duplicated SPDE priors for INLA
+    if(any(vars == "spde")){
+      if(any(duplicated(cbind(vars,types)))){
+        ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]
+        warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
+      }
+    } else {
+      # Remove duplicated variables, taking only the one added
+      if(anyDuplicated(vars)>0){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
+        ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
+      }
     }
 
     # Create new priorlist object and supply all objects here

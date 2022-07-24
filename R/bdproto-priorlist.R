@@ -66,8 +66,10 @@ PriorList <- bdproto(
   exists = function(self, variable, type = NULL){
     assertthat::assert_that(!missing(variable),
                             is.character(variable),
-                            is.character(type) || is.null(type),
+                            is.character(type) || is.null(type) || is.Waiver(type),
                             msg = 'Specify a single variable to query a prior.')
+    # overwrite if not set
+    if(is.Waiver(type)) type <- NULL
     vn <- self$varnames()
     vt <- self$types()
     # If type is specified

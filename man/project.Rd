@@ -4,11 +4,14 @@
 \alias{project}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
-\S4method{project}{BiodiversityScenario, logical, character }(mod, stabilize, stabilize_method)
+\S4method{project}{BiodiversityScenario, character, logical, character }(mod, date_interpolation, stabilize, stabilize_method)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
 Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
+
+\item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated. Options
+include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
 
 \item{stabilize}{A \code{\link{boolean}} value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).}
 

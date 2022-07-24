@@ -39,11 +39,11 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
+                            is.null(priors) || inherits(priors, "PriorList") || class(x)[1] %in% getOption("ibis.priors")
     )
 
     # Convert to prior list object
-    if(inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')){
+    if( class(x)[1] %in% getOption("ibis.priors") ){
       priors <- priors(priors)
     }
     if(!is.null(priors)){
@@ -167,10 +167,10 @@ methods::setMethod(
   "get_priors",
   methods::signature(mod = "ANY", target_engine = "character"),
   function(mod, target_engine, ...) {
-    assertthat::assert_that(inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityDistribution-class"),
+    assertthat::assert_that(inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityDistribution"),
                             is.character(target_engine)
     )
-    if(inherits(mod, "BiodiversityDistribution-class")){ return( mod$model$priors ) }
+    if(inherits(mod, "BiodiversityDistribution")){ return( mod$get_priors() ) }
     check_package("scales")
     # Catch character for engines
     target_engine <- match.arg(toupper(target_engine), choices = c("BART", "<BART>",

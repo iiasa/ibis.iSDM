@@ -19,11 +19,17 @@ PredictorDataset <- bdproto(
   id           = character(0),
   data         = new_waiver(),
   # Printing function
-  # FIXME: Prettify. Print summary values for each layer
   print = function(self){
+    # Getting names and time periods if set
+    nn <- name_atomic(self$get_names(), "predictors")
+    # Get Time dimension if existing
+    tt <- self$get_time()
+    if(!(is.Waiver(tt) || is.null(tt))) tt <- paste0(range(tt),collapse = " <> ") else tt <- NULL
     message(paste0(self$name(),':',
-                   '\n Name(s):  ',name_atomic(self$get_names(), "predictors")
-    ))
+                   '\n Name(s):  ',nn,
+                   ifelse(!is.null(tt), paste0("\n Timeperiod:  ", tt), "")
+                   )
+    )
   },
   # Return name
   name = function(self){
@@ -59,7 +65,12 @@ PredictorDataset <- bdproto(
       # Try and get a z dimension from the raster object
       raster::getZ(d)
     } else {
-      stars::st_get_dimension_values(d, "time")
+      # Get dimensions
+      o <- stars::st_dimensions(d)
+      # Take third entry as the one likely to be the time variable
+      return(
+        stars::st_get_dimension_values(d, names(o)[3], center = TRUE)
+      )
     }
   },
   # Get Projection
@@ -84,7 +95,7 @@ PredictorDataset <- bdproto(
     self$data <- addLayer(self$get_data(), value)
     # FIXME: This creates duplicates as of now.
     invisible()
-},
+  },
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
     assertthat::assert_that(is.vector(x) || is.character(x),
@@ -112,9 +123,7 @@ PredictorDataset <- bdproto(
       summary(out, digits = digits)
     } else {
       if(inherits(d, 'stars')){
-        round(
-          summary(stars:::as.data.frame.stars(d)), digits = digits
-        )
+        summary(stars:::as.data.frame.stars(d))
       } else {
         # Assume raster
         round(

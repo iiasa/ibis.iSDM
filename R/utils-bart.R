@@ -37,10 +37,12 @@ built_formula_bart <- function(obj){
 
 #' Variable importance for dbarts models
 #'
-#' Variable importance measured in the proportion of total branches used for a given variable. Explicitly dropped variables are included as 0
+#' @description
+#' Variable importance measured in the proportion of total branches used for a given variable.
+#' Explicitly dropped variables are included as \code{0}.
 #' @param model A fitted [dbarts] model.
 #' @concept Taken from the \pkg{embarcadero} package.
-#' @return A [`data.frame`] with the variable importance information
+#' @return A [`data.frame`] with the variable importance information.
 #' @keywords utils, internal
 #' @noRd
 varimp.bart <- function(model){
@@ -70,29 +72,25 @@ varimp.bart <- function(model){
 
 #' Partial effects for bart models adapted from embarcadero package
 #'
-#' @param model A fitted [dbarts::bart] model
-#' @param envs A [`raster`] stack of predictors used in the model
-#' @param x.vars The predictor variables to be mapped (Default: All)
-#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: FALSE)
-#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: 1)
-#' @param trace Add traces to plot (Default: TRUE)
-#' @param ci Should credible intervals be shown (Default: TRUE)
-#' @param ciwidth Width of credible intervals (numeric)
-#' @param transform Backtransform using pnorm or not. Set to FALSE if response was not binomial
-#' @concept Taken and adapted from [embarcadero] package
+#' @param model A fitted [dbarts::bart] model.
+#' @param envs A [`raster`] stack of predictors used in the model.
+#' @param x.vars The predictor variables to be mapped (Default: \code{All})
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE})
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1})
+#' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response was not binomial.
+#' @param plot Whether a model should be created (Default: \code{TRUE}).
+#' @concept Function taken and adapted from the [embarcadero] package.
 #' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @return A [`Raster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
-bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, ci = TRUE,
-                     ciwidth = 0.95, trace = TRUE, transform = TRUE) {
+bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, transform = TRUE, plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
     is.null(x.vars) || is.character(x.vars),
-    # is.logical(equal), is.numeric(smooth),
-    is.logical(ci) && is.numeric(ciwidth),
-    is.logical(transform)
+    is.logical(transform),
+    is.logical(plot)
   )
 
   # Get Fit object
@@ -130,110 +128,51 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
     pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, pl = FALSE)
 
   } else {
-    levq = c(0.5 - ciwidth/2, seq(0.1, 0.9, 0.1/smooth),
-             0.5 + ciwidth/2)
-    pd <- pdbart(model, xind = x.vars, levquants = levq,
+    levq = c(0.05, seq(0.1, 0.9, 0.1/smooth),
+             0.95)
+    pd <- dbarts::pdbart(model, xind = x.vars, levquants = levq,
                  pl = FALSE)
   }
 
-  plots <- list()
-  for (i in 1:length(pd$fd)) {
-    if (length(unique(pd$fit$data@x[, pd$xlbs[[i]]])) == 2) {
-      dfbin <- data.frame(pd$fd[[i]])
-      colnames(dfbin) <- c(0, 1)
-      dfbin <- reshape2::melt(dfbin)
-      if (transform == TRUE) dfbin$value <- pnorm(dfbin$value)
-      if (ci == FALSE) {
-        g <- ggplot(dfbin, aes(x = variable, y = value)) +
-          geom_boxplot() + labs(title = pd$xlbs[[i]],
-                                y = "Response", x = "") + theme_light(base_size = 20) +
-          theme(plot.title = element_text(hjust = 0.5),
-                axis.title.y = element_text(vjust = 1.7))
-      }
-      else {
-        g <- ggplot(dfbin, aes(x = variable, y = value)) +
-          geom_boxplot(fill = "deepskyblue1") +
-          labs(title = pd$xlbs[[i]], y = "Response",
-               x = "") + theme_light(base_size = 20) +
-          theme(plot.title = element_text(hjust = 0.5),
-                axis.title.y = element_text(vjust = 1.7))
-      }
-      if (panels == FALSE) {
-        g <- g + theme(plot.margin = unit(c(0.5, 0.5,
-                                            0.5, 0.5), "cm"))
-      }
-      else {
-        g <- g + theme(plot.margin = unit(c(0.15, 0.15,
-                                            0.15, 0.15), "cm"))
-      }
-      plots[[i]] <- g
-    } else {
-      q50 <- apply(pd$fd[[i]], 2, median)
-      if (transform == TRUE) q50 <- pnorm(q50)
-      df <- data.frame(x = pd$levs[[i]], med = q50)
-      if(ci) {
-        # Lower bound
-        q05 <- apply(pd$fd[[i]], 2, quantile, probs = 0.5 -
-                       ciwidth/2)
-        if (transform == TRUE) q05 <- pnorm(q05)
-        # Upper bound
-        q95 <- apply(pd$fd[[i]], 2, quantile, probs = 0.5 +
-                       ciwidth/2)
-        if(transform) q95 <- pnorm(q95)
+  out <- data.frame()
+  # Summarize the posterior
+  for(i in 1:length(pd$fd)){
+    df <- data.frame(partial_effect = pd$levs[[i]])
+    # Summarize quantiles and sd from posterior
+    ms <- as.data.frame(
+      cbind( apply(pd$fd[[i]], 2, function(x) mean(x, na.rm = TRUE)),
+             matrixStats::colSds(pd$fd[[i]]),
+             matrixStats::colQuantiles(pd$fd[[i]], probs = c(.05,.5,.95)),
+             apply(pd$fd[[i]], 2, mode)
+      )
+    )
+    names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+    if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, pnorm)
+    ms$cv <- ms$mean / ms$sd
+    ms$variable <- pd$xlbs[[i]]
+    df <- cbind(df, ms)
+    out <- rbind(out, df);rm(df)
+  }
 
-        df$q05 <- q05;df$q95 <- q95
-
-      }
-      if(trace) {
-        f <- data.frame(t(pd$fd[[i]]))
-        df <- cbind(df, f)
-      }
-      g <- ggplot(df, aes(x = x, y = med)) + labs(title = pd$xlbs[[i]],
-                                                  y = "Response", x = "") + theme_light(base_size = 20) +
-        theme(plot.title = element_text(hjust = 0.5),
-              axis.title.y = element_text(vjust = 1.7))
-      if(ci) {
-        alpha2 <- 0.05
-        k <- 4
-      } else {
-        alpha2 <- 0.025 * (fitobj$control@n.trees/200)
-        k <- 2
-      }
-      if(trace) {
-        if(transform) {
-          for (j in 1:nrow(pd$fd[[i]])) {
-            g <- g + geom_line(aes_string(y = pnorm(df[,
-                                                       j + k])), alpha = alpha2)
-          }
-        } else {
-          for (j in 1:nrow(pd$fd[[i]])) {
-            g <- g + geom_line(aes_string(y = df[, j +
-                                                   k]), alpha = alpha2)
-          }
-        }
-      }
-      # Add credible interval
-      if(ci) {
-        g <- g + geom_ribbon(aes(ymin = q05, ymax = q95),
-                             fill = "deepskyblue1", alpha = 0.3)
-      }
-      g <- g + geom_line(size = 1.25)
-      if(panels == FALSE) {
-        g <- g + theme(plot.margin = unit(c(0.5, 0.5,
-                                            0.5, 0.5), "cm"))
-      }
-      else {
-        g <- g + theme(plot.margin = unit(c(0.15, 0.15,
-                                            0.15, 0.15), "cm"))
-      }
-      plots[[i]] <- g
+  # Create plot if specified
+  if(plot){
+    # Construct overall plot. Might fail for multiple variables
+    g <- ggplot2::ggplot(out, ggplot2::aes(x = partial_effect, y = q50)) +
+      ggplot2::labs(title = "", y = expression(y^q50), x = unique(out$variable)) +
+      ggplot2::theme_light(base_size = 20) +
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95),
+                           fill = "deepskyblue1", alpha = 0.3) +
+      ggplot2::geom_line(size = 1.25) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                     axis.title.y = ggplot2::element_text(vjust = 1.7))
+    # If multiple variables, add facets
+    if(length(unique(out$variable))>1){
+      g <- g + ggplot2::facet_wrap(~variable)
     }
+    g
   }
-  if (panels == TRUE) {
-    return(gridExtra::grid.arrange(plotlist = plots))
-  } else {
-    return(plots)
-  }
+  # Return the partial results
+  return(out)
 }
 
 #' Spatial partial effects for bart models adapted from embarcadero package

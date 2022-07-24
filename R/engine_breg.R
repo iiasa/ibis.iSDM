@@ -285,8 +285,11 @@ engine_breg <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Get name
+        name <- model$biodiversity[[1]]$name
+
         # Messenger
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
 
         # Verbosity
         verbose <- settings$get("verbose")
@@ -392,6 +395,13 @@ engine_breg <- function(x,
         if(!settings$get('inference_only')){
           # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+          # Set target variables to bias_value for prediction if specified
+          if(!is.Waiver(settings$get('bias_variable'))){
+            for(i in 1:length(settings$get('bias_variable'))){
+              if(settings$get('bias_variable')[i] %notin% names(full)) next()
+              full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            }
+          }
 
           # Make a prediction, but do in parallel so as to not overuse memory
           full$rowid <- 1:nrow(full)
@@ -455,6 +465,7 @@ engine_breg <- function(x,
           settings = settings,
           fits = list(
             "fit_best" = fit_breg,
+            "fit_best_equation" = form,
             "prediction" = prediction
           ),
           # Partial effects

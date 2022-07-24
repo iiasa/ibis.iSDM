@@ -267,8 +267,18 @@ engine_gdb <- function(x,
       },
       # Training function
       train = function(self, model, settings, ...){
+        assertthat::assert_that(
+          inherits(settings,'Settings'),
+          is.list(model),length(model)>1,
+          # Check that model id and setting id are identical
+          settings$modelid == model$id
+        )
+
+        # Get name
+        name <- model$biodiversity[[1]]$name
+
         # Messenger
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
 
         # Get output raster
         prediction <- self$get_data('template')

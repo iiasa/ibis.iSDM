@@ -574,6 +574,7 @@ methods::setMethod(
   }
 )
 
+# ---------------- #
 # Add predictor actions for scenario objects ----
 #' @name add_predictors
 #' @rdname add_predictors
@@ -661,3 +662,402 @@ methods::setMethod(
   }
 )
 
+# --------------------- #
+#### GLOBIOM specific code ####
+
+#' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution object
+#'
+#' @description
+#' This is a customized function to format and add downscaled land-use shares from
+#' the [Global Biosphere Management Model (GLOBIOM)](https://iiasa.github.io/GLOBIOM/) to a
+#' [distribution] or [BiodiversityScenario] in ibis.iSDM. GLOBIOM is a partial-equilibrium model
+#' developed at IIASA and represents land-use sectors with a rich set of environmental and
+#' socio-economic parameters, where for instance the agricultural and forestry sector are estimated through
+#' dedicated process-based models. GLOBIOM outputs are spatial explicit and usually at a half-degree resolution globally.
+#' For finer grain analyses GLOBIOM outputs can be produced in a downscaled format with a
+#' customized statistical [downscaling module](https://github.com/iiasa/DownScale).
+#'
+#' The purpose of this script is to format the GLOBIOM outputs of *DownScale* for the use in the
+#' ibis.iSDM package.
+#' @details
+#' See [`add_predictors()`] for additional parameters and customizations.
+#' For more (manual) control the function for formatting the GLOBIOM data can also be
+#' called directly via `formatGLOBIOM()`.
+#'
+#' @param x A [`BiodiversityDistribution-class`] or [`BiodiversityScenario-class`] object.
+#' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
+#' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed (Default: \code{NULL}).
+#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
+#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
+#' @param ... Other parameters passed down
+#' @seealso [add_predictors]
+#' @examples
+#' \dontrun{
+#'  obj <- distribution(background) %>%
+#'         add_predictors_globiom(fname = "", transform = 'none')
+#'  obj
+#' }
+#' @name add_predictors_globiom
+NULL
+
+#' @name add_predictors_globiom
+#' @rdname add_predictors_globiom
+#' @exportMethod add_predictors_globiom
+#' @export
+methods::setGeneric(
+  "add_predictors_globiom",
+  signature = methods::signature("x", "fname"),
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
+           priors = NULL, ...) standardGeneric("add_predictors_globiom"))
+
+#' @name add_predictors_globiom
+#' @rdname add_predictors_globiom
+#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution, character}(x, fname)
+methods::setMethod(
+  "add_predictors_globiom",
+  methods::signature(x = "BiodiversityDistribution", fname = "character"),
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
+           priors = NULL, ... ) {
+    # Try and match transform and derivatives arguments
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor'), several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin'), several.ok = TRUE)
+
+    # Check that file exists and has the correct endings
+    assertthat::assert_that(is.character(fname),
+                            file.exists(fname),
+                            assertthat::is.readable(fname),
+                            assertthat::has_extension(fname, "nc"),
+                            msg = "The provided path to GLOBIOM land-use shares could not be found or is not readable!"
+                            )
+
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.null(priors) || inherits(priors,'PriorList')
+    )
+
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting GLOBIOM inputs for species distribution modelling.')
+
+    # Get and format the GLOBIOM data
+    env <- formatGLOBIOM(fname = fname,
+                         oftype = "raster",
+                         col_class = "lc_class",
+                         period = "reference",
+                         template = x$background
+                         )
+    if(is.list(env)) env <- env[[1]] # Take the first reference entry
+    assertthat::assert_that(is.Raster(env),
+                            raster::nlayers(env)>0)
+
+    if(!is.null(names)) {
+      assertthat::assert_that(nlayers(env)==length(names),
+                              all(is.character(names)),
+                              msg = 'Provided names not of same length as environmental data.')
+      # Set names of env
+      names(env) <- names
+    }
+
+    # Check that all names allowed
+    problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
+    if( length(problematic_names)>0 ){
+      stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
+    }
+
+    # If priors have been set, save them in the distribution object
+    if(!is.null(priors)) {
+      assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
+      x <- x$set_priors(priors)
+    }
+    # Harmonize NA values
+    if(harmonize_na){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      env <- predictor_homogenize_na(env, fill = FALSE)
+    }
+
+    # Standardization and scaling
+    if('none' %notin% transform){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      for(tt in transform) env <- predictor_transform(env, option = tt)
+    }
+
+    # Calculate derivates if set
+    if('none' %notin% derivates){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      new_env <- raster::stack()
+      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+
+      # Add to env
+      env <- raster::addLayer(env, new_env)
+    }
+
+    # Generally not relevant for GLOBIOM unless created as derivate
+    attr(env, 'has_factors') <- FALSE
+
+    # Assign an attribute to this object to keep track of it
+    attr(env,'transform') <- transform
+
+    # Mask predictors with existing background layer
+    if(bgmask){
+      env <- raster::mask(env, mask = x$background)
+      env <- raster::stack(env)
+    }
+
+    # Check whether predictors already exist, if so overwrite
+    if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
+
+    # Finally set the data to the BiodiversityDistribution object
+    x$set_predictors(
+      bdproto(NULL, PredictorDataset,
+              id = new_id(),
+              data = env,
+              ...
+      )
+    )
+  }
+)
+
+#' @name add_predictors_globiom
+#' @rdname add_predictors_globiom
+#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario, character}(x, fname)
+methods::setMethod(
+  "add_predictors_globiom",
+  methods::signature(x = "BiodiversityScenario", fname = "character"),
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', harmonize_na = FALSE, ... ) {
+    # Try and match transform and derivatives arguments
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
+
+    # Check that file exists and has the correct endings
+    assertthat::assert_that(is.character(fname),
+                            file.exists(fname),
+                            assertthat::is.readable(fname),
+                            assertthat::has_extension(fname, "nc"),
+                            msg = "The provided path to GLOBIOM land-use shares could not be found or is not readable!"
+    )
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.logical(harmonize_na)
+    )
+
+    # Get model object
+    obj <- x$get_model()
+
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding GLOBIOM predictors to scenario object...')
+
+    # Get and format the GLOBIOM data
+    env <- formatGLOBIOM(fname = fname,
+                         oftype = "stars",
+                         col_class = "lc_class",
+                         period = "projection",
+                         template = obj$model$background
+    )
+    assertthat::assert_that( inherits(env, "stars") )
+
+    # Rename attributes if names is specified
+    if(!is.null(names)){
+      assertthat::assert_that(length(names) == length(env))
+      names(env) <- names
+    }
+
+    # Harmonize NA values
+    if(harmonize_na){
+      stop('Missing data harmonization for stars not yet implemented!') #TODO
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      env <- predictor_homogenize_na(env, fill = FALSE)
+    }
+
+    # Standardization and scaling
+    if('none' %notin% transform){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      for(tt in transform) env <- predictor_transform(env, option = tt)
+    }
+
+    # # Calculate derivates if set
+    if('none' %notin% derivates){
+      # Get variable names
+      varn <- obj$get_coefficients()[['Feature']]
+      # Are there any derivates present in the coefficients?
+      if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+        for(dd in derivates){
+          if(any(grep(dd, varn))){
+            env <- predictor_derivate(env, option = dd, deriv = varn)
+          } else {
+            if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+          }
+        }
+      } else {
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+      }
+    }
+
+    # Get and format Time period
+    env_dim <- stars::st_dimensions(env)
+    timeperiod <- stars::st_get_dimension_values(env, "time", center = TRUE)
+    if(is.numeric(timeperiod)){
+      # Format to Posix. Assuming years only
+      timeperiod <- as.POSIXct(paste0(timeperiod,"-01-01"))
+    }
+    if(anyNA(timeperiod)) stop('Third dimension is not a time value!')
+
+    # Check whether predictors already exist, if so overwrite
+    if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
+
+    # Finally set the data to the BiodiversityScenario object
+    x$set_predictors(
+      bdproto(NULL, PredictorDataset,
+              id = new_id(),
+              data = env,
+              timeperiod = timeperiod,
+              ...
+      )
+    )
+  }
+)
+
+#' Function to format a prepared GLOBIOM netCDF file for use in Ibis
+#'
+#' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
+#' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
+#' @param col_class A [`character`] for the dimension containing the GLOBIOM class (Default: \code{'lc_class'}).
+#' @param period A [`character`] limiting the period to be returned from the formatted data.
+#' Options include \code{"reference"} for the first entry, \code{"projection"} for all entries but the first,
+#' and \code{"all"} for all entries (Default: \code{"reference"}).
+#' @param template An optional [`RasterLayer`] object towards which projects should be transformed.
+#' @param verbose [`logical`] on whether to be chatty.
+#'
+#' @examples \dontrun{
+#' # Expects a filename pointing to a netCDF file.
+#' covariates <- formatBIOCLIMA(fname)
+#' }
+#' @keywords internal
+#' @noRd
+formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
+                          period = "all", template = NULL,
+                          verbose = getOption("ibis.setupmessages")){
+  assertthat::assert_that(
+    file.exists(fname),
+    assertthat::has_extension(fname, "nc"),
+    is.character(period),
+    is.character(fname),
+    is.logical(verbose)
+  )
+  period <- match.arg(period, c("reference", "projection", "all"), several.ok = FALSE)
+  check_package("stars")
+  check_package("cubelyr")
+  check_package("ncdf4")
+
+  # Try and load in the GLOBIOM file to get the attributes
+  fatt <- ncdf4::nc_open(fname)
+  if(verbose) myLog('[Setup]','green',"Found ", fatt$ndims, " dimensions and ", fatt$nvars, " variables")
+
+  # Get all dimension names and variable names
+  dims <- names(fatt$dim)
+  vars <- names(fatt$var)
+  assertthat::assert_that(all(c("lon", "lat", "time",col_class) %in% dims),
+                          lengths(vars)>0,
+                          msg = "Variables or dimensions not found. Check col_class.")
+
+  # Now open the netcdf file with stats
+  ff <- stars::read_ncdf(fname, var = vars,
+                         make_units = FALSE)
+
+  # Get time dimension (without applying offset) so at the center
+  times <- stars::st_get_dimension_values(ff, "time", center = TRUE)
+  classes <- stars::st_get_dimension_values(ff, col_class, center = TRUE)
+  # And class units as description
+  class_units <- fatt$dim[[col_class]]$units
+  class_units <- make.names(unlist(strsplit(class_units,"/"))) %>% as.vector()
+  # Quick security check
+  assertthat::assert_that(
+    is.character(class_units), length(class_units)>0,
+    msg = "The formatting of the input classes went wronge somewhere!"
+  )
+
+  # Get classes as attributes and rename and reformat
+  ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
+
+  # Formate times unit and convert to posix if not already set
+  if(is.numeric(times)){
+    # Assume year and paste0
+    times <- as.POSIXct( paste0(times, "-01-01") )
+    ff <- stars::st_set_dimensions(ff, "time", times)
+  }
+
+  # Depending on the period, slice the input data
+  if(period == "reference"){
+    # Get the first entry and filter
+    times_first <- stars::st_get_dimension_values(ff, "time")[1]
+    ff <- ff %>% stars:::filter.stars(time == times_first)
+    times <- times_first;rm(times_first)
+  } else if(period == "projection"){
+    # Remove the first time entry instead, only using the last entries
+    times_allbutfirst <- stars::st_get_dimension_values(ff, "time")[-1]
+    ff <- ff %>% stars:::filter.stars(time %in% times_allbutfirst)
+    times <- times_allbutfirst; rm(times_allbutfirst)
+  }
+  assertthat::assert_that(length(times)>0)
+
+  # Reproject to template projection is set
+  if(!is.null(template)){
+    # First create regular grid to warp to
+    reggrid <- ff %>%
+      stars::st_transform_proj(crs = sf::st_crs(template)) %>%
+      st_bbox() %>%
+      st_as_stars()
+    # Then warp
+    ff <- ff %>% st_warp(reggrid)
+    rm(reggrid)
+    # Check that template is a raster, otherwise rasterize for GLOBIOM use
+    if(inherits(template, "sf")){
+      o <- ff %>% stars:::slice.stars("time" , 1) %>% as("Raster")
+      if("fasterize" %in% installed.packages()[,1]){
+        template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
+      } else {
+        template <- raster::rasterize(template, o, field = 1)
+      }
+      rm(o)
+    }
+  }
+
+  # Now format outputs depending on type
+  if(oftype == "raster"){
+    # Output type raster
+    out <- list()
+    for(tt in 1:length(times)){
+      # Slice to a specific time frame for each
+      o <- ff %>% stars:::slice.stars("time" , tt) %>%
+        as("Raster")
+
+      # Reset times to the correct ones
+      o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
+      # Now transform the out put if template is set
+      if(!is.null(template)){
+        # Check again if necessary to rotate
+        if(!raster::compareCRS(o, template)){
+          o <- raster::projectRaster(from = o,crs = template, method = "bilinear")
+          names(o) <- class_units
+        }
+        # Now crop and resample to target extent if necessary
+        if(!compareRaster(o, template, stopiffalse = FALSE)){
+          o <- raster::crop(o, template)
+          o <- alignRasters(data = o,
+                            template = template,
+                            method = "bilinear",
+                            func = "mean", cl = FALSE)
+        }
+      }
+      out[[paste0("time",times[tt])]] <- o
+    }
+    return(out)
+  } else {
+    # Just return stars input raster
+    return(
+      ff
+    )
+  }
+}

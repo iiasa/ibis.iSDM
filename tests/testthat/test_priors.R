@@ -71,12 +71,18 @@ test_that('Create and add priors', {
   expect_vector(test4$get('crops'), c(-2,200))
   expect_vector(test4$get('forest'), c(2,0.5))
 
+  # --- #
+  # Combine BREG priors with same name but different values
+  new1 <- BREGPrior(variable = 'forest', hyper = 1, ip = 0.5)
+  new2 <- BREGPrior(variable = 'forest', hyper = 0, ip = 1)
+  suppressMessages(priors(new1,new2))
+
   # Add two duplicate but different prior.
   # Default behaviour is to take the last one and raise warning
   new3 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(2, 0.5))
   new4 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
-  expect_warning(priors(new3, new4))
-  suppressWarnings(pp <- priors(new3, new4))
+  suppressMessages( priors(new3, new4) )
+  suppressMessages( suppressWarnings(pp <- priors(new3, new4)) )
   expect_equal(pp$length(),1)
   expect_equal(pp$get('crops'),c(-2,200))
 
@@ -84,7 +90,7 @@ test_that('Create and add priors', {
   # Testing spde priors and duplicates
   spde1 <- INLAPrior(variable = 'spde', type = 'prior.range', hyper = c(1, 0.5))
   spde2 <- INLAPrior(variable = 'spde', type = 'prior.sigma', hyper = c(1, 0.05))
-  ss <- priors(spde1,spde2)
+  suppressMessages( ss <- priors(spde1,spde2) )
   expect_equal(ss$length(),2)
   # Return hyper with defined variable
   expect_vector(ss$get('spde','prior.range'), c(1, 0.5))
@@ -92,13 +98,13 @@ test_that('Create and add priors', {
   # Two duplicate INLA priors
   new5 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(2, 0.5))
   new6 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
-  expect_warning(nn <- priors(new5,new6))
+  suppressMessages(nn <- priors(new5,new6))
   expect_vector(nn$get('crops'), c(-2,200))
 
   # Two gdb priors that are duplicate
   gdb1 <- GDBPrior(variable = 'bias',hyper = 'positive')
   gdb2 <- GDBPrior(variable = 'bias',hyper = 'negative')
-  expect_warning(gg <- priors(gdb1,gdb2))
+  suppressMessages(gg <- priors(gdb1,gdb2))
   expect_equal(gg$length(),1)
   expect_equal(gg$get('bias'),'negative') # Should be last added one
 
@@ -113,8 +119,9 @@ test_that('Create and add priors', {
   # Add INLA priors of different types
   pp1 <- INLAPrior(variable = "bias",type = "normal",hyper = c(0,1))
   pp2 <- INLAPrior(variable = "bias",type = "gaussian",hyper = c(0,1))
-  expect_warning(pp <- priors(pp1,pp2))
+  suppressMessages(pp <- priors(pp1,pp2))
   expect_equal(pp$length(), 1)
+  expect_equal(pp$types() |> as.character(), "gaussian")
 })
 
 test_that('Add and modify priors to existing object', {
@@ -161,4 +168,27 @@ test_that('Add and modify priors to existing object', {
   expect_s3_class(x$priors,'Waiver')
   expect_s3_class(x$get_priors(),'Waiver')
   expect_null(x$rm_priors())
+
+  # Add duplicated priors to it with the same name
+  p1 <- INLAPrior(variable = 'CLC3_132_mean_50km',type = 'normal',
+                          hyper = c(2,1e6) )
+  p2 <- INLAPrior(variable = 'CLC3_132_mean_50km',type = 'clinear',
+                  hyper = c(0,Inf) )
+
+  suppressMessages( expect_equal( priors(p1,p2)$length(), 1 ) )
+  pp <- priors(p1,p2)
+  expect_vector(pp$get('CLC3_132_mean_50km'), c(0, Inf))
+
+  # With BREG engine
+  suppressWarnings( suppressMessages(x <- x %>% engine_breg()) )
+  p1 <- BREGPrior("test", hyper = 0.5, ip = 1)
+  p2 <- BREGPrior("test", hyper = 5, ip = .2)
+  expect_equal(priors(p1,p2)$length(),1)
+
+  x <- x %>% add_priors(priors(p1,p2))
+  expect_equal(x$get_prior_variables() |> as.character(), "test")
+  x <- x %>% add_priors(priors(
+    BREGPrior("test2", hyper = 5, ip = .2)
+  ))
+  expect_true("test2" %in% x$get_prior_variables() )
 })

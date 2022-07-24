@@ -22,7 +22,8 @@ NULL
 #' @param method A specifc method for thresholding. See details for available options.
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
 #' @param poi A [`sf`] object containing observational data used for model training.
-#' @param truncate [`logical`] indication whether truncated thresholds should be used (Default: \code{FALSE}). See Muscatello et al. (2021).
+#' @param truncate [`logical`] indication whether truncated thresholds should be used (Default: \code{FALSE}).
+#' Also see Muscatello et al. (2021).
 #' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
 #' @details
 #' The following options are currently implemented:

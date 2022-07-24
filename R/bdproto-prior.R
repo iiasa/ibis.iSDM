@@ -21,7 +21,7 @@ Prior <- bdproto(
   "Prior",
   id = new_waiver(),
   name = character(0),
-  type = character(0),
+  type = new_waiver(),
   variable = character(0),
   distribution = new_waiver(),
   value = vector(), # A named vector containing the hyper-parameters

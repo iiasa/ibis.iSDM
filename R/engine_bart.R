@@ -284,8 +284,11 @@ engine_bart <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Get name
+        name <- model$biodiversity[[1]]$name
+
         # Messenger
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0( 'Starting fitting: ', name))
 
         # Get output raster
         prediction <- self$get_data('template')
@@ -329,7 +332,7 @@ engine_bart <- function(x,
             }
           } else if(model$biodiversity[[1]]$family == "binomial"){
             # Set the created ranges and binaryOffset
-            off = model$biodiversity[[1]]$offset[,"spatial_offset"]
+            off <- model$biodiversity[[1]]$offset[,"spatial_offset"]
           }
         } else { off = 0.0 }
 
@@ -411,7 +414,7 @@ engine_bart <- function(x,
 
         # Predict spatially
         if(!settings$get('inference_only')){
-          # Messager
+          # Messenger
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
 
           # Set target variables to bias_value for prediction if specified
@@ -421,8 +424,8 @@ engine_bart <- function(x,
               full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
           }
-          params <- self$get_data("params")
           check_package("foreach")
+          params <- self$get_data("params")
 
           full$rowid <- 1:nrow(full)
 
@@ -433,70 +436,33 @@ engine_bart <- function(x,
           if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
 
           # Make a prediction
-          if(getOption("ibis.runparallel")){
-            # Run in parallel
-            check_package("doParallel")
-            doParallel::registerDoParallel(cores = getOption("ibis.nthread"))
+          ms <- foreach::foreach(s = unique(splits),
+                                 .inorder = TRUE,
+                                 .combine = rbind,
+                                 .errorhandling = "stop",
+                                 .multicombine = TRUE,
+                                 .export = c("splits", "fit_bart", "full", "model", "params", "of"),
+                                 .packages = c("dbarts", "matrixStats")) %do% {
+                                   i <- which(splits == s)
 
-            # Operating system dependent use
-            ms <- foreach::foreach(s = unique(splits),
-                                   .inorder = TRUE,
-                                   .combine = rbind,
-                                   .errorhandling = "stop",
-                                   .multicombine = TRUE,
-                                   .export = c("splits", "fit_bart", "full", "model", "params", "of"),
-                                   .packages = c("dbarts", "matrixStats")) %dopar% {
-                                     i <- which(splits == s)
-
-                                     pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                                                        newdata = full[i, model$biodiversity[[1]]$predictors_names],
-                                                                        type = params$type,
-                                                                        offset = of[i]
+                                   pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                                                      newdata = full[i, model$biodiversity[[1]]$predictors_names],
+                                                                      type = params$type,
+                                                                      offset = of[i]
+                                   )
+                                   # Summarize quantiles and sd from posterior
+                                   ms <- as.data.frame(
+                                     cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                            matrixStats::colSds(pred_bart),
+                                            matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                            apply(pred_bart, 2, mode)
                                      )
-                                     # Summarize quantiles and sd from posterior
-                                     ms <- as.data.frame(
-                                       cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
-                                              matrixStats::colSds(pred_bart),
-                                              matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                                              apply(pred_bart, 2, mode)
-                                       )
-                                     )
-                                     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-                                     ms$cv <- ms$mean / ms$sd
-                                     rm(pred_bart)
-                                     return( ms )
-                                   } # End of processing
-
-          } else {
-            # Operating system dependent use
-            ms <- foreach::foreach(s = unique(splits),
-                                   .inorder = TRUE,
-                                   .combine = rbind,
-                                   .errorhandling = "stop",
-                                   .multicombine = TRUE,
-                                   .export = c("splits", "fit_bart", "full", "model", "params", "of"),
-                                   .packages = c("dbarts", "matrixStats")) %do% {
-                                     i <- which(splits == s)
-
-                                     pred_bart <- dbarts:::predict.bart(object = fit_bart,
-                                                                        newdata = full[i, model$biodiversity[[1]]$predictors_names],
-                                                                        type = params$type,
-                                                                        offset = of[i]
-                                     )
-                                     # Summarize quantiles and sd from posterior
-                                     ms <- as.data.frame(
-                                       cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
-                                              matrixStats::colSds(pred_bart),
-                                              matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                                              apply(pred_bart, 2, mode)
-                                       )
-                                     )
-                                     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-                                     ms$cv <- ms$mean / ms$sd
-                                     rm(pred_bart)
-                                     return( ms )
-                                   } # End of processing
-          }
+                                   )
+                                   names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                                   ms$cv <- ms$mean / ms$sd
+                                   rm(pred_bart)
+                                   return( ms )
+                                 } # End of processing
           assertthat::assert_that(nrow(ms)>0,
                                   nrow(ms) == nrow(full))
 
@@ -537,9 +503,7 @@ engine_bart <- function(x,
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
-            # Check if family is binomial, if so alter
-            not_binomial = self$get_data('model')$biodiversity[[1]]$family != 'binomial'
-            bart_partial_effect(model, x.var = x.var, transform = not_binomial, ... )
+            bart_partial_effect(model, x.vars = x.var, transform = TRUE, ... )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){

@@ -304,7 +304,7 @@ engine_xgboost <- function(x,
           for(i in 1:length(settings$get('bias_variable'))){
             if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)) next()
 
-            pred_cov[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+            pred_cov[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
           }
         }
         df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
@@ -406,8 +406,11 @@ engine_xgboost <- function(x,
           # Check that model id and setting id are identical
           settings$modelid == model$id
         )
+        # Get name
+        name <- model$biodiversity[[1]]$name
+
         # Messenger
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green', paste0('Starting fitting: ', name))
 
         # Verbosity
         verbose <- settings$get("verbose")

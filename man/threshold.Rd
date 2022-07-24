@@ -31,7 +31,8 @@ threshold(
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
 
-\item{truncate}{\code{\link{logical}} indication whether truncated thresholds should be used (Default: \code{FALSE}). See Muscatello et al. (2021).}
+\item{truncate}{\code{\link{logical}} indication whether truncated thresholds should be used (Default: \code{FALSE}).
+Also see Muscatello et al. (2021).}
 
 \item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
 }

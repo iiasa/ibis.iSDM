@@ -183,12 +183,14 @@ DistributionModel <- bdproto(
     }
   },
   # Plot threshold
-  plot_threshold = function(self){
+  plot_threshold = function(self, what = 1){
+    assertthat::assert_that(is.numeric(what) || is.character(what))
     # Determines whether a threshold exists and plots it
     rl <- self$show_rasters()
     if(length(grep('threshold',rl))>0){
+
       # Get stack of computed thresholds
-      ras <- raster::stack( self$get_data( grep('threshold',rl,value = TRUE) ) )
+      ras <- raster::stack( self$get_data( grep('threshold',rl,value = TRUE)[[what]] ) )
       suppressWarnings(
         ras <- raster::deratify(ras, complete = TRUE)
       )
@@ -326,7 +328,9 @@ DistributionModel <- bdproto(
   rm_threshold = function(self){
     rl <- self$show_rasters()
     if(length(grep('threshold',rl))>0){
-      self$fits[[grep('threshold',rl,value = TRUE)]] <- NULL
+      for(val in grep('threshold',rl,value = TRUE)){
+        self$fits[[val]] <- NULL
+      }
     }
     invisible()
   },

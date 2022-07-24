@@ -351,7 +351,7 @@ methods::setMethod(
       miss <- complete.cases(env)
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       env <- subset(env, miss)
-      if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na'.")
+      if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
       if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) stop("All presence records fall outside the modelling background.")
       # Add intercept
       env$Intercept <- 1

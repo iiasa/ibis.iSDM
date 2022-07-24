@@ -37,6 +37,8 @@ NULL
 #' @seealso [`scenario()`]
 #' @param mod A [`BiodiversityScenario`] object with set predictors.
 #' Note that some constrains such as [MigClim] can still simulate future change without projections.
+#' @param date_interpolation A [`character`] on whether dates should be interpolated. Options
+#' include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
 #' @param stabilize A [`boolean`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
 #' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
 #' @param ... passed on parameters.
@@ -50,31 +52,45 @@ NULL
 NULL
 methods::setGeneric("project",
                     signature = methods::signature("mod"),
-                    function(mod, stabilize = FALSE, stabilize_method = "loess", ...) standardGeneric("project"))
+                    function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess", ...) standardGeneric("project"))
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario, logical, character }(mod, stabilize, stabilize_method)
+#' @usage \S4method{project}{BiodiversityScenario, character, logical, character }(mod, date_interpolation, stabilize, stabilize_method)
 methods::setMethod(
   "project",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, stabilize = FALSE, stabilize_method = "loess", ...){
+  function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
+      is.character(date_interpolation),
       is.logical(stabilize)
     )
+    # Match methods
+    date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
     if(!is.Waiver(mod$get_scenarios())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
     fit <- mod$get_model()
-    assertthat::assert_that(!is.Waiver(fit), msg = "No model found!")
+    # Check that coefficients and model exist
+    assertthat::assert_that(!is.Waiver(fit),
+                            nrow(fit$get_coefficients())>0,
+                            msg = "No model or coefficients found!")
     # Get predictors
     new_preds <- mod$get_predictors()
-    if(is.Waiver(new_preds)) stop('No future predictors found.')
+    if(is.Waiver(new_preds)) stop('No scenario predictors found.')
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Missing projection of future predictors.')
+
+    # Interpolate dates if set
+    if(date_interpolation!="none"){
+      if(getOption('ibis.setupmessages')) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
+      o <- new_preds$get_data()
+      # TODO:
+      #new_preds$set_data()
+    }
 
     # Get limits if present
     if(!is.null( mod$get_limits() )){
@@ -145,6 +161,7 @@ methods::setMethod(
                             hasName(df,'x'), hasName(df,'y'), hasName(df,'time'))
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
     # convert time dimension to Posixct
+    if(is.numeric(df$time)) df$time <- paste0(df$time, "-01-01")
     df$time <- as.POSIXct( df$time )
     # Convert all units classes to numeric to avoid problems
     df <- units::drop_units(df)

@@ -128,7 +128,7 @@ BiodiversityDistribution <- bdproto(
   },
   # Set new priors
   set_priors = function(self, x ){
-    assertthat::assert_that(inherits(x, 'PriorList'),msg = 'An object created through `priors` has to be provided.')
+    assertthat::assert_that(inherits(x, 'PriorList'), msg = 'An object created through `priors` has to be provided.')
     # Check if a priorlist is set. If yes, then combine the new one with existing priors
     if(is.Waiver(self$priors)){
       bdproto(NULL, self, priors = x )
