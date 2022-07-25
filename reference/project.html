@@ -82,8 +82,8 @@ Any constrains specified in the scenario object are applied during the projectio
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario, logical, character </span></span>
-<span><span class="fu">project</span><span class="op">(</span><span class="va">mod</span>, <span class="va">stabilize</span>, <span class="va">stabilize_method</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario, character, logical, character </span></span>
+<span><span class="fu">project</span><span class="op">(</span><span class="va">mod</span>, <span class="va">date_interpolation</span>, <span class="va">stabilize</span>, <span class="va">stabilize_method</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -91,6 +91,11 @@ Any constrains specified in the scenario object are applied during the projectio
     <dl><dt>mod</dt>
 <dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with set predictors.
 Note that some constrains such as MigClim can still simulate future change without projections.</p></dd>
+
+
+<dt>date_interpolation</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> on whether dates should be interpolated. Options
+include <code>"none"</code> (Default), <code>"annual"</code>, <code>"monthly"</code>, <code>"daily"</code>.</p></dd>
 
 
 <dt>stabilize</dt>
