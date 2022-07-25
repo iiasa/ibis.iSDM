@@ -166,6 +166,38 @@ to_formula <- function(formula){
   return(formula)
 }
 
+#' Guess time to Posix
+#'
+#' @description
+#' This little wrapper converts and ensures that a vector of time objects are in POSIXct format.
+#' @param vec A [`vector`] with [`numeric`] or [`Posixct`] data
+#' @keywords utils
+#' @noRd
+to_POSIXct <- function(vec){
+  check_package("units")
+  # Parse differently depending on time
+  if(inherits(vec, "units")){
+    # Try and format directly to posixct
+    out <- as.POSIXct(vec)
+    assertthat::assert_that(any(!is.na.POSIXlt(out)))
+
+  } else if(inherits(vec, "numeric")){
+    if(all(nchar(vec)==4)){
+      # Assume that the numeric is a year
+      vec <- paste0(vec, "-01-01")
+      out <- as.POSIXct(vec)
+    }
+  } else if(inherits(vec, "character")){
+    # Try and convert to posix directly
+    out <- as.POSIXct(vec)
+    if(any(is.na.POSIXlt(out))){
+      # Situation not yet encountered. To be added when use cases are known.
+      message("Date formats probably need some more prior handling.")
+    }
+  }
+  return(out)
+}
+
 #' Hingeval transformation
 #' @param x A [`vector`] with numeric values.
 #' @param min [`numeric`] minimum value for the hinge transformation

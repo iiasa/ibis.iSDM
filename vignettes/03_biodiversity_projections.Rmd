@@ -39,7 +39,7 @@ install <- function(packages){
     install.packages(new.packages, dependencies = TRUE)
   sapply(packages, require, character.only = TRUE)
 }
-invisible( install(c("xgboost", "igraph", "kissmig", "stars", "ncdf4", "ggplot2","cubelyr")) )
+invisible( install(c("xgboost", "igraph", "rgeos", "kissmig", "stars", "ncdf4", "ggplot2","cubelyr")) )
 ```
 
 ## Load relevant packages and testing data
@@ -100,8 +100,8 @@ x <- distribution(background) %>%
 # Train the model
 modf <- train(x, runname = 'Simple PPM', only_linear = TRUE, verbose = FALSE)
 
-# Add a threshold to this model by maximizing the TSS (using trained data)
-modf <- threshold(modf, method = 'TSS')
+# Add a threshold to this model by getting 05 percentile of values
+modf <- threshold(modf, method = 'percentile', value = 0.05)
 
 # -- #
 # Now lets create a scenarios object via scenarios
@@ -142,7 +142,6 @@ will summarize the amount of area at each timestep.
 
 
 ```{r Plotting and summarizing the created projections, eval = TRUE, fig.width = w, fig.height = h}
-
 # Plot all scenarios. With a large number of predictors this figure will be messy...
 plot(sc.fit1) # or sc.fit1$plot()
 
@@ -245,4 +244,6 @@ Another option for constraining prediction is also by imposing a zonal limit (fo
 
 ## Specific parsers for GLOBIOM related scenarios
 
-<TBD>
+IIASA's Global Biosphere Management Model ([GLOBIOM](https://iiasa.github.io/GLOBIOM/)) is a partial equilibrium model and used to analyze the competition for land use between agriculture, forestry, and bioenergy, which are the main land-based production sectors. It builds on.
+
+With the ibis.iSDM being part of IIASA's suite of integrated models, there is a direct link available to make use of downscaled GLOBIOM outputs. Implemented are functions to either directly format the data via [`formatGLOBIOM()`] or add them to any `DistributionModel-class` or `BiodiversityScenario-class` object directly via `add_predictors_globiom()` . 

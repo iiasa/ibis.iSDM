@@ -31,7 +31,7 @@ PriorList <- bdproto(
     if(is.Waiver(self$priors)) { message('No priors found.') }
       else{
         # Get priors for variables
-        message('Set priors: ',length(self))
+        message('Set priors: ', text_green( length(self)) )
       }
   },
   show = function(self) {
@@ -106,19 +106,19 @@ PriorList <- bdproto(
     priors( self$priors[id] )
   },
   # Add a new prior
-  add = function(self, x) {
-    assertthat::assert_that(inherits(x, "Prior"))
+  add = function(self, p) {
+    assertthat::assert_that(inherits(p, "Prior"))
 
     # If variable and type already exist, replace
-    ex <- self$exists(x$variable, x$type)
+    ex <- self$exists(p$variable, p$type)
     # Catch and return NULL in case if not set
     if(is.null(ex)) {
       # Set prior
-      self$priors[[as.character(x$id)]] <- x
+      self$priors[[as.character(p$id)]] <- p
     } else {
-      # Otherwise delete previous prior and add new one
+      # Otherwise first delete previous prior and add new one
       self$rm(ex)
-      self$priors[[as.character(x$id)]] <- x
+      self$priors[[as.character(p$id)]] <- p
     }
     invisible()
   },

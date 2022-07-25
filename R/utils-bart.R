@@ -148,7 +148,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
     )
     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
     if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, pnorm)
-    ms$cv <- ms$mean / ms$sd
+    ms$cv <- ms$sd / ms$mean
     ms$variable <- pd$xlbs[[i]]
     df <- cbind(df, ms)
     out <- rbind(out, df);rm(df)

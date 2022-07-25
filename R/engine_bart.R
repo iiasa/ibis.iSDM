@@ -459,7 +459,7 @@ engine_bart <- function(x,
                                      )
                                    )
                                    names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-                                   ms$cv <- ms$mean / ms$sd
+                                   ms$cv <- ms$sd / ms$mean
                                    rm(pred_bart)
                                    return( ms )
                                  } # End of processing

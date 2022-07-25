@@ -766,7 +766,7 @@ engine_inla <- function(x,
             }
           }
           post <- subset(post, select = c('mean','sd','0.05quant','0.5quant','0.95quant','mode') )
-          post$cv <- post$mean / post$sd
+          post$cv <- post$sd / post$mean
           # Rename
           names(post) <- c("mean", "sd", "q05", "q50", "q95", "mode","cv")
 

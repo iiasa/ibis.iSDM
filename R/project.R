@@ -88,7 +88,8 @@ methods::setMethod(
     if(date_interpolation!="none"){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
       o <- new_preds$get_data()
-      # TODO:
+      stop("TBD")
+      # Set new data
       #new_preds$set_data()
     }
 
@@ -160,10 +161,8 @@ methods::setMethod(
     assertthat::assert_that(nrow(df)>0,
                             hasName(df,'x'), hasName(df,'y'), hasName(df,'time'))
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
-    # convert time dimension to Posixct
-    if(is.numeric(df$time)) df$time <- paste0(df$time, "-01-01")
-    df$time <- as.POSIXct( df$time )
-    # Convert all units classes to numeric to avoid problems
+    df$time <- to_POSIXct( df$time )
+    # Convert all units classes to numeric or character to avoid problems
     df <- units::drop_units(df)
 
     # ------------------ #
@@ -174,7 +173,7 @@ methods::setMethod(
     proj_thresh <- raster::stack()
 
     pb <- progress::progress_bar$new(total = length(unique(df$time)))
-    # TODO: Do this in parallel but in sequence
+    # TODO: Consider doing this in parallel but in sequence
     times <- sort(unique(df$time))
     for(step in times){
       # Get data

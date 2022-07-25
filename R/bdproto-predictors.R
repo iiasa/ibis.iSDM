@@ -69,7 +69,9 @@ PredictorDataset <- bdproto(
       o <- stars::st_dimensions(d)
       # Take third entry as the one likely to be the time variable
       return(
-        stars::st_get_dimension_values(d, names(o)[3], center = TRUE)
+        to_POSIXct(
+          stars::st_get_dimension_values(d, names(o)[3], center = TRUE)
+        )
       )
     }
   },

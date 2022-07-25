@@ -866,7 +866,7 @@ engine_inlabru <- function(x,
               n.samples = 1000 # Pass as parameter?
             )
           )
-          pred_bru$cv <- pred_bru$mean / pred_bru$sd
+          pred_bru$cv <- pred_bru$sd / pred_bru$mean
           # Get only the predicted variables of interest
           if(utils::packageVersion("inlabru") <= '2.5.2'){
             # Older version where probs are ignored
@@ -969,7 +969,7 @@ engine_inlabru <- function(x,
                 n.samples = n.samples
               )
             )
-            out$cv <- out$mean / out$sd
+            out$cv <- out$sd / out$mean
             # Get only the predicted variables of interest
             out <- raster::stack(
               out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
@@ -1029,7 +1029,7 @@ engine_inlabru <- function(x,
                                 n.samples = 100,
                                 probs = c(0.05,0.5,0.95)
                                 )
-            pred_cov$cv <- pred_cov$mean / pred_cov$sd
+            pred_cov$cv <- pred_cov$sd / pred_cov$mean
 
             o <- pred_cov
             names(o)[grep(x.var, names(o))] <- "partial_effect"
@@ -1099,7 +1099,7 @@ engine_inlabru <- function(x,
                                               n.samples = 100,
                                               probs = c(0.05,0.5,0.95)
             )
-            pred_cov$cv <- pred_cov$mean / pred_cov$sd
+            pred_cov$cv <- pred_cov$sd / pred_cov$mean
 
             # Do plot and return result
             if(plot){

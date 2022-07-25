@@ -432,7 +432,7 @@ engine_breg <- function(x,
               apply(pred_breg, 1, mode)
             ) %>% as.data.frame()
             names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            preds$cv <- preds$mean / preds$sd
+            preds$cv <- preds$sd / preds$mean
             out <- rbind(out, preds)
             rm(preds, pred_breg)
           }
@@ -539,7 +539,7 @@ engine_breg <- function(x,
               apply(pred_breg, 1, mode)
             ) %>% as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            pred_part$cv <- pred_part$mean / pred_part$sd
+            pred_part$cv <- pred_part$sd / pred_part$mean
             # And attach the variable
             pred_part <- cbind("partial_effect" = df_partial[[x.var]], pred_part)
 
@@ -624,7 +624,7 @@ engine_breg <- function(x,
               apply(pred_breg, 1, mode)
             ) %>% as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            pred_part$cv <- pred_part$mean / pred_part$sd
+            pred_part$cv <- pred_part$sd / pred_part$mean
 
             # Now create spatial prediction
             prediction <- emptyraster( self$get_data('prediction') ) # Background
@@ -696,7 +696,7 @@ engine_breg <- function(x,
               apply(pred_breg, 1, mode)
             ) %>% as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            pred_part$cv <- pred_part$mean / pred_part$sd
+            pred_part$cv <- pred_part$sd / pred_part$mean
 
             # Now create spatial prediction
             prediction <- emptyraster( self$get_data('prediction') ) # Background
