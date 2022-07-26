@@ -22,14 +22,15 @@ NULL
 #' @param method A specifc method for thresholding. See details for available options.
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
 #' @param poi A [`sf`] object containing observational data used for model training.
-#' @param truncate [`logical`] indication whether truncated thresholds should be used (Default: \code{FALSE}).
-#' Also see Muscatello et al. (2021).
+#' @param format [`character`] indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
+#' formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
+#' @param ... other parameters not yet set.
 #' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
 #' @details
 #' The following options are currently implemented:
 #' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
 #' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
-#' * \code{'percentile'} = For a percentile threshold.
+#' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 #' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the [modEvA] package to be installed.
 #' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the [modEvA] package to be installed.
 #' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the [modEvA] package to be installed.
@@ -60,7 +61,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, poi = NULL,  truncate = FALSE, return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, poi = NULL,  format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -69,12 +70,17 @@ methods::setGeneric(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, truncate = FALSE, return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, format = "binary", return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
-                            is.logical(truncate)
+                            is.character(format)
     )
+    # Check other and add legacy handling
+    dots <- list(...)
+    if("truncate" %in% names(dots)) format <- ifelse(dots[[truncate]],"normalize", "binary")
+    format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
+
     # Get prediction raster
     ras <- obj$get_data('prediction')
     # Get model object
@@ -127,7 +133,7 @@ methods::setMethod(
     if(!inherits(poi,"sf")){ poi <- guess_sf(poi) }
 
     # Now self call threshold
-    out <- threshold(ras, method = method, value = value, poi = poi, truncate = truncate,...)
+    out <- threshold(ras, method = method, value = value, poi = poi, format = format,...)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj
     new_obj <- obj
@@ -145,25 +151,28 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            poi = NULL, truncate = FALSE, return_threshold = FALSE, ...) {
+                            poi = NULL, format = "binary", return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(poi,'sf'),
                           is.null(value) || is.numeric(value),
-                          is.logical(truncate)
+                          is.character(format)
   )
+  # Match format
+  format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
+
   # Apply threshold on each entry
   if(return_threshold){
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi,  truncate = truncate, return_threshold = return_threshold, ...) )
+                                                                value = value, poi = poi,  format = format, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
     out <- raster::stack()
     for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, truncate = truncate, return_threshold = return_threshold, ...) )
+                                                                value = value, poi = poi, format = format, return_threshold = return_threshold, ...) )
   }
   return(out)
 }
@@ -182,13 +191,16 @@ methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthr
 methods::setMethod(
   "threshold",
   methods::signature(obj = "RasterLayer"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, truncate = FALSE, return_threshold = FALSE, plot = FALSE) {
+  function(obj, method = 'fixed', value = NULL, poi = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'RasterLayer'),
                             is.character(method),
                             is.null(value) || is.numeric(value),
-                            is.logical(truncate)
+                            is.character(format)
     )
+    # Match format
+    format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
+
     # If poi is set, try to convert sf
     if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)}, silent = TRUE)
     assertthat::assert_that(is.null(poi) || inherits(poi,'sf'))
@@ -270,19 +282,24 @@ methods::setMethod(
     } else {
       # Finally threshold the raster
       raster_thresh[raster_thresh < tr[1]] <- 0
-      if(!truncate){
+      # Process depending on format
+      if(format == "binary"){
         # Default is to create a binary presence-absence. Otherwise truncated hinge
         raster_thresh[raster_thresh >= tr[1]] <- 1
         raster_thresh <- raster::asFactor(raster_thresh)
-      } else {
+      } else if(format == "normalize"){
         # If truncate, ensure that resulting values are normalized
         raster_thresh <- predictor_transform(raster_thresh, option = "norm")
+        base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
+      } else if(format == "percentile") {
+        raster_thresh <- predictor_transform(raster_thresh, option = "percentile")
+        base::attr(raster_thresh, 'truncate') <- TRUE
       }
       names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
       # Assign attributes
       base::attr(raster_thresh, 'method') <- method
+      base::attr(raster_thresh, 'format') <- format
       base::attr(raster_thresh, 'threshold') <- tr
-      base::attr(raster_thresh, 'truncate') <- truncate
     }
     # Return result
     return(raster_thresh)
@@ -293,8 +310,6 @@ methods::setMethod(
 
 #' Thresholds in scenario estimation
 #'
-#' @note
-#' Settings such as \code{truncate} will be ignored in scenario-based predictions!
 #' @name threshold
 #' @inheritParams threshold
 #' @rdname threshold

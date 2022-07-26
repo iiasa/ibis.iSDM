@@ -9,7 +9,7 @@ threshold(
   method = "mtp",
   value = NULL,
   poi = NULL,
-  truncate = FALSE,
+  format = "binary",
   return_threshold = FALSE,
   ...
 )
@@ -31,10 +31,12 @@ threshold(
 
 \item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
 
-\item{truncate}{\code{\link{logical}} indication whether truncated thresholds should be used (Default: \code{FALSE}).
-Also see Muscatello et al. (2021).}
+\item{format}{\code{\link{character}} indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
+formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}
 
 \item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
+
+\item{...}{other parameters not yet set.}
 }
 \value{
 A \link{RasterLayer} if used with a \link{Raster} object as input.
@@ -60,7 +62,7 @@ The following options are currently implemented:
 \itemize{
 \item \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
 \item \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
-\item \code{'percentile'} = For a percentile threshold.
+\item \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 \item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \link{modEvA} package to be installed.
 \item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \link{modEvA} package to be installed.
 \item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \link{modEvA} package to be installed.
@@ -68,9 +70,6 @@ The following options are currently implemented:
 \item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
 \item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
 }
-}
-\note{
-Settings such as \code{truncate} will be ignored in scenario-based predictions!
 }
 \examples{
 \dontrun{

@@ -1300,8 +1300,10 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
   par(par.ori)
 }
 
-#' Additional INLA priors not already available
-#' @param prior Which prior to pick
+#' Additional INLA priors not already available.
+#'
+#' @param prior Which prior to pick as [`character`].
+#' @source https://becarioprecario.bitbucket.io/inla-gitbook/ch-priors.html#sec:newpriors
 #' @keywords utils
 #' @noRd
 manual_inla_priors <- function(prior){
@@ -1310,6 +1312,17 @@ manual_inla_priors <- function(prior){
   UN.prior = "expression:
   log_dens = 0 - log(2) - theta / 2;
   return(log_dens);"
+
+  # Half-Normal
+  # a normal with zero mean and precision truncated at 0
+  HN.prior = "expression:
+  tau0 = 0.001;
+  sigma = exp(-theta/2);
+  log_dens = log(2) - 0.5 * log(2 * pi) + 0.5 * log(tau0);
+  log_dens = log_dens - 0.5 * tau0 * sigma^2;
+  log_dens = log_dens - log(2) - theta / 2;
+  return(log_dens);
+  "
 
   # Half-Cauchy prior
   # Here, we have set the scale parameter γ to 25 following A Gelman (2006).
@@ -1323,7 +1336,8 @@ manual_inla_priors <- function(prior){
 
   switch (prior,
     'halfcauchy' = return(HC.prior),
-    'uniform'  = return(UN.prior)
+    'uniform'  = return(UN.prior),
+    'halfnormal' = return(HN.prior)
   )
 }
 

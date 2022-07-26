@@ -195,9 +195,15 @@ DistributionModel <- bdproto(
         ras <- raster::deratify(ras, complete = TRUE)
       )
       # Get colour palette
-      if(attr(ras[[1]], 'truncate')== TRUE){
+      format <- attr(ras[[1]], 'format') # Format attribute
+      if(format == "normalize"){
         col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(100)
-      } else { col <- c("grey", "black")}
+      } else if(format == "percentile") {
+        col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(length(unique(ras)))
+      } else {
+        # Binary
+        col <- c("grey", "black")
+      }
       raster::plot(ras,
                    box = FALSE,
                    axes = TRUE,

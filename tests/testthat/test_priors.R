@@ -167,7 +167,6 @@ test_that('Add and modify priors to existing object', {
   x <- x %>% rm_priors()
   expect_s3_class(x$priors,'Waiver')
   expect_s3_class(x$get_priors(),'Waiver')
-  expect_null(x$rm_priors())
 
   # Add duplicated priors to it with the same name
   p1 <- INLAPrior(variable = 'CLC3_132_mean_50km',type = 'normal',
@@ -191,4 +190,25 @@ test_that('Add and modify priors to existing object', {
     BREGPrior("test2", hyper = 5, ip = .2)
   ))
   expect_true("test2" %in% x$get_prior_variables() )
+
+  # Combine priors with the same type
+  x <- x |> rm_priors()
+  expect_s3_class(x, "BiodiversityDistribution")
+  p1 <- INLAPrior("test", type = "normal", hyper = c(0, 0.05))
+  p2 <- INLAPrior("test", type = "clinear", hyper = c(0, Inf))
+  x <- x |> add_priors( priors(p1,p2) )
+  # Reverse and add again
+  x <- x |> add_priors( priors(p2, p1) )
+  expect_equal(x$priors$length(), 1)
+
+  # Check SPDE priors in multiple versions
+  x <- x |> rm_priors()
+  spde1 <- INLAPrior(variable = 'spde', type = 'prior.range', hyper = c(1, 0.5))
+  spde2 <- INLAPrior(variable = 'spde', type = 'prior.sigma', hyper = c(1, 0.05))
+  ss <- priors(spde1, spde2)
+  x <- x |> add_priors(ss)
+  expect_equal(x$priors$length(), 2)
+  # Now reverse and add again. Should still be 2 priors
+  x <- x |> add_priors(priors(spde2, spde1))
+  expect_equal(x$priors$length(), 2)
 })

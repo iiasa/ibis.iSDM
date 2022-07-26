@@ -12,7 +12,7 @@ engine_stan(
   init = "random",
   cores = getOption("ibis.nthread"),
   algorithm = "sampling",
-  control = NULL,
+  control = list(adapt_delta = 0.95),
   type = "response",
   ...
 )

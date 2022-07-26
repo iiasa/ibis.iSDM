@@ -199,6 +199,7 @@ run_stan <- function( model_code, data = list(),
                                   force_recompile = force,
                                   cpp_options = cpp_options,
                                   include_paths = path
+                                  # stanc_options = list("O1") # Can result in substantial speedups!
                                   )
 
   # Final parameters for sampling

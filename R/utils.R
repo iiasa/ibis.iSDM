@@ -174,13 +174,15 @@ to_formula <- function(formula){
 #' @keywords utils
 #' @noRd
 to_POSIXct <- function(vec){
-  check_package("units")
+  # Check th
   # Parse differently depending on time
-  if(inherits(vec, "units")){
+  if(inherits(vec, "POSIXct")){
+    out <- vec
+  } else if(inherits(vec, "units") || inherits(vec, "Date")){
+    check_package("units")
     # Try and format directly to posixct
     out <- as.POSIXct(vec)
     assertthat::assert_that(any(!is.na.POSIXlt(out)))
-
   } else if(inherits(vec, "numeric")){
     if(all(nchar(vec)==4)){
       # Assume that the numeric is a year

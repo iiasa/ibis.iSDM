@@ -46,7 +46,7 @@ engine_stan <- function(x,
                         init = "random",
                         cores = getOption("ibis.nthread"),
                         algorithm = 'sampling',
-                        control = NULL,
+                        control = list(adapt_delta = 0.95),
                         type = "response",
                         ...) {
   # Check whether INLA package is available

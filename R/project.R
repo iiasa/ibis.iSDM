@@ -68,7 +68,7 @@ methods::setMethod(
       is.logical(stabilize)
     )
     # Match methods
-    date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "monthly", "daily"), several.ok = FALSE)
+    date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
     if(!is.Waiver(mod$get_scenarios())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
@@ -87,8 +87,7 @@ methods::setMethod(
     # Interpolate dates if set
     if(date_interpolation!="none"){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
-      o <- new_preds$get_data()
-      stop("TBD")
+      o <- approximate_gaps(env = new_preds$get_data(), date_interpolation = date_interpolation)
       # Set new data
       #new_preds$set_data()
     }

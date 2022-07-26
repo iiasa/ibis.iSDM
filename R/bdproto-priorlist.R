@@ -74,8 +74,16 @@ PriorList <- bdproto(
     vt <- self$types()
     # If type is specified
     if(!is.null(type)){
-      # Return the id of the combination
-      if(all(variable %in% vn) && (type %in% vt) ) return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] ) else return(NULL)
+      # Check whether variable is in vn
+      if(any(variable %in% vn)){
+        # Check type and return the id of the combination
+        if(type %in% vt){
+          return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] )
+        } else {
+          # Get type of variable instead
+          return( names(vn)[which(variable %in% as.character(vn))] )
+        }
+      } else { return(NULL)}
     } else {
       # Simply match against variable names and return id
       if(!all(variable %in% vn)) return(NULL)

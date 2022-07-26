@@ -37,6 +37,7 @@ Available options are:
 \item \code{'scale'} This run the \code{\link[=scale]{scale()}} function with default settings (1 Standard deviation) across all predictors.
 A sensible default to for most model fitting.
 \item \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
+\item \code{'percentile'} This converts and bins all values into percentiles, e.g. the top 10\% or lowest 10\% of values and so on.
 \item \code{'pca'} This option runs a principal component decomposition of all predictors (via \code{\link[=prcomp]{prcomp()}}).
 It returns new predictors resembling all components in order of the most important ones. Can be useful to
 reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.

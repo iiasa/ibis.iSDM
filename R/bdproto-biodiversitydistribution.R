@@ -164,8 +164,14 @@ BiodiversityDistribution <- bdproto(
   },
   # Get Engine
   get_engine = function(self){
-    if(is.Waiver(self$engine)) return('None')
+    if(is.Waiver(self$engine)) return(NULL)
     self$engine$show()
+  },
+  # Remove engine
+  rm_engine = function(self){
+    if(!is.Waiver(self$engine)){
+      bdproto(NULL, self, engine = new_waiver())
+    }
   },
   # Get prior variables
   get_prior_variables = function(self){
@@ -234,7 +240,7 @@ BiodiversityDistribution <- bdproto(
   # Remove priors
   rm_priors = function(self, names = NULL){
     assertthat::assert_that(is.null(names) || is.vector(names) || is.character(names))
-    if(is.Waiver(self$priors)) {return(NULL)}
+    if(is.Waiver(self$priors)) {return( bdproto(NULL, self) )}
     # Delete selected priors
     if(is.null(names)){
       priors <- new_waiver()

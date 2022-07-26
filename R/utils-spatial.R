@@ -601,6 +601,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' * \code{'scale'} This run the [`scale()`] function with default settings (1 Standard deviation) across all predictors.
 #' A sensible default to for most model fitting.
 #' * \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
+#' * \code{'percentile'} This converts and bins all values into percentiles, e.g. the top 10% or lowest 10% of values and so on.
 #' * \code{'pca'} This option runs a principal component decomposition of all predictors (via [`prcomp()`]).
 #' It returns new predictors resembling all components in order of the most important ones. Can be useful to
 #' reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
@@ -630,7 +631,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
      is.numeric(pca.var)
    )
   # Match option
-  option <- match.arg(option, c('none','pca', 'scale', 'norm','windsor', 'revjack'), several.ok = FALSE)
+  option <- match.arg(option, c('none','pca', 'scale', 'norm','windsor', 'revjack', 'percentile'), several.ok = FALSE)
 
   # Nothing to be done
   if(option == 'none') return(env)
@@ -664,6 +665,21 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- raster::scale(env, center = TRUE, scale = TRUE)
     } else {
       out <- lapply(env_list, function(x) raster::scale(x, center = TRUE, scale = TRUE))
+    }
+  }
+
+  # Percentile cutting
+  if(option == 'percentile'){
+    if(is.Raster(env)){
+      perc <- raster::quantile(env, seq(0,1, length.out = 11))
+      perc <- unique(perc)
+      out <- raster::cut(env, perc)
+    } else {
+      out <- lapply(env_list, function(x) {
+        perc <- raster::quantile(x, seq(0,1, length.out = 11))
+        perc <- unique(perc)
+        raster::cut(x, perc)
+      })
     }
   }
 
