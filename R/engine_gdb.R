@@ -292,16 +292,20 @@ engine_gdb <- function(x,
         equation <- model$biodiversity[[1]]$equation
         data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
         w <- model$biodiversity[[1]]$expect
-        full <- model$predictors
 
         # Select predictors
+        full <- model$predictors
         full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
         full$cellid <- rownames(full) # Add row.names
         full <- subset(full, complete.cases(full))
+        full$Intercept <- 1
+        full$w <- 1
 
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(data),
           is.formula(equation),
+          all(model$biodiversity[[1]]$predictors_names %in% names(full)),
+          all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),
           all( model$biodiversity[[1]]$predictors_names %in% names(full) )
         )
 
@@ -398,6 +402,7 @@ engine_gdb <- function(x,
               full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
             }
           }
+
           # Make a prediction
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,

@@ -53,7 +53,7 @@ built_formula_gdb <- function(model, id, x, settings){
       if(length(miss)>0){
         # Add linear predictors
         form <- paste(form, paste0('bols(',miss,')', collapse = ' + '))
-        if(is.Waiver( settings$get('only_linear'))){
+        if(!settings$get('only_linear')){
           # And smooth effects for all numeric data
           miss <- miss[ miss %in% obj$predictors_types$predictors[which(obj$predictors_types$type=="numeric")] ]
           form <- paste(form, ' + ', paste0('bbs(', miss,', knots = 4)',
@@ -229,30 +229,37 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' Calculate weights for Point Process models
 #'
 #' @param df The [`data.frame`] for which weights are to be calculated.
-#' @param presence A [`vector`] with the observed species. Has to be in range \code{0} to \code{Inf}
-#' @param bg A background [`raster`] layer
+#' @param presence A [`vector`] with the observed species. Has to be in range \code{0} to \code{Inf}.
+#' @param bg A background [`raster`] layer.
+#' @param use_area A [`logical`] on whether area is to be used instead of grid counts.
 #' @param weight A [`numeric`] weight to be used in down-weighted regressions.
 #' @param type Accepting either “Infinitely weighted logistic regression” \code{'IWLR'} for use with binomial
-#' logistic regressions or
-#' “Down-weighted Poisson regression” \code{"DWPR"} (Default).
+#' logistic regressions or “Down-weighted Poisson regression” \code{"DWPR"} (Default).
 #' @references
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @return A vector with the weights
 #' @keywords utils
 #' @noRd
-ppm_weights <- function(df, pa, bg, weight = 1e-6, type = "DWPR"){
+ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWPR"){
   assertthat::assert_that(
     is.data.frame(df),
     length(unique(pa)) > 1,
     nrow(df) == length(pa),
+    is.logical(use_area),
     is.numeric(weight),
     is.character(type)
   )
   type <- match.arg(type, c("DWPR", "IWLR"),several.ok = FALSE)
 
-  # number of non-NA cells
-  nc = cellStats(!is.na(bg), sum)
+  if(use_area){
+    suppressWarnings( ar <- raster::area(bg) )
+    ar <- raster::mask(ar, bg)
+    nc <- cellStats(ar, sum)
+  } else {
+    # number of non-NA cells
+    nc <- cellStats(!is.na(bg), sum)
+  }
 
   # Set output weight as default
   if(type == "DWPR"){

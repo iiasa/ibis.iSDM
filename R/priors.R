@@ -71,6 +71,9 @@ methods::setMethod(
     # Replace any Gaussian with normal
     if(any(types == "gaussian")) types[which(types=="gaussian")] <- "normal"
 
+    # Check that there are no NA values among the variables
+    assertthat::assert_that(!anyNA(vars))
+
     # Remove duplicated SPDE priors for INLA
     if(any(vars == "spde")){
       if(any(duplicated(cbind(vars,types)))){

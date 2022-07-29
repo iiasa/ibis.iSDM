@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="A R-package for Integrated Biodiversity distribution modelling">
 <meta property="og:description" content="Help and tutorial for building integrated species distribution models.">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg">
+<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -86,40 +86,44 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="figure">
-<img src="https://www.r-pkg.org/badges/version/ibis.iSDM" alt=""><p class="caption">CRAN Status</p>
-</div>
-<div class="section level1">
+  <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections">The ibis framework - An <strong>I</strong>ntegrated model for <strong>B</strong>iod<strong>I</strong>versity distribution projection<strong>S</strong>
+<img src="logo.png" class="logo" alt=""><h1 id="the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections">The ibis framework - An <strong>I</strong>ntegrated model for <strong>B</strong>iod<strong>I</strong>versity distribution projection<strong>S</strong>
 <a class="anchor" aria-label="anchor" href="#the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections"></a>
 </h1>
 </div>
+<p><img align="right" src="reference/figures/logo.png" alt="logo" width="180" height="180"></p>
 <!-- <a href='https://github.com/iiasa/rN2000'><img src="man/figures/logo.png" align="right"height=140/></a> --->
 <!-- https://shields.io/  For Badges later -->
-<p>The ibis.iSDM package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that are able to incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac et al. (2020)</a> for an introduction to iSDMs.</p>
+<!-- badges: start -->
+
+<p>The <strong>ibis.iSDM</strong> package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac et al. (2020)</a> for an introduction to iSDMs.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Currently only as development version on GitHub.</p>
+<p>The latest version can be installed from GitHub. A CRAN release will eventually be planned.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"IIASA/ibis.iSDM"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"IIASA/ibis.iSDM"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="basic-usage">Basic usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
 </h2>
-<p>See relevant reference sites and vignettes.</p>
-<p>Note that the package in constant development and individual functions might change. As soon as the package has reached a stable state, the repository will be made public An official release will be made as soon as the package is public <strong>In development !!!</strong></p>
+<p>See relevant <a href="https://iiasa.github.io/ibis.iSDM/">reference site</a> and <a href="https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html">vignettes</a>.</p>
+<p>Note that the package is in active development and individual functions might change.</p>
+<strong>Citation:</strong>
+<summary>
+Jung M (2022). ibis.iSDM: Modelling framework for Integrated Biodiversity distribution scenarios. R package version 0.1, <a href="https://github.com/iiasa/ibis.iSDM" class="external-link uri">https://github.com/iiasa/ibis.iSDM</a>.
+</summary>
 </div>
 <div class="section level2">
-<h2 id="package-development">Package development<a class="anchor" aria-label="anchor" href="#package-development"></a>
+<h2 id="acknowledgement-">Acknowledgement <a href="https://iiasa.ac.at" class="external-link"><img src="reference/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"></a>
+<a class="anchor" aria-label="anchor" href="#acknowledgement-"></a>
 </h2>
-<p>The package is in active development and we encourage any user or developer interested in using the package to see github repository (also see <a href="https://github.com/iiasa/ibis.iSDM/issues" class="external-link">issues</a> and <a href="https://github.com/iiasa/ibis.iSDM/projects" class="external-link">projects</a>) as well as the <a href="articles/contributing.html">contributing</a> site.</p>
+<p><strong>ibis.iSDM</strong> is developed by the Biodiversity, Ecology and Conservation group at the International Institute for Applied Systems Analysis (IIASA), Austria.</p>
 <!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
 </div>
 </div>
-
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -165,7 +169,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer>

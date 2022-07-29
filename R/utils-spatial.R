@@ -1378,8 +1378,9 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #'
 #'  [*] \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
 #'  Does not account for any spatial or environmental distance between observations.
-#'  [*] \code{"bias"}: As for random, but here occurrence points are incrementally removed from the dataset, starting
-#'  with the ones that are most biased (parameter \code{"bias"}) first. Thins the observations up to \code{"minpoints"}.
+#'  [*] \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"bias"}) only.
+#'  Points are preferentially thinned from grid cells which are in the 25% most biased (larger values assumed greater bias)
+#'  and have high point density. Thins the observations up to \code{"minpoints"}.
 #'  [*] \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 #'  each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
 #'  [*] \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
@@ -1418,12 +1419,17 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   )
   check_package("dplyr")
   # Match method
-  method <- match.arg(method, choices = c("random", "spatial", "environmental", "zones"), several.ok = FALSE)
+  method <- match.arg(method, choices = c("random", "spatial", "bias", "environmental", "zones"), several.ok = FALSE)
 
   # Label background with id
   bg <- background
   bg[] <- 1:raster::ncell(bg)
   bg <- raster::mask(bg, background)
+
+  # Check that environment has the same projection
+  if(is.Raster(env)){
+    assertthat::assert_that( raster::compareRaster(bg, env) )
+  }
 
   # Take coordinates of supplied data and rasterize
   coords <- sf::st_coordinates( df )
@@ -1454,21 +1460,58 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
     # For those where we have more than the minimum, take at random the upper limits of observations
     ex$oversampled <- ifelse(ex$N >= totake["upper"], 1, 0)
-    # Now sample at random up to the maximum amount. Got tired of doing this outside tidyverse
-    o <- ex %>% dplyr::filter(oversampled == 1) %>%
-      dplyr::group_by(cid) %>%
-      dplyr::slice_sample(n = min(totake))
-    if(nrow(o)>0) sel <- append(sel, o$id)
+    if(dplyr::n_distinct(ex$oversampled) > 1){
+      # If there any oversampled
+      # Now sample at random up to the maximum amount. Got tired of doing this outside tidyverse
+      o <- ex %>% dplyr::filter(oversampled == 1) %>%
+        dplyr::group_by(cid) %>%
+        dplyr::slice_sample(n = min(totake))
+      if(nrow(o)>0) sel <- append(sel, o$id)
+      rm(o)
+    }
     if(anyDuplicated(sel)) sel <- unique(sel)
-    rm(o,ex)
+    rm(ex)
+  } else if(method == "bias"){
+    assertthat::assert_that(is.Raster(env),
+                            raster::nlayers(env)==1,
+                            msg = "Bias requires a single Raster layer provided to env.")
+
+    sel <- vector()
+
+    # Convert bias layer into percentile (largest being)
+    bias_perc <- raster::quantile(env, c(.75))
+
+    # Now extract
+    ex <- data.frame(id = 1:nrow(coords),
+                     cid = raster::extract(bg, coords),
+                     pres = raster::extract(ras, coords),
+                     bias = raster::extract(env, coords)
+    )
+    ex <- subset(ex, complete.cases(ex)) # Don't need missing points
+    # Now identify those to be thinned
+    ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$pres > totake[1]), 1, 0)
+    assertthat::assert_that(dplyr::n_distinct(ex$tothin) == 2)
+    # Now thin those points that are to be thinned
+    ss <- ex |> dplyr::filter(tothin == 1) |>
+      dplyr::group_by(cid) |>
+      dplyr::slice_sample(n = totake[1], weight_by = bias, replace = T) |>
+      dplyr::distinct()
+
+    # Points to take
+    sel <- append(sel, ex$id[ex$tothin==0] )
+    sel <- append(sel, ss$id )
+
   } else if(method == "environmental"){
     # Environmental clustering
+    stop("Not yet implemented!")
 
   } else if(method == "spatial"){
     # Spatial thinning
+    stop("Not yet implemented!")
 
   } else if(method == "zones"){
     # Thinning by zones
+    stop("Not yet implemented!")
   }
 
   # Return subsampled coordinates

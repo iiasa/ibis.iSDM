@@ -19,7 +19,7 @@ there is no DistributionModel to read this information from.
 Note: This of course also allows to estimate the threshold based on withheld data, for instance
 those created from an a-priori cross-validation procedure.
 For BiodiversityScenario objects, adding this function to the processing pipeline
-stores a threshold attribute in the created scenario object."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+stores a threshold attribute in the created scenario object."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
@@ -76,7 +76,7 @@ stores a threshold attribute in the created scenario object."><meta property="og
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Threshold a continuous prediction to a categorical layer</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Threshold a continuous prediction to a categorical layer</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/threshold.R" class="external-link"><code>R/threshold.R</code></a></small>
       <div class="d-none name"><code>threshold.Rd</code></div>
     </div>
@@ -97,27 +97,27 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">threshold</span><span class="op">(</span></span>
-<span>  <span class="va">obj</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"mtp"</span>,</span>
-<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  poi <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  truncate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  return_threshold <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for ANY</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for RasterBrick</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for RasterLayer</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for BiodiversityScenario</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">threshold</span><span class="op">(</span>
+  <span class="va">obj</span>,
+  method <span class="op">=</span> <span class="st">"mtp"</span>,
+  value <span class="op">=</span> <span class="cn">NULL</span>,
+  poi <span class="op">=</span> <span class="cn">NULL</span>,
+  format <span class="op">=</span> <span class="st">"binary"</span>,
+  return_threshold <span class="op">=</span> <span class="cn">FALSE</span>,
+  <span class="va">...</span>
+<span class="op">)</span>
+
+<span class="co"># S4 method for ANY</span>
+<span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>
+
+<span class="co"># S4 method for RasterBrick</span>
+<span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>
+
+<span class="co"># S4 method for RasterLayer</span>
+<span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span>
+
+<span class="co"># S4 method for BiodiversityScenario</span>
+<span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -138,12 +138,17 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 <dd><p>A <code>sf</code> object containing observational data used for model training.</p></dd>
 
 
-<dt>truncate</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> indication whether truncated thresholds should be used (Default: <code>FALSE</code>). See Muscatello et al. (2021).</p></dd>
+<dt>format</dt>
+<dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indication of whether <code>"binary"</code>, <code>"normalize"</code> or <code>"percentile"</code>
+formatted thresholds are to be created (Default: <code>"binary"</code>). Also see Muscatello et al. (2021).</p></dd>
 
 
 <dt>return_threshold</dt>
 <dd><p>Should threshold value be returned instead (Default: <code>FALSE</code>)</p></dd>
+
+
+<dt>...</dt>
+<dd><p>other parameters not yet set.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -157,7 +162,7 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The following options are currently implemented:</p><ul><li><p><code>'fixed'</code> = applies a single pre-determined threshold. Requires <code>value</code> to be set.</p></li>
 <li><p><code>'mtp'</code> = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.</p></li>
-<li><p><code>'percentile'</code> = For a percentile threshold.</p></li>
+<li><p><code>'percentile'</code> = For a percentile threshold. A <code>value</code> as parameter has to be set here.</p></li>
 <li><p><code>'TSS'</code> = Determines the optimal TSS (True Skill Statistic). Requires the modEvA package to be installed.</p></li>
 <li><p><code>'kappa'</code> = Determines the optimal kappa value (Kappa). Requires the modEvA package to be installed.</p></li>
 <li><p><code>'F1score'</code> = Determines the optimal F1score (also known as Sorensen similarity). Requires the modEvA package to be installed.</p></li>
@@ -165,10 +170,6 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 <li><p><code>'Sensitivity'</code> = Determines the optimal sensitivity of presence records. Requires the modEvA package to be installed.</p></li>
 <li><p><code>'Specificity'</code> = Determines the optimal sensitivity of presence records. Requires the modEvA package to be installed.</p></li>
 </ul></div>
-    <div class="section level2">
-    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Settings such as <code>truncate</code> will be ignored in scenario-based predictions!</p>
-    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
@@ -183,11 +184,11 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span> <span class="co"># Where mod is an estimated DistributionModel</span></span></span>
-<span class="r-in"><span> <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">threshold</span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></span>
-<span class="r-in"><span> <span class="va">tr</span><span class="op">$</span><span class="fu">show_rasters</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"> <span class="co"># Where mod is an estimated DistributionModel</span></span>
+<span class="r-in"> <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">threshold</span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
+<span class="r-in"> <span class="va">tr</span><span class="op">$</span><span class="fu">show_rasters</span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -199,7 +200,7 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer></div>

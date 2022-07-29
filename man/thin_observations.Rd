@@ -49,8 +49,9 @@ Currently implemented thinning methods:
 
 \link{*} \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
 Does not account for any spatial or environmental distance between observations.
-\link{*} \code{"bias"}: As for random, but here occurrence points are incrementally removed from the dataset, starting
-with the ones that are most biased (parameter \code{"bias"}) first. Thins the observations up to \code{"minpoints"}.
+\link{*} \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"bias"}) only.
+Points are preferentially thinned from grid cells which are in the 25\% most biased (larger values assumed greater bias)
+and have high point density. Thins the observations up to \code{"minpoints"}.
 \link{*} \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
 \link{*} \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed

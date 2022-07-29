@@ -80,8 +80,8 @@ methods::setMethod(
       method <- 'continuous'
     }
     # If mode truncate was used, also switch to continuous data
-    if(!is.null(attr(threshold,'truncate')) && method == "discrete"){
-      if(attr(threshold,'truncate')){
+    if((attr(threshold,'format')!="binary") && method == "discrete"){
+      if(attr(threshold,'format')!="binary"){
         if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
         method <- 'continuous'
       }
@@ -92,8 +92,8 @@ methods::setMethod(
       temp <- mod$model$predictors_object$get_data()[[1]]; temp[!is.na(temp)] <- 0
       if(!is.null(threshold)){
         new <- sum(threshold, temp, na.rm = TRUE); new <- raster::mask(new, temp)
-        attr(new,'truncate') <- attr(threshold,'truncate')
-        if(!attr(threshold,'truncate')) new <- raster::ratify(new)
+        attr(new,'format') <- attr(threshold,'format')
+        if(attr(threshold,'format')=="binary") new <- raster::ratify(new)
         threshold <- new
         rm(new)
       }
@@ -199,7 +199,7 @@ methods::setMethod(
     method <- match.arg(method, c("discrete", "continuous"),several.ok = FALSE)
 
     # If mode truncate was used, also switch to continuous data
-    if(attr(mod,'truncate') && method == "discrete"){
+    if( attr(threshold,'format')!="binary" && method == "discrete"){
       if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
       method <- 'continuous'
     }

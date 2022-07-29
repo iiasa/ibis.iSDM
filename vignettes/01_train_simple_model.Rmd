@@ -53,7 +53,7 @@ install <- function(packages){
 if(!("INLA" %in% installed.packages()[, "Package"])){
   install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 }
-install(c("inlabru", "xgboost"))
+install(c("inlabru", "xgboost", "rgeos", "igraph"))
 ```
 
 
@@ -209,7 +209,7 @@ fit$plot_threshold()
 
 # It is also possible to use truncated thresholds, which removes non-suitable areas
 # while retaining those that are suitable. These are then normalized to a range of [0-1]
-fit <- threshold(fit, method = "percentile", value = 0.5, truncate = TRUE)
+fit <- threshold(fit, method = "percentile", value = 0.5, format = "normalize")
 fit$plot_threshold()
 
 ```
@@ -227,8 +227,8 @@ Here we will 'validate' the fitted model using the data used for model fitting. 
 fit$rm_threshold()
 validate(fit, method = "cont")
 
-# If the prediction is first thresholded, we can calculate discrete validation estimates
-fit <- threshold(fit, method = "percentile", value = 0.5)
+# If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)
+fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 
 ```
