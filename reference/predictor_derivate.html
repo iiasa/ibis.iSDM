@@ -76,7 +76,14 @@ for example is often done in the popular Maxent framework.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictor_derivate</span><span class="op">(</span><span class="va">env</span>, <span class="va">option</span>, nknots <span class="op">=</span> <span class="fl">4</span>, deriv <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictor_derivate</span><span class="op">(</span></span>
+<span>  <span class="va">env</span>,</span>
+<span>  <span class="va">option</span>,</span>
+<span>  nknots <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  deriv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -97,6 +104,10 @@ for example is often done in the popular Maxent framework.</p>
 <dt>deriv</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code>characters</code> of specific derivates to create (Default: <code>NULL</code>).</p></dd>
 
+
+<dt>int_variables</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with length greater or equal than <code>2</code> specifying the covariates  (Default: <code>NULL</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -106,15 +117,16 @@ for example is often done in the popular Maxent framework.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Available options are:</p><ul><li><p><code>'none'</code> The original layer(s) are returned.</p></li>
-<li><p><code>'quadratic'</code> A quadratic transformation (\(x^{2}\)) is created of the provided layers.</p></li>
-<li><p><code>'hinge'</code> Creates hinge transformation of covariates, which set all values lower than a set threshold to <code>0</code>
+    <p>Available options are:</p><ul><li><p><code>'none'</code> - The original layer(s) are returned.</p></li>
+<li><p><code>'quadratic'</code> - A quadratic transformation (\(x^{2}\)) is created of the provided layers.</p></li>
+<li><p><code>'hinge'</code> - Creates hinge transformation of covariates, which set all values lower than a set threshold to <code>0</code>
 and all others to a range of \([0,1]\). The number of thresholds and thus new derivates is specified
 via the parameter <code>'nknots'</code> (Default: <code>4</code>).</p></li>
-<li><p><code>'thresh'</code> A threshold transformation of covariates, which sets all values lower than a set threshold ot
+<li><p><code>'interaction'</code> - Creates interactions between variables. Target variables have to be specified via <code>"int_variables"</code>.</p></li>
+<li><p><code>'thresh'</code> - A threshold transformation of covariates, which sets all values lower than a set threshold ot
 <code>0</code> and those larger to <code>1</code>.
 The number of thresholds and thus new derivates is specified via the parameter <code>'nknots'</code> (Default: <code>4</code>).</p></li>
-<li><p><code>'bin'</code> Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
+<li><p><code>'bin'</code> - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
 The number of percentile cuts and thus new derivates is specified via the parameter <code>'nknots'</code> (Default: <code>4</code>).</p></li>
 </ul></div>
     <div class="section level2">

@@ -93,7 +93,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Frequently Asked Questions (FAQ)</h1>
                         <h4 data-toc-skip class="author">Martin Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-07-29</h4>
+            <h4 data-toc-skip class="date">2022-07-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/frequently-asked-questions.Rmd" class="external-link"><code>vignettes/frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>frequently-asked-questions.Rmd</code></div>
@@ -127,7 +127,8 @@
 <span><span class="va">virtual_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_pseudoabsence.html">add_pseudoabsence</a></span><span class="op">(</span><span class="va">virtual_points</span>, field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span></span>
 <span><span class="co"># Check that absence points are present</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">virtual_points</span><span class="op">$</span><span class="va">Observed</span><span class="op">)</span></span></code></pre></div>
-Also see the <code><a href="../reference/add_pseudoabsence.html">add_pseudoabsence()</a></code> and <code><a href="../reference/pseudoabs_settings.html">pseudoabs_settings()</a></code> help pages for more settings and information here.
+<p>Also see the <code><a href="../reference/add_pseudoabsence.html">add_pseudoabsence()</a></code> and <code><a href="../reference/pseudoabs_settings.html">pseudoabs_settings()</a></code> help pages for more settings and also the first article on this website.</p>
+<strong>By default all engines in ibis.iSDM fit models according to the input data. When presence-only data is supplied, then usually a Poisson-Process Model is estimated. </strong>
 </details>
 </div>
 <div class="section level3">
@@ -221,7 +222,7 @@ Yes, in many instances it is desirable to transform input predictors to a new ra
 Users are advised to use [<code>engine_inlabru</code>] by <strong>default</strong> in most cases and only use [<code>engine_inla</code>] if predictions look uncertain.
 </details><details><p><summary><b>Where can I find predictions created by <code>train</code> ? </b> </summary></p>
 <p>After a <code>distribution</code> model has been trained and if the <code>inference_only</code> parameter in <code><a href="../reference/train.html">train()</a></code> has been set to <code>FALSE</code> (Default), the outputs of the prediction be found in the created object as a <code>RasterStack</code>. By default all engines will produce a <code>Raster</code> object with at least one band called “mean” which is the average prediction by the engine. This is also the result returned when the created model object is plotted.</p>
-<p>In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename.</p>
+<p>In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename using the <code><a href="../reference/write_output.html">write_output()</a></code> function.</p>
 <p><strong>Example:</strong></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
@@ -236,7 +237,7 @@ Users are advised to use [<code>engine_inlabru</code>] by <strong>default</stron
 <span><span class="va">mod</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="st">"prediction"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># To save the output layer as floating point geoTiff</span></span>
-<span><span class="va">mod</span><span class="op">$</span><span class="fu">save</span><span class="op">(</span><span class="st">"myoutput.tif"</span>, type <span class="op">=</span> <span class="st">"gtif"</span>, dt <span class="op">=</span> <span class="st">"FLT4S"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/write_output.html">write_output</a></span><span class="op">(</span><span class="va">mod</span>, <span class="st">"myoutput.tif"</span>, type <span class="op">=</span> <span class="st">"gtif"</span>, dt <span class="op">=</span> <span class="st">"FLT4S"</span><span class="op">)</span></span></code></pre></div>
 </details><details><p><summary><b>Predictions from <code>engine_xgboost</code> look pixelated?</b> </summary> This is usually due to either the number of rounds for estimation being too low or the learning_rate being to high. Try out different options in the parameters of the engine. A good way to check the performance is also to plot the evaluation log and <strong>logloss</strong>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Requires a fitted model</span></span>
@@ -251,7 +252,7 @@ Users are advised to use [<code>engine_inlabru</code>] by <strong>default</stron
 </details><details><p><summary><b>What can I do when my model outputs with presence-only data seem odd?</b> </summary> By default, presence only biodiversity data is modelled as point-process model (PPM, see <a href="http://doi.wiley.com/10.1111/2041-210X.12352" class="external-link">Renner et al. 2015</a>). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.</p>
 <ul>
 <li>Modify the targeted background sampling for better control of background points. This can be for instance done via the <code><a href="../reference/add_pseudoabsence.html">add_pseudoabsence()</a></code> and <code><a href="../reference/pseudoabs_settings.html">pseudoabs_settings()</a></code> methods. See the respective help files.</li>
-<li>Make use of spatial thinning approaches. See for instance <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132" class="external-link">Aiello-Lammers et al. 2015</a> and <a href="https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525" class="external-link">Steen et al. 2021</a>. Note however that spatial thinning does remove data points, affecting for instance any <code>poisson</code> distributed models (PPMs) in the process. The <code>ibis.iSDM</code> package currently has no built-in methods for spatial thinning.</li>
+<li>Make use of spatial thinning approaches. See for instance <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132" class="external-link">Aiello-Lammers et al. 2015</a> and <a href="https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525" class="external-link">Steen et al. 2021</a>. Note however that spatial thinning does remove data points, affecting for instance any <code>poisson</code> distributed models (PPMs) in the process. The<code>ibis.iSDM</code> package has some functionality for spatial thinning implemented in the <code><a href="../reference/thin_observations.html">thin_observations()</a></code> function.</li>
 <li>Partial out a biased variable during the prediction. The <code>bias_variable</code> can be specified in the <code><a href="../reference/train.html">train()</a></code> command and has to be part the predictor set of the model. In addition a <code>bias_value</code> has to be specified and this can be set for instance to <code>0</code>.</li>
 <li>Add a spatial offset to account for the bias as introduced in <a href="http://doi.wiley.com/10.1111/geb.12453" class="external-link">Merow et al. 2016</a>. This can be done via the <code><a href="../reference/add_offset_bias.html">add_offset_bias()</a></code> function and requires preparation of a bias layer in advance.</li>
 <li>Apply more rigorous filtering and bias control to the input data. In the end no correction can replace good data preparation and cleaning. Remember the <a href="https://en.wikipedia.org/wiki/Garbage_in,_garbage_out" class="external-link">GIGO principle</a>.</li>

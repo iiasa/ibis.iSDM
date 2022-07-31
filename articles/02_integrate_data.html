@@ -93,7 +93,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Data integration</h1>
                         <h4 data-toc-skip class="author">Martin Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-07-29</h4>
+            <h4 data-toc-skip class="date">2022-07-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/02_integrate_data.Rmd" class="external-link"><code>vignettes/02_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>02_integrate_data.Rmd</code></div>
@@ -149,9 +149,9 @@
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Loading required namespace: rgeos</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:10 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:10 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:10 | Transforming predictors...</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:53 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:53 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:53 | Transforming predictors...</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="integration-through-predictors">Integration through predictors<a class="anchor" aria-label="anchor" href="#integration-through-predictors"></a>
@@ -162,7 +162,7 @@
 <span><span class="co"># Here we simply add the range as simple binary predictor</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="va">basemodel</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/add_predictor_range.html">add_predictor_range</a></span><span class="op">(</span><span class="va">virtual_range</span>, method <span class="op">=</span> <span class="st">"distance"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:12 | Adding range predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:57 | Adding range predictors...</span></span></span>
 <span></span>
 <span><span class="co"># We can see that the range has been added to the predictors object</span></span>
 <span><span class="co"># 'distance_range'</span></span>
@@ -177,14 +177,14 @@
 <span><span class="va">basemodel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:14 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:14 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:14 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:59 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:59 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:22:59 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="va">basemodel</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/add_predictor_elevationpref.html">add_predictor_elevationpref</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">elevation_mean_50km</span>,</span>
 <span>                              lower <span class="op">=</span> <span class="fl">300</span>, upper <span class="op">=</span> <span class="fl">800</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:16 | Formatting elevational preference predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:02 | Formatting elevational preference predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Plot the threshold for an upper</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span> <span class="va">mod1</span><span class="op">$</span><span class="va">predictors</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"elev_low"</span>, <span class="st">"elev_high"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span></code></pre></div>
@@ -205,17 +205,17 @@
 <span>      <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># Train</span></span>
 <span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Prediction with range offset"</span>,only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:19 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:19 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:19 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:22 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:22 | Adding range offset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:22 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:22 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:22 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:22 | Starting fitting: Species: </span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:33 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:41:33 | Completed after 11.19 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:06 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:06 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:06 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:09 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:09 | Adding range offset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:09 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:09 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:09 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:09 | Starting fitting: Species: </span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:25 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:23:25 | Completed after 15.69 secs</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_integrate_data_files/figure-html/unnamed-chunk-5-1.png" width="700" style="display: block; margin: auto;"></p>
@@ -241,19 +241,19 @@
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>,field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:35 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:35 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:35 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:41:37 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:27 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:27 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:27 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:23:30 | Adding poipo dataset...</span></span></span>
 <span></span>
 <span><span class="co"># Make a first model</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:37 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:41:37 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:00 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:00 | Starting fitting.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:03 | Starting prediction.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:42:18 | Completed after 41.03 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:30 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:30 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:58 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:23:58 | Starting fitting.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:03 | Starting prediction.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:24:22 | Completed after 52.62 secs</span></span></span>
 <span></span>
 <span><span class="co"># Now assume we now that the species occurs more likely in intensively farmed land. </span></span>
 <span><span class="co"># We can use this information to construct a prior for the linear coefficient.</span></span>
@@ -265,17 +265,17 @@
 <span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priors.html">priors</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
 <span><span class="co"># The variables and values in this object can be queried as well</span></span>
 <span><span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 8fd35a5c-dfee-40a5-b83a-8f79c7bc9da5 </span></span>
+<span><span class="co">#&gt; 5e27c38a-2229-4213-b5ea-a37a61b82273 </span></span>
 <span><span class="co">#&gt;                 "CLC3_211_mean_50km"</span></span>
 <span></span>
 <span><span class="co"># Priors can then be added via </span></span>
 <span><span class="va">mod2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_priors.html">add_priors</a></span><span class="op">(</span><span class="va">pp</span><span class="op">)</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:18 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:18 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:18 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:19 | Starting fitting.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:22 | Starting prediction.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:42:33 | Completed after 14.43 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:23 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:23 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:23 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:23 | Starting fitting.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:27 | Starting prediction.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:24:42 | Completed after 19.53 secs</span></span></span>
 <span><span class="co"># Or alternatively directly as parameter via add_predictors,</span></span>
 <span><span class="co"># e.g. add_predictors(env = predictors, priors = pp)</span></span>
 <span></span>
@@ -300,16 +300,16 @@
 <span>      <span class="co"># Add dataset 1 </span></span>
 <span>      <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span>poipo <span class="op">=</span> <span class="va">virtual_species</span>, name <span class="op">=</span> <span class="st">"Dataset1"</span>,field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Test1"</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:37 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:37 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:37 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:40 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:40 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:40 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:40 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:40 | Starting fitting: Dataset1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:45 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:42:45 | Completed after 5.47 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:24:48 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:24:48 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:24:48 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:24:51 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:51 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:51 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:51 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:51 | Starting fitting: Dataset1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:24:59 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:24:59 | Completed after 7.69 secs</span></span></span>
 <span></span>
 <span><span class="va">mod2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -318,17 +318,17 @@
 <span>      <span class="fu"><a href="../reference/add_biodiversity_polpo.html">add_biodiversity_polpo</a></span><span class="op">(</span><span class="va">virtual_range</span>, name <span class="op">=</span> <span class="st">"Dataset2"</span>,field_occurrence <span class="op">=</span> <span class="st">"Observed"</span>,</span>
 <span>                             simulate <span class="op">=</span> <span class="cn">TRUE</span>,simulate_points <span class="op">=</span> <span class="fl">300</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Test1"</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:47 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:47 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:47 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:50 | Adding polpo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:50 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:50 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:50 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:50 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:50 | Starting fitting: Dataset2_simulated</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:42:55 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:42:55 | Completed after 5.54 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:01 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:01 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:01 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:04 | Adding polpo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:04 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:05 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:05 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:05 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:05 | Starting fitting: Dataset2_simulated</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:12 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:25:12 | Completed after 7.79 secs</span></span></span>
 <span></span>
 <span><span class="co"># Show outputs of each model individually and combined</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
@@ -377,20 +377,20 @@
 <span>  <span class="co"># Train</span></span>
 <span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Combined prediction"</span>,only_linear <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>        method_integration <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:58 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:58 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:42:58 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:43:00 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-29 14:43:00 | Adding poipa dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:01 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:01 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:01 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:01 | Starting fitting: Species: </span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:12 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:12 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:12 | Starting fitting: Species: </span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-29 14:43:15 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-29 14:43:15 | Completed after 14.13 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:15 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:15 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:15 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:19 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:25:19 | Adding poipa dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:19 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:19 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:19 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:19 | Starting fitting: Species: </span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:35 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:35 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:35 | Starting fitting: Species: </span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:25:39 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:25:39 | Completed after 19.8 secs</span></span></span>
 <span></span>
 <span><span class="co"># The resulting object contains only the final prediction, e.g. that of the presence-absence model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
@@ -428,7 +428,7 @@ Y_{i} &amp;\sim {\sf Bernoulli(p_{i})}, i = 1, 2, ... \\
 <span>    <span class="co"># INLA requires the specification of a mesh which in this example is generated from the data.</span></span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># Train</span></span>
-<span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Combined prediction"</span>,only_linear <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Combined prediction"</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>        method_integration <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The resulting object contains the combined prediction with shared coefficients among datasets.</span></span>
@@ -439,19 +439,19 @@ Y_{i} &amp;\sim {\sf Bernoulli(p_{i})}, i = 1, 2, ... \\
 <span><span class="co"># Note how an overall intercept as well as separate intercepts for each dataset are added.</span></span>
 <span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 11 × 8</span></span></span>
-<span><span class="co">#&gt;    variable                 mean      sd 0.025q…¹ 0.5qua…² 0.975…³  mode     kld</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept            -<span style="color: #BB0000;">0.313</span>   25.6    -<span style="color: #BB0000;">50.5</span>    -<span style="color: #BB0000;">0.313</span>    49.8      <span style="color: #BB0000;">NA</span> 3.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species..… -<span style="color: #BB0000;">0.289</span>   25.7    -<span style="color: #BB0000;">50.8</span>    -<span style="color: #BB0000;">0.289</span>    50.2      <span style="color: #BB0000;">NA</span> 2.60<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species..… -<span style="color: #BB0000;">0.286</span>   25.5    -<span style="color: #BB0000;">50.3</span>    -<span style="color: #BB0000;">0.286</span>    49.8      <span style="color: #BB0000;">NA</span> 2.58<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km      -<span style="color: #BB0000;">0.037</span><span style="color: #BB0000; text-decoration: underline;">2</span>   0.136   -<span style="color: #BB0000;">0.304</span>  -<span style="color: #BB0000;">0.036</span><span style="color: #BB0000; text-decoration: underline;">7</span>    0.229    <span style="color: #BB0000;">NA</span> 7.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km      -<span style="color: #BB0000;">0.552</span>    0.126   -<span style="color: #BB0000;">0.802</span>  -<span style="color: #BB0000;">0.552</span>    -<span style="color: #BB0000;">0.306</span>    <span style="color: #BB0000;">NA</span> 2.31<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km       0.460    0.085<span style="text-decoration: underline;">8</span>   0.285   0.462     0.622    <span style="color: #BB0000;">NA</span> 1.09<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km    0.417    0.053<span style="text-decoration: underline;">4</span>   0.310   0.417     0.520    <span style="color: #BB0000;">NA</span> 2.71<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km    0.091<span style="text-decoration: underline;">6</span>   0.048<span style="text-decoration: underline;">4</span>  -<span style="color: #BB0000;">0.011</span><span style="color: #BB0000; text-decoration: underline;">3</span>  0.094<span style="text-decoration: underline;">3</span>    0.179    <span style="color: #BB0000;">NA</span> 1.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km    0.799    0.080<span style="text-decoration: underline;">9</span>   0.641   0.798     0.959    <span style="color: #BB0000;">NA</span> 5.75<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km    0.954    0.066<span style="text-decoration: underline;">1</span>   0.825   0.953     1.08     <span style="color: #BB0000;">NA</span> 1.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km  -<span style="color: #BB0000;">0.008</span><span style="color: #BB0000; text-decoration: underline;">92</span>  0.087<span style="text-decoration: underline;">8</span>  -<span style="color: #BB0000;">0.185</span>  -<span style="color: #BB0000;">0.007</span><span style="color: #BB0000; text-decoration: underline;">56</span>   0.159    <span style="color: #BB0000;">NA</span> 2.39<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span></span></span>
+<span><span class="co">#&gt;    variable                 mean      sd 0.025q…¹ 0.5qu…² 0.975…³  mode      kld</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept             -<span style="color: #BB0000;">0.307</span>  25.2    -<span style="color: #BB0000;">49.7</span>    -<span style="color: #BB0000;">0.307</span>   49.1      <span style="color: #BB0000;">NA</span> 3.15<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species.._… -<span style="color: #BB0000;">0.283</span>  25.8    -<span style="color: #BB0000;">50.9</span>    -<span style="color: #BB0000;">0.283</span>   50.3      <span style="color: #BB0000;">NA</span> 2.54<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species.._… -<span style="color: #BB0000;">0.289</span>  25.9    -<span style="color: #BB0000;">51.1</span>    -<span style="color: #BB0000;">0.289</span>   50.5      <span style="color: #BB0000;">NA</span> 2.62<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km        0.014<span style="text-decoration: underline;">9</span>  0.135   -<span style="color: #BB0000;">0.251</span>   0.015<span style="text-decoration: underline;">4</span>   0.279    <span style="color: #BB0000;">NA</span> 4.12<span style="color: #949494;">e</span><span style="color: #BB0000;">-12</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km       -<span style="color: #BB0000;">0.623</span>   0.127   -<span style="color: #BB0000;">0.875</span>  -<span style="color: #BB0000;">0.622</span>   -<span style="color: #BB0000;">0.376</span>    <span style="color: #BB0000;">NA</span> 2.39<span style="color: #949494;">e</span><span style="color: #BB0000;">- 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km        0.446   0.086<span style="text-decoration: underline;">4</span>   0.270   0.448    0.609    <span style="color: #BB0000;">NA</span> 4.50<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km     0.433   0.053<span style="text-decoration: underline;">0</span>   0.327   0.434    0.535    <span style="color: #BB0000;">NA</span> 2.81<span style="color: #949494;">e</span><span style="color: #BB0000;">- 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km     0.090<span style="text-decoration: underline;">2</span>  0.048<span style="text-decoration: underline;">1</span>  -<span style="color: #BB0000;">0.012</span><span style="color: #BB0000; text-decoration: underline;">1</span>  0.092<span style="text-decoration: underline;">9</span>   0.177    <span style="color: #BB0000;">NA</span> 9.78<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km     0.770   0.079<span style="text-decoration: underline;">9</span>   0.614   0.769    0.928    <span style="color: #BB0000;">NA</span> 6.12<span style="color: #949494;">e</span><span style="color: #BB0000;">- 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km     0.919   0.066<span style="text-decoration: underline;">0</span>   0.791   0.919    1.05     <span style="color: #BB0000;">NA</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">- 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km    0.017<span style="text-decoration: underline;">1</span>  0.087<span style="text-decoration: underline;">7</span>  -<span style="color: #BB0000;">0.159</span>   0.018<span style="text-decoration: underline;">4</span>   0.185    <span style="color: #BB0000;">NA</span> 1.88<span style="color: #949494;">e</span><span style="color: #BB0000;">- 5</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​`0.025quant`, ²​`0.5quant`, ³​`0.975quant`</span></span></span></code></pre></div>
 </div>
 </div>
