@@ -9,20 +9,22 @@ test_that('Load ranges and add them to distribution object', {
   # --- #
   # Load data
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   # Load them as rasters
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Now set them one up step by step
   x <- distribution(background)
   # This won't work since not aligned
-  expect_warning(
-    expect_error(  x %>% add_predictor_range(virtual_range, method = 'distance') )
+  suppressMessages(
+    expect_warning(
+      expect_error(  x %>% add_predictor_range(virtual_range, method = 'distance') )
+    )
   )
 
   # Try and add a range as raster

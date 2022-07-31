@@ -248,6 +248,35 @@ methods::setMethod(
             model$predictors_object$set_data(val, new[[val]] )
           }
           rm(pred, new)
+        } else if(m == "kde") {
+          # Bivariate kernel density estimation
+          # First get all points
+          biodiversity_ids <- as.character( x$biodiversity$get_ids() )
+          poi <- data.frame()
+          for(id in biodiversity_ids) {
+            # Get presence points
+            o <- guess_sf( x$biodiversity$get_data(id) )
+            o <- o[ which( o[[x$biodiversity$get_columns_occ()[[id]]]] > 0 ), ]
+            o <- subset(o, select = "geometry")
+            poi <- rbind(poi, o)
+          }
+          # Ensure we have a backgroudn raster
+          if(inherits(x$background, "sf")){
+            bg <- raster::rasterize(x$background, model$predictors_object$get_data(), 1)
+          } else {bg <- x$background }
+          # Then calculate
+          ras <- st_kde(points = poi, background = bg, bandwidth = 3)
+          # Add to predictor objects, names, types and the object
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(ras) )
+          model[['predictors_names']] <- c( model[['predictors_names']], names(ras) )
+          model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
+                                                          data.frame(predictors = names(ras),
+                                                                     type = "numeric" )
+          )
+          if( !all(names(ras) %in% model[['predictors_object']]$get_names()) ){
+            model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, ras)
+          }
+
         } else if(m == "nnd") {
           # Nearest neighbour
           biodiversity_ids <- as.character( x$biodiversity$get_ids() )
@@ -419,23 +448,31 @@ methods::setMethod(
           if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
 
           obs <- aggregate_observations2grid(df = model[['biodiversity']][[id]]$observations,
-                                              template = bg, field_occurrence = "observed")
+                                              template = bg, field_occurrence = "observed") |>
+                                          # Add pseudo absences
+                      add_pseudoabsence(template = bg, settings = getOption("ibis.pseudoabsence"))
 
           envs <- get_rastervalue(
             coords = obs[,c('x','y')],
             env = model$predictors_object$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
-            rm.na = TRUE
+            rm.na = T
           )
+          # Assert observations match environmental data points
+          obs <- obs[envs$ID,]
+          envs$ID <- NULL
+          assertthat::assert_that(nrow(obs) == nrow(envs), nrow(obs)>0, nrow(envs)>0)
         } else {
-          obs <- model[['biodiversity']][[id]]$observations$observed
+          obs <- model[['biodiversity']][[id]]$observations
           envs <- env[,model[['predictors_names']][which( model[['predictors_names']] %notin% co )]]
+          assertthat::assert_that(any(obs$observed == 0),
+                                  nrow(obs)==nrow(envs))
         }
         # Add abess here
         co2 <- find_subset_of_predictors(
           env = envs,
           observed = obs$observed,
           family = model[['biodiversity']][[id]]$family,
-          tune.type = "cv",
+          tune.type = "gic",
           weight = NULL,
           keep = keep
           )
@@ -920,48 +957,16 @@ methods::setMethod(
     } else if( inherits(x$engine,"STAN-Engine") ){
       # ----------------------------------------------------------- #
       #### STAN Engine ####
-      # For stan, the actual model is built sequentially per id
       # Process per supplied dataset
       for(id in ids) {
         # TODO
         if(length(model$biodiversity)>1) stop("Not yet implemented")
 
-        # Default equation found (e.g. no separate specification of effects)
-        if(model$biodiversity[[id]]$equation=='<Default>'){
-
-          # Go through each variable and build formula for likelihood
-          form <- to_formula(paste("observed",
-                                          " ~ ", "0 + ",
-                                   ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
-                                   paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
-                                   # Check whether a single dataset is provided, otherwise add other intercepts
-                                   ifelse(length(types)==1,
-                                          '',
-                                          paste('+',paste0('Intercept_',
-                                                           make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                           sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                                          )
-                                   ),
-                                   # # If multiple datasets, don't use intercept
-                                   # ifelse(length(ids)>1,"-1", ""),
-                                   collapse = " ")
-                            )
-
-          # Add offset if specified
-          if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
-          # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
-        } else {
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
-          form <- to_formula(model$biodiversity[[1]]$equation)
-          # Update formula to weights if forgotten
-          if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed / w ~ .')
-          assertthat::assert_that(
-            all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
-          )
-        }
         # Update model formula in the model container
-        model$biodiversity[[id]]$equation <- form
-        rm(form)
+        model$biodiversity[[id]]$equation <- built_formula_stan(model = model,
+                                                                id = id,
+                                                                x = x,
+                                                                settings = settings)
 
         # For each type include expected data
         # expectation vector (area for integration points/nodes and 0 for presences)

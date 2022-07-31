@@ -89,7 +89,9 @@ predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_me
 
 For our example model we are going to use 'Integrated Nested Laplace approximation (INLA)' modelling framework as available through the `INLA` and `inlabru` packages. Both have been implemented separately in the ibis.iSDM package, but especially when dealing with future scenarios the use of the `inlabru` package is advised.
 
-Now lets build a simple model object:
+Now lets build a simple model object. In this case we make use of presence-only biodiversity records (`add_biodiversity_poipo`). Any presence-only records added to an object created through `distribution()` are by default modelled as intensity $\lambda$ through an inhomogeneous Poisson point proccess model (PPM), where the Number of Individuals $N$ is integrated as relative rate of occurrence per unit area: $N_i \sim Poisson(\lambda_i|A_i)$. Here $\lambda$ can then be estmated by relating it to environmental covaraites $log(\lambda_i) = \alpha + \beta(x_i)$, where $i$ is a grid cell. 
+
+It is inhomogeneous since the $lambda$ varies over the whole sampling extent. In the context of species distribution modelling PPMs are structurally similar to the popular Maxent modelling framework (see (Renner & Warton [2013])[https://onlinelibrary.wiley.com/doi/10.1111/j.1541-0420.2012.01824.x] and (Renner et al. [2015])[http://doi.wiley.com/10.1111/2041-210X.12352]). Critically, presence-only records can only give an indication of a biased sampling and thus sampling bias has to be taken somehow into account, either through careful data preparation, apriori thinning or model-based control by including covariates $\sigma_i$ that might explain this sampling bias.
 
 ```{r INLA}
 
@@ -195,6 +197,8 @@ s <- spartial(fit, x.var = "CLC3_312_mean_50km")
 plot(s[[1]], col = rainbow(10), main = "Marginal effect of forest on the relative reporting rate")
 
 ```
+
+It is common practice in species distribution modelling that resulting predictions are *thresholded*, e.g. that an abstraction of the continious prediction is created that separates the background into areas where the environment supporting a species is presumably suitable or non-suitable. Threshold can be used in ibis.iSDM via the `threshold()` functions suppling either a fitted model, a RasterLayer or a Scenario object.
 
 ```{r Example for model-based thresholding, fig.width = w, fig.height = h}
 

@@ -13,6 +13,7 @@ add_predictors(
   bgmask = TRUE,
   harmonize_na = FALSE,
   explode_factors = FALSE,
+  int_variables = NULL,
   priors = NULL,
   ...
 )
@@ -41,6 +42,8 @@ add_predictors(
 \item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
 
 \item{explode_factors}{\code{\link{logical}} of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).}
+
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
 
@@ -78,6 +81,7 @@ Available options for creating derivates are:
 \itemize{
 \item \code{'none'} - No additional predictor derivates are created.
 \item \code{'quad'} - Adds quadratic transformed predictors.
+\item \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
 \item \code{'thresh'} - Add threshold transformed predictors.
 \item \code{'hinge'} - Add hinge transformed predictors.
 \item \code{'bin'} - Add predictors binned by their percentiles.

@@ -35,6 +35,7 @@ is necessary during the pre-processing to remove any rows of covariate extractio
 ```{r, echo=TRUE,eval=FALSE}
 predictors[is.na(predictors)] <- 0
 ```
+
 </details>
 
 <details>
@@ -52,7 +53,9 @@ virtual_points <- add_pseudoabsence(virtual_points, field_occurrence = "Observed
 unique(virtual_points$Observed)
 ```
 
-Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for more settings and information here.
+Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for more settings and also the first article on this website.
+
+**By default all engines in ibis.iSDM fit models according to the input data. When presence-only data is supplied, then usually a Poisson-Process Model is estimated. **
 </details>
 
 
@@ -63,8 +66,7 @@ Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for mor
 </summary>
 
 Yes, in many instances it is desirable to transform input predictors to a new range or to remove
-extreme values from the predictors. For example the popular [`maxnet`] R-package for Maximum entropy estimation of species distribution modelling often transforms the variables via quadratic, hinge or threshold transformations. Although this can also (and preferably should) be done before 
-setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [`add_predictors()`] for examples and descriptions.
+extreme values from the predictors. For example the popular [`maxnet`] R-package for Maximum entropy estimation of species distribution modelling often transforms the variables via quadratic, hinge or threshold transformations. Although this can also (and preferably should) be done before setting up a model, there are options available to transform the predictors when they are added to the model. See the help page of [`add_predictors()`] for examples and descriptions.
 </details>
 
 <details>
@@ -222,7 +224,7 @@ Users are advised to use [`engine_inlabru`] by **default** in most cases and onl
 
 After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `RasterStack`. By default all engines will produce a `Raster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
 
-In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename.
+In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename using the `write_output()` function.
 
 **Example:**
 ```{r, echo=TRUE,eval=FALSE}
@@ -238,8 +240,7 @@ plot(mod, "sd")
 mod$get_data("prediction")
 
 # To save the output layer as floating point geoTiff
-mod$save("myoutput.tif", type = "gtif", dt = "FLT4S")
-
+write_output(mod, "myoutput.tif", type = "gtif", dt = "FLT4S")
 ```
 </details>
 
@@ -274,7 +275,7 @@ In the future rather than adding outputs as predictors, there might be an option
 By default, presence only biodiversity data is modelled as point-process model (PPM, see [Renner et al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as Maximum Entropy models these models can be quite sensitive to biased input, which is common for most non-structured biodiversity observations where presence points tend to be clustered in urban or easily accessible areas. To avoid predictions being biased towards those covariates, there are a number of things that can potentially be done here.
 
 * Modify the targeted background sampling for better control of background points. This can be for instance done via the `add_pseudoabsence()` and `pseudoabs_settings()` methods. See the respective help files.
-* Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525). Note however that spatial thinning does remove data points, affecting for instance any `poisson` distributed models (PPMs) in the process. The `ibis.iSDM` package currently has no built-in methods for spatial thinning.
+* Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525). Note however that spatial thinning does remove data points, affecting for instance any `poisson` distributed models (PPMs) in the process. The`ibis.iSDM` package has some functionality for spatial thinning implemented in the `thin_observations()` function.
 * Partial out a biased variable during the prediction. The `bias_variable` can be specified in the `train()` command and has to be part the predictor set of the model. In addition a `bias_value` has to be specified and this can be set for instance to `0`.
 * Add a spatial offset to account for the bias as introduced in [Merow et al. 2016](http://doi.wiley.com/10.1111/geb.12453). This can be done via the `add_offset_bias()` function and requires preparation of a bias layer in advance.
 * Apply more rigorous filtering and bias control to the input data. In the end no correction can replace good data preparation and cleaning. Remember the [GIGO principle](https://en.wikipedia.org/wiki/Garbage_in,_garbage_out).

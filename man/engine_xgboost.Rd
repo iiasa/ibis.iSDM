@@ -23,14 +23,14 @@ engine_xgboost(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{booster}{A \code{\link{character}} of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})}
+\item{booster}{A \code{\link{character}} of the booster to use. Either \code{"gbtree"} or \code{"gblinear"} (Default: \code{gblinear})}
 
 \item{learning_rate}{\code{\link{numeric}} value indicating the learning rate (eta).
 Lower values generally being better but also computationally more costly. (Default: \code{1e-3})}
 
 \item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation.}
 
-\item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: 3)
+\item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
 Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
 
 \item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: \code{0}).}
@@ -42,7 +42,7 @@ Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
 \item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting. Also used for creating a random
 tresting dataset (Default: \code{0.75}).}
 
-\item{colsample_bytree}{\code{\link{numeric}} Subsample ratio of columns when constructing each tree (Default: \code{0.4}).}
+\item{colsample_bytree}{\code{\link{numeric}} Sub-sample ratio of columns when constructing each tree (Default: \code{0.4}).}
 
 \item{min_child_weight}{\code{\link{numeric}} Broadly related to the number of instances necessary for each node (Default: \code{3}).}
 
@@ -51,15 +51,16 @@ tresting dataset (Default: \code{0.75}).}
 \description{
 Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.
 The XGBoost engine is a flexible, yet powerful engine with many customization options,
-supporting multiple options to perform single and multiclass regression
+supporting multiple options to perform single and multi-class regression
 and classification tasks. For a full list of options users are advised to have a look at the
 \link[xgboost:xgb.train]{xgboost::xgb.train} help file and \url{https://xgboost.readthedocs.io}.
 }
 \details{
 The default parameters have been set relatively conservative as to reduce overfitting.
 
-XGBoost supports the specification of monotonic contraints on certain variables. Within
-ibis this is possible via \code{\link{XGBPrior}}.
+XGBoost supports the specification of monotonic constraints on certain variables. Within
+ibis this is possible via \code{\link{XGBPrior}}. However constraints are available only for the
+\code{"gbtree"} baselearners.
 }
 \references{
 \itemize{

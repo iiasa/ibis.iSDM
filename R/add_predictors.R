@@ -31,6 +31,7 @@ NULL
 #' Available options for creating derivates are:
 #' * \code{'none'} - No additional predictor derivates are created.
 #' * \code{'quad'} - Adds quadratic transformed predictors.
+#' * \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
 #' * \code{'thresh'} - Add threshold transformed predictors.
 #' * \code{'hinge'} - Add hinge transformed predictors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
@@ -43,6 +44,7 @@ NULL
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
 #' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
 #' @param explode_factors [`logical`] of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @note
@@ -75,7 +77,8 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
+           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ...) standardGeneric("add_predictors"))
 
 #' @name add_predictors
 #' @rdname add_predictors
@@ -83,12 +86,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
+           explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors = FALSE, priors, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
   }
 )
 
@@ -98,12 +102,13 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
+           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors = FALSE, priors, ...)
+    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
   }
 )
 
@@ -114,15 +119,16 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
+           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction') , several.ok = TRUE)
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(env),
                             all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
-                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
+                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin', 'interaction') ),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
@@ -166,6 +172,7 @@ methods::setMethod(
         # Refactor categorical variables
         if(inherits(env_f,'RasterLayer')){
           env_f <- explode_factorized_raster(env_f)
+          env <- addLayer(env, env_f)
         } else {
           o <- raster::stack()
           for(layer in env_f){
@@ -188,6 +195,11 @@ methods::setMethod(
     # Calculate derivates if set
     if('none' %notin% derivates){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      # Specific condition for interaction
+      if(derivates == "interaction"){
+        assertthat::assert_that(is.vector(int_variables), length(int_variables)>=2)
+        attr(env, "int_variables") <- int_variables
+      }
       new_env <- raster::stack()
       for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
 
@@ -958,13 +970,24 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
   # Get all dimension names and variable names
   dims <- names(fatt$dim)
   vars <- names(fatt$var)
-  assertthat::assert_that(all(c("lon", "lat", "time",col_class) %in% dims),
-                          lengths(vars)>0,
+  assertthat::assert_that(all(c("lon", "lat", "time", col_class) %in% dims),
+                          all(lengths(vars)>0),
                           msg = "Variables or dimensions not found. Check col_class.")
+
+  # If there are more than one variables, grep the area shares
+  if(length(vars)>1) vars <- grep("share", vars, ignore.case = TRUE, value = TRUE) # Grep the area shares
 
   # Now open the netcdf file with stats
   ff <- stars::read_ncdf(fname, var = vars,
-                         make_units = FALSE)
+                         make_units = FALSE # No point making units since GLOBIOM does't create consistent ones
+                         )
+
+  # Crop to background extent if set
+  if(!is.null(template)){
+    bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
+      sf::st_transform(crs = sf::st_crs(ff))
+    ff <- ff |> st_crop(bbox)
+  }
 
   # Get time dimension (without applying offset) so at the center
   times <- stars::st_get_dimension_values(ff, "time", center = TRUE)
@@ -975,14 +998,22 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
   # Quick security check
   assertthat::assert_that(
     is.character(class_units), length(class_units)>0,
-    msg = "The formatting of the input classes went wronge somewhere!"
+    msg = "The formatting of the input classes went wrong somewhere!"
   )
+
+  # Make checks on length of times and if equal to one, drop. check.
+  if(length(times)==1){
+    if(period == "projection") stop("Found only a single time slot. Projections not possible.")
+    if(verbose) myLog('[Setup]','yellow','Found only a single time point in file. Dropping time dimension.')
+    # Drop the time dimension
+    ff <- stars:::adrop.stars(ff, drop = which(names(stars::st_dimensions(ff)) == "time") )
+  }
 
   # Get classes as attributes and rename and reformat
   ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
 
   # Formate times unit and convert to posix if not already set
-  if(is.numeric(times)){
+  if(is.numeric(times) && length(times) > 1){
     # Assume year and paste0
     times <- as.POSIXct( paste0(times, "-01-01") )
     ff <- stars::st_set_dimensions(ff, "time", times)
@@ -991,9 +1022,12 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
   # Depending on the period, slice the input data
   if(period == "reference"){
     # Get the first entry and filter
-    times_first <- stars::st_get_dimension_values(ff, "time")[1]
-    ff <- ff %>% stars:::filter.stars(time == times_first)
-    times <- times_first;rm(times_first)
+    if(length(times)>1){
+      # In case times got removed
+      times_first <- stars::st_get_dimension_values(ff, "time")[1]
+      ff <- ff %>% stars:::filter.stars(time == times_first)
+      times <- times_first;rm(times_first)
+    }
   } else if(period == "projection"){
     # Remove the first time entry instead, only using the last entries
     times_allbutfirst <- stars::st_get_dimension_values(ff, "time")[-1]
@@ -1030,8 +1064,10 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
     out <- list()
     for(tt in 1:length(times)){
       # Slice to a specific time frame for each
-      o <- ff %>% stars:::slice.stars("time" , tt) %>%
-        as("Raster")
+      if(length(times)>1){
+        o <- ff %>% stars:::slice.stars("time" , tt) %>%
+          as("Raster")
+      } else { o <- ff |> as("Raster")}
 
       # Reset times to the correct ones
       o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
@@ -1039,7 +1075,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
       if(!is.null(template)){
         # Check again if necessary to rotate
         if(!raster::compareCRS(o, template)){
-          o <- raster::projectRaster(from = o,crs = template, method = "bilinear")
+          o <- raster::projectRaster(from = o, crs = template, method = "bilinear")
           names(o) <- class_units
         }
         # Now crop and resample to target extent if necessary

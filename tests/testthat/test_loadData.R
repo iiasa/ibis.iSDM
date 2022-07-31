@@ -2,19 +2,19 @@
 test_that('Check that data can be loaded.',{
 
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   expect_s4_class(background,'Raster')
 
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   expect_s3_class(virtual_points,'sf')
   expect_s3_class(virtual_range,'sf')
   expect_true(unique(sf::st_geometry_type(virtual_points)) == 'POINT')
   expect_true(unique(sf::st_geometry_type(virtual_range)) == 'POLYGON')
 
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   expect_gt(length(ll),0)
   expect_true(all( assertthat::has_extension(ll,'tif') ))
 
@@ -29,14 +29,15 @@ test_that('Check that data can be loaded.',{
 test_that('Check that test scenarios can be loaded.',{
   # Load the scenario data
   require(stars)
+  require(abind)
 
-  ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM'),full.names = TRUE)
+  ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
   expect_vector(ll)
   expect_length(ll,9)
   expect_true(all( assertthat::has_extension(ll,'nc') ))
 
   # Load stars files
-  sc <- stars::read_stars(ll)
+  suppressWarnings( sc <- stars::read_stars(ll) )
   # Still having warnings for the bioclimatic files
   expect_type(sc[1], 'list')
   # Average

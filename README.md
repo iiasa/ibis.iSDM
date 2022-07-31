@@ -11,6 +11,9 @@
 
 ![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
 [![R-CMD-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml)
+[![License: CC BY
+4.0](https://img.shields.io/badge/license-CC%20BY%204.0-blue.svg)](https://cran.r-project.org/web/licenses/CC%20BY%204.0)
+[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 The **ibis.iSDM** package provides a series of convenience functions to

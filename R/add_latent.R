@@ -27,6 +27,7 @@ NULL
 #' we could see a higher posterior mean in areas with higher elevation. Note that calculations of
 #' SPDE's can be computationally costly.
 #' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]. Not yet implemented in full.
+#' * \code{"kde"} - additional covariate of the kernel density of input point observations.
 #' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 #' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
 #' to the nearest other grid cell with values. Applied across all datasets in the [`BiodiversityDistribution-class`]) object.
@@ -73,7 +74,7 @@ methods::setMethod(
                             )
 
     # Match the spatial method
-    method <- match.arg(method, c('spde', 'car', 'poly', 'nnd'), several.ok = FALSE)
+    method <- match.arg(method, c('spde', 'car', 'poly', 'nnd', 'kde'), several.ok = FALSE)
 
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding latent spatial terms...')

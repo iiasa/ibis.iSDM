@@ -9,7 +9,7 @@ engines such points are necessary to model Poisson (or Binomial) distributed dat
 we call absence points for Binomial (Bernoulli really) distributed responses 'pseudo-absence' and
 absence data for Poisson responses 'background' points. For more details read Renner et al. (2015).
 The function 'add_pseudoabsence' allows to add absence points to any sf object. See Details for
-additional parameter description and examples on how to 'turn' a presence-only dataset into a presence-(pseudo-)absence."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+additional parameter description and examples on how to 'turn' a presence-only dataset into a presence-(pseudo-)absence."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
@@ -66,7 +66,7 @@ additional parameter description and examples on how to 'turn' a presence-only d
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Specify settings for absence point sampling over the model background</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Specify settings for absence point sampling over the model background</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
       <div class="d-none name"><code>pseudoabs_settings.Rd</code></div>
     </div>
@@ -82,8 +82,8 @@ additional parameter description and examples on how to 'turn' a presence-only d
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, logical, ANY</span>
-<span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">mcp_inside</span>, <span class="va">bias</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, logical, ANY</span></span>
+<span><span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">mcp_inside</span>, <span class="va">bias</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -146,17 +146,17 @@ areas with larger bias.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points</span></span>
-<span class="r-in"><span class="va">ass</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">10000</span>, method <span class="op">=</span> <span class="st">'mcp'</span>, mcp_inside <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># This setting would match the number of presence-absence points directly.</span></span>
-<span class="r-in"><span class="va">ass</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">0</span>, min_ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># These settings can then be used to add pseudo-absence data to a presence-only dataset</span></span>
-<span class="r-in"><span class="va">all_my_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="add_pseudoabsence.html">add_pseudoabsence</a></span><span class="op">(</span>df <span class="op">=</span> <span class="va">virtual_points</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>,</span>
-<span class="r-in">                                     template <span class="op">=</span> <span class="va">background</span>, settings <span class="op">=</span> <span class="va">ass</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points</span></span></span>
+<span class="r-in"><span><span class="va">ass</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">10000</span>, method <span class="op">=</span> <span class="st">'mcp'</span>, mcp_inside <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This setting would match the number of presence-absence points directly.</span></span></span>
+<span class="r-in"><span><span class="va">ass</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">0</span>, min_ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># These settings can then be used to add pseudo-absence data to a presence-only dataset</span></span></span>
+<span class="r-in"><span><span class="va">all_my_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="add_pseudoabsence.html">add_pseudoabsence</a></span><span class="op">(</span>df <span class="op">=</span> <span class="va">virtual_points</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>,</span></span>
+<span class="r-in"><span>                                     template <span class="op">=</span> <span class="va">background</span>, settings <span class="op">=</span> <span class="va">ass</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

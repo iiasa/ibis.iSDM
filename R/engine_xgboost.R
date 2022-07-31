@@ -5,28 +5,29 @@ NULL
 #'
 #' @description Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.
 #' The XGBoost engine is a flexible, yet powerful engine with many customization options,
-#' supporting multiple options to perform single and multiclass regression
+#' supporting multiple options to perform single and multi-class regression
 #' and classification tasks. For a full list of options users are advised to have a look at the
 #' [xgboost::xgb.train] help file and [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io).
 #'
 #' @details
 #' The default parameters have been set relatively conservative as to reduce overfitting.
 #'
-#' XGBoost supports the specification of monotonic contraints on certain variables. Within
-#' ibis this is possible via [`XGBPrior`].
+#' XGBoost supports the specification of monotonic constraints on certain variables. Within
+#' ibis this is possible via [`XGBPrior`]. However constraints are available only for the
+#' \code{"gbtree"} baselearners.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param booster A [`character`] of the booster to use. Either "gbtree" or "gblinear" (Default: \code{gblinear})
+#' @param booster A [`character`] of the booster to use. Either \code{"gbtree"} or \code{"gblinear"} (Default: \code{gblinear})
 #' @param learning_rate [`numeric`] value indicating the learning rate (eta).
 #' Lower values generally being better but also computationally more costly. (Default: \code{1e-3})
 #' @param nrounds [`numeric`] value giving the the maximum number of boosting iterations for cross-validation.
-#' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: 3)
+#' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
 #' Also see [reg_lambda] parameter for the L2 regularization on the weights
 #' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
 #' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
 #' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
 #' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting. Also used for creating a random
 #' tresting dataset (Default: \code{0.75}).
-#' @param colsample_bytree [`numeric`] Subsample ratio of columns when constructing each tree (Default: \code{0.4}).
+#' @param colsample_bytree [`numeric`] Sub-sample ratio of columns when constructing each tree (Default: \code{0.4}).
 #' @param min_child_weight [`numeric`] Broadly related to the number of instances necessary for each node (Default: \code{3}).
 #' @param ... Other none specificed parameters.
 #' @seealso [xgboost::xgb.train]
@@ -170,6 +171,7 @@ engine_xgboost <- function(x,
                                        template = bg,
                                        settings = model$biodiversity[[1]]$pseudoabsence_settings)
           if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points

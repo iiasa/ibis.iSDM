@@ -267,13 +267,13 @@ engine_stan <- function(x,
         # Any spatial or other functions needed?
         if(!is.null(self$get_equation_latent_spatial())){
           # Stan functions for CAR and GP models
-          ir <- readLines( system.file("inst/stanfiles/spatial_functions.stan",package = "ibis.iSDM") )
+          ir <- readLines( system.file("inst/stanfiles/spatial_functions.stan",package = "ibis.iSDM",mustWork = TRUE) )
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$functions <- append(sm_code$functions, i)
         }
 
         # Load all the data parameters
-        ir <- readLines( system.file("inst/stanfiles/data_parameters.stan",package = "ibis.iSDM") )
+        ir <- readLines( system.file("stanfiles/data_parameters.stan",package = "ibis.iSDM",mustWork = TRUE) )
         assertthat::assert_that(length(ir)>0)
         for(i in ir) sm_code$data <- append(sm_code$data, i)
 
@@ -343,7 +343,7 @@ engine_stan <- function(x,
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
           # Add regularized horseshoe prior
           # See brms::horseshoe
-          ir <- readLines( system.file("inst/stanfiles/prior_functions.stan",package = "ibis.iSDM") )
+          ir <- readLines( system.file("stanfiles/prior_functions.stan",package = "ibis.iSDM",mustWork = TRUE) )
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$functions <- append(sm_code$functions, i)
 
@@ -391,9 +391,9 @@ engine_stan <- function(x,
         } else if(model$biodiversity[[1]]$type == "poipo" && model$biodiversity[[1]]$family == "poisson"){
           # For poisson process model add likelihood
           if(has_intercept){
-            ir <- readLines( system.file("inst/stanfiles/poipo_ll_poisson_intercept.stan",package = "ibis.iSDM"))
+            ir <- readLines( system.file("stanfiles/poipo_ll_poisson_intercept.stan",package = "ibis.iSDM",mustWork = TRUE))
           } else {
-            ir <- readLines( system.file("inst/stanfiles/poipo_ll_poisson.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("stanfiles/poipo_ll_poisson.stan",package = "ibis.iSDM",mustWork = TRUE) )
           }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)
@@ -401,9 +401,9 @@ engine_stan <- function(x,
         } else if(model$biodiversity[[1]]$type == "poipa" && model$biodiversity[[1]]$family == "binomial"){
           # For logistic regression
           if(has_intercept){
-            ir <- readLines( system.file("inst/stanfiles/poipa_ll_bernoulli_intercept.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("stanfiles/poipa_ll_bernoulli_intercept.stan",package = "ibis.iSDM",mustWork = TRUE) )
           } else {
-            ir <- readLines( system.file("inst/stanfiles/poipa_ll_bernoulli.stan",package = "ibis.iSDM") )
+            ir <- readLines( system.file("stanfiles/poipa_ll_bernoulli.stan",package = "ibis.iSDM",mustWork = TRUE) )
           }
           assertthat::assert_that(length(ir)>0)
           for(i in ir) sm_code$model <- append(sm_code$model, i)

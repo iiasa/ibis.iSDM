@@ -51,6 +51,7 @@ we could see a higher posterior mean in areas with higher elevation. Note that c
 SPDE's can be computationally costly.
 \itemize{
 \item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}. Not yet implemented in full.
+\item \code{""}
 \item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 \item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
 to the nearest other grid cell with values. Applied across all datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.

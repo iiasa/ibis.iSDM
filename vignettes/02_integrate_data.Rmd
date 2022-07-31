@@ -333,7 +333,7 @@ mod1 <- distribution(background) %>%
     # INLA requires the specification of a mesh which in this example is generated from the data.
       engine_inlabru() %>% 
   # Train
-  train(runname = "Combined prediction",only_linear = TRUE,
+  train(runname = "Combined prediction", only_linear = TRUE,
         method_integration = "predictor")
 
 # The resulting object contains the combined prediction with shared coefficients among datasets.

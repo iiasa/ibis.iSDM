@@ -4,7 +4,14 @@
 \alias{predictor_derivate}
 \title{Create spatial derivative of raster stacks}
 \usage{
-predictor_derivate(env, option, nknots = 4, deriv = NULL, ...)
+predictor_derivate(
+  env,
+  option,
+  nknots = 4,
+  deriv = NULL,
+  int_variables = NULL,
+  ...
+)
 }
 \arguments{
 \item{env}{A \code{\link{Raster}} object.}
@@ -15,6 +22,8 @@ predictor_derivate(env, option, nknots = 4, deriv = NULL, ...)
 \item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
 
 \item{deriv}{A \code{\link{vector}} with \code{\link{characters}} of specific derivates to create (Default: \code{NULL}).}
+
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
 }
 \value{
 Returns the derived adjusted \code{\link{Raster}} objects of identical resolution.
@@ -28,15 +37,16 @@ for example is often done in the popular Maxent framework.
 \details{
 Available options are:
 \itemize{
-\item \code{'none'} The original layer(s) are returned.
-\item \code{'quadratic'} A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
-\item \code{'hinge'} Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
+\item \code{'none'} - The original layer(s) are returned.
+\item \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
+\item \code{'hinge'} - Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
 and all others to a range of \eqn{[0,1]}. The number of thresholds and thus new derivates is specified
 via the parameter \code{'nknots'} (Default: \code{4}).
-\item \code{'thresh'} A threshold transformation of covariates, which sets all values lower than a set threshold ot
+\item \code{'interaction'} - Creates interactions between variables. Target variables have to be specified via \code{"int_variables"}.
+\item \code{'thresh'} - A threshold transformation of covariates, which sets all values lower than a set threshold ot
 \code{0} and those larger to \code{1}.
 The number of thresholds and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
-\item \code{'bin'} Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
+\item \code{'bin'} - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
 The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
 }
 }

@@ -32,6 +32,19 @@ test_that('Create and add priors', {
   expect_null(p1$get('dummy'))
 
   # --- #
+  # Get set some priors
+  p <- INLAPrior(variable = "CLC3_211_mean_50km",
+                 type = "normal",
+                 hyper = c(2, 1000) # Precision priors, thus larger sigmas indicate higher precision
+  )
+  pp <- priors(p)
+  expect_equal(pp$get("CLC3_211_mean_50km"), c(2,1000))
+  # Emulating some hacky code in inlabru module to check that it works
+  vn <- pp$varnames()[which(pp$varnames() == "CLC3_211_mean_50km")]
+  ty <- pp$types()[names(vn)]
+  expect_vector(vn, "CLC3_211_mean_50km")
+
+  # --- #
   # Instead of adding, combine priors
   new1 <- INLAPrior(variable = 'forest', type = 'normal', hyper = c(2, 0.5))
   new2 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
@@ -75,13 +88,13 @@ test_that('Create and add priors', {
   # Combine BREG priors with same name but different values
   new1 <- BREGPrior(variable = 'forest', hyper = 1, ip = 0.5)
   new2 <- BREGPrior(variable = 'forest', hyper = 0, ip = 1)
-  suppressMessages(priors(new1,new2))
+  invisible( suppressMessages(priors(new1,new2)) )
 
   # Add two duplicate but different prior.
   # Default behaviour is to take the last one and raise warning
   new3 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(2, 0.5))
   new4 <- INLAPrior(variable = 'crops', type = 'normal', hyper = c(-2, 200))
-  suppressMessages( priors(new3, new4) )
+  invisible( suppressMessages( priors(new3, new4) ) )
   suppressMessages( suppressWarnings(pp <- priors(new3, new4)) )
   expect_equal(pp$length(),1)
   expect_equal(pp$get('crops'),c(-2,200))
@@ -122,6 +135,19 @@ test_that('Create and add priors', {
   suppressMessages(pp <- priors(pp1,pp2))
   expect_equal(pp$length(), 1)
   expect_equal(pp$types() |> as.character(), "gaussian")
+
+  # --- #
+  # Different type combinations
+  p1 <- INLAPrior(variable = "bias",type = "normal",hyper = c(0,1))
+  p2 <- INLAPrior(variable = "forest",type = "clinear",hyper = c(0,Inf))
+  pp1 <- priors(p1,p2)
+  p3 <- INLAPrior(variable = "bias",type = "clinear",hyper = c(Inf,0))
+  p4 <- INLAPrior(variable = "forest",type = "normal",hyper = c(0,100))
+  pp2 <- priors(p3,p4)
+  # Combine priors
+  expect_invisible(pp1$combine(pp2))
+  expect_equal(pp1$get("forest"), c(0,100))
+
 })
 
 test_that('Add and modify priors to existing object', {
@@ -131,10 +157,11 @@ test_that('Add and modify priors to existing object', {
   library(raster)
   options("ibis.setupmessages" = FALSE)
 
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
-  ll <- list.files('inst/extdata/predictors/',full.names = T)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE), 'points',quiet = TRUE)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Create list of priors
@@ -142,7 +169,8 @@ test_that('Add and modify priors to existing object', {
                           hyper = c(2,1e6) ) )
 
   # Define a model
-  x <- distribution(background) %>%
+  invisible(
+    x <- distribution(background) %>%
     add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
     add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]],
                    transform = 'none',derivates = 'none') %>%
@@ -152,6 +180,7 @@ test_that('Add and modify priors to existing object', {
       cutoff = 0.5,
       proj_stepsize = 1
     )
+  )
   expect_s3_class(x$priors,'Waiver')
   expect_s3_class(x$get_priors(),'Waiver')
 
@@ -162,7 +191,7 @@ test_that('Add and modify priors to existing object', {
   expect_vector(x$get_prior_variables(), "CLC3_132_mean_50km" )
 
   # Remove priors from it
-  x %>% rm_priors()
+  invisible( x %>% rm_priors() )
   expect_s3_class( x$get_priors(), 'PriorList')
   x <- x %>% rm_priors()
   expect_s3_class(x$priors,'Waiver')

@@ -1,3 +1,70 @@
+#' Built formula for STAN model
+#'
+#' @description
+#' This function built a formula for a `engine_stan()` model.
+#' @param model A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @param x A [`BiodiversityDistribution`] object.
+#' @param id The id for the species formula.
+#' @param settings A [`Settings`] object.
+#' @author Martin Jung
+#' @note Function is not meant to be run outside the train() call.
+#' @keywords internal
+#' @noRd
+built_formula_stan <- function(model, id, x, settings){
+  assertthat::assert_that(
+    is.list(model),
+    length(model) > 0,
+    assertthat::has_name(model, "predictors"),
+    inherits(x, "BiodiversityDistribution"),
+    inherits(settings, 'Settings'),
+    is.character(id) || is.Id(id),
+    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+  )
+  # Get object for id
+  obj <- model$biodiversity[[id]]
+  # Extract basic stats from the model object
+  types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
+  fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
+  bionames = sapply(model$biodiversity, function(x) x$name)
+  ids <- names(model$biodiversity)
+  priors <- model$priors
+
+  # Default equation found (e.g. no separate specification of effects)
+  if(model$biodiversity[[id]]$equation=='<Default>'){
+
+    # Go through each variable and build formula for likelihood
+    form <- to_formula(paste("observed",
+                             " ~ ", "0 + ",
+                             ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
+                             paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
+                             # Check whether a single dataset is provided, otherwise add other intercepts
+                             ifelse(length(types)==1,
+                                    '',
+                                    paste('+',paste0('Intercept_',
+                                                     make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                                     sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                                    )
+                             ),
+                             # # If multiple datasets, don't use intercept
+                             # ifelse(length(ids)>1,"-1", ""),
+                             collapse = " ")
+    )
+
+    # Add offset if specified
+    if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+    # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
+  } else {
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
+    form <- to_formula(model$biodiversity[[1]]$equation)
+    # Update formula to weights if forgotten
+    if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed ~ .')
+    assertthat::assert_that(
+      all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+    )
+  }
+  return(form)
+}
+
 #' Logistic (invlogit) transformation function
 #' @param x A [`numeric`] value
 #' @keywords utils

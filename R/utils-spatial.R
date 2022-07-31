@@ -265,6 +265,52 @@ guess_sf <- function(df, geom_name = 'geometry'){
  return(df)
 }
 
+#' Kernel density estimation of coordinates
+#'
+#' @description
+#' Takes input point coordinates as [`sf`] layer and estimates the Gaussian Kernel density over
+#' a specified bandwidth for constructing a bivariate Gaussian kernel (see also [`MASS::kde2d()`]).
+#' @details
+#' Requires the `MASS` R-package to be installed!
+#' @param points A \code{POINTS} [`sf`] object.
+#' @param background A template [`Raster`] object describing the background.
+#' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
+#' @returns A [`RasterLayer`] with the density of point observations.
+#' @keywords utils
+#' @noRd
+st_kde <- function(points, background, bandwidth = 3){
+  assertthat::assert_that(
+    inherits(points, "sf"),
+    is.numeric(bandwidth)
+  )
+  check_package("MASS")
+
+  # Get extent and cellsize
+  cellsize <- raster::res(background)[1]
+  extent_vec <- sf::st_bbox(background)[c(1,3,2,4)]
+
+  n_y <- ceiling((extent_vec[4]-extent_vec[3])/cellsize)
+  n_x <- ceiling((extent_vec[2]-extent_vec[1])/cellsize)
+
+  extent_vec[2] <- extent_vec[1]+(n_x*cellsize)-cellsize
+  extent_vec[4] <- extent_vec[3]+(n_y*cellsize)-cellsize
+
+  # Make
+  coords <- sf::st_coordinates(points)
+  matrix <- MASS::kde2d(coords[,1],coords[,2],
+                        h = bandwidth, n = c(n_x, n_y), lims = extent_vec)
+  out <- raster::raster(matrix)
+
+  # Resample output for small point mismatches
+  if(!raster::compareRaster(out, background,stopiffalse = FALSE)){
+    out <- raster::resample(out, background)
+  }
+  out <- raster::mask(out, background)
+  names(out) <- "kde__coordinates"
+  rm(matrix, coords)
+  return( out )
+}
+
 #' Polygon to points
 #'
 #' @description
@@ -784,21 +830,23 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' for example is often done in the popular Maxent framework.
 #' @details
 #' Available options are:
-#' * \code{'none'} The original layer(s) are returned.
-#' * \code{'quadratic'} A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
-#' * \code{'hinge'} Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
+#' * \code{'none'} - The original layer(s) are returned.
+#' * \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
+#' * \code{'hinge'} - Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
 #' and all others to a range of \eqn{[0,1]}. The number of thresholds and thus new derivates is specified
 #' via the parameter \code{'nknots'} (Default: \code{4}).
-#' * \code{'thresh'} A threshold transformation of covariates, which sets all values lower than a set threshold ot
+#' * \code{'interaction'} - Creates interactions between variables. Target variables have to be specified via \code{"int_variables"}.
+#' * \code{'thresh'} - A threshold transformation of covariates, which sets all values lower than a set threshold ot
 #' \code{0} and those larger to \code{1}.
 #' The number of thresholds and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
-#' * \code{'bin'} Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
+#' * \code{'bin'} - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
 #' The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
 #' @param env A [`Raster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way
 #' (Options: 'none','quadratic', 'hinge', 'thresh', 'bin').
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param deriv A [`vector`] with [`characters`] of specific derivates to create (Default: \code{NULL}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @return Returns the derived adjusted [`Raster`] objects of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
@@ -808,16 +856,17 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' }
 #' @keywords utils
 #' @export
-predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, ...){
+predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, ...){
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, "stars"),
     !missing(env),
     is.numeric(nknots) && nknots > 0,
     is.character(option),
-    is.null(deriv) || is.character(deriv)
+    is.null(deriv) || is.character(deriv),
+    is.null(int_variables) || is.vector(int_variables)
   )
   # Match argument.
-  option <- match.arg(option, c('none','quadratic', 'hinge', 'thresh', 'bin'), several.ok = FALSE)
+  option <- match.arg(option, c('none','quadratic', 'hinge', 'thresh', 'bin', 'interaction'), several.ok = FALSE)
 
   # None, return as is
   if(option == 'none') return(env)
@@ -962,6 +1011,34 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, ...){
         }
       }
       invisible(gc())
+    }
+  }
+
+  # Create interaction variables
+  if(option == 'interaction'){
+    # Check whether interaction is provided or an attribute
+    if(is.null(int_variables)){
+      int_variables <- attr(env, "int_variables")
+    }
+    assertthat::assert_that(is.vector(int_variables))
+
+    if(is.Raster(env)){
+      # Make unique combinations
+      ind <- combn(int_variables, 2)
+
+      # Now for each combination build new variable
+      new_env <- raster::stack()
+
+      for(i in 1:ncol(ind)){
+        # Multiply first with second entry
+        o <- env[[ind[1,1]]] * env[[ind[2,1]]]
+        names(o) <- paste0('inter__', names(env)[ind[1,1]],".",names(env)[ind[2,1]])
+        new_env <- raster::addLayer(new_env,o)
+        rm(o)
+      }
+    } else {
+      # Stars processing
+      stop("Not yet implemented!")
     }
   }
 
@@ -1383,12 +1460,12 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #'  and have high point density. Thins the observations up to \code{"minpoints"}.
 #'  [*] \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 #'  each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
+#'  [*] \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
+#'  that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
+#'  We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
 #'  [*] \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 #'  iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
 #'  be set for this function to work.
-#'  [*] \code{"environmental"}: This approach creates an observation-wide clustering under the assumption that the
-#'  environmental niche has been comprehensively sampled. We then obtain an equal number (\code{"minpoints"}) of
-#'  observations  for clustered zone. This ensures that environmental conditions are approximately covered.
 #'
 #' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
 #' and presence-absence occurrence points equally.
@@ -1427,8 +1504,13 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   bg <- raster::mask(bg, background)
 
   # Check that environment has the same projection
-  if(is.Raster(env)){
+  if(is.Raster(env) && method == "environmental"){
     assertthat::assert_that( raster::compareRaster(bg, env) )
+  }
+  # Check that CRS is the same as background
+  if(sf::st_crs(df) != sf::st_crs(bg)){
+    message("Projection is different from input data. Reprojecting!")
+    df <- df |> sf::st_transform(crs = sf::st_crs(bg))
   }
 
   # Take coordinates of supplied data and rasterize
@@ -1470,7 +1552,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
       rm(o)
     }
     if(anyDuplicated(sel)) sel <- unique(sel)
-    rm(ex)
+
+    try({rm(ex)},silent = TRUE)
   } else if(method == "bias"){
     assertthat::assert_that(is.Raster(env),
                             raster::nlayers(env)==1,
@@ -1501,17 +1584,86 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     sel <- append(sel, ex$id[ex$tothin==0] )
     sel <- append(sel, ss$id )
 
+    try({rm(ss, ex)},silent = TRUE)
+  } else if(method == "zones"){
+    # Thinning by zones
+    assertthat::assert_that(is.Raster(zones),
+                            is.factor(zones))
+
+    if(!raster::compareRaster(bg, zones,stopiffalse = FALSE)){
+      zones <- alignRasters(zones, bg, method = "ngb", func = raster::modal, cl = FALSE)
+    }
+
+    # Output vector
+    sel <- vector()
+
+    ex <- data.frame(id = 1:nrow(coords),
+                     cid = raster::extract(bg, coords),
+                     zones = raster::extract(zones, coords)
+    )
+    # Now for each zone, take the minimum amount at random
+    ss <- ex |>
+      dplyr::group_by(zones) |>
+      dplyr::slice_sample(n = max(totake[1]), replace = TRUE) |>
+      dplyr::distinct()
+
+    # Take the zone data points
+    sel <- append(sel, ss$id )
+    try({rm(ss, ex)},silent = TRUE)
+
   } else if(method == "environmental"){
     # Environmental clustering
-    stop("Not yet implemented!")
 
+    if(!raster::compareRaster(bg, env,stopiffalse = FALSE)){
+      env <- alignRasters(env, bg, method = "ngb", func = raster::modal, cl = FALSE)
+    }
+    # If there are any factors, explode
+    if(any(is.factor(env))){
+      env <- explode_factorized_raster(env)
+    }
+
+    # Output vector
+    sel <- vector()
+
+    # Get a matrix of all environmental data, also with coordinates
+    # However first normalize all data
+    stk <- raster::as.data.frame(
+        predictor_transform(env, option = "norm"),
+      xy = TRUE)
+
+    stk$cid <- 1:nrow(stk)
+    stk <- subset(stk, complete.cases(stk))
+
+    # Cluster
+    E <- kmeans(x = subset(stk, select = -cid),
+                centers = ncol(stk)-1, iter.max = 10)
+
+    stk$cluster <- E$cluster
+
+    # Now fill an empty raster and re-xtract
+    new <- emptyraster(env)
+    new[stk$cid] <- stk$cluster
+
+    # Now re-extract and sampling points
+    ex <- data.frame(id = 1:nrow(coords),
+                     cid = raster::extract(bg, coords),
+                     zones = raster::extract(new, coords)
+    )
+
+    # Now for each zone, take the minimum amount at random
+    ss <- ex |>
+      dplyr::group_by(zones) |>
+      dplyr::slice_sample(n = max(totake[1]), replace = TRUE) |>
+      dplyr::distinct()
+
+    # Take the zone data points
+    sel <- append(sel, ss$id )
+
+    try({rm(new, stk, ss, ex, E)},silent = TRUE)
   } else if(method == "spatial"){
     # Spatial thinning
     stop("Not yet implemented!")
 
-  } else if(method == "zones"){
-    # Thinning by zones
-    stop("Not yet implemented!")
   }
 
   # Return subsampled coordinates

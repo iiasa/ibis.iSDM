@@ -54,12 +54,12 @@ Points are preferentially thinned from grid cells which are in the 25\% most bia
 and have high point density. Thins the observations up to \code{"minpoints"}.
 \link{*} \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
+\link{*} \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
+that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
+We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
 \link{*} \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
 be set for this function to work.
-\link{*} \code{"environmental"}: This approach creates an observation-wide clustering under the assumption that the
-environmental niche has been comprehensively sampled. We then obtain an equal number (\code{"minpoints"}) of
-observations  for clustered zone. This ensures that environmental conditions are approximately covered.
 }
 \references{
 \itemize{

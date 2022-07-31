@@ -47,5 +47,9 @@ Prior <- bdproto(
   # Set prior
   set = function(self, x){
     self$value <- x
+  },
+  # Get ID
+  get_id = function(self){
+    return( self$id )
   }
 )

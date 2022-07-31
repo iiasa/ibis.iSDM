@@ -5,15 +5,16 @@ test_that('Setting up a distribution model',{
   library(raster)
   library(sf)
   library(rgeos)
+  library(igraph)
 
   options("ibis.setupmessages" = FALSE)
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   # Load them as rasters
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -27,7 +28,7 @@ test_that('Setting up a distribution model',{
   expect_error(x$biodiversity$get_data())
   expect_equal(x$biodiversity$length(),0)
   expect_type(x$show_background_info(),'list')
-  expect_equal(x$get_engine(),'None')
+  expect_null(x$get_engine())
   expect_vector(names(x))
 
   # Now add one variable
@@ -39,7 +40,7 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  suppressWarnings(x <- x %>% add_offset_range(virtual_range))
+  invisible( suppressWarnings( suppressMessages(x <- x %>% add_offset_range(virtual_range))) )
   expect_equal(x$get_offset(),'range_distance')
   expect_s4_class(x$offset,'Raster')
 
@@ -105,6 +106,6 @@ test_that('Setting up a distribution model',{
   expect_equal( y$get_engine(), "<XGBOOST>")
 
   # Normal x should still be none
-  expect_equal( x$get_engine(), "None")
+  expect_null( x$get_engine() )
 
 })

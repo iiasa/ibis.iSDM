@@ -663,6 +663,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
                             family = family,
                             tune.type = tune.type,
                             weight = weight,
+                            lambda = lambda,
                             always.include = keep,
                             nfolds = 100, # Increase from default 5
                             num.threads = 0
@@ -673,6 +674,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
     abess_fit <- abess::abess(x = env,
                               y = observed,
                               family = family,
+                              lambda = lambda,
                               tune.type = tune.type,
                               weight = weight,
                               always.include = keep,
@@ -931,7 +933,8 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     } else {
       buf <- raster::rasterize(buf, emptyraster(template), field = 1)
     }
-    bg2 <- raster::mask(template, buf, inverse = TRUE, updatevalue = 0)
+    bg2 <- raster::mask(template, buf, inverse = FALSE, updatevalue = 1)
+    assertthat::assert_that(cellStats(bg2, "max")>0,msg = "Considered buffer distance too big!")
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted

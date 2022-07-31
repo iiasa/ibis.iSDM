@@ -13,7 +13,8 @@ test_that('Check that objects are properly inherited', {
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
-  ll <- list.files('inst/extdata/predictors/',full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Define distribution object
@@ -32,7 +33,7 @@ test_that('Check that objects are properly inherited', {
   expect_equal(x$biodiversity$length(),0)
 
   # Offsets
-  x %>% add_offset_range(virtual_range)
+  suppressWarnings( x %>% add_offset_range(virtual_range) )
   expect_s3_class(x$offset, "Waiver")
 
   # Call predictors

@@ -4,7 +4,7 @@ test_that('Check that INLA works', {
   skip_on_cran()
   skip_if_not_installed('INLA')
 
-  library(INLA)
+  suppressPackageStartupMessages( library(INLA) )
   options("ibis.setupmessages" = FALSE)
 
   # Use test data that comes with INLA
@@ -34,12 +34,12 @@ test_that('Train a distribution model with INLA', {
 
   # Load data
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
+  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
-  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'points',quiet = TRUE)
-  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'),'range',quiet = TRUE)
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM'),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   # Load them as rasters
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -54,7 +54,9 @@ test_that('Train a distribution model with INLA', {
       proj_stepsize = 1
     )
   # Train the model
-  mod <- train(x, "test", inference_only = TRUE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+  suppressWarnings(
+    mod <- train(x, "test", inference_only = TRUE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+  )
 
   # Expect summary
   expect_s3_class(summary(mod), "data.frame")

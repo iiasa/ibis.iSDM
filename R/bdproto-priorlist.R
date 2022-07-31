@@ -69,7 +69,7 @@ PriorList <- bdproto(
                             is.character(type) || is.null(type) || is.Waiver(type),
                             msg = 'Specify a single variable to query a prior.')
     # overwrite if not set
-    if(is.Waiver(type)) type <- NULL
+    if(is.Waiver(type) || is.null(type)) {type <- NULL}
     vn <- self$varnames()
     vt <- self$types()
     # If type is specified
@@ -78,17 +78,43 @@ PriorList <- bdproto(
       if(any(variable %in% vn)){
         # Check type and return the id of the combination
         if(type %in% vt){
-          return( names(vn)[which(variable == as.character(vn) & type == as.character(vt))] )
+          id <- names(vn)[which(variable == as.character(vn) & type == as.character(vt))]
         } else {
           # Get type of variable instead
-          return( names(vn)[which(variable %in% as.character(vn))] )
+          id <- names(vn)[which(variable %in% as.character(vn))]
         }
-      } else { return(NULL)}
+      } else { id <- NULL }
     } else {
       # Simply match against variable names and return id
-      if(!all(variable %in% vn)) return(NULL)
-      return( names(vn)[match(variable, vn,nomatch = 0)] )
+      if(!all(variable %in% vn)){
+        id <- NULL
+      } else {
+        id <- names(vn)[match(variable, vn, nomatch = 0)]
+      }
     }
+    return(id)
+  },
+  # Add a new prior
+  add = function(self, p) {
+    assertthat::assert_that(inherits(p, "Prior"))
+
+    # Check if variable and type or variable exists already?
+    ex <- self$exists(p$variable, p$type)
+    # In case there is not more one variable (SPDE), also check without type
+    if(sum(p$variable == self$varnames())<2){
+      ex2 <- self$exists(p$variable, NULL)
+    } else { ex2 <- "" }
+
+    # Catch and return NULL in case if not set
+    if(is.null(ex)) {
+      # Set prior
+      self$priors[[as.character(p$id)]] <- p
+    } else {
+      # Otherwise first delete previous prior and add new one
+      if(nchar(ex2)>1){ self$rm(ex2)} else {self$rm(ex)}
+      self$priors[[as.character(p$id)]] <- p
+    }
+    invisible()
   },
   # Get specific prior values from the list if set
   get = function(self, variable, type = NULL, what = "value"){
@@ -112,23 +138,6 @@ PriorList <- bdproto(
     id = as.character(id)
     assertthat::assert_that( all(id %in% as.character(self$ids())) )
     priors( self$priors[id] )
-  },
-  # Add a new prior
-  add = function(self, p) {
-    assertthat::assert_that(inherits(p, "Prior"))
-
-    # If variable and type already exist, replace
-    ex <- self$exists(p$variable, p$type)
-    # Catch and return NULL in case if not set
-    if(is.null(ex)) {
-      # Set prior
-      self$priors[[as.character(p$id)]] <- p
-    } else {
-      # Otherwise first delete previous prior and add new one
-      self$rm(ex)
-      self$priors[[as.character(p$id)]] <- p
-    }
-    invisible()
   },
   # Remove a set prior by id
   rm = function(self, id){
