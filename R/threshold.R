@@ -215,10 +215,11 @@ methods::setMethod(
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
-    if(!is.null(poi)) assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
-    assertthat::assert_that(hasName(poi, 'observed'))
-    poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
-
+    if(!is.null(poi)) {
+      assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
+      assertthat::assert_that(hasName(poi, 'observed'))
+      poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
+    }
     # Get the raster layer
     raster_thresh <- obj
 

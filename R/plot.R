@@ -157,7 +157,8 @@ methods::setMethod(
     # Print the plot
     if(plot){
       print(finalPlot)
-    } else if(is.character(fname)){
+    }
+    if(is.character(fname)){
       cowplot::ggsave2(filename = fname, plot = finalPlot)
     } else {
       return(finalPlot)

@@ -44,6 +44,7 @@ NULL
 #' * Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
+#' @keywords latent
 #' @examples
 #' \dontrun{
 #'  distribution(background) %>% add_latent_spatial(method = "poly")
@@ -88,5 +89,44 @@ methods::setMethod(
     }
     # Add to data to the BiodiversityDistribution object
     x$set_latent(type = '<Spatial>', method, separate_spde)
+  }
+)
+
+#' Function to remove a latent effect
+#'
+#' @description
+#' This is just a wrapper function for removing specified offsets from a [`BiodiversityDistribution-class`]) object.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @seealso add_latent_spatial
+#' @keywords latent, internal
+#' @name rm_latent
+NULL
+
+#' @name rm_latent
+#' @rdname rm_latent
+#' @exportMethod rm_latent
+#' @export
+methods::setGeneric(
+  "rm_latent",
+  signature = methods::signature("x"),
+  function(x) standardGeneric("rm_latent"))
+
+#' @name rm_latent
+#' @rdname rm_latent
+#' @usage \S4method{rm_latent}{BiodiversityDistribution}(x)
+methods::setMethod(
+  "rm_latent",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+    # If no offset can be found, just return proto object
+    if(is.Waiver(x$latentfactors)){ return(x) }
+
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Removing latent effects.')
+
+    # Now remove the offset
+    x$rm_latent()
   }
 )

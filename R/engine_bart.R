@@ -499,10 +499,11 @@ engine_bart <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, plot = FALSE, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, ...){
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
+            if(!is.null(values)) stop("Not yet implemented")
             bart_partial_effect(model, x.vars = x.var, transform = TRUE, ... )
           },
           # Spatial partial dependence plot option from embercardo

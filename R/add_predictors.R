@@ -166,7 +166,7 @@ methods::setMethod(
     # Don't transform or create derivatives of factor variables
     if(any(is.factor(env))){
       # Make subsets to join back later
-      env_f <- raster::subset(env,which(is.factor(env)))
+      env_f <- raster::subset(env, which(is.factor(env)))
       env <- raster::subset(env, which(!is.factor(env)))
       if(explode_factors){
         # Refactor categorical variables

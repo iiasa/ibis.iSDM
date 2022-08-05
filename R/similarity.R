@@ -84,13 +84,16 @@ methods::setMethod(
     # Get covariates
     covs <- obj$predictors$get_data()
     # Extract covariates for reference data
-    ref <- get_ngbvalue(
-      coords = obj$biodiversity$get_coordinates(names(bid)),
-      env = obj$predictors$get_data(df = TRUE),
-      field_space = c('x','y'),
-      longlat = raster::isLonLat(covs)
-    )
-    ref$x <- NULL;ref$y <- NULL
+    ref <- get_rastervalue(coords = obj$biodiversity$get_coordinates(names(bid)),
+                           env = covs,
+                           rm.na = FALSE)
+    ref <- ref[,names(covs)]
+    # ref <- get_ngbvalue(
+    #   coords = obj$biodiversity$get_coordinates(names(bid)),
+    #   env = obj$predictors$get_data(df = TRUE),
+    #   field_space = c('x','y'),
+    #   longlat = raster::isLonLat(covs)
+    # )
     # Subset if necessary
     if(!is.null(predictor_names)){ covs <- covs[[predictor_names]]; ref <- ref[,predictor_names]}
 

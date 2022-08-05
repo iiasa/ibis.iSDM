@@ -51,3 +51,39 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
   })
   # new <- stars::st_redimension(out, along = list(time = new_times))
 }
+
+#' Quick handy function to calculate the centre of a range
+#'
+#' @param ras A [`RasterLayer`] object for which the centre of the range is to be calculated.
+#' If the distribution is continious, then the centre is calculated as the value centre to all non-NA values.
+#' @keywords scenario, internal
+#' @noRd
+calculate_range_centre <- function(ras) {
+  assertthat::assert_that(
+    is.Raster(ras)
+  )
+  r_wt <- area(ras)
+  values(r_wt)[is.na(values(ras))] <- NA
+
+  spdf <- rasterToPoints(stack(ras,r_wt), spatial=T)
+
+
+  # spatialEco::wt.centroid(spdf, sp = F)
+  wt.centroid <- function(x, p, sp = TRUE) {
+    # if(class(x)[1] == "sf") { x <- as(x, "Spatial") }
+    if (!inherits(x, "SpatialPointsDataFrame"))
+      stop(deparse(substitute(x)), " MUST BE A SpatialPointsDataFrame OBJECT")
+    p <- x@data[, p]
+    Xw <- sum(sp::coordinates(x)[, 1] * p)
+    Yw <- sum(sp::coordinates(x)[, 2] * p)
+    wX <- Xw/sum(p)
+    wY <- Yw/sum(p)
+    if (sp == FALSE) {
+      return(c(wX, wY))
+    } else {
+      xy <- sp::SpatialPoints(matrix(c(wX, wY), nrow = 1, ncol = 2))
+      sp::proj4string(xy) <- sp::proj4string(x)
+      return(xy)
+    }
+  }
+}

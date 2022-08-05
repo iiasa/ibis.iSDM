@@ -9,6 +9,8 @@ NULL
 #' @param x.var A [character] indicating the variable for which a partial effect is to be calculated.
 #' @param constant A [numeric] constant to be inserted for all other variables. Default calculates a mean per variable.
 #' @param variable_length [numeric] The interpolation depth (nr. of points) to be used (Default: \code{100}).
+#' @param values [numeric] Directly specified values to compute partial effects for. If set, ignores
+#' \code{"variable_length"} (Default: \code{NULL}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param ... Other engine specific parameters
 #' @seealso [partial]
@@ -21,7 +23,7 @@ NULL
 methods::setGeneric(
   "partial",
   signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...) standardGeneric("partial"))
+  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, ...) standardGeneric("partial"))
 
 #' @name partial
 #' @rdname partial
@@ -29,17 +31,18 @@ methods::setGeneric(
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...) {
+  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, ...) {
     assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             is.character(x.var),
                             is.null(constant) || is.numeric(constant),
                             is.numeric(variable_length),
+                            is.numeric(values) || is.null(values),
                             is.logical(plot)
     )
     # Work around to call partial response directly
     if(inherits(mod,'DistributionModel')){
-      partial.DistributionModel(mod, x.var, constant, variable_length, plot, ...)
+      partial.DistributionModel(mod, x.var, constant, variable_length, values, plot, ...)
     } else {
       stop('Partial response calculation not supported!')
     }

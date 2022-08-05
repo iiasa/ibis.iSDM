@@ -841,7 +841,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   if(!inherits(df, 'sf')) df <- guess_sf(df)
   assertthat::assert_that(inherits(df, 'sf'), msg = "Could not convert input to sf. Prepare data first.")
   # Add coordinates if not present
-  if(!assertthat::has_name(df, 'x') && !assertthat::has_name(df, 'y')) {
+  if(!assertthat::has_name(df, 'x') || !assertthat::has_name(df, 'y')) {
     df$x <- sf::st_coordinates(df[attr(df, "sf_column")])[,1]
     df$y <- sf::st_coordinates(df[attr(df, "sf_column")])[,2]
   }

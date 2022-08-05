@@ -67,7 +67,8 @@ Note that all offsets created by this function are by default log-transformed be
 Other offset: 
 \code{\link{add_offset_bias}()},
 \code{\link{add_offset_elevation}()},
-\code{\link{add_offset}()}
+\code{\link{add_offset}()},
+\code{\link{rm_offset}()}
 }
 \concept{offset}
 \keyword{offset}

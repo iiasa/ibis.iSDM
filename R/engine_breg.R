@@ -469,7 +469,7 @@ engine_breg <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, length.out = 100, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, length.out = 100, values = NULL, plot = FALSE, type = NULL, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
@@ -512,7 +512,12 @@ engine_breg <- function(x,
               for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
             }
 
-            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            if(!is.null(values)){
+              assertthat::assert_that(length(values) == length.out)
+              df_partial[[x.var]] <- values
+            } else {
+              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            }
             df_partial <- df_partial %>% as.data.frame()
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])

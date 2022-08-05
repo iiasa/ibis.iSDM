@@ -560,6 +560,7 @@ methods::setMethod(
         )),model$predictors_names] <- NA # Fill with NA
       }
       # The same with offset if specified
+      # Note this operation below is computationally quite costly
       if(!is.Waiver(x$offset)){
         model$offset[which( is.na(
           point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]

@@ -326,8 +326,10 @@ engine_stan <- function(x,
           for(i in 1:length(model$predictors_names)){
             if(!is.Waiver(model$priors)){
               if(model$predictors_names[i] %in% model$priors$varnames()) {
+                # Get prior estimats
+                pp <- model$priors$get(model$predictors_names[i])
                 sm_code$model <- append(sm_code$model, paste0(
-                  "target += normal_lpdf(beta[",i,"] | ",model$priors$get(model$predictors_names[8])[1],", ",model$priors$get(model$predictors_names[8])[2],");"
+                  "target += normal_lpdf(beta[",i,"] | ",pp[1],", ",pp[2],");"
                 ))
               } else {
                 # Default gaussian prior
@@ -340,47 +342,47 @@ engine_stan <- function(x,
           }
         } else
           if( settings$get(what='varsel') == "reg" ){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
-          # Add regularized horseshoe prior
-          # See brms::horseshoe
-          ir <- readLines( system.file("stanfiles/prior_functions.stan",package = "ibis.iSDM",mustWork = TRUE) )
-          assertthat::assert_that(length(ir)>0)
-          for(i in ir) sm_code$functions <- append(sm_code$functions, i)
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
+            # Add regularized horseshoe prior
+            # See brms::horseshoe
+            ir <- readLines( system.file("stanfiles/prior_functions.stan",package = "ibis.iSDM",mustWork = TRUE) )
+            assertthat::assert_that(length(ir)>0)
+            for(i in ir) sm_code$functions <- append(sm_code$functions, i)
 
-          sm_code$data <- append(sm_code$data,"
-                                  // data for the horseshoe prior
-                                  real<lower=0> hs_df;  // local degrees of freedom
-                                  real<lower=0> hs_df_global;  // global degrees of freedom
-                                  real<lower=0> hs_df_slab;  // slab degrees of freedom
-                                  real<lower=0> hs_scale_global;  // global prior scale
-                                  real<lower=0> hs_scale_slab;  // slab prior scale"
-          )
+            sm_code$data <- append(sm_code$data,"
+                                    // data for the horseshoe prior
+                                    real<lower=0> hs_df;  // local degrees of freedom
+                                    real<lower=0> hs_df_global;  // global degrees of freedom
+                                    real<lower=0> hs_df_slab;  // slab degrees of freedom
+                                    real<lower=0> hs_scale_global;  // global prior scale
+                                    real<lower=0> hs_scale_slab;  // slab prior scale"
+            )
 
-          # Parameters and transformed parameters
-          sm_code$parameters <- append(sm_code$parameters,"
-          // local parameters for horseshoe prior
-          vector[K] zb;
-          vector<lower=0>[K] hs_local;
-          // horseshoe shrinkage parameters
-          real<lower=0> hs_global;  // global shrinkage parameters
-          real<lower=0> hs_slab;  // slab regularization parameter
-                                       ")
-          sm_code$transformed_parameters <- append(sm_code$transformed_parameters,"
-            vector[K] beta;  // population-level effects
-            // compute actual regression coefficients
-            beta = horseshoe(zb, hs_local, hs_global, hs_scale_slab^2 * hs_slab);
-          ")
+            # Parameters and transformed parameters
+            sm_code$parameters <- append(sm_code$parameters,"
+            // local parameters for horseshoe prior
+            vector[K] zb;
+            vector<lower=0>[K] hs_local;
+            // horseshoe shrinkage parameters
+            real<lower=0> hs_global;  // global shrinkage parameters
+            real<lower=0> hs_slab;  // slab regularization parameter
+                                         ")
+            sm_code$transformed_parameters <- append(sm_code$transformed_parameters,"
+              vector[K] beta;  // population-level effects
+              // compute actual regression coefficients
+              beta = horseshoe(zb, hs_local, hs_global, hs_scale_slab^2 * hs_slab);
+            ")
 
-          # Finally add priors to model
-          sm_code$model <- append(sm_code$model, "
-          // priors including constants
-          target += std_normal_lpdf(zb);
-          target += student_t_lpdf(hs_local | hs_df, 0, 1)
-          - rows(hs_local) * log(0.5);
-          target += student_t_lpdf(hs_global | hs_df_global, 0, hs_scale_global)
-          - 1 * log(0.5);
-          target += inv_gamma_lpdf(hs_slab | 0.5 * hs_df_slab, 0.5 * hs_df_slab);
-          ")
+            # Finally add priors to model
+            sm_code$model <- append(sm_code$model, "
+            // priors including constants
+            target += std_normal_lpdf(zb);
+            target += student_t_lpdf(hs_local | hs_df, 0, 1)
+            - rows(hs_local) * log(0.5);
+            target += student_t_lpdf(hs_global | hs_df_global, 0, hs_scale_global)
+            - 1 * log(0.5);
+            target += inv_gamma_lpdf(hs_slab | 0.5 * hs_df_slab, 0.5 * hs_df_slab);
+            ")
         }
 
         # Now add the model depending on the type

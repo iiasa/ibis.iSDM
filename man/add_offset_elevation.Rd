@@ -45,7 +45,8 @@ this function also mean-centers the output as recommended by Ellis-Soto et al.
 Other offset: 
 \code{\link{add_offset_bias}()},
 \code{\link{add_offset_range}()},
-\code{\link{add_offset}()}
+\code{\link{add_offset}()},
+\code{\link{rm_offset}()}
 }
 \concept{offset}
 \keyword{offset}

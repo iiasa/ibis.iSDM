@@ -465,7 +465,7 @@ engine_gdb <- function(x,
             return(temp)
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, plot = FALSE){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE){
             # Assert that variable(s) are in fitted model
             assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost') )
             # Unlike the effects function, build specific predictor for target variable(s) only
@@ -489,7 +489,13 @@ engine_gdb <- function(x,
               dummy[,x.var] <- factor(variable_range)
             } else {
               dummy <- as.data.frame(matrix(nrow = variable_length))
-              dummy[,x.var] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+              # If custom input values are specified
+              if(!is.null(values)){
+                assertthat::assert_that(length(values) == variable_length)
+                dummy[, x.var] <- values
+              } else {
+                dummy[,x.var] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+              }
             }
             # For the others
             if(is.null(constant)){

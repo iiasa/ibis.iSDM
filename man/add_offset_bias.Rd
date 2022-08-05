@@ -55,7 +55,8 @@ function \code{\link[=add_offset_range]{add_offset_range()}} or the \code{bossMa
 Other offset: 
 \code{\link{add_offset_elevation}()},
 \code{\link{add_offset_range}()},
-\code{\link{add_offset}()}
+\code{\link{add_offset}()},
+\code{\link{rm_offset}()}
 }
 \concept{offset}
 \keyword{offset}

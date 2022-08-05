@@ -93,6 +93,56 @@ methods::setMethod(
   }
 )
 
+#' Function to remove an offset
+#'
+#' @description
+#' This is just a wrapper function for removing specified offsets from a [`BiodiversityDistribution-class`]) object.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param layer A `character` pointing to the specific layer to be removed. If set to \code{NULL}, then
+#' all offsets are removed from the object.
+#' @family offset
+#' @keywords prior, offset, internal
+#' @name rm_offset
+NULL
+
+#' @name rm_offset
+#' @rdname rm_offset
+#' @exportMethod rm_offset
+#' @export
+methods::setGeneric(
+  "rm_offset",
+  signature = methods::signature("x", "layer"),
+  function(x, layer = NULL) standardGeneric("rm_offset"))
+
+#' @name rm_offset
+#' @rdname rm_offset
+#' @usage \S4method{rm_offset}{BiodiversityDistribution, character}(x, layer)
+methods::setMethod(
+  "rm_offset",
+  methods::signature(x = "BiodiversityDistribution", layer = "character"),
+  function(x, layer = NULL) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.character(layer) || is.null(layer)
+    )
+    # If no offset can be found, just return proto object
+    if(is.Waiver(x$offset)){ return(x) }
+
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Removing offsets.')
+
+    offs <- x$get_offset()
+    if(!is.null(layer)){
+      assertthat::assert_that(layer %in% offs,
+                              msg = paste0("Specified offset ", layer, "not found in the offset list."))
+    }
+
+    # Now remove the offset
+    x$rm_offset()
+  }
+)
+
+#### Bias offset ----
 #' Specify a spatial explicit offset as bias
 #'
 #' @description
@@ -206,7 +256,7 @@ methods::setMethod(
   }
 )
 
-# ---- Add a range as offset ---- #
+#### Add a range as offset ----
 #' Specify a expert-based species range as offset
 #'
 #' @description

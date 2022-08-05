@@ -56,7 +56,8 @@ Offsets specified for non-supported engines are ignored during the estimation
 Other offset: 
 \code{\link{add_offset_bias}()},
 \code{\link{add_offset_elevation}()},
-\code{\link{add_offset_range}()}
+\code{\link{add_offset_range}()},
+\code{\link{rm_offset}()}
 }
 \concept{offset}
 \keyword{offset}

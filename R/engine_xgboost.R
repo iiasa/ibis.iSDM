@@ -578,12 +578,26 @@ engine_xgboost <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, plot = TRUE){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = TRUE){
             assertthat::assert_that(is.character(x.var) || is.null(x.var))
+            if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")
             mod <- self$get_data('fit_best')
             df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
+
+            # if values are set, make sure that they cover the data.frame
+            if(!is.null(values)){
+              assertthat::assert_that(length(x.var) == 1)
+              df2 <- data.frame()
+              df2[[xvar]] <- values
+              # Then add the others
+              for(var in colnames(df)){
+                if(var == xvar) next()
+                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+              }
+              df <- df2; rm(df2)
+            }
 
             # Match x.var to argument
             if(is.null(x.var)){

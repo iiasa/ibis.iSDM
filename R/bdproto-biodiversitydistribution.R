@@ -190,8 +190,14 @@ BiodiversityDistribution <- bdproto(
     names( self$offset )
   },
   # Remove offsets
-  rm_offset = function(self){
-    bdproto(NULL, self, offset = new_waiver() )
+  rm_offset = function(self, what = NULL){
+    if(is.null(what)){
+      bdproto(NULL, self, offset = new_waiver() )
+    } else {
+      of <- self$offset
+      of <- raster::dropLayer(of, what)
+      bdproto(NULL, self, offset = of )
+    }
   },
   # Plot offset
   plot_offsets = function(self){
