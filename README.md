@@ -3,17 +3,16 @@
 
 # The ibis framework - An **I**ntegrated model for **B**iod**I**versity distribution projection**S**
 
-<img align="right" src="man/figures/logo.png" alt="logo" width="180" height = "180">
-
+<!-- <img align="right" src="man/figures/logo.png" alt="logo" width="180" height = "180"> -->
 <!-- <a href='https://github.com/iiasa/rN2000'><img src="man/figures/logo.png" align="right"height=140/></a> --->
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
 
 ![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
+[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml)
 [![License: CC BY
 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-blue.svg)](https://cran.r-project.org/web/licenses/CC%20BY%204.0)
-[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 The **ibis.iSDM** package provides a series of convenience functions to

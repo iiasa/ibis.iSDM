@@ -1044,8 +1044,10 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
   obs$y <- sf::st_coordinates(obs[attr(obs, "sf_column")])[,2]
 
   # Set CRS again
-  suppressWarnings(
-    obs <- sf::st_set_crs(obs, value = sf::st_crs(df))
-  )
+  if(is.na(sf::st_crs(obs))){
+    suppressWarnings(
+      obs <- sf::st_set_crs(obs, value = sf::st_crs(template))
+    )
+  }
   return(obs)
 }

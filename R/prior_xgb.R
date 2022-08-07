@@ -5,7 +5,7 @@ NULL
 #'
 #' @description
 #' Function to include prior information as monotonic constrain to a
-#' extreme gradient descent boosting model [engine_xgboost].
+#' extreme gradient descent boosting model [`engine_xgboost`].
 #' Monotonic priors enforce directionality in direction of certain variables, however
 #' specifying a monotonic constrain does not guarantee that the variable is not regularized out
 #' during model fitting.
@@ -77,7 +77,7 @@ methods::setGeneric(
 
 #' @name XGBPriors
 #' @rdname XGBPriors
-#' @usage \S4method{XGBPriors}{character}(variable)
+#' @usage \S4method{XGBPriors}{character, character}(variable, hyper)
 methods::setMethod(
   "XGBPriors",
   methods::signature(variable = "character"),

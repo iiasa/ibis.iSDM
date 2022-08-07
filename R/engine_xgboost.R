@@ -30,6 +30,8 @@ NULL
 #' @param colsample_bytree [`numeric`] Sub-sample ratio of columns when constructing each tree (Default: \code{0.4}).
 #' @param min_child_weight [`numeric`] Broadly related to the number of instances necessary for each node (Default: \code{3}).
 #' @param ... Other none specificed parameters.
+#' @note
+#' *'Machine learning is statistics minus any checking of models and assumptions‘* ~ Brian D. Ripley, useR! 2004, Vienna
 #' @seealso [xgboost::xgb.train]
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
@@ -586,19 +588,6 @@ engine_xgboost <- function(x,
             df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
 
-            # if values are set, make sure that they cover the data.frame
-            if(!is.null(values)){
-              assertthat::assert_that(length(x.var) == 1)
-              df2 <- data.frame()
-              df2[[xvar]] <- values
-              # Then add the others
-              for(var in colnames(df)){
-                if(var == xvar) next()
-                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
-              }
-              df <- df2; rm(df2)
-            }
-
             # Match x.var to argument
             if(is.null(x.var)){
               x.var <- colnames(df)
@@ -606,15 +595,33 @@ engine_xgboost <- function(x,
               x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
             }
 
+            # if values are set, make sure that they cover the data.frame
+            if(!is.null(values)){
+              assertthat::assert_that(length(x.var) == 1)
+              df2 <- list()
+              df2[[x.var]] <- values
+              # Then add the others
+              for(var in colnames(df)){
+                if(var == x.var) next()
+                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+              }
+              df2 <- df2 |> as.data.frame()
+              df2 <- df2[, mod$feature_names]
+            } else {
+              df2 <- df
+            }
+
             # Check that variables are in
             assertthat::assert_that(all( x.var %in% colnames(df) ),
+                                    all( names(df) == mod$feature_names ),
                                     msg = 'Variable not in predicted model.')
 
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
-              p1 <- pdp::partial(mod, pred.var = v, ice = FALSE, center = TRUE,
+              p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
                                  plot = FALSE, rug = TRUE, train = df)
+              p1 <- p1[,c(x.var, "yhat")]
               names(p1) <- c("partial_effect", "mean")
               p1$variable <- v
               pp <- rbind(pp, p1)

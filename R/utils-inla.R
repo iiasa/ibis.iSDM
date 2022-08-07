@@ -1404,7 +1404,7 @@ inla.backstep <- function(master_form,
                            verbose = FALSE # Verbose for variable selection
     )
     },silent = TRUE)
-    if(class(fit)=='try-error') {not_found <- FALSE;next()}
+    if(inherits(fit, 'try-error')) {not_found <- FALSE;next()}
 
     o <- data.frame(form = deparse1(test_form),
                     converged = fit$ok,
@@ -1442,7 +1442,7 @@ inla.backstep <- function(master_form,
                              verbose = FALSE # Verbose for variable selection
       )
       },silent = TRUE)
-      if(class(fit)=='try-error') next()
+      if(inherits(fit,'try-error')) next()
 
       oo <- rbind(oo, data.frame(form = deparse1(new_form),
                                  converged = fit$ok,

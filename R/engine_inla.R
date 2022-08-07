@@ -82,7 +82,7 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
-  # myLog('[Deprecation]','yellow','Consider using engine_inlabru instead with better prediction support.')
+  myLog('[Deprecation]','yellow','Consider using engine_inlabru as engine with better prediction support.')
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -742,7 +742,7 @@ engine_inla <- function(x,
                                  num.threads = getOption('ibis.nthread')
             )
           },silent = FALSE)
-          if(class(fit_pred)=='try-error') { print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!') }
+          if(inherits(fit_pred,'try-error')) { print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!') }
           # Create a spatial prediction
           index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
           # Which type of prediction (linear predictor or response scale)
@@ -846,13 +846,13 @@ engine_inla <- function(x,
               },
               # Partial response
               # FIXME: Create external function
-              partial = function(self, x, x.var, constant = NULL, variable_length = 100, plot = FALSE){
+              partial = function(self, x, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE){
                 # Goal is to create a sequence of value and constant and append to existing stack
                 # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
                 # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
                 # provide via lincomb = M to an INLA call.
                 # Both should be identical
-
+                stop("Partial function not implemented. Consider using inlabru instead!")
                 # Check that provided model exists and variable exist in model
                 mod <- self$get_data('fit_best')
                 assertthat::assert_that(inherits(mod,'inla'),
@@ -882,7 +882,6 @@ engine_inla <- function(x,
                 # For target variable calculate range
                 variable_range <- range(stack_data_resp[[variable]],na.rm = TRUE)
 
-                stop('Not yet done!')
                 # Create dummy data.frame
                 dummy <- data.frame(observed = rep(NA, variable_length))
 

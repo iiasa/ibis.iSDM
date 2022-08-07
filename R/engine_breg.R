@@ -469,11 +469,11 @@ engine_breg <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, length.out = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
-                                    is.numeric(length.out)
+                                    is.numeric(variable_length)
             )
             # Settings
             settings <- self$settings
@@ -504,20 +504,20 @@ engine_breg <- function(x,
             }
 
             df_partial <- list()
+            if(!is.null(values)){ assertthat::assert_that(length(values) >= 1) }
 
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
             } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
             }
-
             if(!is.null(values)){
-              assertthat::assert_that(length(values) == length.out)
               df_partial[[x.var]] <- values
             } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
+
             df_partial <- df_partial %>% as.data.frame()
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])

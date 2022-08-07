@@ -70,10 +70,8 @@ methods::setMethod(
                             is.logical(separate_intercept),
                             is.logical(docheck)
                             )
-    assertthat::assert_that(length(unique(poipo[[field_occurrence]])) <= 2,
-                            msg = "More 2 unique values. Specify a column.")
 
-    # Messager
+    # Messenger
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipo dataset...")
 
     # Transform to background for analysis
@@ -87,8 +85,10 @@ methods::setMethod(
     }
 
     # Check whether there are any absence point, if so stop with error
-    assertthat::assert_that(!any(poipo[[field_occurrence]] == 0),
-                            msg = "Absence points found. Potentially this data needs to be added as presence-absence instead?")
+    if(any(poipo[[field_occurrence]] == 0)){
+      if(getOption("ibis.setupmessages")) myLog("[Setup]","yellow",
+                                                "Absence points found. Potentially this data needs to be added as presence-absence instead?")
+    }
 
     # Convert formula if necessary
     formula <- to_formula(formula)

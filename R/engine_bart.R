@@ -384,7 +384,9 @@ engine_bart <- function(x,
         if(is.factor(data$observed)){
           fit_bart <- dbarts::bart(y.train = data[,'observed'],
                                    x.train = data[,model$biodiversity[[1]]$predictors_names],
+                                   # To make partial plots faster
                                    keeptrees = dc@keepTrees,
+                                   keepevery = 10,
                                    # weights = w,
                                    binaryOffset = off,
                                    # Hyper parameters
@@ -399,7 +401,9 @@ engine_bart <- function(x,
         } else {
           fit_bart <- dbarts::bart(y.train = data[,'observed'],
                                    x.train = data[,model$biodiversity[[1]]$predictors_names],
+                                   # To make partial plots faster
                                    keeptrees = dc@keepTrees,
+                                   keepevery = 10,
                                    weights = w,
                                    ntree = dc@n.trees,
                                    # Hyper parameters
@@ -503,8 +507,8 @@ engine_bart <- function(x,
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
-            if(!is.null(values)) stop("Not yet implemented")
-            bart_partial_effect(model, x.vars = x.var, transform = TRUE, ... )
+            bart_partial_effect(model, x.vars = x.var,
+                                transform = self$settings$data$binary, values = values, ... )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){

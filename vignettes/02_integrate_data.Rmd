@@ -296,7 +296,7 @@ Some engines, notably [`engine_inla`], [`engine_inlabru`] and [`engine_stan`] su
 N(A) &\sim {\sf Poisson}\left(\int_{A} \lambda(i)\right) \\
 \end{align*}
 \begin{align*}
-\log(\lambda(s)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{ki} 
+\log(\lambda(i)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{ki} 
 \end{align*}
 
 where $N$ is the number of individuals and $A$ the Area for a given spatial unit $i$, with

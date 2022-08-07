@@ -18,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: windows-latest, r: 'release'}
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
@@ -41,9 +40,13 @@ jobs:
       - name: Install gdal libraries
         run: sudo apt-get install -y libgdal-dev
 
+      - name: Install igraph library
+        run: sudo apt-get install -y libglpk-dev
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
+          extra-repositories: "https://inla.r-inla-download.org/R/testing"
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

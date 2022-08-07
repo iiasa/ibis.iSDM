@@ -28,6 +28,8 @@ test_that('Check that data can be loaded.',{
 
 test_that('Check that test scenarios can be loaded.',{
   # Load the scenario data
+  skip_if_not_installed('stars')
+  skip_if_not_installed('abind')
   require(stars)
   require(abind)
 

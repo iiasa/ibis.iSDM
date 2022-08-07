@@ -467,10 +467,12 @@ engine_gdb <- function(x,
           # Partial effect
           partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE){
             # Assert that variable(s) are in fitted model
-            assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost') )
+            assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost'),
+                                     is.numeric(variable_length) )
             # Unlike the effects function, build specific predictor for target variable(s) only
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
             assertthat::assert_that( all( x.var %in% variables), msg = 'x.var variable not found in model!' )
+
             # Special treatment for factors
             if(any(model$predictors_types$type=="factor")){
               if(x.var %in% model$predictors_types$predictors[model$predictors_types$type=="factor"]){
@@ -491,10 +493,11 @@ engine_gdb <- function(x,
               dummy <- as.data.frame(matrix(nrow = variable_length))
               # If custom input values are specified
               if(!is.null(values)){
-                assertthat::assert_that(length(values) == variable_length)
+                variable_length <- length(values)
+                assertthat::assert_that(length(values) >=1)
                 dummy[, x.var] <- values
               } else {
-                dummy[,x.var] <- seq(variable_range[1],variable_range[2],length.out = variable_length)
+                dummy[,x.var] <- seq(variable_range[1],variable_range[2], length.out = variable_length)
               }
             }
             # For the others
@@ -525,7 +528,8 @@ engine_gdb <- function(x,
                                          which = x.var,
                                          type = self$get_data('params')$type, aggregate = 'sum')
             # Combine with
-            out <- data.frame(partial_effect = pp[,grep(x.var, colnames(pp))] ); out[[x.var]] <- dummy[[x.var]]
+            out <- data.frame(partial_effect = dummy[[x.var]],
+                              mean = pp[,grep(x.var, colnames(pp))] )
 
             # If plot, make plot, otherwise
             if(plot){

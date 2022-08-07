@@ -38,7 +38,7 @@ methods::setGeneric(
 
 #' @name GDBPrior
 #' @rdname GDBPrior
-#' @usage \S4method{GDBPrior}{character}(variable)
+#' @usage \S4method{GDBPrior}{character, character}(variable, hyper)
 methods::setMethod(
   "GDBPrior",
   methods::signature(variable = "character"),
@@ -80,7 +80,7 @@ methods::setGeneric(
 
 #' @name GDBPriors
 #' @rdname GDBPriors
-#' @usage \S4method{GDBPriors}{character}(variable)
+#' @usage \S4method{GDBPriors}{character, character}(variable, hyper)
 methods::setMethod(
   "GDBPriors",
   methods::signature(variable = "character"),

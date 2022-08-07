@@ -74,31 +74,43 @@ varimp.bart <- function(model){
 #'
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`raster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: \code{All})
-#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE})
-#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1})
+#' @param x.vars The predictor variables to be mapped (Default: \code{All}).
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
 #' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response was not binomial.
+#' @param values Either a [`numeric`] vector of supplied value ranges or \code{NULL} (Default).
 #' @param plot Whether a model should be created (Default: \code{TRUE}).
 #' @concept Function taken and adapted from the [embarcadero] package.
-#' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' @references
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @return A [`Raster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
-bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1, transform = TRUE, plot = TRUE) {
+bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
+                                 smooth = 1, transform = TRUE, values = NULL, plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
     is.null(x.vars) || is.character(x.vars),
     is.logical(transform),
+    is.logical(equal),
+    is.numeric(smooth),
+    is.null(values) || is.numeric(values),
     is.logical(plot)
   )
 
   # Get Fit object
-  if (class(model) == "bart") {
+  if (inherits(model,"bart")) {
     fitobj <- model$fit
   }
   # If no x.vars are specified, use all
-  if (is.null(x.vars)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.vars]
+  if(!is.null(values)){
+    raw <- list()
+    raw[[x.vars]] <- values
+    raw <- raw |> as.data.frame()
+  } else {
+    if (is.null(x.vars)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.vars]
+  }
 
   # Define binning in equal area width or not
   if(equal) {
@@ -125,13 +137,14 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = TRUE, smooth = 1,
         }
       }
     }
-    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, pl = FALSE)
+    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, keepevery = 10, pl = FALSE)
 
   } else {
     levq = c(0.05, seq(0.1, 0.9, 0.1/smooth),
              0.95)
     pd <- dbarts::pdbart(model, xind = x.vars, levquants = levq,
-                 pl = FALSE)
+                         keepevery = 10,
+                         pl = FALSE)
   }
 
   out <- data.frame()
@@ -247,10 +260,10 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
         data.frame()
       colnames(dfbin) <- c("is", "becomes")
       dfbin$is <- as.numeric(as.character(dfbin$is))
-      if (class(envs) %in% c("RasterStack", "RasterBrick")) {
+      if (is.Raster(envs) && (inherits(envs, "RasterStack") || inherits(envs, "RasterBrick")) ) {
         lyrtmp <- envs[[pd$xlbs[[i]]]]
         lyrtr <- raster::reclassify(lyrtmp, as.matrix(dfbin))
-      } else if (class(envs) == "list") {
+      } else if (inherits(envs, "list")) {
         lyrtr <- lapply(envs, function(x) {
         lyrtmp <- x[[pd$xlbs[[i]]]]
           return(raster::reclassify(lyrtmp, as.matrix(dfbin)))

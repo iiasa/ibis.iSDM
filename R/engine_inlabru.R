@@ -979,7 +979,7 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          partial = function(self, x.var, constant = NULL, length.out = 100, plot = TRUE){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = TRUE){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
@@ -989,8 +989,9 @@ engine_inlabru <- function(x,
             assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
                                     is.character(x.var),
-                                    is.numeric(length.out),
-                                    is.null(constant) || is.numeric(constant)
+                                    is.numeric(variable_length), variable_length >=1,
+                                    is.null(constant) || is.numeric(constant),
+                                    is.null(values) || is.numeric(values)
             )
 
             # Match variable name
@@ -1004,15 +1005,22 @@ engine_inlabru <- function(x,
             } else {
               rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
+            assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
             df_partial <- list()
+            # Set length out to value length to have equal coverage
+            if(!is.null(values)){  variable_length <- length(values) }
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
             } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
             }
-            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            if(!is.null(values)){
+              df_partial[[x.var]] <- values
+            } else {
+              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+            }
             df_partial <- df_partial %>% as.data.frame()
 
             if(any(model$predictors_types$type=="factor")){

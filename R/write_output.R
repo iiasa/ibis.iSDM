@@ -298,6 +298,10 @@ methods::setMethod(
       inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
       msg = "Only objects created through `train()` or `project()` are supported!"
     )
+    # Check writeable or not
+    assertthat::assert_that(
+      assertthat::is.writeable(dirname(fname)),msg = "Given input folder is not writeable!"
+    )
 
     # Get file extension
     ext <- tolower( tools::file_ext(fname) )

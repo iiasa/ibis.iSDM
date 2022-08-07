@@ -309,3 +309,131 @@ methods::setMethod(
     }
   }
 )
+
+#' Function to create an ensemble of partial effects from multiple models
+#'
+#' @description Similar to the `ensemble()` function, this function creates an ensemble of
+#' partial responses of provided distribution models fitted with the [`ibis.iSDM-package`].
+#' Through the `layer` parameter it can be specified which part of the partial prediction
+#' should be averaged in an ensemble (if given). This can be for instance the *mean* prediction and/or
+#' the standard deviation *sd*. Ensemble partial is also being called if more than one input
+#' [`DistributionModel`] object is provided to `partial`.
+#'
+#' By default the ensemble of partial responses is created as average across all models with the
+#' uncertainty being the standard deviation of responses.
+#'
+#' @details
+#' Possible options for creating an ensemble includes:
+#' * \code{'mean'} - Calculates the mean of several predictions.
+#' * \code{'median'} - Calculates the median of several predictions.
+#'
+#' @note
+#' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
+#' By default the response functions of each model are normalized.
+#' @param ... Provided [`DistributionModel`] objects from which partial responses can be called. In the future provided data.frames might be supported as well.
+#' @param x.var A [`character`] of the variable from which an ensemble is to be created.
+#' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
+#' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
+#' ignore any of the layer names in ensembles of `Raster` objects.
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{TRUE}).
+#' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
+#' coefficient of variation across all models.
+
+#' @name ensemble_partial
+#' @aliases ensemble_partial
+#' @keywords train
+#' @exportMethod ensemble_partial
+#' @export
+NULL
+methods::setGeneric("ensemble_partial",
+                    signature = methods::signature("..."),
+                    function(..., x.var, method = "mean", layer = "mean", normalize = TRUE) standardGeneric("ensemble_partial"))
+
+#' @name ensemble_partial
+#' @rdname ensemble_partial
+#' @usage \S4method{ensemble_partial}{ANY}(...)
+methods::setMethod(
+  "ensemble_partial",
+  methods::signature("ANY"),
+  function(..., x.var, method = "mean", layer = "mean", normalize = TRUE){
+    if(length(list(...))>1) {
+      mc <- list(...)
+    } else {
+      # Collate provided models
+      if(!is.list(...)){
+        mc <- list(...)
+      } else mc <- c(...)
+    }
+
+    # Get all those that are DistributionModels
+    mods <- mc[ sapply(mc, function(x) inherits(x, "DistributionModel") ) ]
+
+    if(length(mods)==1){
+      # Only one object provided, just return partial results for it
+      obj <- mods[[1]]
+      return( obj$partial(x.var = x.var) )
+    }
+
+    # Further checks
+    assertthat::assert_that(
+      is.character(method),
+      is.null(layer) || is.character(layer),
+      is.logical(normalize)
+    )
+
+    # Check the method
+    method <- match.arg(method, c('mean', 'median'), several.ok = FALSE)
+
+    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a partial ensemble...")
+
+    # Get variable range from the first object
+    # FIXME: Ideally make a consensus, otherwise assumes that same predictor been used
+    rr <- range(mods[[1]]$model$predictors[,x.var], na.rm = TRUE)
+    assertthat::assert_that(length(rr)==2, !anyNA(rr))
+    rr <- seq(rr[1], rr[2], length.out = 100)
+
+    # Now for each object get the partial values for the target variable
+    out <- data.frame()
+    for(obj in mods){
+      if(length(grep(x.var, summary(obj)[[1]]))==0){
+        message(paste("Layer", text_red(layer), "not found in model. Skipping!"))
+        next()
+      }
+      # Get partial with identical variable length
+      o <- partial(mod = obj, x.var = x.var,variable_length = 100,values = rr, plot = FALSE)
+      assertthat::assert_that(all( o$partial_effect == rr ))
+      # Subset to target variable
+      o <- o[, c("partial_effect", layer)]
+      # Normalize if set
+      if(normalize){
+        if(length(unique(o[[layer]]))>1){
+          o[[layer]] <- (o[[layer]] - min( o[[layer]])) / (max(o[[layer]] ) - min(o[[layer]] ))
+          # o[[layer]] <- scale(o[[layer]], center = F, scale = T)
+        } else {
+          o[[layer]] <- 0 # Assumption being the variable has been regularized out
+        }
+      }
+      o$cid <- 1:nrow(o)
+      o$id <- as.character(obj$id)
+      out <- rbind(out, o)
+    }
+
+    # Now composite the ensemble depending on the option
+    if(method == 'mean'){
+      new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
+                                  FUN = function(x = out[[layer]]) {
+                                    return(cbind( mean = mean(x),sd = sd(x)))
+                                    }) |> as.matrix() |> as.data.frame()
+      colnames(new) <- c("partial_effect", "mean", "sd")
+    } else if(method == 'median'){
+      new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
+                       FUN = function(x = out[[layer]]) {
+                         return(cbind( median = median(x), mad = mad(x)))
+                       }) |> as.matrix() |> as.data.frame()
+      colnames(new) <- c("partial_effect", "median", "mad")
+
+    }
+    return(new)
+  }
+)

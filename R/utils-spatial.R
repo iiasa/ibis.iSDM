@@ -436,7 +436,7 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
   if(raster::projection(data) == raster::projection(template)){
     # Crop raster to template
     data <- raster::crop(data, template, snap = "out")
-    if(class(template) == "RasterLayer"){
+    if(inherits(template, "RasterLayer")){
       # Aggregate to minimal scale
       if(data@ncols / template@ncols >= 2){
         factor <- floor(data@ncols/template@ncols)
@@ -602,7 +602,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
                              y = coords,
                              method = "simple",
                              df = TRUE)},silent = FALSE)
-  if(class(ex) == "try-error") stop(paste("Raster extraction failed: ", ex))
+  if(inherits(ex, "try-error")) stop(paste("Raster extraction failed: ", ex))
   # Find those that have NA in there
   check_again <- apply(ex, 1, function(x) anyNA(x))
   if(any(check_again)){
@@ -613,7 +613,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
                                method = "simple",
                                small = TRUE,
                                df = TRUE)},silent = FALSE)
-    if(class(ex_sub) == "try-error") stop(paste("Raster extraction failed: ", ex_sub))
+    if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed: ", ex_sub))
     ex[which(check_again),] <- ex_sub
   }
   # Add coordinate fields to the predictors as these might be needed later
@@ -1351,9 +1351,9 @@ clean_rasterfile <- function(x, verbose = FALSE)
   sink(tempfile())
   tdir = rasterOptions()[["tmpdir"]]
   sink(NULL)
-  if (class(x) == "RasterLayer")
+  if (inherits(x, "RasterLayer"))
     files = basename(x@file@name)
-  if (class(x) == "RasterStack")
+  if (inherits(x, "RasterStack"))
     files = do.call(c, lapply(methods::slot(x, "layers"),
                               function(x) x@file@name))
   files = files[file.exists(files)]

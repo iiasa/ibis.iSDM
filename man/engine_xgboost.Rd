@@ -62,6 +62,9 @@ XGBoost supports the specification of monotonic constraints on certain variables
 ibis this is possible via \code{\link{XGBPrior}}. However constraints are available only for the
 \code{"gbtree"} baselearners.
 }
+\note{
+\emph{'Machine learning is statistics minus any checking of models and assumptions‘} ~ Brian D. Ripley, useR! 2004, Vienna
+}
 \references{
 \itemize{
 \item Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754

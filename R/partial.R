@@ -12,6 +12,7 @@ NULL
 #' @param values [numeric] Directly specified values to compute partial effects for. If set, ignores
 #' \code{"variable_length"} (Default: \code{NULL}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
+#' @param type A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.
 #' @param ... Other engine specific parameters
 #' @seealso [partial]
 #' @details By default the mean is calculated across all parameters that are not \code{x.var}.

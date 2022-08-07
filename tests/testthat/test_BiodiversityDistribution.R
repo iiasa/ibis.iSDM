@@ -1,6 +1,8 @@
 # Setting up a distribution model
 test_that('Setting up a distribution model',{
   testthat::skip_on_cran()
+  skip_if_not_installed('igraph')
+  skip_if_not_installed('rgeos')
 
   library(raster)
   library(sf)
@@ -65,10 +67,16 @@ test_that('Setting up a distribution model',{
 
   # Add brick object make derivatives
   pb <- raster::brick(predictors)
-  x <- distribution(background) %>% add_predictors(pb$aspect_mean_50km,derivates = 'quadratic')
+  x <- distribution(background) %>% add_predictors(pb$aspect_mean_50km, derivates = 'quadratic')
   testthat::expect_equal(x$predictors$length(),2)
   x <- distribution(background) %>% add_predictors(pb, derivates = c('quadratic','hinge'))
   testthat::expect_equal(x$predictors$length(),84)
+
+  # Interactions
+  suppressMessages( expect_error(x |> add_predictors(pb, derivates = "interaction")) )
+  suppressMessages(y <- (x |> add_predictors(pb, derivates = "interaction",int_variables = c(1,2)) ) )
+  testthat::expect_s3_class(y, "BiodiversityDistribution")
+  rm(y)
 
   x <- x %>% engine_inla()
   # Mesh is not created yet

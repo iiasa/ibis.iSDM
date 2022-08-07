@@ -196,7 +196,7 @@ methods::setMethod(
     if('none' %notin% derivates){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
       # Specific condition for interaction
-      if(derivates == "interaction"){
+      if(any(derivates == "interaction")){
         assertthat::assert_that(is.vector(int_variables), length(int_variables)>=2)
         attr(env, "int_variables") <- int_variables
       }

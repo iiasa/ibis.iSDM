@@ -4,6 +4,8 @@ test_that('Check that objects are properly inherited', {
   # Load packages
   require(raster)
   require(sf)
+  skip_if_not_installed('igraph')
+  skip_if_not_installed('abind')
 
   options("ibis.setupmessages" = FALSE)
 

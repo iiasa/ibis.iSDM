@@ -5,7 +5,15 @@
 \alias{partial.DistributionModel}
 \title{Obtain partial effects of trained model}
 \usage{
-partial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
+partial(
+  mod,
+  x.var,
+  constant = NULL,
+  variable_length = 100,
+  values = NULL,
+  plot = FALSE,
+  ...
+)
 
 \S4method{partial}{ANY,character}(mod, x.var)
 
@@ -20,9 +28,14 @@ partial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
 \item{variable_length}{\link{numeric} The interpolation depth (nr. of points) to be used (Default: \code{100}).}
 
+\item{values}{\link{numeric} Directly specified values to compute partial effects for. If set, ignores
+\code{"variable_length"} (Default: \code{NULL}).}
+
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
 \item{...}{Other engine specific parameters}
+
+\item{type}{A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.}
 }
 \value{
 A \link{data.frame} with the created partial response.

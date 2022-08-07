@@ -372,7 +372,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 
     # Reproject if necessary
-    if(st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
+    if(sf::st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
 
     # If distance max is null, set to 0
     if(is.null(distance_max)) distance_max <- 0
@@ -381,10 +381,17 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)){
       temp <- emptyraster(x$predictors$get_data())
     } else {
-      # TODO: Eventually make this work better
-      myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
-      temp <- raster::raster(extent(x$background), resolution = 1)
+      # Try and guess an sensible background raster
+      myLog('[Setup]','red',
+      'CAREFUL - This might not work without predictors already in the model.
+      Add offset after predictors')
+      temp <- raster::raster(extent(x$background),
+                             resolution = diff(sf::st_bbox(x$background)[c(1,3)]) / 1000,
+                             crs = sf::st_crs(x$background)$input)
     }
+
+    # If layer has multiple entries join them
+    if(nrow(layer)>1) layer <- layer |> sf::st_union() |> sf::st_as_sf()
 
     # Rasterize the range
     if( 'fasterize' %in% installed.packages()[,1] ){
@@ -422,9 +429,9 @@ methods::setMethod(
 
     # Inside I want all X across the entire area for the PPMs,
     # indicating a lambda per area of at least X/A (per unit area) within the range
-    ar <- raster::area(ras_range) # Calculate area
-    pres <- 1 + ( ( cellStats(ar * ras_range, "sum") / cellStats(ar, "sum")) * (presence_prop) )
-    abs <- 1 + ( ( cellStats(ar * ras_range, "sum") / cellStats(ar, "sum")) * (1-presence_prop) )
+    suppressWarnings( ar <- raster::area(ras_range) ) # Calculate area
+    pres <- 1 + ( ( raster::cellStats(ar * ras_range, "sum") / raster::cellStats(ar, "sum")) * (presence_prop) )
+    abs <- 1 + ( ( raster::cellStats(ar * ras_range, "sum") / raster::cellStats(ar, "sum")) * (1-presence_prop) )
     # Now set all values inside the range to pres and outside to abs
     ras_range[ras_range == 1] <- pres
     ras_range[is.na(ras_range)] <- abs

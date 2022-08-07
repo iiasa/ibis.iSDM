@@ -10,9 +10,9 @@ It provides methods for accessing, adding and removing priors from the list
 }
 \examples{
 {
- priorlist(
-    INLAPrior('var1',c(0,0.1)),
-    INLAPrior('var2',c(0,0.1))
+ priors(
+    INLAPrior('var1','normal',c(0,0.1)),
+    INLAPrior('var2','normal',c(0,0.1))
    )
 }
 }

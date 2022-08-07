@@ -615,13 +615,13 @@ engine_stan <- function(x,
 
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, length.out = 100, plot = FALSE, type = NULL){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL){
             mod <- self$get_data('fit_best')
             model <- self$model
             if(is.null(type)) type <- self$settings$get("type")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
-                                    is.numeric(length.out),
+                                    is.numeric(variable_length),
                                     is.null(constant) || is.numeric(constant)
             )
             # Check that given variable is in x.var
@@ -629,13 +629,19 @@ engine_stan <- function(x,
             # Calculate
             rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             df_partial <- list()
+            if(!is.null(values)){ variable_length <- length(values) }
+
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), variable_length )
             } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, length.out )
+              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
             }
-            df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = length.out)
+            if(!is.null(values)){
+              df_partial[[x.var]] <- values
+            } else {
+              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+            }
             df_partial <- df_partial %>% as.data.frame()
 
             # For Integrated model, follow poisson

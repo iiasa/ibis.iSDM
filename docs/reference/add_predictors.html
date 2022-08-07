@@ -79,6 +79,7 @@ objects.</p>
 <span>  bgmask <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  explode_factors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -130,6 +131,10 @@ objects.</p>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether any factor variables should be split up into binary variables (one per class). (Default: <code>FALSE</code>).</p></dd>
 
 
+<dt>int_variables</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with length greater or equal than <code>2</code> specifying the covariates  (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>priors</dt>
 <dd><p>A <code><a href="PriorList-class.html">PriorList</a></code> object. Default is set to <code>NULL</code> which uses default prior assumptions.</p></dd>
 
@@ -161,6 +166,7 @@ this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remov
 extreme outliers.</p></li>
 </ul><p>Available options for creating derivates are:</p><ul><li><p><code>'none'</code> - No additional predictor derivates are created.</p></li>
 <li><p><code>'quad'</code> - Adds quadratic transformed predictors.</p></li>
+<li><p><code>'interaction'</code> - Add interacting predictors. Interactions need to be specified (<code>"int_variables"</code>)!</p></li>
 <li><p><code>'thresh'</code> - Add threshold transformed predictors.</p></li>
 <li><p><code>'hinge'</code> - Add hinge transformed predictors.</p></li>
 <li><p><code>'bin'</code> - Add predictors binned by their percentiles.</p></li>

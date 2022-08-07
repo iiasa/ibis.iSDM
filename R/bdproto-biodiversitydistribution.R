@@ -80,10 +80,7 @@ BiodiversityDistribution <- bdproto(
   },
   # Remove limits
   rm_limits = function(self){
-    if(!is.Waiver(self$limits)){
-      self$limits <- new_waiver()
-    }
-    invisible()
+    bdproto(NULL, self, limits = new_waiver() )
   },
   # Function for querying predictor names if existing
   get_predictor_names = function(self) {

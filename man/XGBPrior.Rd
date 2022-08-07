@@ -17,7 +17,7 @@ XGBPrior(variable, hyper = "increasing", ...)
 }
 \description{
 Function to include prior information as monotonic constrain to a
-extreme gradient descent boosting model \link{engine_xgboost}.
+extreme gradient descent boosting model \code{\link{engine_xgboost}}.
 Monotonic priors enforce directionality in direction of certain variables, however
 specifying a monotonic constrain does not guarantee that the variable is not regularized out
 during model fitting.
