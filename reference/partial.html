@@ -67,7 +67,15 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">partial</span><span class="op">(</span><span class="va">mod</span>, <span class="va">x.var</span>, constant <span class="op">=</span> <span class="cn">NULL</span>, variable_length <span class="op">=</span> <span class="fl">100</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">partial</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  <span class="va">x.var</span>,</span>
+<span>  constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  variable_length <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  values <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for ANY,character</span></span>
 <span><span class="fu">partial</span><span class="op">(</span><span class="va">mod</span>, <span class="va">x.var</span><span class="op">)</span></span>
@@ -94,12 +102,21 @@
 <dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> The interpolation depth (nr. of points) to be used (Default: <code>100</code>).</p></dd>
 
 
+<dt>values</dt>
+<dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> Directly specified values to compute partial effects for. If set, ignores
+<code>"variable_length"</code> (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> indication of whether the result is to be plotted?</p></dd>
 
 
 <dt>...</dt>
 <dd><p>Other engine specific parameters</p></dd>
+
+
+<dt>type</dt>
+<dd><p>A specified type, either <code>'response'</code> or <code>'predictor'</code>. Can be missing.</p></dd>
 
 </dl></div>
     <div class="section level2">

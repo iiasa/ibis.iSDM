@@ -93,7 +93,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Creating biodiversity projections</h1>
                         <h4 data-toc-skip class="author">Martin Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-07-31</h4>
+            <h4 data-toc-skip class="date">2022-08-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/03_biodiversity_projections.Rmd" class="external-link"><code>vignettes/03_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>03_biodiversity_projections.Rmd</code></div>
@@ -153,19 +153,19 @@
 <span>  <span class="co"># Note that we scale the predictors here</span></span>
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_current</span>, transform <span class="op">=</span> <span class="st">'scale'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>nrounds <span class="op">=</span> <span class="fl">5000</span>, learning_rate <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span> <span class="co"># Slightly increase the learning rate</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:26:55 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:26:55 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:26:55 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:26:55 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:45 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:45 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:45 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:45 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Train the model</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Simple PPM'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:26:55 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:26:55 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:26:55 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:26:56 | Starting fitting: Virtual points</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-07-31 22:27:03 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-07-31 22:27:03 | Completed after 7.79 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-08-12 15:41:45 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-08-12 15:41:46 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-08-12 15:41:46 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-08-12 15:41:46 | Starting fitting: Virtual points</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2022-08-12 15:41:53 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2022-08-12 15:41:53 | Completed after 7.5 secs</span></span></span>
 <span></span>
 <span><span class="co"># Add a threshold to this model by getting 05 percentile of values</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">modf</span>, method <span class="op">=</span> <span class="st">'percentile'</span>, value <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
@@ -177,8 +177,8 @@
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_future</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from the model object.</span></span>
 <span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:27:03 | Adding scenario predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-07-31 22:27:03 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:53 | Adding scenario predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2022-08-12 15:41:53 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># This creates a scenario object</span></span>
 <span><span class="va">sc</span></span>
@@ -208,7 +208,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-31 22:27:06 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-08-12 15:41:56 | Starting suitability predictions...</span></span></span>
 <span><span class="co"># Note that an indication of fitted scenarios has been added to the object</span></span>
 <span><span class="va">sc.fit1</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
@@ -285,26 +285,27 @@
 <div class="section level2">
 <h2 id="adding-constrains-to-projections">Adding constrains to projections<a class="anchor" aria-label="anchor" href="#adding-constrains-to-projections"></a>
 </h2>
-<p>In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (islands), environmental and biotic constraints on far the species can disperse. These can be specified through the constrain function [<code><a href="../reference/add_constrain.html">add_constrain()</a></code>] and a variety of constrains is currently available, some of which depend on other packages.</p>
+<p>In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (e.g. islands), environmental and biotic constraints on how far a species can disperse. These can be specified through the constrain function [<code><a href="../reference/add_constrain.html">add_constrain()</a></code>] and a variety of constrains is currently available, some of which depend on other packages.</p>
 <ul>
 <li>
-<code><a href="../reference/add_constrain.html">add_constrain()</a></code> Generic wrapper to which a specific ‘method’ can be supplied.</li>
+<code><a href="../reference/add_constrain.html">add_constrain()</a></code> Generic wrapper to which a specific ‘method’ can be supplied. See documentation for more information on available options and parameters.</li>
 <li>
 <code><a href="../reference/add_constrain_dispersal.html">add_constrain_dispersal()</a></code> To add a dispersal constrain to the projections which is applied after each time step. Supports various options with <code>'sdd_fixed'</code> for fixed dispersal kernels, <code>'sdd_nexpkernel'</code> for a negative exponential kernel or <code>'sdd_kissmig'</code> for applying the kissmig framework.</li>
 <li>
-<code><a href="../reference/add_constrain_MigClim.html">add_constrain_MigClim()</a></code> Use the MigClim package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via <code>sc$plot_migclim()</code>). See also the help file and <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x" class="external-link">Engler et al. (2012)</a> for more information.</li>
+<code><a href="../reference/add_constrain_MigClim.html">add_constrain_MigClim()</a></code> Use the MigClim R-package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via <code>sc$plot_migclim()</code>). See also the help file and <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x" class="external-link">Engler et al. (2012)</a> for more information.</li>
 <li>
-<code><a href="../reference/add_constrain_connectivity.html">add_constrain_connectivity()</a></code> Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options and details here.</li>
+<code><a href="../reference/add_constrain_connectivity.html">add_constrain_connectivity()</a></code> Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options here.</li>
 <li>
-<code>add_constrain_adaptability</code> Simple constrains adding constrains on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which ‘cap’ projections in novel environments to the observed ranges of contemporary predictors.</li>
+<code><a href="../reference/add_constrain_adaptability.html">add_constrain_adaptability()</a></code> Simple constrains on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which ‘cap’ projections in novel environments to the observed ranges of contemporary predictors.</li>
 </ul>
+<p>Lastly there are also options to <em>stabilize</em> suitability projections via the <code><a href="../reference/project.html">project()</a></code> function. Specifying a stabilization here results in the projections being smoothed and informed of incremental time steps. This can particularly help for projections that use variables known to make sudden, abrupt jumps between time steps (e.g. precipitation anomalies).</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Adding a simple negative exponential kernel to constrain the predictions</span></span>
 <span><span class="va">sc.fit2</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
 <span>   <span class="fu"><a href="../reference/add_constrain.html">add_constrain</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-31 22:27:17 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-08-12 15:42:07 | Starting suitability predictions...</span></span></span>
 <span></span>
 <span><span class="co"># Also fit one projection a nichelimit has been added</span></span>
 <span><span class="va">sc.fit3</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
@@ -312,7 +313,7 @@
 <span>   <span class="fu"><a href="../reference/add_constrain_adaptability.html">add_constrain_adaptability</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nichelimit"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-07-31 22:27:32 | Starting suitability predictions...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2022-08-12 15:42:21 | Starting suitability predictions...</span></span></span>
 <span></span>
 <span><span class="co"># Note how constrains are indicated in the scenario object.</span></span>
 <span><span class="va">sc.fit3</span></span>

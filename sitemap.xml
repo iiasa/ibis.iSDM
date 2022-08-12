@@ -220,6 +220,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/ensemble.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ensemble_partial.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/explode_factorized_raster.html</loc>
   </url>
   <url>
@@ -302,6 +305,12 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_latent.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_offset.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_predictors.html</loc>
