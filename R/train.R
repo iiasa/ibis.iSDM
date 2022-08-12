@@ -527,44 +527,47 @@ methods::setMethod(
       # Limit zones
       zones <- subset(x$limits, limit %in% unique(zones$limit) )
 
-      # Now clip all predictors and background to this
-      model$background <- suppressMessages(
-        suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE)  %>%
-        sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
-        sf::st_cast("MULTIPOLYGON")
+      # Only if some points actuall fall in the zones
+      if(nrow(zones)>0){
+        # Now clip all predictors and background to this
+        model$background <- suppressMessages(
+          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE)  %>%
+                              sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
+                              sf::st_cast("MULTIPOLYGON")
           )
         )
 
-      # Extract predictors and offsets again if set
-      if(!is.Waiver(model$predictors_object)){
-        # Using the raster operations is generally faster than point in polygon tests
-        pred_ov <- model$predictors_object$get_data()
-        # Make a rasterized mask of the background
-        pred_ov <- raster::mask( pred_ov, model$background )
-        # Convert Predictors to data.frame, including error catching for raster errors
-        # FIXME: This could be outsourced
-        o <- try({ raster::as.data.frame(pred_ov, xy = TRUE) },silent = TRUE)
-        if(inherits(o, "try-error")){
-          o <- as.data.frame( cbind( raster::coordinates(pred_ov),
-                                     as.matrix( pred_ov )) )
-          if(any(is.factor(pred_ov))){
-            o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+        # Extract predictors and offsets again if set
+        if(!is.Waiver(model$predictors_object)){
+          # Using the raster operations is generally faster than point in polygon tests
+          pred_ov <- model$predictors_object$get_data()
+          # Make a rasterized mask of the background
+          pred_ov <- raster::mask( pred_ov, model$background )
+          # Convert Predictors to data.frame, including error catching for raster errors
+          # FIXME: This could be outsourced
+          o <- try({ raster::as.data.frame(pred_ov, xy = TRUE) },silent = TRUE)
+          if(inherits(o, "try-error")){
+            o <- as.data.frame( cbind( raster::coordinates(pred_ov),
+                                       as.matrix( pred_ov )) )
+            if(any(is.factor(pred_ov))){
+              o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+            }
           }
+          model[['predictors']] <- o
+          # model[['predictors_object']]$data <- pred_ov # This is correct, but results in some oddities
+          rm(pred_ov)
+        } else {
+          model$predictors[which( is.na(
+            point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
+          )),model$predictors_names] <- NA # Fill with NA
         }
-        model[['predictors']] <- o
-        # model[['predictors_object']]$data <- pred_ov # This is correct, but results in some oddities
-        rm(pred_ov)
-      } else {
-        model$predictors[which( is.na(
-          point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
-        )),model$predictors_names] <- NA # Fill with NA
-      }
-      # The same with offset if specified
-      # Note this operation below is computationally quite costly
-      if(!is.Waiver(x$offset)){
-        model$offset[which( is.na(
-          point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-        )), "spatial_offset" ] <- NA # Fill with NA
+        # The same with offset if specified
+        # Note this operation below is computationally quite costly
+        if(!is.Waiver(x$offset)){
+          model$offset[which( is.na(
+            point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
+          )), "spatial_offset" ] <- NA # Fill with NA
+        }
       }
     }
     # Messenger
@@ -1088,7 +1091,9 @@ methods::setMethod(
 
   # Clip to limits again to be sure
   if(!is.Waiver(x$limits)) {
-    out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+    if(settings$get('inference_only')==FALSE){
+      out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+    }
     out$settings$set("has_limits", TRUE)
   } else {
     out$settings$set("has_limits", FALSE)

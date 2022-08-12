@@ -133,8 +133,8 @@ plot( mod1$predictors$get_data()[[c("elev_low", "elev_high")]] )
 
 ## Integration through offsets
 
-Apart from including spatial-explicit prior biodiversity knowledge as predictors in a SDM model, there is - particular for Poisson Process Models (PPM) - also a different approach, that is to include the variable as offset in the prediction. Doing so affects the tells the respective engine to change intercepts and coefficients based on an already provided coefficient.
-Offsets can be specified as addition or as nuisance to existing model, for instance either by adding an expert-delienated range as offset or by factoring out the spatial bias of their occurrence. Multiple offsets can be specified for any given PPM by simply multiplying them. A comprehensive overview can be found in [Merow et al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
+Apart from including spatial-explicit prior biodiversity knowledge as predictors in a SDM model, there is - particular for Poisson Process Models (PPM) - also a different approach, that is to include the variable as offset in the prediction. Doing so effectively tells the respective engine to change intercepts and coefficients based on existing knowledge, which can for instance be an existing coefficient.
+Offsets can be specified as addition or as nuisance for a model, for instance either by adding an expert-delineated range as offset or by factoring out the spatial bias of areas with high sampling density or accessibility. Multiple offsets can be specified for any given PPM by simply multiplying them, since $log(off_1 * off_2) = log(off_1) + log(off_2)$. A comprehensive overview of including offsets in SDMs can be found in [Merow et al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
 
 ```{r}
 
@@ -157,14 +157,14 @@ There are other ways to add offsets to the model object, either directly (`add_o
 
 ## Integration with priors
 
-A different type of integration is also possible through the use of priors which are usually set either on 
-fixed or random effects. In a Bayesian sense a prior is generally understood as some form of uncertain quantity that is meant to reflect the direction and/or magnitude of model parameters and is usually known a-priori to any inference or prediction. Since the ibis.iSDM package supports a variety of engines and not all of them are Bayesian in a strict sense (such as `engine_gdb` or `engine_xgboost`), the specification of priors differs depending on the engine in question. 
+A different type of integration is also possible through the use of informed priors, which can be set on 
+fixed or random effects in the model. In a Bayesian context a prior is generally understood as some form of uncertain quantity that is meant to reflect the direction and/or magnitude of model parameters and is usually known a-priori to any inference or prediction. Offsets can also be understood as "priors", however in the context of SDMs, they are usually included as spatial-explicit data, opposed to priors that are only available in tabular form (such as known habitat affiliations). Since the ibis.iSDM package supports a variety of engines and not all of them are Bayesian in a strict sense (such as `engine_gdb` or `engine_xgboost`), the specification of priors differs depending on the engine in question. 
 
 Generally [`Prior-class`] objects can be grouped into:
 
 * Probabilistic priors with estimates placed on for example the mean ($\mu$) and standard deviation ($\sigma$) or precision in the case of [`engine_inla`].
 
-* Monotonic constraints on the direction of a coefficient in the model. Useful to incorporate for instance prior ecological knowledge on that a certain response function has to be positive.
+* Monotonic constraints on the direction of a coefficient and predictor in the model, such that is $f(x_1) >= f(x_2)$ or  $f(x_1) <= f(x_2)$. Useful to incorporate for instance prior ecological knowledge on that a certain response function has to be positive.
 
 * More complex priors specified on random spatial effects such as penalized complexity priors used for SPDE effects in [`add_latent_spatial()`]. 
 
@@ -205,13 +205,13 @@ p2 <- partial(mod2, pp$varnames(), plot = TRUE)
 
 ```
 
-There is also now a convenience function that allows to extractt coefficients or weights from an existing model when can then be passed to another model or engine (`get_priors()`). Required is only that a fitted model is provided as well as a target engine for which coefficients are to be created.
+There is also now a convenience function that allows to extract coefficients or weights from an existing model when can then be passed to another model or engine (`get_priors()`). Only requirement is that a fitted model is provided as well as the target engine for which coefficients/priors are to be created.
 
 ---
 
 ## Integration with ensembles
 
-Another very straight forward way for model-based integration is to simply fit two separate models each with a different biodiversity dataset and then create an ensemble from them. This approach also works across different engines and a variety of data types (in some cases requiring normalization given the difference in units).
+Another very straight forward way for model-based integration is to simply fit two separate models each with a different biodiversity dataset and then create an ensemble from them. This approach also works across different engines and a variety of data types (in some cases requiring normalization given the difference in units and model assumptions).
 
 ```{r Model ensembles}
 # Create and fit two models
@@ -249,7 +249,7 @@ plot(e)
 ## Combined and joint likelihood estimation
 
 In the examples above we always added only a single biodiversity data source to a model to be trained, but what if we add multiple different ones?
-As outlined by [Isaac et al. 2020](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) joint, model-based integration of different datasources allows to borrow strengths of different datasets (quantity, quality) and can help in supposedly more accurate parameter estimations and help to control for biases. 
+As outlined by [Isaac et al. 2020](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) joint, model-based integration of different data sources allows to borrow strengths of different types of datasets (quantity, quality) for more accurate parameter estimations as well as the control of biases. Particular for SDMs it also has the benefit of avoiding to make unreasonable assumptions about the absence of a species, as commonly being done through the addition of pseudo-absences (despite being called pseudo, any logistic likelihood function treats them as *true* absence).
 
 Depending on the engine, the ibis.iSDM package currently supports either combined or joint estimation of several datasets.
 
@@ -259,16 +259,15 @@ By default all engines that do not support any joint estimation (see below) will
 
 * "predictor": The predicted output of the first (or previously fitted) models are added to the predictor stack and thus are predictors for subsequent models (Default).
 
-* "offset": The predicted output of the first (or previously fitted) models are added as spatial offsets to subsequent models. Offsets are back-transformed depending on the model family.
+* "offset": The predicted output of the first (or previously fitted) models are added as spatial offsets to subsequent models. Offsets are back-transformed depending on the model family. This might not work for all likelihood functions and engines!
 
-* "prior": In this option we only make use of the coefficients from a previous model to define priors to be used in the next model. Might not work with any engine!
+* "prior": In this option we only make use of the coefficients from a previous model to define priors to be used in the next model. Note that this option creates priors based on previous fits and can result in unreasonable constrains (particular if coefficients are driven largely by latent variables). Can be used in projections (`scenario()`).
 
-* "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset). This subsequently only works if one fits a model with multiple datasets on the same response (e.g. Bernoulli distributed).
-
+* "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset) with the others being "partialed" out during prediction. This method only works if one fits a model with multiple datasets on the same response (e.g. Bernoulli distributed). Can be used in projections (`scenario()`).
 
 All of these can be specified as parameter in `train()`.
 
-<b>Note that for "predictor" and "offset" models are trained in the sequence to which datasets have been added!</b>
+<b>Note that for any of these methods (like "predictor" & "offset"), models are trained in the sequence at which datasets are added!</b>
 
 ```{r Combined integration}
 # Specification 
@@ -290,19 +289,19 @@ plot(mod1)
 
 #### Joint likelihood estimation
 
-Some engines, notably [`engine_inla`], [`engine_inlabru`] and [`engine_stan`] support the joint estimation of multiple likelihoods. The algorithmic approach in this package generally follows an approach outlined where any presence-only datasets are modelled through a log-Gaussian Cox process where the expected number of individuals are estimated as a function of area following a Poisson distribution.  
+Some engines, notably [`engine_inla`], [`engine_inlabru`] and [`engine_stan`] support the joint estimation of multiple likelihoods. The algorithmic approach in this package generally follows an approach outlined where any presence-only datasets are modelled through a log-Gaussian Cox process where the expected number of individuals are estimated as a function of area $A$ following a Poisson distribution:
 
 \begin{align*}
 N(A) &\sim {\sf Poisson}\left(\int_{A} \lambda(i)\right) \\
 \end{align*}
 \begin{align*}
-\log(\lambda(i)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{ki} 
+\log(\lambda(i)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{i} 
 \end{align*}
 
-where $N$ is the number of individuals and $A$ the Area for a given spatial unit $i$, with
+where $N$ is the number of individuals, $A$ the Area for a given spatial unit $i$, with
 $N(A)$ being an estimate of the relative rate of occurrence per unit area (or ROR). $k$ is an
 increment for $K$ number of predictors. $\lambda$ is the intensity function, $\alpha$ the intercept and
-$\beta$ the parameter coefficients for environmental covariates.
+$\beta$ the parameter coefficients for environmental covariates. Note that for interactions
 
 Presence-absence data are estimated as draws from a *Bernoulli* distribution:
 
@@ -310,15 +309,14 @@ Presence-absence data are estimated as draws from a *Bernoulli* distribution:
 Y_{i} &\sim {\sf Bernoulli(p_{i})}, i = 1, 2, ... \\
 \end{align*}
 \begin{align*}
-\log(-\log(1-p_{i})) &= \alpha_{2} + \sum_{k}^{K} \beta_{k}x_{ki} 
+\log(-\log(1-p_{i})) &= \alpha_{2} + \sum_{k}^{K} \beta_{k}x_{i}
 \end{align*}
 
-where $Y$ is the presence-absence of an record as sampled from a *Bernoulli* distribution in a given spatial unit $i$. 
-$\alpha$ being the intercept and $\beta$ the parameter coefficients for environmental covariates.
+where $Y$ is the presence-absence of an record (usually a standardized survey) as sampled from a *Bernoulli* distribution in a given spatial unit $i$. $\alpha$ being the intercept and $\beta$ the parameter coefficients for environmental covariates. The log-likelihood can be understood as cloglog functon.
 
-The Joint likelihood is then estimated by multiplying the two likelihoods from above $\prod_{l}^{L} f(l)$, where $L$ is an individual likelihood, with $\beta_{k}$ being shared parameters between the two likelihoods. Equally it is also possible to add latent spatial effects such as Gaussian fields (approximated through a stochastic partial differential equation (SPDE)) to the model, alowing to share the spatial covariance - or bias - among datasets.
+The Joint likelihood is then estimated by multiplying the two likelihoods from above $\prod_{l}^{L} f(l)$, where $L$ is an individual likelihood, with $\beta_{k}$ being shared parameters between the two likelihoods. This works if we assume that $cloglog(p_i) \approx log(\lambda(i))$. Equally it is also possible to add shared latent spatial effects such as Gaussian fields (approximated through a stochastic partial differential equation (SPDE)) to the model, assuming that there are shared factors - or biases - affecting all datasets.
 
-See the [Engine comparison](04_engine_comparison.html) for an overview on which engines support this level of integration.
+See the [Engine comparison](04_engine_comparison.html) for an overview on which engines support which level of integration.
 
 ```{r, warning=FALSE, message=FALSE}
 

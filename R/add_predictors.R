@@ -135,7 +135,7 @@ methods::setMethod(
     )
     assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
                             msg = 'Supplied environmental data not aligned with background.')
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
 
     if(!is.null(names)) {
@@ -175,8 +175,8 @@ methods::setMethod(
           env <- addLayer(env, env_f)
         } else {
           o <- raster::stack()
-          for(layer in env_f){
-            o <- raster::addLayer(o, explode_factorized_raster(layer))
+          for(layer in names(env_f)){
+            o <- raster::addLayer(o, explode_factorized_raster(env_f[[layer]]))
           }
           env_f <- o;rm(o)
           # Joining back to full raster stack
@@ -954,6 +954,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
   assertthat::assert_that(
     file.exists(fname),
     assertthat::has_extension(fname, "nc"),
+    is.character(oftype),
     is.character(period),
     is.character(fname),
     is.logical(verbose)

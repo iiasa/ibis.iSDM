@@ -105,53 +105,85 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' Create mask based on a zonal layer
 #'
 #' @description
-#' This function takes available point data and intersects it with a zonal layer
-#' of the
+#' This function has options to create a mask based on provided point data. It is identical in functionality to
+#' the parameter \code{'limit'} in `train()`. Currently it has two available options:
+#'
+#' [*] It is either possible to provide a categorical zonal raster layer takes available point data and intersects it with a
+#' zonal layer. The output is a [`RasterLayer`] object with only those classes in which a point occurrence fell.
+#' Typical example for instance is layer of the distribution of Biomes, Ecoregions or Climatic Zones.
+#'
+#' [*] Buffer, in which case a buffer in the units of the geographic projection are created. Buffer width have to
+#' be supplied as non-NULL parameter to \code{'buffer_width'}. The output mask thus allows to limit the prediction
+#' to a spatial buffer of provided extent within any geovalid occurrence record.
+#'
 #' @param df A [`sf`] object with point information.
 #' @param zones A [`sf`] or [`RasterLayer`] object with polygons of the zones to be used for occurrence masking.
+#' @param buffer_width A [`numeric`] value specifying the buffer width. Ignored if a Zones layer is provided.
 #' @param column A [`character`] giving the column in which zonal ids are found. Only used when zones is of
 #' type [`sf`].  (Default: \code{"limits"}).
 #' @param template An optional [`RasterLayer`] object on which which the zones should be rasterized (Default: \code{NULL}).
 #' @returns A [`sf`] or [`RasterLayer`] object.
 #' @keywords utils
 #' @noRd
-create_zonaloccurrence_mask <- function(df, zones, column = "limits", template = NULL){
+create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
   assertthat::assert_that(
     inherits(df, "sf"),
     unique(sf::st_geometry_type(df)) %in% "POINT",
     is.character(column),
-    inherits(zones, "sf") || is.Raster(zones),
-    is.null(template) || is.Raster(template)
+    is.null(zones) || (inherits(zones, "sf") || is.Raster(zones)),
+    is.null(buffer_width) || is.numeric(buffer_width),
+    is.null(template) || is.Raster(template),
+    # Can't have both set
+    !(is.null(zones) && is.null(buffer_width))
   )
-  # If zones is sf, check that it is of type polygon
-  if(inherits(zones, "sf")) assertthat::assert_that( all( unique(sf::st_geometry_type(zones)) %in% c("POLYGON", "MULTIPOLYGON") ) )
+  # Make zones mask
+  if(!is.null(zones)){
+    # If zones is sf, check that it is of type polygon
+    if(inherits(zones, "sf")) assertthat::assert_that( all( unique(sf::st_geometry_type(zones)) %in% c("POLYGON", "MULTIPOLYGON") ) )
 
-  if(inherits(zones, "sf")){
-    # Get zones from the limiting area, e.g. those intersecting with input
-    suppressMessages(
-      suppressWarnings(
-        zones <- sf::st_intersection(df, zones)
-      )
-    )
-    # Limit zones
-    zones <- subset(zones, limit %in% unique(zones[[column]]) )
-
-    # Finally rasterize if template is set
-    if(!is.null(template)) zones <- raster::rasterize(zones, template, field = column)
-  } else {
-    # Extract values from zonal raster layer
-    ex <- raster::extract(zones, df) |> unique()
-    # Remove NA if found
-    if(anyNA(ex)) ex <- ex[-which(is.na(ex))]
-
-    # Now create copy of zonal raster and set all values other than ex to NA
-    new <- emptyraster(zones)
-    new[zones %in% ex] <- 1
-    zones <- new
-    # Align with template if set
-    if(!is.null(template)){
-      zones <- alignRasters(zones, template, method = "ngb", func = raster::modal, cl = FALSE)
+    if(sf::st_crs(df)!=sf::st_crs(zones)){
+      zones <- zones |> sf::st_transform(crs = sf::st_crs(df))
     }
+
+    if(inherits(zones, "sf")){
+      # Get zones from the limiting area, e.g. those intersecting with input
+      suppressMessages(
+        suppressWarnings(
+          zones <- sf::st_intersection(df, zones)
+        )
+      )
+      # Limit zones
+      zones <- subset(zones, limit %in% unique(zones[[column]]) )
+
+      # Finally rasterize if template is set
+      if(!is.null(template)) zones <- raster::rasterize(zones, template, field = column)
+    } else {
+      # Extract values from zonal raster layer
+      ex <- raster::extract(zones, df) |> unique()
+      # Remove NA if found
+      if(anyNA(ex)) ex <- ex[-which(is.na(ex))]
+
+      # Now create copy of zonal raster and set all values other than ex to NA
+      new <- emptyraster(zones)
+      new[zones %in% ex] <- 1
+      zones <- new
+      # Align with template if set
+      if(!is.null(template)){
+        if(raster::compareRaster(zones, temolate,stopiffalse = FALSE)){
+          zones <- raster::resample(zones, template, method = "ngb", func = raster::modal)
+        }
+      }
+    }
+  } else {
+    assertthat::assert_that(
+      is.Raster(template),msg = "A background layer has to be provided for this function to work!"
+    )
+    # Buffer points width provided layer
+    suppressWarnings(
+      buf <- sf::st_buffer(x = df, dist = buffer_width, nQuadSegs = 50)
+    )
+    # Rasterize
+    zones <- raster::rasterize(buf, background, field = 1)
   }
   return(zones)
 }

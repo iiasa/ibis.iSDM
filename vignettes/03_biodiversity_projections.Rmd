@@ -183,13 +183,15 @@ Finally, scenarios projections can also be saved as specific outputs. As before,
 
 ## Adding constrains to projections
 
-In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (islands), environmental and biotic constraints on far the species can disperse. These can be specified through the constrain function [`add_constrain()`] and a variety of constrains is currently available, some of which depend on other packages.
+In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (e.g. islands), environmental and biotic constraints on how far a species can disperse. These can be specified through the constrain function [`add_constrain()`] and a variety of constrains is currently available, some of which depend on other packages.
 
-* `add_constrain()` Generic wrapper to which a specific 'method' can be supplied.
+* `add_constrain()` Generic wrapper to which a specific 'method' can be supplied. See documentation for more information on available options and parameters.
 * `add_constrain_dispersal()` To add a dispersal constrain to the projections which is applied after each time step. Supports various options with `'sdd_fixed'` for fixed dispersal kernels, `'sdd_nexpkernel'` for a negative exponential kernel or `'sdd_kissmig'` for applying the kissmig framework.
-* `add_constrain_MigClim()` Use the MigClim package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via `sc$plot_migclim()`). See also the help file and [Engler et al. (2012)](https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x) for more information.
-* `add_constrain_connectivity()` Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options and details here.
-* `add_constrain_adaptability` Simple constrains adding constrains on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which 'cap' projections in novel environments to the observed ranges of contemporary predictors.
+* `add_constrain_MigClim()` Use the MigClim R-package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via `sc$plot_migclim()`). See also the help file and [Engler et al. (2012)](https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x) for more information.
+* `add_constrain_connectivity()` Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options here.
+* `add_constrain_adaptability()` Simple constrains on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which 'cap' projections in novel environments to the observed ranges of contemporary predictors.
+
+Lastly there are also options to *stabilize* suitability projections via the `project()` function. Specifying a stabilization here results in the projections being smoothed and informed of incremental time steps. This can particularly help for projections that use variables known to make sudden, abrupt jumps between time steps (e.g. precipitation anomalies).  
 
 ```{r Add constrains and reproject, eval = TRUE, fig.width = w, fig.height = h}
 # Adding a simple negative exponential kernel to constrain the predictions
