@@ -816,7 +816,7 @@ engine_inla <- function(x,
                 "prediction" = prediction
                 ),
               # Projection function
-              project = function(self, newdata, mode = 'coef', backtransf = NULL){
+              project = function(self, newdata, mode = 'coef', backtransf = NULL, layer = "mean"){
                 assertthat::assert_that('fit_best' %in% names(self$fits),
                                         is.data.frame(newdata) || is.matrix(newdata),
                                         mode %in% c('coef','sim','full'),
@@ -837,7 +837,7 @@ engine_inla <- function(x,
                                   )
                 } else if(mode == 'sim'){
                   # Simulate from posterior. Not yet coded
-                  stop('Simulation from posterior not yet there.')
+                  stop('Simulation from posterior not yet implemented. Use inlabru instead!')
                 } else {
                   stop('Full prediction not yet added.')
                 }

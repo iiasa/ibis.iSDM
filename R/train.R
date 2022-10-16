@@ -76,6 +76,7 @@ NULL
 #' See Examples.
 #' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: \code{NULL}).
 #' Specifying a [`numeric`] value here sets \code{bias_variable} to the target value.
+#' @param aggregate_observations [`logical`] on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).
 #' @param ... further arguments passed on.
 #' @references
 #' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
@@ -112,7 +113,7 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) standardGeneric("train"))
+           bias_variable = NULL, bias_value = NULL, aggregate_observations = TRUE, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -122,7 +123,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           bias_variable = NULL, bias_value = NULL, verbose = FALSE,...) {
+           bias_variable = NULL, bias_value = NULL, aggregate_observations = TRUE, verbose = FALSE,...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -149,7 +150,7 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver();method_integration="predictor"
+    #rm_corPred = TRUE; varsel = "none"; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver();method_integration="predictor";aggregate_observations = TRUE
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
@@ -371,6 +372,14 @@ methods::setMethod(
         } else { model[['biodiversity']][[id]][['pseudoabsence_settings']] <- getOption("ibis.pseudoabsence")}
       }
 
+      # Aggregate observations if poipo
+      if(aggregate_observations && model[['biodiversity']][[id]][['type']] == "poipo"){
+        model$biodiversity[[id]]$observations <- aggregate_observations2grid(
+          df = model$biodiversity[[id]]$observations,
+          template = emptyraster(x$predictors$get_data(df = FALSE)),
+          field_occurrence = "observed")
+      }
+
       # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
       env <- get_rastervalue(coords = guess_sf(model$biodiversity[[id]]$observations),
                              env = model$predictors_object$get_data(df = FALSE),
@@ -406,6 +415,10 @@ methods::setMethod(
         'observed' %in% names( model[['biodiversity']][[id]][['observations']] ),
         all( apply(env, 1, function(x) all(!is.na(x) )) ),msg = 'Missing values in extracted environmental predictors.'
       )
+      if((aggregate_observations && model[['biodiversity']][[id]][['type']] == "poipa")){
+        assertthat::assert_that( has_zeros(model[['biodiversity']][[id]][["observations"]][['observed']]),
+                                 msg = paste(model[['biodiversity']][[id]]$name, "poipa dataset has no absence information") )
+      }
 
       # Check whether predictors should be refined and do so
       if(settings$get('rm_corPred') && ('dummy' %in% model[['predictors_names']])){
@@ -515,7 +528,7 @@ methods::setMethod(
     if(!is.Waiver(x$limits)){
       # Get biodiversity data
       coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y','observed')] ) )
-      coords <- subset(coords, observed > 0)
+      coords <- subset(coords, observed > 0) # Remove absences
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
@@ -527,7 +540,7 @@ methods::setMethod(
       # Limit zones
       zones <- subset(x$limits, limit %in% unique(zones$limit) )
 
-      # Only if some points actuall fall in the zones
+      # Only if some points actually fall in the zones
       if(nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(

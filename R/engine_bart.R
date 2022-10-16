@@ -18,8 +18,8 @@ NULL
 #' * probability that a given variable is chosen for a splitting rule
 #' * probability of splitting that variable at a particular value (Not yet implemented)
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param iter A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
 #' @param nburn A [`numeric`] estimate of the burn in samples.
-#' @param ntree A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
 #' @param chains A number of the number of chains to be used (Default: \code{4})
 #' @param type The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @references
@@ -34,8 +34,8 @@ NULL
 #' @export
 
 engine_bart <- function(x,
+                        iter = 1000,
                         nburn = 250,
-                        ntree = 1000,
                         chains = 4,
                         type = "response",
                        ...) {
@@ -50,11 +50,12 @@ engine_bart <- function(x,
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           is.numeric(nburn),
-                          is.numeric(ntree),
+                          is.numeric(iter),
                           is.character(type),
                           is.numeric(chains)
                           )
-  type <- match.arg(type, choices = c("link", "response"),several.ok = FALSE)
+  type <- match.arg(type, choices = c("link", "response"), several.ok = FALSE)
+  if(nburn > iter) nburn <- floor( iter / 4)
 
   # Create a background raster
   if(is.Waiver(x$predictors)){
@@ -77,7 +78,7 @@ engine_bart <- function(x,
   # Set up dbarts control with some parameters, rest default
   dc <- dbarts::dbartsControl(keepTrees	= TRUE, # Keep trees
                               n.burn = nburn,
-                              n.trees = ntree,
+                              n.trees = iter,
                               n.chains = chains,
                               n.threads = ifelse( dbarts::guessNumCores() < getOption('ibis.nthread'),dbarts::guessNumCores(),getOption('ibis.nthread'))
   )
@@ -112,8 +113,8 @@ engine_bart <- function(x,
       },
       # Function to respecify the control parameters
       set_control = function(self,
+                             iter = 1000,
                              nburn = 250,
-                             ntree = 1000,
                              chains = 4,
                              cores = dbarts::guessNumCores(),
                              verbose = TRUE,
@@ -122,7 +123,7 @@ engine_bart <- function(x,
         # Set up boosting control
         dc <- dbarts::dbartsControl(verbose = verbose,
                                     n.burn = nburn,
-                                    n.trees = ntree,
+                                    n.trees = iter,
                                     n.chains = chains,
                                     n.threads = cores,
                                     ...
@@ -533,38 +534,38 @@ engine_bart <- function(x,
             return(cofs)
           },
           # Engine-specific projection function
-          project = function(self, newdata, summary = 'mean'){
+          project = function(self, newdata, type = "response", layer = 'mean'){
             assertthat::assert_that(!missing(newdata),
                                     is.data.frame(newdata))
 
             # Define rowids as those with no missing data
-            newdata$rowid <- rownames(newdata)
+            rownames(newdata) <- 1:nrow(newdata)
+            newdata$rowid <- as.numeric( rownames(newdata) )
             newdata <- subset(newdata, complete.cases(newdata))
             # Make a prediction
             suppressWarnings(
               pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
                                                  newdata = newdata,
-                                                 type = 'response')
+                                                 type = type) |> t()
               )
+            assertthat::assert_that(nrow(pred_bart) == nrow(newdata))
             # Fill output with summaries of the posterior
-            prediction <- emptyraster(self$fits$prediction) # Background
-            prediction[as.numeric(newdata$rowid)] <- apply(pred_bart, 2, mean)
-
-            # TODO: Generalize uncertainty prediction
-            # # Summarize quantiles and sd from posterior
-            # ms <- as.data.frame(
-            #   cbind( matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-            #          matrixStats::colSds(pred_bart)
-            #   )
-            # )
-            # names(ms) <- c('0.05ci','0.5ci','0.95ci','sd')
-            # # Add them
-            # for(post in names(ms)){
-            #   prediction2 <- self$get_data('template')
-            #   prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
-            #   prediction <- raster::addLayer(prediction, prediction2)
-            #   rm(prediction2)
-            # }
+            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            if(layer == "mean"){
+              prediction[newdata$rowid] <- matrixStats::rowMeans2(pred_bart)
+            } else if(layer == "sd"){
+              prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart)
+            } else if(layer == "q05"){
+              prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.05))
+            } else if(layer == "q50" || layer == "median"){
+              prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.5))
+            } else if(layer == "q95"){
+              prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.95))
+            } else if(layer == "mode"){
+              prediction[newdata$rowid] <- apply(pred_bart, 1, mode)
+            } else if(layer == "cv"){
+              prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
+            } else { message("Custom posterior summary not yet implemented.")}
             return(prediction)
           }
         )

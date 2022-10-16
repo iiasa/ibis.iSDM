@@ -19,7 +19,7 @@ NULL
 #' @param booster A [`character`] of the booster to use. Either \code{"gbtree"} or \code{"gblinear"} (Default: \code{gblinear})
 #' @param learning_rate [`numeric`] value indicating the learning rate (eta).
 #' Lower values generally being better but also computationally more costly. (Default: \code{1e-3})
-#' @param nrounds [`numeric`] value giving the the maximum number of boosting iterations for cross-validation.
+#' @param iter [`numeric`] value giving the the maximum number of boosting iterations for cross-validation (Default: \code{8e3L}).
 #' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
 #' Also see [reg_lambda] parameter for the L2 regularization on the weights
 #' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
@@ -43,8 +43,8 @@ NULL
 
 engine_xgboost <- function(x,
                         booster = "gbtree",
+                        iter = 8e3L,
                         learning_rate = 1e-3,
-                        nrounds = 10000,
                         gamma = 6,
                         reg_lambda = 0,
                         reg_alpha = 0,
@@ -65,7 +65,7 @@ engine_xgboost <- function(x,
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
                           is.character(booster) && booster %in% c("gbtree","gblinear"),
-                          is.numeric(nrounds),
+                          is.numeric(iter),
                           is.numeric(learning_rate) && (learning_rate > 0 && learning_rate < 1),
                           is.numeric(max_depth),
                           is.numeric(subsample) && (subsample > 0 && subsample <= 1),
@@ -94,7 +94,7 @@ engine_xgboost <- function(x,
   # Set up the parameter list
   params <- list(
     booster = booster,
-    nrounds = nrounds,
+    nrounds = iter,
     eta = learning_rate,
     gamma = gamma,
     lambda = reg_lambda,
@@ -168,10 +168,12 @@ engine_xgboost <- function(x,
           assertthat::assert_that(!is.na(cellStats(bg,min)))
 
           # Add pseudo-absence points
-          presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
-                                       field_occurrence = 'observed',
-                                       template = bg,
-                                       settings = model$biodiversity[[1]]$pseudoabsence_settings)
+          suppressMessages(
+            presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
+                                         field_occurrence = 'observed',
+                                         template = bg,
+                                         settings = model$biodiversity[[1]]$pseudoabsence_settings)
+          )
           if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
 
           # Sample environmental points for absence only points
@@ -692,7 +694,7 @@ engine_xgboost <- function(x,
             return(template)
           },
           # Engine-specific projection function
-          project = function(self, newdata){
+          project = function(self, newdata, layer = "mean"){
             assertthat::assert_that(!missing(newdata),
                                     is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
@@ -714,9 +716,9 @@ engine_xgboost <- function(x,
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             prediction[] <- pred_xgb
-            prediction <- raster::mask(prediction, self$get_data('prediction') )
+            prediction <- raster::mask(prediction, self$model$predictors_object$get_data()[[1]] )
 
             return(prediction)
           },

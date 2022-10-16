@@ -45,12 +45,12 @@ methods::setMethod(
            point = NULL, point_column = 'observed', ...){
     assertthat::assert_that(
       inherits(mod, "DistributionModel"),
-      "prediction" %in% mod$show_rasters(),
       inherits(point, 'sf') || is.null(point),
       is.null(point_column) || is.character(point_column),
       is.character(layer),
       is.character(method)
     )
+    assertthat::assert_that( "prediction" %in% mod$show_rasters(),msg = "No prediction of the fitted model found!" )
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
       assertthat::assert_that(is.character(point_column),

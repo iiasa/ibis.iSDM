@@ -28,9 +28,9 @@ NULL
 #' @export
 
 engine_breg <- function(x,
-                           iter = 10000,
-                           nthread = getOption('ibis.nthread'),
-                           type = "response",
+                        iter = 10000,
+                        nthread = getOption('ibis.nthread'),
+                        type = "response",
                            ...) {
 
   # Check whether xgboost package is available
@@ -126,11 +126,6 @@ engine_breg <- function(x,
 
         # Distribution specific procedure
         fam <- model$biodiversity[[1]]$family
-
-        # If offset is specified, raise warning
-        # if(!is.Waiver(model$offset)){
-        #   if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Engine breg can not use offsets. Ignored for now.')
-        # }
 
         # Check whether regularization parameter is set to none, if yes, raise message
         if(settings$get("varsel") != "none"){
@@ -654,7 +649,7 @@ engine_breg <- function(x,
             return(cofs)
           },
           # Engine-specific projection function
-          project = function(self, newdata, type = NULL){
+          project = function(self, newdata, type = NULL, layer = "mean"){
             assertthat::assert_that("model" %in% names(self),
                                     nrow(newdata) > 0,
                                     all( c("x", "y") %in% names(newdata) ),
@@ -693,18 +688,26 @@ engine_breg <- function(x,
               params = settings$data # Use the settings as list
             )
 
-            # Summarize the partial effect
-            pred_part <- cbind(
-              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-              matrixStats::rowSds(pred_breg, na.rm = TRUE),
-              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-              apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
-            names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            pred_part$cv <- pred_part$sd / pred_part$mean
+            # Summarize the partial effect depending on layer
+            if(layer == "mean"){
+              pred_bart <- cbind( matrixStats::rowMeans2(pred_breg, na.rm = TRUE) )
+            } else if(layer == "sd"){
+              pred_bart <- cbind( matrixStats::rowSds(pred_breg, na.rm = TRUE) )
+            } else if(layer == "q05"){
+              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.05), na.rm = TRUE) )
+            } else if(layer == "q5" || layer == "median"){
+              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.5), na.rm = TRUE) )
+            } else if(layer == "q95"){
+              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.95), na.rm = TRUE) )
+            } else if(layer == "mode"){
+              pred_part <- cbind( apply(pred_breg, 1, mode) )
+            } else if(layer == "cv"){
+              pred_part <- cbind( matrixStats::rowSds(pred_breg, na.rm = TRUE) / matrixStats::rowMeans2(pred_breg, na.rm = TRUE) )
+            }
+            names(pred_part) <- layer
 
             # Now create spatial prediction
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             prediction <- fill_rasters(pred_part, prediction)
 
             return(prediction)

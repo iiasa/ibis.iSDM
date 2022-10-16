@@ -31,6 +31,7 @@ NULL
 #' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
 #' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
 #' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
+#' * \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
 #' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the [modEvA] package to be installed.
 #' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the [modEvA] package to be installed.
 #' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the [modEvA] package to be installed.
@@ -93,8 +94,11 @@ methods::setMethod(
       msg = 'No fitted prediction in object!'
     )
     # Matching for correct method
-    method <- match.arg(method, c('fixed','mtp','percentile',
+    method <- match.arg(method, c('fixed','mtp','percentile','min.cv',
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
+
+    # If method is min.cv, check that posterior is accessible
+    if(method == "min.cv") assertthat::assert_that("cv" %in% names(ras), msg = "Method min.cv requires a posterior prediction and coefficient of variation!")
 
     # Get all point data in distribution model
     poi <- do.call(sf:::rbind.sf,
@@ -129,6 +133,7 @@ methods::setMethod(
       abs <- subset(abs, select = c("observed", "name", "type","geometry"))
       poi <- rbind(poi, abs);rm(abs)
     }
+
     # Convert to sf
     if(!inherits(poi,"sf")){ poi <- guess_sf(poi) }
 
@@ -171,8 +176,22 @@ methods::setMethod(
   } else {
     # Return the raster instead
     out <- raster::stack()
+    if(method == "min.cv"){
+      # If the coefficient of variation is to be minmized, mask first all values with the threshold only
+      assertthat::assert_that(raster::nlayers(obj)>2, "sd" %in% names(obj))
+      # Get global coefficient of variation
+      errortr <- quantile(obj[["cv"]], .3)
+      assertthat::assert_that(is.numeric(errortr))
+      # Create mask
+      mm <- obj[["cv"]]
+      mm[mm > errortr] <- NA
+      obj <- raster::mask(obj, mm); rm(mm)
+      # Set the value to errortr
+      value <- errortr
+    }
+    # Now loop
     for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi, format = format, return_threshold = return_threshold, ...) )
+                                                                  value = value, poi = poi, format = format, return_threshold = return_threshold, ...) )
   }
   return(out)
 }
@@ -211,7 +230,7 @@ methods::setMethod(
     }
 
     # Match to correct spelling mistakes
-    method <- match.arg(method, c('fixed','mtp','percentile',
+    method <- match.arg(method, c('fixed','mtp','percentile','min.cv',
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
@@ -245,6 +264,17 @@ methods::setMethod(
         perc <- ceiling(length(pointVals) * (1 - value))
       }
       tr <- rev(sort(pointVals))[perc] # Percentile threshold
+
+    } else if(method == "min.cv"){
+      assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be set!")
+      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+
+      # Get standard deviation and calculate percentile
+      tr <- min( na.omit(pointVals) )
+      names(tr) <- "tr"
+      names(value) <- "min.cv"
+      # Combine as a vector
+      tr <- c(tr, value)
 
     } else {
       # Optimized threshold statistics using the modEvA package
@@ -318,26 +348,23 @@ methods::setMethod(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, ...) {
+  function(obj, tr = new_waiver(), ...) {
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
-    # Check that a threshold layer is available and get the methods and data from it
-    assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
-                             msg = 'Call \' threshold \' for prediction first!')
-    # Get threshold layer
-    tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
-    if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
-    ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
-    tr <- attr(ras_tr[[1]], 'threshold')
-    names(tr) <- attr(ras_tr[[1]], 'method')
-    # Otherwise sample?
-    # tr <- threshold(  obj = obj$get_model()$get_data('prediction'),
-    #                   method = method,
-    #                   value = value,
-    #                   poi = poi,
-    #                   return_threshold = return_threshold,
-    #                   truncate = truncate
-    #                 )
+    # Unless set, check
+    if(is.Waiver(tr)){
+      # Check that a threshold layer is available and get the methods and data from it
+      assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
+                               msg = 'Call \' threshold \' for prediction first!')
+      # Get threshold layer
+      tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
+      if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
+      ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
+      tr <- attr(ras_tr[[1]], 'threshold')
+      names(tr) <- attr(ras_tr[[1]], 'method')
+    } else {
+      assertthat::assert_that(is.numeric(tr))
+    }
     bdproto(NULL, obj, threshold = tr)
   }
 )

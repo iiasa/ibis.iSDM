@@ -169,7 +169,7 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       zones <- new
       # Align with template if set
       if(!is.null(template)){
-        if(raster::compareRaster(zones, temolate,stopiffalse = FALSE)){
+        if(raster::compareRaster(zones, template,stopiffalse = FALSE)){
           zones <- raster::resample(zones, template, method = "ngb", func = raster::modal)
         }
       }
@@ -183,7 +183,10 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       buf <- sf::st_buffer(x = df, dist = buffer_width, nQuadSegs = 50)
     )
     # Rasterize
-    zones <- raster::rasterize(buf, background, field = 1)
+    zones <- raster::rasterize(buf, background, field = 1, background = 0)
+    zones <- raster::mask(zones, background)
+    # Ratify
+    zones <- raster::ratify(zones)
   }
   return(zones)
 }
