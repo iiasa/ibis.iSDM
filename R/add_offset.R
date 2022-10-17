@@ -385,9 +385,18 @@ methods::setMethod(
       myLog('[Setup]','red',
       'CAREFUL - This might not work without predictors already in the model.
       Add offset after predictors')
-      temp <- raster::raster(extent(x$background),
-                             resolution = diff(sf::st_bbox(x$background)[c(1,3)]) / 1000,
-                             crs = sf::st_crs(x$background)$input)
+      temp <- raster::raster(raster::extent(x$background),
+                             resolution = diff(sf::st_bbox(x$background)[c(1,3)]) / 100,
+                             crs = sf::st_crs(x$background))
+    }
+
+    # Check to make the entries valid
+    if( any(!sf::st_is_valid(layer)) ){
+      layer <- sf::st_make_valid(layer) # Check whether to make them valid
+      if( any(!sf::st_is_valid(layer)) ){
+        # If still has errors, combine
+        layer <- layer |> sf::st_combine() |> sf::st_as_sf()
+      }
     }
 
     # If layer has multiple entries join them

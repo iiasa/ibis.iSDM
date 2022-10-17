@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Frequently Asked Questions (FAQ)">
 <meta property="og:description" content="ibis.iSDM">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg">
+<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -91,11 +91,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Frequently Asked Questions (FAQ)</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Frequently Asked Questions (FAQ)</h1>
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-08-06</h4>
+            <h4 data-toc-skip class="date">2022-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/frequently-asked-questions.Rmd" class="external-link"><code>vignettes/frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>frequently-asked-questions.Rmd</code></div>
@@ -145,14 +145,21 @@ one variable has missing data. For instance by assinging a constant to
 <code>NA</code> values:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictors</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">predictors</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></code></pre></div>
-</details><details><summary><b>I have presence-only data (GBIF and co). How can I model a
+</details><details><summary><b>I have presence-only data (GBIF and co). How can I model the
 probability of occurrence? </b>
 </summary><p>Technically, it is impossible to estimate a probability of occurrence
 just with presence-only data (such as commonly available from databases
 like GBIF). What people normally do is to add so called pseudo-absence
-(often in excessive numbers) over the entire background to their
-data.</p>
-<p>In the <code>ibis.iSDM</code> package it is possible to add these
+(often in excessive numbers) over the entire background to their data,
+approximating the probability of occurrence by assuming that detection
+probability is uniform over the landscape (see <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x" class="external-link">Merow
+et al. 2013</a>).</p>
+<p>The <code>ibis.iSDM</code> package follows the design principle that
+all data types (e.g. presence-only or presence-absence records) should
+be modelled with the least amount of assumptions possible. For
+presence-only records the default way of estimating any kind of
+responses or habitat suitability is to estimate such data following a
+Poisson-Process modelling approach. However, it is possible to add these
 pseudo-absence points to a presence-only dataset as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">virtual_points</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/input_data.gpkg'</span>, package<span class="op">=</span><span class="st">'ibis.iSDM'</span><span class="op">)</span>, <span class="st">'points'</span>,quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -162,10 +169,10 @@ pseudo-absence points to a presence-only dataset as follows:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">virtual_points</span><span class="op">$</span><span class="va">Observed</span><span class="op">)</span></span></code></pre></div>
 <p>Also see the <code><a href="../reference/add_pseudoabsence.html">add_pseudoabsence()</a></code> and
 <code><a href="../reference/pseudoabs_settings.html">pseudoabs_settings()</a></code> help pages for more settings and also
-the first article on this website.</p>
-<strong>By default all engines in ibis.iSDM fit models according to the
-input data. When presence-only data is supplied, then usually a
-Poisson-Process Model is estimated. </strong>
+the first article on this website. For example it is possible to define
+pseudo-absence sampling in specific spatial formats, such as sampling
+within or outside a minimum convex polygon (MCP) of all presence points
+or within a certain buffer.</p>
 </details>
 </div>
 <div class="section level3">
@@ -204,6 +211,11 @@ supplied biodiversity observations fall in.</p>
 <span>  <span class="fu"><a href="../reference/engine_gdb.html">engine_gdb</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
+<p>There is further a dedicated function
+([<code>create_zonaloccurrence_mask()</code>]) to help set up such
+zones, either by taking existing categorical raster datasets or by
+constructing buffers around existing presence records (which could for
+example reflect assumed maximum dispersal distances).</p>
 </details><details><summary><b>How exactly do I add a prior to a model ?</b>
 </summary><p>The <code>ibis.iSDM</code> R-package allows to users to add prior
 information on parameters to any model to be estimated. These priors
@@ -390,21 +402,24 @@ performance is also to plot the evaluation log and
 <details><summary><b>How exactly does the model integration work and how does it differ
 among engines?</b>
 </summary><p>There are various forms of integration from a simple approach of
-adding [<code>priors</code>] or [<code>offsets</code>] to fully
-integrated multiple likelihood models (see <a href="https://doi.org/10.1002/ecy.2710" class="external-link">Fletcher et al. 2019</a>). Thus,
-users have a range of possibilities to combine different sources of
-evidence in their modelling.</p>
+adding [<code>ensembles</code>], [<code>priors</code>] or
+[<code>offsets</code>] to fully integrated multiple likelihood models
+(see <a href="https://doi.org/10.1002/ecy.2710" class="external-link">Fletcher et
+al. 2019</a>). Thus, users have a range of possibilities to combine
+different sources of evidence in their modelling.</p>
 <p>With regards to how different [<code>engines</code>] treat multiple
 biodiversity datasets. Unfortunately only the
 [<code><a href="../reference/engine_inla.html">engine_inla()</a></code>], [<code><a href="../reference/engine_inlabru.html">engine_inlabru()</a></code>] and
-[<code><a href="../reference/engine_stan.html">engine_stan()</a></code>] support for fully integrated multiple
-likelihood models. All other [<code>engines</code>] combine multiple
-datasets by running separate models in sequence where the order is
-determined by the sequence the datasets were added to the model. The
-output of each model is then provided as input predictor to the next
-one. In the future rather than adding outputs as predictors, there might
-be an option to specify an offset of the prediction instead. This has
-yet not been implemented.</p>
+[<code><a href="../reference/engine_stan.html">engine_stan()</a></code>] support fully integrated multiple
+likelihood models. A full overview can be found in the <a href="04_engine_comparison.html">Engine comparison</a> table. All other
+[<code>engines</code>] combine multiple datasets by running separate
+models in sequence where the order is determined by the sequence the
+datasets were added to the model. Within the <code><a href="../reference/train.html">train()</a></code>
+function, users have the option of specifying how previous predictions
+should be handled through the [<code>method_integration</code>]
+parameter. For example predictions from one model could be added as
+predictors or offset to the next. Or the coefficients from one model can
+be used to create starting priors for the next model.</p>
 </details><details><summary><b>What can I do when my model outputs with presence-only data seem
 odd?</b>
 </summary><p>By default, presence only biodiversity data is modelled as

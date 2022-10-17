@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Comparison of different engines">
 <meta property="og:description" content="ibis.iSDM">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.svg">
+<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -91,11 +91,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Comparison of different engines</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Comparison of different engines</h1>
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-08-06</h4>
+            <h4 data-toc-skip class="date">2022-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/04_engine_comparison.Rmd" class="external-link"><code>vignettes/04_engine_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>04_engine_comparison.Rmd</code></div>
@@ -110,19 +110,20 @@ Jung</h4>
 et al. (2019)</a>, there are many different forms of integration such as
 through [<code>ensemble</code>] modelling, adding [<code>offsets</code>]
 or [<code>priors</code>] and through full integration of different
-likelihoods. Not all of these options are available for every engine
-supported by the package and this page intends to show the various types
-of possible integration.</p>
-<p>Below can be found a table of the various engines and the types of
-integration supported by them. Stating the name and function call of
-each engine and its supported model complexity with linear (ln) and
-non-linear (nl) formulations, although it should be noted that linear
-models can approximate non-linearity by including transformations (as
-with Maxent, e.g. hinge/product/quadratic). Not every engine supports
-the different types of integration via <code>ensembles</code>,
-<code>offsets</code>, <code>priors</code>, joint likelihood estimation
-and <code>ensemble</code> compositing of models using separate datasets
-of the same species.</p>
+likelihoods (See (<a href="02_integrate_data.html">2 - Data
+integration</a>) ). Not all of these options are available for every
+engine supported by the <em>ibis.iSDM</em> package and the table below
+shows the currently implemented engines and various types of
+integrations supported by them.</p>
+<p>Stating the name and function call of each engine and its supported
+model complexity with linear (ln) and non-linear (nl) formulations,
+although it should be noted that linear models can approximate
+non-linearity by including transformations (as with Maxent,
+e.g. hinge/product/quadratic). Not every engine supports the different
+types of integration via <code>ensembles</code>, <code>offsets</code>,
+<code>priors</code>, joint likelihood estimation and
+<code>ensemble</code> compositing of models using separate datasets of
+the same species.</p>
 <table class="table">
 <colgroup>
 <col width="38%">

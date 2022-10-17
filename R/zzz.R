@@ -18,7 +18,7 @@
 
   # Set some default ibis options
   options('ibis.nthread' = parallel::detectCores() - 1)
-  options('ibis.runparallel' = TRUE)
+  options('ibis.runparallel' = FALSE)
   options('ibis.setupmessages' = TRUE)
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model',
@@ -27,7 +27,8 @@
   options('ibis.priors' = c('INLAPrior', 'BARTPrior', 'GDBPrior',
                             'XGBPrior', 'BREGPrior', 'STANPrior'))
   # Use the future package for any options. Default is FALSE
-  options('ibis.use_future' = FALSE)
+  options('ibis.futurestrategy' = "multisession")
+  options(doFuture.foreach.export = ".export-and-automatic-with-warning")
 
   # Set default corrrelation coefficient threshold for evaluating correlated predictors
   options('ibis.corPred' = 0.7)

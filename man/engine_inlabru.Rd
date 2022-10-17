@@ -66,7 +66,7 @@ All \code{INLA} engines require the specification of a mesh that needs to be pro
 \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
 data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
 
-\link{*}  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+\link{*} \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
 Lower bounds affect the density of triangles
 \link{*} \code{"offset"}: The automatic extension distance of the mesh
 If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter

@@ -141,17 +141,20 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
     # If zones is sf, check that it is of type polygon
     if(inherits(zones, "sf")) assertthat::assert_that( all( unique(sf::st_geometry_type(zones)) %in% c("POLYGON", "MULTIPOLYGON") ) )
 
-    if(sf::st_crs(df)!=sf::st_crs(zones)){
-      zones <- zones |> sf::st_transform(crs = sf::st_crs(df))
-    }
-
     if(inherits(zones, "sf")){
+      if(sf::st_crs(df)!=sf::st_crs(zones)){
+        zones <- zones |> sf::st_transform(crs = sf::st_crs(df))
+      }
+
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
           zones <- sf::st_intersection(df, zones)
         )
       )
+      # Extract values from zonal raster layer
+      limit <- raster::extract(zones, df) |> unique()
+
       # Limit zones
       zones <- subset(zones, limit %in% unique(zones[[column]]) )
 
@@ -169,7 +172,7 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       zones <- new
       # Align with template if set
       if(!is.null(template)){
-        if(raster::compareRaster(zones, temolate,stopiffalse = FALSE)){
+        if(raster::compareRaster(zones, template,stopiffalse = FALSE)){
           zones <- raster::resample(zones, template, method = "ngb", func = raster::modal)
         }
       }

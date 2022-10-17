@@ -4,7 +4,10 @@
 \alias{ibis_future}
 \title{Options to set up ibis for parallel processing with future}
 \usage{
-ibis_future(cores = getOption("ibis.nthread"), strategy = "multisession")
+ibis_future(
+  cores = getOption("ibis.nthread"),
+  strategy = getOption("ibis.futurestrategy")
+)
 }
 \arguments{
 \item{cores}{A \code{\link{numeric}} number stating the number of cores to use.}

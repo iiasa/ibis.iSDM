@@ -39,11 +39,12 @@ predictors[is.na(predictors)] <- 0
 </details>
 
 <details>
-<summary><b>I have presence-only data (GBIF and co). How can I model a probability of occurrence? </b>
+<summary><b>I have presence-only data (GBIF and co). How can I model the probability of occurrence? </b>
 </summary>
-Technically, it is impossible to estimate a probability of occurrence just with presence-only data (such as commonly available from databases like GBIF). What people normally do is to add so called pseudo-absence (often in excessive numbers) over the entire background to their data.
+Technically, it is impossible to estimate a probability of occurrence just with presence-only data (such as commonly available from databases like GBIF). What people normally do is to add so called pseudo-absence (often in excessive numbers) over the entire background to their data, approximating the probability of occurrence by assuming that detection probability is uniform over the landscape (see [Merow et al. 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x)).
 
-In the `ibis.iSDM` package it is possible to add these pseudo-absence points to a presence-only dataset as follows:
+The `ibis.iSDM` package follows the design principle that all data types (e.g. presence-only or presence-absence records) should be modelled with the least amount of assumptions possible. For presence-only records the default way of estimating any kind of responses or habitat suitability is to estimate such data following a Poisson-Process modelling approach. 
+However, it is possible to add these pseudo-absence points to a presence-only dataset as follows:
 
 ```{r, echo=TRUE,eval=FALSE}
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
@@ -53,9 +54,8 @@ virtual_points <- add_pseudoabsence(virtual_points, field_occurrence = "Observed
 unique(virtual_points$Observed)
 ```
 
-Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for more settings and also the first article on this website.
+Also see the `add_pseudoabsence()` and `pseudoabs_settings()` help pages for more settings and also the first article on this website. For example it is possible to define pseudo-absence sampling in specific spatial formats, such as sampling within or outside a minimum convex polygon (MCP) of all presence points or within a certain buffer. 
 
-**By default all engines in ibis.iSDM fit models according to the input data. When presence-only data is supplied, then usually a Poisson-Process Model is estimated. **
 </details>
 
 
@@ -86,6 +86,9 @@ mod <- distribution(background, limits = zone) %>%
   train()
 plot(mod)
 ```
+
+There is further a dedicated function ([`create_zonaloccurrence_mask()`]) to help set up such zones, either by taking existing categorical raster datasets or by constructing buffers around existing presence records (which could for example reflect assumed maximum dispersal distances).
+
 </details>
 
 <details>
@@ -262,10 +265,9 @@ plot(fit$get_data("fit_best")$evaluation_log)
 <details>
 <summary><b>How exactly does the model integration work and how does it differ among engines?</b>
 </summary>
-There are various forms of integration from a simple approach of adding [`priors`] or [`offsets`] to fully integrated multiple likelihood models (see [Fletcher et al. 2019](https://doi.org/10.1002/ecy.2710)). Thus, users have a range of possibilities to combine different sources of evidence in their modelling.
+There are various forms of integration from a simple approach of adding [`ensembles`], [`priors`] or [`offsets`] to fully integrated multiple likelihood models (see [Fletcher et al. 2019](https://doi.org/10.1002/ecy.2710)). Thus, users have a range of possibilities to combine different sources of evidence in their modelling.
 
-With regards to how different [`engines`] treat multiple biodiversity datasets. Unfortunately only the [`engine_inla()`], [`engine_inlabru()`] and [`engine_stan()`] support for fully integrated multiple likelihood models. All other [`engines`] combine multiple datasets by running separate models in sequence where the order is determined by the sequence the datasets were added to the model. The output of each model is then provided as input predictor to the next one.
-In the future rather than adding outputs as predictors, there might be an option to specify an offset of the prediction instead. This has yet not been implemented.
+With regards to how different [`engines`] treat multiple biodiversity datasets. Unfortunately only the [`engine_inla()`], [`engine_inlabru()`] and [`engine_stan()`] support fully integrated multiple likelihood models. A full overview can be found in the [Engine comparison](04_engine_comparison.html) table. All other [`engines`] combine multiple datasets by running separate models in sequence where the order is determined by the sequence the datasets were added to the model. Within the `train()` function, users have the option of specifying how previous predictions should be handled through the [`method_integration`] parameter. For example predictions from one model could be added as predictors or offset to the next. Or the coefficients from one model can be used to create starting priors for the next model.
 
 </details>
 

@@ -16,7 +16,7 @@ NULL
 #' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
 #' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
 #'
-#' [*]  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
 #' Lower bounds affect the density of triangles
 #' [*] \code{"offset"}: The automatic extension distance of the mesh
 #' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
@@ -175,20 +175,7 @@ engine_inlabru <- function(x,
         # Try and infer mesh parameters if not set
 
         # Get all coordinates of observations
-        locs <- do.call("rbind",
-                        lapply(model$biodiversity, function(x){
-                          z <- x$observations
-                          o <- sf::st_coordinates( guess_sf( z )[,1:2])
-                          o <- as.matrix(o)
-                          colnames(o) <- c("x", "y")
-                          return(o)
-                        }
-                        )
-        ) %>% unique()
-        assertthat::assert_that(
-          nrow(locs)>0,
-          ncol(locs)==2
-        )
+        locs <- collect_occurrencepoints(model, include_absences = FALSE)
 
         if(is.null(params$max.edge)){
           # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
@@ -649,7 +636,7 @@ engine_inlabru <- function(x,
           }
         }
 
-        # Get spatial effect if existant
+        # Get spatial effect if existent
         if("latentspatial" %in% self$list_data() ){
           spde <- self$get_data("latentspatial")
           assertthat::assert_that(exists("spde"),
@@ -839,6 +826,8 @@ engine_inlabru <- function(x,
             vn <- fit_bru$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
             ii <- "Intercept"
           }
+          assertthat::assert_that(all( vn %in% names(preds) ))
+          preds <- subset(preds, select = vn )
           # Add offset if set
           if(!is.Waiver(model$offset)){
             ovn <- "spatial_offset"
@@ -854,11 +843,12 @@ engine_inlabru <- function(x,
                    ")")
           )
           # --- #
+          cores <- if(getOption("ibis.runparallel")) getOption("ibis.nthread") else NULL
           # Make a prediction
           suppressWarnings(
             pred_bru <- inlabru:::predict.bru(
               object = fit_bru,
-              num.threads = ifelse(getOption("ibis.runparallel"), getOption("ibis.nthread"), NULL),
+              num.threads = cores,
               data = preds,
               probs = c(0.05, 0.5, 0.95),
               formula = pfo,
@@ -1045,8 +1035,8 @@ engine_inlabru <- function(x,
               o <- subset(o, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
               names(o) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
             } else {
-              o <- subset(o, select = c("partial_effect", "mean", "sd", "q50", "q0.05", "q0.95", "cv"))
-              names(o) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
+              o <- subset(o, select = c("partial_effect", "mean", "sd", "q0.05", "q0.5", "q0.95", "cv"))
+              names(o) <- c("partial_effect", "mean", "sd", "lower", "median", "upper", "cv")
             }
 
             # Do plot and return result

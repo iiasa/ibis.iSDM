@@ -149,7 +149,7 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver();method_integration="predictor"
+    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver();method_integration="predictor"
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)

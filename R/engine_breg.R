@@ -409,34 +409,74 @@ engine_breg <- function(x,
           w_full_sub <- w_full[full_sub$rowid]
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
-          out <- data.frame()
           # Tile the problem
-          splits <- cut(1:nrow(full_sub), nrow(full_sub) / 100 )
-          pb <- progress::progress_bar$new(total = length(levels(unique(splits))))
-          for(s in unique(splits)){
-            pb$tick()
-            i <- which(splits == s)
-            # -> external code in utils-boom
-            pred_breg <- predict_boom(
-              obj = fit_breg,
-              newdata = full_sub[i,],
-              w = w_full_sub[i],
-              fam = fam,
-              params = params
-            )
-            # Summarize the posterior
-            preds <- cbind(
-              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-              matrixStats::rowSds(pred_breg, na.rm = TRUE),
-              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-              apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
-            names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            preds$cv <- preds$sd / preds$mean
-            out <- rbind(out, preds)
-            rm(preds, pred_breg)
-          }
+          splits <- cut(1:nrow(full_sub), nrow(full_sub) / (min(100, nrow(full_sub) / 10)) )
 
+          # Now depending on parallization setting use foreach
+          if(getOption("ibis.runparallel")){
+            # Check that future is registered
+            if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
+                                                            strategy = getOption("ibis.futurestrategy"))
+
+            # Run the outgoing command
+            out <- foreach::foreach(s = iterators::iter(splits),
+                                    .combine = rbind,
+                                    .export = c("splits", "fit_breg", "full_sub",
+                                                "w_full_sub", "fam", "params"),
+                                    .multicombine = TRUE,
+                                    verbose = settings$get("verbose") ) %dopar% {
+              i <- which(splits == s)
+              # -> external code in utils-boom
+              pred_breg <- ibis.iSDM:::predict_boom(
+                obj = fit_breg,
+                newdata = full_sub[i,],
+                w = w_full_sub[i],
+                fam = fam,
+                params = params
+              )
+              # Summarize the posterior
+              preds <- base::as.data.frame(
+                  cbind(
+                  matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+                  matrixStats::rowSds(pred_breg, na.rm = TRUE),
+                  matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+                  apply(pred_breg, 1, mode)
+                )
+              )
+              names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+              preds$cv <- preds$sd / preds$mean
+              return(preds)
+            }
+          } else {
+            out <- data.frame()
+            pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+                                             format = "Creating model prediction (:spin) [:bar] :percent")
+            for(s in unique(splits)){
+              pb$tick()
+              i <- which(splits == s)
+              # -> external code in utils-boom
+              pred_breg <- predict_boom(
+                obj = fit_breg,
+                newdata = full_sub[i,],
+                w = w_full_sub[i],
+                fam = fam,
+                params = params
+              )
+              # Summarize the posterior
+              preds <- cbind(
+                matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+                matrixStats::rowSds(pred_breg, na.rm = TRUE),
+                matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+                apply(pred_breg, 1, mode)
+              )  |> as.data.frame()
+              names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+              preds$cv <- preds$sd / preds$mean
+              out <- rbind(out, preds)
+              rm(preds, pred_breg)
+            }
+          }
+          assertthat::assert_that(is.data.frame(out), nrow(out)>0,
+                                  msg = "Something went wrong withe prediction. Output empty!")
           # Fill output with summaries of the posterior
           stk <- raster::stack()
           for(v in colnames(out)){

@@ -1051,3 +1051,40 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
   }
   return(obs)
 }
+
+#' Get all occurrence point locations
+#'
+#' @description
+#' This is a small helper function that simply goes over all biodiversity sets in
+#' the model object.
+#' **This function is intended to only run within ibis and with the model packages created by it.**
+#' @param model A [`list`] object containing the biodiversity and predictor objects.
+#' @param include_absences A [`logical`] of whether absences should be included (Default: \code{FALSE}).
+#' @returns A [`sf`] object with the newly aggregated points.
+#' @keywords internal
+#' @noRd
+collect_occurrencepoints <- function(model, include_absences = FALSE){
+  assertthat::assert_that(
+    is.list(model),
+    assertthat::has_name(model, "id"),
+    assertthat::has_name(model, "biodiversity"),
+    is.logical(include_absences)
+  )
+
+  # Get the locations
+  locs <- do.call("rbind",
+                  lapply(model$biodiversity, function(x){
+                    z <- x$observations
+                    if(!include_absences) z <- subset(z, observed > 0)
+                    o <- sf::st_coordinates( guess_sf( z )[,1:2])
+                    o <- as.matrix(o)
+                    colnames(o) <- c("x", "y")
+                    return(o)
+                  }
+                  )
+  )
+  assertthat::assert_that(
+    is.matrix(locs), nrow(locs)>1
+  )
+  return(locs)
+}

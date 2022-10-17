@@ -89,11 +89,15 @@ ibis_options <- function(){
 #' @seealso [future]
 #' @keywords misc
 #' @export
-ibis_future <- function(cores = getOption("ibis.nthread"), strategy = "multisession") {
+ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy")) {
   assertthat::assert_that(
     is.numeric(cores),
     is.character(strategy)
   )
+  check_package("future")
+  # Check that number of cores don't exceed what is possible
+  assertthat::assert_that(cores <= future::availableCores())
+
   strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "remote"),
                         several.ok = FALSE)
   check_package("future")
@@ -102,19 +106,22 @@ ibis_future <- function(cores = getOption("ibis.nthread"), strategy = "multisess
     if(strategy == "multicore") stop("Multicore is not supported ")
   }
 
-  # Define plan
+  # Define plan based on formulated strategy
   if(strategy == "remote"){
     #TODO: See if a testing environment could be found.
     stop("TBD. Requires specific setup.")
+    #e.g. cl <- makeCluster(4, type = "MPI")
+  } else if(strategy == "sequential") {
+    future::plan(strategy = future::sequential())
+  } else if(strategy == "multisession"){
+    future::plan(strategy = future::multisession(workers = cores))
+  } else if(strategy == "multicore"){
+    future::plan(strategy = future::multicore(workers = cores) )
+  } else if(strategy == "cluster"){
+    future::plan(strategy = future::cluster(workers = cores) )
   }
-  ev <- switch(strategy,
-               "sequential" = future::sequential(),
-               "multisession" = future::multisession(workers = cores),
-               "multicore" = future::multicore(workers = cores),
-               "cluster" = future::cluster(workers = cores)
-  )
-  # Set up plan
-  future::plan(ev)
+  # Register the doFuture adapate
+  doFuture::registerDoFuture()
   invisible()
 }
 
