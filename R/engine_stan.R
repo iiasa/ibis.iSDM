@@ -559,7 +559,7 @@ engine_stan <- function(x,
             "sm_code" = self$get_data("stancode")
           ),
           # Project function
-          project = function(self, newdata, offset = NULL, type = NULL){
+          project = function(self, newdata, offset = NULL, type = NULL, layer = "mean"){
             assertthat::assert_that(
               nrow(newdata) > 0,
               all( c("x", "y") %in% names(newdata) ),
@@ -608,7 +608,7 @@ engine_stan <- function(x,
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( raster::stack(full) ) # Background
+            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             prediction <- fill_rasters(pred_stan, prediction)
 
             return(prediction)

@@ -41,6 +41,7 @@ NULL
 #' include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
 #' @param stabilize A [`boolean`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
 #' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
+#' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
 #' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
 #'
@@ -52,21 +53,25 @@ NULL
 NULL
 methods::setGeneric("project",
                     signature = methods::signature("mod"),
-                    function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess", ...) standardGeneric("project"))
+                    function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
+                             layer = "mean", ...) standardGeneric("project"))
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario, character, logical, character }(mod, date_interpolation, stabilize, stabilize_method)
+#' @usage \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 methods::setMethod(
   "project",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess", ...){
+  function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
+           layer = "mean", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
       is.character(date_interpolation),
-      is.logical(stabilize)
+      is.logical(stabilize),
+      is.character(layer)
     )
+    # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     # Match methods
     date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
@@ -94,6 +99,7 @@ methods::setMethod(
 
     # Get limits if present
     if(!is.null( mod$get_limits() )){
+      # FIXME: Scenarios need to be checked that the right layer is taken!!
       # Get prediction
       n <- fit$show_rasters()[grep("threshold",fit$show_rasters())]
       tr <- fit$get_data(n)[[1]]
@@ -119,15 +125,15 @@ methods::setMethod(
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
     assertthat::assert_that( all(mod_pred_names %in% pred_names),
-                             msg = 'Model predictors are missing from the scenario predictor!')
+                             msg = paste0('Model predictors are missing from the scenario predictor!') )
 
-    # Get constrains and other parameters
+    # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
     # Not get the baseline raster
-    thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one (mean)
+    thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
     if(inherits(baseline_threshold, 'RasterStack') || inherits(baseline_threshold, 'RasterBrick')){
-      baseline_threshold <- baseline_threshold[[grep("mean",names(baseline_threshold))]] # FIXME: Potentially have an option for this
+      baseline_threshold <- baseline_threshold[[grep(layer,names(baseline_threshold))]]
     }
     scenario_constraints <- mod$get_constraints()
 
@@ -146,17 +152,18 @@ methods::setMethod(
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
-    if(is.Waiver(baseline_threshold) && !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found!")
+    if(is.Waiver(scenario_threshold) && !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found,
+                                                                               which is required for scenarios constraints!")
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Connectivity contraints need a set dispersal constraint.')
     }
     # ----------------------------- #
-    # Start of projection           #
+    #   Start of projection         #
     # ----------------------------- #
 
     # Now convert to data.frame and subset
     df <- new_preds$get_data(df = TRUE)
-    names(df)[1:3] <- tolower(names(df)[1:3])
+    names(df)[1:3] <- tolower(names(df)[1:3]) # Assuming the first three attributes are x,y,t
     assertthat::assert_that(nrow(df)>0,
                             hasName(df,'x'), hasName(df,'y'), hasName(df,'time'))
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
@@ -171,8 +178,9 @@ methods::setMethod(
     proj <- raster::stack()
     proj_thresh <- raster::stack()
 
-    pb <- progress::progress_bar$new(total = length(unique(df$time)))
-    # TODO: Consider doing this in parallel but in sequence
+    pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
+                                     total = length(unique(df$time)))
+    # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
     for(step in times){
       # Get data
@@ -190,9 +198,8 @@ methods::setMethod(
       }
 
       # Project suitability
-      # FIXME: Adapt for uncertainty projections as well!
-      out <- fit$project(newdata = nd)[[1]] # First prediction being the mean
-      names(out) <- paste0("suitability", "_", step)
+      out <- fit$project(newdata = nd, layer = layer)
+      names(out) <- paste0("suitability", "_", layer, "_", step)
       if(is.na(raster::projection(out))) raster::projection(out) <- raster::projection( fit$model$background )
 
       # If other constrains are set, apply them posthoc

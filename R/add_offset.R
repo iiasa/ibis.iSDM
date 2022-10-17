@@ -456,6 +456,11 @@ methods::setMethod(
     ras_range <- raster::scale(ras_range, scale = F)
     names(ras_range) <- "range_distance"
 
+    assertthat::assert_that(
+      is.finite( raster::cellStats(ras_range, "max") ),
+      msg = "Range offset has infinite values. Check parameters!"
+    )
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object

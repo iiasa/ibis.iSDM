@@ -78,6 +78,28 @@ to_camelcase <- function(x){
   x
 }
 
+#' Check whether a given object has zeros (absences)
+#'
+#' @description
+#' This function checks whether a given object has zeros.
+#' Used internally to check whether absences exist in an object.
+#' @param obj A [`data.frame`] column, [`vector`] or [`raster`] object.
+#' @returns [`logical`]
+#' @keywords internal, utils
+#' @noRd
+has_zeros <- function(obj){
+  assertthat::assert_that(
+    is.data.frame(obj) || is.vector(obj) || is.Raster(obj)
+  )
+  if(is.vector(obj)) test <- any(any(obj==0))
+  if(is.data.frame(obj)) {
+    if(ncol(obj)>1) warning("Vector has multiple columns. Taking the first one.")
+    test <- any( obj[,1] == 0)
+  }
+  if(is.Raster(obj)) test <- any(background[]==0,na.rm = TRUE)
+  return(test)
+}
+
 #' Atomic representation of a name
 #'
 #' Return a pretty character representation of an object with elements and
@@ -929,7 +951,10 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     # Calculate buffer
     buf <- sf::st_buffer(x = df, dist = buffer_distance)
     if("fasterize" %in% installed.packages()[,1]){
-      buf <- fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)
+      buf2 <- try(expr = {fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)}, silent = TRUE)
+      if(inherits(buf2, "try-error")){
+        buf <- raster::rasterize(buf, emptyraster(template), field = 1)
+      } else {buf2 <- buf; rm(buf2)}
     } else {
       buf <- raster::rasterize(buf, emptyraster(template), field = 1)
     }

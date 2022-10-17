@@ -19,7 +19,7 @@ NULL
 #' spatial baselearners via [add_latent] or the specification of monotonically constrained priors
 #' via [GDBPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param boosting_iterations An [`integer`] giving the number of boosting iterations
+#' @param iter An [`integer`] giving the number of boosting iterations (Default: \code{2e3L}).
 #' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1} defining the shrinkage parameter.
 #' @param empirical_risk method for empirical risk calculation.
 #' Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).
@@ -35,7 +35,7 @@ NULL
 #' @rdname engine_gdb
 #' @export
 engine_gdb <- function(x,
-                       boosting_iterations = 1000,
+                       iter = 2000,
                        learning_rate = 0.1,
                        empirical_risk = 'inbag',
                        type = "response",
@@ -49,7 +49,7 @@ engine_gdb <- function(x,
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
-                          is.numeric(boosting_iterations),
+                          is.numeric(iter),
                           is.numeric(learning_rate),
                           is.character(empirical_risk),
                           is.character(type),
@@ -68,8 +68,8 @@ engine_gdb <- function(x,
       crs = raster::projection(background),
       res = c(diff( (sf::st_bbox(background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(background)[c(1,3)]) ) / 100
-                    )
-                      )
+             )
+      )
   } else {
     # If predictor existing, use them
     template <- emptyraster(x$predictors$get_data() )
@@ -79,7 +79,7 @@ engine_gdb <- function(x,
   template <- raster::rasterize(background, template, field = 0)
 
   # Set up boosting control
-  bc <- mboost::boost_control(mstop = boosting_iterations,
+  bc <- mboost::boost_control(mstop = iter,
                               nu = learning_rate,
                               risk = empirical_risk
                               )
@@ -106,13 +106,13 @@ engine_gdb <- function(x,
       ),
       # Function to respecify the control parameters
       set_control = function(self,
-                             boosting_iterations = 20,
+                             iter = 20,
                              learning_rate = 0.1, # Set relatively low to not regularize too much
                              empirical_risk = 'inbag',
                              verbose = TRUE
                              ){
         # Set up boosting control
-        bc <- mboost::boost_control(mstop = boosting_iterations,
+        bc <- mboost::boost_control(mstop = iter,
                                     nu = learning_rate,
                                     risk = empirical_risk,
                                     trace = verbose
@@ -225,6 +225,20 @@ engine_gdb <- function(x,
 
           model$biodiversity[[1]]$predictors <- df
           model$biodiversity[[1]]$expect <- w
+
+          # Rasterize observed presences
+          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+                                    bg, fun = 'count', background = 0)
+          # Get for the full dataset
+          w_full <- ppm_weights(df = model$predictors,
+                                pa = pres[],
+                                bg = bg,
+                                weight = 1 # Set those to 1 so that absences become ratio of pres/abs
+          )
+
+          # Add exposure to full model predictor
+          model$exposure <- w_full
+
         } else if(model$biodiversity[[1]]$family != 'poisson'){
           # calculating the case weights (equal weights)
           # the order of weights should be the same as presences and backgrounds in the training data
@@ -297,9 +311,9 @@ engine_gdb <- function(x,
         full <- model$predictors
         full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
         full$cellid <- rownames(full) # Add row.names
-        full <- subset(full, complete.cases(full))
+        full$w <- model$exposure
         full$Intercept <- 1
-        full$w <- 1
+        full <- subset(full, complete.cases(full))
 
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(data),
@@ -345,7 +359,7 @@ engine_gdb <- function(x,
               # weights = w,
               family = fam,
               offset = w, # Add exposure as offset
-              control = bc
+              control = bc,
             )
           },silent = FALSE)
           if(inherits(fit_gdb, "try-error")) {
@@ -407,7 +421,8 @@ engine_gdb <- function(x,
           suppressWarnings(
             pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
                                                type = self$get_data('params')$type,
-                                               aggregate = 'sum')
+                                               aggregate = 'sum',
+                                               offset = full$w)
           )
           # Fill output
           prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
@@ -437,7 +452,7 @@ engine_gdb <- function(x,
             "prediction" = prediction
           ),
           # Project function
-          project = function(self, newdata, type = NULL){
+          project = function(self, newdata, type = NULL, layer = "mean"){
             assertthat::assert_that('fit_best' %in% names(self$fits),
                                     is.data.frame(newdata) || is.matrix(newdata),
                                     assertthat::has_name(newdata,c('x','y'))
@@ -457,11 +472,11 @@ engine_gdb <- function(x,
             temp <- raster::rasterFromXYZ(newdata[,c('x','y')])
             # Predict
             y <- suppressWarnings(
-              mboost::predict.mboost(object = mod,newdata = newdata,
+              mboost::predict.mboost(object = mod, newdata = newdata,
                                      type = type, aggregate = 'sum')
             )
             temp[as.numeric(newdata$rowid)] <- y[,1]
-            names(temp) <- "mean" # Rename to mean
+            names(temp) <- "mean" # Rename to mean, layer parameter gets ignored
             return(temp)
           },
           # Partial effect

@@ -235,11 +235,20 @@ writeNetCDF <- function(file, fname,
                       datatype = dt, NAflag = varNA
   )
 
-  # FIXME: To be defined
-  # Set the time variable
-  # ncFile <- ncdf4::nc_open(outFile, write=TRUE)
-  # ncdf4::ncvar_put(ncFile, "Time", dtInts)
-  # ncdf4::nc_close(ncFile)
+  # Add common attributes
+  ncout <- ncdf4::nc_open(fname, write = TRUE)
+
+  # add global attributes
+  ncdf4::ncatt_put(ncout, 0,"title","Biodiversity suitability projection created with ibis.iSDM")
+
+  history <- paste(Sys.info()['user'], date(), sep=", ")
+  ncdf4::ncatt_put(ncout,0, "created", history)
+  ncdf4::ncatt_put(ncout,0, "Conventions", "CF=1.5")
+
+  # close the file, writing data to disk
+  ncdf4::nc_close(ncout)
+
+  invisible()
 }
 
 # ------------------------- #

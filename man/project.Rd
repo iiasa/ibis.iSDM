@@ -4,7 +4,7 @@
 \alias{project}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
-\S4method{project}{BiodiversityScenario, character, logical, character }(mod, date_interpolation, stabilize, stabilize_method)
+\S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
@@ -16,6 +16,8 @@ include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily
 \item{stabilize}{A \code{\link{boolean}} value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).}
 
 \item{stabilize_method}{\code{\link{character}} stating the stabilization method to be applied. Currently supported is \code{`loess`}.}
+
+\item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
 \item{...}{passed on parameters.}
 }

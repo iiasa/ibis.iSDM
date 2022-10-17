@@ -100,7 +100,7 @@ methods::setMethod(
     x$set_biodiversity(
       id,
       bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), "Species: ",name),
+              name = ifelse(is.null(name), "Species projection",name),
               id = id,
               equation = formula,
               family = family,
@@ -182,7 +182,7 @@ methods::setMethod(
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
                             msg = "Presence-Absence requires at exactly 2 unique values.")
 
-    # Messager
+    # Messenger
     if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipa dataset...")
 
     # Transform to background for analysis
@@ -208,7 +208,7 @@ methods::setMethod(
     x$set_biodiversity(
       id,
       bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), "Species: ",name),
+              name = ifelse(is.null(name), "Species projection",name),
               id = id,
               equation = formula,
               family = family,

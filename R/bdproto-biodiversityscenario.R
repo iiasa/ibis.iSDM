@@ -113,13 +113,13 @@ BiodiversityScenario <- bdproto(
     return( self$threshold )
   },
   # Apply specific threshold
-  apply_threshold = function(self){
+  apply_threshold = function(self, tr = new_waiver()){
     # Assertions
-    assertthat::assert_that( is.numeric(self$threshold), msg = 'No threshold value found.')
+    if(is.Waiver(tr)) assertthat::assert_that( is.numeric(self$threshold), msg = 'No threshold value found.')
     assertthat::assert_that( !is.Waiver(self$scenarios), msg = 'No scenarios found.')
     # Get prediction and threshold
     sc <- self$get_scenarios()
-    tr <- self$threshold
+    if(!is.Waiver(tr)) tr <- self$threshold
     # reclassify to binary
     sc[sc < tr] <- 0; sc[sc >= tr] <- 1
     names(sc) <- 'presence'
@@ -193,7 +193,6 @@ BiodiversityScenario <- bdproto(
     if (unilimtedExists) Colors <- c(Colors, "pink")
 
     # Plot
-
     # 0 - Cells that have never been occupied and are unsuitable habitat at the end of the simulation
     # 1 - Cells that belong to the species' initial distribution and that have remained occupied during the entire simulation.
     # 1 < value < 30 000 - determine the dispersal step during which it was colonized. E.g. 101 is first dispersal even in first step
@@ -231,9 +230,7 @@ BiodiversityScenario <- bdproto(
   summary = function(self, plot = FALSE){
     # Check that baseline and scenario thresholds are all there
     assertthat::assert_that(
-      !is.Waiver(self$get_scenarios()),
-      'threshold' %in% attributes(self$get_scenarios())$names,
-      msg = "This function summarizes thresholds which need to be calculated first."
+      !is.Waiver(self$get_scenarios())
     )
     if( 'threshold' %in% attributes(self$get_scenarios())$names ){
       # TODO: Try and get rid of dplyr dependency. Currently too much work to not use it
@@ -283,13 +280,22 @@ BiodiversityScenario <- bdproto(
       # df <- tapply(df$area, df$band, function(x) sum(x, na.rm = TRUE))
       # df <- units::as_units(df, units::as_units(ar_unit))  # Set Units
     } else {
-      #TODO: Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
       # Get the scenario predictions and from there the thresholds
       scenario <- self$get_scenarios()['suitability']
       st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
-      time <- stars::st_get_dimension_values(scenario,which = 'band')
+      time <- stars::st_get_dimension_values(scenario, which = 'band')
+
+      # Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
+      mod <- self$get_model()
+      if(mod$model$biodiversity[[1]]$family == "binomial"){
+        ar <- stars:::st_area.stars(scenario)
+        # if(inherits(ar$area,"units")) ar_unit <- units::deparse_unit(ar$area)
+        scenario <- as(scenario,"Raster") * as(ar, "Raster")
+        scenario <- raster::setZ(scenario, time)
+      }
       # Convert to scenarios to data.frame
       df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
+      names(df) <- c("x", "y", "band", "suitability")
       # Add grid cell grouping
       df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
         dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
@@ -306,10 +312,10 @@ BiodiversityScenario <- bdproto(
       # Total amount of area lost / gained / stable since previous time step
       totchange_occ <- df %>%
         dplyr::group_by(id) %>%
-        dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup() %>%
+        dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
       o <- totchange_occ %>% dplyr::group_by(band) %>%
-        dplyr::summarise(totchange_gain = mean(change[change > 0]),
-                         totchange_loss = mean(change[change < 0]))
+        dplyr::summarise(suitability_avggain = mean(change[change > 0]),
+                         suitability_avgloss = mean(change[change < 0]))
       out <- out %>% dplyr::left_join(o, by = "band")
     }
 
@@ -327,9 +333,9 @@ BiodiversityScenario <- bdproto(
                                      ymin = suitability_q25,
                                      ymax = suitability_q75)) +
           ggplot2::theme_classic(base_size = 18) +
-          ggplot2::geom_ribbon(fill = "grey80") +
+          ggplot2::geom_ribbon(fill = "grey90") +
           ggplot2::geom_line(size = 2) +
-          ggplot2::labs(x = "Time", y = "Suitability (quantiles)")
+          ggplot2::labs(x = "Time", y = expression(Area(km^2)), title = "Overall suitable habitat")
       }
     }
     return(out)
@@ -353,7 +359,7 @@ BiodiversityScenario <- bdproto(
       }
     )
     names(out) <- 'linear_coefficient'
-    if(plot) stars:::plot.stars(out, breaks = "equal", col = ibis_colours$divg_bluered)
+    if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     return(out)
   },
   #Plot relative change between baseline and projected thresholds

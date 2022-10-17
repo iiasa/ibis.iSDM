@@ -16,6 +16,7 @@ train(
   method_integration = "predictor",
   bias_variable = NULL,
   bias_value = NULL,
+  aggregate_observations = TRUE,
   verbose = FALSE,
   ...
 )
@@ -76,6 +77,8 @@ See Examples.}
 
 \item{bias_value}{A \code{\link{vector}} with values to be set to \emph{bias_variable} (Default: \code{NULL}).
 Specifying a \code{\link{numeric}} value here sets \code{bias_variable} to the target value.}
+
+\item{aggregate_observations}{\code{\link{logical}} on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).}
 
 \item{...}{further arguments passed on.}
 }

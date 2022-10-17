@@ -892,7 +892,7 @@ engine_inlabru <- function(x,
             "prediction" = prediction
           ),
           # Projection function
-          project = function(self, newdata, form = NULL, n.samples = 1000){
+          project = function(self, newdata, form = NULL, n.samples = 1000, layer = "mean"){
             assertthat::assert_that('fit_best' %in% names(self$fits),
                                     is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
                                     is.null(form) || is.character(form) || is.formula(form)
@@ -960,10 +960,18 @@ engine_inlabru <- function(x,
             )
             out$cv <- out$sd / out$mean
             # Get only the predicted variables of interest
-            out <- raster::stack(
-              out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
-            )
-
+            if(utils::packageVersion("inlabru") <= '2.5.2'){
+              # Older version where probs are ignored
+              out <- raster::stack(
+                out[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+              )
+              names(out) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
+            } else {
+              out <- raster::stack(
+                out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
+              )
+              names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+            }
             # Return result
             return(out)
           },

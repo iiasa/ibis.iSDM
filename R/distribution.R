@@ -119,8 +119,6 @@ methods::setMethod(
       # Convert to polygon if raster
       if(inherits(limits,'Raster')){
         if(is.null(levels(limits))) stop('Provided limit raster needs to be ratified (categorical)!')
-        # Remove 0 from ratified raster assuming this is no-data
-        limits[limits == 0] <- NA
         limits <- sf::st_as_sf( raster::rasterToPolygons(limits, n = 16, dissolve = TRUE) )
       }
       # Ensure that limits has the same projection as background
