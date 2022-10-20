@@ -248,6 +248,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
                           is.character(variant)
                           )
+  check_package("deldir")
   # Function from SDraw
   voronoi.polygons <- function (x, bounding.polygon = NULL, range.expand = 0.1)
   {

@@ -32,6 +32,8 @@ Other prior:
 \code{\link{BREGPrior}()},
 \code{\link{GDBPriors}()},
 \code{\link{GDBPrior}()},
+\code{\link{GLMNETPriors}()},
+\code{\link{GLMNETPrior}()},
 \code{\link{INLAPriors}()},
 \code{\link{INLAPrior}()},
 \code{\link{STANPriors}()},

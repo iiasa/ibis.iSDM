@@ -208,6 +208,16 @@ options("ibis.setupmessages" = FALSE)
 ```
 </details>
 
+<details>
+<summary><b> How can I make use of cross-validation in `ibis.iSDM` ?</b>
+</summary>
+
+Cross-validation has been deliberatly not integrated into package. Users who would like to 
+make use of cross-validation techniques thus need to set up their own external modelling routines.
+Reason is that with the multiple types of integration in this package, the construction of (independent)
+testing datasets is not as trivial (considering for example offsets, priors or multiple datasets).
+
+</details>
 
 <details>
 <summary><b>Why are there 2 INLA engines and which one should I use ? </b>

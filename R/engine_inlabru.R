@@ -172,11 +172,10 @@ engine_inlabru <- function(x,
         )
         bdry$loc <- INLA::inla.mesh.map(bdry$loc)
 
-        # Try and infer mesh parameters if not set
-
         # Get all coordinates of observations
         locs <- collect_occurrencepoints(model, include_absences = FALSE)
 
+        # Try and infer mesh parameters if not set
         if(is.null(params$max.edge)){
           # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
           max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)

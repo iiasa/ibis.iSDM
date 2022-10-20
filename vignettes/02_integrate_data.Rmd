@@ -162,13 +162,13 @@ fixed or random effects in the model. In a Bayesian context a prior is generally
 
 Generally [`Prior-class`] objects can be grouped into:
 
-* Probabilistic priors with estimates placed on for example the mean ($\mu$) and standard deviation ($\sigma$) or precision in the case of [`engine_inla`].
+* Probabilistic priors with estimates placed on for example the mean ($\mu$) and standard deviation ($\sigma$) or precision in the case of [`engine_inla`]. Such priors usually allow the greatest amount of flexibility since they are able to incorporate information on both the sign and magnitude of a coefficient.
 
-* Monotonic constraints on the direction of a coefficient and predictor in the model, such that is $f(x_1) >= f(x_2)$ or  $f(x_1) <= f(x_2)$. Useful to incorporate for instance prior ecological knowledge on that a certain response function has to be positive.
+* Monotonic constraints on the direction of a coefficient and predictor in the model, such that is $f(x_1) >= f(x_2)$ or  $f(x_1) <= f(x_2)$. Useful to incorporate for instance prior ecological knowledge on that a certain response function for example has to be positive.
 
 * More complex priors specified on random spatial effects such as penalized complexity priors used for SPDE effects in [`add_latent_spatial()`]. 
 
-* Probabilistic priors on the inclusion probability of a certain variable such as to what certainty the variable should or should not be included in a regularized outcome.
+* Probabilistic priors on the inclusion probability of a certain variable such as to what certainty the variable should or should not be included in a regularized outcome. For example used in the case of [`engine_breg`] or [`engine_glmnet`].
 
 Prior specifications are specific to each engine and more information can be found on the individual help pages of the `priors()` function.
 
