@@ -140,7 +140,24 @@ DistributionModel <- bdproto(
                paste0("\n  Threshold created: ",text_green("yes")),
                "")
       ))
+    } else if(inherits(self, 'GLMNET-Model')) {
+      obj <- self$get_data('fit_best')
 
+      # Summarise coefficients within 1 standard deviation
+      ms <- tidy_glmnet_summary(obj)
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[2mStrongest summary effects:\033[22m',
+        '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
+        '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
+      ))
 
     } else {
       message(paste0(
@@ -244,6 +261,8 @@ DistributionModel <- bdproto(
       posterior::summarise_draws(self$get_data(obj)$beta)
     } else if(inherits(self, "XGBOOST-Model")){
       xgboost::xgb.importance(model = self$get_data(obj))
+    } else if(inherits(self, 'GLMNET-Model')){
+      tidy_glmnet_summary(self$get_data(obj), lambda = "lambda.1se")
     }
   },
   # Dummy partial response calculation. To be overwritten per engine
@@ -269,7 +288,11 @@ DistributionModel <- bdproto(
 
       par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
-      plot_inla_marginals(self$get_data(x),what = 'fixed')
+      plot_inla_marginals(self$get_data(x),what = what)
+    } else if(inherits(self, 'GLMNET-Model')) {
+      if(what == "fixed"){
+        glmnet:::plot.glmnet(self$get_data(x)$glmnet.fit, xvar = "lambda") # Deviance explained
+      } else{ plot(self$get_data(x)) }
     } else if(inherits(self, 'STAN-Model')) {
       # Get true beta parameters
       ra <- grep("beta", names(self$get_data(x)),value = TRUE) # Get range

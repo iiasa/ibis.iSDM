@@ -709,14 +709,14 @@ engine_breg <- function(x,
 
             mod <- self$get_data('fit_best')
             model <- self$model
-            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+            df <- newdata
             df <- subset(df, select = attr(mod$terms, "term.labels"))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
             # Make spatial container for prediction
             suppressWarnings(
-              df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                                       data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+              df_partial <- sp::SpatialPointsDataFrame(coords = df[,c('x', 'y')],
+                                                       data = df[, names(df) %notin% c('x','y')],
                                                        proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
               )
             )

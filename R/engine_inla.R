@@ -190,17 +190,8 @@ engine_inla <- function(x,
         # Try and infer mesh parameters if not set
 
         # Get all coordinates of observations
-        locs <- do.call("rbind",
-          lapply(model$biodiversity, function(x){
-            z <- x$observations
-            z <- subset(z, observed > 0)
-            o <- sf::st_coordinates( guess_sf( z )[,1:2])
-            o <- as.matrix(o)
-            colnames(o) <- c("x", "y")
-            return(o)
-            }
-          )
-        ) %>% unique()
+        locs <- collect_occurrencepoints(model, include_absences = FALSE)
+
         assertthat::assert_that(
           nrow(locs)>0,
           ncol(locs)==2
