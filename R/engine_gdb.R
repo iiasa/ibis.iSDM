@@ -315,6 +315,15 @@ engine_gdb <- function(x,
         full$Intercept <- 1
         full <- subset(full, complete.cases(full))
 
+        # Rescale exposure
+        check_package('scales')
+        w <- scales::rescale(w, to = c(1e-6, 1))
+        full$w <- scales::rescale(full$w, to = c(1e-6, 1))
+        if(anyNA(w)){
+          w[is.na(w)] <- 1e-6
+          full$w[is.na(full$w)] <- 1e-6
+        }
+
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(data),
           is.formula(equation),
@@ -327,16 +336,34 @@ engine_gdb <- function(x,
           # Add offset to full prediction and load vector
           n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
           names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
+          # Add weights
+          # n <- n + full$w
           full <- cbind(full, n)
           # And for biodiversity object
           n <- cbind(model$biodiversity[[1]]$offset[,"spatial_offset"],
                      model$biodiversity[[1]]$offset[,"spatial_offset"]) |> as.data.frame()
           names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
+          # Add weights
+          # n <- n + w
           data <- cbind(data, n)
         }
 
         # --- #
         # Fit the base model
+        # First test for infinitives
+        bc2 <- bc;
+        bc2$mstop <- 1; bc2$trace <- FALSE; bc2$stopintern <- TRUE
+        test <- try({
+          mboost::gamboost(
+            formula = equation,
+            data = data,
+            # weights = w,
+            family = fam,
+            offset = w, # Add exposure as offset
+            control = bc2
+          )
+        },silent = FALSE)
+        if(any(is.infinite(test$risk()))){ return("Infinite residuals. Try simplifying model")}
         fit_gdb <- try({
           mboost::gamboost(
             formula = equation,
@@ -347,7 +374,6 @@ engine_gdb <- function(x,
             control = bc
           )
         },silent = FALSE)
-
         # If error, decrease step size by a factor of 10 and try again.
         if(inherits(fit_gdb, "try-error") || length(names(coef(fit_gdb)))< 2){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
@@ -359,7 +385,7 @@ engine_gdb <- function(x,
               # weights = w,
               family = fam,
               offset = w, # Add exposure as offset
-              control = bc,
+              control = bc
             )
           },silent = FALSE)
           if(inherits(fit_gdb, "try-error")) {

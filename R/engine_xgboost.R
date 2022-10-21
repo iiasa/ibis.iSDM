@@ -220,7 +220,7 @@ engine_xgboost <- function(x,
           w <- ppm_weights(df = df,
                            pa = model$biodiversity[[1]]$observations[['observed']],
                            bg = bg,
-                           weight = 1 # Set those to 1 so that absences become ratio of pres/abs
+                           weight = 1e-6 # Set those to 1 so that absences become ratio of pres/abs
           )
           assertthat::assert_that(length(w) == nrow(df))
 
@@ -237,6 +237,7 @@ engine_xgboost <- function(x,
           )
           assertthat::assert_that(
             !anyNA(w_full), all(is.finite(log(w_full))),
+            !anyNA(w_full),
             length(w_full) == nrow(model$predictors)
           )
 
@@ -321,6 +322,7 @@ engine_xgboost <- function(x,
           # as an exposure offset for the base_margin
           xgboost::setinfo(df_train, "base_margin", log(w))
           # xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
+          assertthat::assert_that(nrow(df_pred) == length(w_full))
           xgboost::setinfo(df_pred, "base_margin", log(w_full))
           params$eval_metric <- "logloss"
         } else if(fam == 'binary:logistic'){
@@ -357,7 +359,6 @@ engine_xgboost <- function(x,
             of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
             # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
             of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
-
           }
           # -- Add offset to full prediction and load vector --
 

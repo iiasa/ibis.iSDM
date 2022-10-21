@@ -227,11 +227,11 @@ methods::setMethod(
       suppressWarnings({ar <- raster::area(r)})
 
       ## Calculate the probability that a cell has been sampled while accounting for area differences in lat/lon
+      ## Direction sign is negative and if area offset considered, use "+ offset(log(off.area)-log(off.bias))"
       off.bias <- (-log(1-exp(-r * ar)) - log(ar))
       names(off.bias) <- "off.bias"
       # Add bias as covariate
       layer <- off.bias
-      ## NOTE: if area offset considered, use "+ offset(log(off.area)-log(off.bias))"
     }
 
     # Check for infinite values

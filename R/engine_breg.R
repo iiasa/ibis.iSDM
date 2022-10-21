@@ -414,12 +414,15 @@ engine_breg <- function(x,
                                                             strategy = getOption("ibis.futurestrategy"))
 
             # Run the outgoing command
-            out <- foreach::foreach(s = iterators::iter(splits),
-                                    .combine = rbind,
-                                    .export = c("splits", "fit_breg", "full_sub",
-                                                "w_full_sub", "fam", "params"),
-                                    .multicombine = TRUE,
-                                    verbose = settings$get("verbose") ) %dopar% {
+            # out <- foreach::foreach(s = unique(splits),
+            #                         .combine = rbind,
+            #                         .export = c("splits", "fit_breg", "full_sub",
+            #                                     "w_full_sub", "fam", "params"),
+            #                         .packages = c("matrixStats"),
+            #                         .multicombine = TRUE,
+            #                         .inorder = TRUE,
+            #                         verbose = settings$get("verbose") ) %do% {
+            out <- parallel::mclapply(unique(splits), function(s) {
               i <- which(splits == s)
               # -> external code in utils-boom
               pred_breg <- ibis.iSDM:::predict_boom(
@@ -441,7 +444,8 @@ engine_breg <- function(x,
               names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
               preds$cv <- preds$sd / preds$mean
               return(preds)
-            }
+              })
+            out <- do.call(rbind, out)
           } else {
             out <- data.frame()
             pb <- progress::progress_bar$new(total = length(levels(unique(splits))),

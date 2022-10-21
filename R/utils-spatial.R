@@ -257,9 +257,9 @@ rename_geometry <- function(g, name){
 #' Convert a data.frame or tibble to simple features
 #'
 #' @description This function tries to guess the coordinate field and converts a data.frame
-#' to a simpel feature
-#' @param df A [`data.frame`], [`tibble`] or [`sf`] object
-#' @param geom_name A [`character`] indicating the name of the geometry column. Default: 'geometry'
+#' to a simple feature.
+#' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
+#' @param geom_name A [`character`] indicating the name of the geometry column (Default: \code{'geometry'}).
 #' @keywords internal, utils
 #' @noRd
 guess_sf <- function(df, geom_name = 'geometry'){

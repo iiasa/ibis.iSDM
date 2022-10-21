@@ -567,20 +567,20 @@ methods::setMethod(
             }
           }
           model[['predictors']] <- o
-          # model[['predictors_object']]$data <- pred_ov # This is correct, but results in some oddities
-          rm(pred_ov)
+          model[['predictors_object']]$data <- fill_rasters(o, model$predictors_object$data)
+          rm(pred_ov, o)
         } else {
           model$predictors[which( is.na(
             point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
           )),model$predictors_names] <- NA # Fill with NA
         }
-        # The same with offset if specified
-        # Note this operation below is computationally quite costly
-        if(!is.Waiver(x$offset)){
-          model$offset[which( is.na(
-            point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-          )), "spatial_offset" ] <- NA # Fill with NA
-        }
+        # The same with offset if specified, Note this operation below is computationally quite costly
+        # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
+        # if(!is.Waiver(x$offset)){
+        #   model$offset[which( is.na(
+        #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
+        #   )), "spatial_offset" ] <- NA # Fill with NA
+        # }
       }
     }
     # Messenger

@@ -6,7 +6,7 @@
 \usage{
 engine_gdb(
   x,
-  boosting_iterations = 1000,
+  iter = 2000,
   learning_rate = 0.1,
   empirical_risk = "inbag",
   type = "response",
@@ -16,7 +16,7 @@ engine_gdb(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{boosting_iterations}{An \code{\link{integer}} giving the number of boosting iterations}
+\item{iter}{An \code{\link{integer}} giving the number of boosting iterations (Default: \code{2e3L}).}
 
 \item{learning_rate}{A bounded \code{\link{numeric}} value between \code{0} and \code{1} defining the shrinkage parameter.}
 

@@ -7,8 +7,8 @@
 engine_xgboost(
   x,
   booster = "gbtree",
+  iter = 8000L,
   learning_rate = 0.001,
-  nrounds = 10000,
   gamma = 6,
   reg_lambda = 0,
   reg_alpha = 0,
@@ -25,10 +25,10 @@ engine_xgboost(
 
 \item{booster}{A \code{\link{character}} of the booster to use. Either \code{"gbtree"} or \code{"gblinear"} (Default: \code{gblinear})}
 
+\item{iter}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation (Default: \code{8e3L}).}
+
 \item{learning_rate}{\code{\link{numeric}} value indicating the learning rate (eta).
 Lower values generally being better but also computationally more costly. (Default: \code{1e-3})}
-
-\item{nrounds}{\code{\link{numeric}} value giving the the maximum number of boosting iterations for cross-validation.}
 
 \item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
 Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
