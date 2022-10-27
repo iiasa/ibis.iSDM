@@ -415,10 +415,6 @@ methods::setMethod(
         'observed' %in% names( model[['biodiversity']][[id]][['observations']] ),
         all( apply(env, 1, function(x) all(!is.na(x) )) ),msg = 'Missing values in extracted environmental predictors.'
       )
-      if((aggregate_observations && model[['biodiversity']][[id]][['type']] == "poipa")){
-        assertthat::assert_that( has_zeros(model[['biodiversity']][[id]][["observations"]][['observed']]),
-                                 msg = paste(model[['biodiversity']][[id]]$name, "poipa dataset has no absence information") )
-      }
 
       # Check whether predictors should be refined and do so
       if(settings$get('rm_corPred') && ('dummy' %in% model[['predictors_names']])){

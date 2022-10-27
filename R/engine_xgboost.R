@@ -309,8 +309,10 @@ engine_xgboost <- function(x,
         # Set target variables to bias_value for prediction if specified
         if(!is.Waiver(settings$get('bias_variable'))){
           for(i in 1:length(settings$get('bias_variable'))){
-            if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)) next()
-
+            if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)){
+              if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+              next()
+            }
             pred_cov[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
           }
         }

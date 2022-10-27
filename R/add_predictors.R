@@ -931,7 +931,11 @@ methods::setMethod(
   }
 )
 
-#' Function to format a prepared GLOBIOM netCDF file for use in Ibis
+#' Function to format a prepared GLOBIOM netCDF file for use in Ibis.iSDM
+#'
+#' @description
+#' This function expects a downscaled GLOBIOM output as created in the BIOCLIMA project.
+#' Likely of little use for anyone outside IIASA.
 #'
 #' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
 #' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
@@ -946,9 +950,8 @@ methods::setMethod(
 #' # Expects a filename pointing to a netCDF file.
 #' covariates <- formatBIOCLIMA(fname)
 #' }
-#' @keywords internal
-#' @noRd
-formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
+#' @keywords internal, utils
+formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_legend",
                           period = "all", template = NULL,
                           verbose = getOption("ibis.setupmessages")){
   assertthat::assert_that(
@@ -961,6 +964,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
   )
   period <- match.arg(period, c("reference", "projection", "all"), several.ok = FALSE)
   check_package("stars")
+  check_package("dplyr")
   check_package("cubelyr")
   check_package("ncdf4")
 
@@ -975,30 +979,103 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
                           all(lengths(vars)>0),
                           msg = "Variables or dimensions not found. Check col_class.")
 
-  # If there are more than one variables, grep the area shares
-  if(length(vars)>1) vars <- grep("share", vars, ignore.case = TRUE, value = TRUE) # Grep the area shares
+  attrs <- list() # For storing the attributes
+  sc <- vector() # For storing the scenario files
 
   # Now open the netcdf file with stats
-  ff <- stars::read_ncdf(fname, var = vars,
-                         make_units = FALSE # No point making units since GLOBIOM does't create consistent ones
-                         )
+  if( stars:::detect.driver(fname) == "netcdf" ){
+    if(verbose){
+      myLog('[Predictor]','green',"Loading in predictor file...")
+      pb <- progress::progress_bar$new(total = length(vars),
+                                       format = "Loading :variable (:spin) [:bar] :percent")
+    }
 
-  # Crop to background extent if set
-  if(!is.null(template)){
-    bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
-      sf::st_transform(crs = sf::st_crs(ff))
-    ff <- ff |> st_crop(bbox)
-  }
+    for(v in vars) {
+      if(verbose) pb$tick(tokens = list(variable = v))
 
-  # Get time dimension (without applying offset) so at the center
+      # Get and save the attributes of each variable
+      attrs[[v]] <- ncdf4::ncatt_get(fatt, varid = v, verbose = FALSE)
+
+      # Load in the variable
+      suppressWarnings(
+        suppressMessages(
+          ff <- stars::read_ncdf(fname,
+                                 var = v,
+                                 proxy = FALSE,
+                                 make_time = TRUE, # Make time on 'time' band
+                                 make_units = FALSE # To avoid unnecessary errors due to unknown units
+          )
+        )
+      )
+
+      # Sometimes variables don't seem to have a time dimension
+      if(!"time" %in% names(stars::st_dimensions(ff))) next()
+
+      # Crop to background extent if set
+      if(!is.null(template)){
+        bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
+          sf::st_transform(crs = sf::st_crs(ff))
+        suppressMessages(
+          ff <- ff |> st_crop(bbox)
+        )
+      }
+
+      # Get dimensions other that x,y and time and split
+      # Commonly used column names
+      check = c("x","X","lon","longitude", "y", "Y", "lat", "latitude", "time", "Time", "year", "Year")
+      chk <- which(!names(stars::st_dimensions(ff)) %in% check)
+
+      if(length(chk)>0){
+        for(i in chk){
+          col_class <- names(stars::st_dimensions(ff))[i]
+          # FIXME: Dirty hack to remove forest zoning
+          if(length( grep("zone",col_class,ignore.case = T) )>0) next()
+
+          # And class units as description from over
+          class_units <- fatt$dim[[col_class]]$units
+          class_units <-  class_units |>
+            strsplit(";") |>
+            # Remove emptyspace and special symbols
+            sapply(function(y)  gsub("[^0-9A-Za-z///' ]", "" , y, ignore.case = TRUE) ) |>
+            sapply(function(y)  gsub(" ", "" , y, ignore.case = TRUE) )
+          # Convert to vector and make names
+          class_units <- make.names(unlist(class_units)) |> as.vector()
+
+          ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
+
+          # FIXME: Dirty hack to deal with the forest zone dimension
+          # If there are more dimensions than 3, aggregate over them
+          if( length(stars::st_dimensions(ff)) >3){
+            # Aggregate spatial-temporally
+            ff <- stars::st_apply(ff, c("longitude", "latitude", "time"), sum, na.rm = TRUE)
+          }
+        }
+      }
+      # Now append to vector
+      sc <- c(sc, ff)
+      rm(ff)
+    }
+
+    invisible(gc())
+    # Format sc object as stars and set dimensions again
+
+
+  } else { stop("Fileformat not recognized!")}
+
+
+  # Get time dimension (without applying offset) so at the centre
   times <- stars::st_get_dimension_values(ff, "time", center = TRUE)
+
+  # Get classes and class units from the land-use legend
   classes <- stars::st_get_dimension_values(ff, col_class, center = TRUE)
+
   # And class units as description
   class_units <- fatt$dim[[col_class]]$units
-  class_units <- make.names(unlist(strsplit(class_units,"/"))) %>% as.vector()
+  class_units <- make.names(unlist(strsplit(class_units,";"))) %>% as.vector()
   # Quick security check
   assertthat::assert_that(
     is.character(class_units), length(class_units)>0,
+    length(classes) == length(class_units),
     msg = "The formatting of the input classes went wrong somewhere!"
   )
 
@@ -1009,6 +1086,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "lc_class",
     # Drop the time dimension
     ff <- stars:::adrop.stars(ff, drop = which(names(stars::st_dimensions(ff)) == "time") )
   }
+
 
   # Get classes as attributes and rename and reformat
   ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
