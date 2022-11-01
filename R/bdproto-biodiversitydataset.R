@@ -120,6 +120,11 @@ BiodiversityDatasetCollection <- bdproto(
     x <- lapply(self$data, function(z) z$get_column_occ())
     x
   },
+  # Get weights
+  get_weights = function(self){
+    x <- lapply(self$data, function(z) z$get_weight())
+    x
+  },
   # Get ids of all assets in collection
   get_ids = function(self){
     x <- lapply(self$data, function(z) z$id)
@@ -218,6 +223,7 @@ BiodiversityDataset <- bdproto(
   family           = character(0),
   link             = new_waiver(),
   type             = new_waiver(),
+  weight           = new_waiver(),
   field_occurrence = character(0),
   data             = new_waiver(),
   # Set new equation
@@ -280,6 +286,10 @@ BiodiversityDataset <- bdproto(
   # Get data
   get_data = function(self){
     self$data
+  },
+  # Get weight
+  get_weight = function(self){
+    self$weight
   },
   # Print input messages
   show = function(self) {

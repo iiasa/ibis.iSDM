@@ -69,16 +69,16 @@ determine_lambda <- function(obj){
 #'
 #' @description
 #' This helper function summarizes the coefficients from a glmnet model.
+#' The optimal lambda is determined through the [`determine_lambda`] function.
 #' @param obj An object created with \code{'cv.glmnet'}.
-#' @param lambda Which lambda object to use for the coefficients y default
 #' @keywords internal, utils
 #' @noRd
-tidy_glmnet_summary <- function(obj, lambda = "lambda.1se"){
+tidy_glmnet_summary <- function(obj){
   assertthat::assert_that(
-    inherits(obj, "cv.glmnet"),
-    is.character(lambda)
+    inherits(obj, "cv.glmnet")
   )
-  lambda <- match.arg(lambda, c("lambda.1se", "lambda.min"), several.ok = FALSE)
+  # Determine best lambda
+  lambda <- determine_lambda(obj)
 
   # Summarise coefficients within 1 standard deviation
   ms <- coef(obj, s = lambda) |>

@@ -159,13 +159,6 @@ engine_gdb <- function(x,
           bg <- self$get_data("template")
           assertthat::assert_that(is.Raster(bg), !is.na(raster::cellStats(bg,min)))
 
-          # # Aggregate observations
-          # MJ: Removed for now. For this to work, the non-duplicates need to matched with the envs
-          # model$biodiversity[[1]]$observations <- aggregate_observations2grid(
-          #   df = model$biodiversity[[1]]$observations,
-          #   template = bg,
-          #   field_occurrence = "observed")
-
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
                                    field_occurrence = 'observed',
@@ -184,7 +177,13 @@ engine_gdb <- function(x,
           df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
                       envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+          if(length(any_missing)>0) {
+            presabs <- presabs[-any_missing,] # This works as they are in the same order
+            model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+            # Fill the absences with 1 as multiplier. This works since absences follow the presences
+            model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                 rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+          }
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -199,6 +198,7 @@ engine_gdb <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
+                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
           # Add offset if existent
@@ -221,10 +221,10 @@ engine_gdb <- function(x,
                            bg = bg,
                            weight = 1e-6
           )
-          df$w <- w # Also add as column
+          df$w <- w * model$biodiversity[[1]]$expect # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- df$w
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -237,7 +237,7 @@ engine_gdb <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full
+          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
 
         } else if(model$biodiversity[[1]]$family != 'poisson'){
           # calculating the case weights (equal weights)
@@ -245,9 +245,6 @@ engine_gdb <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
-          # Weights for IWLR
-          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
-
           # If family is not poisson, assume factor distribution for response
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
 
@@ -261,7 +258,7 @@ engine_gdb <- function(x,
             model$biodiversity[[1]]$offset <- ofs
           }
 
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
         }
 
         # ---- #

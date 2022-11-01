@@ -12,6 +12,7 @@ add_biodiversity_poipo(
   formula = NULL,
   family = "poisson",
   link = NULL,
+  weight = 1,
   separate_intercept = TRUE,
   docheck = TRUE,
   pseudoabsence_settings = NULL,
@@ -35,6 +36,10 @@ add_biodiversity_poipo(
 
 \item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
+Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipo}}.}
+
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
 
@@ -50,10 +55,11 @@ distribution object.
 }
 \details{
 This function allows to add presence-only biodiversity records to a \link{distribution} \pkg{ibis.iSDM}
-Presence-only data are usually modelled through some inferential model (see Guisan and Zimmerman, 2000) that
+Presence-only data are usually modelled through an inferential model (see Guisan and Zimmerman, 2000) that
 relate their occurrence in relation to environmental covariates to a selected sample of
-'background' points. The most common approach for estimation are "Maxent" or poisson-process models (PPM), the
-latter of which are used in this package. See Renner et al. 2015 for an overview.
+'background' points. The most common approach for estimation and the one supported by this type of dataset
+are poisson-process models (PPM) in which presence-only points are fitted through a down-weighted Poisson
+regression. See Renner et al. 2015 for an overview.
 }
 \examples{
 \dontrun{

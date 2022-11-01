@@ -7,7 +7,7 @@
 formatGLOBIOM(
   fname,
   oftype = "raster",
-  col_class = "Landuse_class_legend",
+  ignore = NULL,
   period = "all",
   template = NULL,
   verbose = getOption("ibis.setupmessages")
@@ -18,7 +18,7 @@ formatGLOBIOM(
 
 \item{oftype}{A \code{\link{character}} denoting the output type (Default: \code{'raster'}).}
 
-\item{col_class}{A \code{\link{character}} for the dimension containing the GLOBIOM class (Default: \code{'lc_class'}).}
+\item{ignore}{A \code{\link{vector}} of variables to be ignored (Default: \code{NULL}).}
 
 \item{period}{A \code{\link{character}} limiting the period to be returned from the formatted data.
 Options include \code{"reference"} for the first entry, \code{"projection"} for all entries but the first,

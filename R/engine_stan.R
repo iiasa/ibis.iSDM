@@ -215,7 +215,13 @@ engine_stan <- function(x,
             df <- rbind(model$biodiversity[[i]]$predictors[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)],
                         envs[,c('x','y','Intercept', model$biodiversity[[i]]$predictors_names)] )
             any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-            if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+            if(length(any_missing)>0){
+              presabs <- presabs[-any_missing,] # This works as they are in the same order
+              model$biodiversity[[i]]$expect <- model$biodiversity[[i]]$expect[-any_missing]
+              # Fill the absences with 1 as multiplier. This works since absences follow the presences
+              model$biodiversity[[i]]$expect <- c( model$biodiversity[[i]]$expect,
+                                                   rep(1, nrow(presabs)-length(model$biodiversity[[i]]$expect) ))
+            }
             df <- subset(df, complete.cases(df))
             assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -225,6 +231,7 @@ engine_stan <- function(x,
             # Preprocessing security checks
             assertthat::assert_that( all( model$biodiversity[[i]]$observations[['observed']] >= 0 ),
                                      any(!is.na(presabs[['observed']])),
+                                     length(model$biodiversity[[i]]$expect)==nrow(model$biodiversity[[i]]$observations),
                                      nrow(df) == nrow(model$biodiversity[[i]]$observations)
             )
 
@@ -246,10 +253,17 @@ engine_stan <- function(x,
                              bg = bg,
                              weight = 1e-6
             )
-            df$w <- w # Also add as column
+            df$w <- w * model$biodiversity[[i]]$expect # Also add as column
 
             model$biodiversity[[i]]$predictors <- df
-            model$biodiversity[[i]]$expect <- w
+            model$biodiversity[[i]]$expect <- df$w
+          } else {
+            # calculating the case weights (equal weights)
+            # the order of weights should be the same as presences and backgrounds in the training data
+            prNum <- as.numeric(table(model$biodiversity[[i]]$observations[['observed']])["1"]) # number of presences
+            bgNum <- as.numeric(table(model$biodiversity[[i]]$observations[['observed']])["0"]) # number of backgrounds
+            w <- ifelse(model$biodiversity[[i]]$observations[['observed']] == 1, 1, prNum / bgNum)
+            model$biodiversity[[i]]$expect <- w * model$biodiversity[[i]]$expect # Multiply with provided weights
           }
         }
         # --- #

@@ -100,10 +100,9 @@ ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption(
 
   strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "remote"),
                         several.ok = FALSE)
-  check_package("future")
 
   if(isTRUE(Sys.info()[["sysname"]] == "Windows")){
-    if(strategy == "multicore") stop("Multicore is not supported ")
+    if(strategy == "multicore") stop("Multicore is not supported on windows!")
   }
 
   # Define plan based on formulated strategy
@@ -114,7 +113,7 @@ ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption(
   } else if(strategy == "sequential") {
     future::plan(strategy = future::sequential())
   } else if(strategy == "multisession"){
-    future::plan(strategy = future::multisession(workers = cores))
+    future::plan(strategy = future::multisession(workers = cores) )
   } else if(strategy == "multicore"){
     future::plan(strategy = future::multicore(workers = cores) )
   } else if(strategy == "cluster"){

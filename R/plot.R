@@ -105,7 +105,8 @@ methods::setMethod(
     obj <- mod$get_data()
     # Check that at least mean and standard deviation is available
     assertthat::assert_that(xvar %in% names(obj),
-                            yvar %in% names(obj))
+                            yvar %in% names(obj),
+                            msg = "Specified (default?) variables for xvar/yvar not found in model!")
 
     # Check whether biscale package is available
     check_package('biscale')

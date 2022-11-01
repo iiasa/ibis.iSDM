@@ -12,9 +12,10 @@ add_biodiversity_polpa(
   formula = NULL,
   family = "binomial",
   link = NULL,
+  weight = 1,
   simulate = FALSE,
   simulate_points = 100,
-  simulate_weights = NULL,
+  simulate_bias = NULL,
   simulate_strategy = "random",
   separate_intercept = TRUE,
   docheck = TRUE,
@@ -39,11 +40,15 @@ add_biodiversity_polpa(
 
 \item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
+Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{polpa}}.}
+
 \item{simulate}{Simulate poipa points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipa}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation.}
 
-\item{simulate_weights}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
+\item{simulate_bias}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
 \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}

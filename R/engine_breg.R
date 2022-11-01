@@ -168,7 +168,13 @@ engine_breg <- function(x,
           df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
                       envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+          if(length(any_missing)>0){
+            presabs <- presabs[-any_missing,] # This works as they are in the same order
+            model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+            # Fill the absences with 1 as multiplier. This works since absences follow the presences
+            model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                 rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+          }
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -178,6 +184,7 @@ engine_breg <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
+                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 
@@ -205,7 +212,7 @@ engine_breg <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -218,7 +225,7 @@ engine_breg <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full
+          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
 
         } else if(fam == "binomial"){
           # calculating the case weights (equal weights)
@@ -226,9 +233,7 @@ engine_breg <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
-          # Calculate weights for Infinetly weighted logistic regressions (although not possible to fit using Boom)
-          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
           # Convert to numeric
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
         }

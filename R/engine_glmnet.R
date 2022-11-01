@@ -153,7 +153,8 @@ engine_glmnet <- function(x,
         # -- #
         # Expand predictors if specified in settings
         if(settings$get('only_linear') == FALSE){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Non-linear estimation not added to engine. Suggest to create variable derivatives externally.')
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                    'Non-linear estimation not yet added to engine. Suggest to create variable derivatives externally.')
         }
         # -- #
 
@@ -181,7 +182,13 @@ engine_glmnet <- function(x,
           df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
                       envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+          if(length(any_missing)>0) {
+            presabs <- presabs[-any_missing,] # This works as they are in the same order
+            model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+            # Fill the absences with 1 as multiplier. This works since absences follow the presences
+            model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                 rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+          }
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -191,6 +198,7 @@ engine_glmnet <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
+                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 
@@ -214,7 +222,7 @@ engine_glmnet <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -227,7 +235,7 @@ engine_glmnet <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full
+          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
 
         } else if(fam == "binomial"){
           # Check that observations are all <=1
@@ -237,7 +245,7 @@ engine_glmnet <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
           model$biodiversity[[1]]$observations$observed <- as.factor( model$biodiversity[[1]]$observations$observed )
         }
 

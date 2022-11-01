@@ -188,7 +188,13 @@ engine_xgboost <- function(x,
           df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
                       envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+          if(length(any_missing)>0){
+            presabs <- presabs[-any_missing,] # This works as they are in the same order
+            model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+            # Fill the absences with 1 as multiplier. This works since absences follow the presences
+            model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                 rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+          }
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -198,6 +204,7 @@ engine_xgboost <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
+                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 
@@ -225,7 +232,7 @@ engine_xgboost <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
 
           # Get for the full dataset
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -235,6 +242,8 @@ engine_xgboost <- function(x,
                                 bg = bg,
                                 weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
+          # Multiply with first weight value
+          w_full <- w_full * unique(model$biodiversity[[1]]$expect)[1]
           assertthat::assert_that(
             !anyNA(w_full), all(is.finite(log(w_full))),
             !anyNA(w_full),
@@ -247,7 +256,7 @@ engine_xgboost <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
           # Convert to numeric
           model$biodiversity[[1]]$observations$observed <- as.numeric( model$biodiversity[[1]]$observations$observed )
         }

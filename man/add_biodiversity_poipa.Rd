@@ -12,6 +12,7 @@ add_biodiversity_poipa(
   formula = NULL,
   family = "binomial",
   link = NULL,
+  weight = 1,
   separate_intercept = TRUE,
   docheck = TRUE,
   ...
@@ -34,6 +35,10 @@ add_biodiversity_poipa(
 
 \item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
+Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipa}}.}
+
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in.
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
@@ -48,9 +53,8 @@ distribution object.
 \details{
 Opposed to presence-only data, presence-absence biodiversity records usually originate from
 structured biodiversity surveys where the absence of a species in a given region was specifically
-assessed.
-By default, the cloglog link function is used in a logistic regression setup unless the specific \link{engine}
-does not support generalised linear regressions (e.g. \link{engine_bart})
+assessed. By default, the cloglog link function is used in a logistic regression setting
+unless the specific \link{engine} does not support generalised linear regressions (e.g. \link{engine_bart})
 }
 \section{Notes}{
 

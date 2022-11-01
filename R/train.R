@@ -69,6 +69,9 @@ NULL
 #' (see Leung et al. 2019 for a description).
 #' [*] \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
 #' Might not work with any engine!
+#' [*] \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
+#' Individual weight multipliers can be determined while setting up the model (**Note: Default is 1**). Datasets are then combined for estimation
+#' and weighted respectively, thus giving for example presence-only records less weight than survey records.
 #'
 #' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
 #' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
@@ -154,7 +157,7 @@ methods::setMethod(
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
-    method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior"), several.ok = FALSE)
+    method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
     settings$set('rm_corPred', rm_corPred)
@@ -206,6 +209,18 @@ methods::setMethod(
     } else {
       # Convert Predictors to data.frame
       model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
+
+      # Check whether any of the variables are fully NA, if so exclude
+      if( any( apply(model[['predictors']], 2, function(z) all(is.na(z))) )){
+        chk <- which( apply(model[['predictors']], 2, function(z) all(is.na(z))) )
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+                                                  paste0('The following variables are fully missing and are removed:\n',
+                                                         paste(names(chk),collapse = " | "))
+        )
+        model[['predictors']] <- model[['predictors']][,-chk]
+        x$predictors$rm_data(names(chk)) # Remove the variables
+      }
+
       # Also set predictor names
       model[['predictors_names']] <- x$get_predictor_names()
       # Get predictor types
@@ -343,6 +358,7 @@ methods::setMethod(
       model[['biodiversity']][[id]][['link']]         <- x$biodiversity$get_links()[[id]]
       model[['biodiversity']][[id]][['equation']]     <- x$biodiversity$get_equations()[[id]]
       model[['biodiversity']][[id]][['use_intercept']]<- x$biodiversity$data[[id]]$use_intercept # Separate intercept?
+      model[['biodiversity']][[id]][['expect']]       <- x$biodiversity$get_weights()[[id]] # Weights per dataset
       # --- #
       # Rename observation column to 'observed'. Needs to be consistent for INLA
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
@@ -358,6 +374,14 @@ methods::setMethod(
                                )
         model[['biodiversity']][[id]][['observations']] <- o |> as.data.frame()
         model[['biodiversity']][[id]][['type']] <- ifelse(model[['biodiversity']][[id]][['type']] == 'polpo', 'poipo', 'poipa')
+        # Check and reset multiplication weights
+        if(nrow(o) != length( model[['biodiversity']][[id]][['expect']] )){
+          if(length(unique( model[['biodiversity']][[id]][['expect']] ))>1){
+            myLog('[Setup]','red', 'First weight is taken from the observations due to type conversion!')
+          }
+          val <- unique( model[['biodiversity']][[id]][['expect']] )[1]
+          model[['biodiversity']][[id]][['expect']] <- rep(val, nrow(o))
+        }
         rm(o)
       } else {
         # FIXME: For polygons this won't work. Ideally switch to WKT as default in future
@@ -378,6 +402,9 @@ methods::setMethod(
           df = model$biodiversity[[id]]$observations,
           template = emptyraster(x$predictors$get_data(df = FALSE)),
           field_occurrence = "observed")
+        # Check and reset multiplication weights
+        model[['biodiversity']][[id]][['expect']] <- rep(unique( model[['biodiversity']][[id]][['expect']] )[1],
+                                                         nrow(model$biodiversity[[id]]$observations))
       }
 
       # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
@@ -387,7 +414,11 @@ methods::setMethod(
 
       # Remove missing values as several engines can't deal with those easily
       miss <- complete.cases(env)
+      if(sum( !miss )>0 && getOption('ibis.setupmessages')) {
+        myLog('[Setup]','yellow', 'Excluded ', sum( !miss ), ' observations owing to missing values in covariates!' )
+      }
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
+      model[['biodiversity']][[id]][['expect']] <- model[['biodiversity']][[id]][['expect']][miss]
       env <- subset(env, miss)
       if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
       if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) stop("All presence records fall outside the modelling background.")
@@ -493,6 +524,39 @@ methods::setMethod(
       model[['biodiversity']][[id]][['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
       model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
     }
+    # If the method of integration is weights and there are more than 2 datasets, combine
+    if(method_integration == "weight" && length(model$biodiversity)>=2){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
+      # Check that all types and families can be combined
+      types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
+      fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
+      assertthat::assert_that(length(unique(types))==1, length(unique(fams))==1,
+                              msg = "Integration by weights requires identical biodiversity datasets!")
+      obs <- lapply( model$biodiversity, function(x) {
+        guess_sf( x$observations )
+      } )
+      obs <- do.call("rbind", obs)
+      w <- lapply( model$biodiversity, function(x) x$expect ) |> unlist() |> unname()
+      assertthat::assert_that(nrow(obs) == length(w))
+      preds <- lapply( model$biodiversity, function(x) x$predictors )
+      preds <- do.call("rbind", preds) |> unique()
+      predn <- lapply( model$biodiversity, function(x) x$predictors_names ) |> unlist() |> unname() |> unique()
+      predt <- lapply( model$biodiversity, function(x) x$predictors_types )
+      predt <- do.call("rbind", predt) |> unique()
+      # Now combine the biodiversity objects and create a new id
+      new <- list(
+        name = "Combined_data_weight",
+        observations = obs |> sf::st_drop_geometry(),
+        type = unique(types)[1], family = unique(fams)[1],
+        equation = "<Default>", # Use default equation #FIXME This could be more cleverer
+        use_intercept = TRUE, # Assume default
+        expect = w,
+        predictors = preds, predictors_names = predn, predictors_types = predt
+      )
+      model[['biodiversity']] <- list()
+      model[['biodiversity']][[as.character(new_id())]] <- new
+      rm(new, obs, w, preds, predn, predt)
+    }
 
     # Get and assign Priors
     if(!is.Waiver(x$priors)){
@@ -583,6 +647,12 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
+    # Basic consistency checks
+    assertthat::assert_that(nrow(model$biodiversity[[1]]$observations)>0,
+                            length(model[['biodiversity']][[1]][['expect']])>1,
+                            all(c("predictors","background","biodiversity") %in% names(model) ),
+                            length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
+                            )
     # --------------------------------------------------------------------- #
     #### Engine specific code starts below                               ####
     # --------------------------------------------------------------------- #
@@ -618,7 +688,7 @@ methods::setMethod(
         # For each type include expected data
         # expectation vector (area for integration points/nodes and 0 for presences)
         if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
-        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
+        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
       # Run the engine setup script
       model <- x$engine$setup(model, settings)
@@ -650,16 +720,10 @@ methods::setMethod(
                                                                 id = id,
                                                                 x = x,
                                                                 settings = settings)
-        # Remove non-covered predictors from the predictor names objects
-        # model$biodiversity[[id]]$predictors_names <- model$biodiversity[[id]]$predictors_names[which(model$biodiversity[[id]]$predictors_names %in% all.vars(form))]
-        # model$biodiversity[[id]]$predictors_types <- model$biodiversity[[id]]$predictors_types[
-        #   which( model$biodiversity[[id]]$predictors_types$predictors %in% model$biodiversity[[id]]$predictors_names )
-        #   ,]
-
         # For each type include expected data
         # expectation vector (area for integration points/nodes and 0 for presences)
         if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
-        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
+        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
       # Run the engine setup script

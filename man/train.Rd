@@ -68,6 +68,9 @@ partialed out during prediction. Here the first dataset added determines the ref
 (see Leung et al. 2019 for a description).
 \link{*} \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
 Might not work with any engine!
+\link{*} \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
+Individual weight multipliers can be determined while setting up the model (\strong{Note: Default is 1}). Datasets are then combined for estimation
+and weighted respectively, thus giving for example presence-only records less weight than survey records.
 
 \strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}
 

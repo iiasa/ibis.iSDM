@@ -262,7 +262,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, "XGBOOST-Model")){
       xgboost::xgb.importance(model = self$get_data(obj))
     } else if(inherits(self, 'GLMNET-Model')){
-      tidy_glmnet_summary(self$get_data(obj), lambda = "lambda.1se")
+      tidy_glmnet_summary(self$get_data(obj))
     }
   },
   # Dummy partial response calculation. To be overwritten per engine

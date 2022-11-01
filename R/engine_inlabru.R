@@ -217,9 +217,11 @@ engine_inlabru <- function(x,
           )
         )
         # Calculate area
-        ar <- suppressWarnings(
-          mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
-        )
+        ar <- suppressMessages(
+                suppressWarnings(
+                  mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+                )
+              )
 
         # Now set the output
         self$set_data("mesh", mesh)

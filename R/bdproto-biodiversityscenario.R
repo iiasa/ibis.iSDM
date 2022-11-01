@@ -95,12 +95,18 @@ BiodiversityScenario <- bdproto(
     }
   },
   # Get time period of projection
-  get_timeperiod = function(self){
+  get_timeperiod = function(self, what = "range"){
     if(is.Waiver(self$predictors)) return(self$predictors)
     if(inherits(self$predictors, "PredictorDataset")) {
-      return(
-        c( min(self$predictors$timeperiod), max(self$predictors$timeperiod) )
-      )
+      if(what == "range"){
+        return(
+          c( min(self$predictors$timeperiod), max(self$predictors$timeperiod) )
+        )
+      } else {
+        return(
+          sort( self$predictors$timeperiod )
+        )
+      }
     }
   },
   # Get constrains for model

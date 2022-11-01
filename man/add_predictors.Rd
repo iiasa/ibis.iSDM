@@ -24,6 +24,8 @@ add_predictors(
 
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
 
+\S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+
 \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
 }
 \arguments{

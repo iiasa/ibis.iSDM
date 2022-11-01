@@ -169,7 +169,13 @@ engine_bart <- function(x,
           df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
                       envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
           any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-          if(length(any_missing)>0) presabs <- presabs[-any_missing,] # This works as they are in the same order
+          if(length(any_missing)>0){
+            presabs <- presabs[-any_missing,] # This works as they are in the same order
+            model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+            # Fill the absences with 1 as multiplier. This works since absences follow the presences
+            model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                 rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+          }
           df <- subset(df, complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
@@ -179,6 +185,7 @@ engine_bart <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
+                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 
@@ -204,7 +211,7 @@ engine_bart <- function(x,
           df$w <- w # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with provided weights
         } else {
           # If family is not poisson, assume factor distribution for response
           assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
@@ -213,10 +220,7 @@ engine_bart <- function(x,
           prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
           bgNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["0"]) # number of backgrounds
           w <- ifelse(model$biodiversity[[1]]$observations[['observed']] == 1, 1, prNum / bgNum)
-          # Weights for IWLR
-          # w <- (10^6)^(1 - model$biodiversity[[1]]$observations[['observed']])
-          model$biodiversity[[1]]$expect <- w
-
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with provided weights
           model$biodiversity[[1]]$observations[['observed']] <- factor(model$biodiversity[[1]]$observations[['observed']])
         }
 

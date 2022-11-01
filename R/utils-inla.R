@@ -268,8 +268,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
       bb <- sp::bbox(x) + (matrix(dxy, nrow = 2, ncol = 1) %*%
                              matrix(c(-1, 1), nrow = 1, ncol = 2)) * abs(range.expand)
       bb <- c(t(bb))
-    }
-    else {
+    } else {
       bb = c(t(sp::bbox(bounding.polygon)))
     }
     z = deldir::deldir(crds[, 1], crds[, 2], rw = bb)
@@ -277,14 +276,21 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     polys = vector(mode = "list", length = length(w))
     for (i in seq(along = polys)) {
       pcrds = cbind(w[[i]]$x, w[[i]]$y)
+      # 01/11/2022 -> Added as bug fix
+      if(nrow(pcrds)==0) next()
       pcrds = rbind(pcrds, pcrds[1, ])
       polys[[i]] = sp::Polygons(list(sp::Polygon(pcrds)), ID = as.character(i))
     }
+    # 01/11/2022 -> Error removal
+    if(length(which(sapply(polys, is.null)))>0) {
+      crds <-  crds[-which(sapply(polys, is.null)),]
+      polys[which(sapply(polys, is.null))] <- NULL
+    }
     SP = sp::SpatialPolygons(polys, proj4string = sp::CRS(sp::proj4string(x)))
-    voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,
-                                                                      1], y = crds[, 2], area = sapply(slot(SP, "polygons"),
-                                                                                                       slot, "area"), row.names = sapply(slot(SP, "polygons"),
-                                                                                                                                         slot, "ID")))
+    voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,1],
+                                                                 y = crds[, 2],
+                                                                 area = sapply(slot(SP, "polygons"),slot, "area"),
+                                                                 row.names = sapply(slot(SP, "polygons"),slot, "ID")))
     if (!is.null(bounding.polygon)) {
       bounding.polygon <- rgeos::gUnion(bounding.polygon, bounding.polygon)
       voronoi.clipped <- rgeos::gIntersection(voronoi, bounding.polygon,

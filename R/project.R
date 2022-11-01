@@ -165,7 +165,8 @@ methods::setMethod(
     df <- new_preds$get_data(df = TRUE)
     names(df)[1:3] <- tolower(names(df)[1:3]) # Assuming the first three attributes are x,y,t
     assertthat::assert_that(nrow(df)>0,
-                            hasName(df,'x'), hasName(df,'y'), hasName(df,'time'))
+                            hasName(df,'x'), hasName(df,'y'), hasName(df,'time'),
+                            msg = "Error: Projection data and training data are not of equal size and format!")
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
     df$time <- to_POSIXct( df$time )
     # Convert all units classes to numeric or character to avoid problems

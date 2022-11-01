@@ -242,6 +242,25 @@ methods::setMethod(
   }
 )
 
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityDistribution", env = "stars"),
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
+           explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            !missing(env))
+    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Taking first time entry from object.')
+
+    # Convert to raster
+    env <- stars_to_raster(env, which = 1)
+    if(is.list(env)) env <- env[[1]]
+    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+  }
+)
+
 # Add elevational delineation as predictor ----
 
 #' Create lower and upper limits for an elevational range and add them as separate predictors
@@ -653,10 +672,11 @@ methods::setMethod(
       }
     }
 
-    # Get and format Time period
+    # Get, guess and format Time period
     env_dim <- stars::st_dimensions(env)
-    timeperiod <- as.POSIXct(env_dim[[3]]$values$start) # Assumes the third dimension is time
-    if(anyNA(timeperiod)) stop('Third dimension is not a time value!')
+    timeperiod <- stars::st_get_dimension_values(env,
+                                                 grep("year|time|date", names(env_dim), ignore.case = TRUE, value = TRUE)
+                                                 )
 
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain
@@ -675,7 +695,7 @@ methods::setMethod(
 )
 
 # --------------------- #
-#### GLOBIOM specific code ####
+#### GLOBIOM specific code ----
 
 #' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution object
 #'
@@ -756,10 +776,10 @@ methods::setMethod(
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
                          oftype = "raster",
-                         col_class = "lc_class",
                          period = "reference",
                          template = x$background
                          )
+
     if(is.list(env)) env <- env[[1]] # Take the first reference entry
     assertthat::assert_that(is.Raster(env),
                             raster::nlayers(env)>0)
@@ -863,7 +883,6 @@ methods::setMethod(
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
                          oftype = "stars",
-                         col_class = "lc_class",
                          period = "projection",
                          template = obj$model$background
     )
@@ -939,7 +958,7 @@ methods::setMethod(
 #'
 #' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
 #' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
-#' @param col_class A [`character`] for the dimension containing the GLOBIOM class (Default: \code{'lc_class'}).
+#' @param ignore A [`vector`] of variables to be ignored (Default: \code{NULL}).
 #' @param period A [`character`] limiting the period to be returned from the formatted data.
 #' Options include \code{"reference"} for the first entry, \code{"projection"} for all entries but the first,
 #' and \code{"all"} for all entries (Default: \code{"reference"}).
@@ -951,13 +970,14 @@ methods::setMethod(
 #' covariates <- formatBIOCLIMA(fname)
 #' }
 #' @keywords internal, utils
-formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_legend",
+formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
                           period = "all", template = NULL,
                           verbose = getOption("ibis.setupmessages")){
   assertthat::assert_that(
     file.exists(fname),
     assertthat::has_extension(fname, "nc"),
     is.character(oftype),
+    is.null(ignore) || is.character(ignore),
     is.character(period),
     is.character(fname),
     is.logical(verbose)
@@ -975,9 +995,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
   # Get all dimension names and variable names
   dims <- names(fatt$dim)
   vars <- names(fatt$var)
-  assertthat::assert_that(all(c("lon", "lat", "time", col_class) %in% dims),
-                          all(lengths(vars)>0),
-                          msg = "Variables or dimensions not found. Check col_class.")
+  if(!is.null(ignore)) assertthat::assert_that( all( ignore %in% vars ) )
 
   attrs <- list() # For storing the attributes
   sc <- vector() # For storing the scenario files
@@ -992,6 +1010,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
 
     for(v in vars) {
       if(verbose) pb$tick(tokens = list(variable = v))
+      if(!is.null(ignore)) if(ignore == v) next()
 
       # Get and save the attributes of each variable
       attrs[[v]] <- ncdf4::ncatt_get(fatt, varid = v, verbose = FALSE)
@@ -1020,6 +1039,9 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
         )
       }
 
+      # Record dimensions for later
+      full_dis <- stars::st_dimensions(ff)
+
       # Get dimensions other that x,y and time and split
       # Commonly used column names
       check = c("x","X","lon","longitude", "y", "Y", "lat", "latitude", "time", "Time", "year", "Year")
@@ -1039,7 +1061,10 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
             sapply(function(y)  gsub("[^0-9A-Za-z///' ]", "" , y, ignore.case = TRUE) ) |>
             sapply(function(y)  gsub(" ", "" , y, ignore.case = TRUE) )
           # Convert to vector and make names
-          class_units <- make.names(unlist(class_units)) |> as.vector()
+          class_units <- paste0(
+            v, "__",
+            make.names(unlist(class_units)) |> as.vector()
+          )
 
           ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
 
@@ -1051,51 +1076,59 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
           }
         }
       }
+
+      # Finally aggregate
+      if(!is.null(template) && is.Raster(template)){
+        # Make background
+        bg <- stars::st_as_stars(template)
+
+        # Get resolution
+        res <- sapply(st_dimensions(bg), "[[", "delta")
+        res[1:2] = abs(res[1:2]) # Assumes the first too entries are the coordinates
+        assertthat::assert_that(!anyNA(res))
+
+        # And warp by projecting and resampling
+        ff <- ff |> stars::st_warp(crs = sf::st_crs(bg),
+                                  cellsize = res,
+                                  method = "near")
+        # Overwrite full dimensions
+        full_dis <- stars::st_dimensions(ff)
+      }
       # Now append to vector
       sc <- c(sc, ff)
       rm(ff)
     }
-
     invisible(gc())
-    # Format sc object as stars and set dimensions again
+    assertthat::assert_that(length(names(full_dis))>=3)
 
+    # Format sc object as stars and set dimensions again
+    sc <- stars::st_as_stars(sc)
+    assertthat::assert_that(length(sc)>0)
+    full_dis <- full_dis[c(
+      grep("x|longitude",names(full_dis), ignore.case = TRUE,value = TRUE),
+      grep("y|latitude",names(full_dis), ignore.case = TRUE,value = TRUE),
+      grep("year|time",names(full_dis), ignore.case = TRUE,value = TRUE)
+      )] # Order assumed to be correct
+    stars:::st_dimensions(sc) <- full_dis # Target dimensions
 
   } else { stop("Fileformat not recognized!")}
 
-
   # Get time dimension (without applying offset) so at the centre
-  times <- stars::st_get_dimension_values(ff, "time", center = TRUE)
-
-  # Get classes and class units from the land-use legend
-  classes <- stars::st_get_dimension_values(ff, col_class, center = TRUE)
-
-  # And class units as description
-  class_units <- fatt$dim[[col_class]]$units
-  class_units <- make.names(unlist(strsplit(class_units,";"))) %>% as.vector()
-  # Quick security check
-  assertthat::assert_that(
-    is.character(class_units), length(class_units)>0,
-    length(classes) == length(class_units),
-    msg = "The formatting of the input classes went wrong somewhere!"
-  )
+  times <- stars::st_get_dimension_values(sc, "time", center = TRUE)
 
   # Make checks on length of times and if equal to one, drop. check.
   if(length(times)==1){
     if(period == "projection") stop("Found only a single time slot. Projections not possible.")
     if(verbose) myLog('[Setup]','yellow','Found only a single time point in file. Dropping time dimension.')
     # Drop the time dimension
-    ff <- stars:::adrop.stars(ff, drop = which(names(stars::st_dimensions(ff)) == "time") )
+    sc <- stars:::adrop.stars(sc, drop = which(names(stars::st_dimensions(sc)) == "time") )
   }
-
-
-  # Get classes as attributes and rename and reformat
-  ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
 
   # Formate times unit and convert to posix if not already set
   if(is.numeric(times) && length(times) > 1){
-    # Assume year and paste0
+    # Assume year and paste0 as properly POSIX formatted
     times <- as.POSIXct( paste0(times, "-01-01") )
-    ff <- stars::st_set_dimensions(ff, "time", times)
+    sc <- stars::st_set_dimensions(sc, "time", times)
   }
 
   # Depending on the period, slice the input data
@@ -1103,31 +1136,24 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
     # Get the first entry and filter
     if(length(times)>1){
       # In case times got removed
-      times_first <- stars::st_get_dimension_values(ff, "time")[1]
-      ff <- ff %>% stars:::filter.stars(time == times_first)
+      times_first <- stars::st_get_dimension_values(sc, "time")[1]
+      sc <- sc %>% stars:::filter.stars(time == times_first)
       times <- times_first;rm(times_first)
     }
   } else if(period == "projection"){
     # Remove the first time entry instead, only using the last entries
-    times_allbutfirst <- stars::st_get_dimension_values(ff, "time")[-1]
-    ff <- ff %>% stars:::filter.stars(time %in% times_allbutfirst)
+    times_allbutfirst <- stars::st_get_dimension_values(sc, "time")[-1]
+    sc <- sc %>% stars:::filter.stars(time %in% times_allbutfirst)
     times <- times_allbutfirst; rm(times_allbutfirst)
   }
-  assertthat::assert_that(length(times)>0)
+  assertthat::assert_that(length(times)>0,
+                          length(sc)>=1)
 
-  # Reproject to template projection is set
+  # Create raster template if set
   if(!is.null(template)){
-    # First create regular grid to warp to
-    reggrid <- ff %>%
-      stars::st_transform_proj(crs = sf::st_crs(template)) %>%
-      st_bbox() %>%
-      st_as_stars()
-    # Then warp
-    ff <- ff %>% st_warp(reggrid)
-    rm(reggrid)
     # Check that template is a raster, otherwise rasterize for GLOBIOM use
     if(inherits(template, "sf")){
-      o <- ff %>% stars:::slice.stars("time" , 1) %>% as("Raster")
+      o <- sc %>% stars:::slice.stars("time" , 1) %>% as("Raster")
       if("fasterize" %in% installed.packages()[,1]){
         template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
       } else {
@@ -1137,42 +1163,10 @@ formatGLOBIOM <- function(fname, oftype = "raster", col_class = "Landuse_class_l
     }
   }
 
-  # Now format outputs depending on type
+  # Now format outputs depending on type, either returning the raster or the stars object
   if(oftype == "raster"){
-    # Output type raster
-    out <- list()
-    for(tt in 1:length(times)){
-      # Slice to a specific time frame for each
-      if(length(times)>1){
-        o <- ff %>% stars:::slice.stars("time" , tt) %>%
-          as("Raster")
-      } else { o <- ff |> as("Raster")}
-
-      # Reset times to the correct ones
-      o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
-      # Now transform the out put if template is set
-      if(!is.null(template)){
-        # Check again if necessary to rotate
-        if(!raster::compareCRS(o, template)){
-          o <- raster::projectRaster(from = o, crs = template, method = "bilinear")
-          names(o) <- class_units
-        }
-        # Now crop and resample to target extent if necessary
-        if(!compareRaster(o, template, stopiffalse = FALSE)){
-          o <- raster::crop(o, template)
-          o <- alignRasters(data = o,
-                            template = template,
-                            method = "bilinear",
-                            func = "mean", cl = FALSE)
-        }
-      }
-      out[[paste0("time",times[tt])]] <- o
-    }
+    # Output type raster, use function from utils_scenario
+    out <- stars_to_raster(sc, which = NULL, template = template)
     return(out)
-  } else {
-    # Just return stars input raster
-    return(
-      ff
-    )
-  }
+  } else { return( sc ) }
 }

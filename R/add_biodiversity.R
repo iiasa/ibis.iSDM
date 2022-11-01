@@ -12,6 +12,9 @@ NULL
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{'Poisson'}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
+#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`poipo`].
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
@@ -19,10 +22,11 @@ NULL
 #' @param ... Other parameters passed down to the object. Normally not used unless described in details.
 #'
 #' @details This function allows to add presence-only biodiversity records to a [distribution] \pkg{ibis.iSDM}
-#' Presence-only data are usually modelled through some inferential model (see Guisan and Zimmerman, 2000) that
+#' Presence-only data are usually modelled through an inferential model (see Guisan and Zimmerman, 2000) that
 #' relate their occurrence in relation to environmental covariates to a selected sample of
-#' 'background' points. The most common approach for estimation are "Maxent" or poisson-process models (PPM), the
-#' latter of which are used in this package. See Renner et al. 2015 for an overview.
+#' 'background' points. The most common approach for estimation and the one supported by this type of dataset
+#' are poisson-process models (PPM) in which presence-only points are fitted through a down-weighted Poisson
+#' regression. See Renner et al. 2015 for an overview.
 #'
 #' @references
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
@@ -52,7 +56,7 @@ methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
   function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
-           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_poipo"))
+           weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_poipo"))
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
@@ -61,14 +65,15 @@ methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
   function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
-           separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {
+           weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipo, field_occurrence),
                             inherits(formula, "formula") || is.null(formula) || is.character(formula),
                             is.character(family), is.null(link) || is.character(link),
                             is.logical(separate_intercept),
-                            is.logical(docheck)
+                            is.logical(docheck),
+                            is.numeric(weight) && all(weight > 0)
                             )
 
     # Messenger
@@ -96,6 +101,13 @@ methods::setMethod(
     # Create a new id for this dataset
     id <- new_id()
 
+    # Check that weights are correctly set
+    if(length(weight)>1){
+      assertthat::assert_that(length(weight) == nrow(poipo))
+    } else {
+      weight <- rep(weight, nrow(poipo))
+    }
+
     # Finally set the data to the BiodiversityDistribution object
     x$set_biodiversity(
       id,
@@ -106,6 +118,7 @@ methods::setMethod(
               family = family,
               link = link,
               type = "poipo",
+              weight = weight,
               field_occurrence = field_occurrence,
               data = format_biodiversity_data(poipo, field_occurrence),
               use_intercept = separate_intercept,
@@ -126,6 +139,9 @@ methods::setMethod(
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
+#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`poipa`].
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in.
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
@@ -133,9 +149,8 @@ methods::setMethod(
 #'
 #' @details Opposed to presence-only data, presence-absence biodiversity records usually originate from
 #' structured biodiversity surveys where the absence of a species in a given region was specifically
-#' assessed.
-#' By default, the cloglog link function is used in a logistic regression setup unless the specific [engine]
-#' does not support generalised linear regressions (e.g. [engine_bart])
+#' assessed. By default, the cloglog link function is used in a logistic regression setting
+#' unless the specific [engine] does not support generalised linear regressions (e.g. [engine_bart])
 #'
 #' @family add_biodiversity
 #' @keywords biodiversity
@@ -143,7 +158,6 @@ methods::setMethod(
 #' @references
 #' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
-#'
 #' @examples
 #' \dontrun{
 #' # Define model
@@ -161,7 +175,8 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipa",
   signature = methods::signature("x", "poipa"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL, separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+           weight = 1, separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
@@ -169,7 +184,8 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL, separate_intercept = TRUE, docheck = TRUE, ... ) {
+  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+           weight = 1, separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipa, "Spatial") || inherits(poipa, "sf") || inherits(poipa, "data.frame") || inherits(poipa, "tibble"),
                             assertthat::is.scalar(field_occurrence), assertthat::has_name(poipa, field_occurrence),
@@ -177,6 +193,7 @@ methods::setMethod(
                             is.character(family),
                             is.null(link) || is.character(link),
                             is.logical(separate_intercept),
+                            is.numeric(weight) && all(weight > 0),
                             is.logical(docheck)
     )
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
@@ -204,6 +221,13 @@ methods::setMethod(
     # Create a new id for this dataset
     id = new_id()
 
+    # Check that weights are correctly set
+    if(length(weight)>1) {
+      assertthat::assert_that(length(weight) == nrow(poipa))
+    } else {
+      weight <- rep(weight, nrow(poipa))
+    }
+
     # Finally set the data to the BiodiversityDistribution object
     x$set_biodiversity(
       id,
@@ -214,14 +238,14 @@ methods::setMethod(
               family = family,
               link = link,
               type = "poipa",
+              weight = weight,
               field_occurrence = field_occurrence,
-              data = format_biodiversity_data(poipa,field_occurrence),
+              data = format_biodiversity_data(poipa, field_occurrence),
               use_intercept = separate_intercept
       )
     )
   }
 )
-
 
 #' Add biodiversity polygon dataset to a distribution object (presence-only)
 #'
@@ -235,9 +259,12 @@ methods::setMethod(
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{poisson}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
+#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpo`].
 #' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE})
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
-#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
+#' @param simulate_bias A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
@@ -274,7 +301,7 @@ methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
 #' @name add_biodiversity_polpo
@@ -284,7 +311,7 @@ methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
   function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson", link = NULL,
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpo, "Spatial") || inherits(polpo, "sf") || inherits(polpo, "data.frame") || inherits(polpo, "tibble"),
@@ -293,8 +320,9 @@ methods::setMethod(
                             is.character(family),
                             is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
-                            is.null(simulate_weights) || inherits(simulate_weights, "Raster"),
-                            is.logical(separate_intercept)
+                            is.null(simulate_bias) || inherits(simulate_bias, "Raster"),
+                            is.logical(separate_intercept),
+                            is.numeric(weight) && all(weight > 0)
     )
 
     # Check type and ensure that is a polygon
@@ -317,19 +345,19 @@ methods::setMethod(
       # Simulation strategy
       simulate_strategy <- match.arg(simulate_strategy, c('random', 'regular'), several.ok = FALSE)
 
-      if(!is.null(simulate_weights)){
+      if(!is.null(simulate_bias)){
         # Crop to target range
-        simulate_weights <- raster::crop(simulate_weights, polpo)
+        simulate_bias <- raster::crop(simulate_bias, polpo)
         # Normalize the weight layer if is not a factorized, else set everything to 1
-        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights, "norm") else simulate_weights[simulate_weights>0] <- 1
+        if(is.null(levels(simulate_bias))) simulate_bias <- predictor_transform(simulate_bias, "norm") else simulate_bias[simulate_bias>0] <- 1
 
         # Weighted sampling on background raster, the greater the value, the more likely sampled points
-        ptscell <- sample(which(!is.na(simulate_weights[])),
+        ptscell <- sample(which(!is.na(simulate_bias[])),
                           size = simulate_points,
-                          prob = simulate_weights[which(!is.na(simulate_weights[]))],
+                          prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipo_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
-        poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
+        poipo_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {
       # Simply sample presence points within as determined
@@ -345,15 +373,30 @@ methods::setMethod(
       poipo_on$x <- st_coordinates(poipo_on)[,1];poipo_on$y <- st_coordinates(poipo_on)[,2]
       poipo <- poipo_on
 
+      # Check that weights are correctly set
+      if(length(weight)>1) {
+        assertthat::assert_that(length(weight) == nrow(poipo))
+      } else {
+        weight <- rep(weight, nrow(poipo))
+      }
+
       # Add simulated poipo object instead
       add_biodiversity_poipo(x, poipo = poipo, name = paste0(name, "_simulated"),
-                             field_occurrence = field_occurrence, formula = formula, family = family, link = link, ... )
+                             field_occurrence = field_occurrence, formula = formula, family = family, link = link,
+                             weight = weight, ... )
     } else {
       # Convert formula if necessary
       formula = to_formula(formula)
 
       # Create a new id for this dataset
       id = new_id()
+
+      # Check that weights are correctly set
+      if(length(weight)>1) {
+        assertthat::assert_that(length(weight) == nrow(polpo))
+      } else {
+        weight <- rep(weight, nrow(polpo))
+      }
 
       # Finally set the data to the BiodiversityDistribution object
       x$set_biodiversity(
@@ -365,6 +408,7 @@ methods::setMethod(
                 family = family,
                 link = link,
                 type = "polpo",
+                weight = weight,
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo,field_occurrence),
                 use_intercept = separate_intercept,
@@ -389,9 +433,12 @@ methods::setMethod(
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
+#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpa`].
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation.
-#' @param simulate_weights A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
+#' @param simulate_bias A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
@@ -427,7 +474,7 @@ methods::setGeneric(
   "add_biodiversity_polpa",
   signature = methods::signature("x", "polpa"),
   function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpa"))
 
 #' @name add_biodiversity_polpa
@@ -437,7 +484,7 @@ methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
   function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
-           simulate = FALSE, simulate_points = 100, simulate_weights = NULL, simulate_strategy = "random",
+           weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(polpa, "Spatial") || inherits(polpa, "sf") || inherits(polpa, "data.frame") || inherits(polpa, "tibble"),
@@ -446,7 +493,8 @@ methods::setMethod(
                             is.character(family),
                             is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
-                            is.null(simulate_weights) || inherits(simulate_weights, "Raster"),
+                            is.null(simulate_bias) || inherits(simulate_bias, "Raster"),
+                            is.numeric(weight) && all(weight > 0),
                             is.logical(separate_intercept)
     )
 
@@ -467,19 +515,19 @@ methods::setMethod(
       # Simulation strategy
       simulate_strategy <- match.arg(simulate_strategy, c('random', 'regular'), several.ok = FALSE)
 
-      if(!is.null(simulate_weights)){
+      if(!is.null(simulate_bias)){
         # Crop to target range
-        simulate_weights <- raster::crop(simulate_weights, polpa)
+        simulate_bias <- raster::crop(simulate_bias, polpa)
         # Normalize the weight layer if is not a factorized, else set everything to 1
-        if(is.null(levels(simulate_weights))) simulate_weights <- predictor_transform(simulate_weights, "norm") else simulate_weights[simulate_weights>0] <- 1
+        if(is.null(levels(simulate_bias))) simulate_bias <- predictor_transform(simulate_bias, "norm") else simulate_bias[simulate_bias>0] <- 1
 
         # Weighted sampling on background raster, the greater the value, the more likely sampled points
-        ptscell <- sample(which(!is.na(simulate_weights[])),
+        ptscell <- sample(which(!is.na(simulate_bias[])),
                           size = simulate_points,
-                          prob = simulate_weights[which(!is.na(simulate_weights[]))],
+                          prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipa_on <- as.data.frame(raster::xyFromCell(simulate_weights, ptscell))
-        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_weights))
+        poipa_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {
         # Simply sample presence points within as determined
@@ -520,9 +568,17 @@ methods::setMethod(
 
       poipa <- rbind(poipa_on,poipa_off)
 
+      # Check that weights are correctly set
+      if(length(weight)>1) {
+        assertthat::assert_that(length(weight) == nrow(poipa))
+      } else {
+        weight <- rep(weight, nrow(poipa))
+      }
+
       # Add simulated poipa object instead
       add_biodiversity_poipa(x, poipa = poipa, name = paste0(name, "_simulated"),
-                             field_occurrence = field_occurrence, formula = formula, family = family, link = link, ... )
+                             field_occurrence = field_occurrence, formula = formula, family = family, link = link,
+                             weight = weight, ... )
     } else {
 
       # Messenger
@@ -538,6 +594,13 @@ methods::setMethod(
       # Create a new id for this dataset
       id = new_id()
 
+      # Check that weights are correctly set
+      if(length(weight)>1) {
+        assertthat::assert_that(length(weight) == nrow(polpa))
+      } else {
+        weight <- rep(weight, nrow(polpa))
+      }
+
       # Finally set the data to the BiodiversityDistribution object
       x$set_biodiversity(
         id,
@@ -548,6 +611,7 @@ methods::setMethod(
                 family = family,
                 link = link,
                 type = "polpa",
+                weight = weight,
                 field_occurrence = field_occurrence,
                 data = format_biodiversity_data(polpo, field_occurrence),
                 use_intercept = separate_intercept,
