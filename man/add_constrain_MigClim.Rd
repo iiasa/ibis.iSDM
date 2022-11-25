@@ -54,12 +54,6 @@ The barrier parameter is defined through \link{add_barrier}.
 }
 \seealso{
 \code{\link[=MigClim.userGuide]{MigClim.userGuide()}}
-
-Other constrain: 
-\code{\link{add_constrain_adaptability}()},
-\code{\link{add_constrain_connectivity}()},
-\code{\link{add_constrain_dispersal}()},
-\code{\link{add_constrain}()}
 }
 \concept{constrain}
 \keyword{scenario}

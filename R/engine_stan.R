@@ -253,7 +253,7 @@ engine_stan <- function(x,
                              bg = bg,
                              weight = 1e-6
             )
-            df$w <- w * model$biodiversity[[i]]$expect # Also add as column
+            df$w <- w * (1/model$biodiversity[[i]]$expect) # Also add as column
 
             model$biodiversity[[i]]$predictors <- df
             model$biodiversity[[i]]$expect <- df$w

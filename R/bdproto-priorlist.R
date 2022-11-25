@@ -147,6 +147,26 @@ PriorList <- bdproto(
     self$priors[[id]] <- NULL
     invisible()
   },
+  # Summary function that lists all priors
+  summary = function(self){
+    if(is.Waiver(self$priors)) return(NULL)
+    # Loop through each id and summarize the hyper parameters
+    ids <- self$ids()
+    varn <- self$varnames()
+    out <- data.frame(id = character(), class = character(), variable = character(),
+                      type = character(), hyper = character())
+    for(id in ids){
+      pp <- self$collect(ids)
+      co <- data.frame(id = as.character( id ),
+                       class = self$classes()[[id]],
+                       variable = varn[[id]],
+                       type = self$types()[id],
+                       hyper = paste0( self$get(varn[id]) ,collapse = " | ") )
+      out <- rbind(out, co)
+    }
+    assertthat::assert_that(nrow(out)>0)
+    return(out)
+  },
   # Combining function to combine this PriorList with another
   combine = function(self, x){
     assertthat::assert_that(inherits(x, 'PriorList'))

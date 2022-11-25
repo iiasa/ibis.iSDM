@@ -138,7 +138,7 @@ gains or losses of suitable habitat!
 * `calc_scenarios_slope()` calculates the slope (rate of change) across timesteps. Useful for summarizing results
 * `summary()` creates a summary output of the contained scenarios. If a `threshold()` is specified, this function
 will summarize the amount of area at each timestep.
-* `get_scenarios()` gets the created scenarios a `stars` object (plus *thresholds* if specified).
+* `get_data()` gets the created scenarios a `stars` object (plus *thresholds* if specified).
 
 
 ```{r Plotting and summarizing the created projections, eval = TRUE, fig.width = w, fig.height = h}

@@ -75,7 +75,7 @@ methods::setMethod(
     # Match methods
     date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
-    if(!is.Waiver(mod$get_scenarios())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
+    if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
     fit <- mod$get_model()
@@ -152,10 +152,10 @@ methods::setMethod(
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
-    if(is.Waiver(scenario_threshold) && !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found,
-                                                                               which is required for scenarios constraints!")
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Connectivity contraints need a set dispersal constraint.')
+      if(is.Waiver(scenario_threshold) || !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found,
+                                                                               which is required for scenarios constraints!")
     }
     # ----------------------------- #
     #   Start of projection         #
@@ -173,7 +173,7 @@ methods::setMethod(
     df <- units::drop_units(df)
 
     # ------------------ #
-    if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability predictions...')
+    if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability projections for ', length(unique(df$time)), ' timesteps.')
 
     # Now for each unique element, loop and project in order
     proj <- raster::stack()
@@ -262,10 +262,10 @@ methods::setMethod(
       pb$tick()
     }
     rm(pb)
-    proj <- raster::setZ(proj, as.Date(times) )
+    proj <- raster::setZ(proj, times )
     if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, as.Date(times) )
 
-    # Apply MigClim if set
+    # Apply MigClim and other post-hoc constraints if set
     # FIXME: Ideally make this whole setup more modular. So create suitability projections first
     if(!is.Waiver(scenario_constraints)){
       # Calculate dispersal constraint if set
@@ -339,10 +339,26 @@ methods::setMethod(
                      summary = run_sums,
                      raster = run_sim)
         }
+      } # End of MigClim processing chain
+
+      # Finally apply boundary constraint if set
+      if("boundary" %in% names(scenario_constraints)){
+        if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer,stopiffalse = FALSE)){
+          scenario_constraints$boundary$params$layer <- alignRasters(
+            scenario_constraints$boundary$params$layer,
+            proj,
+            method = "ngb", func = raster::modal, cl = FALSE
+          )
+        }
+        proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
+        # Get background and ensure that all values outside are set to 0
+        proj[is.na(proj)] <- 0
+        proj <- raster::mask(proj, fit$model$background )
       }
-    } # End of MigClim processing chain
+    }
     # If not found, set a waiver
     if(!exists("mc")) mc <- new_waiver()
+
     # ---- #
     assertthat::assert_that(
       is.Raster(proj), is.Raster(proj_thresh),

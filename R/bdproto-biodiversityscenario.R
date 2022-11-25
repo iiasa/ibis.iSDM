@@ -124,7 +124,7 @@ BiodiversityScenario <- bdproto(
     if(is.Waiver(tr)) assertthat::assert_that( is.numeric(self$threshold), msg = 'No threshold value found.')
     assertthat::assert_that( !is.Waiver(self$scenarios), msg = 'No scenarios found.')
     # Get prediction and threshold
-    sc <- self$get_scenarios()
+    sc <- self$get_data()
     if(!is.Waiver(tr)) tr <- self$threshold
     # reclassify to binary
     sc[sc < tr] <- 0; sc[sc >= tr] <- 1
@@ -151,26 +151,26 @@ BiodiversityScenario <- bdproto(
     return(self$predictors)
   },
   # Get scenario predictions
-  get_scenarios = function(self, what = "scenarios"){
+  get_data = function(self, what = "scenarios"){
     return(self[[what]])
   },
   # Plot the prediction
   plot = function(self, what = "suitability", which = NULL, ...){
     # FIXME: More plotting options would be good
-    if(is.Waiver(self$get_scenarios())){
+    if(is.Waiver(self$get_data())){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
       invisible()
     } else {
       # Get unique number of data values. Surely there must be an easier val
-      vals <- self$get_scenarios()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique() %>% length()
+      vals <- self$get_data()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique() %>% length()
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
-        stars:::plot.stars( self$get_scenarios()[what], breaks = "equal", col = col )
+        stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
       } else {
         # Assert that which is actually within the dimensions
-        assertthat::assert_that(which <= dim(self$get_scenarios())[3],
+        assertthat::assert_that(which <= dim(self$get_data())[3],
                                 msg = "Band selection out of bounds.")
-        obj <- self$get_scenarios()[what,,,which]
+        obj <- self$get_data()[what,,,which]
         stars:::plot.stars( obj, breaks = "equal", col = col,
                             main = paste0(what," for ", stars::st_get_dimension_values(obj, "band") )  )
       }
@@ -179,7 +179,7 @@ BiodiversityScenario <- bdproto(
   # Plot Migclim results if existing
   plot_migclim = function(self){
     # Get scenarios
-    mc <- self$get_scenarios("scenarios_migclim")
+    mc <- self$get_data("scenarios_migclim")
     if(is.Waiver(mc)) return(mc)
 
     # Otherwise plot the raster
@@ -210,10 +210,10 @@ BiodiversityScenario <- bdproto(
   },
   # Plot animation of scenarios
   plot_animation = function(self, what = "suitability", fname = NULL){
-    assertthat::assert_that(!is.Waiver(self$get_scenarios()) )
+    assertthat::assert_that(!is.Waiver(self$get_data()) )
     check_package('gganimate')
     # Get scenarios
-    obj <- self$get_scenarios()[what]
+    obj <- self$get_data()[what]
 
     # Make the animation plot
     g <- ggplot2::ggplot() +
@@ -233,16 +233,17 @@ BiodiversityScenario <- bdproto(
     } else { g }
   },
   # Summarize the change in thresholded layer between timesteps
-  summary = function(self, plot = FALSE){
+  summary = function(self, plot = FALSE, relative = FALSE){
     # Check that baseline and scenario thresholds are all there
     assertthat::assert_that(
-      !is.Waiver(self$get_scenarios())
+      !is.Waiver(self$get_data()),
+      is.logical(plot), is.logical(relative)
     )
-    if( 'threshold' %in% attributes(self$get_scenarios())$names ){
+    if( 'threshold' %in% attributes(self$get_data())$names ){
       # TODO: Try and get rid of dplyr dependency. Currently too much work to not use it
       check_package("dplyr")
       # Get the scenario predictions and from there the thresholds
-      scenario <- self$get_scenarios()['threshold']
+      scenario <- self$get_data()['threshold']
       st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
       time <- stars::st_get_dimension_values(scenario,which = 'band')
       # HACK: Add area to stars
@@ -287,9 +288,9 @@ BiodiversityScenario <- bdproto(
       # df <- units::as_units(df, units::as_units(ar_unit))  # Set Units
     } else {
       # Get the scenario predictions and from there the thresholds
-      scenario <- self$get_scenarios()['suitability']
+      scenario <- self$get_data()['suitability']
       st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
-      time <- stars::st_get_dimension_values(scenario, which = 'band')
+      times <- stars::st_get_dimension_values(scenario, which = 'band')
 
       # Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
       mod <- self$get_model()
@@ -297,36 +298,14 @@ BiodiversityScenario <- bdproto(
         ar <- stars:::st_area.stars(scenario)
         # if(inherits(ar$area,"units")) ar_unit <- units::deparse_unit(ar$area)
         scenario <- as(scenario,"Raster") * as(ar, "Raster")
-        scenario <- raster::setZ(scenario, time)
+        scenario <- raster::setZ(scenario, times)
       }
-      # Convert to scenarios to data.frame
-      df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
-      names(df) <- c("x", "y", "band", "suitability")
-      # Add grid cell grouping
-      df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
-        dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
-        dplyr::arrange(id, band)
-
-      # Summarize the overall moments
-      out <- df %>%
-        dplyr::filter(suitability > 0) %>%
-        dplyr::group_by(band) %>%
-        dplyr::summarise(suitability_mean = mean(suitability, na.rm = TRUE),
-                         suitability_q25 = quantile(suitability, .25),
-                         suitability_q50 = quantile(suitability, .5),
-                         suitability_q75 = quantile(suitability, .75))
-      # Total amount of area lost / gained / stable since previous time step
-      totchange_occ <- df %>%
-        dplyr::group_by(id) %>%
-        dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
-      o <- totchange_occ %>% dplyr::group_by(band) %>%
-        dplyr::summarise(suitability_avggain = mean(change[change > 0]),
-                         suitability_avgloss = mean(change[change < 0]))
-      out <- out %>% dplyr::left_join(o, by = "band")
+      out <- summarise_projection(scenario, relative = relative)
     }
 
     if(plot){
-      if( 'threshold' %in% attributes(self$get_scenarios())$names ){
+      if( 'threshold' %in% attributes(self$get_data())$names ){
+        if(has_name(out,"band")) out <- dplyr::rename(out, "time" = "band")
         ggplot2::ggplot(out,
                         ggplot2::aes(x = time, y = as.numeric(area_km2))) +
           ggplot2::theme_classic(base_size = 18) +
@@ -348,10 +327,10 @@ BiodiversityScenario <- bdproto(
   },
   # Calculate slopes
   calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
-    if(is.Waiver(self$get_scenarios())) return( new_waiver() )
-    assertthat::assert_that(what %in% attributes(self$get_scenarios())$names )
+    if(is.Waiver(self$get_data())) return( new_waiver() )
+    assertthat::assert_that(what %in% attributes(self$get_data())$names )
 
-    oo <- self$get_scenarios()[what]
+    oo <- self$get_data()[what]
     tt <- as.numeric( stars::st_get_dimension_values(self$scenarios, 3) )
     # Calc pixel-wise linear slope
     out <- stars::st_apply(
@@ -383,8 +362,8 @@ BiodiversityScenario <- bdproto(
     }
     # Check that baseline and scenarios are all there
     assertthat::assert_that(
-      !is.Waiver(self$get_scenarios()),
-      'threshold' %in% attributes(self$get_scenarios())$names,
+      !is.Waiver(self$get_data()),
+      'threshold' %in% attributes(self$get_data())$names,
       length(thresh_reference) >0 & is.character(thresh_reference),
       is.Raster( self$get_model()$get_data('prediction') )
     )
@@ -392,7 +371,7 @@ BiodiversityScenario <- bdproto(
     # Not get the baseline raster
     baseline <- self$get_model()$get_data(thresh_reference)
     # And the last scenario prediction
-    scenario <- self$get_scenarios()['threshold']
+    scenario <- self$get_data()['threshold']
     time <- stars::st_get_dimension_values(scenario,which = 'band')
     if(is.numeric(position)) position <- time[position]
     if(is.null(position)) position <- time[length(time)]
@@ -437,7 +416,7 @@ BiodiversityScenario <- bdproto(
       !missing(fname),
       is.character(fname),
       is.character(type),
-      !is.Waiver(self$get_scenarios()),
+      !is.Waiver(self$get_data()),
       is.character(dt)
     )
     # Match input types
@@ -463,9 +442,9 @@ BiodiversityScenario <- bdproto(
     )
 
     # Get scenario object
-    ras <- self$get_scenarios()
+    ras <- self$get_data()
     # If Migclim has been computed, save as well
-    if(!is.Waiver(self$scenarios_migclim)) ras_migclim <- self$get_scenarios("scenarios_migclim")
+    if(!is.Waiver(self$scenarios_migclim)) ras_migclim <- self$get_data("scenarios_migclim")
 
     if(type %in% c('gtif','gtiff','tif')){
       # Write stars output for every band

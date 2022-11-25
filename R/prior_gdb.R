@@ -15,7 +15,7 @@ NULL
 #'
 #' @param variable A [`character`] matched against existing predictors variables.
 #' @param hyper A [`character`] object describing the type of constrain. Available options are \code{'increasing'},
-#'  \code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.
+#'  \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or \code{'none'}.
 #' @param ... Variables passed on to prior object.
 #' @details TBD
 #' @references

@@ -70,9 +70,10 @@ methods::setMethod(
       # Check whether scenario objects were not provided instead
       mods1 <- mc[ sapply(mc, function(x) inherits(x, "BiodiversityScenario") ) ]
       mods2 <- mc[ sapply(mc, function(x) is.Raster(x) ) ]
-      assertthat::assert_that(length(mods1)>0 || length(mods2)>0,
-                              msg = "Ensemble only works with DistributionModel or BiodiversityScenario objects!")
-      if(length(mods1)>0) mods <- mods1 else mods <- mods2
+      mods3 <- mc[  sapply(mc, function(x) inherits(x, "stars") ) ]
+      assertthat::assert_that(length(mods1)>0 || length(mods2)>0 || length(mods3)>0,
+                              msg = "Ensemble only works with DistributionModel or BiodiversityScenario objects! Alternativel supply raster or stars objects.")
+      if(length(mods1)>0) mods <- mods1 else if(length(mods2)>0) mods <- mods2 else mods <- mods3
     }
 
     # Further checks
@@ -254,30 +255,40 @@ methods::setMethod(
     return(out)
   } else {
     # Scenario objects
-    # Check that layers all have a prediction layer
-    assertthat::assert_that(
-      all( sapply(mods, function(x) !is.Waiver(x$get_scenarios()) ) ),
-      msg = "All distribution models need a fitted scenario object!"
-    )
-    # Check that layer is present in supplied mods
-    assertthat::assert_that(
-      all( sapply(mods, function(x) layer %in% names(x$get_scenarios()) ) ),
-      msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-    )
+    if(all(sapply(mods, function(z) inherits(z, "stars")))){
+      # Check that layer is in stars
+      if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
+        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
+        layer <- names(mods[[1]])[1]
+      }
+      # Format to table
+      lmat <- do.call("rbind", mods) |> as.data.frame()
+      # Get dimensions
+      lmat_dim <- stars:::st_dimensions(mods[[1]])
 
-    # Get projected suitability from all mods
-    lmat <- stars::st_as_stars(
-      sapply(mods, function(x) x$get_scenarios()[layer])
-    ) |> as.data.frame()
-    # Get dimensions
-    lmat_dim <- stars:::st_dimensions(mods[[1]]$get_scenarios())
-
-    # If normalize before running an ensemble if parameter set
-    if(normalize) {
+    } else {
+      # Check that layers all have a prediction layer
+      assertthat::assert_that(
+        all( sapply(mods, function(x) !is.Waiver(x$get_data()) ) ),
+        msg = "All distribution models need a fitted scenario object!"
+      )
+      # Check that layer is present in supplied mods
+      assertthat::assert_that(
+        all( sapply(mods, function(x) layer %in% names(x$get_data()) ) ),
+        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+      )
+      # Get projected suitability from all mods
+      lmat <- stars::st_as_stars(
+        sapply(mods, function(x) x$get_data()[layer])
+      ) |> as.data.frame()
+      # Get dimensions
+      lmat_dim <- stars:::st_dimensions(mods[[1]]$get_data())
+    }
+    if(normalize){
       lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) {
-                     (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE) )
-                   })
+                                   2, function(x) {
+                                     (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE) )
+                                   })
     }
 
     # Now create the ensemble depending on the option
@@ -297,7 +308,7 @@ methods::setMethod(
       stop("This has not been reasonably implemented in this context.")
     }
     # Add dimensions to output
-    out <- cbind( sf::st_coordinates(mods[[1]]$get_scenarios()[layer]), "ensemble" = out ) |> as.data.frame()
+    out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
 
     # Convert to stars
     out <- out |> stars:::st_as_stars.data.frame(out, dims = c(1,2,3), coords = 1:2)

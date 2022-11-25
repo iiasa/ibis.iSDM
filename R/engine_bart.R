@@ -211,7 +211,7 @@ engine_bart <- function(x,
           df$w <- w # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with provided weights
+          model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect) # Multiply with provided weights
         } else {
           # If family is not poisson, assume factor distribution for response
           assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)

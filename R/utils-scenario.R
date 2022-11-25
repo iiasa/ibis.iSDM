@@ -160,11 +160,14 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
     is.null(which) || is.numeric(which),
     is.null(template) || is.Raster(template)
   )
+  # Take name of third band, assuming it to be time
+  time_band <- names(dim(o))[3]
+
   assertthat::assert_that(
-    length(which) <= dim(obj)['time']
+    length(which) <= dim(obj)[time_band]
   )
   # Get time dimension and correct if specific entries are requested
-  times <- stars::st_get_dimension_values(obj, "time")
+  times <- stars::st_get_dimension_values(obj, time_band, center = TRUE)
   if(is.null(which)) {
     which <- 1:length(times) # Use default length
   }
@@ -173,7 +176,7 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   out <- list()
   for(tt in which){
     # Slice to a specific time frame for each
-    o <- obj %>% stars:::slice.stars("time" , tt) |>
+    o <- obj %>% stars:::slice.stars({{time_band}}, tt) |>
       as("Raster")
 
     # Reset times to the correct ones
@@ -184,20 +187,20 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
       if(is.Raster(template)){
         # Check again if necessary to rotate
         if(!raster::compareCRS(o, template)){
-          o <- raster::projectRaster(from = o, crs = template, method = "bilinear")
-          names(o) <- class_units
+          o <- raster::projectRaster(from = o, crs = template, method = "ngb")
+          names(o) <- names(obj)
         }
         # Now crop and resample to target extent if necessary
         if(!compareRaster(o, template, stopiffalse = FALSE)){
           o <- raster::crop(o, template)
           o2 <- try({alignRasters(data = o,
                                   template = template,
-                                  method = "bilinear",
+                                  method = "ngb",
                                   func = "mean", cl = FALSE)
           },silent = TRUE)
           if(inherits(o2,"try-error")){
             o <- raster::resample(o, template,
-                                  method = "bilinear")
+                                  method = "ngb")
           } else { o <- o2; rm(o2)}
         }
       }
@@ -207,10 +210,190 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   return( out )
 }
 
+#' This function add layers from a RasterStack to a stars object
+#'
+#' @description
+#' Often it is necessary to add static variables to existing stars objects.
+#' These will be replicated across the time dimension. This function is a small helper function
+#' that allows the addition of said raster stacks to a stars object.
+#' @param obj A [`stars`] object with a time dimension (\code{"time"}).
+#' @param new A [`RasterStack`] object with additional covariates to be added.
+#' @returns A [`stars`] object with the names of the [`Raster`] object added.
+#' @keywords scenario, internal
+st_add_raster <- function(obj, new){
+  assertthat::assert_that(
+    inherits(obj, "stars"),
+    is.Raster(new),
+    raster::nlayers(new) >= 1
+  )
+
+  # Check whether there are any variables in the stars object already, if so drop
+  if(any(names(new) %in% names(obj))){
+    myLog("[Starting]", "yellow", "Duplicate variables in stars and new objects.")
+    new <- raster::dropLayer(new, which( names(new) %in% names(obj) ) )
+  }
+
+  # Get times objects
+  times <- rep(stars::st_get_dimension_values(obj, "time"))
+  # Overwrite time dimension
+  full_dims <- stars::st_dimensions(obj)
+
+  # Now loop through each layer and add it to the target file
+  for(lyr in names(new)){
+    s <- raster::stack(replicate(length(times), new[[lyr]])) |>
+      stars::st_as_stars()
+    names(s) <- lyr
+
+    dims <- stars::st_dimensions(s)
+    # Replace the band variable with the original one
+    names(dims)[3] <- "time"
+    dims$time <- full_dims$time
+    stars::st_dimensions(s) <- dims
+    obj <- c(obj, s)
+  }
+  assertthat::assert_that(
+    all(all(names(new) %in% names(obj)))
+  )
+  return(obj)
+}
+
+#' Summarize results from scenario projection object
+#'
+#' @description
+#' This is a wrapper function to summarize the output of a scenario projection. The
+#' output will contain the average change in the layer per time step.
+#' A parameter called \code{"relative"} can be set to calculate relative change instead.
+#' @param scenario A [`stars`] object with a time dimension.
+#' @param relative A [`logical`] check whether to calculate relative changes instead.
+#' @keywords internal, scenario
+#' @noRd
+summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
+  assertthat::assert_that(
+  inherits(scenario, "stars"),
+    length(dim(scenario))==3,
+    is.logical(relative)
+  )
+  fun <- match.arg(fun, c("mean", "sum"),several.ok = FALSE)
+
+  # Convert to scenarios to data.frame
+  df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
+  names(df) <- c("x", "y", "band", "suitability")
+  # Add grid cell grouping
+  df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
+    dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
+    dplyr::arrange(id, band)
+
+  # Summarize the overall moments
+  if(fun == "mean"){
+    out <- df %>%
+      dplyr::filter(suitability > 0) %>%
+      dplyr::group_by(band) %>%
+      dplyr::summarise(suitability_mean = mean(suitability, na.rm = TRUE),
+                       suitability_q25 = quantile(suitability, .25),
+                       suitability_q50 = quantile(suitability, .5),
+                       suitability_q75 = quantile(suitability, .75))
+    # Total amount of area lost / gained / stable since previous time step
+    totchange_occ <- df %>%
+      dplyr::group_by(id) %>%
+      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
+    o <- totchange_occ %>% dplyr::group_by(band) %>%
+      dplyr::summarise(suitability_avggain = mean(change[change > 0]),
+                       suitability_avgloss = mean(change[change < 0]))
+
+    out <- out %>% dplyr::left_join(o, by = "band")
+    if(relative){
+      # Finally calculate relative change to baseline (first entry) for all entries where this is possible
+      relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) *fac)
+      out[,c("suitability_mean","suitability_q25", "suitability_q50", "suitability_q75")] <- apply(
+        out[,c("suitability_mean","suitability_q25", "suitability_q50", "suitability_q75")], 2, relChange)
+      out$suitability_avggain[is.na(out$suitability_avggain)] <- 0
+      out$suitability_avggain <- out$suitability_avggain+1
+      out$suitability_avgloss[is.na(out$suitability_avgloss)] <- 0
+      out$suitability_avgloss <- out$suitability_avgloss+1
+    }
+  } else {
+    stop("TBD")
+  }
+
+  # Return output
+  return(
+    out
+    )
+}
+
+#' Crop and project a stars raster `HACK`
+#'
+#' @description
+#' The reprojection of WGS84 currently fails due to some unforeseen bug.
+#' This function is meant to reproject back the lasyer
+#' @param obj A ['stars'] object to be clipped and cropped.
+#' @param template A ['Raster'] or ['sf'] object to which the object should be projected.
+#' @keywords internal, scenario
+#' @noRd
+hack_project_stars <- function(obj, template){
+  assertthat::assert_that(
+    inherits(obj, "stars"),
+    is.Raster(template) || inherits(template, "sf")
+  )
+  # Get tempdir
+  td <- raster::tmpDir()
+
+  # Get resolution
+  bg <- stars::st_as_stars(template)
+
+  # Get full dis
+  full_dis <- stars::st_dimensions(obj)
+  assertthat::assert_that(length(full_dis)<=3,msg = "Stars object can only have x,y,z dimension.")
+
+  # Output
+  out <- c()
+  for(v in names(obj)){
+    sub <- obj[v]
+    stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
+
+    suppressWarnings(
+      gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
+                          dstfile = file.path(td, "ReprojectedStars_temp.tif"),
+                          s_srs = "EPSG:4296",
+                          tr = raster::res(template),
+                          te = raster::bbox(template),
+                          t_srs = sp::proj4string(template))
+    )
+    oo <- stars::read_stars(file.path(td, "ReprojectedStars_temp.tif"),proxy = F)
+    names(oo) <- v # Rename
+
+    # provide to output
+    out <- c(out, oo)
+    rm(oo)
+    try({file.remove(file.path(td, "ReprojectedStars.tif"),
+                file.path(td, "ReprojectedStars_temp.tif"))},silent = TRUE)
+  }
+  # Reformat again
+  out <- stars::st_as_stars(out)
+  assertthat::assert_that(
+    length(stars::st_get_dimension_values(bg, "x")) == length(stars::st_get_dimension_values(out, "x"))
+  )
+  # Now reset the dimensions and add to output
+  dims <- stars::st_dimensions(out)
+  # Replace the band variable with the original one
+  names(dims)[3] <- "time"
+  dims$time <- full_dis$time
+  # And the x-y dimensions by the template values
+  bg_dim <- stars::st_dimensions(bg)
+  dims$x <- bg_dim$x; dims$y <- bg_dim$y
+  stars::st_dimensions(out) <- dims
+  out <-  stars::st_set_dimensions(out, xy = c("x","y"))
+  assertthat::assert_that(
+    length(out) == length(obj),
+    stars:::is_regular_grid(out)
+  )
+  return(out)
+}
+
 #' Quick handy function to calculate the centre of a range
 #'
 #' @param ras A [`RasterLayer`] object for which the centre of the range is to be calculated.
-#' If the distribution is continious, then the centre is calculated as the value centre to all non-NA values.
+#' If the distribution is continuous, then the centre is calculated as the value centre to all non-NA values.
 #' @keywords scenario, internal
 #' @noRd
 calculate_range_centre <- function(ras) {

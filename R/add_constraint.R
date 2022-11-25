@@ -1,26 +1,27 @@
 #' @include utils.R bdproto-biodiversityscenario.R
 NULL
 
-#' Add a constrain to an existing \code{scenario}
+#' Add a constraint to an existing \code{scenario}
 #'
 #' @description This function adds a constrain to a [`BiodiversityScenario-class`] object to
-#' constrain (future) projections. These constrains can for instance be constrains on a possible
+#' constrain (future) projections. These constrains can for instance be constraints on a possible
 #' dispersal distance, connectivity between identified patches or limitations on species adaptability.
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
-#' @param method A [`character`] indicating the type of constrain to be added to the scenario. See details.
+#' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details.
 #' @param value For many dispersal [`constrain`] this is set as [`numeric`] value specifying a
 #' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 #' give the number of iteration steps (or within year migration steps).
-#' For adaptability constrains this parameter specifies the extent (in units of standard deviation) to which extrapolations
+#' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 #' should be performed.
 #' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
-#' @param ... passed on parameters. See also the specific methods for adding constrains.
+#' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
+#' @param ... passed on parameters. See also the specific methods for adding constraints.
 #'
-#' @seealso [`add_constrain_dispersal`], [`add_constrain_connectivity`], [`add_constrain_adaptability`]
+#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`],[`add_constraint_boundary`]
 #' @details
 #' Currently this method functions as a wrapper to support the definition of further modelling constraints.
-#' Supported are the options for dispersal and connectivity constrains:
+#' Supported are the options for dispersal and connectivity constraints:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
@@ -28,6 +29,7 @@ NULL
 #' * \code{hardbarrier} - Defines a hard barrier to any dispersal events.
 #' * \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
 #' can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
+#' * \code{boundary} - Applies a hard boundary constraint on the projection.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -35,22 +37,22 @@ NULL
 #' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' * Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
-#' @name add_constrain
-#' @family constrain
-#' @aliases add_constrain
+#' @name add_constraint
+#' @family constraint
+#' @aliases add_constraint
 #' @keywords scenario
-#' @exportMethod add_constrain
+#' @exportMethod add_constraint
 #' @export
 NULL
-methods::setGeneric("add_constrain",
+methods::setGeneric("add_constraint",
                     signature = methods::signature("mod"),
-                    function(mod, method,...) standardGeneric("add_constrain"))
+                    function(mod, method,...) standardGeneric("add_constraint"))
 
-#' @name add_constrain
-#' @rdname add_constrain
-#' @usage \S4method{add_constrain}{BiodiversityScenario, character}(mod, method)
+#' @name add_constraint
+#' @rdname add_constraint
+#' @usage \S4method{add_constraint}{BiodiversityScenario, character}(mod, method)
 methods::setMethod(
-  "add_constrain",
+  "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, ...){
     assertthat::assert_that(
@@ -61,46 +63,51 @@ methods::setMethod(
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
-                                    "hardbarrier",
+                                    "hardbarrier","boundary",
                                     "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
     o <- switch(method,
                   # Fixed dispersal
-                  "sdd_fixed" = add_constrain_dispersal(mod, method = "sdd_fixed", ...),
+                  "sdd_fixed" = add_constraint_dispersal(mod, method = "sdd_fixed", ...),
                   # Short-distance dispersal
-                  "sdd_nexpkernel" = add_constrain_dispersal(mod, method = "sdd_nexpkernel", ...),
+                  "sdd_nexpkernel" = add_constraint_dispersal(mod, method = "sdd_nexpkernel", ...),
                   # Add kissmig dispersal
-                  "kissmig" = add_constrain_dispersal(mod, method = "kissmig", ...),
+                  "kissmig" = add_constraint_dispersal(mod, method = "kissmig", ...),
                   # Using the migclim package
-                  "migclim" = add_constrain_dispersal(mod, method = "migclim", ...),
+                  "migclim" = add_constraint_dispersal(mod, method = "migclim", ...),
                   # --- #
-                 "hardbarrier" = add_constrain_connectivity(mod, method = "hardbarrier", ...),
+                 "hardbarrier" = add_constraint_connectivity(mod, method = "hardbarrier", ...),
                   # --- #
-                  "nichelimit" = add_constrain_adaptability(mod, method = "nichelimit", ...)
+                  "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
+                  # --- #
+                  "boundary" = add_constraint_boundary(mod, ...)
                   )
     return(o)
   }
 )
 
+# ------------------------ #
+#### Dispersal constraints ####
+
 #' @title Adds a dispersal constrain to a scenario object
-#' @name add_constrain_dispersal
-#' @aliases add_constrain_dispersal
-#' @inheritParams add_constrain
-#' @family constrain
+#' @name add_constraint_dispersal
+#' @aliases add_constraint_dispersal
+#' @inheritParams add_constraint
+#' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constrain_dispersal
+#' @exportMethod add_constraint_dispersal
 #' @export
 NULL
-methods::setGeneric("add_constrain_dispersal",
+methods::setGeneric("add_constraint_dispersal",
                     signature = methods::signature("mod"),
-                    function(mod, method, value = NULL, type = NULL, ...) standardGeneric("add_constrain_dispersal"))
+                    function(mod, method, value = NULL, type = NULL, ...) standardGeneric("add_constraint_dispersal"))
 
-#' @name add_constrain_dispersal
-#' @rdname add_constrain_dispersal
-#' @usage \S4method{add_constrain_dispersal}{BiodiversityScenario, character, numeric}(mod, method, value)
+#' @name add_constraint_dispersal
+#' @rdname add_constraint_dispersal
+#' @usage \S4method{add_constraint_dispersal}{BiodiversityScenario, character, numeric}(mod, method, value)
 methods::setMethod(
-  "add_constrain_dispersal",
+  "add_constraint_dispersal",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, value = NULL, type = NULL, ...){
     assertthat::assert_that(
@@ -168,7 +175,7 @@ methods::setMethod(
     if(method == "migclim"){
       # Using the MigClim package for calculating any transitions and
       # This requires prior calculated Thresholds!
-      out <- add_constrain_MigClim(mod = mod, ...)
+      out <- add_constraint_MigClim(mod = mod, ...)
       return(out)
     } else {
       # --- #
@@ -308,25 +315,25 @@ methods::setMethod(
 # ------------------------ #
 #### Connectivity constraints ####
 
-#' @title Adds a connectivity constrain to a scenario object
-#' @name add_constrain_connectivity
-#' @aliases add_constrain_connectivity
-#' @inheritParams add_constrain
+#' @title Adds a connectivity constraint to a scenario object
+#' @name add_constraint_connectivity
+#' @aliases add_constraint_connectivity
+#' @inheritParams add_constraint
 #' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
-#' @family constrain
+#' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constrain_connectivity
+#' @exportMethod add_constraint_connectivity
 #' @export
 NULL
-methods::setGeneric("add_constrain_connectivity",
+methods::setGeneric("add_constraint_connectivity",
                     signature = methods::signature("mod"),
-                    function(mod, method, value = NULL, resistance = NULL, ...) standardGeneric("add_constrain_connectivity"))
+                    function(mod, method, value = NULL, resistance = NULL, ...) standardGeneric("add_constraint_connectivity"))
 
-#' @name add_constrain_connectivity
-#' @rdname add_constrain_connectivity
-#' @usage \S4method{add_constrain_connectivity}{BiodiversityScenario, character, numeric, RasterLayer}(mod, method, value, resistance)
+#' @name add_constraint_connectivity
+#' @rdname add_constraint_connectivity
+#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, RasterLayer}(mod, method, value, resistance)
 methods::setMethod(
-  "add_constrain_connectivity",
+  "add_constraint_connectivity",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, value = NULL, resistance = NULL, ...){
     assertthat::assert_that(
@@ -375,36 +382,36 @@ methods::setMethod(
 # ------------------------ #
 #### Adaptability constraints ####
 
-#' @title Adds an adaptability constrain to a scenario object
+#' @title Adds an adaptability constraint to a scenario object
 #' @description
-#' Adaptability constrains assume that suitable habitat for species in (future) projections might be unsuitable if
+#' Adaptability constraints assume that suitable habitat for species in (future) projections might be unsuitable if
 #' it is outside the range of conditions currently observed for the species.
 #'
 #' Currently only `nichelimit` is implemented, which adds a simple constrain on the predictor parameter space, which
 #' can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
 #' are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
 #' training.
-#' @name add_constrain_adaptability
-#' @aliases add_constrain_adaptability
-#' @inheritParams add_constrain
+#' @name add_constraint_adaptability
+#' @aliases add_constraint_adaptability
+#' @inheritParams add_constraint
 #' @param names A [`character`] vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).
 #' @param value A [`numeric`] value in units of standard deviation (Default: \code{1}).
 #' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
 #' Allows incremental widening of the niche space, thus opening constraints.
-#' @family constrain
+#' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constrain_adaptability
+#' @exportMethod add_constraint_adaptability
 #' @export
 NULL
-methods::setGeneric("add_constrain_adaptability",
+methods::setGeneric("add_constraint_adaptability",
                     signature = methods::signature("mod"),
-                    function(mod, method, names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constrain_adaptability"))
+                    function(mod, method, names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constraint_adaptability"))
 
-#' @name add_constrain_adaptability
-#' @rdname add_constrain_adaptability
-#' @usage \S4method{add_constrain_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
+#' @name add_constraint_adaptability
+#' @rdname add_constraint_adaptability
+#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
 methods::setMethod(
-  "add_constrain_adaptability",
+  "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, names = NULL, value = 1, increment = 0, ...){
     assertthat::assert_that(
@@ -499,3 +506,65 @@ methods::setMethod(
   }
   return(nd)
 }
+
+# ------------------------ #
+#### Boundary constraints ####
+
+#' @title Adds a boundary constraint to a scenario object
+#' @description
+#' The purpose of boundary constraints is to limit a future projection within a specified area
+#' (such as for example a range or ecoregion). This can help to limit unreasonable projections into geographic space.
+#'
+#' Similar to boundary constraints it is also possible to define a \code{"zone"} for the scenario projections, similar
+#' as was done for model training. The difference to a boundary constraint is that the boundary constraint is applied posthoc
+#' as a hard cut on any projection, while the zones would allow any projection (and other constraints) to be applied within
+#' the zone.
+#' **Note: Setting a boundary constraint for future projections effectively potentially suitable areas!**
+#' @name add_constraint_boundary
+#' @aliases add_constraint_boundary
+#' @inheritParams add_constraint
+#' @param layer A [`RasterLayer`] object with the same extent as the model background. Has to be binary and
+#' is used for a posthoc masking of projected grid cells.
+#' @family constraint
+#' @keywords scenario
+#' @exportMethod add_constraint_boundary
+#' @export
+NULL
+methods::setGeneric("add_constraint_boundary",
+                    signature = methods::signature("mod"),
+                    function(mod, layer, ...) standardGeneric("add_constraint_boundary"))
+
+#' @name add_constraint_boundary
+#' @rdname add_constraint_boundary
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
+methods::setMethod(
+  "add_constraint_boundary",
+  methods::signature(mod = "BiodiversityScenario"),
+  function(mod, layer, method = "boundary", ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      is.Raster(layer),
+      is.character(method)
+    )
+    # Add processing method #
+    # --- #
+    co <- list()
+    if(method == "boundary"){
+      # Add a constrain on parameter space, e.g. max 1 SD from training data covariates
+      assertthat::assert_that(
+        length( unique( layer )) <=2
+      )
+      # If length of values is greater than 1, remove everything else by setting it to NA
+      if( length( unique( layer )) >1 ){
+        layer[layer<1] <- NA
+      }
+      co[['boundary']] <- list(method = method,
+                                   params = c("layer" = layer))
+    }
+    # --- #
+    new <- mod$set_constraints(co)
+    return(
+      bdproto(NULL, new)
+    )
+  }
+)
