@@ -5,6 +5,7 @@
 \alias{is.Waiver}
 \alias{is.formula}
 \alias{is.Raster}
+\alias{is.stars}
 \title{Check whether a provided object is truly of a specific type}
 \usage{
 is.Id(x)
@@ -14,11 +15,15 @@ is.Waiver(x)
 is.formula(x)
 
 is.Raster(x)
+
+is.stars(x)
 }
 \arguments{
 \item{x}{an R Object.}
 }
 \value{
+Boolean evaluation with \link{logical} output.
+
 Boolean evaluation with \link{logical} output.
 
 Boolean evaluation with \link{logical} output.
@@ -35,5 +40,7 @@ Is the provided object of type waiver?
 Check whether a formula is valid
 
 Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
+
+Tests if an input is a stars object.
 }
 \keyword{misc}

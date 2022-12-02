@@ -490,11 +490,24 @@ engine_gdb <- function(x,
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
 
+            # Also get settings for bias values
+            settings <- self$settings
+
+            # Set target variables to bias_value for prediction if specified
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
+
             # Add rowid
             newdata$rowid <- 1:nrow(newdata)
             # Subset to non-missing data
-            # FIXME: Potentially limit to relevant variables only
-            # newdata <- subset(newdata, complete.cases(newdata))
+            newdata <- subset(newdata, complete.cases(newdata))
             # Make empty template
             temp <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             # Predict

@@ -64,6 +64,7 @@ methods::setMethod(
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
            layer = "mean", ...){
+    # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -71,7 +72,6 @@ methods::setMethod(
       is.logical(stabilize),
       is.character(layer)
     )
-    # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     # Match methods
     date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
@@ -263,7 +263,7 @@ methods::setMethod(
     }
     rm(pb)
     proj <- raster::setZ(proj, times )
-    if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, as.Date(times) )
+    if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, times )
 
     # Apply MigClim and other post-hoc constraints if set
     # FIXME: Ideally make this whole setup more modular. So create suitability projections first

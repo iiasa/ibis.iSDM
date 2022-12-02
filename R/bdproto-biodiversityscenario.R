@@ -294,12 +294,6 @@ BiodiversityScenario <- bdproto(
 
       # Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
       mod <- self$get_model()
-      if(mod$model$biodiversity[[1]]$family == "binomial"){
-        ar <- stars:::st_area.stars(scenario)
-        # if(inherits(ar$area,"units")) ar_unit <- units::deparse_unit(ar$area)
-        scenario <- as(scenario,"Raster") * as(ar, "Raster")
-        scenario <- raster::setZ(scenario, times)
-      }
       out <- summarise_projection(scenario, relative = relative)
     }
 

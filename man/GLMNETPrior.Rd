@@ -4,9 +4,9 @@
 \alias{GLMNETPrior}
 \title{Placeholder for GLMNET}
 \usage{
-GLMNETPrior(variable, hyper = 0, ...)
+GLMNETPrior(variable, hyper = 0, lims = c(-Inf, Inf), ...)
 
-\S4method{GLMNETPrior}{character, numeric}(variable, hyper)
+\S4method{GLMNETPrior}{character, numeric, numeric}(variable, hyper, lims)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} variable passed on to the prior object.}
@@ -14,14 +14,21 @@ GLMNETPrior(variable, hyper = 0, ...)
 \item{hyper}{A \code{\link{numeric}} value between \code{0} and \code{1} that state the penalization factor.
 By default this is set to \code{0}, implying the \code{"variable"} provided is not regularized at all.}
 
+\item{lims}{A \code{\link{numeric}} \code{\link{vector}} of the lower and upper limits for each coefficient (Default: \code{c(-Inf, Inf)}).}
+
 \item{...}{Variables passed on to prior object.}
 }
 \description{
 The \code{\link{engine_glmnet}} engine does not support priors in a typical sense, however it is
-possible to specify so called penalty factors on all variables in the model.
+possible to specify so called penalty factors as well as lower and upper limits
+on all variables in the model.
 
 The default penalty is \code{1} for each coefficient, i.e. coefficients are penalized equally.
 In contrast a variable with penalty.factor equal to \code{0} is not penalized at all.
+
+The lower and upper limits can be specified to constrain coefficients to a certain range.
+By default those ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset to a
+specific value range by altering \code{"lims"}.
 
 For a regularized regression that supports a few more options on the priors, check out the
 Bayesian \code{\link{engine_breg}}.
@@ -32,7 +39,7 @@ Bayesian \code{\link{engine_breg}}.
 p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 p1
 # Smaller chance to be regularized
-p2 <- GLMNETPrior(variable = "forest", hyper = 0.2)
+p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(-Inf, Inf))
 p2
 }
 }

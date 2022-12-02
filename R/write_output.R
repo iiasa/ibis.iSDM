@@ -436,7 +436,7 @@ methods::setMethod(
       }
 
       # Model summary in a tibble and formula
-      output[["output"]][["summary"]] <- mod$summary(plot = FALSE)
+      output[["output"]][["summary"]] <- mod$summary(plot = FALSE,...)
       if(!is.Waiver(mod$get_data() )){
         sc_dim <- stars::st_dimensions(mod$get_data())
         output[["output"]][["resolution"]] <- abs( c(x = sc_dim$x$delta, y = sc_dim$y$delta) )

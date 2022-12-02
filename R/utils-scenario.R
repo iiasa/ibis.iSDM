@@ -161,7 +161,7 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
     is.null(template) || is.Raster(template)
   )
   # Take name of third band, assuming it to be time
-  time_band <- names(dim(o))[3]
+  time_band <- names(dim(obj))[3]
 
   assertthat::assert_that(
     length(which) <= dim(obj)[time_band]
@@ -269,7 +269,7 @@ st_add_raster <- function(obj, new){
 #' @noRd
 summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   assertthat::assert_that(
-  inherits(scenario, "stars"),
+    is.list(scenario) || inherits(scenario, "stars"),
     length(dim(scenario))==3,
     is.logical(relative)
   )

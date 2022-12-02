@@ -711,11 +711,24 @@ engine_xgboost <- function(x,
                                     is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
             mod <- self$get_data('fit_best')
+            # Also get settings for bias values
+            settings <- self$settings
+
             if(!inherits(newdata, "xgb.DMatrix")){
               assertthat::assert_that(
                 all( mod$feature_names %in% colnames(newdata) )
               )
               newdata <- subset(newdata, select = mod$feature_names)
+
+              if(!is.Waiver(settings$get('bias_variable'))){
+                for(i in 1:length(settings$get('bias_variable'))){
+                  if(settings$get('bias_variable')[i] %notin% colnames(newdata)){
+                    if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                    next()
+                  }
+                  newdata[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+                }
+              }
               newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
             }
 

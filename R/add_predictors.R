@@ -1001,7 +1001,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   sc <- vector() # For storing the scenario files
 
   # Now open the netcdf file with stats
-  if( stars:::detect.driver(fname) == "netcdf" ){
+  if( length( grep("netcdf", stars:::detect.driver(fname), ignore.case = TRUE) )>0 ){
     if(verbose){
       myLog('[Predictor]','green',"Loading in predictor file...")
       pb <- progress::progress_bar$new(total = length(vars),

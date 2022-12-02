@@ -90,3 +90,15 @@ is.Raster <- function(x)
 {
   return((class(x)[1]=="RasterLayer" || class(x)[1]=="RasterBrick" || class(x)[1]=="RasterStack"))
 }
+
+#' Tests if an input is a stars object.
+#'
+#' @param x an R Object.
+#' @return Boolean evaluation with [logical] output.
+#' @rdname is
+#' @keywords misc
+#' @export
+is.stars <- function(x)
+{
+  return(inherits(x, "stars") || is.list(x))
+}
