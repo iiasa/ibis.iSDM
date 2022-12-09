@@ -362,7 +362,7 @@ methods::setMethod(
       output[["input"]][["predictors"]] <- model$predictors_types
       if(!is.Waiver(model$offset)) output[["input"]][["offset"]] <- names(model$offset) else output[["input"]][["offset"]] <- NA
       if(!is.Waiver(model$priors)){
-        output[["input"]][["priors"]] <- model$priors$varnames()
+        output[["input"]][["priors"]] <- model$priors$summary()
       } else output[["input"]][["priors"]] <- NA
 
       # Go over biodiversity datasets
@@ -397,7 +397,7 @@ methods::setMethod(
 
       # Model summary in a tibble and formula
       output[["output"]][["summary"]] <- mod$summary()
-      if(!is.Waiver(mod$get_data("prediction") )){
+      if(!is.null(mod$get_data("prediction") )){
         output[["output"]][["resolution"]] <- raster::res( mod$get_data("prediction") )
         output[["output"]][["prediction"]] <- names( mod$get_data("prediction") )
       } else {
