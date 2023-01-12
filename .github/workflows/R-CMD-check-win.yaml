@@ -42,12 +42,12 @@ jobs:
 
       - name: Install dependencies (primarily from binary)
         run: |
-          install.packages("remotes")
+          install.packages('"remotes"')
           options("install.packages.compile.from.source" = "never", "pkgType" = "binary")
           remotes::install_deps(dependencies = TRUE)
           options("install.packages.compile.from.source" = NULL)
-          install.packages("uuid", type = "source")
-          install.packages("raster", type = "source")
+          install.packages('"uuid"')
+          install.packages('"raster"')
 
       - uses: r-lib/actions/check-r-package@v2
         with:
@@ -59,8 +59,3 @@ jobs:
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
-
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
