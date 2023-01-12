@@ -558,6 +558,13 @@ methods::setMethod(
       rm(new, obs, w, preds, predn, predt)
     }
 
+    # Warning if Np is larger than Nb
+    if(settings$get("varsel") == "none"){
+      if( sum(x$biodiversity$get_observations() )-1 <= length(model$predictors_names)){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'There are more predictors than observations! Consider setting varsel= to \"reg\" ')
+      }
+    }
+
     # Get and assign Priors
     if(!is.Waiver(x$priors)){
       # First clean and remove all priors that are not relevant to the engine
@@ -727,7 +734,6 @@ methods::setMethod(
       }
 
       # Run the engine setup script
-      # FIXME: Do some checks on whether an observation falls into the mesh?
       x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
@@ -1159,9 +1165,6 @@ methods::setMethod(
     } else if (inherits(x$engine,"GLMNET-Engine") ){
       # ----------------------------------------------------------- #
       #### GLMNET Engine ####
-      assertthat::assert_that(
-        method_integration != "prior",msg = "GLMNET does not support priors! Use engine_breg instead!"
-      )
       # For each formula, process in sequence
       for(id in ids){
 

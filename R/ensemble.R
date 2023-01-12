@@ -357,6 +357,10 @@ methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),
   function(..., x.var, method = "mean", layer = "mean", normalize = TRUE){
+    assertthat::assert_that(
+      is.character(x.var),
+      msg = "Partial ensemble requires explicit specification of the parameter x.var."
+    )
     if(length(list(...))>1) {
       mc <- list(...)
     } else {

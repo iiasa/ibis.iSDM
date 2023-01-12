@@ -148,7 +148,7 @@ DistributionModel <- bdproto(
 
       message(paste0(
         'Trained ',class(self)[1],' (',self$show(),')',
-        '\n  \033[2mStrongest summary effects:\033[22m',
+        '\n  \033[1mStrongest summary effects:\033[22m',
         '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
         '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
         ifelse(has_prediction,
@@ -256,7 +256,8 @@ DistributionModel <- bdproto(
       assertthat::assert_that(nrow(vi) == length(model$predictors_names),
                               length(vi$parameter) == length(model$predictors_names))
       vi$parameter <- model$predictors_names
-      vi
+      names(vi) <- make.names(names(vi))
+      return( tibble::as_tibble( vi ) )
     } else if(inherits(self, 'BREG-Model')){
       posterior::summarise_draws(self$get_data(obj)$beta)
     } else if(inherits(self, "XGBOOST-Model")){

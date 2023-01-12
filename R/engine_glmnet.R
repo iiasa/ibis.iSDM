@@ -222,7 +222,7 @@ engine_glmnet <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
+          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with prior weight
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -235,7 +235,7 @@ engine_glmnet <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
+          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1] # Multiply with prior weight (first value)
 
         } else if(fam == "binomial"){
           # Check that observations are all <=1
@@ -309,6 +309,13 @@ engine_glmnet <- function(x,
         # Then add each factor level
         fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
         p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
+
+        # Trick for creation for some default lambda values for the regularization multiplier
+        if(is.null(params$lambda)){
+          reg <- default.regularization(p = df$observed, m = model.matrix(form, df)) * c(1, p.fac) # add 1 for the intercept
+          params$lambda <- 10^(seq(4, 0, length.out = 200)) * sum(p.fac)/length(p.fac) * sum(p.fac)/sum(w)
+          if(anyNA(params$lambda)) params$lambda <- NULL
+        }
 
         if(!is.Waiver(model$priors)){
           # Reset those contained in the prior object

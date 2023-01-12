@@ -158,7 +158,7 @@ built_formula_inla <- function(model, id, x, settings){
       # FIXME: check that this works
       form <- to_formula( obj$equation )
     }
-  # -------------------- INLABRU ----------------
+  # -------------------- INLABRU formula----------------
   } else if(x$get_engine() == "<INLABRU>"){
 
     # Default equation found (e.g. no separate specification of effects)
@@ -1272,9 +1272,14 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(length(w2)==1)
 
   # Format the output
-  m[[w2]] %>%
+  o <- m[[w2]] %>%
     tibble::rownames_to_column('variable') %>%
     tibble::as_tibble()
+  if(what == "fixed"){
+    names(o) <- c("variable", "mean", "sd", "q05", "q50", "q95", "mode", "kld")
+  }
+  assertthat::assert_that(nrow(o)>0)
+  return( o )
 }
 
 #' Plot marginal distributions of effects or hyperparameters from INLA model

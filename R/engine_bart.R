@@ -141,11 +141,13 @@ engine_bart <- function(x,
           nrow(model$predictors) == ncell(self$get_data('template')),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Add pseudo-absence points if necessary
         if('poipo' == model$biodiversity[[1]]$type && model$biodiversity[[1]]$family == 'poisson') {
+          # Warning since PPMs are not really performing / correctly set up in bart
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Engine BART prone to overfit Poisson-distributed occurrence data.\nConsider non-linear xgboost as alternative!')
 
           # Get background layer
           bg <- self$get_data('template')

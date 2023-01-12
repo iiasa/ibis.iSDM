@@ -65,6 +65,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param fname A [`character`] specifying the output filename a created figure should be written to.
+#' @param title Allows to respecify the title through a [`character`] (Default: \code{NULL}).
 #' @param col A [`character`] stating the colour palette to use. Has to be either a predefined value or a
 #' vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
 #' @param ... Other engine specific parameters
@@ -88,7 +89,7 @@ methods::setGeneric(
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),
-  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, col = "BlueGold",...) {
+  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, title = NULL, col = "BlueGold",...) {
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             msg = "The bivplot function currently only works with fitted distribution objects!")
     # Generic checks
@@ -96,6 +97,7 @@ methods::setMethod(
                             is.character(xvar),
                             is.character(yvar),
                             is.character(col) || is.vector(col),
+                            is.null(title) || is.character(title),
                             is.null(fname) || is.character(fname)
     )
     # Check that distribution object has a prediction
@@ -124,6 +126,11 @@ methods::setMethod(
       col <- match.arg(col, choices, several.ok = FALSE)
     }
 
+    # Define default title
+    if(is.null(title)){
+      title <- paste("Bivariate plot of prediction\n (",mod$model$runname,')')
+    }
+
     # Create dimensions
     legend <- biscale::bi_legend(pal = col,
                         dim = 3,
@@ -144,11 +151,11 @@ methods::setMethod(
       biscale::bi_scale_fill(pal = col, na.value = "transparent") +
       # coord_quickmap() +
       ggplot2::labs(
-        title = paste("Bivariate plot of prediction\n (",mod$model$runname,')'),
+        title = title,
         x = "",
         y = ""
       ) +
-      ggplot2::theme(legend.position="none")
+      ggplot2::theme(legend.position = "none")
 
     # Add legend with cowplot
     finalPlot <- cowplot::ggdraw() +
@@ -161,9 +168,9 @@ methods::setMethod(
     }
     if(is.character(fname)){
       cowplot::ggsave2(filename = fname, plot = finalPlot)
-    } else {
-      return(finalPlot)
     }
+
+    return(finalPlot)
   }
 )
 

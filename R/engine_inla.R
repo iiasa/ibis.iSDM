@@ -238,9 +238,16 @@ engine_inla <- function(x,
           )
         )
         # Calculate area
+        # ar <- suppressMessages(
+        #     suppressWarnings(
+        #       mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+        #     )
+        # )
+        # 06/01/2023: This should work and is identical to inlabru::ipoints
         ar <- suppressWarnings(
-          mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+          diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
         )
+        assertthat::assert_that(length(ar) == mesh$n)
 
         # Now set the output
         self$set_data("mesh", mesh)

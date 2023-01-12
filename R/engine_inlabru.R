@@ -193,6 +193,7 @@ engine_inlabru <- function(x,
           }
           params$offset <- offset
         }
+
         if(is.null(params$cutoff)){
           # Specify as minimum distance between y coordinates
           # Thus capturing most points on this level
@@ -217,11 +218,16 @@ engine_inlabru <- function(x,
           )
         )
         # Calculate area
-        ar <- suppressMessages(
-                suppressWarnings(
-                  mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
-                )
-              )
+        # ar <- suppressMessages(
+        #         suppressWarnings(
+        #           mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+        #         )
+        #       )
+        # 06/01/2023: This should work and is identical to inlabru::ipoints
+        ar <- suppressWarnings(
+          inlabru::ipoints(samplers = mesh)$weight |> as.vector()
+        )
+        assertthat::assert_that(length(ar) == mesh$n)
 
         # Now set the output
         self$set_data("mesh", mesh)
@@ -401,7 +407,7 @@ engine_inlabru <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Construct likelihoods for each entry in the dataset
@@ -421,21 +427,25 @@ engine_inlabru <- function(x,
           # Options for specifying link function of likelihood
           o <- inlabru::bru_options_get()
           # Data type specific. Currently only binomial and poisson supported
-          if(model$biodiversity[[j]]$type == 'poipo'){
-            ips <- self$calc_integration_points(model, mode = 'cp')
-
-            # Log gaussian cox process
-            lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-                                family = "cp",
-                                data = df,
-                                mesh = self$get_data('mesh'),
-                                ips = ips,
-                                options = o
-            )
-          # If not poipo but still poisson, prepare data as follows
-          } else if(model$biodiversity[[j]]$family == "poisson"){
+          # FIXME: Code below does not work as intended. Worked in earlier versions. To be debugged later!
+          # if(model$biodiversity[[j]]$type == 'poipo'){
+          #   ips <- self$calc_integration_points(model, mode = 'cp')
+          #
+          #   # Log gaussian cox process
+          #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+          #                       # include = model$biodiversity[[j]]$predictors_names,
+          #                       family = "cp",
+          #                       data = df,
+          #                       domain = list(coordinates = self$get_data("mesh")),
+          #                       # mesh = self$get_data('mesh'),
+          #                       ips = ips,
+          #                       options = o
+          #   )
+          # # If not poipo but still poisson, prepare data as follows
+          # } else
+            if(model$biodiversity[[j]]$family == "poisson"){
             # Calculate integration points for PPMs and to estimation data.frame
-            ips <- self$calc_integration_points(model)
+            ips <- self$calc_integration_points(model, mode = 'stack')
             abs_E = ips$E; ips <- ips$ips
             assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
             new <- sp:::rbind.SpatialPointsDataFrame(
@@ -451,8 +461,10 @@ engine_inlabru <- function(x,
                                 options = o
             )
           } else if(model$biodiversity[[j]]$family == "binomial"){
-            # Set likelihood to cloglog for binomial following Simpson 2016
-            o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
+            # Set likelihood to cloglog for binomial following Simpson 2016 if multiple likelihoods
+            if(length(model$biodiversity)>1){
+              o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
+            }
 
             # Formulate the likelihood
             lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
@@ -502,7 +514,9 @@ engine_inlabru <- function(x,
         # --- #
         # Get unified predictors from likelihoods
         pn <- lapply(lhl, function(x) all.vars(x$formula) ) %>% do.call(c,.) %>% unique()
+        # pn <- lapply(model$biodiversity, function(x) x$predictors_names ) %>% do.call(c,.) %>% unique()
         pn <- pn[grep("Intercept|coordinates", pn, invert = TRUE)]
+        assertthat::assert_that(length(pn)>0)
         model$predictors_types <- model$predictors_types[which(model$predictors_types$predictors %in% pn),]
 
         # Add Predictors to component
@@ -607,7 +621,7 @@ engine_inlabru <- function(x,
         # Get likelihood
         likelihoods <- self$get_data("likelihoods")
 
-        # Get components
+        # Get model components
         comp <- self$get_data("components")
 
         # Get params
@@ -650,7 +664,7 @@ engine_inlabru <- function(x,
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
         if( settings$get(what='varsel') == "reg" ){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing variable selection...')
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing incremental variable selection...')
 
           # Catch all variables with set priors and keep them!
           if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
@@ -759,12 +773,14 @@ engine_inlabru <- function(x,
           comp <- as.formula(best_found)
         }
 
+        # --- #
         # Fitting bru model
         try({
           fit_bru <- inlabru::bru(components = comp,
                                   likelihoods,
                                   options = options)
         }, silent = FALSE)
+        # --- #
 
         # Security checks
         if(!exists("fit_bru")){

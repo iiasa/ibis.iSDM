@@ -164,11 +164,17 @@ clean_mboost_summary <- function(obj){
     } else x[2]
   })
 
+  # Now split up the names and types
+  types <- sapply(names(vi), function(z) strsplit(z, "\\(")[[1]][1]) |> as.vector()
+  vars <- sapply(names(vi), function(z) strsplit(z, "\\(")[[1]][2]) |> as.vector()
+  vars <- gsub(vars, pattern="\\)",replacement="")
+
   # Construct tibble
   out <- tibble::tibble(
-    variable = names(vi),
+    variable = vars,
+    type = types,
     varimp = vi,
-    coef = co
+    beta = co
   )
   return(out)
 }

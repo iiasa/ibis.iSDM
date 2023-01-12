@@ -31,6 +31,8 @@ bivplot(
 vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
 
 \item{...}{Other engine specific parameters}
+
+\item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
 }
 \value{
 A \link{RasterLayer} with the created partial response.
