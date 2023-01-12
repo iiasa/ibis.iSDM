@@ -222,7 +222,7 @@ engine_glmnet <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with prior weight
+          model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect) # Multiply with prior weight
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -235,7 +235,7 @@ engine_glmnet <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1] # Multiply with prior weight (first value)
+          model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1]) # Multiply with prior weight (first value)
 
         } else if(fam == "binomial"){
           # Check that observations are all <=1

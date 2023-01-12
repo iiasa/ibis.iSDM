@@ -25,7 +25,6 @@ jobs:
           r-version: ${{ matrix.config.r }}
 
       - name: Install gdal and igraph dependencies on Linux (gdal)
-        if: runner.os == "Linux"
         run: |
           sudo apt-get -y install \
           libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
@@ -38,7 +37,7 @@ jobs:
 
       - name: Get remaining dependencies
         run: |
-          install.packages('remotes')
+          install.packages("remotes")
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("urlchecker")
 
@@ -49,7 +48,6 @@ jobs:
           Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
 
       - name: Check URLs
-        if: runner.os == 'Linux'
         run: |
           result <- urlchecker::url_check()
           if (nrow(result) > 0) {

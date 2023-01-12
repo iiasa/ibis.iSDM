@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check-linux
 
 jobs:
   R-CMD-check:
@@ -43,7 +43,6 @@ jobs:
           extra-repositories: "https://inla.r-inla-download.org/R/testing"
 
       - name: Install gdal and igraph dependencies on Linux (gdal)
-        if: runner.os == "Linux"
         run: |
           sudo apt-get -y install \
           libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev

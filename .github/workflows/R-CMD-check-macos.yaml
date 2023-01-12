@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check-macos
 
 jobs:
   R-CMD-check:
@@ -51,7 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages('remotes')
+          install.packages("remotes")
           options("install.packages.compile.from.source" = "never")
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")

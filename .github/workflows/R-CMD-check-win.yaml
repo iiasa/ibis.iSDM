@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check-win
 
 jobs:
   R-CMD-check:
@@ -42,8 +42,8 @@ jobs:
 
       - name: Install dependencies (primarily from binary)
         run: |
-          install.packages('remotes')
-          options("install.packages.compile.from.source" = "never", pkgType = "binary")
+          install.packages("remotes")
+          options("install.packages.compile.from.source" = "never", "pkgType" = "binary")
           remotes::install_deps(dependencies = TRUE)
           options("install.packages.compile.from.source" = NULL)
           install.packages("uuid", type = "source")

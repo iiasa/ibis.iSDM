@@ -39,6 +39,12 @@ summary.PredictorDataset <- function(x) x$summary()
 #' @export
 summary.BiodiversityScenario <- function(x) x$summary()
 
+#' @rdname summary
+#' @method summary PriorList
+#' @keywords summary
+#' @export
+summary.PriorList <- function(x) x$summary()
+
 #' Obtains the coefficients of a trained model
 #'
 #' @description
