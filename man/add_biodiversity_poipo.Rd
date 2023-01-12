@@ -38,7 +38,8 @@ add_biodiversity_poipo(
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
 Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipo}}.}
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipo}}.
+\strong{Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).}}
 
 \item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}

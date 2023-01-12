@@ -161,13 +161,19 @@ methods::setMethod(
 
       # Check that absence points are present, otherwise add some.
       # Reason is that some engine such as inlabru don't save their integration points
-      if( all(unique(df2$observed) == 1) && method == "discrete"){
+      if( !any(df2[[point_column]]==0) && method == "discrete"){
         if(getOption('ibis.setupmessages')) myLog('[Validation]','yellow','No absence data found for threshold. Generating random points.')
-        o <- sf::st_as_sf( raster::sampleRandom(threshold, size = nrow(df2)*2, sp = TRUE) )
-        o <- o[o[[1]]==0,]
-        abs <- list(); abs[[point_column]] <- o[[1]]
+
+        # Use the pseudo-absence generation
+        o <- add_pseudoabsence(df = point,
+                               field_occurrence = point_column,
+                               template = threshold,
+                               settings = pseudoabs_settings(background = threshold,nrpoints = nrow(df2)*2)) |>
+          subset(subset = observed == 0)
+
+        abs <- list(); abs[[point_column]] <- o[[point_column]]
         abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
-        abs[["pred"]] <- raster::extract(prediction, o); abs[["pred_tr"]] <- o[[1]]
+        abs[["pred"]] <- raster::extract(prediction, o); abs[["pred_tr"]] <- raster::extract(threshold, o)
 
         df2 <- rbind(df2, as.data.frame(abs))
       }
@@ -396,10 +402,10 @@ methods::setMethod(
     # For discrete functions to work correctly, ensure that all values are 0/1
     df2[[point_column]] <- ifelse(df2[[point_column]] > 0, 1, 0 )
     # Build the confusion matrix
-    ta  <-  sum((df2["pred_tr"] == 0) & (df2[point_column] == 0))
-    fp  <-  sum((df2["pred_tr"] == 1) & (df2[point_column] == 0))
-    fa  <-  sum((df2["pred_tr"] == 0) & (df2[point_column] == 1))
-    tp  <-  sum((df2["pred_tr"] == 1) & (df2[point_column] == 1))
+    ta  <-  sum((df2["pred_tr"] == 0) & (df2[point_column] == 0)) # True absence
+    fp  <-  sum((df2["pred_tr"] == 1) & (df2[point_column] == 0)) # False presence
+    fa  <-  sum((df2["pred_tr"] == 0) & (df2[point_column] == 1)) # False absence
+    tp  <-  sum((df2["pred_tr"] == 1) & (df2[point_column] == 1)) # True presence
 
     # Binary brier Score
     BS <- function(pred, obs, na.rm = TRUE) {

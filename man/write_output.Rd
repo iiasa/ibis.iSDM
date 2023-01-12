@@ -13,6 +13,8 @@
 \S4method{write_output}{RasterStack, character, character, logical}(mod, fname, dt, verbose)
 
 \S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
+
+\S4method{write_output}{stars, character, character, logical}(mod, fname, dt, verbose)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{Raster}} or \code{\link{stars}} object.}

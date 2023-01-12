@@ -266,7 +266,7 @@ predictors$koeppen_50km <- raster::ratify(predictors$koeppen_50km)
 x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
-  engine_xgboost(nrounds = 3000)
+  engine_xgboost(iter = 8000)
 
 # Now train 2 models, one without and one with a spatial latent effect
 mod_null <- train(x, runname = 'Normal PPM projection', only_linear = TRUE, verbose = FALSE)
@@ -294,7 +294,7 @@ x <- distribution(background, limits = predictors$koeppen_50km) %>%
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") %>% 
-  engine_xgboost(nrounds = 3000, learning_rate = 0.01)
+  engine_xgboost(iter = 3000, learning_rate = 0.01)
 
 # Spatially limited prediction
 mod_limited <- train(x, runname = 'Limited prediction background', only_linear = TRUE, verbose = FALSE)

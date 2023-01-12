@@ -19,7 +19,7 @@ NULL
 #' Which of them is chosen is critical dependent on the alpha value:
 #' [*] For \code{alpha} equal to \code{0} a ridge regularization is used. Ridge regularization has the property that
 #' it doesn't remove variables entirely, but instead sets their coefficients to \code{0}.
-#' [*] For \code{alpha} equal to \code{0} a lasso regularization is used. Lassos tend to remove those coefficients
+#' [*] For \code{alpha} equal to \code{1} a lasso regularization is used. Lassos tend to remove those coefficients
 #' fully from the final model that do not improve the loss function.
 #' [*] For \code{alpha} values between \code{0} and \code{1} a elastic-net regularization is used, which is essentially a combination
 #' of the two.
@@ -306,9 +306,14 @@ engine_glmnet <- function(x,
         # Check priors, e.g penalty factors
         p.fac <- rep(1, sum( model$biodiversity[[1]]$predictors_types$type=="numeric") ) # Added plus 1 for the weight?
         names(p.fac) <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="numeric")]
-        # Then add each factor level
-        fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
-        p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
+        # Then add each factor level if set
+        if(any(model$predictors_types$type=="factor")){
+          fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
+          p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
+        }
+        # Duplicate p.fac container for lower and upper limits
+        lowlim <- rep(-Inf, length(p.fac)) |> setNames(names(p.fac))
+        upplim <- rep(Inf, length(p.fac)) |> setNames(names(p.fac))
 
         # Trick for creation for some default lambda values for the regularization multiplier
         if(is.null(params$lambda)){
@@ -320,7 +325,9 @@ engine_glmnet <- function(x,
         if(!is.Waiver(model$priors)){
           # Reset those contained in the prior object
           for(v in model$priors$varnames()){
-            p.fac[v] <- model$priors$get(v)
+            p.fac[v]  <- model$priors$get(v, what = "value")
+            lowlim[v] <- model$priors$get(v, what = "lims")[1]
+            upplim[v] <- model$priors$get(v, what = "lims")[2]
           }
         }
 
@@ -347,8 +354,8 @@ engine_glmnet <- function(x,
                     family = fam,
                     penalty.factor = p.fac,
                     # Option for limiting the coefficients
-                    # lower.limits = 0,
-                    # upper.limits = 1,
+                    lower.limits = lowlim,
+                    upper.limits = upplim,
                     standardize = FALSE, # Don't standardize to avoid doing anything to weights
                     maxit = (10^5)*2, # Increase the maximum number of passes for lambda
                     parallel = getOption("ibis.runparallel"),
@@ -581,6 +588,17 @@ engine_glmnet <- function(x,
             model <- self$model
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            # Set target variables to bias_value for prediction if specified
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
 
             df <- newdata
             df$w <- model$exposure # Also get exposure variable

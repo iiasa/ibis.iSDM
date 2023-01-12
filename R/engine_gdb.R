@@ -221,7 +221,7 @@ engine_gdb <- function(x,
                            bg = bg,
                            weight = 1e-6
           )
-          df$w <- w * model$biodiversity[[1]]$expect # Also add as column
+          df$w <- w * (1/model$biodiversity[[1]]$expect) # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
           model$biodiversity[[1]]$expect <- df$w
@@ -237,7 +237,7 @@ engine_gdb <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
+          model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1])
 
         } else if(model$biodiversity[[1]]$family != 'poisson'){
           # calculating the case weights (equal weights)
@@ -490,12 +490,26 @@ engine_gdb <- function(x,
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
 
+            # Also get settings for bias values
+            settings <- self$settings
+
+            # Set target variables to bias_value for prediction if specified
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
+
             # Add rowid
             newdata$rowid <- 1:nrow(newdata)
             # Subset to non-missing data
-            newdata <- subset(newdata, complete.cases(newdata)) # FIXME: Potentially limit to relevant variables only
+            newdata <- subset(newdata, complete.cases(newdata))
             # Make empty template
-            temp <- raster::rasterFromXYZ(newdata[,c('x','y')])
+            temp <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             # Predict
             y <- suppressWarnings(
               mboost::predict.mboost(object = mod, newdata = newdata,
@@ -590,8 +604,7 @@ engine_gdb <- function(x,
             assertthat::assert_that(x.var %in% variables )
 
             # Make template of target variable(s)
-            temp <- raster::rasterFromXYZ(cbind(model$predictors$x,model$predictors$y),
-                                          crs = raster::projection(model$background))
+            temp <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             # Get target variables and predict
             target <- model$predictors
             # Set all variables other the target variable to constant

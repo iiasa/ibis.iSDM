@@ -5,8 +5,10 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Creating biodiversity projections}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -95,10 +97,10 @@ x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
   # Note that we scale the predictors here
   add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-  engine_xgboost(nrounds = 5000, learning_rate = 1e-2) # Slightly increase the learning rate
+  engine_glmnet(alpha = 0) # Slightly increase the learning rate
 
 # Train the model
-modf <- train(x, runname = 'Simple PPM', only_linear = TRUE, verbose = FALSE)
+modf <- train(x, runname = 'Simple PPM', only_linear = FALSE, verbose = FALSE)
 
 # Add a threshold to this model by getting 05 percentile of values
 modf <- threshold(modf, method = 'percentile', value = 0.05)
@@ -138,7 +140,7 @@ gains or losses of suitable habitat!
 * `calc_scenarios_slope()` calculates the slope (rate of change) across timesteps. Useful for summarizing results
 * `summary()` creates a summary output of the contained scenarios. If a `threshold()` is specified, this function
 will summarize the amount of area at each timestep.
-* `get_scenarios()` gets the created scenarios a `stars` object (plus *thresholds* if specified).
+* `get_data()` gets the created scenarios a `stars` object (plus *thresholds* if specified).
 
 
 ```{r Plotting and summarizing the created projections, eval = TRUE, fig.width = w, fig.height = h}
@@ -147,6 +149,7 @@ plot(sc.fit1) # or sc.fit1$plot()
 
 # As an alternative, visualize the linear slope per grid cell and across all time steps
 o <- sc.fit1$calc_scenarios_slope()
+plot(o,)
 
 # Another option is to calculate the relative change between start and finish
 o <- sc.fit1$plot_relative_change()
@@ -171,39 +174,40 @@ plot(area_km2~band, data = o, type = 'b',
 
 # How does habitat gain and loss change over time?
 plot(totchange_gain_km2~band, data = o, type = 'n',
-     main = "Habitat gain and loss",
+     main = "Habitat gain and loss", ylim = c(-1e4, 1e4),
      ylab = "Amount of area (km2)", xlab = "Time")
 lines(o$totchange_gain_km2~o$band, col = "blue")
-lines(abs(o$totchange_loss_km2)~o$band, col = "red")
+lines((o$totchange_loss_km2)~o$band, col = "red")
 
 ```
 
 Finally, scenarios projections can also be saved as specific outputs. As before, this is enabled via
 `write_output()` and works just the same for [`BiodiversityScenario`] objects, with the only difference being that the output can be specified as netCDF-4 file.
 
-## Adding constrains to projections
+## Adding constraints to projections
 
-In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (e.g. islands), environmental and biotic constraints on how far a species can disperse. These can be specified through the constrain function [`add_constrain()`] and a variety of constrains is currently available, some of which depend on other packages.
+In the simple scenario above we use the naive assumption that any, depending on the response functions of the fitted distribution model, any suitable habitat within the background modelling region is potentially reachable by the species. In reality there might however be geographic (e.g. islands), environmental and biotic constraints on how far a species can disperse. These can be specified through the constrain function [`add_constraint()`] and a variety of constraints is currently available, some of which depend on other packages.
 
-* `add_constrain()` Generic wrapper to which a specific 'method' can be supplied. See documentation for more information on available options and parameters.
-* `add_constrain_dispersal()` To add a dispersal constrain to the projections which is applied after each time step. Supports various options with `'sdd_fixed'` for fixed dispersal kernels, `'sdd_nexpkernel'` for a negative exponential kernel or `'sdd_kissmig'` for applying the kissmig framework.
-* `add_constrain_MigClim()` Use the MigClim R-package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via `sc$plot_migclim()`). See also the help file and [Engler et al. (2012)](https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x) for more information.
-* `add_constrain_connectivity()` Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options here.
-* `add_constrain_adaptability()` Simple constrains on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which 'cap' projections in novel environments to the observed ranges of contemporary predictors.
+* `add_constraint()` Generic wrapper to which a specific 'method' can be supplied. See documentation for more information on available options and parameters.
+* `add_constraint_dispersal()` To add a dispersal constraint to the projections which is applied after each time step. Supports various options with `'sdd_fixed'` for fixed dispersal kernels, `'sdd_nexpkernel'` for a negative exponential kernel or `'sdd_kissmig'` for applying the kissmig framework.
+* `add_constraint_MigClim()` Use the MigClim R-package to simulate dispersal events between time steps. A number of parameters are required here and adding this constrain will also overwrite some default plotting capacities (For example via `sc$plot_migclim()`). See also the help file and [Engler et al. (2012)](https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0587.2012.07608.x) for more information.
+* `add_constraint_connectivity()` Add a connectivity constrain to the projection. Currently only hard barriers are implemented, but in future additional sub-modules are planned to enable more options here.
+* `add_constraint_adaptability()` Simple constraints on the adaptability of species to novel climatic conditions. Currently only simple nichelimits are implemented, which 'cap' projections in novel environments to the observed ranges of contemporary predictors.
+* `add_constraint_boundary()` Specifying a hard boundary constraint on all projections, for example by limiting (future) projections to only a certain area such as a biome or a contemporary range.
 
 Lastly there are also options to *stabilize* suitability projections via the `project()` function. Specifying a stabilization here results in the projections being smoothed and informed of incremental time steps. This can particularly help for projections that use variables known to make sudden, abrupt jumps between time steps (e.g. precipitation anomalies).  
 
-```{r Add constrains and reproject, eval = TRUE, fig.width = w, fig.height = h}
+```{r Add constraints and reproject, eval = TRUE, fig.width = w, fig.height = h}
 # Adding a simple negative exponential kernel to constrain the predictions
 sc.fit2 <- sc %>%  
-   add_constrain(method = "sdd_nex", value = 1e5) %>%
+   add_constraint(method = "sdd_nex", value = 1e5) %>%
    # Directly fit the object
    project(stabilize = F)
 
 # Also fit one projection a nichelimit has been added
 sc.fit3 <- sc %>%  
-   add_constrain(method = "sdd_nex", value = 1e5) %>%
-   add_constrain_adaptability(method = "nichelimit") %>% 
+   add_constraint(method = "sdd_nex", value = 1e5) %>%
+   add_constraint_adaptability(method = "nichelimit") %>% 
    # Directly fit the object
    project(stabilize = F)
 
@@ -242,7 +246,7 @@ legend("bottomleft",
 
 ```
 
-Another option for constraining prediction is also by imposing a zonal limit (for instance climatically defined) on the projections. This has to be done while fitting the SDM for the reference conditions (see the example with limits ([1](01_train_simple_model.html)) ) and is considered when doing (future) projections.
+Another option for constraining prediction is also by imposing a zonal limit (for instance climatically defined) on the projections (see alternatively `add_constraint_boundary()` above). This has to be done while fitting the SDM for the reference conditions (see the example with limits ([1](01_train_simple_model.html)) ) and is considered when doing (future) projections.
 
 ## Specific parsers for GLOBIOM related scenarios
 

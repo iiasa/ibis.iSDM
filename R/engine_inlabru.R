@@ -920,6 +920,19 @@ engine_inlabru <- function(x,
             # Get model
             mod <- self$get_data('fit_best')
             model <- self$model
+            # Also get settings for bias values
+            settings <- self$settings
+
+            # Set target variables to bias_value for prediction if specified
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
 
             # If newdata is not yet a SpatialPixel object, transform
             if(!inherits(newdata,'SpatialPixelsDataFrame')){

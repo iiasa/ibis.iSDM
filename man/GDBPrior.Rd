@@ -12,7 +12,7 @@ GDBPrior(variable, hyper = "increasing", ...)
 \item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
-\code{'decreasing'}, \code{'convex'}, \code{'concave'} or \code{'none'}.}
+\code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }

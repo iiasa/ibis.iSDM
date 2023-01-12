@@ -47,7 +47,7 @@ install <- function(packages){
 if(!("INLA" %in% installed.packages()[, "Package"])){
   install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 }
-invisible( install(c("inlabru", "xgboost", "igraph")) )
+invisible( install(c("inlabru", "xgboost", "igraph", "glmnet")) )
 ```
 
 ## Load relevant packages and testing data
@@ -55,6 +55,7 @@ invisible( install(c("inlabru", "xgboost", "igraph")) )
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
+library(glmnet)
 library(xgboost)
 library(raster)
 library(igraph)
@@ -144,8 +145,8 @@ Offsets can be specified as addition or as nuisance for a model, for instance ei
 mod1 <- distribution(background) %>% 
       add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
       add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
-      add_offset_range(virtual_range) %>% 
-      engine_xgboost() %>% 
+      add_offset_range(virtual_range, distance_max = 5e5) %>% 
+      engine_glmnet() %>% 
   # Train
   train(runname = "Prediction with range offset",only_linear = TRUE)
 
@@ -219,18 +220,18 @@ Another very straight forward way for model-based integration is to simply fit t
 # Create and fit two models
 mod1 <- distribution(background) %>% 
       add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      engine_xgboost(nrounds = 5000) %>% 
+      engine_glmnet() %>% 
       # Add dataset 1 
       add_biodiversity_poipo(poipo = virtual_species, name = "Dataset1",field_occurrence = "Observed") %>% 
       train(runname = "Test1", only_linear = TRUE)
 
 mod2 <- distribution(background) %>% 
       add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      engine_xgboost(nrounds = 5000) %>% 
+      engine_xgboost(iter = 5000) %>% 
       # Add dataset 2, Here we simple simulate presence-only points from a range
       add_biodiversity_polpo(virtual_range, name = "Dataset2",field_occurrence = "Observed",
                              simulate = TRUE,simulate_points = 300) %>% 
-      train(runname = "Test1", only_linear = TRUE)
+      train(runname = "Test1", only_linear = FALSE)
 
 # Show outputs of each model individually and combined
 plot(mod1)

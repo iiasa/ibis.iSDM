@@ -212,7 +212,7 @@ engine_breg <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
+          model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect)
 
           # Rasterize observed presences
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -225,7 +225,7 @@ engine_breg <- function(x,
           )
 
           # Add exposure to full model predictor
-          model$exposure <- w_full * unique(model$biodiversity[[1]]$expect)[1]
+          model$exposure <- w_full * (1/ unique(model$biodiversity[[1]]$expect)[1])
 
         } else if(fam == "binomial"){
           # calculating the case weights (equal weights)
@@ -719,48 +719,49 @@ engine_breg <- function(x,
             model <- self$model
             df <- newdata
             df <- subset(df, select = attr(mod$terms, "term.labels"))
+            df$rowid <- 1:nrow(df)
+            df_sub <- subset(df, complete.cases(df))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
-            # Make spatial container for prediction
-            suppressWarnings(
-              df_partial <- sp::SpatialPointsDataFrame(coords = df[,c('x', 'y')],
-                                                       data = df[, names(df) %notin% c('x','y')],
-                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
-              )
-            )
-            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
-            pred_breg <- predict_boom(
-              obj = mod,
-              newdata = df_partial@data,
-              w = unique(w)[2], # The second entry of unique contains the non-observed variables
-              fam = fam,
-              params = settings$data # Use the settings as list
-            )
+            # Rather predict in steps than for the whole thing
+            out <- data.frame()
 
-            # Summarize the partial effect depending on layer
-            if(layer == "mean"){
-              pred_bart <- cbind( matrixStats::rowMeans2(pred_breg, na.rm = TRUE) )
-            } else if(layer == "sd"){
-              pred_bart <- cbind( matrixStats::rowSds(pred_breg, na.rm = TRUE) )
-            } else if(layer == "q05"){
-              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.05), na.rm = TRUE) )
-            } else if(layer == "q5" || layer == "median"){
-              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.5), na.rm = TRUE) )
-            } else if(layer == "q95"){
-              pred_bart <- cbind( matrixStats::rowQuantiles(pred_breg, probs = c(.95), na.rm = TRUE) )
-            } else if(layer == "mode"){
-              pred_part <- cbind( apply(pred_breg, 1, mode) )
-            } else if(layer == "cv"){
-              pred_part <- cbind( matrixStats::rowSds(pred_breg, na.rm = TRUE) / matrixStats::rowMeans2(pred_breg, na.rm = TRUE) )
+            # Tile the problem
+            splits <- cut(1:nrow(df_sub), nrow(df_sub) / (min(100, nrow(df_sub) / 10)) )
+
+            pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+                                             format = "Projecting on new data (:spin) [:bar] :percent")
+            for(s in unique(splits)){
+              pb$tick()
+              i <- which(splits == s)
+              # -> external code in utils-boom
+              pred_breg <- predict_boom(
+                obj = mod,
+                newdata = df_sub[i,],
+                w = unique(w)[2],
+                fam = fam,
+                params = settings$data
+              )
+              # Summarize the posterior
+              preds <- cbind(
+                matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+                matrixStats::rowSds(pred_breg, na.rm = TRUE),
+                matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+                apply(pred_breg, 1, mode)
+              )  |> as.data.frame()
+              names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+              preds$cv <- preds$sd / preds$mean
+              out <- rbind(out, preds)
+              rm(preds, pred_breg)
             }
-            names(pred_part) <- layer
 
             # Now create spatial prediction
             prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
-            prediction <- fill_rasters(pred_part, prediction)
+            prediction[df_sub$rowid] <- out[,layer]
+            names(prediction) <- layer
 
             return(prediction)
           }

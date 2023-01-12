@@ -45,7 +45,7 @@ Regularized regressions are effectively GLMs that are fitted with ridge, lasso o
 Which of them is chosen is critical dependent on the alpha value:
 \link{*} For \code{alpha} equal to \code{0} a ridge regularization is used. Ridge regularization has the property that
 it doesn't remove variables entirely, but instead sets their coefficients to \code{0}.
-\link{*} For \code{alpha} equal to \code{0} a lasso regularization is used. Lassos tend to remove those coefficients
+\link{*} For \code{alpha} equal to \code{1} a lasso regularization is used. Lassos tend to remove those coefficients
 fully from the final model that do not improve the loss function.
 \link{*} For \code{alpha} values between \code{0} and \code{1} a elastic-net regularization is used, which is essentially a combination
 of the two.

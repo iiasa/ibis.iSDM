@@ -232,7 +232,7 @@ engine_xgboost <- function(x,
           assertthat::assert_that(length(w) == nrow(df))
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect
+          model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect)
 
           # Get for the full dataset
           pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
@@ -243,7 +243,7 @@ engine_xgboost <- function(x,
                                 weight = 1 # Set those to 1 so that absences become ratio of pres/abs
           )
           # Multiply with first weight value
-          w_full <- w_full * unique(model$biodiversity[[1]]$expect)[1]
+          w_full <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1])
           assertthat::assert_that(
             !anyNA(w_full), all(is.finite(log(w_full))),
             !anyNA(w_full),
@@ -711,11 +711,24 @@ engine_xgboost <- function(x,
                                     is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
             mod <- self$get_data('fit_best')
+            # Also get settings for bias values
+            settings <- self$settings
+
             if(!inherits(newdata, "xgb.DMatrix")){
               assertthat::assert_that(
                 all( mod$feature_names %in% colnames(newdata) )
               )
               newdata <- subset(newdata, select = mod$feature_names)
+
+              if(!is.Waiver(settings$get('bias_variable'))){
+                for(i in 1:length(settings$get('bias_variable'))){
+                  if(settings$get('bias_variable')[i] %notin% colnames(newdata)){
+                    if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                    next()
+                  }
+                  newdata[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+                }
+              }
               newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
             }
 

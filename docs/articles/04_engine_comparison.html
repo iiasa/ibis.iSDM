@@ -95,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2022-10-17</h4>
+            <h4 data-toc-skip class="date">2022-12-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/04_engine_comparison.Rmd" class="external-link"><code>vignettes/04_engine_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>04_engine_comparison.Rmd</code></div>
@@ -108,13 +108,14 @@ Jung</h4>
 </h2>
 <p>As outlined by <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher
 et al. (2019)</a>, there are many different forms of integration such as
-through [<code>ensemble</code>] modelling, adding [<code>offsets</code>]
-or [<code>priors</code>] and through full integration of different
-likelihoods (See (<a href="02_integrate_data.html">2 - Data
-integration</a>) ). Not all of these options are available for every
-engine supported by the <em>ibis.iSDM</em> package and the table below
-shows the currently implemented engines and various types of
-integrations supported by them.</p>
+through [<code>ensemble</code>] modelling, adding
+[<code>offsets</code>], predictors
+(e.g. [<code><a href="../reference/add_predictor_range.html">add_predictor_range()</a></code>] ) or [<code>priors</code>]
+and through full integration of different likelihoods (See (<a href="02_integrate_data.html">Data integration</a>) ). Not all of these
+options are available for every engine supported by the
+<em>ibis.iSDM</em> package and the table below shows the currently
+implemented engines and various types of integrations supported by
+them.</p>
 <p>Stating the name and function call of each engine and its supported
 model complexity with linear (ln) and non-linear (nl) formulations,
 although it should be noted that linear models can approximate
@@ -123,7 +124,13 @@ e.g. hinge/product/quadratic). Not every engine supports the different
 types of integration via <code>ensembles</code>, <code>offsets</code>,
 <code>priors</code>, joint likelihood estimation and
 <code>ensemble</code> compositing of models using separate datasets of
-the same species.</p>
+the same species. When multiple biodiversity datasets are added to an
+engine that does not support joint likelihood estimation, the parameter
+<code>method_integration</code> in [<code><a href="../reference/train.html">train()</a></code>] determines how
+the different predictions are integrated. Available options for
+integration are via <code>predictors</code>, <code>offsets</code>,
+<code>interactions</code>, <code>priors</code> or <code>weights</code>
+(see the help file of [<code><a href="../reference/train.html">train()</a></code>] for more information).</p>
 <table class="table">
 <colgroup>
 <col width="38%">
@@ -145,6 +152,15 @@ the same species.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td>Regularized elastic net regression (GLMNET)</td>
+<td align="center">ln</td>
+<td align="center">[<code>engine_glmnet</code>]</td>
+<td align="center">x</td>
+<td align="center"><code><a href="../reference/GLMNETPrior.html">GLMNETPrior()</a></code></td>
+<td align="center"></td>
+<td align="right">x</td>
+</tr>
+<tr class="even">
 <td>Bayesian additive regression trees (BART)</td>
 <td align="center">nl</td>
 <td align="center">[<code><a href="../reference/engine_bart.html">engine_bart()</a></code>]</td>
@@ -153,7 +169,7 @@ the same species.</p>
 <td align="center"></td>
 <td align="right">x</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Bayesian regularized regression (BREG)</td>
 <td align="center">ln</td>
 <td align="center">[<code><a href="../reference/engine_breg.html">engine_breg()</a></code>]</td>
@@ -162,7 +178,7 @@ the same species.</p>
 <td align="center"></td>
 <td align="right">x</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Gradient descent boosting (GDB)</td>
 <td align="center">ln/nl</td>
 <td align="center">[<code><a href="../reference/engine_gdb.html">engine_gdb()</a></code>]</td>
@@ -171,7 +187,7 @@ the same species.</p>
 <td align="center"></td>
 <td align="right">x</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Integrated Nested Laplace approximation (INLA)</td>
 <td align="center">ln</td>
 <td align="center">[<code><a href="../reference/engine_inla.html">engine_inla()</a></code>]</td>
@@ -180,7 +196,7 @@ the same species.</p>
 <td align="center">x</td>
 <td align="right">x</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Integrated Nested Laplace approximation (INLABRU)</td>
 <td align="center">ln</td>
 <td align="center">[<code><a href="../reference/engine_inlabru.html">engine_inlabru()</a></code>]</td>
@@ -189,7 +205,7 @@ the same species.</p>
 <td align="center">x</td>
 <td align="right">x</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Bayesian regressions (Stan)</td>
 <td align="center">ln</td>
 <td align="center">[<code><a href="../reference/engine_stan.html">engine_stan()</a></code>]</td>
@@ -198,7 +214,7 @@ the same species.</p>
 <td align="center">x</td>
 <td align="right">x</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>eXtreme Gradient Boosting (XGBOOST)</td>
 <td align="center">ln/nl</td>
 <td align="center">[<code><a href="../reference/engine_xgboost.html">engine_xgboost()</a></code>]</td>

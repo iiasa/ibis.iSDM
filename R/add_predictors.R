@@ -1001,7 +1001,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   sc <- vector() # For storing the scenario files
 
   # Now open the netcdf file with stats
-  if( stars:::detect.driver(fname) == "netcdf" ){
+  if( length( grep("netcdf", stars:::detect.driver(fname), ignore.case = TRUE) )>0 ){
     if(verbose){
       myLog('[Predictor]','green',"Loading in predictor file...")
       pb <- progress::progress_bar$new(total = length(vars),
@@ -1032,11 +1032,13 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
 
       # Crop to background extent if set
       if(!is.null(template)){
-        bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
-          sf::st_transform(crs = sf::st_crs(ff))
-        suppressMessages(
-          ff <- ff |> st_crop(bbox)
-        )
+        # FIXME: Currently this code, while working clips too much of Europe.
+        # Likely need to
+        # bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
+        #   sf::st_transform(crs = sf::st_crs(ff))
+        # suppressMessages(
+        # ff <- ff |> stars:::st_crop.stars(bbox)
+        # )
       }
 
       # Record dimensions for later
@@ -1079,18 +1081,24 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
 
       # Finally aggregate
       if(!is.null(template) && is.Raster(template)){
+        # FIXME:
+        # MJ 14/11/2022 - The code below is buggy, resulting in odd curvilinear extrapolations for Europe
+        # Hacky approach now is to convert to raster, crop, project and then convert back.
+        ff <- hack_project_stars(ff, template)
         # Make background
-        bg <- stars::st_as_stars(template)
-
-        # Get resolution
-        res <- sapply(st_dimensions(bg), "[[", "delta")
-        res[1:2] = abs(res[1:2]) # Assumes the first too entries are the coordinates
-        assertthat::assert_that(!anyNA(res))
-
-        # And warp by projecting and resampling
-        ff <- ff |> stars::st_warp(crs = sf::st_crs(bg),
-                                  cellsize = res,
-                                  method = "near")
+        # bg <- stars::st_as_stars(template)
+        #
+        # # Get resolution
+        # res <- sapply(stars::st_dimensions(bg), "[[", "delta")
+        # res[1:2] = abs(res[1:2]) # Assumes the first too entries are the coordinates
+        # assertthat::assert_that(!anyNA(res))
+        #
+        # # And warp by projecting and resampling
+        # ff <- ff |> st_transform(crs = sf::st_crs(template)) |>
+        #   stars::st_warp(crs = sf::st_crs(bg),
+        #                           cellsize = res,
+        #                           method = "near") |>
+        #   stars:::st_transform.stars(crs = sf::st_crs(template))
         # Overwrite full dimensions
         full_dis <- stars::st_dimensions(ff)
       }

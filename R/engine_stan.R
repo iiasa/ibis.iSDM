@@ -253,7 +253,7 @@ engine_stan <- function(x,
                              bg = bg,
                              weight = 1e-6
             )
-            df$w <- w * model$biodiversity[[i]]$expect # Also add as column
+            df$w <- w * (1/model$biodiversity[[i]]$expect) # Also add as column
 
             model$biodiversity[[i]]$predictors <- df
             model$biodiversity[[i]]$expect <- df$w
@@ -583,9 +583,18 @@ engine_stan <- function(x,
             # Check that fitted model exists
             obj <- self$get_data("fit_best")
             model <- self$model
-            if(is.null(type)) type <- self$settings$get("type")
+            settings <- self$settings
+            if(is.null(type)) type <- settings$get("type")
             assertthat::assert_that(inherits(obj, "stanfit"),
                                     all(model$predictors_names %in% colnames(newdata)))
+
+            # Set target variables to bias_value for prediction if specified
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)) next()
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
 
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)

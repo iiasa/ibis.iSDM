@@ -213,7 +213,7 @@ engine_bart <- function(x,
           df$w <- w # Also add as column
 
           model$biodiversity[[1]]$predictors <- df
-          model$biodiversity[[1]]$expect <- w * model$biodiversity[[1]]$expect # Multiply with provided weights
+          model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect) # Multiply with provided weights
         } else {
           # If family is not poisson, assume factor distribution for response
           assertthat::assert_that(  length( unique(model$biodiversity[[1]]$observations[['observed']])) == 2)
@@ -551,6 +551,20 @@ engine_bart <- function(x,
             rownames(newdata) <- 1:nrow(newdata)
             newdata$rowid <- as.numeric( rownames(newdata) )
             newdata <- subset(newdata, complete.cases(newdata))
+
+            # Also get settings for bias values
+            settings <- self$settings
+
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% names(newdata)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+              }
+            }
+
             # Make a prediction
             suppressWarnings(
               pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),

@@ -167,6 +167,36 @@ methods::setMethod(
   }
 )
 
+#' @name write_output
+#' @rdname write_output
+#' @usage \S4method{write_output}{stars, character, character, logical}(mod, fname, dt, verbose)
+methods::setMethod(
+  "write_output",
+  methods::signature(mod = "stars"),
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
+    assertthat::assert_that(
+      !missing(mod),
+      # is.list(mod),
+      is.character(fname),
+      is.logical(verbose)
+    )
+    # Check that it is a star object
+    assertthat::assert_that(
+      inherits(mod, "stars"), msg = "Supplied list object needs to be a stars object."
+    )
+
+    # Define filename
+    fname <- paste0( tools::file_path_sans_ext(fname), ".nc")
+    # TODO: Align with write NetCDF function further below
+    stars::write_stars(
+      obj = mod,
+      dsn = fname,
+      layer = names(mod),
+      ...)
+    invisible()
+  }
+)
+
 #' Saves a raster file in Geotiff format
 #'
 #' @description Functions that acts as a wrapper to [raster::writeRaster].
@@ -332,7 +362,7 @@ methods::setMethod(
       output[["input"]][["predictors"]] <- model$predictors_types
       if(!is.Waiver(model$offset)) output[["input"]][["offset"]] <- names(model$offset) else output[["input"]][["offset"]] <- NA
       if(!is.Waiver(model$priors)){
-        output[["input"]][["priors"]] <- model$priors$varnames()
+        output[["input"]][["priors"]] <- model$priors$summary()
       } else output[["input"]][["priors"]] <- NA
 
       # Go over biodiversity datasets
@@ -367,7 +397,7 @@ methods::setMethod(
 
       # Model summary in a tibble and formula
       output[["output"]][["summary"]] <- mod$summary()
-      if(!is.Waiver(mod$get_data("prediction") )){
+      if(!is.null(mod$get_data("prediction") )){
         output[["output"]][["resolution"]] <- raster::res( mod$get_data("prediction") )
         output[["output"]][["prediction"]] <- names( mod$get_data("prediction") )
       } else {
@@ -401,17 +431,16 @@ methods::setMethod(
       output[["params"]][["id"]] <- as.character(mod$modelid)
       output[["params"]][["runname"]] <- as.character(model$model$runname)
       output[["params"]][["algorithm"]] <- class(model)[1]
-      output[["params"]][["equation"]] <- mod$get_equation()
       if( "settings" %in% names(mod) ){
         output[["params"]][["settings"]] <- model$settings$data
       }
 
       # Model summary in a tibble and formula
-      output[["output"]][["summary"]] <- mod$summary(plot = FALSE)
-      if(!is.Waiver(mod$get_scenarios() )){
-        sc_dim <- stars::st_dimensions(mod$get_scenarios())
+      output[["output"]][["summary"]] <- mod$summary(plot = FALSE,...)
+      if(!is.Waiver(mod$get_data() )){
+        sc_dim <- stars::st_dimensions(mod$get_data())
         output[["output"]][["resolution"]] <- abs( c(x = sc_dim$x$delta, y = sc_dim$y$delta) )
-        output[["output"]][["prediction"]] <- names(mod$get_scenarios())
+        output[["output"]][["prediction"]] <- names(mod$get_data())
       } else {
         output[["output"]][["resolution"]] <- NA
         output[["output"]][["prediction"]] <- NA

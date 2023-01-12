@@ -15,6 +15,7 @@ NULL
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
 #' one dataset is added. A [`vector`] is also supported but must be of the same length as [`poipo`].
+#' **Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).**
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).

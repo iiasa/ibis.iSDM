@@ -5,10 +5,15 @@ NULL
 #'
 #' @description
 #' The [`engine_glmnet`] engine does not support priors in a typical sense, however it is
-#' possible to specify so called penalty factors on all variables in the model.
+#' possible to specify so called penalty factors as well as lower and upper limits
+#' on all variables in the model.
 #'
 #' The default penalty is \code{1} for each coefficient, i.e. coefficients are penalized equally.
 #' In contrast a variable with penalty.factor equal to \code{0} is not penalized at all.
+#'
+#' The lower and upper limits can be specified to constrain coefficients to a certain range.
+#' By default those ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset to a
+#' specific value range by altering \code{"lims"}.
 #'
 #' For a regularized regression that supports a few more options on the priors, check out the
 #' Bayesian [`engine_breg`].
@@ -16,6 +21,7 @@ NULL
 #' @param variable A [`character`] variable passed on to the prior object.
 #' @param hyper A [`numeric`] value between \code{0} and \code{1} that state the penalization factor.
 #' By default this is set to \code{0}, implying the \code{"variable"} provided is not regularized at all.
+#' @param lims A [`numeric`] [`vector`] of the lower and upper limits for each coefficient (Default: \code{c(-Inf, Inf)}).
 #' @param ... Variables passed on to prior object.
 #' @seealso [`Prior-class`]
 #' @examples
@@ -24,7 +30,7 @@ NULL
 #' p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 #' p1
 #' # Smaller chance to be regularized
-#' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2)
+#' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(-Inf, Inf))
 #' p2
 #' }
 #' @keywords priors
@@ -40,22 +46,31 @@ NULL
 methods::setGeneric(
   "GLMNETPrior",
   signature = methods::signature("variable"),
-  function(variable, hyper = 0, ...) standardGeneric("GLMNETPrior"))
+  function(variable, hyper = 0, lims = c(-Inf, Inf), ...) standardGeneric("GLMNETPrior"))
 
 #' @name GLMNETPrior
 #' @rdname GLMNETPrior
-#' @usage \S4method{GLMNETPrior}{character, numeric}(variable, hyper)
+#' @usage \S4method{GLMNETPrior}{character, numeric, numeric}(variable, hyper, lims)
 methods::setMethod(
   "GLMNETPrior",
   methods::signature(variable = "character"),
-  function(variable, hyper = 0, ... ) {
+  function(variable, hyper = 0, lims = c(-Inf, Inf), ... ) {
     assertthat::assert_that(!missing(variable),
                             is.numeric(hyper),
                             hyper >=0, hyper <=1,
+                            is.numeric(lims),
                             msg = 'Variable or hyper unset unset.')
 
     assertthat::assert_that(length(variable)==1,
                             msg = 'More than one prior variable supplied. Use BREGPriors')
+
+    assertthat::assert_that(
+      # Check that lower limit is negative or zero
+      sign(lims[1])==0 || sign(lims[1])==-1,
+      # Check that upper limit is positive or zero
+      sign(lims[2])==0 || sign(lims[2])==1,
+      msg = "Lower or upper limits specified incorrectly!"
+                            )
 
     # Create new prior object
     bdproto(
@@ -63,7 +78,8 @@ methods::setMethod(
       Prior,
       id = new_id(),
       variable = variable,
-      value = hyper
+      value = hyper,
+      lims = lims
     )
   }
 )
@@ -82,20 +98,21 @@ methods::setMethod(
 methods::setGeneric(
   "GLMNETPriors",
   signature = methods::signature("variable"),
-  function(variable, hyper = 0) standardGeneric("GLMNETPriors"))
+  function(variable, hyper = 0, lims = c(-Inf, Inf)) standardGeneric("GLMNETPriors"))
 
 #' @name GLMNETPriors
 #' @rdname GLMNETPriors
-#' @usage \S4method{GLMNETPriors}{character, numeric}(variable, hyper)
+#' @usage \S4method{GLMNETPriors}{character, numeric, numeric}(variable, hyper, lims)
 methods::setMethod(
   "GLMNETPriors",
   methods::signature(variable = "character"),
-  function(variable, hyper = 0) {
+  function(variable, hyper = 0, lims = c(-Inf, Inf)) {
     assertthat::assert_that(!missing(variable),
                             msg = 'Variable not set.')
     assertthat::assert_that(
       is.character(variable),
-      is.null(hyper) || is.numeric(hyper)
+      is.null(hyper) || is.numeric(hyper),
+      is.numeric(lims)
     )
     assertthat::assert_that(length(variable)>1, msg = 'Only one prior variable supplied. Use GLMNETPrior')
 
@@ -104,7 +121,7 @@ methods::setMethod(
 
     multiple_priors <- list()
     for(k in variable){
-      np <- GLMNETPrior(variable = k, hyper = hyper)
+      np <- GLMNETPrior(variable = k, hyper = hyper, lims = lims)
       multiple_priors[[as.character(np$id)]] <- np
     }
     return(multiple_priors)
