@@ -93,6 +93,7 @@ reference:
       - plot
       - print
       - summary
+      - coef
       - validate
       - similarity
       - effects
