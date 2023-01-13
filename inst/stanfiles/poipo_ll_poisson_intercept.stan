@@ -3,7 +3,7 @@ vector[N] mu;
 
 // Initialize linear predictor term with intercept
 mu = Intercept + rep_vector(0.0, N) + offsets;
-# log poisson probability mass of y given log-rate alpha+x*beta
+// log poisson probability mass of y given log-rate alpha+x*beta
 target += poisson_log_glm_lpmf(observed | Xc, mu, beta);
 
 // Build lambda as lambda = mu + X * b ;

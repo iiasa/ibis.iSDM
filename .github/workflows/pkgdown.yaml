@@ -31,15 +31,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: pkgdown
-          extra-repositories: "https://inla.r-inla-download.org/R/testing"
+          extra-packages: pkgdown, urlchecker
           needs: website
-
-      - name: Get remaining dependencies
-        run: |
-          install.packages('"remotes"')
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("urlchecker")
 
       - name: Deploy package
         run: |

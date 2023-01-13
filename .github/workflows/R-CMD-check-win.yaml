@@ -40,14 +40,11 @@ jobs:
           r-version: ${{ matrix.config.r }}
           extra-repositories: "https://inla.r-inla-download.org/R/testing"
 
-      - name: Install dependencies (primarily from binary)
-        run: |
-          install.packages('"remotes"')
-          options("install.packages.compile.from.source" = "never", "pkgType" = "binary")
-          remotes::install_deps(dependencies = TRUE)
-          options("install.packages.compile.from.source" = NULL)
-          install.packages('"uuid"')
-          install.packages('"raster"')
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"all"'
+          extra-packages: |
+             rcmdcheck
 
       - uses: r-lib/actions/check-r-package@v2
         with:

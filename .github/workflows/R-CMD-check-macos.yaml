@@ -49,12 +49,11 @@ jobs:
           brew install geos
           brew install gdal
 
-      - name: Install dependencies
-        run: |
-          install.packages('"remotes"')
-          options("install.packages.compile.from.source" = "never")
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"all"'
+          extra-packages: |
+             rcmdcheck
 
       - uses: r-lib/actions/check-r-package@v2
         with:

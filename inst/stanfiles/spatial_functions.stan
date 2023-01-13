@@ -1,6 +1,6 @@
 // Generic functions to use
 
-# Exponential covariance structure through a Gaussian process
+// Exponential covariance structure through a Gaussian process
 matrix GP(matrix x, real sigma_sq, real scale, real delta) {
     int N = dims(x)[1];
     matrix[N, N] K;

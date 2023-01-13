@@ -428,22 +428,25 @@ engine_inlabru <- function(x,
           o <- inlabru::bru_options_get()
           # Data type specific. Currently only binomial and poisson supported
           # FIXME: Code below does not work as intended. Worked in earlier versions. To be debugged later!
+          # FIXME: Apparently the code works when an SPDE is added, thus cp seems to rely on the matter covs
           # if(model$biodiversity[[j]]$type == 'poipo'){
-          #   ips <- self$calc_integration_points(model, mode = 'cp')
+          # ips <- self$calc_integration_points(model, mode = 'cp')
           #
-          #   # Log gaussian cox process
-          #   lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-          #                       # include = model$biodiversity[[j]]$predictors_names,
-          #                       family = "cp",
-          #                       data = df,
-          #                       domain = list(coordinates = self$get_data("mesh")),
-          #                       # mesh = self$get_data('mesh'),
-          #                       ips = ips,
-          #                       options = o
-          #   )
-          # # If not poipo but still poisson, prepare data as follows
+          # # Log gaussian cox process
+          # lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+          #                     # include = model$biodiversity[[j]]$predictors_names,
+          #                     family = "cp",
+          #                     data = df,
+          #                     # samplers = as(model$background,"Spatial"),
+          #                     domain = list(coordinates = self$get_data("mesh")),
+          #                     ips = ips,
+          #                     options = o
+          # )
+          # assertthat::assert_that(sum(lh$response_data$BRU_response_cp>0)>2,
+          #                         msg = "Found issues with aligning coordinates within the domain most likely.")
+          # If not poipo but still poisson, prepare data as follows
           # } else
-            if(model$biodiversity[[j]]$family == "poisson"){
+          if(model$biodiversity[[j]]$family == "poisson"){
             # Calculate integration points for PPMs and to estimation data.frame
             ips <- self$calc_integration_points(model, mode = 'stack')
             abs_E = ips$E; ips <- ips$ips
@@ -457,7 +460,7 @@ engine_inlabru <- function(x,
                                 data = new, # Combine presence and absence information
                                 mesh = self$get_data('mesh'),
                                 E = c(model$biodiversity[[j]]$expect, abs_E), # Combine Exposure variants
-                                # include = include[[i]], # Don't need this as all variables
+                                # include = include[[i]], # Don't need this as all variables included in equation
                                 options = o
             )
           } else if(model$biodiversity[[j]]$family == "binomial"){
@@ -660,6 +663,7 @@ engine_inlabru <- function(x,
         }
         # Get options
         options <- inlabru::bru_options_get()
+        assertthat::assert_that(inlabru::bru_options_check(options))
         # -------- #
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
