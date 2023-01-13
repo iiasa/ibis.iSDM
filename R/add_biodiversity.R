@@ -57,7 +57,7 @@ methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
   function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
-           weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_poipo"))
+           weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {standardGeneric("add_biodiversity_poipo") })
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
@@ -636,10 +636,10 @@ methods::setMethod(
 #' @keywords internal
 #' @noRd
 
-format_biodiversity_data <- function(x, field_occurrence, field_space = c('x','y'),...){
+format_biodiversity_data <- function(x, field_occurrence, field_space = c("x","y"), ... ){
   # Final checks
-  if(inherits(x,'sf')) assertthat::assert_that(unique(sf::st_geometry_type(x)) %in% c('POINT','MULTIPOINT',
-                                                                                      'POLYGON','MULTIPOLYGON'))
+  if(inherits(x,'sf')) assertthat::assert_that(unique(sf::st_geometry_type(x)) %in% c("POINT","MULTIPOINT",
+                                                                                      "POLYGON","MULTIPOLYGON"))
 
   # If data.frame or tibble, check whether coordinates are in there
   if(!(inherits(x,'sf') )){
@@ -664,12 +664,12 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c('x','y
                              msg ='No spatial column found in the dataset. Specify manually or set to [x] and [y].')
     # Select and format
     out <- subset(x, select = c(field_space, field_occurrence) ) %>%
-      as_tibble()
+      tibble::as_tibble()
   } else {
-    if(inherits(x, 'Spatial')) x <- sf::st_as_sf(x) # First convert to sf
+    if(inherits(x, "Spatial")) x <- sf::st_as_sf(x) # First convert to sf
     #if(inherits(x,'sf')) coords <- sf::st_coordinates(x) %>% tibble::as_tibble()
 
-    if(unique(sf::st_geometry_type(x)) %in% c('POINT','MULTIPOINT')){
+    if(unique(sf::st_geometry_type(x)) %in% c("POINT","MULTIPOINT")){
       # Take target column and append coordinates to it
       out <- cbind(subset(x, select = field_occurrence),
                    sf::st_coordinates(x)) %>% tibble::as_tibble()

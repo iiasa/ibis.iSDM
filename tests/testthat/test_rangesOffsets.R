@@ -3,6 +3,7 @@ test_that('Load ranges and add them to distribution object', {
   skip_on_travis()
   skip_on_cran()
   skip_if_not_installed('INLA')
+  skip_if_not_installed('igraph')
 
   require(igraph)
 

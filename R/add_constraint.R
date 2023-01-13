@@ -46,7 +46,7 @@ NULL
 NULL
 methods::setGeneric("add_constraint",
                     signature = methods::signature("mod"),
-                    function(mod, method,...) standardGeneric("add_constraint"))
+                    function(mod, method, ...) standardGeneric("add_constraint"))
 
 #' @name add_constraint
 #' @rdname add_constraint
@@ -54,7 +54,7 @@ methods::setGeneric("add_constraint",
 methods::setMethod(
   "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, method, ...){
+  function(mod, method, ...) {
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -128,8 +128,8 @@ methods::setMethod(
     # Check if there is already a dispersal constrain, if yes raise warning
     if(!is.Waiver(mod$get_constraints())){
       # If there are any dispersal constrains in there, raise warning
-      if(any( "dispersal" %in% names(mod$get_constraints()) )){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Overwriting existing dispersal constraint.')
+      if(any("dispersal" %in% names(mod$get_constraints()))){
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]', 'yellow', 'Overwriting existing dispersal constraint.')
       }
     }
 

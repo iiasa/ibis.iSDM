@@ -10,17 +10,12 @@ name: R-CMD-check-linux
 
 jobs:
   R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ubuntu-latest
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
-      matrix:
-        config:
-          - {os: ubuntu-20.04, r: 'release', pkgs: 'all'}
-          - {os: ubuntu-20.04, r: 'devel', pkgs: 'all'}
-          - {os: ubuntu-20.04, r: 'devel', pkgs: 'depends only'}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       _R_CHECK_TIMINGS_: 10

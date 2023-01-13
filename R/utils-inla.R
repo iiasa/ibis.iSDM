@@ -236,11 +236,11 @@ built_formula_inla <- function(model, id, x, settings){
 
 #' Calculate area of each voronoi polygon in a INLA mesh
 #'
-#' @param mesh [`inla.mesh`] mesh object
-#' @param region.poly A supplied [`region.poly`] object
-#' @param variant A character to which type of area calculation (Default: 'gpc')
-#' @param relative Should the total amount of area converted to relatives (Default: FALSE)
-#' @returns A [`vector`] with the area of each polygon
+#' @param mesh [`inla.mesh`] mesh object.
+#' @param region.poly A supplied [`region.poly`] object.
+#' @param variant A character to which type of area calculation (Default: \code{'gpc'}).
+#' @param relative Should the total amount of area converted to relatives (Default: \code{FALSE}).
+#' @returns A [`vector`] with the area of each polygon.
 #' @keywords utils
 #' @noRd
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE){
@@ -351,7 +351,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 }
 
 #' Mesh to polygon script
-#' @param mesh [`inla.mesh`] mesh object
+#' @param mesh [`inla.mesh`] mesh object.
 #' @returns A [`sf`] object
 #' @keywords utils
 #' @noRd
@@ -384,7 +384,7 @@ mesh_as_sf <- function(mesh) {
 }
 
 #' Extract boundary points from mesh
-#' @param mesh A [`inla.mesh`] object
+#' @param mesh A [`inla.mesh`] object.
 #' @keywords utils
 #' @noRd
 mesh_boundary <- function(mesh){
@@ -398,8 +398,8 @@ mesh_boundary <- function(mesh){
 #'
 #' Work in progress for creating a physical barrier model for INLA
 #'
-#' @param mesh A [`inla.mesh`] object
-#' @param region.poly A [`SpatialPolygons`] object
+#' @param mesh A [`inla.mesh`] object.
+#' @param region.poly A [`SpatialPolygons`] object.
 #' @source https://www.sciencedirect.com/science/article/pii/S221167531830099X
 #' @keywords utils
 #' @noRd
@@ -439,7 +439,7 @@ mesh_barrier <- function(mesh, region.poly){
 
 #' Query if a point is inside the mesh boundary
 #'
-#' @param mesh A [`inla.mesh`] object
+#' @param mesh A [`inla.mesh`] object.
 #' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
 #' @keywords utils
 #' @return A [`vector`] of Boolean values indicating if a point is inside the mesh
@@ -479,9 +479,9 @@ coords_in_mesh <- function(mesh, coords) {
 #' TODO: Switch to posterior sampling
 #' https://groups.google.com/g/r-inla-discussion-group/c/y-rQlDVtzmM
 #'
-#' @param mesh x A [`distribution`] object used for fitting an [INLA] model
-#' @param mod A trained [`distribution`] model
-#' @param type The summary statistic to use
+#' @param mesh x A [`distribution`] object used for fitting an [`INLA`] model.
+#' @param mod A trained [`distribution`] model.
+#' @param type The summary statistic to use.
 #' @param backtransf Either NULL or a function
 #' @param coords A [matrix] with coordinates or NULL. If NULL coordinates are recreated from predictors
 #' @keywords utils
@@ -585,9 +585,9 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 
 #' Direct prediction by posterior simulation
 #'
-#' @param mod A trained distribution model
-#' @param nsamples The number of samples to be taken from the posterior
-#' @param backtransf Either NULL or a function
+#' @param mod A trained distribution model.
+#' @param nsamples [`numeric`] on the number of samples to be taken from the posterior
+#' @param backtransf Either \code{NULL} or a function.
 #' @param seed A random seed that can be specified
 #' @keywords utils
 #' @noRd
@@ -1355,16 +1355,17 @@ manual_inla_priors <- function(prior){
 
 #' Backward variable selection using INLA
 #'
+#' @description
 #' Best model is assessed through their within-sample predictive accuracy via conditional predictive ordinate (CPO)
 #' Ideally this procedure is replaced by a proper regularizing prior at some point...
-#' @param form A supplied [`formula`] object
-#' @param stack_data_resp A list containing inla stack data
-#' @param stk_inference An inla.data.stack object
-#' @param fam A [`character`] indicating the distribution to be fitted
-#' @param cf List of link functions to be used
-#' @param li Internal indication for the link function (Default: 1)
-#' @param response The response variable. If not specified, extract from formula (default: NULL)
-#' @param keep A [`vector`] of variables that are to be removed from model iterations (default: NULL)
+#' @param form A supplied [`formula`] object.
+#' @param stack_data_resp A list containing inla stack data.
+#' @param stk_inference An inla.data.stack object.
+#' @param fam A [`character`] indicating the distribution to be fitted.
+#' @param cf List of link functions to be used.
+#' @param li Internal indication for the link function (Default: \code{1}).
+#' @param response The response variable. If not specified, extract from formula (default: \code{NULL}).
+#' @param keep A [`vector`] of variables that are to be removed from model iterations (default: \code{NULL}).
 #' @keywords utils
 #' @noRd
 inla.backstep <- function(master_form,

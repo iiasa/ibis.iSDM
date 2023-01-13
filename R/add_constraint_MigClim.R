@@ -55,8 +55,8 @@ methods::setMethod(
   function(mod, rcThresholdMode = 'continuous', dispSteps = 1,
            dispKernel = c(1.0, 0.4, 0.16, 0.06, 0.03), barrierType = "strong",
            lddFreq = 0, lddRange = c(1000, 10000),
-           iniMatAge = 1, propaguleProdProb = c(0.2, 0.6,0.8, 0.95),
-           replicateNb = 10, dtmp = raster::tmpDir()){
+           iniMatAge = 1, propaguleProdProb = c(0.2, 0.6, 0.8, 0.95),
+           replicateNb = 10, dtmp = raster::tmpDir()) {
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),

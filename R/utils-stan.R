@@ -34,7 +34,7 @@ built_formula_stan <- function(model, id, x, settings){
 
     # Go through each variable and build formula for likelihood
     form <- to_formula(paste("observed",
-                             " ~ ", "0 + ",
+                             " ~ ", "Intercept + ",
                              ifelse(model$biodiversity[[id]]$family=='poisson', " offset(log(w)) + ", ""), # Use log area as offset
                              paste(model$biodiversity[[id]]$predictors_names,collapse = " + "),
                              # Check whether a single dataset is provided, otherwise add other intercepts

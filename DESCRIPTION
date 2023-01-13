@@ -51,7 +51,7 @@ Suggests:
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
     BoomSpikeSlab (>= 1.2.4)
-URL: https://github.com/iiasa/ibis.iSDM
+URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3

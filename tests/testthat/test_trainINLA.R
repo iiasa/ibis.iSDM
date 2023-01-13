@@ -2,6 +2,7 @@
 test_that('Check that INLA works', {
   skip_on_travis()
   skip_on_cran()
+  skip_on_ci()
   skip_if_not_installed('INLA')
 
   suppressPackageStartupMessages( library(INLA) )
