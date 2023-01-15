@@ -28,6 +28,11 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install gdal and igraph dependencies on Linux (gdal)
+        run: |
+          sudo apt-get -y install \
+          libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.

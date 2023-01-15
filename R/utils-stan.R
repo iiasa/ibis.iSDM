@@ -241,6 +241,7 @@ run_stan <- function( model_code, data = list(),
     is.numeric(iter), is.numeric(warmup),
     is.numeric(threads),
     threads < cores,
+    is.list(data),
     is.list(control), is.list(cpp_options),
     is.logical(save_warmup),
     is.logical(force)
@@ -468,3 +469,24 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
 
   return(out)
 }
+
+#' Show the stan code from a trained model
+#'
+#' @description
+#' This helper function shows the code from a trained [DistributionModel]
+#' using the [`engine_stan`].
+#' This function is emulated after a similar functionality in the [brms] R-package.
+#' **It only works with models inferred with stan!**
+#' @param obj Any prepared object.
+#'
+#' @return None.
+#' @keywords engine
+#' @seealso [rstan], [cmdstanr], [brms]
+#' @name stancode
+NULL
+
+#' @rdname stancode
+#' @method stancode DistributionModel
+#' @keywords engine
+#' @export
+stancode.DistributionModel <- function(x) x$show_code()

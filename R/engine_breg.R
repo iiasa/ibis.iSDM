@@ -309,6 +309,8 @@ engine_breg <- function(x,
 
         # All other needed data for model fitting
         fam <- model$biodiversity[[1]]$family
+        li <- model$biodiversity[[1]]$link
+        if(!is.null(li)) if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
                     data.frame(observed = model$biodiversity[[1]]$observations[,'observed'])

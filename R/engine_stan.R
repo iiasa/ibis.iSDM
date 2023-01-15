@@ -53,6 +53,8 @@ engine_stan <- function(x,
   check_package('rstan')
   if(!isNamespaceLoaded("rstan")) { attachNamespace("rstan");requireNamespace('rstan') }
   stan_check_cmd(install = TRUE)
+  check_package("cmdstanr")
+  assertthat::assert_that( cmdstanr::cmdstan_version()>"2.26.0")
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -275,8 +277,9 @@ engine_stan <- function(x,
 
         # Has intercept?
         has_intercept <- attr(terms.formula(model$biodiversity[[1]]$equation), "intercept") == 1
-        # Family
+        # Family and link function
         fam <- model$biodiversity[[1]]$family
+        li <- model$biodiversity[[1]]$link
 
         # Any spatial or other functions needed?
         if(!is.null(self$get_equation_latent_spatial())){
@@ -291,9 +294,14 @@ engine_stan <- function(x,
         assertthat::assert_that(length(ir)>0)
         for(i in ir) sm_code$data <- append(sm_code$data, i)
 
-        # Transformed data
+        # Append prior to transformed parameters
+        sm_code$transformed_parameters <- append(sm_code$transformed_parameters,"
+                            // Prior contribution to log posterior
+                            real lprior = 0;")
+
+        # Equation has overall intercept
         if(has_intercept){
-          # Equation has intercept
+          # Add data
           sm_code$transformed_data <- append(sm_code$transformed_data,"
                                               int Kc = K - 1;
                                               matrix[N, Kc] Xc;  // centered version of X without an intercept
@@ -309,10 +317,10 @@ engine_stan <- function(x,
                                           real Intercept;  // temporary intercept for centered predictors
                                        ")
           # add a prior on the intercept
-          sm_code$model <- append(sm_code$model,
+          sm_code$transformed_parameters <- append(sm_code$transformed_parameters,
           paste0("
                                     // priors including constants
-                                    target += student_t_lpdf(Intercept | 3, ",
+                                    lprior += student_t_lpdf(Intercept | 3, ",
                                     ifelse(fam == "poisson", -2, 0), # Adapted student prior for poisson
                                     ", 2.5);
                                   ")
@@ -325,33 +333,35 @@ engine_stan <- function(x,
         }
 
         # Transformed parameters
-
         # Add (gaussian) priors to model likelihood if set
         if((!is.Waiver(model$priors) || settings$get(what='varsel') == "none")){
           # If no intercept is specified, add beta
           if(!has_intercept){
             # Parameters
-            sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
+            sm_code$parameters <- append(sm_code$parameters, "
+                                         vector[K] beta;")
           }
 
           # Add priors for each variable for which it is set to the model
-          sm_code$model <- append(sm_code$model, "// priors including constants")
+          sm_code$transformed_parameters <- append(sm_code$transformed_parameters, "// beta priors including constants")
           # Now add for each one a normal effect
           for(i in 1:length(model$predictors_names)){
             if(!is.Waiver(model$priors)){
               if(model$predictors_names[i] %in% model$priors$varnames()) {
                 # Get prior estimats
                 pp <- model$priors$get(model$predictors_names[i])
-                sm_code$model <- append(sm_code$model, paste0(
-                  "target += normal_lpdf(beta[",i,"] | ",pp[1],", ",pp[2],");"
+                sm_code$transformed_parameters <- append(sm_code$transformed_parameters, paste0(
+                  "lprior += normal_lpdf(beta[",i,"] | ",pp[1],", ",pp[2],");"
                 ))
               } else {
                 # Default gaussian prior
-                sm_code$model <- append(sm_code$model, paste0("target += normal_lpdf(beta[",i,"] | 0, 2);"))
+                sm_code$transformed_parameters <- append(sm_code$transformed_parameters,
+                                                        paste0("lprior += normal_lpdf(beta[",i,"] | 0, 2);"))
               }
             } else {
               # Default gaussian prior
-              sm_code$model <- append(sm_code$model, paste0("target += normal_lpdf(beta[",i,"] | 0, 2);"))
+              sm_code$transformed_parameters <- append(sm_code$transformed_parameters,
+                                                      paste0("lprior += normal_lpdf(beta[",i,"] | 0, 2);"))
             }
           }
         } else
@@ -427,6 +437,10 @@ engine_stan <- function(x,
           # Else
           stop("Model as of now not implemented for Stan!")
         }
+        # Append prior contributions to model
+        sm_code$model <- append(sm_code$model, "
+                                // Prior contributions
+                                target += lprior;")
 
         # Wrap list entries in model code and save in model object
         self$set_data("stancode", wrap_stanmodel(sm_code))
@@ -451,9 +465,6 @@ engine_stan <- function(x,
         settings$set('iter', self$stan_param$iter)
         settings$set('warmup', self$stan_param$warmup)
         settings$set('type', self$stan_param$type)
-        # Set a model seed for reproducibility
-        # FIXME: Ideally this is passed on better and earlier
-        settings$set('seed', 31337)
 
         # --- #
         # Collect data for stan modelling

@@ -264,9 +264,11 @@ engine_gdb <- function(x,
         # ---- #
         # Detect and format the family
         fam <- model$biodiversity[[1]]$family
+        li <- model$biodiversity[[1]]$link
+        if(is.null(li) && fam == "binomial") li <- "logit"
         fam <- switch (fam,
           "poisson" = mboost::Poisson(),
-          "binomial" = mboost::Binomial(type = "glm", link = "cloglog"),
+          "binomial" = mboost::Binomial(type = "glm", link = li),
           "gaussian" = Gaussian(),
           "hurdle" = Hurdle(nuirange = c(0,100))
         )

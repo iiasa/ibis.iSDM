@@ -167,6 +167,7 @@ methods::setMethod(
     settings$set('verbose', verbose)
     settings$set('bias_variable', bias_variable)
     settings$set('bias_value',bias_value)
+    settings$set('seed', 19372) # Set a (pseudo-random) model seed for reproducibility
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -1051,11 +1052,6 @@ methods::setMethod(
                                                                 id = id,
                                                                 x = x,
                                                                 settings = settings)
-
-        # For each type include expected data
-        # expectation vector (area for integration points/nodes and 0 for presences)
-        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
-        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) )
       }
 
       # Run the engine setup script

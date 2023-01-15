@@ -124,6 +124,7 @@ reference:
       - clean_rasterfile
       - run_stan
       - wrap_stanmodel
+      - stancode
       - ibis_options
       - starts_with("write_")
       - has_keyword("utils")

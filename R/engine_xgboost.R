@@ -440,6 +440,16 @@ engine_xgboost <- function(x,
         params <- self$get_data('params')
         # Check only linear and reset to linear booster then
         if(settings$get("only_linear")) params$booster <- "gblinear" else params$booster <- "gbtree"
+        # Check that link function and objective is changed if needed
+        li <- model$biodiversity[[1]]$link
+        if(!is.null(li)){
+          if(model$biodiversity[[1]]$family=="binomial"){
+            li <- match.arg(li, c("logit", "cloglog"),several.ok = FALSE)
+            if(li=="cloglog") params$objective <- "binary:logitraw"
+          } else {
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
+          }
+        }
 
         # All other needed data for model fitting
         df_train <- self$get_data("df_train")
@@ -550,7 +560,7 @@ engine_xgboost <- function(x,
           # watchlist = watchlist,
           nrounds = nrounds,
           verbose = ifelse(verbose, 1, 0),
-          # early_stopping_rounds = 1000,
+          early_stopping_rounds = min(nrounds, 1000),
           print_every_n = 100
         )
         # --- #
@@ -567,6 +577,8 @@ engine_xgboost <- function(x,
               newdata = df_pred
               )
           )
+          if(params$objective=="binary:logitraw") pred_xgb <- ilink(pred_xgb, "cloglog")
+
           # Fill output with summaries of the posterior
           prediction[] <- pred_xgb
           names(prediction) <- 'mean'
