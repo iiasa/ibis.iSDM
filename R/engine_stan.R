@@ -318,7 +318,7 @@ engine_stan <- function(x,
                                        ")
           # add a prior on the intercept
           sm_code$transformed_parameters <- append(sm_code$transformed_parameters,
-          paste0("
+                              paste0("
                                     // priors including constants
                                     lprior += student_t_lpdf(Intercept | 3, ",
                                     ifelse(fam == "poisson", -2, 0), # Adapted student prior for poisson
@@ -336,10 +336,12 @@ engine_stan <- function(x,
         # Add (gaussian) priors to model likelihood if set
         if((!is.Waiver(model$priors) || settings$get(what='varsel') == "none")){
           # If no intercept is specified, add beta
-          if(!has_intercept){
+          if(has_intercept){
             # Parameters
             sm_code$parameters <- append(sm_code$parameters, "
-                                         vector[K] beta;")
+                                         vector[Kc] beta;")
+          } else {
+            sm_code$parameters <- append(sm_code$parameters, "vector[K] beta;")
           }
 
           # Add priors for each variable for which it is set to the model
@@ -471,12 +473,17 @@ engine_stan <- function(x,
         if(length(model$biodiversity)>1){
           stop("done")
         } else {
-          # Format datalist
+          has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
+          # Format data list
+          if(has_intercept == 1){
+            pn <- c("Intercept",model$biodiversity[[1]]$predictors_names)
+          } else { pn <- model$biodiversity[[1]]$predictors_names }
+
           dl <- list(
             N = nrow( model$biodiversity[[1]]$observations),
             observed = model$biodiversity[[1]]$observations[["observed"]],
-            X = as.matrix( model$biodiversity[[1]]$predictors[, model$biodiversity[[1]]$predictors_names] ),
-            K = length( model$biodiversity[[1]]$predictors_names ),
+            X = as.matrix( model$biodiversity[[1]]$predictors[, pn] ),
+            K = length( pn ),
             offsets = log(model$biodiversity[[1]]$expect), # Notice that exposure is log-transformed here!
             has_intercept = attr(terms(model$biodiversity[[1]]$equation), "intercept"),
             has_spatial = ifelse(is.null(self$get_equation_latent_spatial()), 0, 1),
@@ -517,6 +524,8 @@ engine_stan <- function(x,
           # Full data for prediction
           full <- subset(model$predictors, select = c('x','y',model$predictors_names))
 
+          if(has_intercept==1) full$Intercept <- 1
+
           # If poipo, add w to prediction container
           bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
           if(any(bd_poipo)){
@@ -548,21 +557,23 @@ engine_stan <- function(x,
           fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
 
           # Do the prediction by sampling from the posterior
-          pred_stan <- posterior_predict_stanfit(obj = fit_stan,
-                                         form = to_formula(paste0("observed ~ ", paste(model$biodiversity[[1]]$predictors_names,collapse = " + "))),
+          out <- posterior_predict_stanfit(obj = fit_stan,
+                                         form = to_formula(paste0("observed ~ ",
+                                                                  ifelse(has_intercept==1, "Intercept + ", ""),
+                                                                  paste(model$biodiversity[[1]]$predictors_names,collapse = " + "))),
                                          newdata = full@data,
                                          offset = (full$w),
-                                         family = fam,
-                                         mode = self$stan_param$type # Simulated response
+                                         family = fam, # Family
+                                         mode = self$stan_param$type # Type
           )
 
           # Convert full to raster
           prediction <- raster::stack(full)
           # Fill output
-          prediction <- fill_rasters(post = pred_stan, background = prediction)
+          prediction <- fill_rasters(post = out, background = prediction)
           prediction <- raster::mask(prediction, model$background) # Mask with background
           # plot(prediction$mean, col = ibis.iSDM:::ibis_colours$sdm_colour)
-
+          try({ rm(out) })
         } else {
           prediction <- NULL
         }
@@ -649,13 +660,15 @@ engine_stan <- function(x,
 
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "predictor"){
+            # Get model and intercept if present
             mod <- self$get_data('fit_best')
             model <- self$model
+            has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
             if(is.null(type)) type <- self$settings$get("type")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
-                                    is.numeric(variable_length),
+                                    is.numeric(variable_length) && variable_length > 1,
                                     is.null(constant) || is.numeric(constant)
             )
             # Check that given variable is in x.var
@@ -681,11 +694,27 @@ engine_stan <- function(x,
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
 
+            # Add intercept if present
+            if(has_intercept==1) df_partial$Intercept <- 1
+            # If poipo, add w to prediction container
+            bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
+            if(any(bd_poipo)){
+              # FIXME: Bit hackish. See if works for other projections
+              df_partial$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
+            }
+            # Add offset if set
+            if(!is.Waiver(model$offset)) {
+              # Offsets are simply added linearly (albeit transformed).
+              # FIXME: Taken here as average. To be re-evaluated as use case develops!
+              if(hasName(df_partial,"w")) df_partial$w <- df_partial$w + mean(model$offset,na.rm = TRUE) else df_partial$w <- mean(model$offset,na.rm = TRUE)
+            }
             # Simulate from the posterior
             pred_part <- posterior_predict_stanfit(obj = mod,
-                                                   form = to_formula(paste0("observed ~ ", paste(model$predictors_names,collapse = " + "))),
+                                                   form = to_formula(paste0("observed ~ ",
+                                                                            ifelse(has_intercept==1, "Intercept +", ""),
+                                                                            paste(model$predictors_names,collapse = " + "))),
                                                    newdata = df_partial,
-                                                   offset = NULL,
+                                                   offset = df_partial$w,
                                                    family = fam,
                                                    mode = type # Linear predictor
             )
@@ -709,6 +738,7 @@ engine_stan <- function(x,
             # Get model object and check that everything is in order
             mod <- self$get_data('fit_best')
             model <- self$model
+            has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     'model' %in% names(self),
                                     is.character(x.var),
@@ -742,11 +772,21 @@ engine_stan <- function(x,
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
 
+            # Check intercept
+            if(has_intercept==1) df_partial$Intercept <- 1
+            # If poipo, add w to prediction container
+            bd_poipo <- sapply(model$biodiversity, function(x) x$type) == "poipo"
+            if(any(bd_poipo)){
+              # FIXME: Bit hackish. See if works for other projections
+              df_partial$w <- unique(model$biodiversity[[which(bd_poipo)]]$expect)[2] # Absence location being second unique value
+            } else { df_partial$w <- NULL }
+
             # Simulate from the posterior
             pred_part <- posterior_predict_stanfit(obj = mod,
-                                                   form = to_formula(paste0("observed ~ ", paste(model$predictors_names,collapse = " + "))),
+                                                   form = to_formula(paste0("observed ~ Intercept + ",
+                                                                            paste(model$predictors_names,collapse = " + "))),
                                                    newdata = df_partial@data,
-                                                   offset = NULL,
+                                                   offset = df_partial$w,
                                                    family = fam,
                                                    mode = type # Linear predictor
             )

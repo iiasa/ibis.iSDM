@@ -361,11 +361,11 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
                      data = newdata)
   assertthat::assert_that(nrow(A)>0, inherits(A, "matrix") || inherits(A, "dgCMatrix"))
   # Remove intercept unless set
-  # if(attr(terms(form),"intercept") != 1) {
+  if(attr(terms(form),"intercept") == 1) {
     if(length(grep("Intercept", colnames(A), ignore.case = TRUE))>0){
-      A <- A[,-(grep("Intercept", colnames(A), ignore.case = TRUE))]
+        A <- A[,-(grep("(Intercept)", colnames(A),fixed = T))]
     }
-  # }
+  }
 
   # Draw from the posterior
   if(inherits(obj, "stanfit")) {
@@ -380,6 +380,7 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   # Get only beta coefficients and Intercept if set
   if("Intercept" %in% colnames(pp)) what <- "beta|Intercept" else what <- "beta"
   suppressWarnings( pp <- pp[ c(grep(what, colnames(pp), value = TRUE)) ] )
+  if(hasName(pp, "b_Intercept")) pp <- pp[ grep("b_Intercept",colnames(pp), invert = T)]
 
   # Prepare offset if set
   if(!is.null(offset)) {
@@ -394,70 +395,85 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
     is.numeric(offset)
   )
 
-  if(mode == "predictor"){
-    # Summarize the coefficients from the posterior
-    pp <- posterior::summarise_draws(pp) |>
-      subset(select = c("variable", "mean", "q5", "median", "q95", "sd"))  |>
-      as.data.frame()
-    # --- #
-    pp$variable <- colnames(A)
-    # Calculate b*X + offset if set
-    preds <- cbind(
-      A %*% pp[,"mean"] + ifelse(is.null(offset),0, offset),
-      A %*% pp[,"q5"] + ifelse(is.null(offset),0, offset),
-      A %*% pp[,"median"] + ifelse(is.null(offset),0, offset),
-      A %*% pp[,"q95"] + ifelse(is.null(offset),0, offset),
-      A %*% pp[,"sd"] + ifelse(is.null(offset),0, offset)
-    )
-
-    # Add random noise equivalent to the posterior length
-    .rnorm_matrix <- function(mean, sd) {
-      stopifnot(length(dim(mean)) == 2)
-      error <- matrix(rnorm(length(mean), 0, sd), ncol=ncol(mean), byrow=TRUE)
-      mean + error
-    }
-    preds <- .rnorm_matrix(preds, pp[,"sd"]) # FIXME: This only makes sense for mean. Apply mad to median?
-
-    # Apply ilink
-    if(!is.null(family)){
-      preds <- switch (family,
-        "poisson" = ilink(preds, link = "log"),
-        "binomial" = ilink(preds, link = "logit"),
-        ilink(preds, link = "log")
-      )
-    }
-
-  } else {
+  # 16/01/2023 - Change towards matrix multiplication by default (below)
+  # if(mode == "predictor"){
+  #   # Summarize the coefficients from the posterior
+  #   pp <- posterior::summarise_draws(pp) |>
+  #     subset(select = c("variable", "mean", "q5", "median", "q95", "sd"))  |>
+  #     as.data.frame()
+  #   # --- #
+  #   pp$variable <- colnames(A)
+  #   # Calculate b*X + offset if set
+  #   preds <- cbind(
+  #     A %*% pp[,"mean"] + ifelse(is.null(offset),0, offset),
+  #     A %*% pp[,"q5"] + ifelse(is.null(offset),0, offset),
+  #     A %*% pp[,"median"] + ifelse(is.null(offset),0, offset),
+  #     A %*% pp[,"q95"] + ifelse(is.null(offset),0, offset),
+  #     A %*% pp[,"sd"] + ifelse(is.null(offset),0, offset)
+  #   )
+  #
+  #   # Add random noise equivalent to the posterior length and sd of the posterior
+  #   # Necessary since we already summarize the moment above
+  #   .rnorm_matrix <- function(mean, sd) {
+  #     stopifnot(length(dim(mean)) == 2)
+  #     error <- matrix(rnorm(length(mean), 0, sd), ncol = ncol(mean), byrow=TRUE)
+  #     mean + error
+  #   }
+  #   preds <- .rnorm_matrix(preds, pp[,"sd"]) # FIXME: This only makes sense for mean. Apply mad to median?
+  #
+  #   # Apply ilink
+  #   if(!is.null(family)){
+  #     preds <- switch (family,
+  #       "poisson" = ilink(preds, link = "log"),
+  #       "binomial" = ilink(preds, link = "logit"),
+  #       ilink(preds, link = "log")
+  #     )
+  #   }
+  #
+  # } else {
     # Simulate linear response approximating poisson_rng in stan
     out <- vector("list", nrow(pp))
-    # TODO: Parallelize over threads
+    # TODO: Parallelize over threads?
+    pb <- progress::progress_bar$new(total = nrow(pp),
+                                     format = "Simulating posterior samples (:spin) [:bar] :percent")
     for(i in 1:nrow(pp)){
+      pb$tick()
       # Build eta as additive beta with the A matrix row
       eta <- 0 + base::tcrossprod(as.matrix(pp)[i,] |> base::unname(), A) + offset
       out[[i]] <- base::unname(eta)
     }
-    # ilink transform?
-    # Get family and number of observations and
-    # draw random variable for each draw and lambda value
-    if(family == "poisson"){
-      a <- lapply(out, function(lambda) rpois(nrow(A), ilink(lambda, link = "log")) )
-    } else if(family == "binomial") {
-      a <- lapply(out, function(mu) rbinom(nrow(A), size = 1, prob = ilink(mu, link = "logit")) )
-    } else {
-      stop("Not yet implemented method for linear response prediction")
-    }
+
     # Combine link
-    a <- do.call(cbind, a)
+    a <- do.call(rbind, out)
     colnames(a) <- rownames(a) <- NULL
+
+    # Backtransformation
+    if(mode == "response"){
+      if(family == "poisson"){
+        a <- apply(a, 2, function(lambda) ilink(lambda, link = "log"))
+      } else if(family == "binomial") {
+        a <- apply(a, 2, function(mu) ilink(mu, link = "logit"))
+      }
+    }
+    # # Draw random variable for each draw and lambda value
+    # if(family == "poisson"){
+    #   a <- suppressWarnings( lapply(out, function(lambda) rpois(nrow(A), ilink(lambda, link = "log")) ) )
+    # } else if(family == "binomial") {
+    #   a <- suppressWarnings( lapply(out, function(mu) rbinom(nrow(A), size = 1, prob = ilink(mu, link = "logit")) ) )
+    # } else {
+    #   stop("Not yet implemented method for prediction the linear response.")
+    # }
+
     # Finally summarize
     preds <- cbind(
-      matrixStats::rowMeans2(a, na.rm = TRUE),
-      matrixStats::rowQuantiles(a, probs = c(.05,.5,.95), na.rm = TRUE),
-      matrixStats::rowSds(a, na.rm = TRUE)
+      matrixStats::colMeans2(a, na.rm = TRUE),
+      matrixStats::colQuantiles(a, probs = c(.05,.5,.95), na.rm = TRUE),
+      matrixStats::colSds(a, na.rm = TRUE)
     )
-  }
+
+  # ---- #
   # Create output with cellid
-  out <- tibble::rowid_to_column(newdata,var = "cellid")["cellid"] |> as.data.frame()
+  out <- tibble::rowid_to_column(newdata, var = "cellid")["cellid"] |> as.data.frame()
   out$cv <- out$q95 <- out$q50 <- out$q05 <- out$sd <- out$mean <- NA
   out$mean[as.numeric(row.names(A))] <- preds[,1]
   out$sd[as.numeric(row.names(A))] <- preds[,5]
@@ -478,15 +494,19 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
 #' This function is emulated after a similar functionality in the [brms] R-package.
 #' **It only works with models inferred with stan!**
 #' @param obj Any prepared object.
+#' @param ... not used.
 #'
 #' @return None.
 #' @keywords engine
 #' @seealso [rstan], [cmdstanr], [brms]
 #' @name stancode
 NULL
+methods::setGeneric("stancode",
+                    signature = methods::signature("..."),
+                    function(obj, ...) standardGeneric("stancode"))
 
 #' @rdname stancode
 #' @method stancode DistributionModel
 #' @keywords engine
 #' @export
-stancode.DistributionModel <- function(x) x$show_code()
+stancode.DistributionModel <- function(x, ...) x$show_code()
