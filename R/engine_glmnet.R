@@ -13,7 +13,7 @@ NULL
 #' a number of efficiency settings are implemented in particular for cross-validation of alpha and lambda values.
 #'
 #' Limited amount of prior information can be specified for this engine, specifically via offsets or as
-#' [`GLMNETPrior`], which allow to specify prio
+#' [`GLMNETPrior`], which allow to specify priors as regularization constants.
 #' @details
 #' Regularized regressions are effectively GLMs that are fitted with ridge, lasso or elastic-net regularization.
 #' Which of them is chosen is critical dependent on the alpha value:

@@ -38,7 +38,7 @@ then this package is the best way of doing so. Compared to the \code{'maxnet'} R
 a number of efficiency settings are implemented in particular for cross-validation of alpha and lambda values.
 
 Limited amount of prior information can be specified for this engine, specifically via offsets or as
-\code{\link{GLMNETPrior}}, which allow to specify prio
+\code{\link{GLMNETPrior}}, which allow to specify priors as regularization constants.
 }
 \details{
 Regularized regressions are effectively GLMs that are fitted with ridge, lasso or elastic-net regularization.

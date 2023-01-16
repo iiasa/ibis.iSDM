@@ -47,7 +47,7 @@ install <- function(packages){
 if(!("INLA" %in% installed.packages()[, "Package"])){
   install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 }
-invisible( install(c("inlabru", "xgboost", "igraph", "glmnet")) )
+invisible( install(c("inlabru", "xgboost", "igraph", "glmnet", "glmnetUtils")) )
 ```
 
 ## Load relevant packages and testing data
