@@ -76,6 +76,12 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/GDBPriors.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/GLMNETPrior.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/GLMNETPriors.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/INLAPrior.html</loc>
   </url>
   <url>
@@ -121,19 +127,22 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_polpo.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_MigClim.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_adaptability.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_connectivity.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_adaptability.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constrain_dispersal.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_boundary.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_connectivity.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_dispersal.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_latent_spatial.html</loc>
@@ -187,6 +196,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/coef.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/distribution.html</loc>
   </url>
   <url>
@@ -203,6 +215,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_gdb.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_glmnet.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_inla.html</loc>
@@ -233,6 +248,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/find_subset_of_predictors.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/formatGLOBIOM.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_ngbvalue.html</loc>
@@ -337,7 +355,19 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/spartial.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/st_add_raster.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/st_reduce.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/stan_check_cmd.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/stancode.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/stars_to_raster.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/summary.html</loc>
