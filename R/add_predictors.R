@@ -5,12 +5,11 @@ NULL
 #'
 #' @description
 #' This function allows to add predictors to [distribution] or [BiodiversityScenario]
-#' objects.
-#' @details
-#' Predictors are covariates that in spatial projection have to match
+#' objects. Predictors are covariates that in spatial projection have to match
 #' the geographic projection of the background layer in the [distribution] object.
 #' This function furthermore allows to transform or create derivates of provided
 #' predictors.
+#'
 #' A transformation takes the provided rasters and for instance rescales them or transforms
 #' them through a principal component analysis ([prcomp]). In contrast, derivates leave
 #' the original provided predictors alone, but instead create new ones, for instance by transforming

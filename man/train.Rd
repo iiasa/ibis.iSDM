@@ -14,8 +14,6 @@ train(
   inference_only = FALSE,
   only_linear = TRUE,
   method_integration = "predictor",
-  bias_variable = NULL,
-  bias_value = NULL,
   aggregate_observations = TRUE,
   verbose = FALSE,
   ...
@@ -74,13 +72,6 @@ and weighted respectively, thus giving for example presence-only records less we
 
 \strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}
 
-\item{bias_variable}{A \code{\link{vector}} with names of variables to be set to \emph{bias_value} (Default: \code{NULL}).
-This option can for instance be used to 'partial' out certain biases after predictions have been made.
-See Examples.}
-
-\item{bias_value}{A \code{\link{vector}} with values to be set to \emph{bias_variable} (Default: \code{NULL}).
-Specifying a \code{\link{numeric}} value here sets \code{bias_variable} to the target value.}
-
 \item{aggregate_observations}{\code{\link{logical}} on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).}
 
 \item{...}{further arguments passed on.}
@@ -115,9 +106,6 @@ the engine does not support joint integration of likelihoods.
 See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 if users want more control about this aspect, another option is to fit separate models
 and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
-\link{*} \code{"bias_variable"} and \code{"bias_value"} Specifying a variable and value here performs a model-based
-control of a certain bias variable (e.g. accessibility) with the variable in question being partialed out during
-the prediction step.
 }
 \examples{
 \dontrun{

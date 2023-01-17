@@ -94,9 +94,7 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(assertthat::is.string(x),
                             is.Raster(value),
                             is_comparable_raster(self$get_data(), value))
-    self$data <- addLayer(self$get_data(), value)
-    # FIXME: This creates duplicates as of now.
-    invisible()
+    bdproto(NULL, self, data = addLayer(self$get_data(), value))
   },
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
@@ -125,11 +123,15 @@ PredictorDataset <- bdproto(
       summary(out, digits = digits)
     } else {
       if(inherits(d, 'stars')){
-        summary(stars:::as.data.frame.stars(d))
+        return(
+          summary(stars:::as.data.frame.stars(d))
+        )
       } else {
         # Assume raster
-        round(
-          raster::summary( d ), digits = digits
+        return(
+          round(
+            raster::summary( d ), digits = digits
+          )
         )
       }
     }

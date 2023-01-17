@@ -43,4 +43,9 @@ test_that('Load ranges and add them to distribution object', {
   virtual_range_ras <- raster::aggregate(virtual_range_ras, 5)
   expect_s3_class( x %>% add_predictor_range(virtual_range_ras),class = "BiodiversityDistribution" )
 
+  # Add bias variable
+  y <- x |> add_control_bias(layer = predictors$hmi_mean_50km)
+  expect_type(y$bias, 'list')
+  expect_length(y$get_biascontrol(), 3)
+
 })

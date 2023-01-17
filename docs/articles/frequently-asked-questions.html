@@ -95,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-01-13</h4>
+            <h4 data-toc-skip class="date">2023-01-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/frequently-asked-questions.Rmd" class="external-link"><code>vignettes/frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>frequently-asked-questions.Rmd</code></div>
@@ -451,10 +451,11 @@ models (PPMs) in the process. The<code>ibis.iSDM</code> package has some
 functionality for spatial thinning implemented in the
 <code><a href="../reference/thin_observations.html">thin_observations()</a></code> function.</li>
 <li>Partial out a biased variable during the prediction. The
-<code>bias_variable</code> can be specified in the <code><a href="../reference/train.html">train()</a></code>
-command and has to be part the predictor set of the model. In addition a
+<code><a href="../reference/add_control_bias.html">add_control_bias()</a></code> function can be used to specify a value
+that needs to be partialed out in the model. There a
 <code>bias_value</code> has to be specified and this can be set for
-instance to <code>0</code>.</li>
+instance to <code>0</code> or an amount assumed to be equivalent to
+minimal bias .</li>
 <li>Add a spatial offset to account for the bias as introduced in <a href="http://doi.wiley.com/10.1111/geb.12453" class="external-link">Merow et al. 2016</a>.
 This can be done via the <code><a href="../reference/add_offset_bias.html">add_offset_bias()</a></code> function and
 requires preparation of a bias layer in advance.</li>

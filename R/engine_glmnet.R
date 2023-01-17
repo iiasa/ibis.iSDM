@@ -27,7 +27,7 @@ NULL
 #' to \code{"reg"}.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{1}).
+#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).
 #' @param nlambda A [`numeric`] giving the number of lambda values to be used (Default: \code{100}).
 #' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually best to let this parameter be
 #' determined deterministically (Default: \code{NULL}).
@@ -44,7 +44,7 @@ NULL
 #' @export
 
 engine_glmnet <- function(x,
-                          alpha = 1,
+                          alpha = 0,
                           nlambda = 100,
                           lambda = NULL,
                           type = "response",
@@ -136,7 +136,7 @@ engine_glmnet <- function(x,
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
           inherits(settings,'Settings') || is.null(settings),
-          nrow(model$predictors) == ncell(self$get_data('template')),
+          nrow(model$predictors) == raster::ncell(self$get_data('template')),
           !is.Waiver(self$get_data("params")),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -162,7 +162,7 @@ engine_glmnet <- function(x,
         if(fam == "poisson"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(raster::cellStats(bg,min)))
+          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
