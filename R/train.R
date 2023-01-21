@@ -1250,7 +1250,9 @@ methods::setMethod(
             }
             rm(new)
           } else if(method_integration == "prior"){
-            stop("Not supported by this engine!")
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
           }
         } # End of multiple ides
       }

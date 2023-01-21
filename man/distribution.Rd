@@ -23,12 +23,17 @@ intersected with input data (Default: \code{NULL}).}
 \description{
 This function creates an object that contains all the data, parameters and settings
 for building an (integrated) species distribution model.
-Key functions to add data are \link{add_biodiversity}, \link{add_predictors},
-\link{add_latent}, \link{engine}, \link{add_priors} and \link{add_offset}. This creates a
+Key functions to add data are \code{\link{add_biodiversity_*}}, \code{\link[=add_predictors]{add_predictors()}},
+\code{\link{add_latent_*}}, \code{\link{engine_*}}, \code{\link{add_priors}} and \code{\link{add_offset}}. It creates a
 prototype \code{\link{BiodiversityDistribution}} object with its own functions.
 After setting input data and parameters, model predictions can then be created
 via the \link{train} function and predictions be created.
-See \strong{Details} for further functions available to modify or summarize the created object.
+
+Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
+the background. See also the frequently asked question (FAQ) section for more information.
+
+See \strong{Details} for a description of the internal functions available
+to modify or summarize data within the created object.
 
 \strong{Note that any model requires at minimum a single added \link{biodiversity} dataset
 as well as a specified \link{engine}.}
@@ -74,6 +79,9 @@ There are other functions as well but those are better accessed through their re
  # Define model
  x <- distribution(background)
  x
+ # Show names of the functions within the object
+ names(x)
+
 }
 }
 \references{

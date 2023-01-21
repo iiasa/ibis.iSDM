@@ -493,9 +493,12 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
   return(data)
 }
 
-#' @title Create an empty \code{rasterLayer} based on a template
+#' @title Create an empty \code{RasterLayer} based on a template
 #'
-#' @param x a \code{raster*} object corresponding.
+#' @description
+#' This function creates an empty copy of a provided \code{RasterLayer} object. It
+#' is primarily used in the package to create the outputs for the predictions.
+#' @param x a \code{Raster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{raster}}
 #' @return an empty raster, i.e. all cells are \code{NA}.
 #' @import raster

@@ -5,10 +5,17 @@ NULL
 #'
 #' @description
 #' Function to include prior information as split probability for the
-#' Bayesian additive regression tree model [engine_bart].
+#' Bayesian additive regression tree model added via [engine_bart].
 #'
-#' Priors for bart will be specified as transition probabilities of variables used to generate splits
-#' in the regression tree. These can be numeric and between \code{0} and \code{1}.
+#' Priors for [engine_bart] have to be specified as transition probabilities of variables which
+#' are interally used to generate splits in the regression tree. Specifying a prior can thus help
+#' to 'enforce' a split with a given variable.
+#' These can be numeric and coded as values between \code{0} and \code{1}.
+#'
+#' @note
+#' Even if a given variable is included as split in the regression or classification tree, this does
+#' not necessarily mean that the prediction changes if the value is non-informative (as the split can occur
+#' early on). It does however affect any variable importance estimates calculated from the model.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param hyper A [`numeric`] object with a number being \code{>0} and equal to \code{1}. Defaults to \code{0.75}.
@@ -59,7 +66,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied
+#' Helper function when multiple variables are supplied for a BART prior
 #' @name BARTPriors
 #' @description
 #' This is a helper function to specify several [BARTPrior] objects with the same

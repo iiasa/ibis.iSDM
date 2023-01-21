@@ -7,6 +7,7 @@
 \alias{summary.PredictorDataset}
 \alias{summary.BiodiversityScenario}
 \alias{summary.PriorList}
+\alias{summary.Settings}
 \title{Summarises a trained model or predictor object}
 \usage{
 \method{summary}{distribution}(x)
@@ -18,18 +19,42 @@
 \method{summary}{BiodiversityScenario}(x)
 
 \method{summary}{PriorList}(x)
+
+\method{summary}{Settings}(x)
 }
 \arguments{
 \item{x}{Any prepared object.}
 
 \item{...}{not used.}
 }
-\value{
-None.
-}
 \description{
 This helper function summarizes a given object, including
-\link{DistributionModel} and \link{PredictorDataset}.
+\link{DistributionModel}, \link{PredictorDataset} or \link{PriorList} objects and others. This can be
+a helpful way to summarize what is contained within and the values of specified
+models or objects.
+
+When unsure, it is usually a good strategy to run \link{summary} on any object.
+}
+\examples{
+\dontrun{
+# Example with a trained model
+x <- distribution(background) \%>\%
+        # Presence-absence data
+        add_biodiversity_poipa(surveydata) \%>\%
+        # Add predictors and scale them
+        add_predictors(env = predictors) \%>\%
+        # Use glmnet and lasso regression for estimation
+        engine_glmnet(alpha = 1)
+ # Train the model
+ mod <- train(x)
+ summary(mod)
+
+ # Example with a prior object
+ p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
+ p2 <- BREGPrior(variable = "cropland", hyper = NULL, ip = 1)
+ pp <- priors(p1,p2)
+ summary(pp)
+}
 }
 \seealso{
 \code{\link[base:summary]{base::summary()}}.

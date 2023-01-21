@@ -8,16 +8,16 @@ NULL
 #'
 #' Currently supported for INLA in ibis.iSDM are the following priors that can be specified via \code{"type"}:
 #'
-#' [*] \code{"normal"} or \code{"gaussian"}: Priors on normal distributed and set to specified variable. Required parameters
+#' * \code{"normal"} or \code{"gaussian"}: Priors on normal distributed and set to specified variable. Required parameters
 #'  are a mean and a precision estimate provided to \code{"hyper"}. Note that precision is not equivalent
 #'  (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of \code{0}
 #'  and a precision of \code{0.001}.
 #'
-#' [*] \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
+#' * \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
 #' so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
 #' negative, positive or infinite.
 #'
-#' [*] \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
+#' * \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
 #' penalized complexity priors which can be added to a SPDE spatial random effect added via [`add_latent_spatial()`].
 #' Here the range of the penalized complexity prior can be specified through \code{'prior.range'} and
 #' the uncertainty via \code{'prior.sigma'} both supplied to the options 'type' and 'hyper'.
@@ -25,14 +25,16 @@ NULL
 #' Other priors available in INLA \code{ names(INLA::inla.models()$prior) ) } might also work, but have not
 #' been tested!
 #' @note
-#' Compared to other engines INLA does unfortunately does not support priors related to
+#' Compared to other engines, INLA does unfortunately does not support priors related to
 #' more stringent parameter regularization such as Laplace or Horseshoe priors,
 #' which limits the capability of [`engine_inla`] for regularization. That
-#' being said many of the default priors act already regularizing to some degree.
+#' being said many of the default uninformative priors act already
+#' regularize the coefficients to some degree.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters. See description. Multiple entries can be supplied.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters. See description.
+#' The default values are set to a mean of \code{0} and a precision of \code{0.001}.
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
@@ -98,7 +100,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables and types are supplied
+#' Helper function when multiple variables and types are supplied for INLA
 #' @description
 #' This is a helper function to specify several [INLAPrior] objects with the same
 #' hyper-parameters, but different variables.

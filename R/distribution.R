@@ -6,12 +6,17 @@ NULL
 #' @description
 #' This function creates an object that contains all the data, parameters and settings
 #' for building an (integrated) species distribution model.
-#' Key functions to add data are [add_biodiversity], [add_predictors],
-#' [add_latent], [engine], [add_priors] and [add_offset]. This creates a
+#' Key functions to add data are [`add_biodiversity_*`], [`add_predictors()`],
+#' [`add_latent_*`], [`engine_*`], [`add_priors`] and [`add_offset`]. It creates a
 #' prototype [`BiodiversityDistribution`] object with its own functions.
 #' After setting input data and parameters, model predictions can then be created
 #' via the [train] function and predictions be created.
-#' See **Details** for further functions available to modify or summarize the created object.
+#'
+#' Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
+#' the background. See also the frequently asked question (FAQ) section for more information.
+#'
+#' See **Details** for a description of the internal functions available
+#' to modify or summarize data within the created object.
 #'
 #' **Note that any model requires at minimum a single added [biodiversity] dataset
 #' as well as a specified [engine].**
@@ -67,6 +72,9 @@ NULL
 #'  # Define model
 #'  x <- distribution(background)
 #'  x
+#'  # Show names of the functions within the object
+#'  names(x)
+#'
 #' }
 #' @export
 methods::setGeneric("distribution",

@@ -1,20 +1,23 @@
 #' @include utils.R bdproto.R bdproto-prior.R
 NULL
 
-#' Create a new stan prior
+#' Create a new STAN prior
 #'
-#' Function to create a new stan prior that can be added to environmental predictors
+#' @description
+#' Function to create a new prior for [engine_stan] models. Priors currently
+#' can be set on specific environmental predictors.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyperparameters.
-#' First entry is treated as mean, the second as variation.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper parameters.
+#' First entry is treated as mean (Default: \code{0}), the second as the standard variation (Default: \code{2}) of
+#' a Gaussian distribution on the respective coefficient.
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' @seealso [`Prior-class`].
-#'
+#' s
 #' @family prior
 #' @keywords priors
 #' @aliases STANPrior
@@ -64,7 +67,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables and types are supplied
+#' Helper function when multiple variables and types are supplied for STAN
 #'
 #' @name STANPriors
 #' @description

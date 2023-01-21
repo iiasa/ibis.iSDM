@@ -53,8 +53,9 @@ navbar:
 reference:
   - title: Setting up and train models
     desc: >
-      Key functions for setting up models and training them. Start with
-      distribution and see examples how to build a model.
+      Key functions for setting up species distribution models and adding information to them. Start with
+      distribution() and see articles examples on how to build a model from there. Also includes functions
+      to specify priors for a model.
     contents:
         - distribution
         - has_keyword("priors")
@@ -65,7 +66,9 @@ reference:
         - train
 
   - title: Add or modify data and parameters
-    desc: Functions to add or modify data and parameters in existing objects.
+    desc: >
+      Functions to add or modify data and parameters in a distribution object. These can be
+      used to add or remove biodiversity, covariates and priors in various forms.
     contents:
       - starts_with("add_")
       - starts_with("set_")
@@ -75,12 +78,16 @@ reference:
 
 
   - title: Engines
-    desc: Statistical models used for estimation of species distributions.
+    desc: >
+      Statistical models used for estimation of species distributions.
     contents:
       - starts_with("engine_")
 
   - title: Create spatial-temporal projections
-    desc: Functions specifically for adding constrains and creating scenarios based on trained models.
+    desc: >
+      After a model has been trained, the functions in here can be used to
+      create projections with scenario() objects. Constraints can be on such scenarios
+      to limit extrapolations.
     contents:
       - scenario
       - project
@@ -105,7 +112,9 @@ reference:
       - has_keyword("partial")
 
   - title: Utility functions
-    desc: Functions used by engines or spatial processing
+    desc: >
+      These functions are used by engines or spatial processing in the package. Most
+      of them are for internal use, but can be of use if input needs to be reformatted.
     contents:
       - is_comparable_raster
       - explode_factorized_raster

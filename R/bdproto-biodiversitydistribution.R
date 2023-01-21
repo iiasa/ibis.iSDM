@@ -7,9 +7,13 @@ NULL
 
 #' Biodiversity Distribution master class
 #'
+#' @description
 #' Base [`proto`] class for any biodiversity distribution objects.
 #' Serves as container that supplies data and functions to
 #' other [`proto`] classes.
+#'
+#' @details
+#' Run [names()] on a [`distribution`] object to show all available functions.
 #'
 #' @name BiodiversityDistribution-class
 #' @aliases BiodiversityDistribution
@@ -76,6 +80,11 @@ BiodiversityDistribution <- bdproto(
     o[['extent']] <- round( sf::st_bbox(r), 3)
     o[['proj']] <-  raster::projection(r)
     return(o)
+  },
+  # Set limits
+  set_limits = function(self, x){
+    assertthat::assert_that(is.Raster(x))
+    bdproto(NULL, self, limits = x )
   },
   # Get provided limits
   get_limits = function(self){

@@ -48,33 +48,41 @@ plot.Engine <- function(x,...) x$plot(...)
 #' @export
 plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
-
 # ------------ '
 #' Bivariate plot wrapper for distribution objects
 #'
 #' @description
-#' In particular Bayesian engines can produce not only mean estimates of a fitted response,
-#' but also estimates of uncertainty such as the standard deviation of the posterio or the coefficient
-#' of variation of a given prediction.
+#' Often there is an intention to display not only the predictions made with a SDM, but
+#' also the uncertainty of the prediction. Uncertainty be estimated either directly by the model
+#' or by calculating the variation in prediction values among a set of models.
 #'
-#' This function makes use of the [`biscale`] R-package to create bivariate plots of the fitted distribution object.
-#' It is mostly thought of as a convenience function to create such plots for quick visualization.
+#' In particular Bayesian engines can produce not only mean estimates of fitted responses,
+#' but also pixel-based estimates of uncertainty from the posterior such as the standard deviation (SD)
+#' or the coefficient of variation of a given prediction.
 #'
-#' @param mod A trained `DistributionModel` object with \code{fit_best} model within.
+#' This function makes use of the [`biscale`] R-package to create bivariate plots of the fitted distribution object,
+#' allowing to visualize two variables at once. It is mostly thought of as a convenience function to
+#' create such bivariate plots for quick visualization.
+#'
+#' Supported Inputs are either single trained Bayesian [`DistributionModel`] with uncertainty or
+#' the output of an [`ensemble()`] call. In both cases, users have to make sure that \code{"xvar"} and
+#' \code{"yvar"} are set accordingly.
+#'
+#' @param mod A trained [`DistributionModel`] or alternatively a [`Raster`] object with \code{prediction} model within.
 #' @param xvar A [`character`] denoting the value on the x-axis (Default: \code{'mean'}).
 #' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
-#' @param plot A [`logical`] indication of whether the result is to be plotted?
+#' @param plot A [`logical`] indication of whether the result is to be plotted (Default: \code{TRUE})?
 #' @param fname A [`character`] specifying the output filename a created figure should be written to.
 #' @param title Allows to respecify the title through a [`character`] (Default: \code{NULL}).
 #' @param col A [`character`] stating the colour palette to use. Has to be either a predefined value or a
 #' vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
-#' @param ... Other engine specific parameters
+#' @param ... Other engine specific parameters.
 #' @seealso [partial], [plot.DistributionModel]
 #' @note
 #' **This function requires the biscale package to be installed.**
 #' Although a work around without the package could be developed, it was not deemed necessary at this point.
 #' See also this [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
-#' @return A [RasterLayer] with the created partial response.
+#' @return Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
 #' @keywords misc
 #' @export
 #' @name bivplot
@@ -90,21 +98,34 @@ methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),
   function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, title = NULL, col = "BlueGold",...) {
-    assertthat::assert_that(inherits(mod, "DistributionModel"),
-                            msg = "The bivplot function currently only works with fitted distribution objects!")
     # Generic checks
     assertthat::assert_that(is.logical(plot),
                             is.character(xvar),
                             is.character(yvar),
                             is.character(col) || is.vector(col),
                             is.null(title) || is.character(title),
-                            is.null(fname) || is.character(fname)
+                            is.null(fname) || is.character(fname),
+                            isTRUE(plot) || is.character(fname)
     )
-    # Check that distribution object has a prediction
-    assertthat::assert_that("prediction" %in% mod$show_rasters(),
-                            is.Raster(mod$get_data()),
-                            msg = "No prediction found in the provided object.")
-    obj <- mod$get_data()
+    # Check whether object is a raster, otherwise extract object
+    if(is.Raster(mod)){
+      assertthat::assert_that(raster::nlayers(mod)>1)
+      obj <- mod
+      # If number of layers equal to 2 (output from ensemble?), change xvar and yvar
+      if(raster::nlayers(mod)==2 && !(xvar %in% names(obj))){
+        if(getOption('ibis.setupmessages')) myLog('[Parameter]','yellow','Variable not found. Changing to layer names...')
+        xvar <- names(obj)[1]; yvar <- names(obj)[2]
+      }
+    } else {
+      assertthat::assert_that(inherits(mod, "DistributionModel"),
+                              msg = "The bivplot function currently only works with fitted distribution objects!")
+      # Check that distribution object has a prediction
+      assertthat::assert_that("prediction" %in% mod$show_rasters(),
+                              is.Raster(mod$get_data()),
+                              msg = "No prediction found in the provided object.")
+      obj <- mod$get_data()
+    }
+
     # Check that at least mean and standard deviation is available
     assertthat::assert_that(xvar %in% names(obj),
                             yvar %in% names(obj),

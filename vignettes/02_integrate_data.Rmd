@@ -256,7 +256,7 @@ As outlined by [Isaac et al. 2020](https://linkinghub.elsevier.com/retrieve/pii/
 
 Depending on the engine, the ibis.iSDM package currently supports either combined or joint estimation of several datasets.
 
-#### Combined integration ####
+#### Combined integration
 
 By default all engines that do not support any joint estimation (see below) will make use of a combined integration, for which there are currently three different options:
 

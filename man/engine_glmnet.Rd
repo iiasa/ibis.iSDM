@@ -6,7 +6,7 @@
 \usage{
 engine_glmnet(
   x,
-  alpha = 1,
+  alpha = 0,
   nlambda = 100,
   lambda = NULL,
   type = "response",
@@ -17,7 +17,7 @@ engine_glmnet(
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
 \item{alpha}{A \code{\link{numeric}} giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-\code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{1}).}
+\code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).}
 
 \item{nlambda}{A \code{\link{numeric}} giving the number of lambda values to be used (Default: \code{100}).}
 

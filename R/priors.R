@@ -3,17 +3,23 @@ NULL
 
 #' Creates a new PriorList object
 #'
-#' @description A [`PriorList`] object is essentially a list that contains individual
+#' @description
+#' A [`PriorList`] object is essentially a list that contains individual
 #' [`Prior-class`] objects. In order to use priors for any of the engines,
 #' the respective [`Prior-class`] has to be identified (e.g. [`INLAPrior`]) and embedded
 #' in a [`PriorList`] object.
+#' Afterwards these objects can then be added to a [distribution] object with the
+#' [add_priors] function.
+#'
 #' @param x A [`Prior-class`] object added to the list.
 #' @param ... One or multiple additional [`Prior-class`] object added to the list.
 #' @returns A [`PriorList`] object.
 #' @examples
+#' \dontrun{
 #' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 #' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 #' priors(p1, p2)
+#' }
 #' @seealso [`Prior-class`], [`PriorList-class`]
 #' @family prior
 #' @aliases priors

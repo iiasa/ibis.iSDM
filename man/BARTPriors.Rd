@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_bart.R
 \name{BARTPriors}
 \alias{BARTPriors}
-\title{Helper function when multiple variables are supplied}
+\title{Helper function when multiple variables are supplied for a BART prior}
 \usage{
 BARTPriors(variable, hyper = 0.75, ...)
 

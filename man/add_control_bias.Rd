@@ -39,6 +39,7 @@ across the background.
 offsets to factor out a specified bias variable.
 }
 \note{
+**Covariate transformations applied to other predictors need to **
 Another option to consider biases particular in Poisson-point process models is to remove them
 through an offset. Functionality to do so is available through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting the
 method to \code{"offset"} will automatically point to this option.

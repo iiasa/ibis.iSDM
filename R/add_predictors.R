@@ -256,7 +256,8 @@ methods::setMethod(
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
     if(is.list(env)) env <- env[[1]]
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+    x <- add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+    return( x )
   }
 )
 
@@ -342,7 +343,8 @@ methods::setMethod(
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        x$predictors$set_data(n, r)
+        x$predictors <- x$predictors$set_data(n, r)
+        rm(r)
       }
     }
     return(x)
@@ -411,7 +413,7 @@ methods::setMethod(
     if(is.Waiver(x$predictors)){
       x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors$set_data('range_distance', layer)
+      x$predictors <- x$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
@@ -495,9 +497,9 @@ methods::setMethod(
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x,env = dis,transform = 'none',derivates = 'none')
+      x <- add_predictors(x, env = dis,transform = 'none',derivates = 'none')
     } else {
-      x$predictors$set_data('range_distance', dis)
+      x$predictors <- x$predictors$set_data('range_distance', dis)
     }
     return(x)
   }

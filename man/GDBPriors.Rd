@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPriors}
 \alias{GDBPriors}
-\title{Helper function when multiple variables are supplied}
+\title{Helper function when multiple variables are supplied for a GDB prior}
 \usage{
 GDBPriors(variable, hyper = "increasing", ...)
 
@@ -17,7 +17,8 @@ GDBPriors(variable, hyper = "increasing", ...)
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Helper function when multiple variables are supplied
+This is a helper function to specify several \link{GLMNETPrior} with the same
+hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 

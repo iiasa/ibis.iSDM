@@ -106,6 +106,7 @@ Collate:
     'prior_xgb.R'
     'priors.R'
     'project.R'
+    'pseudoabsence.R'
     'scenario.R'
     'similarity.R'
     'summary.R'

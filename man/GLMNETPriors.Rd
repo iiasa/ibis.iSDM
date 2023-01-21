@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_glmnet.R
 \name{GLMNETPriors}
 \alias{GLMNETPriors}
-\title{Helper function when multiple variables are supplied}
+\title{Helper function when multiple variables are supplied for a GLMNET prior}
 \usage{
 GLMNETPriors(variable, hyper = 0, lims = c(-Inf, Inf))
 
