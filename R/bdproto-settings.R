@@ -53,7 +53,11 @@ Settings <- bdproto(
     d <- self$data
     o <- data.frame(name = character(), type = character(), value = character() )
     for(entry in names(d)){
-      val <- try({ as.character( d[[entry]]) },silent = TRUE)
+      if(inherits(d[[entry]], "sf")){
+        val <- sf::st_geometry_type( d[[entry]] )[1]
+      } else {
+        val <- try({ as.character( d[[entry]]) },silent = TRUE)
+      }
       if(inherits(val, 'try-error')) val <- NA
       e <- data.frame(name = entry, type = class(d[[entry]])[1], value = val)
       o <- rbind(o, e)
