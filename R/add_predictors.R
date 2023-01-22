@@ -132,8 +132,6 @@ methods::setMethod(
                             is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
     )
-    assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
-                            msg = 'Supplied environmental data not aligned with background.')
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
 
