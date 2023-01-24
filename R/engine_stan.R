@@ -816,7 +816,7 @@ engine_stan <- function(x,
             return(NULL)
           },
           # Custom function to show stan code
-          show_code = function(self){
+          stancode = function(self){
             message(
               self$get_data("sm_code")
             )

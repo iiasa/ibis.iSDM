@@ -502,11 +502,11 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
 #' @name stancode
 NULL
 methods::setGeneric("stancode",
-                    signature = methods::signature("..."),
+                    signature = methods::signature("obj"),
                     function(obj, ...) standardGeneric("stancode"))
 
 #' @rdname stancode
 #' @method stancode DistributionModel
 #' @keywords engine
 #' @export
-stancode.DistributionModel <- function(x, ...) x$show_code()
+stancode.DistributionModel <- function(x, ...) x$stancode()

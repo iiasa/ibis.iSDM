@@ -119,7 +119,7 @@ mod <- distribution(background, limits = zone) %>%
   add_biodiversity_poipo(species_data) %>% 
   add_predictors(covariates) %>% 
   add_priors(priors = pp)
-  engine_gdb()
+  engine_inlabru()
   
 ```
 Multiple priors for an Engine can be defined in a `PriorList`. Whenever a prior 

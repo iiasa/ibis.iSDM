@@ -1,3 +1,6 @@
+#' @include utils-spatial.R
+NULL
+
 #' Function to create an ensemble of multiple fitted models
 #'
 #' @description This function creates an ensemble of multiple provided distribution models
@@ -5,12 +8,13 @@
 #' optional uncertainty in form of the standard deviation or similar.
 #' Through the `layer` parameter it can be specified which part of the prediction
 #' should be averaged in an ensemble. This can be for instance the *mean* prediction and/or
-#' the standard deviation *sd*.
+#' the standard deviation *sd*. See Details below for an overview of the different methods.
 #'
 #' Also returns a coefficient of variation (cv) as output of the ensemble, but note
 #' this should not be interpreted as measure of model uncertainty as it cannot
 #' capture parameter uncertainty of individual models; rather it reflects variation among predictions which
 #' can be due to many factors including simply differences in model complexity.
+#'
 #' @details
 #' Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
@@ -18,6 +22,7 @@
 #' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 #' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 #' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
+#' * \code{'pca'} - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).
 #'
 #' In addition to the different ensemble methods, a minimal threshold (\code{min.value}) can be set that needs to be surpassed for averaging.
 #' By default this option is not used (Default: \code{NULL}).
@@ -27,14 +32,26 @@
 #'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log]. In this case
+#' the \code{"normalize"} parameter has to be set.
 #' @param ... Provided [`DistributionModel`] objects.
-#' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
+#' @param method Approach on how the ensemble is to be created. See details for available options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
 #' @param min.value A [`numeric`] stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
 #' ignore any of the layer names in ensembles of `Raster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
+#' @param uncertainty A [`character`] indicating how the uncertainty among models shoudl be calculated. Available options include
+#' the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).
+#' @examples
+#' \dontrun{
+#'  # Assumes previously computed predictions
+#'  ex <- ensemble(mod1, mod2, mod3, method = "mean")
+#'  names(ex)
+#'
+#'  # Make a bivariate plot (might require other packages)
+#'  bivplot(ex)
+#' }
 #' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
 #' coefficient of variation across all models.
 
@@ -46,7 +63,8 @@
 NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
-                    function(..., method = "mean", weights = NULL, min.value = NULL,layer = "mean", normalize = FALSE) standardGeneric("ensemble"))
+                    function(..., method = "mean", weights = NULL, min.value = NULL,layer = "mean",
+                             normalize = FALSE, uncertainty = "cv") standardGeneric("ensemble"))
 
 #' @name ensemble
 #' @rdname ensemble
@@ -54,7 +72,8 @@ methods::setGeneric("ensemble",
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
-  function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean", normalize = FALSE){
+  function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
+           normalize = FALSE, uncertainty = "cv"){
     if(length(list(...))>1) {
       mc <- list(...)
     } else {
@@ -85,11 +104,14 @@ methods::setMethod(
       is.null(min.value) || is.numeric(min.value),
       is.null(layer) || is.character(layer),
       is.null(weights) || is.vector(weights),
-      is.logical(normalize)
+      is.logical(normalize),
+      is.character(uncertainty)
     )
 
     # Check the method
-    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'threshold.frequency', 'min.sd'), several.ok = FALSE)
+    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
+    # Uncertainty calculation
+    uncertainty <- match.arg(uncertainty, c('sd', 'cv', 'range'), several.ok = FALSE)
 
     # Check that weight lengths is equal to provided distribution objects
     if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
@@ -97,7 +119,7 @@ methods::setMethod(
     if(is.numeric(weights)) weights <- weights / sum(weights)
 
     # For Distribution model ensembles
-    if( inherits(mods[[1]], "DistributionModel") ){
+    if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){
       # Check that layers all have a prediction layer
       assertthat::assert_that(
         all( sapply(mods, function(x) !is.Waiver(x$get_data('prediction')) ) ),
@@ -167,18 +189,27 @@ methods::setMethod(
           for(cl in raster::unique(min_sd)){
             new[min_sd == cl] <- ras[[cl]][min_sd == cl]
           }
+        } else if(method == 'pca'){
+          # Calculate a pca on the layers and return the first axes
+          new <- predictor_transform(ras, option = "pca",pca.var = 1)[[1]]
         }
+
         # Rename
         names(new) <- paste0("ensemble_", lyr)
         # Add attributes on the method of ensembling
         attr(new, "method") <- method
-        # Add a coefficient of variation
-        ras_cv <- raster::cv(ras, na.rm = TRUE); names(ras_cv) <- paste0("cv_", lyr)
+        # Add uncertainty
+        ras_uncertainty <- switch (uncertainty,
+          "sd" = raster::calc(ras, sd, na.rm = TRUE),
+          "cv" = raster::cv(ras, na.rm = TRUE),
+          "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+        )
+        names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
         # Add attributes on the method of ensembling
-        attr(ras_cv, "method") <- method
+        attr(ras_uncertainty, "method") <- uncertainty
 
         # Add all layers to out
-        out <- raster::stack(out, new, ras_cv)
+        out <- raster::stack(out, new, uncertainty)
       }
 
       assertthat::assert_that(is.Raster(out))
@@ -237,18 +268,26 @@ methods::setMethod(
         for(cl in raster::unique(min_sd)){
           new[min_sd == cl] <- ras[[cl]][min_sd == cl]
         }
+      } else if(method == 'pca'){
+        # Calculate a pca on the layers and return the first axes
+        new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
       }
       # Rename
       names(new) <- paste0("ensemble_", lyr)
       # Add attributes on the method of ensemble
       attr(new, "method") <- method
-      # Add a coefficient of variation
-      ras_cv <- raster::cv(ras, na.rm = TRUE); names(ras_cv) <- paste0("cv_", lyr)
-      # Add attributes on the method of ensemble
-      attr(ras_cv, "method") <- method
+      # Add uncertainty
+      ras_uncertainty <- switch (uncertainty,
+                                 "sd" = raster::calc(ras, sd, na.rm = TRUE),
+                                 "cv" = raster::cv(ras, na.rm = TRUE),
+                                 "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+      )
+      names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
+      # Add attributes on the method of ensembling
+      attr(ras_uncertainty, "method") <- uncertainty
 
       # Add all layers to out
-      out <- raster::stack(out, new, ras_cv)
+      out <- raster::stack(out, new, ras_uncertainty)
     }
 
     assertthat::assert_that(is.Raster(out))
@@ -305,6 +344,8 @@ methods::setMethod(
       stop("This has not been reasonably implemented in this context.")
       # Check that thresholds are available
     } else if(method == 'min.sd'){
+      stop("This has not been reasonably implemented in this context.")
+    } else if(method == 'pca'){
       stop("This has not been reasonably implemented in this context.")
     }
     # Add dimensions to output

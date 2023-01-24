@@ -131,13 +131,26 @@ methods::setMethod(
 
 #' Add biodiversity point dataset to a distribution object (presence-absence)
 #'
-#' @description This function adds a presence-absence biodiversity dataset to a
-#' distribution object.
+#' @description
+#' This function adds a presence-absence biodiversity dataset to a distribution object.
+#' Opposed to presence-only data, presence-absence biodiversity records usually originate from
+#' structured biodiversity surveys where the absence of a species in a given region was specifically
+#' assessed.
+#'
+#' If it is the analysts choice it is also possible to format presence-only biodiversity data
+#' into a presence-absence form, by adding pseudo-absence through [`add_pseudoabsence`]. See the help file
+#' for more information.
+#'
+#' @details
+#' By default, the logit link function is used in a logistic regression setting
+#' unless the specific [engine] does not support generalised linear regressions (e.g. [engine_bart]).
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param poipa A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-absence point occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
+#' By default set to \code{"Observed"} and an error will be thrown if a [`numeric`] column with that name does not exist.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default (\code{NULL}) is to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
@@ -147,11 +160,6 @@ methods::setMethod(
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down
-#'
-#' @details Opposed to presence-only data, presence-absence biodiversity records usually originate from
-#' structured biodiversity surveys where the absence of a species in a given region was specifically
-#' assessed. By default, the cloglog link function is used in a logistic regression setting
-#' unless the specific [engine] does not support generalised linear regressions (e.g. [engine_bart])
 #'
 #' @family add_biodiversity
 #' @keywords biodiversity
@@ -250,9 +258,11 @@ methods::setMethod(
 
 #' Add biodiversity polygon dataset to a distribution object (presence-only)
 #'
-#' @description This function can be used to add a [`sf`] polygon dataset to an existing
+#' @description
+#' This function can be used to add a [`sf`] polygon dataset to an existing
 #' distribution object. Presence-only polygon data is treated differential than point data in
 #' some engines particular through the way that points are generated.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param polpo A [`sf`] or [`Spatial`]) polygon object of presence-only occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
@@ -422,7 +432,8 @@ methods::setMethod(
 
 #' Add biodiversity polygon dataset to a distribution object (presence-absence)
 #'
-#' @description This function can be used to add a [`sf`] polygon dataset to an existing
+#' @description
+#' This function can be used to add a [`sf`] polygon dataset to an existing
 #' distribution object. Presence-absence polygon data assumes that each area within the polygon
 #' can be treated as 'presence' for the species, while each area outside the polygon is where the
 #' species is absent.

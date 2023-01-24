@@ -39,9 +39,9 @@ devtools::install_github("IIASA/ibis.iSDM")
 
 ## Basic usage
 
-See relevant [reference site](https://iiasa.github.io/ibis.iSDM/) and [vignettes](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
+See relevant [reference site](https://iiasa.github.io/ibis.iSDM/) and [articles](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
 
-Note that the package is in active development and individual functions might change.
+Note that the package is in active development and parameters of some functions might change.
 
 **Citation:**
 <summary>

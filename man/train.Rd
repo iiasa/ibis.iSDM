@@ -107,6 +107,11 @@ See also Miller et al. (2019) in the references for more details on different ty
 if users want more control about this aspect, another option is to fit separate models
 and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
 }
+\note{
+There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
+understand the objective, workflow and parameters than can be used to modify the outcomes. Different predictions can
+be obtained from the same data and parameters and not all necessarily make sense or are useful.
+}
 \examples{
 \dontrun{
  # Fit a linear penalized logistic regression model via stan

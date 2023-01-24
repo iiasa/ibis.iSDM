@@ -54,7 +54,8 @@ engine_bart <- function(x,
                           is.character(type),
                           is.numeric(chains)
                           )
-  type <- match.arg(type, choices = c("link", "response"), several.ok = FALSE)
+  type <- match.arg(type, choices = c("link", "predictor", "response", "ppd"), several.ok = FALSE)
+  if(type == "predictor") type <- "link"
   if(nburn > iter) nburn <- floor( iter / 4)
 
   # Create a background raster

@@ -27,9 +27,10 @@ add_biodiversity_poipa(
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records indicating presence/absence.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records indicating presence/absence.
+By default set to \code{"Observed"} and an error will be thrown if a \code{\link{numeric}} column with that name does not exist.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default (\code{NULL}) is to use all covariates (if specified).}
 
 \item{family}{A \code{\link{character}} stating the family to be used (Default: \code{binomial}).}
 
@@ -47,14 +48,18 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 \item{...}{Other parameters passed down}
 }
 \description{
-This function adds a presence-absence biodiversity dataset to a
-distribution object.
-}
-\details{
+This function adds a presence-absence biodiversity dataset to a distribution object.
 Opposed to presence-only data, presence-absence biodiversity records usually originate from
 structured biodiversity surveys where the absence of a species in a given region was specifically
-assessed. By default, the cloglog link function is used in a logistic regression setting
-unless the specific \link{engine} does not support generalised linear regressions (e.g. \link{engine_bart})
+assessed.
+
+If it is the analysts choice it is also possible to format presence-only biodiversity data
+into a presence-absence form, by adding pseudo-absence through \code{\link{add_pseudoabsence}}. See the help file
+for more information.
+}
+\details{
+By default, the logit link function is used in a logistic regression setting
+unless the specific \link{engine} does not support generalised linear regressions (e.g. \link{engine_bart}).
 }
 \section{Notes}{
 

@@ -30,6 +30,11 @@ NULL
 #' if users want more control about this aspect, another option is to fit separate models
 #' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
 #'
+#' @note
+#' There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
+#' understand the objective, workflow and parameters than can be used to modify the outcomes. Different predictions can
+#' be obtained from the same data and parameters and not all necessarily make sense or are useful.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
 #' @param rm_corPred Remove highly correlated predictors (Default: \code{FALSE}). This option

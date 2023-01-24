@@ -695,6 +695,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' The parameter \code{'pca.var'} can be modified to specify the minimum variance to be covered by the axes.
 #' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
 #' Identified outliers are by default set to \code{NA}.
+#'
 #' @param env A [`Raster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},
 #' \code{'scale'}, \code{'norm'}, \code{'pca'}, \code{'revjack'}). See Details.
@@ -796,8 +797,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       return(o)
     }
     if(is.Raster(env)){
-      out <- env
-      for(n in 1:nlayers(out)){
+      out <- raster::stack()
+      for(n in 1:nlayers(env)){
         out <- raster::addLayer(out, rj(env[[n]]) )
       }
     } else {
@@ -901,7 +902,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, "stars"),
     !missing(env),
-    is.numeric(nknots) && nknots > 0,
+    is.numeric(nknots) && nknots > 1,
     is.character(option),
     is.null(deriv) || is.character(deriv),
     is.null(int_variables) || is.vector(int_variables)
@@ -937,7 +938,11 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   # Simple quadratic transformation
   if(option == 'quadratic'){
     if(is.Raster(env)){
-      new_env <- raster::calc(env, function(x) I(x^2))
+      if(raster::nlayers(env)==1){
+        new_env <- env^2
+      } else {
+        new_env <- raster::calc(env, function(x) I(x^2))
+      }
       names(new_env) <- paste0('quad__', names(env))
     } else {
       # Stars processing
