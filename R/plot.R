@@ -163,8 +163,9 @@ methods::setMethod(
     df <- obj[[c(xvar,yvar)]] |> predictor_transform(option = "norm") |>
       raster::as.data.frame(xy = TRUE)
     names(df)[3:4] <- c("var1", "var2")
-    # df <- subset(df, complete.cases(df))
-    df <- biscale::bi_class(df, x = var1, y = var2, dim = 3, style = "quantile")
+    suppressWarnings(
+      df <- biscale::bi_class(df, x = var1, y = var2, dim = 3, style = "quantile")
+    )
 
     map <- ggplot2::ggplot() +
       ggplot2::geom_raster(data = df , ggplot2::aes(x = x, y = y, fill = bi_class)) +

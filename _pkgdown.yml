@@ -136,6 +136,7 @@ reference:
       - starts_with("stancode")
       - ibis_options
       - starts_with("write_")
+      - starts_with("load_")
       - has_keyword("utils")
 
   - title: Class definitions and methods

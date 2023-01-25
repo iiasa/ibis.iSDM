@@ -30,7 +30,9 @@ After setting input data and parameters, model predictions can then be created
 via the \link{train} function and predictions be created.
 
 Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
-the background. See also the frequently asked question (FAQ) section for more information.
+the background. This can be for instance a buffered layer by a certain dispersal distance (Cooper and Soberon, 2018)
+or a categorical layer representing biomes or soil conditions. See also the
+frequently asked question (FAQ) section on the homepage for more information.
 
 See \strong{Details} for a description of the internal functions available
 to modify or summarize data within the created object.
@@ -87,6 +89,7 @@ There are other functions as well but those are better accessed through their re
 \references{
 \itemize{
 \item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. \url{https://doi.org/10.1002/ecy.2710}
+\item Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
 }
 }
 \seealso{

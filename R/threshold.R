@@ -50,7 +50,7 @@ NULL
 #' \dontrun{
 #'  # Where mod is an estimated DistributionModel
 #'  tr <- threshold(mod)
-#'  tr$show_rasters()
+#'  tr$plot_threshold()
 #' }
 #' @export
 NULL
@@ -312,18 +312,25 @@ methods::setMethod(
       return(tr)
     } else {
       # Finally threshold the raster
-      raster_thresh[raster_thresh < tr[1]] <- 0
       # Process depending on format
       if(format == "binary"){
         # Default is to create a binary presence-absence. Otherwise truncated hinge
+        raster_thresh[raster_thresh < tr[1]] <- 0
         raster_thresh[raster_thresh >= tr[1]] <- 1
         raster_thresh <- raster::asFactor(raster_thresh)
       } else if(format == "normalize"){
+        raster_thresh[raster_thresh < tr[1]] <- NA
         # If truncate, ensure that resulting values are normalized
         raster_thresh <- predictor_transform(raster_thresh, option = "norm")
+        raster_thresh[is.na(raster_thresh)] <- 0
+        raster_thresh <- raster::mask(raster_thresh, obj)
+        base::attr(raster_thresh, 'truncate') <- TRUE
+
         base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
       } else if(format == "percentile") {
+        raster_thresh[raster_thresh < tr[1]] <- NA
         raster_thresh <- predictor_transform(raster_thresh, option = "percentile")
+        raster_thresh <- raster::mask(raster_thresh, obj)
         base::attr(raster_thresh, 'truncate') <- TRUE
       }
       names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
