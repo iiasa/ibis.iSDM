@@ -30,6 +30,13 @@
   options('ibis.futurestrategy' = "multisession")
   options(doFuture.foreach.export = ".export-and-automatic-with-warning")
 
+  # Other dependencies not directly added in DESCRIPTION (to minimize potential issues)
+  options('ibis.dependencies' = c(
+    "pdp", "biscale",
+    "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
+    "dbarts", "mboost", "rstan", "cmdstanr"
+  ))
+
   # Set default corrrelation coefficient threshold for evaluating correlated predictors
   options('ibis.corPred' = 0.7)
 

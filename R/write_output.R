@@ -504,10 +504,10 @@ methods::setGeneric("write_model",
 
 #' @name write_model
 #' @rdname write_model
-#' @usage \S4method{write_model}{DistributionModel, character, logical, logical}(mod, fname, slim, verbose)
+#' @usage \S4method{write_model}{ANY, character, logical, logical}(mod, fname, slim, verbose)
 methods::setMethod(
   "write_model",
-  methods::signature(mod = "DistributionModel"),
+  methods::signature(mod = "ANY"),
   function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) {
     assertthat::assert_that(
       !missing(mod),

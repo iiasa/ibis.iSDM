@@ -73,7 +73,6 @@ methods::setMethod(
       warning('Supplied layer does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
-    names(layer) <- "bias_variable"
 
     # Calculate a default bias value if not already set
     if(is.null(bias_value)) bias_value <- raster::cellStats(layer, stat = "min")

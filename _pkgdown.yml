@@ -134,7 +134,6 @@ reference:
       - run_stan
       - wrap_stanmodel
       - starts_with("stancode")
-      - ibis_options
       - starts_with("write_")
       - starts_with("load_")
       - has_keyword("utils")
@@ -169,4 +168,6 @@ reference:
       - new_id
       - new_waiver
       - ibis_future
+      - ibis_options
+      - ibis_dependencies
 
