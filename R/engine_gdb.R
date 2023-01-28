@@ -314,6 +314,9 @@ engine_gdb <- function(x,
         full$Intercept <- 1
         full <- subset(full, complete.cases(full))
 
+        # Clamp?
+        if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+
         # Rescale exposure
         check_package('scales')
         w <- scales::rescale(w, to = c(1e-6, 1))
@@ -487,6 +490,7 @@ engine_gdb <- function(x,
                                     )
             # Get model
             mod <- self$get_data('fit_best')
+            model <- self$model
             assertthat::assert_that(inherits(mod,'mboost'),msg = 'No model found!')
             if(is.null(type)) type <- self$get_data('params')$type
             # Check that all variables are in provided data.frame
@@ -494,6 +498,9 @@ engine_gdb <- function(x,
 
             # Also get settings for bias values
             settings <- self$settings
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             # Set target variables to bias_value for prediction if specified
             if(!is.Waiver(settings$get('bias_variable'))){
@@ -511,7 +518,7 @@ engine_gdb <- function(x,
             # Subset to non-missing data
             newdata <- subset(newdata, complete.cases(newdata))
             # Make empty template
-            temp <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            temp <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
             # Predict
             y <- suppressWarnings(
               mboost::predict.mboost(object = mod, newdata = newdata,

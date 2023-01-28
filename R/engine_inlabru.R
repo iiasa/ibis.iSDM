@@ -798,6 +798,7 @@ engine_inlabru <- function(x,
 
           covs <- model$predictors_object$get_data(df = FALSE)
           covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
+
           # Build coordinates
           suppressWarnings(
             preds <- inla_predpoints(mesh = self$get_data('mesh'),
@@ -807,6 +808,8 @@ engine_inlabru <- function(x,
                                      spatial = TRUE
             )
           )
+          # Clamp?
+          if( settings$get("clamp") ) preds@data <- clamp_predictions(model, preds@data)
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -822,6 +825,7 @@ engine_inlabru <- function(x,
           # Define formula
           if(params$type == "response"){
             # Transformation to use for prediction scale
+            # FIXME: This assumes no custom link function has been set!
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
           } else {
             fun <- "" # Linear predictor
@@ -926,6 +930,9 @@ engine_inlabru <- function(x,
             model <- self$model
             # Also get settings for bias values
             settings <- self$settings
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             # Set target variables to bias_value for prediction if specified
             if(!is.Waiver(settings$get('bias_variable'))){

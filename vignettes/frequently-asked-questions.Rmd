@@ -230,6 +230,15 @@ This simulation is particularly helpful for creating (future) projections as oth
 Users are advised to use [`engine_inlabru`] by **default** in most cases and only use [`engine_inla`] if predictions look uncertain.
 </details>
 
+<details>
+<summary><b> I am concerned about extrapolation during prediction. What options do I have? </b>
+</summary>
+
+When creating predictive models such as SDMs it is often a concern to not predict to a variable range outside the environmental conditions for which a model was trained. The `ibis.iSDM` package supports variable 'clamping' of its predictions similar as the popular Maxent model, however for each [`engine`]. Clamping can be enabled by setting the parameter `clamp` in [`train`] to `TRUE`. This restricts any spatial (or spatial-temporal) projections to the combined `range` of predictor variables observed for each of the training localities.
+
+Similar functionalities are also available separately during scenario projections by setting adaptability constraints (see [`add_constraint_adaptability`]).
+
+</details>
 
 <details>
 <summary><b>Where can I find predictions created by `train` ? </b>

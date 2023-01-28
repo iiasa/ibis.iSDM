@@ -73,7 +73,7 @@ methods::setMethod(
       sign(lims[1])==0 || sign(lims[1])==-1,
       # Check that upper limit is positive or zero
       sign(lims[2])==0 || sign(lims[2])==1,
-      msg = "Lower or upper limits specified incorrectly!"
+      msg = "Lower or upper limits specified incorrectly! They have to be negative/positive or zero each."
                             )
 
     # Create new prior object

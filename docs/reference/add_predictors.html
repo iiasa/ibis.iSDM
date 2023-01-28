@@ -160,10 +160,11 @@ extreme outliers.</p></li>
 <span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="st">"scale"</span>,</span>
 <span>  derivates <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivate_knots <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bgmask <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  explode_factors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -206,6 +207,14 @@ extreme outliers.</p></li>
 <dd><p>A Boolean check whether derivate features should be considered (Options: <code>'none'</code>, <code>'thresh'</code>, <code>'hinge'</code>, <code>'quad'</code>) )</p></dd>
 
 
+<dt>derivate_knots</dt>
+<dd><p>A single <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> giving the number of knots for derivate creation if relevant (Default: <code>4</code>).</p></dd>
+
+
+<dt>int_variables</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with length greater or equal than <code>2</code> specifying the covariates (Default: <code>NULL</code>).</p></dd>
+
+
 <dt>bgmask</dt>
 <dd><p>Check whether the environmental data should be masked with the background layer (Default: <code>TRUE</code>)</p></dd>
 
@@ -216,10 +225,6 @@ extreme outliers.</p></li>
 
 <dt>explode_factors</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether any factor variables should be split up into binary variables (one per class). (Default: <code>FALSE</code>).</p></dd>
-
-
-<dt>int_variables</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with length greater or equal than <code>2</code> specifying the covariates  (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>priors</dt>

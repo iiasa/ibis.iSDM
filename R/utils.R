@@ -318,6 +318,62 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
   }
   return( out )
 }
+
+#' Clamp a predictor matrix by given values
+#'
+#' @description
+#' To limit extreme extrapolation it is possible to \code{'clamp'} an existing projection to the range
+#' of predictor values observed during model training.
+#' This function takes an internal model matrix and restricts the values seen in the predictor matrix
+#' to those observed during training.
+#' @note This function is meant to be used within a certain [`engine`] or within [`project`].
+#' @param model A [`list`] with the input data used for inference. Created during model setup.
+#' @param pred An optional [`data.frame`] of the prediction container.
+#' @returns A [`data.frame`] with the clamped predictors.
+#' @keywords utils
+#' @keywords internal
+#' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
+clamp_predictions <- function(model, pred){
+  assertthat::assert_that(
+    is.list(model),
+    assertthat::has_name(model, "biodiversity"),
+    (is.data.frame(pred) || is.matrix(pred)) || missing(pred)
+  )
+
+  # For each biodiversity dataset, calculate the range of predictors observed
+  vars_clamp <- data.frame()
+  for(ds in model$biodiversity){
+    # Calculate range for each variable
+    rr <- apply(ds$predictors[,ds$predictors_names], 2, function(z) range(z, na.rm = TRUE)) |>
+      t() |> as.data.frame() |> tibble::rownames_to_column("variable")
+    names(rr) <- c("variable", "min", "max")
+    vars_clamp <- rbind(vars_clamp, rr)
+    rm(rr)
+  }
+  # Aggregate if multiple variables
+  if(anyDuplicated(vars_clamp$variable)){
+    o1 <- aggregate(variable ~ min, data = vars_clamp,
+              FUN = function(x) min(x) )
+    o2 <- aggregate(variable ~ max, data = vars_clamp,
+                    FUN = function(x) max(x) )
+    vars_clamp <- merge(o1,o2)
+  }
+  # --- #
+  # Now clamp either predictors
+  if(missing(pred)) pred <- model$predictors
+
+  # Now clamp the prediction matrix with the clamped variables
+  for (v in intersect(vars_clamp$variable, names(pred))) {
+    pred[, v] <- pmin(
+      pmax(pred[, v], vars_clamp$min[vars_clamp==v] ),
+      vars_clamp$max[vars_clamp==v])
+  }
+
+  assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
+                           nrow(pred)>0)
+  return(pred)
+}
+
 #' Create formula matrix
 #'
 #' Function to create list of formulas with all possible combinations of variables

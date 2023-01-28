@@ -20,6 +20,9 @@
   options('ibis.nthread' = parallel::detectCores() - 1)
   options('ibis.runparallel' = FALSE)
   options('ibis.setupmessages' = TRUE)
+  # Known seed
+  options('ibis.seed' = 19372)
+  # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
@@ -32,7 +35,7 @@
 
   # Other dependencies not directly added in DESCRIPTION (to minimize potential issues)
   options('ibis.dependencies' = c(
-    "pdp", "biscale",
+    "pdp", "scales", "biscale", "modEvA",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
     "dbarts", "mboost", "rstan", "cmdstanr"
   ))

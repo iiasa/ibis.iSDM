@@ -315,6 +315,9 @@ engine_xgboost <- function(x,
         # Ensure that the column names are identical for both
         pred_cov <- pred_cov[, colnames(train_cov)]
 
+        # Clamp?
+        if( settings$get("clamp") ) pred_cov <- clamp_predictions(model, pred_cov)
+
         # Set target variables to bias_value for prediction if specified
         if(!is.Waiver(settings$get('bias_variable'))){
           for(i in 1:length(settings$get('bias_variable'))){
@@ -723,6 +726,9 @@ engine_xgboost <- function(x,
                                     is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
             mod <- self$get_data('fit_best')
+            # Get model object
+            model <- self$model
+
             # Also get settings for bias values
             settings <- self$settings
 
@@ -731,6 +737,9 @@ engine_xgboost <- function(x,
                 all( mod$feature_names %in% colnames(newdata) )
               )
               newdata <- subset(newdata, select = mod$feature_names)
+
+              # Clamp?
+              if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
               if(!is.Waiver(settings$get('bias_variable'))){
                 for(i in 1:length(settings$get('bias_variable'))){
@@ -742,7 +751,7 @@ engine_xgboost <- function(x,
                 }
               }
               newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
-            }
+            } else {stop("Not implemented. Supply a data.frame as newdata!")}
 
             # Make a prediction
             suppressWarnings(

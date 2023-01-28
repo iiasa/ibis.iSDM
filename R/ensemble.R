@@ -3,7 +3,11 @@ NULL
 
 #' Function to create an ensemble of multiple fitted models
 #'
-#' @description This function creates an ensemble of multiple provided distribution models
+#' @description
+#' Ensemble models calculated on multiple models have often been shown to
+#' outcompete any single model in comparative assessments (Valavi et al. 2022).
+#'
+#' This function creates an ensemble of multiple provided distribution models
 #' fitted with the [`ibis.iSDM-package`]. Each model has to have estimated predictions with a given method and
 #' optional uncertainty in form of the standard deviation or similar.
 #' Through the `layer` parameter it can be specified which part of the prediction
@@ -43,6 +47,8 @@ NULL
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @param uncertainty A [`character`] indicating how the uncertainty among models shoudl be calculated. Available options include
 #' the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).
+#' @references
+#' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed predictions
@@ -63,7 +69,7 @@ NULL
 NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
-                    function(..., method = "mean", weights = NULL, min.value = NULL,layer = "mean",
+                    function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
                              normalize = FALSE, uncertainty = "cv") standardGeneric("ensemble"))
 
 #' @name ensemble
@@ -141,7 +147,7 @@ methods::setMethod(
       # Now ensemble per layer entry
       out <- raster::stack()
       for(lyr in layer){
-        ras <- stack(sapply(ll_ras, function(x) x[[lyr]]))
+        ras <- raster::stack(sapply(ll_ras, function(x) x[[lyr]]))
 
         # If normalize before running an ensemble if parameter set
         if(normalize) ras <- predictor_transform(ras, option = "norm")
@@ -209,7 +215,7 @@ methods::setMethod(
         attr(ras_uncertainty, "method") <- uncertainty
 
         # Add all layers to out
-        out <- raster::stack(out, new, uncertainty)
+        out <- raster::stack(out, new, ras_uncertainty)
       }
 
       assertthat::assert_that(is.Raster(out))
@@ -457,7 +463,7 @@ methods::setMethod(
         next()
       }
       # Get partial with identical variable length
-      o <- partial(mod = obj, x.var = x.var,variable_length = 100,values = rr, plot = FALSE)
+      o <- partial(mod = obj, x.var = x.var, variable_length = 100, values = rr, plot = FALSE)
       assertthat::assert_that(all( o$partial_effect == rr ))
       # Subset to target variable
       o <- o[, c("partial_effect", layer)]
@@ -465,7 +471,6 @@ methods::setMethod(
       if(normalize){
         if(length(unique(o[[layer]]))>1){
           o[[layer]] <- (o[[layer]] - min( o[[layer]])) / (max(o[[layer]] ) - min(o[[layer]] ))
-          # o[[layer]] <- scale(o[[layer]], center = F, scale = T)
         } else {
           o[[layer]] <- 0 # Assumption being the variable has been regularized out
         }
@@ -479,7 +484,7 @@ methods::setMethod(
     if(method == 'mean'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                                   FUN = function(x = out[[layer]]) {
-                                    return(cbind( mean = mean(x),sd = sd(x)))
+                                    return(cbind( mean = mean(x), sd = sd(x)))
                                     }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "mean", "sd")
     } else if(method == 'median'){
@@ -488,7 +493,6 @@ methods::setMethod(
                          return(cbind( median = median(x), mad = mad(x)))
                        }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "median", "mad")
-
     }
     return(new)
   }

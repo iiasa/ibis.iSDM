@@ -116,6 +116,7 @@ Collate:
     'utils-boom.R'
     'utils-gdb.R'
     'utils-glmnet.R'
+    'utils-predictors.R'
     'utils-scenario.R'
     'utils-stan.R'
     'utils-xgboost.R'

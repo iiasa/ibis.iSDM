@@ -95,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-01-21</h4>
+            <h4 data-toc-skip class="date">2023-01-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/frequently-asked-questions.Rmd" class="external-link"><code>vignettes/frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>frequently-asked-questions.Rmd</code></div>
@@ -245,7 +245,7 @@ prior can generally be define via a combination of
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">species_data</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/add_priors.html">add_priors</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">pp</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/engine_gdb.html">engine_gdb</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Multiple priors for an Engine can be defined in a
 <code>PriorList</code>. Whenever a prior for the same variable is set
 again, it overwrites the previous value.</p>
@@ -365,6 +365,20 @@ newdata object.</p>
 Users are advised to use [<code>engine_inlabru</code>] by
 <strong>default</strong> in most cases and only use
 [<code>engine_inla</code>] if predictions look uncertain.
+</details><details><summary><b> I am concerned about extrapolation during prediction. What options
+do I have? </b>
+</summary><p>When creating predictive models such as SDMs it is often a concern to
+not predict to a variable range outside the environmental conditions for
+which a model was trained. The <code>ibis.iSDM</code> package supports
+variable ‘clamping’ of its predictions similar as the popular Maxent
+model, however for each [<code>engine</code>]. Clamping can be enabled
+by setting the parameter <code>clamp</code> in [<code>train</code>] to
+<code>TRUE</code>. This restricts any spatial (or spatial-temporal)
+projections to the combined <code>range</code> of predictor variables
+observed for each of the training localities.</p>
+<p>Similar functionalities are also available separately during scenario
+projections by setting adaptability constraints (see
+[<code>add_constraint_adaptability</code>]).</p>
 </details><details><summary><b>Where can I find predictions created by <code>train</code> ? </b>
 </summary><p>After a <code>distribution</code> model has been trained and if the
 <code>inference_only</code> parameter in <code><a href="../reference/train.html">train()</a></code> has been

@@ -18,17 +18,19 @@ NULL
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
 #' Available options in this function include:
-#' [*] \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
+#'
+#' * \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
 #' prior to fitting.
-#' [*] \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
+#' * \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
 #' alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
 #' runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
 #' variables.
-#' [*] \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
+#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
 #' the engine does not support joint integration of likelihoods.
 #' See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 #' if users want more control about this aspect, another option is to fit separate models
 #' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
+#' * \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
 #'
 #' @note
 #' There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
@@ -60,23 +62,25 @@ NULL
 #' that do not support the integration of more than one dataset. Integration methods are generally sensitive
 #' to the order in which they have been added to the  [`BiodiversityDistribution`] object.
 #' Available options are:
-#' [*] \code{"predictor"} The predicted output of the first (or previously fitted) models are
+#' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
 #' added to the predictor stack and thus are predictors for subsequent models (Default).
-#' [*] \code{"offset"} The predicted output of the first (or previously fitted) models are
+#' * \code{"offset"} The predicted output of the first (or previously fitted) models are
 #' added as spatial offsets to subsequent models. Offsets are back-transformed depending
 #' on the model family. This option might not be supported for every [`engine`].
-#' [*] \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
+#' * \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 #' are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 #' partialed out during prediction. Here the first dataset added determines the reference level
 #' (see Leung et al. 2019 for a description).
-#' [*] \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
+#' * \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
 #' Might not work with any engine!
-#' [*] \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
+#' * \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
 #' Individual weight multipliers can be determined while setting up the model (**Note: Default is 1**). Datasets are then combined for estimation
 #' and weighted respectively, thus giving for example presence-only records less weight than survey records.
 #'
 #' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
 #' @param aggregate_observations [`logical`] on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).
+#' @param clamp [`logical`] whether predictions should be clamped to the range of predictor values observed during model fitting (Default: \code{FALSE}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).
 #' @param ... further arguments passed on.
 #' @references
 #' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
@@ -113,7 +117,7 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, verbose = FALSE,...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -123,7 +127,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, verbose = FALSE,...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -134,6 +138,7 @@ methods::setMethod(
       is.logical(inference_only),
       is.logical(only_linear),
       is.character(method_integration),
+      is.logical(clamp),
       is.logical(verbose)
     )
     # Now make checks on completeness of the object
@@ -145,7 +150,7 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE
+    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
@@ -156,8 +161,9 @@ methods::setMethod(
     settings$set('varsel', varsel)
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
+    settings$set('clamp', clamp)
     settings$set('verbose', verbose)
-    settings$set('seed', 19372) # Set a (pseudo-random) model seed for reproducibility
+    settings$set('seed', getOption("ibis.seed"))
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )

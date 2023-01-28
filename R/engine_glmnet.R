@@ -287,7 +287,13 @@ engine_glmnet <- function(x,
         # All other needed data for model fitting
         fam <- model$biodiversity[[1]]$family
         li <- model$biodiversity[[1]]$link
-        if(!is.null(li)) if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
+        if(!is.null(li)){
+          if(li %in% c("cloglog", "logit", "probit")){
+            fam <- binomial(link = li)
+          } else {
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Custom link functions not supported!"))
+          }
+        }
 
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
@@ -333,6 +339,9 @@ engine_glmnet <- function(x,
             upplim[v] <- model$priors$get(v, what = "lims")[2]
           }
         }
+
+        # Clamp?
+        if( settings$get("clamp") ) full <- clamp_predictions(model, full)
 
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(df),
@@ -591,6 +600,9 @@ engine_glmnet <- function(x,
             model <- self$model
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             # Set target variables to bias_value for prediction if specified
             if(!is.Waiver(settings$get('bias_variable'))){

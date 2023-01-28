@@ -28,6 +28,9 @@ A \code{\link{RasterStack}} containing the ensemble of the provided predictions 
 coefficient of variation across all models.
 }
 \description{
+Ensemble models calculated on multiple models have often been shown to
+outcompete any single model in comparative assessments (Valavi et al. 2022).
+
 This function creates an ensemble of multiple provided distribution models
 fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have estimated predictions with a given method and
 optional uncertainty in form of the standard deviation or similar.
@@ -70,6 +73,11 @@ the \code{"normalize"} parameter has to be set.
 
  # Make a bivariate plot (might require other packages)
  bivplot(ex)
+}
+}
+\references{
+\itemize{
+\item Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
 }
 }
 \keyword{train}

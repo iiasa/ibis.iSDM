@@ -319,6 +319,9 @@ engine_bart <- function(x,
         full$cellid <- rownames(full) # Add rownames
         full <- subset(full, complete.cases(full))
 
+        # Clamp?
+        if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(data),
           is.formula(equation),
@@ -548,6 +551,9 @@ engine_bart <- function(x,
             assertthat::assert_that(!missing(newdata),
                                     is.data.frame(newdata))
 
+            # get model data
+            model <- self$model
+
             # Define rowids as those with no missing data
             rownames(newdata) <- 1:nrow(newdata)
             newdata$rowid <- as.numeric( rownames(newdata) )
@@ -555,6 +561,9 @@ engine_bart <- function(x,
 
             # Also get settings for bias values
             settings <- self$settings
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             if(!is.Waiver(settings$get('bias_variable'))){
               for(i in 1:length(settings$get('bias_variable'))){
@@ -574,7 +583,7 @@ engine_bart <- function(x,
               )
             assertthat::assert_that(nrow(pred_bart) == nrow(newdata))
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
             if(layer == "mean"){
               prediction[newdata$rowid] <- matrixStats::rowMeans2(pred_bart)
             } else if(layer == "sd"){

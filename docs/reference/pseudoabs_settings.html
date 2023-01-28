@@ -82,8 +82,8 @@ additional parameter description and examples on how to 'turn' a presence-only d
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, logical, ANY</span></span>
-<span><span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">mcp_inside</span>, <span class="va">bias</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY, numeric, numeric, character, numeric, logical, logical ANY</span></span>
+<span><span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>, <span class="va">nrpoints</span>, <span class="va">min_ratio</span>, <span class="va">method</span>, <span class="va">buffer_distance</span>, <span class="va">inside</span>, <span class="va">layer</span>, <span class="va">bias</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -94,11 +94,13 @@ additional parameter description and examples on how to 'turn' a presence-only d
 
 
 <dt>nrpoints</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> given the number of background points to be created (Default: <code>10 000</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> given the number of absence points to be created. Has to be larger than <code>0</code> and
+normally points are not created in excess of the number of cells of the background (Default: <code>10 000</code>).</p></dd>
 
 
 <dt>min_ratio</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the minimum ratio of background points relative to presence points.
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the minimum ratio of background points relative to the presence points.
+Setting this value to <code>1</code> generates an equal amount of absence points relative to the presence points.
 Usually ignored unless the ratio exceeds the <code>nrpoints</code> parameters (Default: <code>0.25</code>).</p></dd>
 
 
@@ -108,12 +110,18 @@ Usually ignored unless the ratio exceeds the <code>nrpoints</code> parameters (D
 
 <dt>buffer_distance</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A distance from the observations in which pseudo-absence points are not to be generated.
-Note that units follow the units of the projection (e.g. <code>m</code> or <code>°</code>).</p></dd>
+Note that units follow the units of the projection (e.g. <code>m</code> or <code>°</code>). Only used when <code>method = "buffer"</code>.</p></dd>
 
 
-<dt>mcp_inside</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value of whether absence points should be sampled outside (Default) or inside the
-minimum convex polygon provided this method is chosen (parameter <code>method = "mcp"</code>).</p></dd>
+<dt>inside</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value of whether absence points should be sampled outside (Default) or inside a
+minimum convex polygon or range provided the respective method is chosen (parameter <code>method = "mcp"</code> or
+<code>method = "range"</code>).</p></dd>
+
+
+<dt>layer</dt>
+<dd><p>A <code>sf</code> or <code>RasterLayer</code> (in the case of method <code>'zones'</code>) object indicating the range of a species.
+Only used with <code>method = "range"</code> or <code>method = "zones"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>bias</dt>
@@ -127,16 +135,22 @@ be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</c
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Possible parameters are:</p><ul><li><p><code>background</code> Specifies the extent over which absence points are to be sampled.</p></li>
-<li><p><code>nrpoints</code> The number of points to be generated. Has to be larger than <code>0</code>.</p></li>
-<li><p><code>method</code> The specific method on how absence points should be generated. Available options
-are <code>'random'</code> (Default), <code>'buffer'</code> to generate only within a buffered distance of existing points, or <code>'mcp'</code> to only generate them
-within or outside a minimum convex polygon of the presence points. The parameter <code>mcp_inside</code> supports inside vs outside generation.</p></li>
-<li><p><code>buffer_distance</code> The numeric value indicating the distance from presence points where absence points are to be created.</p></li>
-<li><p><code>min_ratio</code> The minimum ratio of absence points relative presence points. Ensures a minimum number of
-absence points. For instance setting this value to <code>1</code> generates an equal amount of absence points relative to presence points.</p></li>
-<li><p><code>bias</code> An optional bias layer over which points should preferentially be sampled. Points are preferentially generated in
-areas with larger bias.</p></li>
+    <p>There are multiple methods available for sampling a biased background layer.
+Possible parameters for <code>method</code> are:</p><ul><li><p><code>'random'</code> Absence points are generated randomly over the background (Default),</p></li>
+<li><p><code>'buffer'</code> Absence points are generated only within a buffered distance of existing points.
+This option requires the specification of the parameter <code>buffer_distance</code>.</p></li>
+<li><p><code>'mcp'</code> Can be used to only generate absence points within or outside a
+minimum convex polygon of the presence points. The parameter <code>inside</code> specifies whether
+points should be sampled inside or outside (Default) the minimum convex polygon.</p></li>
+<li><p><code>'range'</code> Absence points are created either inside or outside a provided additional
+layer that indicates for example a range of species (controlled through parameter <code>inside</code>).</p></li>
+<li><p><code>'zones'</code> A ratified (e.g. of type <a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a>) <code>RasterLayer</code> layer depicting zones from which absence
+points are to be sampled. This method checks which points fall within which zones and then samples absence
+points either within or outside these zones exclusively. Both <code>'layer'</code> and <code>'inside'</code> have to be set
+for this option.</p></li>
+<li><p><code>'target'</code> Make use of a target background for sampling absence points. Here a <code>RasterLayer</code> object
+has to be provided through the parameter <code>'layer'</code>. Absence points are then sampled exclusively within
+the target areas for grid cells with non-zero values.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -149,7 +163,7 @@ areas with larger bias.</p></li>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points</span></span></span>
-<span class="r-in"><span><span class="va">ass1</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">10000</span>, method <span class="op">=</span> <span class="st">'mcp'</span>, mcp_inside <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ass1</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">10000</span>, method <span class="op">=</span> <span class="st">'mcp'</span>, inside <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># This setting would match the number of presence-absence points directly.</span></span></span>
 <span class="r-in"><span><span class="va">ass2</span> <span class="op">&lt;-</span> <span class="fu">pseudoabs_settings</span><span class="op">(</span>nrpoints <span class="op">=</span> <span class="fl">0</span>, min_ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>

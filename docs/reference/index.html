@@ -172,7 +172,7 @@
         <dd>Creates a new PriorList object</dd>
       </dl><dl><dt>
           
-          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
+          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; logical ANY&gt;</i>)</a></code> 
         </dt>
         <dd>Settings for specifying pseudo-absence points within the model background</dd>
       </dl><dl><dt>
@@ -617,9 +617,9 @@
         <dd>Show the stan code from a trained model</dd>
       </dl><dl><dt>
           
-          <code><a href="ibis_options.html">ibis_options()</a></code> 
+          <code><a href="write_model.html">write_model(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
         </dt>
-        <dd>Print ibis options</dd>
+        <dd>Save a model for later use</dd>
       </dl><dl><dt>
           
           <code><a href="write_output.html">write_output(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterStack&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;data.frame&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;stars&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
@@ -635,6 +635,16 @@
           <code><a href="write_summary.html">write_summary(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
         </dt>
         <dd>Generic function to write summary outputs from created models.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="load_model.html">load_model(<i>&lt;character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
+        </dt>
+        <dd>Load a pre-computed model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="clamp_predictions.html">clamp_predictions()</a></code> 
+        </dt>
+        <dd>Clamp a predictor matrix by given values</dd>
       </dl><dl><dt>
           
           <code><a href="formatGLOBIOM.html">formatGLOBIOM()</a></code> 
@@ -747,6 +757,11 @@
           <code><a href="bivplot.html">bivplot()</a></code> 
         </dt>
         <dd>Bivariate plot wrapper for distribution objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ibis_dependencies.html">ibis_dependencies()</a></code> 
+        </dt>
+        <dd>Install ibis dependencies</dd>
       </dl><dl><dt>
           
           <code><a href="ibis_future.html">ibis_future()</a></code> 
