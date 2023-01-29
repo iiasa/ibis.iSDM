@@ -35,7 +35,7 @@
 
   # Other dependencies not directly added in DESCRIPTION (to minimize potential issues)
   options('ibis.dependencies' = c(
-    "pdp", "scales", "biscale", "modEvA",
+    "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
     "dbarts", "mboost", "rstan", "cmdstanr"
   ))

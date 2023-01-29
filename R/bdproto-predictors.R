@@ -80,6 +80,15 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
     sf::st_crs(self$data)
   },
+  # Get Resolution
+  get_resolution = function(self){
+    assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
+    if(is.Raster(self$data)){
+      raster::res(self$data)
+    } else {
+      stars::st_res(self$data)
+    }
+  },
   # Clip the predictor dataset by another dataset
   crop_data = function(self, pol){
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),

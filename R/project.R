@@ -132,6 +132,8 @@ methods::setMethod(
     # Not get the baseline raster
     thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
+    if(is.na(raster::projection(baseline_threshold))) projection(baseline_threshold) <- raster::projection( fit$model$background )
+
     if(inherits(baseline_threshold, 'RasterStack') || inherits(baseline_threshold, 'RasterBrick')){
       baseline_threshold <- baseline_threshold[[grep(layer,names(baseline_threshold))]]
     }
@@ -145,7 +147,7 @@ methods::setMethod(
       } else if(scenario_constraints[["dispersal"]]$method == "kissmig"){
         assertthat::assert_that( is.Raster(baseline_threshold))
         if(!is.Waiver(scenario_threshold)) {
-          if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Using kissmig to calculate updated distribution thresholds.')
+          if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Using kissmig to calculate updated distribution thresholds.')
           scenario_threshold <- new_waiver()
         }
       } else {
@@ -418,6 +420,10 @@ methods::setMethod(
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)
       ); names(proj_thresh) <- 'threshold'
+      # Correct band if different
+      if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
+        proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))
+      }
       proj <- stars:::c.stars(proj, proj_thresh)
     }
 

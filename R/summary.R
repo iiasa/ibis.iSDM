@@ -61,7 +61,7 @@ summary.PredictorDataset <- function(x) x$summary()
 #' @method summary BiodiversityScenario
 #' @keywords summary
 #' @export
-summary.BiodiversityScenario <- function(x) x$summary()
+summary.BiodiversityScenario <- function(x, ...) x$summary(...)
 
 #' @rdname summary
 #' @method summary PriorList

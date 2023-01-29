@@ -22,6 +22,11 @@ should be performed.}
 \item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
 
 \item{layer}{A \code{\link{Raster}} object that can be used for boundary constraints (Default: \code{NULL}).}
+
+\item{pext}{\code{\link{numeric}} indicator for \code{\link{kissmig}} of the probability a colonized cell becomes uncolonized,
+i.e., the species gets locally extinct (Default: \code{0.1}).}
+
+\item{pcor}{\code{\link{numeric}} probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).}
 }
 \description{
 This function adds a constrain to a \code{\linkS4class{BiodiversityScenario}} object to

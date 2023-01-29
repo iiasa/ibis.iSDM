@@ -73,6 +73,14 @@ BiodiversityScenario <- bdproto(
   show = function(self) {
     self$modelobject
   },
+  # Get projection
+  get_projection = function(self){
+    return( self$predictors$get_projection() )
+  },
+  # Get resolution
+  get_resolution = function(self){
+    return( self$predictors$get_resolution() )
+  },
   # Get Model
   get_model = function(self){
     if(is.Waiver(self$modelobject)) return( new_waiver() )
@@ -100,7 +108,7 @@ BiodiversityScenario <- bdproto(
     if(inherits(self$predictors, "PredictorDataset")) {
       if(what == "range"){
         return(
-          c( min(self$predictors$timeperiod), max(self$predictors$timeperiod) )
+          c( min(as.Date(self$predictors$timeperiod)), max(as.Date(self$predictors$timeperiod)) )
         )
       } else {
         return(
@@ -156,13 +164,13 @@ BiodiversityScenario <- bdproto(
   },
   # Plot the prediction
   plot = function(self, what = "suitability", which = NULL, ...){
-    # FIXME: More plotting options would be good
     if(is.Waiver(self$get_data())){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
       invisible()
     } else {
       # Get unique number of data values. Surely there must be an easier val
-      vals <- self$get_data()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique() %>% length()
+      vals <- self$get_data()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique()
+      vals <- length(na.omit(vals))
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
         stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
@@ -175,6 +183,13 @@ BiodiversityScenario <- bdproto(
                             main = paste0(what," for ", stars::st_get_dimension_values(obj, "band") )  )
       }
     }
+  },
+  # Convenience function to plot thresholds if set
+  plot_threshold = function(self, which = NULL){
+    # Check that baseline and scenario thresholds are all there
+    if(!( 'threshold' %in% attributes(self$get_data())$names )) return(new_waiver())
+
+    self$plot(what = "threshold", which = which)
   },
   # Plot Migclim results if existing
   plot_migclim = function(self){
@@ -232,22 +247,96 @@ BiodiversityScenario <- bdproto(
       gganimate::anim_save(animation = g, fname)
     } else { g }
   },
-  # Summarize the change in thresholded layer between timesteps
-  summary = function(self, plot = FALSE, relative = FALSE){
+  #Plot relative change between baseline and projected thresholds
+  plot_relative_change = function(self, position = NULL, variable = 'mean', plot = TRUE){
+    # Default position is the last one
+    assertthat::assert_that(is.null(position) || is.numeric(position) || is.character(position),
+                            is.character(variable))
+    # Threshold
+    obj <- self$get_model()
+    thresh_reference <- grep('threshold',obj$show_rasters(),value = T)
+    # If there is more than one threshold only use the one from variable
+    if(length(thresh_reference)>1) {
+      warning('More than one baseline threshold. Using the first one.')
+      thresh_reference <- grep(variable, thresh_reference,value = T)[1]
+    }
+    # Check that baseline and scenarios are all there
+    assertthat::assert_that(
+      !is.Waiver(self$get_data()),
+      'threshold' %in% attributes(self$get_data())$names,
+      length(thresh_reference) >0 & is.character(thresh_reference),
+      is.Raster( self$get_model()$get_data('prediction') ),
+      msg = "Threshold not found!"
+    )
+
+    # Not get the baseline raster
+    baseline <- self$get_model()$get_data(thresh_reference)
+    # And the last scenario prediction
+    scenario <- self$get_data()['threshold']
+    time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
+    if(is.numeric(position)) position <- time[position]
+    if(is.null(position)) position <- time[length(time)]
+    final <- scenario %>%
+      stars:::filter.stars(band == position) %>%
+      as('Raster')
+    raster::projection(final) <- raster::projection(baseline)
+    # -- #
+    if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
+    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
+
+    # Calculate overlays
+    diff_f <- raster::overlay(baseline, final, fun = function(x, y){x + y * 2})
+    diff_f <- raster::ratify(diff_f)
+    # 0 = Unsuitable | 1 = Loss | 2 = Gain | 3 = stable
+    rat <- levels(diff_f)[[1]]
+    rat <- merge.data.frame(rat, data.frame(ID = seq(0,3), diff = c("Unsuitable", "Loss", "Gain", "Stable")),all = TRUE)
+    levels(diff_f) <- rat
+    diff_f <- raster::mask(diff_f, baseline)
+    rm(baseline, final)
+
+    # Plot
+    if(plot){
+      # Colours
+      cols <- c("Unsuitable" = "gray92", "Loss" = "#DE646A", "Gain" = "cyan3", "Stable" = "gray60")
+
+      # Convert to raster
+      diff_ff <- as.data.frame(diff_f, xy = TRUE)
+      names(diff_ff)[3] <- "Change"
+      diff_ff$Change <- factor(diff_ff$Change, levels = names(cols))
+
+      # Use ggplot
+      g <- ggplot2::ggplot() +
+        ggplot2::coord_equal() +
+        ggplot2::geom_raster(data = diff_ff, aes(x = x, y = y, fill = Change)) +
+        ggplot2::theme_light(base_size = 18) +
+        ggplot2::scale_x_discrete(expand=c(0,0)) +
+        ggplot2::scale_y_discrete(expand=c(0,0)) +
+        ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
+        ggplot2::theme(legend.position = "bottom") +
+        ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
+      return(g)
+    } else {
+      # Return
+      return(diff_f)
+    }
+  },
+  # Summarize the change in layers between timesteps
+  summary = function(self, layer = "threshold", plot = FALSE, relative = FALSE){
     # Check that baseline and scenario thresholds are all there
     assertthat::assert_that(
       !is.Waiver(self$get_data()),
       is.logical(plot), is.logical(relative)
     )
-    if( 'threshold' %in% attributes(self$get_data())$names ){
+    if( layer == "threshold" & 'threshold' %in% attributes(self$get_data())$names ){
       # TODO: Try and get rid of dplyr dependency. Currently too much work to not use it
       check_package("dplyr")
       # Get the scenario predictions and from there the thresholds
       scenario <- self$get_data()['threshold']
-      st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
       time <- stars::st_get_dimension_values(scenario,which = 'band')
+      assertthat::assert_that(!is.na(sf::st_crs(scenario)), msg = "Scenario not correctly projected.")
       # HACK: Add area to stars
       ar <- stars:::st_area.stars(scenario)
+      # Get the unit
       ar_unit <- units::deparse_unit(ar$area)
       new <- as(scenario,"Raster") * as(ar, "Raster")
       new <- raster::setZ(new, time)
@@ -283,18 +372,25 @@ BiodiversityScenario <- bdproto(
                          totchange_loss_km2 = sum(change[change < 0]))
       out <- out %>% dplyr::left_join(o, by = "band")
 
-      # Aggregate
-      # df <- tapply(df$area, df$band, function(x) sum(x, na.rm = TRUE))
-      # df <- units::as_units(df, units::as_units(ar_unit))  # Set Units
+      if(relative == TRUE){
+        # Finally calculate relative change to baseline (first entry) for all entries where this is possible
+        relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) * fac)
+        out <- subset(out, select = c("band", "area_km2", "totarea_km2"))
+        out[,c("area_km2")] <- apply( out[,c("area_km2")], 2, relChange)
+      }
     } else {
       # Get the scenario predictions and from there the thresholds
       scenario <- self$get_data()['suitability']
-      st_crs(scenario) <- sf::st_crs(self$get_model()$get_data('prediction')) # Set projection
       times <- stars::st_get_dimension_values(scenario, which = 'band')
+      # Get area
+      ar <- stars:::st_area.stars(scenario)
+      # Get the unit
+      ar_unit <- units::deparse_unit(ar$area)
 
-      # Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
+      # TODO: Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
       mod <- self$get_model()
-      out <- summarise_projection(scenario, relative = relative)
+      scenario <- scenario * ar
+      out <- summarise_projection(scenario, fun = "mean", relative = relative)
     }
 
     if(plot){
@@ -314,10 +410,27 @@ BiodiversityScenario <- bdproto(
           ggplot2::theme_classic(base_size = 18) +
           ggplot2::geom_ribbon(fill = "grey90") +
           ggplot2::geom_line(size = 2) +
-          ggplot2::labs(x = "Time", y = expression(Area(km^2)), title = "Overall suitable habitat")
+          ggplot2::labs(x = "Time", y = expression(Area(km^2)), title = "Relative suitable habitat")
       }
     }
     return(out)
+  },
+  # Summarize beforeafter
+  summary_beforeafter = function(self){
+    # Check that baseline and scenario thresholds are all there
+    assertthat::assert_that(
+      !is.Waiver(self$get_data()),
+      ( 'threshold' %in% attributes(self$get_data())$names ),
+      msg = "This function only works with added thresholds."
+    )
+    scenario <- self$get_data()['threshold']
+
+    # Get runname
+    runname <- self$get_model()[["model"]]$runname
+
+    return(
+      tibble::add_column( summarise_change(scenario), runname = runname, .before = 1)
+    )
   },
   # Calculate slopes
   calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
@@ -340,69 +453,6 @@ BiodiversityScenario <- bdproto(
     names(out) <- 'linear_coefficient'
     if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     return(out)
-  },
-  #Plot relative change between baseline and projected thresholds
-  plot_relative_change = function(self, position = NULL, variable = 'mean', plot = TRUE){
-    # Default position is the last one
-    assertthat::assert_that(is.null(position) || is.numeric(position) || is.character(position),
-                            is.character(variable))
-    # Threshold
-    obj <- self$get_model()
-    thresh_reference <- grep('threshold',obj$show_rasters(),value = T)
-    # If there is more than one threshold only use the one from variable
-    if(length(thresh_reference)>1) {
-      warning('More than one baseline threshold. Using the first one.')
-      thresh_reference <- grep(variable, thresh_reference,value = T)[1]
-    }
-    # Check that baseline and scenarios are all there
-    assertthat::assert_that(
-      !is.Waiver(self$get_data()),
-      'threshold' %in% attributes(self$get_data())$names,
-      length(thresh_reference) >0 & is.character(thresh_reference),
-      is.Raster( self$get_model()$get_data('prediction') )
-    )
-
-    # Not get the baseline raster
-    baseline <- self$get_model()$get_data(thresh_reference)
-    # And the last scenario prediction
-    scenario <- self$get_data()['threshold']
-    time <- stars::st_get_dimension_values(scenario,which = 'band')
-    if(is.numeric(position)) position <- time[position]
-    if(is.null(position)) position <- time[length(time)]
-    final <- scenario %>%
-      stars:::filter.stars(band == position) %>%
-      as('Raster')
-    raster::projection(final) <- raster::projection(baseline)
-    # -- #
-    if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
-    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
-    final[final > 0 & !is.na(final)] <- 2
-    # Sum up the layers. 1 == Presence earlier | 2 == Presence in future | 3 == Presence in bot
-    diff_f <- as.factor( (baseline + final)+1 )
-    rat <- levels(diff_f)[[1]]
-    rat <- merge.data.frame(rat, data.frame(ID = seq(1,4), diff = c("Absent", "Extinction", "Colonisation", "Stable")))
-    levels(diff_f) <- rat
-    diff_f <- raster::mask(diff_f, baseline)
-
-    # Plot
-    # Convert to stars for plotting otherwise
-    diff_ff <- stars::st_as_stars(diff_f, att = 'diff');names(diff_ff) <- 'Change'
-    if(plot){
-      cols <- c("grey75","coral","cyan3","grey25")
-
-      # Use ggplot
-      ggplot2::ggplot() +
-        stars::geom_stars(data = diff_ff) +
-        ggplot2::coord_equal() +
-        ggplot2::theme_light(base_size = 18) +
-        ggplot2::scale_x_discrete(expand=c(0,0)) +
-        ggplot2::scale_y_discrete(expand=c(0,0)) +
-        ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
-        ggplot2::theme(legend.position = "bottom") +
-        ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
-    }
-    # Return
-    return(diff_f)
   },
   # Save object
   save = function(self, fname, type = 'tif', dt = 'FLT4S'){

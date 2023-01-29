@@ -299,7 +299,7 @@ methods::setMethod(
     assertthat::assert_that(is.Raster(out))
     return(out)
   } else {
-    # Scenario objects
+    # Scenario objects as stars or Scenario objects
     if(all(sapply(mods, function(z) inherits(z, "stars")))){
       # Check that layer is in stars
       if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
@@ -347,7 +347,8 @@ methods::setMethod(
       out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                    1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
     } else if(method == 'threshold.frequency'){
-      stop("This has not been reasonably implemented in this context.")
+      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                   1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
       # Check that thresholds are available
     } else if(method == 'min.sd'){
       stop("This has not been reasonably implemented in this context.")
@@ -358,12 +359,42 @@ methods::setMethod(
     out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
 
     # Convert to stars
-    out <- out |> stars:::st_as_stars.data.frame(out, dims = c(1,2,3), coords = 1:2)
+    out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
     # Rename dimension names
     out <- out |> stars:::st_set_dimensions(names = c("x", "y", "band"))
-    # Also calculate coefficient of variation across predictions
-    assertthat::assert_that(inherits(out, "stars"))
-    return(out)
+    # Rename
+    names(out) <- paste0("ensemble_", layer)
+    # Add attributes on the method of ensemble
+    attr(out, "method") <- method
+
+    # --- #
+    # Add uncertainty
+    out_uncertainty <- switch (uncertainty,
+                               "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
+                               "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) raster::cv(x, na.rm = TRUE)),
+                               "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+    )
+    if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
+    # Add dimensions to output
+    out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+
+    # Convert to stars
+    out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+    # Rename dimension names
+    out_uncertainty <- out_uncertainty |> stars:::st_set_dimensions(names = c("x", "y", "band"))
+    # Rename
+    names(out_uncertainty) <- paste0(uncertainty, "_", layer)
+    # Add attributes on the method of ensembling
+    attr(out_uncertainty, "method") <- uncertainty
+
+    # --- #
+    # Combine both ensemble and uncertainty
+    ex <- stars:::c.stars(out, out_uncertainty)
+    # Correct projection is unset
+    if(is.na(sf::st_crs(ex))) ex <- st_set_crs(ex, st_crs(mods[[1]]$get_data()))
+
+    assertthat::assert_that(inherits(ex, "stars"))
+    return(ex)
     }
   }
 )

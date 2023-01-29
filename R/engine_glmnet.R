@@ -151,12 +151,6 @@ engine_glmnet <- function(x,
         fam <- model$biodiversity[[1]]$family
 
         # -- #
-        # Expand predictors if specified in settings
-        if(settings$get('only_linear') == FALSE){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
-                                                    'Non-linear estimation not yet added to engine. Suggest to create variable derivatives externally.')
-        }
-        # -- #
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
@@ -343,11 +337,39 @@ engine_glmnet <- function(x,
         # Clamp?
         if( settings$get("clamp") ) full <- clamp_predictions(model, full)
 
+        # -- #
+        # Expand predictors if non-linear is specified in settings
+        if(settings$get('only_linear') == FALSE){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                    'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
+          # linear_predictors <- attr(terms.formula(form), "term.labels")
+          # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
+          #
+          # form <- update.formula(form,
+          #                        paste0(
+          #                          ". ~ . +",
+          #                          paste0("I(", linear_predictors,"^2)",collapse = " + "),
+          #                          " + ",
+          #                          paste0(m[lower.tri(m)], collapse = " + ")
+          #                        ))
+          # # Update penalty factors and limits
+          # for(var in attr(terms.formula(form), "term.labels")){
+          #   if(!(var %in% p.fac)){
+          #     v <- 1 # Take the maximum regularization penalty by default
+          #     vlow <- -Inf; vupp <- Inf
+          #     names(v) <- var; names(vlow) <- var; names(vupp) <- var
+          #     p.fac <- append(p.fac, v)
+          #     lowlim <- append(lowlim, vlow); upplim <- append(upplim, vupp)
+          #   }
+          # }
+        }
+
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(df),
           is.null(ofs) || is.vector(ofs),
           is.null(ofs_pred) || is.vector(ofs_pred),
-          all(w >= 0,na.rm = TRUE) # Required for engine_breg
+          length(p.fac) == length(lowlim),
+          all(w >= 0,na.rm = TRUE)
         )
 
         # --- #
@@ -356,27 +378,51 @@ engine_glmnet <- function(x,
           if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
                                                           strategy = getOption("ibis.futurestrategy"))
         }
-        cv_gn <- try({
-          cv.glmnet(formula = form,
-                    data = df,
-                    alpha = params$alpha, # Elastic net mixing parameter
-                    lambda = params$lambda, # Overwrite lambda
-                    weights = w, # Case weights
-                    offset = ofs,
-                    family = fam,
-                    penalty.factor = p.fac,
-                    # Option for limiting the coefficients
-                    lower.limits = lowlim,
-                    upper.limits = upplim,
-                    standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                    maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-                    parallel = getOption("ibis.runparallel"),
-                    trace.it = settings$get("verbose"),
-                    nfolds = 10  # number of folds for cross-validation
-          )
-        },silent = FALSE)
+        # Depending if regularized should be set, specify this separately
+        # if( (settings$get('varsel') == "reg") ){
+        #   if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
+        #                                             'Finding optimal combinations of alpha and lambda.')
+        #   cv_gn <- try({
+        #     cva.glmnet(formula = form,
+        #               data = df,
+        #               alpha = params$alpha, # Elastic net mixing parameter
+        #               lambda = params$lambda, # Overwrite lambda
+        #               weights = w, # Case weights
+        #               offset = ofs,
+        #               family = fam,
+        #               penalty.factor = p.fac,
+        #               # Option for limiting the coefficients
+        #               lower.limits = lowlim,
+        #               upper.limits = upplim,
+        #               standardize = FALSE, # Don't standardize to avoid doing anything to weights
+        #               maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+        #               parallel = getOption("ibis.runparallel"),
+        #               trace.it = settings$get("verbose"),
+        #               nfolds = 10  # number of folds for cross-validation
+        #     )
+        #   },silent = FALSE)
+        # } else {
+          cv_gn <- try({
+            cv.glmnet(formula = form,
+                      data = df,
+                      alpha = params$alpha, # Elastic net mixing parameter
+                      lambda = params$lambda, # Overwrite lambda
+                      weights = w, # Case weights
+                      offset = ofs,
+                      family = fam,
+                      penalty.factor = p.fac,
+                      # Option for limiting the coefficients
+                      lower.limits = lowlim,
+                      upper.limits = upplim,
+                      standardize = FALSE, # Don't standardize to avoid doing anything to weights
+                      maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+                      parallel = getOption("ibis.runparallel"),
+                      trace.it = settings$get("verbose"),
+                      nfolds = 10  # number of folds for cross-validation
+            )
+          },silent = FALSE)
+        # }
         if(inherits(cv_gn, "try-error")) stop("Model failed to converge with provided input data!")
-        # Could consider using assess.glmnet(cv_gn$glmnet.fit, test.data)
 
         # --- #
         # Predict spatially

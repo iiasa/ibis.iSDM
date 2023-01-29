@@ -260,6 +260,17 @@ BiodiversityDistribution <- bdproto(
     # Calculate the dimensions of the background
     if(!is.Waiver(self$background)) extent_dimensions(self$background) else NULL
   },
+  # Get projection
+  get_projection = function(self){
+    assertthat::assert_that(inherits(self$background,'sf'))
+    sf::st_crs(self$background)
+  },
+  # Get resolution
+  get_resolution = function(self){
+    if(!is.Waiver(self$predictors)){
+      self$predictors$get_resolution()
+    }
+  },
   # Remove predictors
   rm_predictors = function(self, names){
     assertthat::assert_that(

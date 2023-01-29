@@ -16,7 +16,7 @@
 
 \method{summary}{PredictorDataset}(x)
 
-\method{summary}{BiodiversityScenario}(x)
+\method{summary}{BiodiversityScenario}(x, ...)
 
 \method{summary}{PriorList}(x)
 
