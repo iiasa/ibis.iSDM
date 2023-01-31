@@ -20,8 +20,9 @@ ignore any of the layer names in ensembles of \code{Raster} objects.}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
 
-\item{uncertainty}{A \code{\link{character}} indicating how the uncertainty among models shoudl be calculated. Available options include
-the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).}
+\item{uncertainty}{A \code{\link{character}} indicating how the uncertainty among models should be calculated. Available options include
+\code{"none"}, the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default)
+or the range between the lowest and highest value (\code{"range"}).}
 }
 \value{
 A \code{\link{RasterStack}} containing the ensemble of the provided predictions specified by \code{method} and a

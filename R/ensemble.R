@@ -45,8 +45,9 @@ NULL
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
 #' ignore any of the layer names in ensembles of `Raster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
-#' @param uncertainty A [`character`] indicating how the uncertainty among models shoudl be calculated. Available options include
-#' the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).
+#' @param uncertainty A [`character`] indicating how the uncertainty among models should be calculated. Available options include
+#' \code{"none"}, the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default)
+#' or the range between the lowest and highest value (\code{"range"}).
 #' @references
 #' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
 #' @examples
@@ -117,7 +118,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
-    uncertainty <- match.arg(uncertainty, c('sd', 'cv', 'range'), several.ok = FALSE)
+    uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range'), several.ok = FALSE)
 
     # Check that weight lengths is equal to provided distribution objects
     if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
@@ -204,18 +205,22 @@ methods::setMethod(
         names(new) <- paste0("ensemble_", lyr)
         # Add attributes on the method of ensembling
         attr(new, "method") <- method
-        # Add uncertainty
-        ras_uncertainty <- switch (uncertainty,
-          "sd" = raster::calc(ras, sd, na.rm = TRUE),
-          "cv" = raster::cv(ras, na.rm = TRUE),
-          "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
-        )
-        names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
-        # Add attributes on the method of ensembling
-        attr(ras_uncertainty, "method") <- uncertainty
+        if(uncertainty!='none'){
+          # Add uncertainty
+          ras_uncertainty <- switch (uncertainty,
+                                     "sd" = raster::calc(ras, sd, na.rm = TRUE),
+                                     "cv" = raster::cv(ras, na.rm = TRUE),
+                                     "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+          )
+          names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
+          # Add attributes on the method of ensembling
+          attr(ras_uncertainty, "method") <- uncertainty
 
-        # Add all layers to out
-        out <- raster::stack(out, new, ras_uncertainty)
+          # Add all layers to out
+          out <- raster::stack(out, new, ras_uncertainty)
+        } else {
+          out <- raster::stack(out, new)
+        }
       }
 
       assertthat::assert_that(is.Raster(out))
@@ -282,18 +287,21 @@ methods::setMethod(
       names(new) <- paste0("ensemble_", lyr)
       # Add attributes on the method of ensemble
       attr(new, "method") <- method
-      # Add uncertainty
-      ras_uncertainty <- switch (uncertainty,
-                                 "sd" = raster::calc(ras, sd, na.rm = TRUE),
-                                 "cv" = raster::cv(ras, na.rm = TRUE),
-                                 "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
-      )
-      names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
-      # Add attributes on the method of ensembling
-      attr(ras_uncertainty, "method") <- uncertainty
-
-      # Add all layers to out
-      out <- raster::stack(out, new, ras_uncertainty)
+      if(uncertainty != "none"){
+        # Add uncertainty
+        ras_uncertainty <- switch (uncertainty,
+                                   "sd" = raster::calc(ras, sd, na.rm = TRUE),
+                                   "cv" = raster::cv(ras, na.rm = TRUE),
+                                   "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+        )
+        names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
+        # Add attributes on the method of ensembling
+        attr(ras_uncertainty, "method") <- uncertainty
+        # Add all layers to out
+        out <- raster::stack(out, new, ras_uncertainty)
+      } else {
+        out <- raster::stack(out, new)
+      }
     }
 
     assertthat::assert_that(is.Raster(out))
@@ -368,31 +376,36 @@ methods::setMethod(
     attr(out, "method") <- method
 
     # --- #
-    # Add uncertainty
-    out_uncertainty <- switch (uncertainty,
-                               "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
-                               "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) raster::cv(x, na.rm = TRUE)),
-                               "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
-    )
-    if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
-    # Add dimensions to output
-    out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+    if(uncertainty != 'none'){
+      # Add uncertainty
+      out_uncertainty <- switch (uncertainty,
+                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
+                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) raster::cv(x, na.rm = TRUE)),
+                                 "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+      )
+      if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
+      # Add dimensions to output
+      out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
 
-    # Convert to stars
-    out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
-    # Rename dimension names
-    out_uncertainty <- out_uncertainty |> stars:::st_set_dimensions(names = c("x", "y", "band"))
-    # Rename
-    names(out_uncertainty) <- paste0(uncertainty, "_", layer)
-    # Add attributes on the method of ensembling
-    attr(out_uncertainty, "method") <- uncertainty
-
-    # --- #
-    # Combine both ensemble and uncertainty
-    ex <- stars:::c.stars(out, out_uncertainty)
+      # Convert to stars
+      out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+      # Rename dimension names
+      out_uncertainty <- out_uncertainty |> stars:::st_set_dimensions(names = c("x", "y", "band"))
+      # Rename
+      names(out_uncertainty) <- paste0(uncertainty, "_", layer)
+      # Add attributes on the method of ensembling
+      attr(out_uncertainty, "method") <- uncertainty
+      # --- #
+      # Combine both ensemble and uncertainty
+      ex <- stars:::c.stars(out, out_uncertainty)
+      # Correct projection is unset
+      if(is.na(sf::st_crs(ex))) ex <- st_set_crs(ex, st_crs(mods[[1]]$get_data()))
+    } else {
+      # Only the output
+      ex <- out
+    }
     # Correct projection is unset
     if(is.na(sf::st_crs(ex))) ex <- st_set_crs(ex, st_crs(mods[[1]]$get_data()))
-
     assertthat::assert_that(inherits(ex, "stars"))
     return(ex)
     }

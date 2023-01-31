@@ -132,7 +132,9 @@ methods::setMethod(
     # Not get the baseline raster
     thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
-    if(is.na(raster::projection(baseline_threshold))) projection(baseline_threshold) <- raster::projection( fit$model$background )
+    if(!is.Waiver(scenario_threshold)){
+      if(is.na(raster::projection(baseline_threshold))) projection(baseline_threshold) <- raster::projection( fit$model$background )
+    }
 
     if(inherits(baseline_threshold, 'RasterStack') || inherits(baseline_threshold, 'RasterBrick')){
       baseline_threshold <- baseline_threshold[[grep(layer,names(baseline_threshold))]]
