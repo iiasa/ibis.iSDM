@@ -602,11 +602,12 @@ engine_breg <- function(x,
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
+              g <- ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_ribbon(fill = 'grey90') +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = paste0("partial of ",x.var), y = expression(hat(y)))
+              print(g)
             }
             # Return the data
             return(pred_part)

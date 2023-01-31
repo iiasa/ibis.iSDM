@@ -659,11 +659,12 @@ engine_xgboost <- function(x,
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
+              pm <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = "", y = expression(hat(y))) +
                 ggplot2::facet_wrap(~variable,scales = 'free')
+              print(pm)
             }
             # Return the data
             return(pp)
