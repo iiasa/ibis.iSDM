@@ -97,10 +97,10 @@ x <- distribution(background) %>%
   add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
   # Note that we scale the predictors here
   add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-  engine_glmnet(alpha = 0) # Slightly increase the learning rate
+  engine_glmnet(alpha = 0) 
 
 # Train the model
-modf <- train(x, runname = 'Simple PPM', only_linear = FALSE, verbose = FALSE)
+modf <- train(x, runname = 'Simple PPM', verbose = FALSE)
 
 # Add a threshold to this model by getting 05 percentile of values
 modf <- threshold(modf, method = 'percentile', value = 0.05)
@@ -123,8 +123,7 @@ names(sc)
 The scenario object can finally be trained via `project()`.
 
 ```{r Create the scenario}
-sc.fit1 <- sc %>% 
-  project()
+sc.fit1 <- sc |> project()
 # Note that an indication of fitted scenarios has been added to the object
 sc.fit1
 ```
@@ -149,22 +148,11 @@ plot(sc.fit1) # or sc.fit1$plot()
 
 # As an alternative, visualize the linear slope per grid cell and across all time steps
 o <- sc.fit1$calc_scenarios_slope()
-plot(o,)
+plot(o)
 
 # Another option is to calculate the relative change between start and finish
-o <- sc.fit1$plot_relative_change()
-diff_ff <- stars::st_as_stars(o, att = 'diff');names(diff_ff) <- 'Change'
-
-# Use ggplot to visualize the changes
-ggplot2::ggplot() +
-  stars::geom_stars(data = diff_ff) +
-  ggplot2::coord_equal() +
-  ggplot2::theme_light(base_size = 16) +
-  ggplot2::scale_x_discrete(expand=c(0,0)) +
-  ggplot2::scale_y_discrete(expand=c(0,0)) +
-  ggplot2::scale_fill_manual(values = c("grey75","coral","cyan3","grey25"),na.value = 'transparent') +
-  ggplot2::theme(legend.position = "bottom") +
-  ggplot2::labs(x = "", y = "", title = paste0('Change between 2015 and ', 2100))
+o <- sc.fit1$plot_relative_change(plot = TRUE)
+print(o)
 
 # We can also summarize the thresholded data
 o <- sc.fit1$summary()
@@ -174,7 +162,7 @@ plot(area_km2~band, data = o, type = 'b',
 
 # How does habitat gain and loss change over time?
 plot(totchange_gain_km2~band, data = o, type = 'n',
-     main = "Habitat gain and loss", ylim = c(-1e4, 1e4),
+     main = "Habitat gain and loss", ylim = c(-2e4, 2e4),
      ylab = "Amount of area (km2)", xlab = "Time")
 lines(o$totchange_gain_km2~o$band, col = "blue")
 lines((o$totchange_loss_km2)~o$band, col = "red")
@@ -243,6 +231,10 @@ legend("bottomleft",
   lty = c(1, 2, 3),
   cex = 1.2,
   bty = "n")
+
+# Lastly it is also possible to directly summarize the state 
+# before (usually first year) and end (last year).
+sc.fit2$summary_beforeafter()
 
 ```
 

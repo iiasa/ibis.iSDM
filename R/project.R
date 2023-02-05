@@ -344,21 +344,6 @@ methods::setMethod(
                      raster = run_sim)
         }
       } # End of MigClim processing chain
-
-      # Finally apply boundary constraint if set
-      if("boundary" %in% names(scenario_constraints)){
-        if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer,stopiffalse = FALSE)){
-          scenario_constraints$boundary$params$layer <- alignRasters(
-            scenario_constraints$boundary$params$layer,
-            proj,
-            method = "ngb", func = raster::modal, cl = FALSE
-          )
-        }
-        proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
-        # Get background and ensure that all values outside are set to 0
-        proj[is.na(proj)] <- 0
-        proj <- raster::mask(proj, fit$model$background )
-      }
     }
     # If not found, set a waiver
     if(!exists("mc")) mc <- new_waiver()
@@ -368,6 +353,27 @@ methods::setMethod(
       is.Raster(proj), is.Raster(proj_thresh),
       msg = "Something went wrong with the projection."
     )
+
+    # Apply boundary constraints if set
+    if("boundary" %in% names(scenario_constraints)){
+      if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer, stopiffalse = FALSE)){
+        scenario_constraints$boundary$params$layer <- alignRasters(
+          scenario_constraints$boundary$params$layer,
+          proj,
+          method = "ngb", func = raster::modal, cl = FALSE
+        )
+      }
+      proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
+      # Get background and ensure that all values outside are set to 0
+      proj[is.na(proj)] <- 0
+      proj <- raster::mask(proj, fit$model$background )
+      # Also for thresholds if existing
+      if(raster::nlayers(proj_thresh)>0){
+        proj_thresh <- raster::mask(proj_thresh, scenario_constraints$boundary$params$layer)
+        proj_thresh[is.na(proj_thresh)] <- 0
+        proj_thresh <- raster::mask(proj_thresh, fit$model$background )
+      }
+    }
 
     # Should stabilization be applied?
     if(stabilize){
@@ -399,7 +405,7 @@ methods::setMethod(
         new_proj <- raster::overlay(proj, fun = impute.loess, unstack = TRUE, forcefun = FALSE)
         # Rename again
         names(new_proj) <- names(proj)
-        new_proj <- raster::setZ(new_proj, as.Date(times) )
+        new_proj <- raster::setZ(new_proj, times )
         proj <- new_proj; rm(new_proj)
         # Were thresholds calculated? If yes, recalculate on the smoothed estimates
         if(raster::nlayers(proj_thresh)>0){

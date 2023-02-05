@@ -273,6 +273,10 @@ BiodiversityDistribution <- bdproto(
   },
   # Remove predictors
   rm_predictors = function(self, names){
+    if(is.Waiver(self$predictors) || is.null(self$predictors)) return(NULL)
+    if(missing(names)){
+      names <- self$get_predictor_names() # Assume all names
+    }
     assertthat::assert_that(
       is.character(names) || assertthat::is.scalar(names) || is.vector(names)
     )
@@ -280,6 +284,7 @@ BiodiversityDistribution <- bdproto(
     prcol <- bdproto(NULL, self)
     # Set the object
     prcol$predictors$rm_data(names)
+    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
     return(prcol)
   },
   # Remove priors

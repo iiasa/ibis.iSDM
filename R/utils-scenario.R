@@ -210,6 +210,56 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   return( out )
 }
 
+#' Converts a raster object to stars
+#'
+#' @description
+#' This is a small helper function to convert a to a [`Raster`] object.
+#' @param obj A [`Raster`] object with a \code{"time"} dimension at least (checked via [`getZ`]).
+#' @returns A [`stars`] object with the formatted data
+#' @seealso `stars_to_raster`
+#' @keywords scenario, internal
+raster_to_stars <- function(obj){
+  assertthat::assert_that(
+    is.Raster(obj)
+  )
+  # Check that time dimension exist
+  assertthat::assert_that( !is.null( raster::getZ(obj) ),
+                           msg = "The supplied object requires a z dimension! Preferably provide a stars object.")
+  assertthat::assert_that(!is.na(raster::crs(obj)),
+                           msg = "Uniform projection for input raster is missing!")
+
+  # Get time dimension
+  times <- raster::getZ(obj)
+  if(!all(inherits(times,"Date"))) times <- as.Date(times)
+  prj <- sf::st_crs(raster::crs(obj))
+
+  # Convert to RasterStack and reset time dimension
+  obj <- raster::stack(obj)
+  obj <- raster::setZ(obj, times)
+  # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
+
+  # Convert to stars step by step
+  new_env <- list()
+  for(i in 1:raster::nlayers(obj)){
+    suppressWarnings(  o <- stars::st_as_stars(obj[[i]]) )
+    # If CRS is NA
+    if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
+
+    # Some hacky stuff since stars is not behaving as intended
+    dims <- stars::st_dimensions(o)
+    dims$time <- stars:::create_dimension(values = times[i])
+    o <- stars::st_redimension(o,new_dims = dims)
+
+    new_env[[names(obj)[i]]] <- o
+  }
+
+  new_env <- do.call(stars:::c.stars, new_env)
+  assertthat::assert_that(inherits(new_env, "stars"),
+                          stars::st_dimensions(new_env) |> length() == 3)
+
+  return(new_env)
+}
+
 #' This function add layers from a RasterStack to a stars object
 #'
 #' @description

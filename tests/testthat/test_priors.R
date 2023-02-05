@@ -88,7 +88,20 @@ test_that('Create and add priors', {
   # Combine BREG priors with same name but different values
   new1 <- BREGPrior(variable = 'forest', hyper = 1, ip = 0.5)
   new2 <- BREGPrior(variable = 'forest', hyper = 0, ip = 1)
-  invisible( suppressMessages(priors(new1,new2)) )
+  pp <- invisible( suppressMessages(priors(new1,new2)) )
+  expect_equal(pp$length(), 1)
+
+  # Combine single prior with lists of priors
+  new1 <- BREGPrior(variable = 'forest', hyper = 1, ip = 0.5)
+  new2 <- BREGPriors(variable = c("shrubs", "cropland"), hyper = 0, ip = 1)
+  pp <- invisible( suppressMessages(priors(new1,new2)) )
+  expect_equal(pp$length(), 3)
+
+  # Combine two lists of priors
+  new1 <- BREGPriors(variable = c('forest', "secondary"), hyper = 1, ip = 0.5)
+  new2 <- BREGPriors(variable = c("shrubs", "cropland"), hyper = 0, ip = 1)
+  pp <- invisible( suppressMessages(priors(new1,new2)) )
+  expect_equal(pp$length(), 4)
 
   # Add two duplicate but different prior.
   # Default behaviour is to take the last one and raise warning

@@ -113,7 +113,7 @@ Collate:
     'threshold.R'
     'train.R'
     'utils-bart.R'
-    'utils-boom.R'
+    'utils-breg.R'
     'utils-gdb.R'
     'utils-glmnet.R'
     'utils-predictors.R'

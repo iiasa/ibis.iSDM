@@ -4,7 +4,7 @@
 \alias{scenario}
 \title{Create a new scenario based on trained model parameters}
 \usage{
-scenario(fit, limits = NULL)
+scenario(fit, limits = NULL, copy_model = FALSE)
 
 \S4method{scenario}{ANY}(fit)
 }
@@ -14,6 +14,9 @@ scenario(fit, limits = NULL)
 \item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the projection surface when
 intersected with the prediction data (Default: \code{NULL}). This can for instance be set
 as an expert-delineated constrain to limit spatial projections.}
+
+\item{copy_model}{A \code{\link{logical}} of whether the model object is to be copied to the scenario object. Note
+that setting this option to \code{TRUE} can increase the required amount of memory (Default: \code{FALSE}).}
 }
 \description{
 This function creates a new \linkS4class{BiodiversityScenario} object

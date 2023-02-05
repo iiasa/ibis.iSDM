@@ -1005,28 +1005,28 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #' @details
 #' Currently implemented thinning methods:
 #'
-#'  [*] \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
+#'  * \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
 #'  Does not account for any spatial or environmental distance between observations.
-#'  [*] \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"bias"}) only.
+#'  * \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
 #'  Points are preferentially thinned from grid cells which are in the 25% most biased (larger values assumed greater bias)
 #'  and have high point density. Thins the observations up to \code{"minpoints"}.
-#'  [*] \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
+#'  * \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 #'  each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
-#'  [*] \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
+#'  * \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
 #'  that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
 #'  We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
-#'  [*] \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
+#'  * \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 #'  iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
 #'  be set for this function to work.
 #'
 #' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
 #' and presence-absence occurrence points equally.
 #' @param background A [`RasterLayer`] object with the background of the study region. Use for assessing point density.
-#' @param env A [`Raster`] object with environmental covaraites. Needed when method is set to \code{"environmental"} (Default: \code{NULL}).
+#' @param env A [`Raster`] object with environmental covaraites. Needed when method is set to \code{"environmental"}
+#' or \code{"bias"} (Default: \code{NULL}).
 #' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
 #' @param minpoints A [`numeric`] giving the number of data points at minimum to take (Default: \code{10}).
 #' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations (Default: \code{NULL}).
-#' @param bias A supplied [`RasterLayer`] bias layer for method \code{"bias"} (Default: \code{NULL}).
 #' @param zones A [`RasterLayer`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
 #' @param verbose [`logical`] of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).
 #' @references

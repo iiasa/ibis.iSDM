@@ -90,12 +90,28 @@ built_formula_gdb <- function(model, id, x, settings){
       )
     }
   } else{
-    # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
-    # Update formula to weights if forgotten
-    if(obj$family=='poisson') form <- update.formula(form, 'observed ~ .')
+    # If response is missing, add manually
+    if(attr(terms(form), "response")==0){
+      form <- update.formula(form, "observed ~ .")
+    }
+    # Check that bols/bbs are in terms and if not add them for each variable
+    if( settings$get("only_linear") ){
+      if( length(grep("bols",attr(terms(form2), "term.labels") ))==0 ){
+        # Assume that each variable as none, so add
+        form <- as.formula(paste0("observed ~", paste0("bols(", obj$predictors_names, ")",collapse = " + ")))
+      }
+    } else {
+      if( length(grep("bbs",attr(terms(form2), "term.labels") ))==0 ){
+        # Assume that each variable as none, so add
+        form <- as.formula(paste0("observed ~", paste0("bbs(", obj$predictors_names, ")",collapse = " + ")))
+      }
+    }
+
     assertthat::assert_that(
+      is.formula(form),
+      attr(terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
     )
   }

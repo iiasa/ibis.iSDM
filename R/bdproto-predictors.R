@@ -112,8 +112,14 @@ PredictorDataset <- bdproto(
                             )
     # Match indices
     ind <- match(x, self$get_names())
-    # Overwrite predictor dataset
-    self$data <- raster::dropLayer(self$get_data(), ind)
+    if(is.Raster(self$get_data() )){
+      # Overwrite predictor dataset
+      self$data <- raster::dropLayer(self$get_data(), ind)
+    } else {
+      suppressWarnings(
+        self$data <- stars:::select.stars(self$data, -ind)
+      )
+    }
     invisible()
   },
   # Print input messages

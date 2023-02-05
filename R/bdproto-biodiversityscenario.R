@@ -59,19 +59,31 @@ BiodiversityScenario <- bdproto(
       )
     )
   },
-  # Verify that set Model exist
+  # Verify that set Model exist and check self-validity
   verify = function(self){
     assertthat::validate_that( !is.Waiver(self$modelobject),
-                               !is.Waiver(self$modelid),
-                               exists(self$modelobject) )
+                               !is.Waiver(self$modelid)
+                               )
     # Get Model object and check that ID is correct
-    x <- get(self$modelobject)
+    if(inherits(self$modelobject, "DistributionModel")){
+      x <- self$modelobject
+    } else {
+      x <- get(self$modelobject)
+    }
     assertthat::validate_that(x$id == self$modelid)
+    # Check that objects are correctly set or found
+    assertthat::assert_that(is.Waiver(self$get_predictors()) || inherits(self$get_predictors(), "PredictorDataset"))
+    assertthat::assert_that(is.Waiver(self$get_data()) || (inherits(self$get_data(), "stars") || is.Raster(self$get_data())) )
+    assertthat::assert_that(is.Waiver(self$get_constraints()) || is.list(self$get_constraints()))
     invisible()
   },
   # Show the name of the Model
   show = function(self) {
-    self$modelobject
+    if(is.character(self$modelobject)){
+      return( self$modelobject )
+    } else {
+      return( fit$model$runname )
+    }
   },
   # Get projection
   get_projection = function(self){
@@ -84,9 +96,15 @@ BiodiversityScenario <- bdproto(
   # Get Model
   get_model = function(self){
     if(is.Waiver(self$modelobject)) return( new_waiver() )
-      else
-        if(!exists(self$modelobject)) return( FALSE )
-          else return( get(self$modelobject) )
+      else {
+        if(inherits(self$modelobject, "DistributionModel")){
+          return( self$modelobject )
+        } else {
+          if(!exists(self$modelobject)) return( FALSE ) else {
+            return( get(self$modelobject) )
+            }
+        }
+      }
   },
   # Get provided limits
   get_limits = function(self){
@@ -157,6 +175,22 @@ BiodiversityScenario <- bdproto(
   # Get Predictors
   get_predictors = function(self){
     return(self$predictors)
+  },
+  # Remove predictors
+  rm_predictors = function(self, names){
+    if(is.Waiver(self$predictors) || is.null(self$predictors)) return(NULL)
+    if(missing(names)){
+      names <- self$get_predictor_names() # Assume all names
+    }
+    assertthat::assert_that(
+      is.character(names) || assertthat::is.scalar(names) || is.vector(names)
+    )
+    # Get predictor collection
+    prcol <- bdproto(NULL, self)
+    # Set the object
+    prcol$predictors$rm_data(names)
+    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
+    return(prcol)
   },
   # Get scenario predictions
   get_data = function(self, what = "scenarios"){
@@ -307,11 +341,11 @@ BiodiversityScenario <- bdproto(
       # Use ggplot
       g <- ggplot2::ggplot() +
         ggplot2::coord_equal() +
-        ggplot2::geom_raster(data = diff_ff, aes(x = x, y = y, fill = Change)) +
+        ggplot2::geom_raster(data = diff_ff, ggplot2::aes(x = x, y = y, fill = Change)) +
         ggplot2::theme_light(base_size = 18) +
         ggplot2::scale_x_discrete(expand=c(0,0)) +
         ggplot2::scale_y_discrete(expand=c(0,0)) +
-        ggplot2::scale_fill_manual(values = cols,na.value = 'transparent') +
+        ggplot2::scale_fill_manual(values = cols, na.value = 'transparent') +
         ggplot2::theme(legend.position = "bottom") +
         ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
       return(g)

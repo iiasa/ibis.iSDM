@@ -62,7 +62,7 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
                which(raster::values(is.na(tt[[3]]))))
 
   # Fill missing values
-  # TODO: Implement
+  # TODO: Yet to be implemented
   # tt <- predictor_homogenize_na(raster::stack(rr, r2, r3),fill = TRUE)
 
   # ---- #

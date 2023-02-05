@@ -155,8 +155,18 @@ built_formula_inla <- function(model, id, x, settings){
       }
     } else{
       # If custom supplied formula, check that variable names match supplied predictors
-      # FIXME: check that this works
+      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
       form <- to_formula( obj$equation )
+      # If response is missing, add manually
+      if(attr(terms(form), "response")==0){
+        form <- update.formula(form, "observed ~ .")
+      }
+      # Security checks
+      assertthat::assert_that(
+        is.formula(form),
+        attr(terms(form), "response")==1, # Has Response
+        all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
+      )
     }
   # -------------------- INLABRU formula----------------
   } else if(x$get_engine() == "<INLABRU>"){

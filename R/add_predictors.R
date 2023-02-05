@@ -372,6 +372,8 @@ methods::setMethod(
 #' @param layer A [`sf`] or [`Raster`] object with the range for the target feature.
 #' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
 #' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
+#' @param fraction An optional [`RasterLayer`] object that is multiplied with digitized raster layer.
+#' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
 #' @references
 #' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
@@ -385,7 +387,7 @@ NULL
 methods::setGeneric(
   "add_predictor_range",
   signature = methods::signature("x", "layer", "method"),
-  function(x, layer, method = 'distance', distance_max = NULL, priors = NULL) standardGeneric("add_predictor_range"))
+  function(x, layer, method = 'distance', distance_max = NULL, fraction = NULL, priors = NULL) standardGeneric("add_predictor_range"))
 
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
@@ -394,12 +396,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
-  function(x, layer, method = 'precomputed_range', priors = NULL) {
+  function(x, layer, method = 'precomputed_range', fraction = NULL, priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(layer),
+                            is.Raster(fraction) || is.null(fraction),
                             is.character(method)
     )
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
@@ -408,6 +411,14 @@ methods::setMethod(
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
     names(layer) <- method
+
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      layer <- layer * fraction
+    }
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -426,19 +437,20 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
 methods::setMethod(
   "add_predictor_range",
-  methods::signature(x = "BiodiversityDistribution", layer = "sf", method = "character"),
-  function(x, layer, method = 'distance', distance_max = Inf, priors = NULL ) {
+  methods::signature(x = "BiodiversityDistribution", layer = "sf"),
+  function(x, layer, method = 'distance', distance_max = Inf, fraction = NULL, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
                             inherits(layer, 'sf'),
                             method %in% c('binary','distance'),
+                            is.null(fraction) || is.Raster(fraction),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
     )
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
@@ -455,7 +467,7 @@ methods::setMethod(
 
     # Rasterize the range
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(layer, temp, field = NULL)
+      ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL) }, silent = TRUE)
       if(inherits(ras_range,"try-error")){
         myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
         ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
@@ -479,13 +491,26 @@ methods::setMethod(
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
         attr(dis, "distance_max") <- distance_max
-      }
+      } else { distance_max <- raster::cellStats(dis, "max") }
+      # Grow baseline raster by using an exponentially weighted kernel
+      alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
+      # Grow baseline raster by using an exponentially weighted kernel
+      dis <- raster::calc(dis, fun = function(x) exp(-alpha * x))
       # Convert to relative for better scaling in predictions
-      dis <- 1 - (dis / cellStats(dis,'max'))
+      dis <- (dis / raster::cellStats(dis,'max'))
+
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
       dis <- raster::mask(dis, x$background)
       names(dis) <- 'distance_range'
+    }
+
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      layer <- layer * fraction
     }
 
     # If priors have been set, save them in the distribution object
@@ -497,7 +522,7 @@ methods::setMethod(
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = dis,transform = 'none',derivates = 'none')
+      x <- add_predictors(x, env = dis, transform = 'none',derivates = 'none')
     } else {
       x$predictors <- x$predictors$set_data('range_distance', dis)
     }
@@ -608,6 +633,59 @@ methods::setMethod(
 
 # ---------------- #
 # Add predictor actions for scenario objects ----
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterBrick}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterBrick"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterLayer}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterLayer"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterStack}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterStack"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
 #' @name add_predictors
 #' @rdname add_predictors
 #' @usage \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)

@@ -56,7 +56,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
     lyrs <- names(env) # Names of predictors
-    times <- stars::st_get_dimension_values(env, which = 3) # Time attribute
+    times <- stars::st_get_dimension_values(env, which = 3) # Assume this being the time attribute
+    dims <- stars::st_dimensions(env)
     # Convert to list
     env_list <- list()
     for(name in lyrs) env_list[[name]] <- as(env[name], 'Raster')
@@ -193,7 +194,12 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     )
     # Reset names of attributes
     names(out) <- lyrs
-    out <- stars::st_set_dimensions(out, which = 3, values = times, names = "time")
+    # FIXME: Hacky solution, but breaks other scenarios otherwise
+    out2 <- try({stars::st_set_dimensions(out, which = 3, values = times, names = "time")},silent = TRUE)
+    if(inherits(out2, "try-error")){
+      # This happens when a stars provided layer has only a single time band
+      out <- stars::st_redimension(out, new_dims = dims) # use the previously saved dimensions
+    } else { out <- out2; out2}
   } else {
     # Final security checks
     assertthat::assert_that(

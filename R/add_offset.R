@@ -285,6 +285,8 @@ methods::setMethod(
 #' @param presence_prop [`numeric`] giving the proportion of all records expected to be inside the range. By
 #' default this is set to \code{0.9} indicating that 10% of all records are likely outside the range.
 #' @param distance_clip [`logical`] as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).
+#' @param fraction An optional [`RasterLayer`] object that is multiplied with digitized raster layer.
+#' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
 #' @seealso [`bossMaps`]
 #' @references
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
@@ -301,7 +303,8 @@ NULL
 methods::setGeneric(
   "add_offset_range",
   signature = methods::signature("x", "layer"),
-  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9, distance_clip = FALSE, add = TRUE) standardGeneric("add_offset_range"))
+  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9,
+           distance_clip = FALSE, fraction = NULL, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
@@ -310,12 +313,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
-  function(x, layer, add = TRUE) {
+  function(x, layer, fraction = NULL, add = TRUE) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(layer),
+                            is.null(fraction) || is.Raster(fraction),
                             is.logical(add)
     )
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 
     # Save name
@@ -332,6 +336,14 @@ methods::setMethod(
       warning('Supplied range does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       names(layer) <- ori.name # In case the layer name got lost
+    }
+
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      layer <- layer * fraction
     }
 
     # Check whether an offset exists already
@@ -356,12 +368,14 @@ methods::setMethod(
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
-  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9, distance_clip = FALSE, add = TRUE ) {
+  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9,
+           distance_clip = FALSE, fraction = NULL, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(layer, 'sf'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.numeric(presence_prop),
                             is.logical(distance_clip),
+                            is.null(fraction) || is.Raster(fraction),
                             is.character(type),
                             is.logical(add)
     )
@@ -448,6 +462,14 @@ methods::setMethod(
     ras_range <- ras_range * dis
     # Normalize the result by dividing by the sum
     ras_range <- ras_range / raster::cellStats(ras_range, "sum", na.rm = TRUE)
+
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      ras_range <- ras_range * fraction
+    }
 
     # -------------- #
     # Log transform

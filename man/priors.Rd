@@ -7,6 +7,10 @@
 priors(x, ...)
 
 \S4method{priors}{Prior}(x)
+
+priors(x, ...)
+
+\S4method{priors}{Prior}(x)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{Prior}} object added to the list.}
@@ -15,8 +19,17 @@ priors(x, ...)
 }
 \value{
 A \code{\link{PriorList}} object.
+
+A \code{\link{PriorList}} object.
 }
 \description{
+A \code{\link{PriorList}} object is essentially a list that contains individual
+\code{\linkS4class{Prior}} objects. In order to use priors for any of the engines,
+the respective \code{\linkS4class{Prior}} has to be identified (e.g. \code{\link{INLAPrior}}) and embedded
+in a \code{\link{PriorList}} object.
+Afterwards these objects can then be added to a \link{distribution} object with the
+\link{add_priors} function.
+
 A \code{\link{PriorList}} object is essentially a list that contains individual
 \code{\linkS4class{Prior}} objects. In order to use priors for any of the engines,
 the respective \code{\linkS4class{Prior}} has to be identified (e.g. \code{\link{INLAPrior}}) and embedded
@@ -30,9 +43,35 @@ p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 priors(p1, p2)
 }
+\dontrun{
+p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
+p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
+priors(p1, p2)
+}
 }
 \seealso{
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
+
+\code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
+
+Other prior: 
+\code{\link{BARTPriors}()},
+\code{\link{BARTPrior}()},
+\code{\link{BREGPriors}()},
+\code{\link{BREGPrior}()},
+\code{\link{GDBPriors}()},
+\code{\link{GDBPrior}()},
+\code{\link{GLMNETPriors}()},
+\code{\link{GLMNETPrior}()},
+\code{\link{INLAPriors}()},
+\code{\link{INLAPrior}()},
+\code{\link{STANPriors}()},
+\code{\link{STANPrior}()},
+\code{\link{XGBPriors}()},
+\code{\link{XGBPrior}()},
+\code{\link{add_priors}()},
+\code{\link{get_priors}()},
+\code{\link{rm_priors}()}
 
 Other prior: 
 \code{\link{BARTPriors}()},

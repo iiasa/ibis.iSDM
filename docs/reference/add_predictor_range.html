@@ -99,14 +99,15 @@ alternatively with a linear distance transform from the range boundary. The para
 <span>  <span class="va">layer</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"distance"</span>,</span>
 <span>  distance_max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fraction <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  priors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityDistribution, raster</span></span>
 <span><span class="fu">add_predictor_range</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution, sf, vector</span></span>
-<span><span class="fu">add_predictor_range</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, <span class="va">method</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution, sf</span></span>
+<span><span class="fu">add_predictor_range</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -125,6 +126,11 @@ alternatively with a linear distance transform from the range boundary. The para
 
 <dt>distance_max</dt>
 <dd><p>Numeric threshold on the maximum distance (Default: <code>NULL</code>).</p></dd>
+
+
+<dt>fraction</dt>
+<dd><p>An optional <code>RasterLayer</code> object that is multiplied with digitized raster layer.
+Can be used to for example to remove or reduce the expected value (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>priors</dt>

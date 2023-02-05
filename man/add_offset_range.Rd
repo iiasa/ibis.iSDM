@@ -11,6 +11,7 @@ add_offset_range(
   type = "poisson",
   presence_prop = 0.9,
   distance_clip = FALSE,
+  fraction = NULL,
   add = TRUE
 )
 
@@ -36,6 +37,9 @@ For integrated models leave at default.}
 default this is set to \code{0.9} indicating that 10\% of all records are likely outside the range.}
 
 \item{distance_clip}{\code{\link{logical}} as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).}
+
+\item{fraction}{An optional \code{\link{RasterLayer}} object that is multiplied with digitized raster layer.
+Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}

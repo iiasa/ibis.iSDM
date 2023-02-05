@@ -161,6 +161,16 @@ engine_xgboost <- function(x,
                       model$biodiversity[[1]]$family
         )
 
+        # Change the number of variables included if custom equation is used
+        if(!is.Waiver(model$biodiversity[[1]]$equation)){
+          varn <- model$biodiversity[[1]]$predictors_names[which( all.vars(form) %in% model$biodiversity[[1]]$predictors_names )]
+          assertthat::assert_that(length(varn)>0)
+          # Match to existing ones and remove those not covered
+          model$biodiversity[[1]]$predictors_names <- model$biodiversity[[1]]$predictors_names[match(varn, model$biodiversity[[1]]$predictors_names)]
+          model$biodiversity[[1]]$predictors_types <- subset(model$biodiversity[[1]]$predictors_types,
+                                                             predictors %in% model$biodiversity[[1]]$predictors_names)
+        }
+
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "count:poisson" && model$biodiversity[[1]]$type == "poipo"){
           # Get background layer
@@ -333,6 +343,8 @@ engine_xgboost <- function(x,
 
         if(fam == "count:poisson"){
           # Specifically for count poisson data we will set the areas
+          assertthat::assert_that(all(is.finite(log(w))),
+                                  all(is.finite(log(w_full))))
           # as an exposure offset for the base_margin
           xgboost::setinfo(df_train, "base_margin", log(w))
           # xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
@@ -368,11 +380,11 @@ engine_xgboost <- function(x,
             of_train <- rep(1, nrow(model$biodiversity[[1]]$observations[,c("x","y")]))
             of_pred <- rep(1, nrow(model$offset))
           } else {
-            # For the offset we simply add the (log-transformed) offset to the existing
-            # Add exp at the end to backtransform
-            of_train <- xgboost::getinfo(df_train, "base_margin") |> exp()
+            # For the offset we simply add the (log-transformed) offset to the existing one
+            # given that for example log(2*3) == log(2) + log(3)
+            of_train <- xgboost::getinfo(df_train, "base_margin")
             # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
-            of_pred <- xgboost::getinfo(df_pred, "base_margin") |> exp()
+            of_pred <- xgboost::getinfo(df_pred, "base_margin")
           }
           # -- Add offset to full prediction and load vector --
 
@@ -398,10 +410,14 @@ engine_xgboost <- function(x,
           # of_test <- of_test + of2[,"spatial_offset"]
           of_pred <- of_pred + of[,"spatial_offset"]
 
+          # Check that values are valid
+          assertthat::assert_that(all(is.finite(of_train)), all(is.finite(of_pred)),
+                                  !anyNA(of_train), !anyNA(of_pred))
+
           # Set the new offset
-          xgboost::setinfo(df_train, "base_margin", of_train)
+          xgboost::setinfo(df_train, "base_margin", ( of_train ))
           # xgboost::setinfo(df_test, "base_margin", of_test)
-          xgboost::setinfo(df_pred, "base_margin", of_pred)
+          xgboost::setinfo(df_pred, "base_margin", ( of_pred ))
         }
 
         # --- #
@@ -563,7 +579,7 @@ engine_xgboost <- function(x,
           # watchlist = watchlist,
           nrounds = nrounds,
           verbose = ifelse(verbose, 1, 0),
-          early_stopping_rounds = min(nrounds, 1000),
+          early_stopping_rounds = min(nrounds, ceiling(nrounds*.25)),
           print_every_n = 100
         )
         # --- #
