@@ -463,3 +463,160 @@ methods::setMethod(
     invisible()
   }
 )
+
+# ------------------------- #
+#### Save model for later use ####
+
+#' Save a model for later use
+#'
+#' @description
+#' The `write_model` function (opposed to the `write_output`) is a generic wrapper to writing a
+#' [`DistributionModel`] to disk. It is essentially a wrapper to [`saveRDS`].
+#' Models can be loaded again via the `load_model` function.
+#'
+#' @note
+#' By default output files will be overwritten if already existing!
+#'
+#' @param mod Provided [`DistributionModel`] object.
+#' @param fname A [`character`] depicting an output filename.
+#' @param slim A [`logical`] option to whether unnecessary entries in the model object should be deleted.
+#' This deletes for example predictions or any other non-model content from the object (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @returns No R-output is created. A file is written to the target direction.
+#' @examples \dontrun{
+#' x <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
+#' write_model(x, "testmodel.rds")
+#' }
+
+#' @name write_model
+#' @aliases write_model
+#' @seealso load_model
+#' @keywords utils
+#' @exportMethod write_model
+#' @export
+NULL
+methods::setGeneric("write_model",
+                    signature = methods::signature("mod"),
+                    function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) standardGeneric("write_model"))
+
+#' @name write_model
+#' @rdname write_model
+#' @usage \S4method{write_model}{ANY, character, logical, logical}(mod, fname, slim, verbose)
+methods::setMethod(
+  "write_model",
+  methods::signature(mod = "ANY"),
+  function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) {
+    assertthat::assert_that(
+      !missing(mod),
+      is.character(fname),
+      is.logical(slim),
+      is.logical(verbose)
+    )
+    # Check that provided model is correct
+    assertthat::assert_that(inherits(mod, "DistributionModel"),
+                            !is.Waiver(mod$get_data("fit_best")) )
+    # And model format
+    assertthat::assert_that( assertthat::has_extension(fname, "rds"))
+
+    # If slim, remove some balast
+    if(slim){
+      if(!is.Waiver(mod$get_data("prediction"))) mod$fits$prediction <- NULL
+    }
+
+    # Save output
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Writing model to file...'))
+    saveRDS(mod, fname)
+    invisible()
+  }
+)
+
+#' Load a pre-computed model
+#'
+#' @description
+#' The `load_model` function (opposed to the `write_model`) loads previous saved
+#' [`DistributionModel`]. It is essentially a wrapper to [`readRDS`].
+#'
+#' When models are loaded, they are briefly checked for their validity and presence of
+#' necessary components.
+#'
+#' @param fname A [`character`] depicting an output filename.
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @returns A [`DistributionModel`] object.
+#' @examples \dontrun{
+#' # Load model
+#' mod <- load_model("testmodel.rds")
+#'
+#' summary(mod)
+#' }
+
+#' @name load_model
+#' @aliases load_model
+#' @seealso write_model
+#' @keywords utils
+#' @exportMethod load_model
+#' @export
+NULL
+methods::setGeneric("load_model",
+                    signature = methods::signature("fname"),
+                    function(fname, verbose = getOption("ibis.setupmessages")) standardGeneric("load_model"))
+
+#' @name load_model
+#' @rdname load_model
+#' @usage \S4method{load_model}{character, logical}(fname, verbose)
+methods::setMethod(
+  "load_model",
+  methods::signature(fname = "character"),
+  function(fname, verbose = getOption("ibis.setupmessages")) {
+    assertthat::assert_that(
+      is.character(fname),
+      is.logical(verbose)
+    )
+    # Check that file exists and is an rds file
+    assertthat::assert_that(
+      assertthat::has_extension(fname, "rds"),
+      file.exists(fname)
+    )
+
+    # Get file size
+    fz <- (file.size(fname) * 0.000001) |> round(digits = 3)
+
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,' MB)'))
+    # Load file
+    mod <- readRDS(fname)
+
+    # --- #
+    # Make some checks #
+    assertthat::assert_that(
+      inherits(mod, "DistributionModel"),
+      hasName(mod, "model"),
+      !is.Waiver(mod$get_data("fit_best"))
+    )
+    # Check that model type is known
+    assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
+    # Depending on engine, check package and load them
+    if(inherits(mod, "GDB-Model")){
+      check_package("mboost"); require("mboost")
+    } else if(inherits(mod, "BART-Model")){
+      check_package("dbarts"); require("dbarts")
+    } else if(inherits(mod, "INLABRU-Model")){
+      check_package("INLA"); require("INLA")
+      check_package("inlabru"); require("inlabru")
+    } else if(inherits(mod, "BREG-Model")){
+      check_package("BoomSpikeSlab"); require("BoomSpikeSlab")
+    } else if(inherits(mod, "GLMNET-Model")){
+      check_package("glmnet"); require("glmnet")
+      check_package("glmnetUtils"); require("glmnetUtils")
+    } else if(inherits(mod, "STAN-Model")){
+      check_package("rstan"); require("rstan")
+      check_package("cmdstanr"); require("cmdstanr")
+    } else if(inherits(mod, "XGBOOST-Model")){
+      check_package("xgboost"); require("xgboost")
+    }
+    # --- #
+    # Return the model
+    return(mod)
+  }
+)

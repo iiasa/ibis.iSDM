@@ -349,6 +349,9 @@ engine_breg <- function(x,
           }
         }
 
+        # Clamp?
+        if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(df),
           all(w >= 0,na.rm = TRUE) # Required for engine_breg
@@ -599,11 +602,12 @@ engine_breg <- function(x,
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
+              g <- ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_ribbon(fill = 'grey90') +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = paste0("partial of ",x.var), y = expression(hat(y)))
+              print(g)
             }
             # Return the data
             return(pred_part)
@@ -721,6 +725,20 @@ engine_breg <- function(x,
             model <- self$model
             df <- newdata
             df <- subset(df, select = attr(mod$terms, "term.labels"))
+
+            # Clamp?
+            if( settings$get("clamp") ) df <- clamp_predictions(model, df)
+
+            if(!is.Waiver(settings$get('bias_variable'))){
+              for(i in 1:length(settings$get('bias_variable'))){
+                if(settings$get('bias_variable')[i] %notin% colnames(df)){
+                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+                  next()
+                }
+                df[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+              }
+            }
+
             df$rowid <- 1:nrow(df)
             df_sub <- subset(df, complete.cases(df))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable

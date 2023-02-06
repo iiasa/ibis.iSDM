@@ -348,11 +348,37 @@ DistributionModel <- bdproto(
     ff[[x]] <- value
     bdproto(NULL, self, fits = ff )
   },
+  # Get the threshold value if calculated
+  get_thresholdvalue = function(self){
+    # Determines whether a threshold exists and plots it
+    rl <- self$show_rasters()
+    if(length(grep('threshold',rl))==0) return( new_waiver() )
+
+    # Get the thresholded layer and return the respective attribute
+    obj <- self$get_data( grep('threshold',rl,value = TRUE) )
+    assertthat::assert_that(assertthat::has_attr(obj, "threshold"))
+    return(
+      attr(obj, "threshold")
+    )
+  },
   # List all rasters in object
   show_rasters = function(self){
     rn <- names(self$fits)
     rn <- rn[ which( sapply(rn, function(x) is.Raster(self$get_data(x)) ) ) ]
     return(rn)
+  },
+  # Get projection
+  get_projection = function(self){
+    sf::st_crs(self$model$background)
+  },
+  # Get resolution
+  get_resolution = function(self){
+    if(!is.Waiver(self$get_data())){
+      raster::res( self$get_data() )
+    } else {
+      # Try to get it from the modelling object
+      self$model$predictors_object$get_resolution()
+    }
   },
   # Remove calculated thresholds
   rm_threshold = function(self){

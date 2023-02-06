@@ -318,6 +318,62 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
   }
   return( out )
 }
+
+#' Clamp a predictor matrix by given values
+#'
+#' @description
+#' To limit extreme extrapolation it is possible to \code{'clamp'} an existing projection to the range
+#' of predictor values observed during model training.
+#' This function takes an internal model matrix and restricts the values seen in the predictor matrix
+#' to those observed during training.
+#' @note This function is meant to be used within a certain [`engine`] or within [`project`].
+#' @param model A [`list`] with the input data used for inference. Created during model setup.
+#' @param pred An optional [`data.frame`] of the prediction container.
+#' @returns A [`data.frame`] with the clamped predictors.
+#' @keywords utils
+#' @keywords internal
+#' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
+clamp_predictions <- function(model, pred){
+  assertthat::assert_that(
+    is.list(model),
+    assertthat::has_name(model, "biodiversity"),
+    (is.data.frame(pred) || is.matrix(pred)) || missing(pred)
+  )
+
+  # For each biodiversity dataset, calculate the range of predictors observed
+  vars_clamp <- data.frame()
+  for(ds in model$biodiversity){
+    # Calculate range for each variable
+    rr <- apply(ds$predictors[,ds$predictors_names], 2, function(z) range(z, na.rm = TRUE)) |>
+      t() |> as.data.frame() |> tibble::rownames_to_column("variable")
+    names(rr) <- c("variable", "min", "max")
+    vars_clamp <- rbind(vars_clamp, rr)
+    rm(rr)
+  }
+  # Aggregate if multiple variables
+  if(anyDuplicated(vars_clamp$variable)){
+    o1 <- aggregate(variable ~ min, data = vars_clamp,
+              FUN = function(x) min(x) )
+    o2 <- aggregate(variable ~ max, data = vars_clamp,
+                    FUN = function(x) max(x) )
+    vars_clamp <- merge(o1,o2)
+  }
+  # --- #
+  # Now clamp either predictors
+  if(missing(pred)) pred <- model$predictors
+
+  # Now clamp the prediction matrix with the clamped variables
+  for (v in intersect(vars_clamp$variable, names(pred))) {
+    pred[, v] <- pmin(
+      pmax(pred[, v], vars_clamp$min[vars_clamp==v] ),
+      vars_clamp$max[vars_clamp==v])
+  }
+
+  assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
+                           nrow(pred)>0)
+  return(pred)
+}
+
 #' Create formula matrix
 #'
 #' Function to create list of formulas with all possible combinations of variables
@@ -696,289 +752,6 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
   } else {
     co
   }
-}
-
-#' Specify settings for absence point sampling over the model background
-#'
-#' @description
-#' This function defines the settings for pseudo-absence sampling of the background. For many
-#' engines such points are necessary to model Poisson (or Binomial) distributed data. Specifically
-#' we call absence points for Binomial (Bernoulli really) distributed responses \code{'pseudo-absence'} and
-#' absence data for Poisson responses \code{'background'} points. For more details read Renner et al. (2015).
-#'
-#' The function \code{'add_pseudoabsence'} allows to add absence points to any [`sf`] object. See **Details** for
-#' additional parameter description and examples on how to 'turn' a presence-only dataset into a presence-(pseudo-)absence.
-#' @details
-#' Possible parameters are:
-#'
-#' * \code{background} Specifies the extent over which absence points are to be sampled.
-#' * \code{nrpoints} The number of points to be generated. Has to be larger than \code{0}.
-#' * \code{method} The specific method on how absence points should be generated. Available options
-#' are \code{'random'} (Default), \code{'buffer'} to generate only within a buffered distance of existing points, or \code{'mcp'} to only generate them
-#' within or outside a minimum convex polygon of the presence points. The parameter \code{mcp_inside} supports inside vs outside generation.
-#' * \code{buffer_distance} The numeric value indicating the distance from presence points where absence points are to be created.
-#' * \code{min_ratio} The minimum ratio of absence points relative presence points. Ensures a minimum number of
-#' absence points. For instance setting this value to \code{1} generates an equal amount of absence points relative to presence points.
-#' * \code{bias} An optional bias layer over which points should preferentially be sampled. Points are preferentially generated in
-#' areas with larger bias.
-#' @param background A [`RasterLayer`] or [`sf`] object over which background points can be sampled. Default is
-#' \code{NULL} (Default) and the background is then added when the sampling is first called.
-#' @param nrpoints A [`numeric`] given the number of background points to be created (Default: \code{10 000}).
-#' @param method [`character`] denoting how the sampling should be done. See details for options (Default: \code{"random"}).
-#' @param buffer_distance [`numeric`] A distance from the observations in which pseudo-absence points are not to be generated.
-#' Note that units follow the units of the projection (e.g. \code{m} or \code{°}).
-#' @param mcp_inside A [`logical`] value of whether absence points should be sampled outside (Default) or inside the
-#' minimum convex polygon provided this method is chosen (parameter \code{method = "mcp"}).
-#' @param min_ratio A [`numeric`] with the minimum ratio of background points relative to presence points.
-#' Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).
-#' @param bias A [`RasterLayer`] with the same extent and projection and background. Absence points will
-#' be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).
-#' @param ... Any other settings to be added to the pseudoabs settings.
-#' @examples
-#' \dontrun{
-#' # This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points
-#' ass <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', mcp_inside = FALSE)
-#'
-#' # This setting would match the number of presence-absence points directly.
-#' ass <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
-#'
-#' # These settings can then be used to add pseudo-absence data to a presence-only dataset
-#' all_my_points <- add_pseudoabsence(df = virtual_points, field_occurrence = 'Observed',
-#'                                      template = background, settings = ass)
-#' }
-#' @references
-#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
-#' @name pseudoabs_settings
-#' @aliases pseudoabs_settings
-#' @keywords train
-#' @exportMethod pseudoabs_settings
-#' @export
-NULL
-methods::setGeneric("pseudoabs_settings",
-                    signature = methods::signature("background"),
-                    function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
-                             method = "random", buffer_distance = 10000, mcp_inside = FALSE,
-                             bias = NULL, ...) standardGeneric("pseudoabs_settings"))
-
-#' @name pseudoabs_settings
-#' @rdname pseudoabs_settings
-#' @usage \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, ANY}(background, nrpoints, min_ratio, method, buffer_distance, mcp_inside, bias)
-methods::setMethod(
-  "pseudoabs_settings",
-  methods::signature(background = "ANY"),
-  function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
-           method = "random", buffer_distance = 10000, mcp_inside = FALSE,
-           bias = NULL, ...){
-    # Check inputs
-    assertthat::assert_that(
-      is.Raster(background) || inherits(background, 'sf') || is.null(background),
-      is.numeric(nrpoints),
-      is.numeric(min_ratio),
-      is.character(method),
-      is.numeric(buffer_distance),
-      is.Raster(bias) || is.null(bias)
-    )
-    method <- match.arg(method, c("random", "buffer", "mcp"), several.ok = FALSE)
-    # Create the settings object
-    settings <- bdproto(NULL, Settings)
-    settings$name <- "Background"
-    settings$set('background', background)
-    # Set all options
-    settings$set('nrpoints', nrpoints)
-    settings$set('min_ratio', min_ratio)
-    settings$set('mcp_inside', mcp_inside)
-    settings$set('method', method)
-    settings$set('buffer_distance', buffer_distance)
-    settings$set('bias', bias)
-    # Other settings
-    mc <- match.call(expand.dots = FALSE)
-    settings$data <- c( settings$data, mc$... )
-
-    return(settings)
-  }
-)
-
-#' Add pseudo-absence points to a point data set
-#'
-#' @description
-#' For most engines, background or pseudo-absence points are necessary. The distinction
-#' lies in how the absence data are handled. For [`poisson`] distributed responses,
-#' absence points are considered background points over which the intensity of sampling lambda
-#' is integrated (in a classical Poisson-Process-Model).
-#' In contrast in [`binomial`] distributed responses, the absence information is assumed to
-#' be an adequate representation of the true absences and treated by the model as such..
-#' @details
-#' A [`pseudoabs_settings()`] object can be added to setup specific absence-sampling. A \code{bias} parameter
-#' can be set to specify a bias layer to sample from, for instance a layer of accessibility.
-#' Note that when modelling several datasets, it might make sense to check across all datasets
-#' whether certain areas are truly absent.
-#' By default, the pseudo-absence points are not sampled in areas in which there are already presence points.
-#' @note
-#' This method removes all columns from the input \code{df} object other than the \code{field_occurrence} column
-#' and the coordinate columns (which will be created if not already present).
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
-#' @param field_occurrence A [`character`] name of the coloumn containing the presence information (Default: \code{observed}).
-#' @param template A [`RasterLayer`] object that is aligned with the predictors (Default: \code{NULL}). If set to \code{NULL},
-#' then \code{background} in the [`pseudoabs_settings()`] has to be a [`RasterLayer`] object.
-#' @param settings A [`pseudoabs_settings()`] objects. Takes the default ibis settings if not set.
-#' @references
-#' * Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in presence‐only species distribution modelling. Diversity and Distributions, 21(5), 595-608.
-#' @keywords train
-#' @returns A [`data.frame`] containing the newly created pseudo absence points.
-#' @export
-add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL, settings = getOption("ibis.pseudoabsence")){
-  assertthat::assert_that(
-    is.data.frame(df) || inherits(df, 'sf') || tibble::is_tibble(df),
-    is.Raster(template) || is.null(template),
-    is.character(field_occurrence),
-    assertthat::has_name(df, field_occurrence),
-    inherits(settings, "Settings")
-  )
-  # Check that no 0 are present, otherwise raise a warning.
-  assertthat::see_if( any(df[[field_occurrence]] != 0) )
-
-  # Try and guess the geometry
-  if(!inherits(df, 'sf')) df <- guess_sf(df)
-  assertthat::assert_that(inherits(df, 'sf'), msg = "Could not convert input to sf. Prepare data first.")
-  # Add coordinates if not present
-  if(!assertthat::has_name(df, 'x') || !assertthat::has_name(df, 'y')) {
-    df$x <- sf::st_coordinates(df[attr(df, "sf_column")])[,1]
-    df$y <- sf::st_coordinates(df[attr(df, "sf_column")])[,2]
-  }
-  # Select relevant columns and assign type
-  df$type <- "Presence"
-
-  # Check whether the background is set and if not, use the bbox
-  if(is.Waiver(settings$get("background"))){
-    # Check whether temlate wasn't provided
-    if(!is.null(template)){
-      background <- template
-    } else {
-      background <- sf::st_as_sf(
-        sf::st_as_sfc(sf::st_bbox(df))
-      );background$bg <- 1
-    }
-  } else {
-    background <- settings$get("background")
-  }
-  # Check that background is a raster, otherwise rasterize with identical resolution
-  if(!is.Raster(background)){
-    assertthat::assert_that(is.Raster(template),
-                            msg = "No suitable RasterLayer was provided through Settings or as template!")
-    if("fasterize" %in% installed.packages()[,1]){
-      background <- fasterize::fasterize(sf = background, raster = emptyraster(template), field = NULL)
-    } else {
-      background <- raster::rasterize(background, emptyraster(template), field = 1)
-    }
-    assertthat::assert_that(is.Raster(background))
-  }
-
-  # --- #
-  # Now depending on the settings create absence points
-  # Get number of points to sample and ratio
-  nrpoints <- settings$get('nrpoints')
-  min_ratio <- settings$get('min_ratio')
-
-  method <- settings$get('method')
-  buffer_distance <- settings$get('buffer_distance')
-
-  # If the nr of points is 0, set it equal to the number of min_ratio or presented presence points
-  nrpoints <- max(nrpoints, round( nrow(df) * min_ratio ))
-  if(nrpoints > raster::ncell(background)) nrpoints <- raster::ncell(background)
-
-  if(!is.Waiver(settings$get("bias"))){
-    bias <- settings$get("bias")
-    if(!compareRaster(bias, background, stopiffalse = FALSE)){
-      #raster::compareCRS(bias, background) # Raise error if projection is different
-      # Resample to ensure same coverage
-      bias <- raster::crop(bias, raster::extent(background))
-      bias <- raster::resample(bias, background, method = "bilinear")
-    }
-    # Normalize if not already set
-    if(raster::cellStats(bias, 'max') > 1 || raster::cellStats(bias, 'min') < 0 ){
-      bias <- predictor_transform(bias, option = "norm")
-    }
-  } else { bias <- NULL }
-
-  # Rasterize the presence estimates
-  bg1 <- raster::rasterize(df[,c('x','y')] %>% sf::st_drop_geometry(),
-                           background, fun = 'count', background = 0)
-  bg1 <- raster::mask(bg1, background)
-
-  assertthat::assert_that(
-    is.finite(raster::cellStats(bg1,'max',na.rm = T)[1])
-  )
-
-  # Generate pseudo absence data
-  if(method == "random"){
-    # Now sample from all cells not occupied
-    if(!is.null(bias)){
-      # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg1[]==0)]
-      if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
-    } else {
-      # raster::sampleStratified(bg1, nrpoints)[,1]
-      abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE)
-    }
-  } else if(method == "buffer"){
-    assertthat::assert_that(is.numeric(buffer_distance),msg = "Buffer distance parameter not numeric!")
-    # Get units of projection and print for
-    un <- sf:::crs_parameters(sf::st_crs(df))$ud_unit
-    if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance ,units::deparse_unit(un),' buffer'))
-    # Calculate buffer
-    buf <- sf::st_buffer(x = df, dist = buffer_distance)
-    if("fasterize" %in% installed.packages()[,1]){
-      buf <- fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)
-    } else {
-      buf <- raster::rasterize(buf, emptyraster(template), field = 1)
-    }
-    bg2 <- raster::mask(template, buf, inverse = FALSE, updatevalue = 1)
-    assertthat::assert_that(cellStats(bg2, "max")>0,msg = "Considered buffer distance too big!")
-    # Now sample from all cells not occupied
-    if(!is.null(bias)){
-      # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==1)]
-      if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE, prob = prob_bias)
-    } else {
-      # raster::sampleStratified(bg1, nrpoints)[,1]
-      abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE)
-    }
-    rm(bg2, buf)
-  } else if(method == "mcp"){
-    # Idea is to draw a MCP polygon around all points and sample background points only outside of it.
-    pol <- sf::st_as_sf( sf::st_convex_hull(sf::st_union(df)) )
-    # Now mask out this area from the background
-    inside <- settings$get("mcp_inside")
-    assertthat::assert_that(is.logical(inside), msg = "MCP inside / outside parameter has to be set.")
-    bg2 <- raster::mask(bg1, mask = pol, inverse = !inside)
-    if(!is.null(bias)){
-      # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==0)]
-      if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
-    } else {
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE)
-    }
-    rm(bg2)
-  }
-
-  # Append to the presence information.
-  abs <- sf::st_as_sf(data.frame(raster::xyFromCell(bg1, abs)),
-                      coords = c("x", "y"), crs = sf::st_crs(df) )
-  abs$x <- sf::st_coordinates(abs)[,1]; abs$y <- sf::st_coordinates(abs)[,2]
-  abs$type <- "Pseudo-absence"; abs[[field_occurrence]] <- 0
-  sf::st_geometry(abs) <- attr(df, "sf_column") # Rename geom column to be the same as for df
-  assertthat::assert_that( nrow(abs) > 0,
-                           all(names(abs) %in% names(df)))
-  # Unique to remove any duplicate values (otherwise double counted cells)
-  # FIXME: Ignoring this as one might want to stress contrast to biases cells
-  # abs <- unique(abs)
-  # Combine with presence information and return
-  out <- rbind.data.frame(subset(df, select = names(abs)),
-                          abs)
-  return(out)
 }
 
 #' Aggregate count observations to a grid

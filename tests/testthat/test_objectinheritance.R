@@ -1,11 +1,12 @@
 # Most of the testing code is obsolete. These tests were created to assess that
 # model objects are self-contained
-test_that('Check that objects are properly inherited', {
+test_that('Check that distribution objects are properly inherited', {
+  skip_if_not_installed('igraph')
+  skip_if_not_installed('abind')
+
   # Load packages
   require(raster)
   require(sf)
-  skip_if_not_installed('igraph')
-  skip_if_not_installed('abind')
 
   options("ibis.setupmessages" = FALSE)
 
@@ -38,10 +39,30 @@ test_that('Check that objects are properly inherited', {
   suppressWarnings( x %>% add_offset_range(virtual_range) )
   expect_s3_class(x$offset, "Waiver")
 
+  # -- #
   # Call predictors
-  add_predictors(x, predictors, transform = 'none',derivates = 'none',priors = NULL)
+  add_predictors(x, predictors, transform = 'none',derivates = 'none', priors = NULL)
   expect_true(is.Waiver(x$predictors))
 
+  y <- x |> add_predictors(predictors)
+  expect_length(x$get_predictor_names(), 0)
+  expect_length(y$get_predictor_names(), 14)
+
+  # Add elevation
+  y <- x |> add_predictor_elevationpref(predictors$elevation_mean_50km, 500, 1000)
+  expect_length(y$get_predictor_names(), 2)
+  y <- x |> add_predictors(predictors) |>
+    add_predictor_elevationpref(predictors$elevation_mean_50km, 500, 1000)
+  expect_length(y$get_predictor_names(), 16)
+
+  # Add range
+  y <- x |> add_predictors(predictors) |>
+    add_predictor_range(virtual_range, method = "binary")
+  expect_length(y$get_predictor_names(), 15)
+  z <- y |> add_predictor_range(virtual_range, method = "distance")
+  expect_length(y$get_predictor_names(), 16)
+
+  # -- #
   # Latent effect check
   x %>% add_latent_spatial(method = "spde",priors = NULL)
   expect_true(is.Waiver(x$latentfactors))

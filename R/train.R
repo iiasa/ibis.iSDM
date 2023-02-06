@@ -18,20 +18,24 @@ NULL
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
 #' Available options in this function include:
-#' [*] \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
+#'
+#' * \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
 #' prior to fitting.
-#' [*] \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
+#' * \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
 #' alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
 #' runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
 #' variables.
-#' [*] \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
+#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
 #' the engine does not support joint integration of likelihoods.
 #' See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 #' if users want more control about this aspect, another option is to fit separate models
 #' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
-#' [*] \code{"bias_variable"} and \code{"bias_value"} Specifying a variable and value here performs a model-based
-#' control of a certain bias variable (e.g. accessibility) with the variable in question being partialed out during
-#' the prediction step.
+#' * \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
+#'
+#' @note
+#' There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
+#' understand the objective, workflow and parameters than can be used to modify the outcomes. Different predictions can
+#' be obtained from the same data and parameters and not all necessarily make sense or are useful.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
@@ -58,28 +62,25 @@ NULL
 #' that do not support the integration of more than one dataset. Integration methods are generally sensitive
 #' to the order in which they have been added to the  [`BiodiversityDistribution`] object.
 #' Available options are:
-#' [*] \code{"predictor"} The predicted output of the first (or previously fitted) models are
+#' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
 #' added to the predictor stack and thus are predictors for subsequent models (Default).
-#' [*] \code{"offset"} The predicted output of the first (or previously fitted) models are
+#' * \code{"offset"} The predicted output of the first (or previously fitted) models are
 #' added as spatial offsets to subsequent models. Offsets are back-transformed depending
 #' on the model family. This option might not be supported for every [`engine`].
-#' [*] \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
+#' * \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 #' are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 #' partialed out during prediction. Here the first dataset added determines the reference level
 #' (see Leung et al. 2019 for a description).
-#' [*] \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
+#' * \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
 #' Might not work with any engine!
-#' [*] \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
+#' * \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
 #' Individual weight multipliers can be determined while setting up the model (**Note: Default is 1**). Datasets are then combined for estimation
 #' and weighted respectively, thus giving for example presence-only records less weight than survey records.
 #'
 #' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
-#' @param bias_variable A [`vector`] with names of variables to be set to *bias_value* (Default: \code{NULL}).
-#' This option can for instance be used to 'partial' out certain biases after predictions have been made.
-#' See Examples.
-#' @param bias_value A [`vector`] with values to be set to *bias_variable* (Default: \code{NULL}).
-#' Specifying a [`numeric`] value here sets \code{bias_variable} to the target value.
 #' @param aggregate_observations [`logical`] on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).
+#' @param clamp [`logical`] whether predictions should be clamped to the range of predictor values observed during model fitting (Default: \code{FALSE}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).
 #' @param ... further arguments passed on.
 #' @references
 #' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
@@ -116,7 +117,7 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           bias_variable = NULL, bias_value = NULL, aggregate_observations = TRUE, verbose = FALSE,...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -126,7 +127,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           bias_variable = NULL, bias_value = NULL, aggregate_observations = TRUE, verbose = FALSE,...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -135,10 +136,9 @@ methods::setMethod(
       is.character(runname),
       is.logical(rm_corPred),
       is.logical(inference_only),
-      is.null(bias_variable) || is.character(bias_variable),
-      is.null(bias_value) || is.numeric(bias_value),
       is.logical(only_linear),
       is.character(method_integration),
+      is.logical(clamp),
       is.logical(verbose)
     )
     # Now make checks on completeness of the object
@@ -147,13 +147,10 @@ methods::setMethod(
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
-    if(!is.null(bias_variable)) assertthat::assert_that(bias_variable %in% x$get_predictor_names(),length(bias_variable) == length(bias_value)) else {
-      bias_variable <- new_waiver(); bias_value <- new_waiver()
-    }
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;bias_variable = new_waiver();bias_value = new_waiver();method_integration="predictor";aggregate_observations = TRUE
+    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
     if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
     varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
@@ -164,10 +161,9 @@ methods::setMethod(
     settings$set('varsel', varsel)
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
+    settings$set('clamp', clamp)
     settings$set('verbose', verbose)
-    settings$set('bias_variable', bias_variable)
-    settings$set('bias_value',bias_value)
-    settings$set('seed', 19372) # Set a (pseudo-random) model seed for reproducibility
+    settings$set('seed', getOption("ibis.seed"))
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -262,7 +258,7 @@ methods::setMethod(
           pred <- model$predictors_object$get_data(df = FALSE)
           new <-  fill_rasters(coords_poly, emptyraster(pred))
           for(val in names(new)){
-            model$predictors_object$set_data(val, new[[val]] )
+            model$predictors_object <- model$predictors_object$set_data(val, new[[val]] )
           }
           rm(pred, new)
         } else if(m == "kde") {
@@ -346,6 +342,27 @@ methods::setMethod(
       # Also add offset object for faster extraction
       model[['offset_object']] <- ras_of
     } else { model[['offset']] <- new_waiver() }
+
+    # Setting up variable bias control if set
+    if(!is.Waiver( x$get_biascontrol())){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable for bias control.')
+      bias <- x$bias
+      if(bias$method == "partial"){
+        settings$set("bias_variable", names(bias$layer) )
+        settings$set("bias_value", bias$bias_value )
+        # Check that variable is already in the predictors object
+        if(!(names(bias$layer) %in% model$predictors_names)){
+          model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
+          # Also set predictor names
+          model[['predictors_names']] <- model$predictors_object$get_names()
+          model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+          # Get predictor types
+          lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
+          model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu, 'factor', 'numeric') )
+        }
+        assertthat::assert_that(nrow(model[['predictors']]) == raster::ncell(model$predictors_object$get_data()))
+      }
+    }
 
     # Get biodiversity data
     model[['biodiversity']] <- list()
@@ -1244,7 +1261,9 @@ methods::setMethod(
             }
             rm(new)
           } else if(method_integration == "prior"){
-            stop("Not supported by this engine!")
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
           }
         } # End of multiple ides
       }

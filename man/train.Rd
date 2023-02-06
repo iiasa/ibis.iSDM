@@ -14,9 +14,8 @@ train(
   inference_only = FALSE,
   only_linear = TRUE,
   method_integration = "predictor",
-  bias_variable = NULL,
-  bias_value = NULL,
   aggregate_observations = TRUE,
+  clamp = FALSE,
   verbose = FALSE,
   ...
 )
@@ -57,31 +56,30 @@ than one \code{\linkS4class{BiodiversityDataset}} object is provided in \code{x}
 that do not support the integration of more than one dataset. Integration methods are generally sensitive
 to the order in which they have been added to the  \code{\link{BiodiversityDistribution}} object.
 Available options are:
-\link{*} \code{"predictor"} The predicted output of the first (or previously fitted) models are
+\itemize{
+\item \code{"predictor"} The predicted output of the first (or previously fitted) models are
 added to the predictor stack and thus are predictors for subsequent models (Default).
-\link{*} \code{"offset"} The predicted output of the first (or previously fitted) models are
+\item \code{"offset"} The predicted output of the first (or previously fitted) models are
 added as spatial offsets to subsequent models. Offsets are back-transformed depending
 on the model family. This option might not be supported for every \code{\link{engine}}.
-\link{*} \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
+\item \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 partialed out during prediction. Here the first dataset added determines the reference level
 (see Leung et al. 2019 for a description).
-\link{*} \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
+\item \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
 Might not work with any engine!
-\link{*} \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
+\item \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
 Individual weight multipliers can be determined while setting up the model (\strong{Note: Default is 1}). Datasets are then combined for estimation
 and weighted respectively, thus giving for example presence-only records less weight than survey records.
+}
 
 \strong{Note that this parameter is ignored for engines that support joint likelihood estimation.}}
 
-\item{bias_variable}{A \code{\link{vector}} with names of variables to be set to \emph{bias_value} (Default: \code{NULL}).
-This option can for instance be used to 'partial' out certain biases after predictions have been made.
-See Examples.}
-
-\item{bias_value}{A \code{\link{vector}} with values to be set to \emph{bias_variable} (Default: \code{NULL}).
-Specifying a \code{\link{numeric}} value here sets \code{bias_variable} to the target value.}
-
 \item{aggregate_observations}{\code{\link{logical}} on whether observations covering the same grid cell should be aggregated (Default: \code{TRUE}).}
+
+\item{clamp}{\code{\link{logical}} whether predictions should be clamped to the range of predictor values observed during model fitting (Default: \code{FALSE}).}
+
+\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).}
 
 \item{...}{further arguments passed on.}
 }
@@ -104,20 +102,25 @@ a \link{RasterLayer} object named \code{\link{prediction}} that contains the spa
 These objects can be requested via \code{object$get_data("fit_best")}.
 
 Available options in this function include:
-\link{*} \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
+\itemize{
+\item \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
 prior to fitting.
-\link{*} \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
+\item \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
 alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
 runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
 variables.
-\link{*} \code{"method_integration"} Only relevant if more than one \code{\link{BiodiversityDataset}} is supplied and when
+\item \code{"method_integration"} Only relevant if more than one \code{\link{BiodiversityDataset}} is supplied and when
 the engine does not support joint integration of likelihoods.
 See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 if users want more control about this aspect, another option is to fit separate models
 and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
-\link{*} \code{"bias_variable"} and \code{"bias_value"} Specifying a variable and value here performs a model-based
-control of a certain bias variable (e.g. accessibility) with the variable in question being partialed out during
-the prediction step.
+\item \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
+}
+}
+\note{
+There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
+understand the objective, workflow and parameters than can be used to modify the outcomes. Different predictions can
+be obtained from the same data and parameters and not all necessarily make sense or are useful.
 }
 \examples{
 \dontrun{

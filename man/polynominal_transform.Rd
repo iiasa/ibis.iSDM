@@ -11,9 +11,9 @@ polynominal_transform(
 )
 }
 \arguments{
-\item{coords}{A \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object with coordinates (2 columns named x-y)}
+\item{coords}{A \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object with coordinates (2 columns named x-y).}
 
-\item{degree}{The number of degrees used for polynominal transformation (Default: 2)}
+\item{degree}{The number of degrees used for polynominal transformation (Default: \code{2}).}
 
 \item{weights}{Set by default to the inverse of the number of coordinates.}
 }

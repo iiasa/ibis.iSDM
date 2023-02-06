@@ -21,7 +21,8 @@ and presence-absence occurrence points equally.}
 
 \item{background}{A \code{\link{RasterLayer}} object with the background of the study region. Use for assessing point density.}
 
-\item{env}{A \code{\link{Raster}} object with environmental covaraites. Needed when method is set to \code{"environmental"} (Default: \code{NULL}).}
+\item{env}{A \code{\link{Raster}} object with environmental covaraites. Needed when method is set to \code{"environmental"}
+or \code{"bias"} (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
 
@@ -32,8 +33,6 @@ and presence-absence occurrence points equally.}
 \item{zones}{A \code{\link{RasterLayer}} to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).}
 
 \item{verbose}{\code{\link{logical}} of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).}
-
-\item{bias}{A supplied \code{\link{RasterLayer}} bias layer for method \code{"bias"} (Default: \code{NULL}).}
 }
 \description{
 For most species distribution modelling approaches it is assumed that occurrence records are unbiased, which
@@ -46,20 +45,21 @@ data prior to any estimation and its use should be considered with care (see als
 }
 \details{
 Currently implemented thinning methods:
-
-\link{*} \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
+\itemize{
+\item \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
 Does not account for any spatial or environmental distance between observations.
-\link{*} \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"bias"}) only.
+\item \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
 Points are preferentially thinned from grid cells which are in the 25\% most biased (larger values assumed greater bias)
 and have high point density. Thins the observations up to \code{"minpoints"}.
-\link{*} \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
+\item \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
-\link{*} \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
+\item \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
 that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
 We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
-\link{*} \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
+\item \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
 be set for this function to work.
+}
 }
 \references{
 \itemize{

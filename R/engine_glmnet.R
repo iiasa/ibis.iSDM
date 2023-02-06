@@ -27,7 +27,7 @@ NULL
 #' to \code{"reg"}.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{1}).
+#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).
 #' @param nlambda A [`numeric`] giving the number of lambda values to be used (Default: \code{100}).
 #' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually best to let this parameter be
 #' determined deterministically (Default: \code{NULL}).
@@ -44,7 +44,7 @@ NULL
 #' @export
 
 engine_glmnet <- function(x,
-                          alpha = 1,
+                          alpha = 0,
                           nlambda = 100,
                           lambda = NULL,
                           type = "response",
@@ -136,7 +136,7 @@ engine_glmnet <- function(x,
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
           inherits(settings,'Settings') || is.null(settings),
-          nrow(model$predictors) == ncell(self$get_data('template')),
+          nrow(model$predictors) == raster::ncell(self$get_data('template')),
           !is.Waiver(self$get_data("params")),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -151,18 +151,12 @@ engine_glmnet <- function(x,
         fam <- model$biodiversity[[1]]$family
 
         # -- #
-        # Expand predictors if specified in settings
-        if(settings$get('only_linear') == FALSE){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
-                                                    'Non-linear estimation not yet added to engine. Suggest to create variable derivatives externally.')
-        }
-        # -- #
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(raster::cellStats(bg,min)))
+          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -287,7 +281,13 @@ engine_glmnet <- function(x,
         # All other needed data for model fitting
         fam <- model$biodiversity[[1]]$family
         li <- model$biodiversity[[1]]$link
-        if(!is.null(li)) if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
+        if(!is.null(li)){
+          if(li %in% c("cloglog", "logit", "probit")){
+            fam <- binomial(link = li)
+          } else {
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Custom link functions not supported!"))
+          }
+        }
 
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
@@ -334,11 +334,42 @@ engine_glmnet <- function(x,
           }
         }
 
+        # Clamp?
+        if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+
+        # -- #
+        # Expand predictors if non-linear is specified in settings
+        if(settings$get('only_linear') == FALSE){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                    'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
+          # linear_predictors <- attr(terms.formula(form), "term.labels")
+          # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
+          #
+          # form <- update.formula(form,
+          #                        paste0(
+          #                          ". ~ . +",
+          #                          paste0("I(", linear_predictors,"^2)",collapse = " + "),
+          #                          " + ",
+          #                          paste0(m[lower.tri(m)], collapse = " + ")
+          #                        ))
+          # # Update penalty factors and limits
+          # for(var in attr(terms.formula(form), "term.labels")){
+          #   if(!(var %in% p.fac)){
+          #     v <- 1 # Take the maximum regularization penalty by default
+          #     vlow <- -Inf; vupp <- Inf
+          #     names(v) <- var; names(vlow) <- var; names(vupp) <- var
+          #     p.fac <- append(p.fac, v)
+          #     lowlim <- append(lowlim, vlow); upplim <- append(upplim, vupp)
+          #   }
+          # }
+        }
+
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(df),
           is.null(ofs) || is.vector(ofs),
           is.null(ofs_pred) || is.vector(ofs_pred),
-          all(w >= 0,na.rm = TRUE) # Required for engine_breg
+          length(p.fac) == length(lowlim),
+          all(w >= 0,na.rm = TRUE)
         )
 
         # --- #
@@ -347,27 +378,51 @@ engine_glmnet <- function(x,
           if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
                                                           strategy = getOption("ibis.futurestrategy"))
         }
-        cv_gn <- try({
-          cv.glmnet(formula = form,
-                    data = df,
-                    alpha = params$alpha, # Elastic net mixing parameter
-                    lambda = params$lambda, # Overwrite lambda
-                    weights = w, # Case weights
-                    offset = ofs,
-                    family = fam,
-                    penalty.factor = p.fac,
-                    # Option for limiting the coefficients
-                    lower.limits = lowlim,
-                    upper.limits = upplim,
-                    standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                    maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-                    parallel = getOption("ibis.runparallel"),
-                    trace.it = settings$get("verbose"),
-                    nfolds = 10  # number of folds for cross-validation
-          )
-        },silent = FALSE)
+        # Depending if regularized should be set, specify this separately
+        # if( (settings$get('varsel') == "reg") ){
+        #   if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
+        #                                             'Finding optimal combinations of alpha and lambda.')
+        #   cv_gn <- try({
+        #     cva.glmnet(formula = form,
+        #               data = df,
+        #               alpha = params$alpha, # Elastic net mixing parameter
+        #               lambda = params$lambda, # Overwrite lambda
+        #               weights = w, # Case weights
+        #               offset = ofs,
+        #               family = fam,
+        #               penalty.factor = p.fac,
+        #               # Option for limiting the coefficients
+        #               lower.limits = lowlim,
+        #               upper.limits = upplim,
+        #               standardize = FALSE, # Don't standardize to avoid doing anything to weights
+        #               maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+        #               parallel = getOption("ibis.runparallel"),
+        #               trace.it = settings$get("verbose"),
+        #               nfolds = 10  # number of folds for cross-validation
+        #     )
+        #   },silent = FALSE)
+        # } else {
+          cv_gn <- try({
+            cv.glmnet(formula = form,
+                      data = df,
+                      alpha = params$alpha, # Elastic net mixing parameter
+                      lambda = params$lambda, # Overwrite lambda
+                      weights = w, # Case weights
+                      offset = ofs,
+                      family = fam,
+                      penalty.factor = p.fac,
+                      # Option for limiting the coefficients
+                      lower.limits = lowlim,
+                      upper.limits = upplim,
+                      standardize = FALSE, # Don't standardize to avoid doing anything to weights
+                      maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+                      parallel = getOption("ibis.runparallel"),
+                      trace.it = settings$get("verbose"),
+                      nfolds = 10  # number of folds for cross-validation
+            )
+          },silent = FALSE)
+        # }
         if(inherits(cv_gn, "try-error")) stop("Model failed to converge with provided input data!")
-        # Could consider using assess.glmnet(cv_gn$glmnet.fit, test.data)
 
         # --- #
         # Predict spatially
@@ -491,11 +546,12 @@ engine_glmnet <- function(x,
 
             if(plot){
               # Make a plot
-              ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
+              g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = "", y = expression(hat(y))) +
                 ggplot2::facet_wrap(~variable,scales = 'free')
+              print(g)
             }
             return(pp)
           },
@@ -591,6 +647,9 @@ engine_glmnet <- function(x,
             model <- self$model
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             # Set target variables to bias_value for prediction if specified
             if(!is.Waiver(settings$get('bias_variable'))){

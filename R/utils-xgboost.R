@@ -24,10 +24,16 @@ built_formula_xgboost <- function(obj){
     form <- new_waiver()
     # Note: Priors are added in the fitted distribution object through the model object
   } else{
-    # If custom supplied formula, check that variable names match supplied predictors
-    stop("Custom formulas not yet implemented")
-    # TODO: Remove elements from predictors that are not used in the formula
-    form <- new_waiver()
+    # If custom supplied formula, check that variable names match the supplied predictors
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    form <- to_formula(obj$equation)
+
+    # Get all variables and check
+    varn <- obj$predictors_names[which( all.vars(form) %in% obj$predictors_names )]
+    form <- to_formula( paste0("observed ~", paste0(varn, collapse = " + ")) )
+    assertthat::assert_that(
+      is.formula(form), length(all.vars(form))>1
+    )
   }
 
   return(form)

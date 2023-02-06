@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_inla.R
 \name{INLAPriors}
 \alias{INLAPriors}
-\title{Helper function when multiple variables and types are supplied}
+\title{Helper function when multiple variables and types are supplied for INLA}
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 

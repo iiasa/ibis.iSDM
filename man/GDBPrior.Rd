@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPrior}
 \alias{GDBPrior}
-\title{Create a new monotonic prior}
+\title{Monotonic constrained priors for boosted regressions}
 \usage{
 GDBPrior(variable, hyper = "increasing", ...)
 
@@ -20,15 +20,13 @@ GDBPrior(variable, hyper = "increasing", ...)
 Monotonic constrains for gradient descent boosting models do not work in the same way as other priors
 where a specific coefficient or magnitude of importance is specified.
 Rather monotonic constraints \strong{enforce} a specific directionality of regression coefficients so that
-for instance a coefficient has to be positive.
-\strong{Important:} Specifying a monotonic constrain does not guarantee that the variable is retained in the
-model if model regularization is applied!
-}
-\details{
-TBD
+for instance a coefficient has to be positive or negative.
+
+\strong{Important:} Specifying a monotonic constrain for the \link{engine_gdb} does not guarantee that the variable is retained in the
+model as it can still be regularized out.
 }
 \note{
-Similar priors can also be defined for the \code{\link{engine_xgboost}} via \code{\linkS4class{XGBPrior}}.
+Similar priors can also be defined for the \code{\link{engine_xgboost}} via \code{\link[=XGBPrior]{XGBPrior()}}.
 }
 \references{
 \itemize{
@@ -36,7 +34,7 @@ Similar priors can also be defined for the \code{\link{engine_xgboost}} via \cod
 }
 }
 \seealso{
-\code{\linkS4class{Prior}}, \code{\linkS4class{XGBPrior}}
+\code{\linkS4class{Prior}}, \code{\link{XGBPrior}}
 
 Other prior: 
 \code{\link{BARTPriors}()},

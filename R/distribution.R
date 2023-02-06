@@ -6,12 +6,19 @@ NULL
 #' @description
 #' This function creates an object that contains all the data, parameters and settings
 #' for building an (integrated) species distribution model.
-#' Key functions to add data are [add_biodiversity], [add_predictors],
-#' [add_latent], [engine], [add_priors] and [add_offset]. This creates a
+#' Key functions to add data are [`add_biodiversity_*`], [`add_predictors()`],
+#' [`add_latent_*`], [`engine_*`], [`add_priors`] and [`add_offset`]. It creates a
 #' prototype [`BiodiversityDistribution`] object with its own functions.
 #' After setting input data and parameters, model predictions can then be created
 #' via the [train] function and predictions be created.
-#' See **Details** for further functions available to modify or summarize the created object.
+#'
+#' Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
+#' the background. This can be for instance a buffered layer by a certain dispersal distance (Cooper and Soberon, 2018)
+#' or a categorical layer representing biomes or soil conditions. See also the
+#' frequently asked question (FAQ) section on the homepage for more information.
+#'
+#' See **Details** for a description of the internal functions available
+#' to modify or summarize data within the created object.
 #'
 #' **Note that any model requires at minimum a single added [biodiversity] dataset
 #' as well as a specified [engine].**
@@ -50,12 +57,16 @@ NULL
 #' * \code{object$get_prior_variables()} Returns a description of [`priors`] added.
 #'
 #' There are other functions as well but those are better accessed through their respective wrapper functions.
+#'
+#'
+#'
 #' @returns [`BiodiversityDistribution-class`] object containing data for building a biodiversity distribution modelling problem.
 #'
 #' @seealso [`bdproto`] on the general definition of [`proto`] objects and in particular [`bdproto-biodiversitydistribution`].
 #'
 #' @references
 #' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. [https://doi.org/10.1002/ecy.2710](https://doi.org/10.1002/ecy.2710)
+#' * Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
 #' @aliases distribution
 #' @exportMethod distribution
 #' @name distribution
@@ -67,6 +78,9 @@ NULL
 #'  # Define model
 #'  x <- distribution(background)
 #'  x
+#'  # Show names of the functions within the object
+#'  names(x)
+#'
 #' }
 #' @export
 methods::setGeneric("distribution",

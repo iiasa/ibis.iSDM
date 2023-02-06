@@ -524,6 +524,9 @@ engine_stan <- function(x,
           # Full data for prediction
           full <- subset(model$predictors, select = c('x','y',model$predictors_names))
 
+          # Clamp?
+          if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+
           if(has_intercept==1) full$Intercept <- 1
 
           # If poipo, add w to prediction container
@@ -609,6 +612,9 @@ engine_stan <- function(x,
             if(is.null(type)) type <- settings$get("type")
             assertthat::assert_that(inherits(obj, "stanfit"),
                                     all(model$predictors_names %in% colnames(newdata)))
+
+            # Clamp?
+            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
             # Set target variables to bias_value for prediction if specified
             if(!is.Waiver(settings$get('bias_variable'))){
@@ -816,7 +822,7 @@ engine_stan <- function(x,
             return(NULL)
           },
           # Custom function to show stan code
-          show_code = function(self){
+          stancode = function(self){
             message(
               self$get_data("sm_code")
             )

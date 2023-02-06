@@ -7,9 +7,13 @@ NULL
 
 #' Biodiversity Distribution master class
 #'
+#' @description
 #' Base [`proto`] class for any biodiversity distribution objects.
 #' Serves as container that supplies data and functions to
 #' other [`proto`] classes.
+#'
+#' @details
+#' Run [names()] on a [`distribution`] object to show all available functions.
 #'
 #' @name BiodiversityDistribution-class
 #' @aliases BiodiversityDistribution
@@ -25,6 +29,7 @@ BiodiversityDistribution <- bdproto(
   biodiversity  = bdproto(NULL, BiodiversityDatasetCollection),
   predictors    = new_waiver(),
   priors        = new_waiver(),
+  bias          = new_waiver(),
   latentfactors = new_waiver(),
   offset        = new_waiver(),
   log           = new_waiver(),
@@ -34,25 +39,28 @@ BiodiversityDistribution <- bdproto(
   print = function(self) {
     # TODO: Prettify below
     # Query information from the distribution object
-    ex =  self$show_background_info()
-    pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
-    of = ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
-    pio = ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
+    ex <- self$show_background_info()
+    pn <- ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
+    of <- ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
+    pio <- ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
+    bv <- ifelse(is.Waiver(self$bias), '', paste0( "\n  bias control:   <", self$bias$method, ">" ) )
+    en <- ifelse(is.null(self$get_engine()), text_red("<NONE>"), self$get_engine() )
 
-    message(paste0('\033[1m','\033[36m','<',self$name(),'>','\033[39m','\033[22m',
-                   ifelse(is.Waiver(self$limits),"\nBackground extent: ","\nBackground extent (limited): "),
+    message(paste0('\033[1m','\033[36m','<', self$name(),'>','\033[39m','\033[22m',
+                   ifelse(is.Waiver(self$limits), "\nBackground extent: ", "\nBackground extent (limited): "),
                    "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
                    "\n     ymin: ", ex[['extent']][3], ", ymax: ", ex[['extent']][4],
                    "\n   projection: ", ex[['proj']],
                    "\n --------- ",
-                   "\n",self$biodiversity$show(),
+                   "\n", self$biodiversity$show(),
                    "\n --------- ",
                    "\n  predictors:     ", pn,
                    "\n  priors:         ", pio,
-                   "\n  latent:         ", paste(self$get_latent(),collapse = ', '),
+                   "\n  latent:         ", paste(self$get_latent(), collapse = ', '),
                    of,
+                   bv,
                    "\n  log:            ", self$get_log(),
-                   "\n  engine:         ", self$get_engine()
+                   "\n  engine:         ", en
                    )
             )
   },
@@ -72,6 +80,11 @@ BiodiversityDistribution <- bdproto(
     o[['extent']] <- round( sf::st_bbox(r), 3)
     o[['proj']] <-  raster::projection(r)
     return(o)
+  },
+  # Set limits
+  set_limits = function(self, x){
+    assertthat::assert_that(is.Raster(x))
+    bdproto(NULL, self, limits = x )
   },
   # Get provided limits
   get_limits = function(self){
@@ -176,7 +189,6 @@ BiodiversityDistribution <- bdproto(
     self$priors$varnames()
   },
   # Set offset
-  # FIXME: For logical consistency could define a new bdproto object
   set_offset = function(self, x){
     assertthat::assert_that(is.Raster(x))
     bdproto(NULL, self, offset = x )
@@ -198,12 +210,31 @@ BiodiversityDistribution <- bdproto(
   },
   # Plot offset
   plot_offsets = function(self){
-    if(is.Waiver(self$offset)) return( self$offset() )
+    if(is.Waiver(self$offset)) return( self$offset )
     if(raster::nlayers(self$offset)>1){
-      of <- sum(self$offset,na.rm = TRUE)
+      of <- sum(self$offset, na.rm = TRUE)
       of <- raster::mask(of, self$background)
     } else {of <- self$offset}
     raster::plot(of, col = ibis_colours$viridis_orig, main = "Combined offset")
+  },
+  # set_biascontrol
+  set_biascontrol = function(self, x, method, value){
+    assertthat::assert_that(is.Raster(x), is.numeric(value))
+    bdproto(NULL, self, bias = list(layer = x, method = method, bias_value = value) )
+  },
+  # Get bias control (print name)
+  get_biascontrol = function(self){
+    if(is.Waiver(self$bias)) return( self$bias )
+    names( self$bias )
+  },
+  # Remove bias controls
+  rm_biascontrol = function(self){
+    bdproto(NULL, self, bias = new_waiver() )
+  },
+  # Plot bias variable
+  plot_bias = function(self){
+    if(is.Waiver(self$bias)) return( self$bias )
+    raster::plot(self$bias$layer, col = ibis_colours$viridis_plasma, main = "Bias variable")
   },
   # Get log
   get_log = function(self){
@@ -229,8 +260,23 @@ BiodiversityDistribution <- bdproto(
     # Calculate the dimensions of the background
     if(!is.Waiver(self$background)) extent_dimensions(self$background) else NULL
   },
+  # Get projection
+  get_projection = function(self){
+    assertthat::assert_that(inherits(self$background,'sf'))
+    sf::st_crs(self$background)
+  },
+  # Get resolution
+  get_resolution = function(self){
+    if(!is.Waiver(self$predictors)){
+      self$predictors$get_resolution()
+    }
+  },
   # Remove predictors
   rm_predictors = function(self, names){
+    if(is.Waiver(self$predictors) || is.null(self$predictors)) return(NULL)
+    if(missing(names)){
+      names <- self$get_predictor_names() # Assume all names
+    }
     assertthat::assert_that(
       is.character(names) || assertthat::is.scalar(names) || is.vector(names)
     )
@@ -238,6 +284,7 @@ BiodiversityDistribution <- bdproto(
     prcol <- bdproto(NULL, self)
     # Set the object
     prcol$predictors$rm_data(names)
+    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
     return(prcol)
   },
   # Remove priors

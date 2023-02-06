@@ -9,12 +9,13 @@ add_predictor_range(
   layer,
   method = "distance",
   distance_max = NULL,
+  fraction = NULL,
   priors = NULL
 )
 
 \S4method{add_predictor_range}{BiodiversityDistribution, raster}(x, layer)
 
-\S4method{add_predictor_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
+\S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -24,6 +25,9 @@ add_predictor_range(
 \item{method}{\code{\link{character}} describing how the range should be included (\code{"binary"} | \code{"distance"}).}
 
 \item{distance_max}{Numeric threshold on the maximum distance (Default: \code{NULL}).}
+
+\item{fraction}{An optional \code{\link{RasterLayer}} object that is multiplied with digitized raster layer.
+Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions}
 }

@@ -88,7 +88,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied
+#' Helper function when multiple variables are supplied for a BREG prior
 #' @name BREGPriors
 #' @description
 #' This is a helper function to specify several [BREGPrior] with the same

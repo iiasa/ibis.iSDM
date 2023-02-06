@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_stan.R
 \name{STANPriors}
 \alias{STANPriors}
-\title{Helper function when multiple variables and types are supplied}
+\title{Helper function when multiple variables and types are supplied for STAN}
 \usage{
 STANPriors(variables, type, hyper = c(0, 2), ...)
 

@@ -20,6 +20,9 @@
   options('ibis.nthread' = parallel::detectCores() - 1)
   options('ibis.runparallel' = FALSE)
   options('ibis.setupmessages' = TRUE)
+  # Known seed
+  options('ibis.seed' = 19372)
+  # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
@@ -29,6 +32,13 @@
   # Use the future package for any options. Default is FALSE
   options('ibis.futurestrategy' = "multisession")
   options(doFuture.foreach.export = ".export-and-automatic-with-warning")
+
+  # Other dependencies not directly added in DESCRIPTION (to minimize potential issues)
+  options('ibis.dependencies' = c(
+    "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
+    "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
+    "dbarts", "mboost", "rstan", "cmdstanr"
+  ))
 
   # Set default corrrelation coefficient threshold for evaluating correlated predictors
   options('ibis.corPred' = 0.7)

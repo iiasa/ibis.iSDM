@@ -91,7 +91,7 @@ predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_me
 
 We can define a generic model to use for any of the sections below.
 
-```{r, eval = TRUE}
+```{r Create basemodel, eval = TRUE}
 # First define a generic model and engine using the available predictors
 basemodel <- distribution(background) %>% 
       add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
@@ -102,7 +102,7 @@ basemodel <- distribution(background) %>%
 
 The most simple way of integrating prior observations into species distribution models is to add them as covariate. This is based on the assumption that for instance an expert-drawn range map can be useful in predicting where species exist might or might not find suitable habitat (see for instance [Domisch et al. 2016](http://doi.wiley.com/10.1111/ecog.01925)). A benefit of this approach is that predictors can be easily added to all kinds of `engines` in the ibis.ISDM package and also used for scenarios.
 
-```{r, eval = TRUE}
+```{r Add range as predictor, eval = TRUE}
 
 # Here we simply add the range as simple binary predictor
 mod1 <- basemodel %>% 
@@ -117,7 +117,7 @@ Expert-ranges can currently be added as simple `binary` or `distance` transform.
 Another option that has been added is the possibility to add thresholded masks based on some elevational (or other) limits. The idea here is to generate two layers, one with areas between a lower and an upper range and one above the upper range. Regression against such thresholded layers can thus approximate the lower and upper bounds.
 For instance suppose a species is known to occur between 300 and 800m above sea level, this can be added as follows:
 
-```{r eval=TRUE}
+```{r add elevation as predictor, eval=TRUE}
 # Specification 
 basemodel <- distribution(background) %>% 
       add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
@@ -139,7 +139,7 @@ plot( mod1$predictors$get_data()[[c("elev_low", "elev_high")]] )
 Apart from including spatial-explicit prior biodiversity knowledge as predictors in a SDM model, there is - particular for Poisson Process Models (PPM) - also a different approach, that is to include the variable as offset in the prediction. Doing so effectively tells the respective engine to change intercepts and coefficients based on existing knowledge, which can for instance be an existing coefficient.
 Offsets can be specified as addition or as nuisance for a model, for instance either by adding an expert-delineated range as offset or by factoring out the spatial bias of areas with high sampling density or accessibility. Multiple offsets can be specified for any given PPM by simply multiplying them, since $log(off_1 * off_2) = log(off_1) + log(off_2)$. A comprehensive overview of including offsets in SDMs can be found in [Merow et al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
 
-```{r}
+```{r Train model with range offset}
 
 # Specification 
 mod1 <- distribution(background) %>% 
@@ -215,6 +215,7 @@ There is also now a convenience function that allows to extract coefficients or 
 ## Integration with ensembles
 
 Another very straight forward way for model-based integration is to simply fit two separate models each with a different biodiversity dataset and then create an ensemble from them. This approach also works across different engines and a variety of data types (in some cases requiring normalization given the difference in units and model assumptions).
+(Note that it also possible to create an ensemble of partial responses via `ensemble_partial()`).
 
 ```{r Model ensembles}
 # Create and fit two models
@@ -238,13 +239,12 @@ plot(mod1)
 plot(mod2)
 
 # Now create an ensemble:
-# Although not strictly necessary here sinc everything else is equal, we are going to normalize
-# both layers for the ensemble
+# By setting normalize to TRUE we furthermore ensure each prediction
+# is on a comparable scale [0-1].
 e <- ensemble(mod1, mod2, method = "mean", normalize = TRUE)
 
 # The ensemble contains the mean and the coefficient of variation across all objects
 plot(e)
-
 ```
 
 ---
@@ -256,7 +256,7 @@ As outlined by [Isaac et al. 2020](https://linkinghub.elsevier.com/retrieve/pii/
 
 Depending on the engine, the ibis.iSDM package currently supports either combined or joint estimation of several datasets.
 
-#### Combined integration ####
+#### Combined integration
 
 By default all engines that do not support any joint estimation (see below) will make use of a combined integration, for which there are currently three different options:
 

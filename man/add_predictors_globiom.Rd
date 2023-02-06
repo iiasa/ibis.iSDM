@@ -10,6 +10,8 @@ add_predictors_globiom(
   names = NULL,
   transform = "none",
   derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
   bgmask = TRUE,
   harmonize_na = FALSE,
   priors = NULL,
@@ -30,6 +32,10 @@ add_predictors_globiom(
 \item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
+
+\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of knots for derivate creation if relevant (Default: \code{4}).}
+
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).}
 
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
 

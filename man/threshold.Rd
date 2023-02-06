@@ -76,7 +76,7 @@ The following options are currently implemented:
 \dontrun{
  # Where mod is an estimated DistributionModel
  tr <- threshold(mod)
- tr$show_rasters()
+ tr$plot_threshold()
 }
 }
 \references{

@@ -10,10 +10,11 @@ add_predictors(
   names = NULL,
   transform = "scale",
   derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
   bgmask = TRUE,
   harmonize_na = FALSE,
   explode_factors = FALSE,
-  int_variables = NULL,
   priors = NULL,
   ...
 )
@@ -25,6 +26,12 @@ add_predictors(
 \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
 
 \S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+
+\S4method{add_predictors}{BiodiversityScenario,RasterBrick}(x, env)
+
+\S4method{add_predictors}{BiodiversityScenario,RasterLayer}(x, env)
+
+\S4method{add_predictors}{BiodiversityScenario,RasterStack}(x, env)
 
 \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
 }
@@ -39,13 +46,15 @@ add_predictors(
 
 \item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
 
+\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of knots for derivate creation if relevant (Default: \code{4}).}
+
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).}
+
 \item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
 
 \item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
 
 \item{explode_factors}{\code{\link{logical}} of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).}
-
-\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
 
@@ -53,13 +62,11 @@ add_predictors(
 }
 \description{
 This function allows to add predictors to \link{distribution} or \link{BiodiversityScenario}
-objects.
-}
-\details{
-Predictors are covariates that in spatial projection have to match
+objects. Predictors are covariates that in spatial projection have to match
 the geographic projection of the background layer in the \link{distribution} object.
 This function furthermore allows to transform or create derivates of provided
 predictors.
+
 A transformation takes the provided rasters and for instance rescales them or transforms
 them through a principal component analysis (\link{prcomp}). In contrast, derivates leave
 the original provided predictors alone, but instead create new ones, for instance by transforming

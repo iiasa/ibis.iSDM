@@ -82,6 +82,68 @@ ibis_options <- function(){
   print(items)
 }
 
+#' Install ibis dependencies
+#'
+#' @description
+#' Some of the dependencies (R-Packages) that ibis.iSDM relies on are by intention
+#' not added to the Description of the file to keep the number of mandatory dependencies small
+#' and enable the package to run even on systems that might not have all libraries pre-installed.
+#'
+#' This function provides a convenience wrapper to install those missing dependencies as needed. It
+#' furthermore checks which packages require updating and updates them as needed.
+#' @note
+#' INLA is handled in a special way as it is not available via cran.
+#' @param deps A [`vector`] with the names of the packages to be installed (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
+#' @param update A [`logical`] flag of whether all (installed) packages should also be checked for updates (Default: \code{TRUE}).
+#' @returns Nothing. Packages will be installed.
+#' @examples \dontrun{
+#'   # Install and update all dependencies
+#'   ibis_dependencies()
+#' }
+#' @keywords misc
+#' @export
+ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TRUE){
+  assertthat::assert_that(
+    is.vector(deps),
+    length(deps) >= 1,
+    is.logical(update)
+  )
+  # First check which packages are not installed and then do so.
+  new.packages <- deps[!(deps %in% installed.packages()[, "Package"])]
+  if(length(new.packages)>0){
+    if("INLA" %in% new.packages){
+      suppressMessages(
+        install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
+                       dependencies = TRUE, quiet = TRUE)
+      )
+    }
+    suppressMessages(
+      install.packages(new.packages, dependencies = TRUE, quiet = TRUE)
+    )
+  }
+
+  # Update packages if set
+  if(update){
+    if("INLA" %in% deps){
+      # For windows
+      if(length(grep("Windows", osVersion,ignore.case = TRUE)) && !("INLA" %in% installed.packages()[, "Package"])){
+        # On windows we remove INLA and reinstall
+        install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
+      } else {
+        require("INLA")
+        suppressPackageStartupMessages(
+          inla.upgrade(ask = FALSE)
+        )
+      }
+    }
+    # Update all the package excluding INLA
+    suppressMessages(
+      update.packages(deps, ask = FALSE)
+    )
+  }
+  invisible()
+}
+
 #' Options to set up ibis for parallel processing with future
 #'
 #' @param cores A [`numeric`] number stating the number of cores to use.

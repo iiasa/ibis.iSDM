@@ -9,7 +9,7 @@
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects.}
 
-\item{method}{Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).}
+\item{method}{Approach on how the ensemble is to be created. See details for available options (Default: \code{'mean'}).}
 
 \item{weights}{(\emph{Optional}) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).}
 
@@ -19,18 +19,25 @@
 ignore any of the layer names in ensembles of \code{Raster} objects.}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
+
+\item{uncertainty}{A \code{\link{character}} indicating how the uncertainty among models should be calculated. Available options include
+\code{"none"}, the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default)
+or the range between the lowest and highest value (\code{"range"}).}
 }
 \value{
 A \code{\link{RasterStack}} containing the ensemble of the provided predictions specified by \code{method} and a
 coefficient of variation across all models.
 }
 \description{
+Ensemble models calculated on multiple models have often been shown to
+outcompete any single model in comparative assessments (Valavi et al. 2022).
+
 This function creates an ensemble of multiple provided distribution models
 fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have estimated predictions with a given method and
 optional uncertainty in form of the standard deviation or similar.
 Through the \code{layer} parameter it can be specified which part of the prediction
 should be averaged in an ensemble. This can be for instance the \emph{mean} prediction and/or
-the standard deviation \emph{sd}.
+the standard deviation \emph{sd}. See Details below for an overview of the different methods.
 
 Also returns a coefficient of variation (cv) as output of the ensemble, but note
 this should not be interpreted as measure of model uncertainty as it cannot
@@ -45,6 +52,7 @@ Possible options for creating an ensemble includes:
 \item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
+\item \code{'pca'} - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).
 }
 
 In addition to the different ensemble methods, a minimal threshold (\code{min.value}) can be set that needs to be surpassed for averaging.
@@ -55,6 +63,22 @@ other summary statistics from the posterior (e.g. \code{'sd'}) can be specified.
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}.
+Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}. In this case
+the \code{"normalize"} parameter has to be set.
+}
+\examples{
+\dontrun{
+ # Assumes previously computed predictions
+ ex <- ensemble(mod1, mod2, mod3, method = "mean")
+ names(ex)
+
+ # Make a bivariate plot (might require other packages)
+ bivplot(ex)
+}
+}
+\references{
+\itemize{
+\item Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
+}
 }
 \keyword{train}

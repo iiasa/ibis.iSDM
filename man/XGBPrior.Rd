@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPrior}
 \alias{XGBPrior}
-\title{Create a new monotonic prior}
+\title{Create a new monotonic prior for boosted regressions}
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)
 
@@ -11,7 +11,8 @@ XGBPrior(variable, hyper = "increasing", ...)
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain.
+Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }

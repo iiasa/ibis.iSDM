@@ -132,6 +132,10 @@ methods::setMethod(
     # Not get the baseline raster
     thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
+    if(!is.Waiver(scenario_threshold)){
+      if(is.na(raster::projection(baseline_threshold))) projection(baseline_threshold) <- raster::projection( fit$model$background )
+    }
+
     if(inherits(baseline_threshold, 'RasterStack') || inherits(baseline_threshold, 'RasterBrick')){
       baseline_threshold <- baseline_threshold[[grep(layer,names(baseline_threshold))]]
     }
@@ -145,7 +149,7 @@ methods::setMethod(
       } else if(scenario_constraints[["dispersal"]]$method == "kissmig"){
         assertthat::assert_that( is.Raster(baseline_threshold))
         if(!is.Waiver(scenario_threshold)) {
-          if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Using kissmig to calculate updated distribution thresholds.')
+          if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Using kissmig to calculate updated distribution thresholds.')
           scenario_threshold <- new_waiver()
         }
       } else {
@@ -340,21 +344,6 @@ methods::setMethod(
                      raster = run_sim)
         }
       } # End of MigClim processing chain
-
-      # Finally apply boundary constraint if set
-      if("boundary" %in% names(scenario_constraints)){
-        if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer,stopiffalse = FALSE)){
-          scenario_constraints$boundary$params$layer <- alignRasters(
-            scenario_constraints$boundary$params$layer,
-            proj,
-            method = "ngb", func = raster::modal, cl = FALSE
-          )
-        }
-        proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
-        # Get background and ensure that all values outside are set to 0
-        proj[is.na(proj)] <- 0
-        proj <- raster::mask(proj, fit$model$background )
-      }
     }
     # If not found, set a waiver
     if(!exists("mc")) mc <- new_waiver()
@@ -364,6 +353,27 @@ methods::setMethod(
       is.Raster(proj), is.Raster(proj_thresh),
       msg = "Something went wrong with the projection."
     )
+
+    # Apply boundary constraints if set
+    if("boundary" %in% names(scenario_constraints)){
+      if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer, stopiffalse = FALSE)){
+        scenario_constraints$boundary$params$layer <- alignRasters(
+          scenario_constraints$boundary$params$layer,
+          proj,
+          method = "ngb", func = raster::modal, cl = FALSE
+        )
+      }
+      proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
+      # Get background and ensure that all values outside are set to 0
+      proj[is.na(proj)] <- 0
+      proj <- raster::mask(proj, fit$model$background )
+      # Also for thresholds if existing
+      if(raster::nlayers(proj_thresh)>0){
+        proj_thresh <- raster::mask(proj_thresh, scenario_constraints$boundary$params$layer)
+        proj_thresh[is.na(proj_thresh)] <- 0
+        proj_thresh <- raster::mask(proj_thresh, fit$model$background )
+      }
+    }
 
     # Should stabilization be applied?
     if(stabilize){
@@ -395,7 +405,7 @@ methods::setMethod(
         new_proj <- raster::overlay(proj, fun = impute.loess, unstack = TRUE, forcefun = FALSE)
         # Rename again
         names(new_proj) <- names(proj)
-        new_proj <- raster::setZ(new_proj, as.Date(times) )
+        new_proj <- raster::setZ(new_proj, times )
         proj <- new_proj; rm(new_proj)
         # Were thresholds calculated? If yes, recalculate on the smoothed estimates
         if(raster::nlayers(proj_thresh)>0){
@@ -418,6 +428,10 @@ methods::setMethod(
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)
       ); names(proj_thresh) <- 'threshold'
+      # Correct band if different
+      if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
+        proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))
+      }
       proj <- stars:::c.stars(proj, proj_thresh)
     }
 

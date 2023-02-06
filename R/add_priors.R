@@ -179,6 +179,7 @@ methods::setMethod(
                                                                    "BART", "<BART>",
                                                                    "STAN", "<STAN>",
                                                                    "BREG", "<BREG>",
+                                                                   "GLMNET", "<GLMNET>",
                                                                    "XGBOOST","<XGBOOST>"), several.ok = FALSE)
 
     # Get the coefficients
@@ -237,6 +238,16 @@ methods::setMethod(
           # Unfortunately can't set any priors based on weights alone, thus set to none
           pl[[i]] <- GDBPrior(variable = sub$Feature,
                               hyper = "none")
+        }
+      }
+      # --- GLMNET ---
+      if(target_engine %in% c("GLMNET", "<GLMNET>")){
+        if(has_beta){
+          pl[[i]] <- GLMNETPrior(variable = sub$Feature,
+                                 # If absolute beta coefficient is larger than 0.05, use a rescaled value
+                                 # for defining the regularization constant
+                                 hyper = ifelse(abs(sub$Beta)>0.05, abs(scales::rescale(abs(cofs$Beta), to = c(0, 1))-1)[i], 1),
+                                 lims = c(-Inf, Inf))
         }
       }
       # --- XGBOOST ---

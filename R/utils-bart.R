@@ -26,9 +26,19 @@ built_formula_bart <- function(obj){
     # Convert to formula
     form <- to_formula(form)
   } else {
-    # FIXME: Also make checks for correctness in supplied formula, e.g. if variable is contained within object
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
+    # If response is missing, add manually
+    if(attr(terms(form), "response")==0){
+      if(obj$type == "poipo"){
+        form <- update.formula(form, "observed/w ~ .")
+      } else {
+        form <- update.formula(form, "observed ~ .")
+      }
+    }
     assertthat::assert_that(
+      is.formula(form),
+      attr(terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
     )
   }

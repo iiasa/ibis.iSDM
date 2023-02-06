@@ -16,6 +16,9 @@ NULL
 #' should be performed.
 #' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
 #' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
+#' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonized,
+#' i.e., the species gets locally extinct (Default: \code{0.1}).
+#' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
 #' @param ... passed on parameters. See also the specific methods for adding constraints.
 #'
 #' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`],[`add_constraint_boundary`]
@@ -156,12 +159,15 @@ methods::setMethod(
       # Gather some default parameters
       if(is.null(type)) type <- "DIS" else match.arg(type, c("DIS", "FOC", "LOC", "NOC"), several.ok = FALSE)
       assertthat::assert_that(
-        is.numeric(value), msg = "For kissmig the value needs to give the number of iteration steps (or within time migration steps)."
+        is.numeric(value),
+        value > 0, msg = "For kissmig the value needs to give the number of iteration steps (or within time migration steps)."
       )
       # probability [0,1] a colonized cell becomes uncolonized between iteration steps, i.e., the species gets locally extinct
       if("pext" %in% argnames) pext <- dots[["pext"]] else pext <- 0.1
       # probability [0,1] corner cells are considered in the 3x3 cell neighborhood. Following Nobis & Nomand 2014, 0.2 is recommended for circular spread
       if("pcor" %in% argnames) pcor <- dots[["pcor"]] else pcor <- 0.2
+
+      if(getOption('ibis.setupmessages')) myLog('[Estimation]', 'green', 'KISSMIG options: iterations=',value,'| pext=', pext,'| pcor=', pcor)
 
       cr[['dispersal']] <- list(method = method,
                                 params = c("iteration" = value,
@@ -200,7 +206,7 @@ methods::setMethod(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     raster::compareRaster(baseline_threshold, new_suit),
     is.numeric(value),
-    is.logical(resistance) || is.Raster(resistance),
+    is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
     length(unique(baseline_threshold))==2
   )
@@ -287,7 +293,7 @@ methods::setMethod(
   check_package('kissmig')
   if(!isNamespaceLoaded("kissmig")) { attachNamespace("kissmig");requireNamespace("kissmig") }
 
-  # Set suitability layer to 0 if set
+  # Set suitability layer to 0 if resistance layer is set
   if(is.Raster(resistance)){
     new_suit[resistance>0] <- 0
   }
@@ -405,7 +411,7 @@ methods::setMethod(
 NULL
 methods::setGeneric("add_constraint_adaptability",
                     signature = methods::signature("mod"),
-                    function(mod, method, names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constraint_adaptability"))
+                    function(mod, method = "nichelimit", names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constraint_adaptability"))
 
 #' @name add_constraint_adaptability
 #' @rdname add_constraint_adaptability
@@ -413,7 +419,7 @@ methods::setGeneric("add_constraint_adaptability",
 methods::setMethod(
   "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, method, names = NULL, value = 1, increment = 0, ...){
+  function(mod, method = "nichelimit", names = NULL, value = 1, increment = 0, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -531,15 +537,48 @@ methods::setMethod(
 #' @export
 NULL
 methods::setGeneric("add_constraint_boundary",
-                    signature = methods::signature("mod"),
+                    signature = methods::signature("mod", "layer"),
                     function(mod, layer, ...) standardGeneric("add_constraint_boundary"))
+
+#' @name add_constraint_boundary
+#' @rdname add_constraint_boundary
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
+methods::setMethod(
+  "add_constraint_boundary",
+  methods::signature(mod = "BiodiversityScenario", layer = "sf"),
+  function(mod, layer, method = "boundary", ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      inherits(layer, "sf"),
+      is.character(method)
+    )
+
+    # Rasterize the layer
+    # First try and dig out a layer from a predictor dataset if found
+    if(inherits( mod$get_predictors(), "PredictorDataSet")){
+      ras <- mod$get_predictors()$get_data() |> stars_to_raster()
+      ras <- ras[[1]]
+    } else {
+      # Try and get the underlying model and its predictors
+      ras <- mod$get_model()$get_data()
+    }
+    assertthat::assert_that(is.Raster(ras))
+    bb <- try({ raster::rasterize(layer, ras, 1)},silent = TRUE)
+    if(inherits(bb, "try-error")) stop("Provide a rasterized layer of the boundary constraint!")
+
+    # Call again
+    o <- add_constraint_boundary(mod, layer = bb, method = method, ..)
+
+    return( o )
+  }
+)
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
 #' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
 methods::setMethod(
   "add_constraint_boundary",
-  methods::signature(mod = "BiodiversityScenario"),
+  methods::signature(mod = "BiodiversityScenario", layer = "RasterLayer"),
   function(mod, layer, method = "boundary", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),

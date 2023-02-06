@@ -121,7 +121,7 @@ methods::setMethod(
       if(!hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
       if(!hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
       # Ensure comparable columns
-      point <- subset(point, select = c(point_column, "name", "type", "geometry"))
+      point <- subset(point, select = c(point_column, "name", "type", attr(point, "sf_column") ))
     } else {
       # TODO: Think about how to do validation with non-point data
       # Get all point datasets and combine them
@@ -129,7 +129,7 @@ methods::setMethod(
                         lapply(mod$model$biodiversity, function(y){
                          o <-  guess_sf(y$observations)
                          o$name <- y$name; o$type <- y$type
-                         subset(o, select = c(point_column, "name", "type", "geometry"))
+                         subset(o, select = c(point_column, "name", "type", attr(o, "sf_column")))
                         } )
                         ) %>% tibble::remove_rownames()
       if(is.factor(point[[point_column]])){

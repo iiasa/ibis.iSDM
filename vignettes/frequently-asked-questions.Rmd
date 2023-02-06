@@ -119,7 +119,7 @@ mod <- distribution(background, limits = zone) %>%
   add_biodiversity_poipo(species_data) %>% 
   add_predictors(covariates) %>% 
   add_priors(priors = pp)
-  engine_gdb()
+  engine_inlabru()
   
 ```
 Multiple priors for an Engine can be defined in a `PriorList`. Whenever a prior 
@@ -230,6 +230,15 @@ This simulation is particularly helpful for creating (future) projections as oth
 Users are advised to use [`engine_inlabru`] by **default** in most cases and only use [`engine_inla`] if predictions look uncertain.
 </details>
 
+<details>
+<summary><b> I am concerned about extrapolation during prediction. What options do I have? </b>
+</summary>
+
+When creating predictive models such as SDMs it is often a concern to not predict to a variable range outside the environmental conditions for which a model was trained. The `ibis.iSDM` package supports variable 'clamping' of its predictions similar as the popular Maxent model, however for each [`engine`]. Clamping can be enabled by setting the parameter `clamp` in [`train`] to `TRUE`. This restricts any spatial (or spatial-temporal) projections to the combined `range` of predictor variables observed for each of the training localities.
+
+Similar functionalities are also available separately during scenario projections by setting adaptability constraints (see [`add_constraint_adaptability`]).
+
+</details>
 
 <details>
 <summary><b>Where can I find predictions created by `train` ? </b>
@@ -288,7 +297,8 @@ By default, presence only biodiversity data is modelled as point-process model (
 
 * Modify the targeted background sampling for better control of background points. This can be for instance done via the `add_pseudoabsence()` and `pseudoabs_settings()` methods. See the respective help files.
 * Make use of spatial thinning approaches. See for instance [Aiello-Lammers et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132) and [Steen et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525). Note however that spatial thinning does remove data points, affecting for instance any `poisson` distributed models (PPMs) in the process. The`ibis.iSDM` package has some functionality for spatial thinning implemented in the `thin_observations()` function.
-* Partial out a biased variable during the prediction. The `bias_variable` can be specified in the `train()` command and has to be part the predictor set of the model. In addition a `bias_value` has to be specified and this can be set for instance to `0`.
+* Partial out a biased variable during the prediction. The `add_control_bias()` function can be used to specify a value that needs to be partialed out in the model. There a `bias_value` has to be specified and this can be set for instance to `0` or an amount assumed to be equivalent to minimal bias.
+* Consider setting the [`clamp`] parameter in `train()` to `TRUE`. 
 * Add a spatial offset to account for the bias as introduced in [Merow et al. 2016](http://doi.wiley.com/10.1111/geb.12453). This can be done via the `add_offset_bias()` function and requires preparation of a bias layer in advance.
 * Apply more rigorous filtering and bias control to the input data. In the end no correction can replace good data preparation and cleaning. Remember the [GIGO principle](https://en.wikipedia.org/wiki/Garbage_in,_garbage_out).
 </details>

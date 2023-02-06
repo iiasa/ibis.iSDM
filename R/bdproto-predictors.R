@@ -80,6 +80,15 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
     sf::st_crs(self$data)
   },
+  # Get Resolution
+  get_resolution = function(self){
+    assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
+    if(is.Raster(self$data)){
+      raster::res(self$data)
+    } else {
+      stars::st_res(self$data)
+    }
+  },
   # Clip the predictor dataset by another dataset
   crop_data = function(self, pol){
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
@@ -94,9 +103,7 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(assertthat::is.string(x),
                             is.Raster(value),
                             is_comparable_raster(self$get_data(), value))
-    self$data <- addLayer(self$get_data(), value)
-    # FIXME: This creates duplicates as of now.
-    invisible()
+    bdproto(NULL, self, data = addLayer(self$get_data(), value))
   },
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
@@ -105,8 +112,14 @@ PredictorDataset <- bdproto(
                             )
     # Match indices
     ind <- match(x, self$get_names())
-    # Overwrite predictor dataset
-    self$data <- raster::dropLayer(self$get_data(), ind)
+    if(is.Raster(self$get_data() )){
+      # Overwrite predictor dataset
+      self$data <- raster::dropLayer(self$get_data(), ind)
+    } else {
+      suppressWarnings(
+        self$data <- stars:::select.stars(self$data, -ind)
+      )
+    }
     invisible()
   },
   # Print input messages
@@ -125,11 +138,15 @@ PredictorDataset <- bdproto(
       summary(out, digits = digits)
     } else {
       if(inherits(d, 'stars')){
-        summary(stars:::as.data.frame.stars(d))
+        return(
+          summary(stars:::as.data.frame.stars(d))
+        )
       } else {
         # Assume raster
-        round(
-          raster::summary( d ), digits = digits
+        return(
+          round(
+            raster::summary( d ), digits = digits
+          )
         )
       }
     }

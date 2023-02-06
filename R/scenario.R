@@ -10,6 +10,8 @@ NULL
 #' @param limits A [`raster`] or [`sf`] object that limits the projection surface when
 #' intersected with the prediction data (Default: \code{NULL}). This can for instance be set
 #' as an expert-delineated constrain to limit spatial projections.
+#' @param copy_model A [`logical`] of whether the model object is to be copied to the scenario object. Note
+#' that setting this option to \code{TRUE} can increase the required amount of memory (Default: \code{FALSE}).
 #' @aliases scenario
 #' @exportMethod scenario
 #' @name scenario
@@ -21,7 +23,7 @@ NULL
 #' @export
 methods::setGeneric("scenario",
                     signature = methods::signature("fit"),
-                    function(fit, limits = NULL) standardGeneric("scenario"))
+                    function(fit, limits = NULL, copy_model = FALSE) standardGeneric("scenario"))
 
 #' @name scenario
 #' @usage \S4method{scenario}{ANY}(fit)
@@ -29,14 +31,20 @@ methods::setGeneric("scenario",
 methods::setMethod(
   "scenario",
   methods::signature(fit = "ANY"),
-  function(fit, limits = NULL) {
+  function(fit, limits = NULL, copy_model = FALSE) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(fit) || inherits(fit,'DistributionModel'),
                             inherits(limits,'Raster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            is.logical(copy_model),
                             msg = 'No trained model supplied!')
 
     # Get model object name and id
-    modelobject <- deparse(substitute(fit))
+    if(!copy_model){
+      modelobject <- deparse(substitute(fit))
+    } else {
+      if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
+      modelobject <- fit
+    }
     modelid <- fit$id
 
     # Convert limits if provided

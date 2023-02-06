@@ -586,6 +586,9 @@ engine_inla <- function(x,
           )
         stk_inference <- do.call(INLA::inla.stack, stk_inference)
 
+        # Clamp?
+        if( settings$get("clamp") ) model$predictors <- clamp_predictions(model, model$predictors)
+
         # Make projection stack if not directly supplied
         if(is.null(self$data$stk_pred)){
 
@@ -820,6 +823,8 @@ engine_inla <- function(x,
                                         mode %in% c('coef','sim','full'),
                                         assertthat::has_name(newdata,c('x','y'))
                 )
+                stop("Projection using engine INLA is deprecated. Use engine_inlabru !")
+
                 # Try and guess backtransformation
                 if(is.null(backtransf)){
                   fam <- self$get_data('fit_best')$.args$family

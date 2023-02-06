@@ -5,12 +5,11 @@ NULL
 #'
 #' @description
 #' This function allows to add predictors to [distribution] or [BiodiversityScenario]
-#' objects.
-#' @details
-#' Predictors are covariates that in spatial projection have to match
+#' objects. Predictors are covariates that in spatial projection have to match
 #' the geographic projection of the background layer in the [distribution] object.
 #' This function furthermore allows to transform or create derivates of provided
 #' predictors.
+#'
 #' A transformation takes the provided rasters and for instance rescales them or transforms
 #' them through a principal component analysis ([prcomp]). In contrast, derivates leave
 #' the original provided predictors alone, but instead create new ones, for instance by transforming
@@ -41,10 +40,11 @@ NULL
 #' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed.
 #' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
 #' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
 #' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
 #' @param explode_factors [`logical`] of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @note
@@ -77,8 +77,8 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
-           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ...) standardGeneric("add_predictors"))
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL, bgmask = TRUE,
+           harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
 
 #' @name add_predictors
 #' @rdname add_predictors
@@ -86,13 +86,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
-           explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
   }
 )
 
@@ -102,13 +102,13 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
-           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
   }
 )
 
@@ -119,8 +119,8 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE,
-           harmonize_na = FALSE, explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction') , several.ok = TRUE)
@@ -129,12 +129,11 @@ methods::setMethod(
                             is.Raster(env),
                             all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
                             all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin', 'interaction') ),
+                            is.vector(derivate_knots) || is.numeric(derivate_knots),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
                             is.null(priors) || inherits(priors,'PriorList')
     )
-    assertthat::assert_that(sf::st_crs(x$background) == sf::st_crs(env@crs),
-                            msg = 'Supplied environmental data not aligned with background.')
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
 
@@ -201,7 +200,7 @@ methods::setMethod(
         attr(env, "int_variables") <- int_variables
       }
       new_env <- raster::stack()
-      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
 
       # Add to env
       env <- raster::addLayer(env, new_env)
@@ -248,8 +247,8 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
-           explode_factors = FALSE, int_variables = NULL, priors = NULL, ... ) {
+  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Taking first time entry from object.')
@@ -257,7 +256,8 @@ methods::setMethod(
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
     if(is.list(env)) env <- env[[1]]
-    add_predictors(x, env, names, transform, derivates, bgmask, harmonize_na, explode_factors, int_variables, priors, ...)
+    x <- add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    return( x )
   }
 )
 
@@ -343,7 +343,8 @@ methods::setMethod(
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        x$predictors$set_data(n, r)
+        x$predictors <- x$predictors$set_data(n, r)
+        rm(r)
       }
     }
     return(x)
@@ -371,6 +372,8 @@ methods::setMethod(
 #' @param layer A [`sf`] or [`Raster`] object with the range for the target feature.
 #' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
 #' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
+#' @param fraction An optional [`RasterLayer`] object that is multiplied with digitized raster layer.
+#' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
 #' @references
 #' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
@@ -384,7 +387,7 @@ NULL
 methods::setGeneric(
   "add_predictor_range",
   signature = methods::signature("x", "layer", "method"),
-  function(x, layer, method = 'distance', distance_max = NULL, priors = NULL) standardGeneric("add_predictor_range"))
+  function(x, layer, method = 'distance', distance_max = NULL, fraction = NULL, priors = NULL) standardGeneric("add_predictor_range"))
 
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
@@ -393,12 +396,13 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
-  function(x, layer, method = 'precomputed_range', priors = NULL) {
+  function(x, layer, method = 'precomputed_range', fraction = NULL, priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(layer),
+                            is.Raster(fraction) || is.null(fraction),
                             is.character(method)
     )
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
@@ -408,11 +412,19 @@ methods::setMethod(
     }
     names(layer) <- method
 
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      layer <- layer * fraction
+    }
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
       x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors$set_data('range_distance', layer)
+      x$predictors <- x$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
@@ -425,19 +437,20 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf, vector}(x, layer, method)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
 methods::setMethod(
   "add_predictor_range",
-  methods::signature(x = "BiodiversityDistribution", layer = "sf", method = "character"),
-  function(x, layer, method = 'distance', distance_max = Inf, priors = NULL ) {
+  methods::signature(x = "BiodiversityDistribution", layer = "sf"),
+  function(x, layer, method = 'distance', distance_max = Inf, fraction = NULL, priors = NULL ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(method),
                             inherits(layer, 'sf'),
                             method %in% c('binary','distance'),
+                            is.null(fraction) || is.Raster(fraction),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.null(priors) || inherits(priors,'PriorList')
     )
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
@@ -454,7 +467,7 @@ methods::setMethod(
 
     # Rasterize the range
     if( 'fasterize' %in% installed.packages()[,1] ){
-      ras_range <- fasterize::fasterize(layer, temp, field = NULL)
+      ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL) }, silent = TRUE)
       if(inherits(ras_range,"try-error")){
         myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
         ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
@@ -478,13 +491,26 @@ methods::setMethod(
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
         attr(dis, "distance_max") <- distance_max
-      }
+      } else { distance_max <- raster::cellStats(dis, "max") }
+      # Grow baseline raster by using an exponentially weighted kernel
+      alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
+      # Grow baseline raster by using an exponentially weighted kernel
+      dis <- raster::calc(dis, fun = function(x) exp(-alpha * x))
       # Convert to relative for better scaling in predictions
-      dis <- 1 - (dis / cellStats(dis,'max'))
+      dis <- (dis / raster::cellStats(dis,'max'))
+
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
       dis <- raster::mask(dis, x$background)
       names(dis) <- 'distance_range'
+    }
+
+    # Multiply with fraction layer if set
+    if(!is.null(fraction)){
+      # Rescale if necessary and set 0 to a small constant 1e-6
+      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      fraction[fraction==0] <- 1e-6
+      layer <- layer * fraction
     }
 
     # If priors have been set, save them in the distribution object
@@ -496,9 +522,9 @@ methods::setMethod(
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x,env = dis,transform = 'none',derivates = 'none')
+      x <- add_predictors(x, env = dis, transform = 'none',derivates = 'none')
     } else {
-      x$predictors$set_data('range_distance', dis)
+      x$predictors <- x$predictors$set_data('range_distance', dis)
     }
     return(x)
   }
@@ -609,11 +635,65 @@ methods::setMethod(
 # Add predictor actions for scenario objects ----
 #' @name add_predictors
 #' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterBrick}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterBrick"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterLayer}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterLayer"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
+#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterStack}(x, env)
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityScenario", env = "RasterStack"),
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            !missing(env))
+
+    env <- raster_to_stars(env) # Convert to stars
+
+    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
+                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+  }
+)
+
+#' @name add_predictors
+#' @rdname add_predictors
 #' @usage \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),
-  function(x, env, names = NULL, transform = 'none', derivates = 'none', harmonize_na = FALSE, ... ) {
+  function(x, env, names = NULL, transform = 'none', derivates = 'none',
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
@@ -622,6 +702,8 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
+                            is.vector(derivate_knots) || is.numeric(derivate_knots),
+                            is.null(int_variables) || is.character(int_variables),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(harmonize_na)
     )
@@ -662,7 +744,7 @@ methods::setMethod(
           if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
           for(dd in derivates){
             if(any(grep(dd, varn))){
-              env <- predictor_derivate(env, option = dd, deriv = varn)
+              env <- predictor_derivate(env, option = dd, nknots = derivate_knots, deriv = varn, int_variables = int_variables)
             } else {
               if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
             }
@@ -721,6 +803,8 @@ methods::setMethod(
 #' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed (Default: \code{NULL}).
 #' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
 #' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).
 #' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
 #' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
@@ -742,7 +826,8 @@ NULL
 methods::setGeneric(
   "add_predictors_globiom",
   signature = methods::signature("x", "fname"),
-  function(x, fname, names = NULL, transform = 'none', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE,
            priors = NULL, ...) standardGeneric("add_predictors_globiom"))
 
 #' @name add_predictors_globiom
@@ -751,8 +836,8 @@ methods::setGeneric(
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution", fname = "character"),
-  function(x, fname, names = NULL, transform = 'none', derivates = 'none', bgmask = TRUE, harmonize_na = FALSE,
-           priors = NULL, ... ) {
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           bgmask = TRUE, harmonize_na = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor'), several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin'), several.ok = TRUE)
@@ -767,7 +852,9 @@ methods::setMethod(
 
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
-                            is.null(priors) || inherits(priors,'PriorList')
+                            is.null(priors) || inherits(priors,'PriorList'),
+                            is.vector(derivate_knots) || is.null(derivate_knots),
+                            is.null(int_variables) || is.vector(int_variables)
     )
 
     # Messenger
@@ -819,7 +906,7 @@ methods::setMethod(
     if('none' %notin% derivates){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
       new_env <- raster::stack()
-      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd) )
+      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
 
       # Add to env
       env <- raster::addLayer(env, new_env)
@@ -857,7 +944,8 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityScenario", fname = "character"),
-  function(x, fname, names = NULL, transform = 'none', derivates = 'none', harmonize_na = FALSE, ... ) {
+  function(x, fname, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+           harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
@@ -871,7 +959,9 @@ methods::setMethod(
     )
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
-                            is.logical(harmonize_na)
+                            is.logical(harmonize_na),
+                            is.vector(derivate_knots) || is.null(derivate_knots),
+                            is.null(int_variables) || is.vector(int_variables)
     )
 
     # Get model object
@@ -916,7 +1006,7 @@ methods::setMethod(
         if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
         for(dd in derivates){
           if(any(grep(dd, varn))){
-            env <- predictor_derivate(env, option = dd, deriv = varn)
+            env <- predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables, deriv = varn)
           } else {
             if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
           }

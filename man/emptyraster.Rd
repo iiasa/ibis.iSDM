@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils-spatial.R
 \name{emptyraster}
 \alias{emptyraster}
-\title{Create an empty \code{rasterLayer} based on a template}
+\title{Create an empty \code{RasterLayer} based on a template}
 \usage{
 emptyraster(x, ...)
 }
 \arguments{
-\item{x}{a \code{raster*} object corresponding.}
+\item{x}{a \code{Raster*} object corresponding.}
 
 \item{...}{other arguments that can be passed to \code{\link{raster}}}
 }
@@ -15,7 +15,8 @@ emptyraster(x, ...)
 an empty raster, i.e. all cells are \code{NA}.
 }
 \description{
-Create an empty \code{rasterLayer} based on a template
+This function creates an empty copy of a provided \code{RasterLayer} object. It
+is primarily used in the package to create the outputs for the predictions.
 }
 \examples{
 require(raster)

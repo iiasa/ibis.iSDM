@@ -210,6 +210,56 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   return( out )
 }
 
+#' Converts a raster object to stars
+#'
+#' @description
+#' This is a small helper function to convert a to a [`Raster`] object.
+#' @param obj A [`Raster`] object with a \code{"time"} dimension at least (checked via [`getZ`]).
+#' @returns A [`stars`] object with the formatted data
+#' @seealso `stars_to_raster`
+#' @keywords scenario, internal
+raster_to_stars <- function(obj){
+  assertthat::assert_that(
+    is.Raster(obj)
+  )
+  # Check that time dimension exist
+  assertthat::assert_that( !is.null( raster::getZ(obj) ),
+                           msg = "The supplied object requires a z dimension! Preferably provide a stars object.")
+  assertthat::assert_that(!is.na(raster::crs(obj)),
+                           msg = "Uniform projection for input raster is missing!")
+
+  # Get time dimension
+  times <- raster::getZ(obj)
+  if(!all(inherits(times,"Date"))) times <- as.Date(times)
+  prj <- sf::st_crs(raster::crs(obj))
+
+  # Convert to RasterStack and reset time dimension
+  obj <- raster::stack(obj)
+  obj <- raster::setZ(obj, times)
+  # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
+
+  # Convert to stars step by step
+  new_env <- list()
+  for(i in 1:raster::nlayers(obj)){
+    suppressWarnings(  o <- stars::st_as_stars(obj[[i]]) )
+    # If CRS is NA
+    if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
+
+    # Some hacky stuff since stars is not behaving as intended
+    dims <- stars::st_dimensions(o)
+    dims$time <- stars:::create_dimension(values = times[i])
+    o <- stars::st_redimension(o,new_dims = dims)
+
+    new_env[[names(obj)[i]]] <- o
+  }
+
+  new_env <- do.call(stars:::c.stars, new_env)
+  assertthat::assert_that(inherits(new_env, "stars"),
+                          stars::st_dimensions(new_env) |> length() == 3)
+
+  return(new_env)
+}
+
 #' This function add layers from a RasterStack to a stars object
 #'
 #' @description
@@ -285,6 +335,8 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
 
   # Summarize the overall moments
   if(fun == "mean"){
+    # Check if has unit, if so deparse
+    if(inherits(df$suitability, 'units')) df$suitability <- as.numeric(df$suitability)
     out <- df %>%
       dplyr::filter(suitability > 0) %>%
       dplyr::group_by(band) %>%
@@ -306,19 +358,115 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
       relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) *fac)
       out[,c("suitability_mean","suitability_q25", "suitability_q50", "suitability_q75")] <- apply(
         out[,c("suitability_mean","suitability_q25", "suitability_q50", "suitability_q75")], 2, relChange)
-      out$suitability_avggain[is.na(out$suitability_avggain)] <- 0
-      out$suitability_avggain <- out$suitability_avggain+1
-      out$suitability_avgloss[is.na(out$suitability_avgloss)] <- 0
-      out$suitability_avgloss <- out$suitability_avgloss+1
     }
-  } else {
-    stop("TBD")
+  } else if(fun == "sum") {
+    # Check if has unit, if so deparse
+    if(inherits(df$suitability, 'units')) df$suitability <- as.numeric(df$suitability)
+    out <- df %>%
+      dplyr::filter(suitability > 0) %>%
+      dplyr::group_by(band) %>%
+      dplyr::summarise(suitability_sum = sum(suitability, na.rm = TRUE),
+                       suitability_q25 = quantile(suitability, .25),
+                       suitability_q50 = quantile(suitability, .5),
+                       suitability_q75 = quantile(suitability, .75))
+    # Total amount of area lost / gained / stable since previous time step
+    totchange_occ <- df %>%
+      dplyr::group_by(id) %>%
+      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
+    o <- totchange_occ %>% dplyr::group_by(band) %>%
+      dplyr::summarise(suitability_avggain = sum(change[change > 0]),
+                       suitability_avgloss = sum(change[change < 0]))
+
+    out <- out %>% dplyr::left_join(o, by = "band")
+    if(relative){
+      # Finally calculate relative change to baseline (first entry) for all entries where this is possible
+      relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) *fac)
+      out[,c("suitability_sum","suitability_q25", "suitability_q50", "suitability_q75")] <- apply(
+        out[,c("suitability_sum","suitability_q25", "suitability_q50", "suitability_q75")], 2, relChange)
+    }
   }
 
   # Return output
-  return(
-    out
-    )
+  return(out)
+}
+
+#' Summarize change before to after
+#'
+#' @description
+#' This is a wrapper function to summarize the output of a scenario projection, but specifically
+#' calculates statistics of change for two time steps, a before and after step.
+#' @param scenario A [`stars`] object with a time dimension.
+#' @references
+#' * Godsoe, W. (2014). Inferring the similarity of species distributions using Species’ Distribution Models. Ecography, 37(2), 130-136.
+#' @keywords internal, scenario
+#' @noRd
+summarise_change <- function(scenario){
+  assertthat::assert_that(
+    inherits(scenario, "stars")
+  )
+  check_package("geosphere")
+
+  # Get the current and future
+  ss <- stars_to_raster(scenario)
+  # Time period
+  times <- stars::st_get_dimension_values(scenario, 3,center = TRUE)
+  current <- ss[[1]]
+  future <- ss[[length(ss)]]
+  times_length <- round(as.numeric(difftime(times[length(times)], times[1], unit="weeks"))/52.25,0)
+  rm(ss)
+
+  # Calculate the area and  units
+  ar <- st_area(scenario)
+  ar_unit <- units::deparse_unit(ar$area)
+  if(ar_unit == "m2"){
+    ar_unit <- "ha"
+    mult <- 0.0001
+  } else { mult <- 1}
+  ar <- as(ar, "Raster")
+
+  # --- #
+  val <- c("Current range", "Future range", "Unsuitable",
+           "Loss", "Gain", "Stable", "Percent loss",
+           "Percent gain", "Range change", "Percent change",
+           "Sorensen index", "Centroid distance", "Centroid change direction")
+  change <- data.frame(category = val,
+                       period = c(times[1] |> as.character(),
+                                  times[length(times)] |> as.character(), rep(paste0(times_length, " years"), 11 ) ),
+                       value = NA,
+                       unit = c(rep(ar_unit,6), "%", "%", ar_unit, "%", "similarity", NA, "deg"))
+  change$value[1] <- raster::cellStats((current) * raster::area(current), "sum") * mult
+  change$value[2] <- raster::cellStats((future) * raster::area(future), "sum") * mult
+
+  # Check that is binary thresholded
+  rr <- raster::overlay(current, future, fun = function(x, y){x + y * 2})
+  change$value[3] <- raster::cellStats((rr == 0) * raster::area(current), "sum") * mult
+  change$value[4] <- raster::cellStats((rr == 1) * raster::area(current), "sum") * mult
+  change$value[5] <- raster::cellStats((rr == 2) * raster::area(current), "sum") * mult
+  change$value[6] <- raster::cellStats((rr == 3) * raster::area(current), "sum") * mult
+  change$value[7] <- change$value[4] / change$value[1] * 100
+  change$value[8] <- change$value[5] / change$value[1] * 100
+  change$value[9] <- change$value[2] - change$value[1]
+  change$value[10] <- change$value[9] / sum(c(change$value[3], change$value[4])) * 100
+
+  # Sorensen similarity index
+  change$value[11] <- 2 * raster::cellStats(rr == 3, "sum") / (raster::cellStats(current, "sum") + raster::cellStats(future, "sum"))
+
+  # Calculate distance between centroids
+  sf1 <- calculate_range_centre(current, spatial = TRUE)
+  sf2 <- calculate_range_centre(future, spatial = TRUE)
+  dis <- sf::st_distance(sf1, sf2, by_element = FALSE)
+  dis_unit <- units::deparse_unit(dis)
+  # Convert units if meter
+  if( dis_unit == "m") {mult <- 0.001; dis_unit = "km" } else { mult <- 1}
+  change$value[12] <- as.vector(dis) * mult
+  change$unit[12] <- dis_unit
+
+  # Calculate direction between centroids
+  change$value[13] <- geosphere::finalBearing(as_Spatial(sf1 |> sf::st_transform(crs = sf::st_crs(4326))),
+                                              as_Spatial(sf2 |> sf::st_transform(crs = sf::st_crs(4326))))
+
+  change <- change |> tibble::as_tibble()
+  return(change)
 }
 
 #' Crop and project a stars raster `HACK`
@@ -390,38 +538,76 @@ hack_project_stars <- function(obj, template){
   return(out)
 }
 
-#' Quick handy function to calculate the centre of a range
+#' Quick handy function to calculate an area-weighted centre of a range
 #'
-#' @param ras A [`RasterLayer`] object for which the centre of the range is to be calculated.
+#' @param layer A [`RasterLayer`] or [`sf`] object for which the centre of the range is to be calculated.
 #' If the distribution is continuous, then the centre is calculated as the value centre to all non-NA values.
+#' @param spatial A [`logical`] of whether outputs should be returned as spatial
 #' @keywords scenario, internal
 #' @noRd
-calculate_range_centre <- function(ras) {
+calculate_range_centre <- function(layer, spatial = TRUE) {
   assertthat::assert_that(
-    is.Raster(ras)
+    is.Raster(layer) || inherits(layer, "sf")
   )
-  r_wt <- area(ras)
-  values(r_wt)[is.na(values(ras))] <- NA
 
-  spdf <- rasterToPoints(stack(ras,r_wt), spatial=T)
+  # If layer is a raster
+  if(is.Raster(layer)){
+    assertthat::assert_that(
+      length( unique(layer) ) == 2,
+      raster::cellStats(layer, 'max') == 1
+    )
+    # Calculate area-weighted centre
+    r_wt <- raster::area(layer)
+    values(r_wt)[is.na(values(layer))] <- NA
 
+    # Make a spatial point layer
+    spdf <- raster::rasterToPoints( raster::stack(layer, r_wt), spatial = TRUE) |> sf::st_as_sf()
+    spdf <- spdf[which(spdf[[1]]>0), ] # Get only non-zero values
 
-  # spatialEco::wt.centroid(spdf, sp = F)
-  wt.centroid <- function(x, p, sp = TRUE) {
-    # if(class(x)[1] == "sf") { x <- as(x, "Spatial") }
-    if (!inherits(x, "SpatialPointsDataFrame"))
-      stop(deparse(substitute(x)), " MUST BE A SpatialPointsDataFrame OBJECT")
-    p <- x@data[, p]
-    Xw <- sum(sp::coordinates(x)[, 1] * p)
-    Yw <- sum(sp::coordinates(x)[, 2] * p)
+    if(is.na(sf::st_crs(spdf))) stop("Unprojected layer found. Check projections throughout!")
+    # If long-latitude, convert to google mercator for calculating the centroids
+    if(sf::st_is_longlat(spdf) ){
+      ori.proj <- sf::st_crs(spdf)
+      spdf <- sf::st_transform( spdf, crs = sf::st_crs(3857))
+    } else { ori.proj <- sf::st_crs(spdf) }
+
+    p <- sf::st_drop_geometry(spdf[, names(spdf)[2] ])[,1]
+    # Calculate weighted centroid
+    Xw <- sum(sf::st_coordinates(spdf)[,1] * p)
+    Yw <- sum(sf::st_coordinates(spdf)[,2] * p)
     wX <- Xw/sum(p)
     wY <- Yw/sum(p)
-    if (sp == FALSE) {
-      return(c(wX, wY))
+    xy <- data.frame(ID = 1, name = names(layer), X=wX, Y=wY)
+    cent <- sf::st_as_sf(xy, coords = c("X", "Y"),
+                       crs = sf::st_crs(spdf), agr = "constant")
+    # Convert back to original projection
+    cent <- sf::st_transform(cent, ori.proj)
+
+  } else {
+    if(is.na(sf::st_crs(layer))) stop("Unprojected layer found. Check projections throughout!")
+    # If long-latitude, convert to google mercator for calculating the centroids
+    if(sf::st_is_longlat(layer) ){
+      ori.proj <- sf::st_crs(layer)
+      layer <- sf::st_transform( layer, crs = sf::st_crs(3857))
+    } else { ori.proj <- sf::st_crs(layer) }
+
+    if(unique(sf::st_geometry_type(layer)) %in% c("POLYGON", "MULTIPOLYGON")){
+      # Cast them into a multi-polygon
+      cent <- sf::st_combine(layer) |> sf::st_centroid() |> sf::st_as_sf()
+    } else if(unique(sf::st_geometry_type(layer)) %in% c("POINT", "MULTIPOINT")){
+      cent <- sf::st_combine(layer) |> sf::st_centroid() |> sf::st_as_sf()
     } else {
-      xy <- sp::SpatialPoints(matrix(c(wX, wY), nrow = 1, ncol = 2))
-      sp::proj4string(xy) <- sp::proj4string(x)
-      return(xy)
+      stop("Centroid calculations not implemented!")
     }
+    # Convert back to original projection
+    cent <- sf::st_transform(cent, ori.proj)
+    cent$ID = 1
   }
+
+  if(!spatial){
+    cent$X <- sf::st_coordinates(cent)[,1]
+    cent$Y <- sf::st_coordinates(cent)[,2]
+    cent <- sf::st_drop_geometry(cent)
+  }
+  return(cent)
 }

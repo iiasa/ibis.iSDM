@@ -23,12 +23,11 @@ test_that('Load ranges and add them to distribution object', {
 
   # Now set them one up step by step
   x <- distribution(background)
-  # This won't work since not aligned
+  # This will raise a warning since projection is different
   suppressMessages(
     expect_warning(
-      expect_error(  x %>% add_predictor_range(virtual_range, method = 'distance') )
+      x %>% add_predictor_range(virtual_range, method = 'distance') )
     )
-  )
 
   # Try and add a range as raster
   virtual_range_ras <- raster::rasterize(virtual_range, background)
@@ -42,5 +41,10 @@ test_that('Load ranges and add them to distribution object', {
   # Artificially aggregate the range
   virtual_range_ras <- raster::aggregate(virtual_range_ras, 5)
   expect_s3_class( x %>% add_predictor_range(virtual_range_ras),class = "BiodiversityDistribution" )
+
+  # Add bias variable
+  y <- x |> add_control_bias(layer = predictors$hmi_mean_50km)
+  expect_type(y$bias, 'list')
+  expect_length(y$get_biascontrol(), 3)
 
 })

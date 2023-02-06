@@ -1,19 +1,22 @@
 #' @include utils.R bdproto.R bdproto-prior.R
 NULL
 
-#' Placeholder for GLMNET
+#' Regression penalty priors for GLMNET
 #'
 #' @description
 #' The [`engine_glmnet`] engine does not support priors in a typical sense, however it is
 #' possible to specify so called penalty factors as well as lower and upper limits
 #' on all variables in the model.
 #'
-#' The default penalty is \code{1} for each coefficient, i.e. coefficients are penalized equally.
+#' The default penalty multiplier is \code{1} for each coefficient X covariate,
+#' i.e. coefficients are penalized equally and then informed by an intersection
+#' of any absence information with the covariates.
 #' In contrast a variable with penalty.factor equal to \code{0} is not penalized at all.
 #'
-#' The lower and upper limits can be specified to constrain coefficients to a certain range.
+#' In addition, it is possible to specifiy a lower and upper limit for specific coefficients,
+#' which constrain them to a certain range.
 #' By default those ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset to a
-#' specific value range by altering \code{"lims"}.
+#' specific value range by altering \code{"lims"} (see examples).
 #'
 #' For a regularized regression that supports a few more options on the priors, check out the
 #' Bayesian [`engine_breg`].
@@ -30,7 +33,7 @@ NULL
 #' p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 #' p1
 #' # Smaller chance to be regularized
-#' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(-Inf, Inf))
+#' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(0, Inf))
 #' p2
 #' }
 #' @keywords priors
@@ -59,6 +62,7 @@ methods::setMethod(
                             is.numeric(hyper),
                             hyper >=0, hyper <=1,
                             is.numeric(lims),
+                            length(lims)==2,
                             msg = 'Variable or hyper unset unset.')
 
     assertthat::assert_that(length(variable)==1,
@@ -69,7 +73,7 @@ methods::setMethod(
       sign(lims[1])==0 || sign(lims[1])==-1,
       # Check that upper limit is positive or zero
       sign(lims[2])==0 || sign(lims[2])==1,
-      msg = "Lower or upper limits specified incorrectly!"
+      msg = "Lower or upper limits specified incorrectly! They have to be negative/positive or zero each."
                             )
 
     # Create new prior object
@@ -84,7 +88,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied
+#' Helper function when multiple variables are supplied for a GLMNET prior
 #' @name GLMNETPriors
 #' @description
 #' This is a helper function to specify several [GLMNETPrior] with the same

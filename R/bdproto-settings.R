@@ -45,6 +45,28 @@ Settings <- bdproto(
       self$data$end.time - self$data$start.time
       )
   },
+  # Summary call
+  summary = function(self){
+    if(self$length()==0) return(NULL)
+    # Loop through each entry and try to summarize
+    # Do so by estimating name, type or class and value (if possible)
+    d <- self$data
+    o <- data.frame(name = character(), type = character(), value = character() )
+    for(entry in names(d)){
+      if(inherits(d[[entry]], "sf")){
+        val <- sf::st_geometry_type( d[[entry]] )[1]
+      } else {
+        val <- try({ as.character( d[[entry]]) },silent = TRUE)
+      }
+      if(inherits(val, 'try-error')) val <- NA
+      e <- data.frame(name = entry, type = class(d[[entry]])[1], value = val)
+      o <- rbind(o, e)
+    }
+    # Return the data.frame
+    return(
+      o
+    )
+  },
   # Get setting
   get = function(self, what){
     assertthat::assert_that(is.character(what))
