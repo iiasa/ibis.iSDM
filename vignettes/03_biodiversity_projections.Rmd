@@ -41,7 +41,7 @@ install <- function(packages){
     install.packages(new.packages, dependencies = TRUE)
   sapply(packages, require, character.only = TRUE)
 }
-invisible( install(c("xgboost", "igraph", "rgeos", "kissmig", "stars", "ncdf4", "ggplot2","cubelyr")) )
+invisible( install(c("xgboost", "igraph", "rgeos", "kissmig", "stars", "ncdf4","geosphere", "ggplot2","cubelyr")) )
 ```
 
 ## Load relevant packages and testing data
