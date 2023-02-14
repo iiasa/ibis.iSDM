@@ -793,6 +793,9 @@ engine_xgboost <- function(x,
             cofs <- xgboost:::xgb.importance(model = obj) %>%
               as.data.frame()
             cofs$Sigma <- NA
+            if(!self$settings$get("only_linear")){
+              cofs <- subset(cofs, select = c("Feature", "Gain", "Sigma"))
+            }
             names(cofs) <- c("Feature", "Beta", "Sigma")
             return(cofs)
           },
