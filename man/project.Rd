@@ -44,6 +44,8 @@ respectively:
 a barrier that prevents migration.
 \item \code{\link[=add_constrain_adaptability]{add_constrain_adaptability()}} Apply an adaptability constrain to the projection, for instance
 constraining the speed a species is able to adapt to new conditions.
+\item \code{\link[=add_constrain_boundary]{add_constrain_boundary()}} To artificially limit the distribution change. Similar as specifying projection limits, but
+can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).
 }
 
 Many constrains also requires thresholds to be calculated. Adding \code{\link[=threshold]{threshold()}} to a

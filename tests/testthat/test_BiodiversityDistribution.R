@@ -4,10 +4,10 @@ test_that('Setting up a distribution model',{
   skip_if_not_installed('igraph')
   skip_if_not_installed('rgeos')
 
-  library(raster)
-  library(sf)
-  library(rgeos)
-  library(igraph)
+  suppressWarnings( library(raster) )
+  suppressWarnings( library(sf) )
+  suppressWarnings( library(rgeos) )
+  suppressWarnings( library(igraph) )
 
   options("ibis.setupmessages" = FALSE)
   # Background Raster

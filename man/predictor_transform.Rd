@@ -9,6 +9,7 @@ predictor_transform(
   option,
   windsor_props = c(0.05, 0.95),
   pca.var = 0.8,
+  method = NULL,
   ...
 )
 }
@@ -21,6 +22,8 @@ predictor_transform(
 \item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).}
 
 \item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).}
+
+\item{method}{As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).}
 }
 \value{
 Returns a adjusted \code{\link{Raster}} object of identical resolution.

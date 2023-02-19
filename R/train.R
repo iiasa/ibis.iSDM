@@ -639,7 +639,7 @@ methods::setMethod(
         # Extract predictors and offsets again if set
         if(!is.Waiver(model$predictors_object)){
           # Using the raster operations is generally faster than point in polygon tests
-          pred_ov <- model$predictors_object$get_data()
+          pred_ov <- model$predictors_object$get_data(df = FALSE)
           # Make a rasterized mask of the background
           pred_ov <- raster::mask( pred_ov, model$background )
           # Convert Predictors to data.frame, including error catching for raster errors
@@ -653,7 +653,8 @@ methods::setMethod(
             }
           }
           model[['predictors']] <- o
-          model[['predictors_object']]$data <- fill_rasters(o, model$predictors_object$data)
+          model[['predictors_object']]$data <- fill_rasters(o[,c(1,2)*-1], # Remove x and y coordinates for overwriting raster data
+                                                            model$predictors_object$data)
           rm(pred_ov, o)
         } else {
           model$predictors[which( is.na(

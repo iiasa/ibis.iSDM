@@ -283,10 +283,10 @@ st_add_raster <- function(obj, new){
     new <- raster::dropLayer(new, which( names(new) %in% names(obj) ) )
   }
 
-  # Get times objects
-  times <- rep(stars::st_get_dimension_values(obj, "time"))
-  # Overwrite time dimension
   full_dims <- stars::st_dimensions(obj)
+  # Get times objects
+  time_name <- names(full_dims)[3]
+  times <- rep(stars::st_get_dimension_values(obj, time_name))
 
   # Now loop through each layer and add it to the target file
   for(lyr in names(new)){
@@ -294,11 +294,7 @@ st_add_raster <- function(obj, new){
       stars::st_as_stars()
     names(s) <- lyr
 
-    dims <- stars::st_dimensions(s)
-    # Replace the band variable with the original one
-    names(dims)[3] <- "time"
-    dims$time <- full_dims$time
-    stars::st_dimensions(s) <- dims
+    stars::st_dimensions(s) <- full_dims
     obj <- c(obj, s)
   }
   assertthat::assert_that(

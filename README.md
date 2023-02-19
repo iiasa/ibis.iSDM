@@ -38,16 +38,16 @@ devtools::install_github("IIASA/ibis.iSDM")
 ## Basic usage
 
 See relevant [reference site](https://iiasa.github.io/ibis.iSDM/) and
-[vignettes](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
+[articles](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
 
-Note that the package is in active development and individual functions
-might change.
+Note that the package is in active development and parameters of some
+functions might change.
 
 **Citation:**
 <summary>
-Jung M (2022). ibis.iSDM: Modelling framework for Integrated
-Biodiversity distribution scenarios. R package version 0.1,
-<https://github.com/iiasa/ibis.iSDM>.
+Jung, Martin. 2023. “An Integrated Species Distribution Modelling
+Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February
+19. [DOI:](https://osf.io/vusz8).
 </summary>
 
 ## Acknowledgement <a href="https://iiasa.ac.at"><img src="man/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>

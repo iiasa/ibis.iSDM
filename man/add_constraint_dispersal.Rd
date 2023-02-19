@@ -9,7 +9,8 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
+information.}
 
 \item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
 fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to

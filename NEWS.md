@@ -1,3 +1,3 @@
-# ibis.iSDM 0.1
+# ibis.iSDM 0.0.1
 
 Initial public release version! Finding and fixing further bugs... 

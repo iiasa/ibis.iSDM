@@ -6,9 +6,10 @@ test_that('Scenarios and constraints', {
   skip_if_not_installed('glmnet')
   skip_on_travis()
   skip_on_cran()
-  require('glmnet')
-  require('igraph')
-  library("ibis.iSDM")
+
+  suppressWarnings( require('glmnet') )
+  suppressWarnings( require('igraph') )
+  suppressWarnings( library("ibis.iSDM") )
 
   options("ibis.setupmessages" = FALSE) # Be less chatty
   options("ibis.seed" = 1234)
@@ -54,6 +55,7 @@ test_that('Scenarios and constraints', {
   expect_s3_class(fit$show_duration(), "difftime")
   expect_equal(length(fit$show_rasters()), 2) # Should have prediction and threshold
   expect_s3_class(fit$get_equation(), "formula")
+
   # -- #
   expect_gt(fit$get_thresholdvalue(), 0)
   expect_s3_class(fit$settings, "Settings")
@@ -139,7 +141,12 @@ test_that('Scenarios and constraints', {
   expect_type(mod2b$get_constraints(), "list")
   expect_length(mod2b$get_constraints(), 2)
 
-  # Continue ..
+  # Connectivity stuff
+  res <- pred_current$Urban
+  mod2 <- mod |> add_constraint_connectivity(method = "resistance",resistance = res)
+  expect_equal(names(mod2$get_constraints()), "connectivity")
+  expect_true(is.Raster(mod2$get_constraints()$connectivity$params$resistance))
+
   # --- #
   # Check that stabilization works
   mods <- mod |> project(stabilize = TRUE)
