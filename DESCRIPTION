@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for Integrated Biodiversity distribution scenarios
-Version: 0.1
+Version: 0.0.1
 Authors@R: 
     person(given = "Martin",
            family = "Jung",

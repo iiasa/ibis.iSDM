@@ -467,7 +467,7 @@ BiodiversityScenario <- bdproto(
     )
   },
   # Calculate slopes
-  calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE){
+  calc_scenarios_slope = function(self, what = 'suitability', plot = TRUE, oftype = "stars"){
     if(is.Waiver(self$get_data())) return( new_waiver() )
     assertthat::assert_that(what %in% attributes(self$get_data())$names )
 
@@ -485,7 +485,12 @@ BiodiversityScenario <- bdproto(
       }
     )
     names(out) <- 'linear_coefficient'
-    if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+    if(oftype == "stars"){
+      if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+    } else {
+      out <- as(out, "Raster")
+      if(plot) plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+    }
     return(out)
   },
   # Save object

@@ -163,6 +163,7 @@ engine_xgboost <- function(x,
 
         # Change the number of variables included if custom equation is used
         if(!is.Waiver(model$biodiversity[[1]]$equation)){
+          form <- model$biodiversity[[1]]$equation
           varn <- model$biodiversity[[1]]$predictors_names[which( all.vars(form) %in% model$biodiversity[[1]]$predictors_names )]
           assertthat::assert_that(length(varn)>0)
           # Match to existing ones and remove those not covered

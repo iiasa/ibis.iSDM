@@ -30,6 +30,7 @@ NULL
 #' \code{'scale'}, \code{'norm'}, \code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
 #' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).
+#' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @returns Returns a adjusted [`Raster`] object of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
@@ -39,13 +40,21 @@ NULL
 #' }
 #' @keywords utils
 #' @export
-predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, ...){
+predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, 'stars'),
-    is.character(option),
-    base::length(option) == 1,   # TODO: incorporate possibility of doing multiple options at once and in the order they are supplied?
+    # Support multiple options
     is.numeric(windsor_props) & length(windsor_props)==2,
     is.numeric(pca.var)
+  )
+  # Convenience function
+  if(missing(option)){
+    assertthat::assert_that(!is.null(method))
+    option <- method
+  }
+  assertthat::assert_that(
+    is.character(option),
+    base::length(option) == 1
   )
   # Match option
   option <- match.arg(option, c('none','pca', 'scale', 'norm','windsor', 'windsor_thresh', 'revjack', 'percentile'), several.ok = FALSE)
@@ -61,6 +70,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     # Convert to list
     env_list <- list()
     for(name in lyrs) env_list[[name]] <- as(env[name], 'Raster')
+  } else {
+    # Get times in case a stack is supplied (this can get lost depending on transformation)
+    times <- raster::getZ(env)
   }
 
   # Normalization
@@ -206,6 +218,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       raster::nlayers(env) == raster::nlayers(out),
       is_comparable_raster(out, env)
     )
+    # Reset times
+    if(!is.null(times)) out <- raster::setZ(out, times)
+
     return(out)
   }
 }
@@ -232,10 +247,11 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
 #' @param env A [`Raster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way
-#' (Options: 'none','quadratic', 'hinge', 'thresh', 'bin').
+#' (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param deriv A [`vector`] with [`characters`] of specific derivates to create (Default: \code{NULL}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
+#' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @return Returns the derived adjusted [`Raster`] objects of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
@@ -245,14 +261,22 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' }
 #' @keywords utils
 #' @export
-predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, ...){
+predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, method = NULL, ...){
   assertthat::assert_that(
     inherits(env,'Raster') || inherits(env, "stars"),
     !missing(env),
     is.numeric(nknots) && nknots > 1,
-    is.character(option),
     is.null(deriv) || is.character(deriv),
     is.null(int_variables) || is.vector(int_variables)
+  )
+  # Convenience function
+  if(missing(option)){
+    assertthat::assert_that(!is.null(method))
+    option <- method
+  }
+  assertthat::assert_that(
+    is.character(option),
+    base::length(option) == 1
   )
   # Match argument.
   option <- match.arg(option, c('none','quadratic', 'hinge', 'thresh', 'bin', 'interaction'), several.ok = FALSE)
@@ -466,7 +490,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 #' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: FALSE)
 #' @returns A [`Raster`] object with the same number of layers as the input.
 #' @keywords utils
-#' @noRd
+#' @export
 predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
   assertthat::assert_that(
     is.Raster(env) || inherits(env, 'stars'),

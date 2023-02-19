@@ -14,7 +14,8 @@
 \item{layer}{A \code{\link{RasterLayer}} object with the same extent as the model background. Has to be binary and
 is used for a posthoc masking of projected grid cells.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
+information.}
 
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 }

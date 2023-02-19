@@ -5,7 +5,9 @@ test_that('Check that INLA works', {
   skip_on_ci()
   skip_if_not_installed('INLA')
 
-  suppressPackageStartupMessages( library(INLA) )
+  suppressWarnings(
+    suppressPackageStartupMessages( library(INLA) )
+  )
   options("ibis.setupmessages" = FALSE)
 
   # Use test data that comes with INLA
