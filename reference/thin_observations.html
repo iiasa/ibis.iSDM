@@ -22,7 +22,7 @@ data prior to any estimation and its use should be considered with care (see als
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,8 @@ and presence-absence occurrence points equally.</p></dd>
 
 
 <dt>env</dt>
-<dd><p>A <code>Raster</code> object with environmental covaraites. Needed when method is set to <code>"environmental"</code> (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code>Raster</code> object with environmental covaraites. Needed when method is set to <code>"environmental"</code>
+or <code>"bias"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>method</dt>
@@ -131,28 +132,23 @@ and presence-absence occurrence points equally.</p></dd>
 <dt>verbose</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether to print some statistics about the thinning outcome (Default: <code>TRUE</code>).</p></dd>
 
-
-<dt>bias</dt>
-<dd><p>A supplied <code>RasterLayer</code> bias layer for method <code>"bias"</code> (Default: <code>NULL</code>).</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Currently implemented thinning methods:</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"random"</code>: Samples at random up to number of <code>"minpoints"</code> across all occupied grid cells.
-Does not account for any spatial or environmental distance between observations.
-<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"bias"</code>: This option removed explicitly points that are considered biased (parameter <code>"bias"</code>) only.
+    <p>Currently implemented thinning methods:</p><ul><li><p><code>"random"</code>: Samples at random up to number of <code>"minpoints"</code> across all occupied grid cells.
+Does not account for any spatial or environmental distance between observations.</p></li>
+<li><p><code>"bias"</code>: This option removed explicitly points that are considered biased (parameter <code>"env"</code>) only.
 Points are preferentially thinned from grid cells which are in the 25% most biased (larger values assumed greater bias)
-and have high point density. Thins the observations up to <code>"minpoints"</code>.
-<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"zones"</code>: Assesses for each observation that it falls with a maximum of <code>"minpoints"</code> into
-each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
-<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"environmental"</code>: This approach creates an observation-wide clustering (k-means) under the assumption
+and have high point density. Thins the observations up to <code>"minpoints"</code>.</p></li>
+<li><p><code>"zones"</code>: Assesses for each observation that it falls with a maximum of <code>"minpoints"</code> into
+each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.</p></li>
+<li><p><code>"environmental"</code>: This approach creates an observation-wide clustering (k-means) under the assumption
 that the full environmental niche has been comprehensively sampled and is covered by the provided covariates <code>env</code>.
-We then obtain an number equal to (<code>"minpoints"</code>) of observations for each cluster.
-<a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"spatial"</code>: Calculates the spatial distance between all observations. Then points are removed
+We then obtain an number equal to (<code>"minpoints"</code>) of observations for each cluster.</p></li>
+<li><p><code>"spatial"</code>: Calculates the spatial distance between all observations. Then points are removed
 iteratively until the minimum distance between points is crossed.  The <code>"mindistance"</code> parameter has to
-be set for this function to work.</p>
-    </div>
+be set for this function to work.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     

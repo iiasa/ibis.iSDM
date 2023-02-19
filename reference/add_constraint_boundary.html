@@ -22,7 +22,7 @@ Note: Setting a boundary constraint for future projections effectively potential
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,10 @@ the zone.
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario, Raster, character</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario, sf, character</span></span>
+<span><span class="fu">add_constraint_boundary</span><span class="op">(</span><span class="va">mod</span>, <span class="va">layer</span>, <span class="va">method</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityScenario, Raster, character</span></span>
 <span><span class="fu">add_constraint_boundary</span><span class="op">(</span><span class="va">mod</span>, <span class="va">layer</span>, <span class="va">method</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -101,7 +104,8 @@ is used for a posthoc masking of projected grid cells.</p></dd>
 
 
 <dt>method</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type of constraints to be added to the scenario. See details.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type of constraints to be added to the scenario. See details for more
+information.</p></dd>
 
 
 <dt>...</dt>

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@
     <div class="section level2">
       <h2 id="setting-up-and-train-models">Setting up and train models<a class="anchor" aria-label="anchor" href="#setting-up-and-train-models"></a></h2>
       
-      <p class="section-desc"></p><p>Key functions for setting up models and training them. Start with distribution and see examples how to build a model.</p>
+      <p class="section-desc"></p><p>Key functions for setting up species distribution models and adding information to them. Start with distribution() and see articles examples on how to build a model from there. Also includes functions to specify priors for a model.</p>
 
       
     </div><div id="" class="section level2">
@@ -84,7 +84,7 @@
           
           <code><a href="BARTPriors.html">BARTPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables are supplied</dd>
+        <dd>Helper function when multiple variables are supplied for a BART prior</dd>
       </dl><dl><dt>
           
           <code><a href="BREGPrior.html">BREGPrior()</a></code> 
@@ -94,27 +94,27 @@
           
           <code><a href="BREGPriors.html">BREGPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables are supplied</dd>
+        <dd>Helper function when multiple variables are supplied for a BREG prior</dd>
       </dl><dl><dt>
           
           <code><a href="GDBPrior.html">GDBPrior()</a></code> 
         </dt>
-        <dd>Create a new monotonic prior</dd>
+        <dd>Monotonic constrained priors for boosted regressions</dd>
       </dl><dl><dt>
           
           <code><a href="GDBPriors.html">GDBPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables are supplied</dd>
+        <dd>Helper function when multiple variables are supplied for a GDB prior</dd>
       </dl><dl><dt>
           
           <code><a href="GLMNETPrior.html">GLMNETPrior()</a></code> 
         </dt>
-        <dd>Placeholder for GLMNET</dd>
+        <dd>Regression penalty priors for GLMNET</dd>
       </dl><dl><dt>
           
           <code><a href="GLMNETPriors.html">GLMNETPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables are supplied</dd>
+        <dd>Helper function when multiple variables are supplied for a GLMNET prior</dd>
       </dl><dl><dt>
           
           <code><a href="INLAPrior.html">INLAPrior()</a></code> 
@@ -124,27 +124,27 @@
           
           <code><a href="INLAPriors.html">INLAPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables and types are supplied</dd>
+        <dd>Helper function when multiple variables and types are supplied for INLA</dd>
       </dl><dl><dt>
           
           <code><a href="STANPrior.html">STANPrior()</a></code> 
         </dt>
-        <dd>Create a new stan prior</dd>
+        <dd>Create a new STAN prior</dd>
       </dl><dl><dt>
           
           <code><a href="STANPriors.html">STANPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables and types are supplied</dd>
+        <dd>Helper function when multiple variables and types are supplied for STAN</dd>
       </dl><dl><dt>
           
           <code><a href="XGBPrior.html">XGBPrior()</a></code> 
         </dt>
-        <dd>Create a new monotonic prior</dd>
+        <dd>Create a new monotonic prior for boosted regressions</dd>
       </dl><dl><dt>
           
           <code><a href="XGBPriors.html">XGBPriors()</a></code> 
         </dt>
-        <dd>Helper function when multiple variables are supplied</dd>
+        <dd>Helper function when multiple variables are supplied for XGBOOST</dd>
       </dl><dl><dt>
           
           <code><a href="Prior-class.html">Prior-class</a></code> <code><a href="Prior-class.html">Prior</a></code> 
@@ -162,19 +162,19 @@
         <dd>Print</dd>
       </dl><dl><dt>
           
-          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PriorList&gt;</i>)</a></code> 
+          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;Settings&gt;</i>)</a></code> 
         </dt>
         <dd>Summarises a trained model or predictor object</dd>
       </dl><dl><dt>
           
-          <code><a href="priors.html">priors()</a></code> 
+          <code><a href="priors.html">priors()</a></code> <code><a href="priors.html">priors()</a></code> 
         </dt>
         <dd>Creates a new PriorList object</dd>
       </dl><dl><dt>
           
-          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
+          <code><a href="pseudoabs_settings.html">pseudoabs_settings(<i>&lt;ANY&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; logical ANY&gt;</i>)</a></code> 
         </dt>
-        <dd>Specify settings for absence point sampling over the model background</dd>
+        <dd>Settings for specifying pseudo-absence points within the model background</dd>
       </dl><dl><dt>
           
           <code><a href="train.html">train()</a></code> 
@@ -183,7 +183,7 @@
       </dl></div><div class="section level2">
       <h2 id="add-or-modify-data-and-parameters">Add or modify data and parameters<a class="anchor" aria-label="anchor" href="#add-or-modify-data-and-parameters"></a></h2>
       
-      <p class="section-desc"></p><p>Functions to add or modify data and parameters in existing objects.</p>
+      <p class="section-desc"></p><p>Functions to add or modify data and parameters in a distribution object. These can be used to add or remove biodiversity, covariates and priors in various forms.</p>
 
       
     </div><div id="" class="section level2">
@@ -228,19 +228,24 @@
         <dd>Adds an adaptability constraint to a scenario object</dd>
       </dl><dl><dt>
           
-          <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; Raster&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+          <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; Raster&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Adds a boundary constraint to a scenario object</dd>
       </dl><dl><dt>
           
-          <code><a href="add_constraint_connectivity.html">add_constraint_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; RasterLayer&gt;</i>)</a></code> 
+          <code><a href="add_constraint_connectivity.html">add_constraint_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
         </dt>
-        <dd>Adds a connectivity constraint to a scenario object</dd>
+        <dd>Adds a connectivity constraint to a scenario object.</dd>
       </dl><dl><dt>
           
           <code><a href="add_constraint_dispersal.html">add_constraint_dispersal(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
         </dt>
         <dd>Adds a dispersal constrain to a scenario object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_control_bias.html">add_control_bias()</a></code> 
+        </dt>
+        <dd>Add a specified variable that the model should control for</dd>
       </dl><dl><dt>
           
           <code><a href="add_latent_spatial.html">add_latent_spatial()</a></code> 
@@ -390,7 +395,7 @@
       </dl></div><div class="section level2">
       <h2 id="create-spatial-temporal-projections">Create spatial-temporal projections<a class="anchor" aria-label="anchor" href="#create-spatial-temporal-projections"></a></h2>
       
-      <p class="section-desc"></p><p>Functions specifically for adding constrains and creating scenarios based on trained models.</p>
+      <p class="section-desc"></p><p>After a model has been trained, the functions in here can be used to create projections with scenario() objects. Constraints can be on such scenarios to limit extrapolations.</p>
 
       
     </div><div id="" class="section level2">
@@ -425,14 +430,14 @@
         <dd>Adds an adaptability constraint to a scenario object</dd>
       </dl><dl><dt>
           
-          <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; Raster&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+          <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="add_constraint_boundary.html">add_constraint_boundary(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; Raster&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Adds a boundary constraint to a scenario object</dd>
       </dl><dl><dt>
           
-          <code><a href="add_constraint_connectivity.html">add_constraint_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; RasterLayer&gt;</i>)</a></code> 
+          <code><a href="add_constraint_connectivity.html">add_constraint_connectivity(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; ANY&gt;</i>)</a></code> 
         </dt>
-        <dd>Adds a connectivity constraint to a scenario object</dd>
+        <dd>Adds a connectivity constraint to a scenario object.</dd>
       </dl><dl><dt>
           
           <code><a href="add_constraint_dispersal.html">add_constraint_dispersal(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
@@ -461,7 +466,7 @@
         <dd>Print</dd>
       </dl><dl><dt>
           
-          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PriorList&gt;</i>)</a></code> 
+          <code><a href="summary.html">summary(<i>&lt;distribution&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;DistributionModel&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PredictorDataset&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;PriorList&gt;</i>)</a></code> <code><a href="summary.html">summary(<i>&lt;Settings&gt;</i>)</a></code> 
         </dt>
         <dd>Summarises a trained model or predictor object</dd>
       </dl><dl><dt>
@@ -512,7 +517,7 @@
       </dl></div><div class="section level2">
       <h2 id="utility-functions">Utility functions<a class="anchor" aria-label="anchor" href="#utility-functions"></a></h2>
       
-      <p class="section-desc"></p><p>Functions used by engines or spatial processing</p>
+      <p class="section-desc"></p><p>These functions are used by engines or spatial processing in the package. Most of them are for internal use, but can be of use if input needs to be reformatted.</p>
 
       
     </div><div id="" class="section level2">
@@ -569,7 +574,7 @@
           
           <code><a href="emptyraster.html">emptyraster()</a></code> 
         </dt>
-        <dd>Create an empty <code>rasterLayer</code> based on a template</dd>
+        <dd>Create an empty <code>RasterLayer</code> based on a template</dd>
       </dl><dl><dt>
           
           <code><a href="get_ngbvalue.html">get_ngbvalue()</a></code> 
@@ -612,9 +617,9 @@
         <dd>Show the stan code from a trained model</dd>
       </dl><dl><dt>
           
-          <code><a href="ibis_options.html">ibis_options()</a></code> 
+          <code><a href="write_model.html">write_model(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
         </dt>
-        <dd>Print ibis options</dd>
+        <dd>Save a model for later use</dd>
       </dl><dl><dt>
           
           <code><a href="write_output.html">write_output(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterStack&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;data.frame&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;stars&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
@@ -632,6 +637,16 @@
         <dd>Generic function to write summary outputs from created models.</dd>
       </dl><dl><dt>
           
+          <code><a href="load_model.html">load_model(<i>&lt;character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
+        </dt>
+        <dd>Load a pre-computed model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="clamp_predictions.html">clamp_predictions()</a></code> 
+        </dt>
+        <dd>Clamp a predictor matrix by given values</dd>
+      </dl><dl><dt>
+          
           <code><a href="formatGLOBIOM.html">formatGLOBIOM()</a></code> 
         </dt>
         <dd>Function to format a prepared GLOBIOM netCDF file for use in Ibis.iSDM</dd>
@@ -645,6 +660,11 @@
           <code><a href="polynominal_transform.html">polynominal_transform()</a></code> 
         </dt>
         <dd>Create a polynomial transformation from coordinates</dd>
+      </dl><dl><dt>
+          
+          <code><a href="predictor_homogenize_na.html">predictor_homogenize_na()</a></code> 
+        </dt>
+        <dd>Homogenize NA values across a set of predictors.</dd>
       </dl><dl><dt>
           
           <code><a href="thin_observations.html">thin_observations()</a></code> 
@@ -742,6 +762,11 @@
           <code><a href="bivplot.html">bivplot()</a></code> 
         </dt>
         <dd>Bivariate plot wrapper for distribution objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ibis_dependencies.html">ibis_dependencies()</a></code> 
+        </dt>
+        <dd>Install ibis dependencies</dd>
       </dl><dl><dt>
           
           <code><a href="ibis_future.html">ibis_future()</a></code> 

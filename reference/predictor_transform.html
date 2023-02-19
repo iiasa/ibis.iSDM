@@ -14,7 +14,7 @@ This function works both with Raster as well as with stars objects."><meta prope
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,7 @@ This function works both with Raster as well as with stars objects."><meta prope
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Spatial adjustment of environmental predictors and raster stacks</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/utils-spatial.R" class="external-link"><code>R/utils-spatial.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/utils-predictors.R" class="external-link"><code>R/utils-predictors.R</code></a></small>
       <div class="d-none name"><code>predictor_transform.Rd</code></div>
     </div>
 
@@ -78,6 +78,7 @@ This function works both with <code>Raster</code> as well as with <code><a href=
 <span>  <span class="va">option</span>,</span>
 <span>  windsor_props <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  pca.var <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -90,7 +91,7 @@ This function works both with <code>Raster</code> as well as with <code><a href=
 
 <dt>option</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be preprocessed in any way (Options: <code>'none'</code>,
-<code>'scale'</code>, <code>'norm'</code>, <code>'pca'</code>, <code>'revjack'</code>). See Details.</p></dd>
+<code>'scale'</code>, <code>'norm'</code>, <code>'windsor'</code>, <code>'windsor_thresh'</code>, <code>'percentile'</code> <code>'pca'</code>, <code>'revjack'</code>). See Details.</p></dd>
 
 
 <dt>windsor_props</dt>
@@ -99,6 +100,10 @@ This function works both with <code>Raster</code> as well as with <code><a href=
 
 <dt>pca.var</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value between <code>&gt;0</code> and <code>1</code> stating the minimum amount of variance to be covered (Default: <code>0.8</code>).</p></dd>
+
+
+<dt>method</dt>
+<dd><p>As <code>'option'</code> for more intuitive method setting. Can be left empty (in this case option has to be set).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -113,6 +118,10 @@ This function works both with <code>Raster</code> as well as with <code><a href=
 <li><p><code>'scale'</code> This run the <code><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale()</a></code> function with default settings (1 Standard deviation) across all predictors.
 A sensible default to for most model fitting.</p></li>
 <li><p><code>'norm'</code> This normalizes all predictors to a range from <code>0-1</code>.</p></li>
+<li><p><code>'windsor'</code> This applies a 'windsorization' to an existing raster layer by setting the lowest, respectively
+largest values to the value at a certain percentage level (e.g. 95%). Those can be set via the parameter <code>"windsor_props"</code>.</p></li>
+<li><p><code>'windsor_thresh'</code> Same as option 'windsor', however in this case values are clamped to a thresholds
+rather than certain percentages calculated on the data.</p></li>
 <li><p><code>'percentile'</code> This converts and bins all values into percentiles, e.g. the top 10% or lowest 10% of values and so on.</p></li>
 <li><p><code>'pca'</code> This option runs a principal component decomposition of all predictors (via <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code>).
 It returns new predictors resembling all components in order of the most important ones. Can be useful to

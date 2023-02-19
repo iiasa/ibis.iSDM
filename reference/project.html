@@ -20,7 +20,7 @@ Any constrains specified in the scenario object are applied during the projectio
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,6 +131,8 @@ respectively:</p><ul><li><p><code>add_constrain()</code> for generic wrapper to 
 a barrier that prevents migration.</p></li>
 <li><p><code>add_constrain_adaptability()</code> Apply an adaptability constrain to the projection, for instance
 constraining the speed a species is able to adapt to new conditions.</p></li>
+<li><p><code>add_constrain_boundary()</code> To artificially limit the distribution change. Similar as specifying projection limits, but
+can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).</p></li>
 </ul><p>Many constrains also requires thresholds to be calculated. Adding <code><a href="threshold.html">threshold()</a></code> to a
 <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object enables the computation of thresholds at every step based on the threshold
 used for the main model (threshold values are taken from there).</p>

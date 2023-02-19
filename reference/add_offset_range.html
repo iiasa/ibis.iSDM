@@ -20,7 +20,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +89,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
 <span>  type <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>  presence_prop <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  distance_clip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fraction <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -129,6 +130,11 @@ default this is set to <code>0.9</code> indicating that 10% of all records are l
 
 <dt>distance_clip</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> as to whether distance should be clipped after the maximum distance (Default: <code>FALSE</code>).</p></dd>
+
+
+<dt>fraction</dt>
+<dd><p>An optional <code>RasterLayer</code> object that is multiplied with digitized raster layer.
+Can be used to for example to remove or reduce the expected value (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>add</dt>

@@ -145,6 +145,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_dispersal.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_control_bias.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_latent_spatial.html</loc>
   </url>
   <url>
@@ -191,6 +194,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/bivplot.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/clamp_predictions.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
@@ -262,6 +268,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_rastervalue.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_dependencies.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_future.html</loc>
   </url>
   <url>
@@ -278,6 +287,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/is_comparable_raster.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/load_model.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/myLog.html</loc>
@@ -310,6 +322,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_derivate.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_homogenize_na.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.html</loc>
   </url>
   <url>
@@ -323,6 +338,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/raster_to_stars.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_latent.html</loc>
@@ -386,6 +404,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/wrap_stanmodel.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/write_model.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/write_output.html</loc>

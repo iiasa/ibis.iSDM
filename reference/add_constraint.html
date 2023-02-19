@@ -16,7 +16,7 @@ Most constrains require pre-calculated thresholds to present in the Biodiversity
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,8 @@ dispersal distance, connectivity between identified patches or limitations on sp
 
 
 <dt>method</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type of constraints to be added to the scenario. See details.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type of constraints to be added to the scenario. See details for more
+information.</p></dd>
 
 
 <dt>...</dt>
@@ -109,21 +110,40 @@ should be performed.</p></dd>
 <dt>layer</dt>
 <dd><p>A <code>Raster</code> object that can be used for boundary constraints (Default: <code>NULL</code>).</p></dd>
 
+
+<dt>pext</dt>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> indicator for <code>kissmig</code> of the probability a colonized cell becomes uncolonised,
+i.e., the species gets locally extinct (Default: <code>0.1</code>).</p></dd>
+
+
+<dt>pcor</dt>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> probability that corner cells are considered in the 3x3 neighbourhood (Default: <code>0.2</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Currently this method functions as a wrapper to support the definition of further modelling constraints.
-Supported are the options for dispersal and connectivity constraints:</p><ul><li><p><code>sdd_fixed</code> - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
+    <p>Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
+target feature. This function acts as a wrapper to add these constraints.
+Currently supported are the following options:
+<strong>Dispersal</strong>:</p><ul><li><p><code>sdd_fixed</code> - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
 <li><p><code>sdd_nexpkernel</code> - Applies a dispersal distance using a negative exponential kernel from its origin.</p></li>
 <li><p><code>kissmig</code> - Applies the kissmig stochastic dispersal model. Requires kissmig package. Applied at each modelling time step.</p></li>
 <li><p><code>migclim</code> - Applies the dispersal algorithm MigClim to the modelled objects. Requires MigClim package.</p></li>
-<li><p><code>hardbarrier</code> - Defines a hard barrier to any dispersal events.</p></li>
-<li><p><code>nichelimit</code> - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
-can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.</p></li>
-<li><p><code>boundary</code> - Applies a hard boundary constraint on the projection.</p></li>
 </ul><p>A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).</p>
-    </div>
+<p><strong>Connectivity</strong>:</p><ul><li><p><code>hardbarrier</code> - Defines a hard barrier to any dispersal events. By definition this sets all values larger
+than <code>0</code> in the barrier layer to <code>0</code> in the projection. Barrier has to be provided through the <code>"resistance"</code>
+parameter.</p></li>
+<li><p><code>resistance</code> - Allows the provision of a static or dynamic layer that is multiplied with the projection at each
+time step. Can for example be used to reduce the suitability of any given area (using pressures not included in the model).
+The respective layer(s) have to be provided through the <code>"resistance"</code> parameter. Provided layers are incorporated as
+<code>abs(resistance - 1)</code> and multiplied with the prediction.</p></li>
+</ul><p><strong>Adaptability</strong>:</p><ul><li><p><code>nichelimit</code> - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.</p></li>
+</ul><p><strong>Boundary</strong>:</p><ul><li><p><code>boundary</code> - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
+the provide layer. Similar as specifying projection limits (see <code><a href="distribution.html">distribution</a></code>), but can be used to specifically
+constrain a projection within a certain area (e.g. a species range or an island).</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
