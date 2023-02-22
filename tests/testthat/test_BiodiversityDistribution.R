@@ -4,6 +4,11 @@ test_that('Setting up a distribution model',{
   skip_if_not_installed('igraph')
   skip_if_not_installed('rgeos')
 
+  # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
+  skip_if_not_installed("cmdstanr")
+  skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
+          message = "No cmdstan path")
+
   suppressWarnings( library(raster) )
   suppressWarnings( library(sf) )
   suppressWarnings( library(rgeos) )
