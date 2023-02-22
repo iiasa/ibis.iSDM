@@ -163,7 +163,6 @@ methods::setMethod(
 #'
 #' @family add_biodiversity
 #' @keywords biodiversity
-#' @section Notes:
 #' @references
 #' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.

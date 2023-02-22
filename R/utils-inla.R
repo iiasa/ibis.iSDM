@@ -351,7 +351,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     # Calculate area of each polygon in km2
     w <- sf::st_area(
        sf::st_as_sf(polys)
-    ) %>% units::set_units("km²") %>% as.numeric()
+    ) %>% units::set_units(km^2) %>% as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
   }
@@ -388,7 +388,7 @@ mesh_as_sf <- function(mesh) {
     # Convert to sf
     sf::st_as_sf(.)
   # Calculate and add area to the polygon
-  dp$areakm2 <- sf::st_area(dp) %>% units::set_units("km²") %>% as.numeric()
+  dp$areakm2 <- sf::st_area(dp) %>% units::set_units(km^2) %>% as.numeric()
   dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
   return(dp)
 }
@@ -1347,7 +1347,7 @@ manual_inla_priors <- function(prior){
   "
 
   # Half-Cauchy prior
-  # Here, we have set the scale parameter γ to 25 following A Gelman (2006).
+  # Here, we have set the scale parameter lambda to 25 following A Gelman (2006).
   HC.prior = "expression:
               sigma = exp(-theta/2);
               gamma = 25;
@@ -1434,7 +1434,7 @@ inla.backstep <- function(master_form,
                     waic = fit$waic$waic,
                     dic = fit$dic$dic,
                     # conditional predictive ordinate values
-                    # The sum of the log CPO’s and is an estimator for the log marginal likelihood.
+                    # The sum of the log CPO's and is an estimator for the log marginal likelihood.
                     # The factor -2 is included as that places the measure on the same scale as other commonly used information criteria such as the DIC or WAIC.
                     cpo = sum(log(fit$cpo$cpo)) * -2,
                     mean.deviance = fit$dic$mean.deviance )

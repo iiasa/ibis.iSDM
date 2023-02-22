@@ -1,0 +1,26 @@
+# Contributing to development of the  _ibis.iSDM_ R-package
+
+We welcome contributions to the _ibis.iSDM_ R-package. These contributions could be simple typo fixes, additions to the documentation and **testthat** tests, enhancing the vignettes to provide a greater understanding this package, or completely new functions.
+
+For the latter, please get in touch with the package authors first.
+
+*Note that pushing to master or forking is disabled at the moment.*
+This will be changed in the future when the package has reached a stable state. Pull requests require a confirmation and review from active editors.
+
+### Development guidelines
+
+-   The _ibis.iSDM_ contains primarily functions for fitting models.
+-   Speed and flexibility are key
+-   Don’t repeat yourself. Create new functions and if necessary
+    classes. Equally try to reuse common names from R, e.g. *plot*,
+    *summary*
+-   Avoid using additional package dependencies where possible
+-   Comment your code!!
+-   Use assertions to verify inputs to functions
+-   If bored, please write unit tests and ensure they all evaluate
+    (CRTL+SHIFT+T)!
+
+(also see [issues](https://github.com/iiasa/ibis.iSDM/issues) and
+[projects](https://github.com/iiasa/ibis.iSDM/projects)) for open issues
+
+<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->

@@ -61,10 +61,6 @@ for more information.
 By default, the logit link function is used in a logistic regression setting
 unless the specific \link{engine} does not support generalised linear regressions (e.g. \link{engine_bart}).
 }
-\section{Notes}{
-
-}
-
 \examples{
 \dontrun{
 # Define model
