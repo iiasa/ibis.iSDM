@@ -45,10 +45,10 @@ navbar:
           href: articles/05_package_comparison.html
     faq:
       text: FAQ
-      href: articles/frequently-asked-questions.html
+      href: articles/06_frequently-asked-questions.html
     contributing:
       text: Contributing
-      href: articles/contributing.html
+      href: contributing/index.html
 
 reference:
   - title: Setting up and train models

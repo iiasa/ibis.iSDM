@@ -64,4 +64,4 @@ src/*.dll
 # Other temporary files
 tmp/
 tmp/*.*
-docs
+inst/doc

@@ -24,3 +24,5 @@ configure.ac
 LICENSE.md
 README.Rmd
 ^CITATION\.cff$
+^vignettes/articles$
+CONTRIBUTING.md
