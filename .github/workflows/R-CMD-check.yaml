@@ -51,6 +51,10 @@ jobs:
             brew install proj
             brew install geos
             brew install gdal
+          else
+           echo "Nothing to do"
+          fi
+        shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
