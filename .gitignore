@@ -65,3 +65,4 @@ src/*.dll
 tmp/
 tmp/*.*
 inst/doc
+docs
