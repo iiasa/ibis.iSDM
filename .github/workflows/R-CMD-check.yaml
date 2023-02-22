@@ -45,7 +45,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get -y install \
             libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
-          elif ["$RUNNER_OS" == "macOS"]; then
+          elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install --cask xquartz
             brew install pkg-config
             brew install proj
