@@ -52,7 +52,7 @@ jobs:
             brew install geos
             brew install gdal
           else
-           echo "Nothing to do"
+            echo "Nothing to do"
           fi
         shell: bash
 
