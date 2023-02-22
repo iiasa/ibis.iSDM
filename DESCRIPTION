@@ -24,7 +24,6 @@ Imports:
     foreach,
     future (>= 1.23.0),
     doFuture (>= 0.12.2),
-    rgeos (>= 0.5-5),
     proto (>= 1.0.0),
     raster (>= 3.4-5),
     Rcpp (>= 0.12.0),
