@@ -299,7 +299,7 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
                                                   min), min(df$x)), xmeds), to = c(xmeds, max(cellStats(lyrtmp,
                                                                                                         max), max(df$x))), becomes = df$med)
         lyrtr <- raster::reclassify(lyrtmp, xmat, include.lowest = TRUE)
-      } else if (class(envs) == "list") {
+      } else if (inherits(x = envs, what = "list")) {
         lyrtr <- lapply(envs, function(x) {
           lyrtmp <- x[[pd$xlbs[[i]]]]
           xmat <- data.frame(from = c(min(cellStats(lyrtmp,
