@@ -6,7 +6,7 @@
 \usage{
 \S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
 
-\S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
+\S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

@@ -575,16 +575,23 @@ methods::setMethod(
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
 methods::setMethod(
   "add_constraint_boundary",
-  methods::signature(mod = "BiodiversityScenario", layer = "RasterLayer"),
+  methods::signature(mod = "BiodiversityScenario", layer = "ANY"),
   function(mod, layer, method = "boundary", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       is.Raster(layer),
       is.character(method)
     )
+
+    # Check that layer is a single RasterLayer
+    if(!inherits(layer, "RasterLayer")){
+      assertthat::assert_that(raster::nlayers(layer) == 1)
+      layer <- layer[[1]]
+    }
+
     # Add processing method #
     # --- #
     co <- list()
