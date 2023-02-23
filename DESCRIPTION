@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for Integrated Biodiversity distribution scenarios
-Version: 0.1
+Version: 0.0.1
 Authors@R: 
     person(given = "Martin",
            family = "Jung",
@@ -24,7 +24,6 @@ Imports:
     foreach,
     future (>= 1.23.0),
     doFuture (>= 0.12.2),
-    rgeos (>= 0.5-5),
     proto (>= 1.0.0),
     raster (>= 3.4-5),
     Rcpp (>= 0.12.0),
@@ -50,7 +49,9 @@ Suggests:
     doParallel,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    BoomSpikeSlab (>= 1.2.4)
+    BoomSpikeSlab (>= 1.2.4),
+    rmarkdown,
+    knitr
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
@@ -126,3 +127,4 @@ Collate:
 Roxygen: list(markdown = TRUE)
 Biarch: true
 SystemRequirements: GNU make
+VignetteBuilder: knitr

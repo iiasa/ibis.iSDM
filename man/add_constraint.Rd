@@ -9,7 +9,8 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
+information.}
 
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 
@@ -23,7 +24,7 @@ should be performed.}
 
 \item{layer}{A \code{\link{Raster}} object that can be used for boundary constraints (Default: \code{NULL}).}
 
-\item{pext}{\code{\link{numeric}} indicator for \code{\link{kissmig}} of the probability a colonized cell becomes uncolonized,
+\item{pext}{\code{\link{numeric}} indicator for \code{\link{kissmig}} of the probability a colonized cell becomes uncolonised,
 i.e., the species gets locally extinct (Default: \code{0.1}).}
 
 \item{pcor}{\code{\link{numeric}} probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).}
@@ -35,21 +36,43 @@ dispersal distance, connectivity between identified patches or limitations on sp
 \strong{Most constrains require pre-calculated thresholds to present in the \code{\linkS4class{BiodiversityScenario}} object!}
 }
 \details{
-Currently this method functions as a wrapper to support the definition of further modelling constraints.
-Supported are the options for dispersal and connectivity constraints:
+Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
+target feature. This function acts as a wrapper to add these constraints.
+Currently supported are the following options:
+\strong{Dispersal}:
 \itemize{
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 \item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
 \item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
-\item \code{hardbarrier} - Defines a hard barrier to any dispersal events.
-\item \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
-can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
-\item \code{boundary} - Applies a hard boundary constraint on the projection.
 }
 
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).
+
+\strong{Connectivity}:
+\itemize{
+\item \code{hardbarrier} - Defines a hard barrier to any dispersal events. By definition this sets all values larger
+than \code{0} in the barrier layer to \code{0} in the projection. Barrier has to be provided through the \code{"resistance"}
+parameter.
+\item \code{resistance} - Allows the provision of a static or dynamic layer that is multiplied with the projection at each
+time step. Can for example be used to reduce the suitability of any given area (using pressures not included in the model).
+The respective layer(s) have to be provided through the \code{"resistance"} parameter. Provided layers are incorporated as
+\code{abs(resistance - 1)} and multiplied with the prediction.
+}
+
+\strong{Adaptability}:
+\itemize{
+\item \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
+}
+
+\strong{Boundary}:
+\itemize{
+\item \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
+the provide layer. Similar as specifying projection limits (see \code{\link{distribution}}), but can be used to specifically
+constrain a projection within a certain area (e.g. a species range or an island).
+}
 }
 \references{
 \itemize{

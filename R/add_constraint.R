@@ -8,7 +8,8 @@ NULL
 #' dispersal distance, connectivity between identified patches or limitations on species adaptability.
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
-#' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details.
+#' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details for more
+#' information.
 #' @param value For many dispersal [`constrain`] this is set as [`numeric`] value specifying a
 #' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 #' give the number of iteration steps (or within year migration steps).
@@ -16,26 +17,43 @@ NULL
 #' should be performed.
 #' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
 #' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
-#' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonized,
+#' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonised,
 #' i.e., the species gets locally extinct (Default: \code{0.1}).
 #' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
 #' @param ... passed on parameters. See also the specific methods for adding constraints.
 #'
 #' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`],[`add_constraint_boundary`]
 #' @details
-#' Currently this method functions as a wrapper to support the definition of further modelling constraints.
-#' Supported are the options for dispersal and connectivity constraints:
+#' Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
+#' target feature. This function acts as a wrapper to add these constraints.
+#' Currently supported are the following options:
+#' **Dispersal**:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
-#' * \code{hardbarrier} - Defines a hard barrier to any dispersal events.
-#' * \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
-#' can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
-#' * \code{boundary} - Applies a hard boundary constraint on the projection.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
+#'
+#' **Connectivity**:
+#' * \code{hardbarrier} - Defines a hard barrier to any dispersal events. By definition this sets all values larger
+#' than \code{0} in the barrier layer to \code{0} in the projection. Barrier has to be provided through the \code{"resistance"}
+#' parameter.
+#' * \code{resistance} - Allows the provision of a static or dynamic layer that is multiplied with the projection at each
+#' time step. Can for example be used to reduce the suitability of any given area (using pressures not included in the model).
+#' The respective layer(s) have to be provided through the \code{"resistance"} parameter. Provided layers are incorporated as
+#' \code{abs(resistance - 1)} and multiplied with the prediction.
+#'
+#' **Adaptability**:
+#' * \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
+#' can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
+#'
+#' **Boundary**:
+#' * \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
+#' the provide layer. Similar as specifying projection limits (see [`distribution`]), but can be used to specifically
+#' constrain a projection within a certain area (e.g. a species range or an island).
+#'
 #' @references
 #' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' * Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
@@ -66,7 +84,7 @@ methods::setMethod(
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
-                                    "hardbarrier","boundary",
+                                    "hardbarrier","resistance", "boundary",
                                     "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
@@ -80,7 +98,9 @@ methods::setMethod(
                   # Using the migclim package
                   "migclim" = add_constraint_dispersal(mod, method = "migclim", ...),
                   # --- #
-                 "hardbarrier" = add_constraint_connectivity(mod, method = "hardbarrier", ...),
+                  "hardbarrier" = add_constraint_connectivity(mod, method = "hardbarrier", ...),
+                  # --- #
+                  "resistance" = add_constraint_connectivity(mod, method = "resistance", ...),
                   # --- #
                   "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
                   # --- #
@@ -321,7 +341,7 @@ methods::setMethod(
 # ------------------------ #
 #### Connectivity constraints ####
 
-#' @title Adds a connectivity constraint to a scenario object
+#' @title Adds a connectivity constraint to a scenario object.
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
@@ -337,7 +357,7 @@ methods::setGeneric("add_constraint_connectivity",
 
 #' @name add_constraint_connectivity
 #' @rdname add_constraint_connectivity
-#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, RasterLayer}(mod, method, value, resistance)
+#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, ANY}(mod, method, value, resistance)
 methods::setMethod(
   "add_constraint_connectivity",
   methods::signature(mod = "BiodiversityScenario"),
@@ -351,13 +371,13 @@ methods::setMethod(
     )
     # Match method
     method <- match.arg(arg = method,
-                        choices = c("hardbarrier"), several.ok = FALSE)
+                        choices = c("hardbarrier", "resistance"), several.ok = FALSE)
 
     # Check if there is already a dispersal constrain, if yes raise warning
     if(!is.Waiver(mod$get_constraints())){
       # If there are any dispersal constrains in there, raise warning
       if(any( "connectivity" %in% names(mod$get_constraints()) )){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Overwriting existing connectivity constraint')
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Overwriting existing connectivity constraint')
       }
     }
 
@@ -365,17 +385,42 @@ methods::setMethod(
     # --- #
     co <- list()
     if(method == "hardbarrier"){
-      # Short-distance dispersal (Fixed)
+      # Assert hard barrier
       assertthat::assert_that(
         is.Raster(resistance),
         !is.null(resistance), msg = "Set a hard barrier via the resistance parameter."
       )
       # Check that resistance layer is a binary mask
       assertthat::assert_that(length(unique(resistance))<=2,
-                              cellStats(resistance,'max')>0,
-                              msg = "Resistance layer should be a binary mark.")
+                              raster::cellStats(resistance,'max')>0,
+                              msg = "Resistance layer should be a binary mark with values 0/1.")
       co[['connectivity']] <- list(method = method,
                                 params = c("resistance" = resistance))
+    } else if(method == "resistance"){
+      # Flexible resistance layer
+      assertthat::assert_that(
+        is.Raster(resistance),
+        !is.null(resistance), msg = "The method resistance requires a specified resistance raster."
+      )
+      # If raster is stack with multiple layers, ensure that time
+      if(raster::nlayers(resistance)>1){
+        # Check that layers have a z dimension and fall within the timeperiod
+        startend <- mod$get_timeperiod()
+        assertthat::assert_that( !is.null( raster::getZ(resistance) ),
+                                 all( range(raster::getZ(resistance))==startend ),
+                                 msg = "If a stack of layers is supplied as resistance, it needs a Z value of equal length to the predictors!")
+      }
+      times <- raster::getZ(resistance)
+      # If resistance layer is bigger than 1, normalize
+      if(any(raster::cellStats(resistance,'max')>1)){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Resistance values larger than 1. Normalizing...')
+        resistance <- predictor_transform(resistance, option = "norm")
+      }
+      resistance <- abs( resistance - 1 ) # Invert
+      if(!is.null(times)) resistance <- raster::setZ(resistance, times) # Reset times again if found
+
+      co[['connectivity']] <- list(method = method,
+                                   params = c("resistance" = resistance))
     }
     # --- #
     new <- mod$set_constraints(co)

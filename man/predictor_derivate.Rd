@@ -10,6 +10,7 @@ predictor_derivate(
   nknots = 4,
   deriv = NULL,
   int_variables = NULL,
+  method = NULL,
   ...
 )
 }
@@ -17,13 +18,15 @@ predictor_derivate(
 \item{env}{A \code{\link{Raster}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way
-(Options: 'none','quadratic', 'hinge', 'thresh', 'bin').}
+(Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).}
 
 \item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
 
 \item{deriv}{A \code{\link{vector}} with \code{\link{characters}} of specific derivates to create (Default: \code{NULL}).}
 
 \item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
+
+\item{method}{As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).}
 }
 \value{
 Returns the derived adjusted \code{\link{Raster}} objects of identical resolution.

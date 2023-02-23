@@ -65,8 +65,8 @@ Display information about any object created through the \pkg{ibis.iSDM} R-packa
 \dontrun{
 # Where mod is fitted object
 mod
+print(mod)
 }
-print(a)
 }
 \seealso{
 \code{\link[base:print]{base::print()}}.

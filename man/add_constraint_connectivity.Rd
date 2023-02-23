@@ -2,14 +2,15 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_connectivity}
 \alias{add_constraint_connectivity}
-\title{Adds a connectivity constraint to a scenario object}
+\title{Adds a connectivity constraint to a scenario object.}
 \usage{
-\S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, RasterLayer}(mod, method, value, resistance)
+\S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, ANY}(mod, method, value, resistance)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
+information.}
 
 \item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
 fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
@@ -22,7 +23,7 @@ should be performed.}
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 }
 \description{
-Adds a connectivity constraint to a scenario object
+Adds a connectivity constraint to a scenario object.
 }
 \seealso{
 Other constraint: 

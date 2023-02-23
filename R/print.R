@@ -18,8 +18,8 @@ NULL
 #' \dontrun{
 #' # Where mod is fitted object
 #' mod
+#' print(mod)
 #' }
-#' print(a)
 NULL
 
 #' @rdname print

@@ -1,5 +1,5 @@
 
-<!-- README.md is generated from README.Rmd. Please use this file for any edits-->
+<!-- README.md is generated from README.Rmd. Please use this file for any edits -->
 
 # The ibis framework - An **I**ntegrated model for **B**iod**I**versity distribution projection**S**
 
@@ -9,8 +9,8 @@
 <!-- badges: start -->
 
 ![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
-[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![R-CMD-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check_linux.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check_linux.yaml)
+[![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![r-cmd-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml)
 [![License: CC BY
 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 <!-- badges: end -->
@@ -38,16 +38,16 @@ devtools::install_github("IIASA/ibis.iSDM")
 ## Basic usage
 
 See relevant [reference site](https://iiasa.github.io/ibis.iSDM/) and
-[vignettes](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
+[articles](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
 
-Note that the package is in active development and individual functions
-might change.
+Note that the package is in active development and parameters of some
+functions might change.
 
 **Citation:**
 <summary>
-Jung M (2022). ibis.iSDM: Modelling framework for Integrated
-Biodiversity distribution scenarios. R package version 0.1,
-<https://github.com/iiasa/ibis.iSDM>.
+Jung, Martin. 2023. “An Integrated Species Distribution Modelling
+Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February
+19. [DOI:](https://osf.io/vusz8).
 </summary>
 
 ## Acknowledgement <a href="https://iiasa.ac.at"><img src="man/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>

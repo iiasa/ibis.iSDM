@@ -22,6 +22,8 @@ NULL
 #' a barrier that prevents migration.
 #' * [`add_constrain_adaptability()`] Apply an adaptability constrain to the projection, for instance
 #' constraining the speed a species is able to adapt to new conditions.
+#' * [`add_constrain_boundary()`] To artificially limit the distribution change. Similar as specifying projection limits, but
+#' can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).
 #'
 #' Many constrains also requires thresholds to be calculated. Adding [`threshold()`] to a
 #' [`BiodiversityScenario-class`] object enables the computation of thresholds at every step based on the threshold
@@ -157,9 +159,7 @@ methods::setMethod(
       }
     }
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Connectivity contraints need a set dispersal constraint.')
-      if(is.Waiver(scenario_threshold) || !is.Waiver(scenario_constraints)) stop("No baseline threshold layer found,
-                                                                               which is required for scenarios constraints!")
+      if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
     }
     # ----------------------------- #
     #   Start of projection         #
@@ -209,6 +209,23 @@ methods::setMethod(
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
+        # Apply a resistance surface if found
+        if("connectivity" %in% names(scenario_constraints)){
+          # Get the layer for later
+          resistance <- scenario_constraints$connectivity$params$resistance
+          # By definition a hard barrier removes all suitable again
+          if(any(scenario_constraints$connectivity$method == "resistance")){
+            if(raster::nlayers(resistance)>1){
+              ind <- which( raster::getZ(resistance) == as.Date(step) ) # Get specific step
+              assertthat::assert_that(is.numeric(ind))
+              resistance <- resistance[[ind]]
+            }
+            out <- out * resistance
+          }
+        } else {
+          resistance <- NULL
+        }
+
         # Calculate dispersal constraint if set
         if("dispersal" %in% names(scenario_constraints) ){
           # MigClim simulations are run posthoc
@@ -216,10 +233,10 @@ methods::setMethod(
             out <- switch (scenario_constraints$dispersal$method,
                            "sdd_fixed" = .sdd_fixed(baseline_threshold, out,
                                                     value = scenario_constraints$dispersal$params[1],
-                                                    resistance = scenario_constraints$connectivity$params$resistance ),
+                                                    resistance = resistance ),
                            "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold, out,
                                                               value = scenario_constraints$dispersal$params[1],
-                                                              resistance = scenario_constraints$connectivity$params$resistance)
+                                                              resistance = resistance)
             )
             names(out) <-  paste0('suitability_', step)
           }
@@ -227,7 +244,7 @@ methods::setMethod(
           if(scenario_constraints$dispersal$method == "kissmig"){
             out <- .kissmig_dispersal(baseline_threshold,
                                       new_suit = out,
-                                      resistance = scenario_constraints$connectivity$params$resistance,
+                                      resistance = resistance,
                                       params = scenario_constraints$dispersal$params)
             # Returns a layer of two with both the simulated threshold and the masked suitability raster
             names(out) <- paste0(c('threshold_', 'suitability_'), step)
@@ -237,16 +254,18 @@ methods::setMethod(
             out <- out[[2]]
           }
         }
-        # Connectivity constraints
+
+        # Connectivity constraints with hard barriers
         if("connectivity" %in% names(scenario_constraints)){
-          # By definition a hard barrier removes all suitable
-          if(scenario_constraints$connectivity$method == "hardbarrier"){
-            out[scenario_constraints$connectivity$params$resistance] <- 0
+          # By definition a hard barrier removes all suitable again
+          if(any(scenario_constraints$connectivity$method == "hardbarrier")){
+            out[resistance==1] <- 0
           }
         }
 
       }
-      # Calculate thresholds if set manually
+
+      # Recalculate thresholds if set manually
       if(!is.Waiver(scenario_threshold)){
         # FIXME: Currently this works only for mean thresholds. Think of how the other are to be handled
         scenario_threshold <- scenario_threshold[1]

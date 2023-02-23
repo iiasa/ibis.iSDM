@@ -64,4 +64,6 @@ src/*.dll
 # Other temporary files
 tmp/
 tmp/*.*
+inst/doc
 docs
+Rplots.pdf
