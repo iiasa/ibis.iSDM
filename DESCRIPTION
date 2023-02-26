@@ -10,7 +10,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-7569-1390")),
       person(given = "Maximilian H.K.",
            family = "Hesselbarth",
-           role = c("cre", "ctb"),
+           role = c("ctb"),
            email = "hesselbarth@iiasa.ac.at",
            comment = c(ORCID = "0000-0003-1125-9918"))
       )

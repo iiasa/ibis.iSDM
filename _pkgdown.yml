@@ -48,7 +48,7 @@ navbar:
       href: articles/06_frequently-asked-questions.html
     contributing:
       text: Contributing
-      href: contributing/index.html
+      href: articles/contributing.html
 
 reference:
   - title: Setting up and train models

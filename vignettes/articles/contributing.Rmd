@@ -1,13 +1,24 @@
+---
+title: "Contributing to the Package development"
+author: "Martin Jung"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: false
+fontsize: 11pt
+vignette: >
+  %\VignetteIndexEntry{Contributing to the Package development}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 # Contributing to development of the  _ibis.iSDM_ R-package
 
 We welcome contributions to the _ibis.iSDM_ R-package. These contributions could be simple typo fixes, additions to the documentation and **testthat** tests, enhancing the vignettes to provide a greater understanding this package, or completely new functions.
 
-For the latter, please get in touch with the package authors first.
+For the latter, please get in touch with the package author or one of the maintainers first. Pull requests to the _master_ branch require a confirmation and code review from package maintainers.
 
-*Note that pushing to master or forking is disabled at the moment.*
-This will be changed in the future when the package has reached a stable state. Pull requests require a confirmation and review from active editors.
-
-### Development guidelines
+## Development guidelines
 
 -   The _ibis.iSDM_ contains primarily functions for fitting models.
 -   Speed and flexibility are key
@@ -23,4 +34,3 @@ This will be changed in the future when the package has reached a stable state. 
 (also see [issues](https://github.com/iiasa/ibis.iSDM/issues) and
 [projects](https://github.com/iiasa/ibis.iSDM/projects)) for open issues
 
-<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
