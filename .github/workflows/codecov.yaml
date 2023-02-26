@@ -25,6 +25,22 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install gdal and igraph dependencies on Linux (gdal)
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get -y install \
+            libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install --cask xquartz
+            brew install pkg-config
+            brew install proj
+            brew install geos
+            brew install gdal
+          else
+            echo "Nothing to do"
+          fi
+        shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::covr
