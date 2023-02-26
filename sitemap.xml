@@ -4,9 +4,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/404.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/CONTRIBUTING.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/LICENSE.html</loc>
   </url>
   <url>
@@ -29,6 +26,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/Get_started.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/contributing.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/index.html</loc>

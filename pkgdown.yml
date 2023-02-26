@@ -9,7 +9,8 @@ articles:
   04_engine_comparison: 04_engine_comparison.html
   05_package_comparison: 05_package_comparison.html
   06_frequently-asked-questions: 06_frequently-asked-questions.html
-last_built: 2023-02-23T15:02Z
+  contributing: contributing.html
+last_built: 2023-02-26T23:25Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles
