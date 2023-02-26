@@ -1,10 +1,12 @@
 ---
-output: github_document
+output:
+  rmarkdown::github_document:
+    html_preview: no
 ---
 
 <!-- README.md is generated from README.Rmd. Please use this file for any edits -->
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -16,14 +18,13 @@ knitr::opts_chunk$set(
 
 <!-- <img align="right" src="man/figures/logo.png" alt="logo" width="180" height = "180"> -->
 
-<!-- <a href='https://github.com/iiasa/rN2000'><img src="man/figures/logo.png" align="right"height=140/></a> --->  
 <!-- https://shields.io/  For Badges later -->
-
 <!-- badges: start -->
 ![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
 [![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![r-cmd-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC BY 4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Coverage Status](https://img.shields.io/codecov/c/github/iiasa/ibis.iSDM?label=Coverage)](https://app.codecov.io/gh/iiasa/ibis.iSDM/branch/master)
 <!-- badges: end -->
   
 The **ibis.iSDM** package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an introduction to iSDMs.
@@ -45,7 +46,7 @@ Note that the package is in active development and parameters of some functions 
 
 **Citation:**
 <summary>
-Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February 19. [DOI:](https://osf.io/vusz8).
+Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February 19. [DOI](https://osf.io/vusz8).
 </summary>
 
 ## Acknowledgement <a href="https://iiasa.ac.at"><img src="man/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>
