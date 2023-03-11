@@ -13,6 +13,17 @@ NULL
 #' @details
 #' The plotted outputs vary depending on what object is being plotted.
 #' For example for a fitted [DistributionModel] the output is usually the fitted spatial prediction (Default: \code{'mean'}).
+#' @examples
+#' \dontrun{
+#' # Build and train a model
+#' mod <- distribution(background) |>
+#'   add_biodiversity_poipo(species) |>
+#'   add_predictors(predictors) |>
+#'   engine_glmnet() |>
+#'   train()
+#' # Plot the resulting model
+#' plot(mod)
+#' }
 #' @return Graphical output
 #' @keywords misc
 #' @name plot

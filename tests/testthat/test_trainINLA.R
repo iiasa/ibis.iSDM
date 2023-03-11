@@ -71,4 +71,9 @@ test_that('Train a distribution model with INLA', {
   )
   expect_equal(length(mod$show_rasters()), 1) # Now predictions found
 
+  # --- #
+  # Some checks
+  expect_true("get_data" %in% names(mod))
+  expect_true("plot" %in% names(mod))
+  expect_true("summary" %in% names(mod))
 })

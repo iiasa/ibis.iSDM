@@ -9,8 +9,7 @@ output:
 ```{r, echo = FALSE, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "vignettes/figures/"
+  comment = "#>"
 )
 ```
 
