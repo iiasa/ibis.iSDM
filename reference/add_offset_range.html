@@ -9,7 +9,7 @@ add_offset(), allowing customized options specifically for expert-based ranges a
 polygon information on species occurrences.
 If even more control is needed, the user is informed of the bossMaps package Merow et al. (2017). The bossMaps package
 calculates - based on supplied point information - the probability of occurrences being inside vs outside the
-range map and can thus be used as a method to 'improve' the mapping of a species range."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+range map and can thus be used as a method to 'improve' the mapping of a species range."><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
@@ -66,7 +66,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Specify a expert-based species range as offset</h1>
+      <img src="" class="logo" alt=""><h1>Specify a expert-based species range as offset</h1>
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/add_offset.R" class="external-link"><code>R/add_offset.R</code></a></small>
       <div class="d-none name"><code>add_offset_range.Rd</code></div>
     </div>
@@ -143,6 +143,12 @@ this parameter to <code>FALSE</code> replaces the current offsets with the new o
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>Adds a range offset to a <code><a href="distribution.html">distribution</a></code> object.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The output created by this function creates a <code>RasterLayer</code> to be added to a provided distribution object. Offsets
 in regression models are likelihood specific as they are added directly to the overall estimate of <code>`y^hat`</code>.</p>
@@ -165,6 +171,14 @@ in regression models are likelihood specific as they are added directly to the o
 <code><a href="rm_offset.html">rm_offset</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="co"># Adds the offset to a distribution object</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">add_offset_range</span><span class="op">(</span><span class="va">species_range</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

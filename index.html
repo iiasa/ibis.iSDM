@@ -19,7 +19,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="A R-package for Integrated Biodiversity distribution modelling">
 <meta property="og:description" content="Help and tutorial for building integrated species distribution models.">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -87,24 +86,25 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections">The ibis framework - An <strong>I</strong>ntegrated model for <strong>B</strong>iod<strong>I</strong>versity distribution projection<strong>S</strong>
+<div class="page-header"><h1 id="the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections">The ibis framework - An <strong>I</strong>ntegrated model for <strong>B</strong>iod<strong>I</strong>versity distribution projection<strong>S</strong>
 <a class="anchor" aria-label="anchor" href="#the-ibis-framework---an-integrated-model-for-biodiversity-distribution-projections"></a>
-</h1>
-</div>
-<!-- <img align="right" src="man/figures/logo.png" alt="logo" width="180" height = "180"> -->
-<!-- <a href='https://github.com/iiasa/rN2000'><img src="man/figures/logo.png" align="right"height=140/></a> --->
+</h1></div>
+<!-- <img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180"> -->
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
 
-<p>The <strong>ibis.iSDM</strong> package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac et al. (2020)</a> for an introduction to iSDMs.</p>
+<p>The <strong>ibis.iSDM</strong> package provides a series of convenience functions to fit integrated Species Distribution Models (iSDMs). With integrated models we generally refer to SDMs that incorporate information from different biodiversity datasets, external parameters such as priors or offsets with respect to certain variables and regions. See <a href="https://doi.org/10.1002/ecy.2710" class="external-link">Fletcher et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac et al. (2020)</a> for an introduction to iSDMs.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>The latest version can be installed from GitHub. A CRAN release will eventually be planned.</p>
+<p>The latest version can be installed from GitHub. A CRAN release is planned.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"IIASA/ibis.iSDM"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># For CRAN installation</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ibis.iSDM"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># For Installation directly from github</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"IIASA/ibis.iSDM"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-usage">Basic usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
@@ -113,11 +113,11 @@
 <p>Note that the package is in active development and parameters of some functions might change.</p>
 <strong>Citation:</strong>
 <summary>
-Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February 19. <a href="https://osf.io/vusz8" class="external-link">DOI:</a>.
+Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February 19. <a href="https://osf.io/vusz8" class="external-link">DOI</a>
 </summary>
 </div>
 <div class="section level2">
-<h2 id="acknowledgement-">Acknowledgement <a href="https://iiasa.ac.at" class="external-link"><img src="reference/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"></a>
+<h2 id="acknowledgement-">Acknowledgement <a href="https://iiasa.ac.at" class="external-link"><img src="articles/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"></a>
 <a class="anchor" aria-label="anchor" href="#acknowledgement-"></a>
 </h2>
 <p><strong>ibis.iSDM</strong> is developed by the Biodiversity, Ecology and Conservation group at the International Institute for Applied Systems Analysis (IIASA), Austria.</p>
@@ -152,7 +152,7 @@ Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework fo
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Martin Jung <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-7569-1390" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Martin Jung <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-7569-1390" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>

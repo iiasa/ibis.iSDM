@@ -19,7 +19,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating biodiversity projections">
 <meta property="og:description" content="ibis.iSDM">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -91,11 +90,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Creating biodiversity projections</h1>
+      <img src="" class="logo" alt=""><h1>Creating biodiversity projections</h1>
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-02-26</h4>
+            <h4 data-toc-skip class="date">2023-03-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/03_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/03_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>03_biodiversity_projections.Rmd</code></div>
@@ -196,19 +195,19 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_current</span>, transform <span class="op">=</span> <span class="st">'scale'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Loaded glmnet 4.1-6</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:07 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:07 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:07 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:07 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:45 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:45 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:46 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:46 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Train the model</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Simple PPM'</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-02-26 23:31:07 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-02-26 23:31:07 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-02-26 23:31:07 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-02-26 23:31:08 | Starting fitting: Virtual points</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-02-26 23:31:09 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-02-26 23:31:10 | Completed after 2.38 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 07:08:46 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 07:08:46 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 07:08:46 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 07:08:46 | Starting fitting: Virtual points</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 07:08:48 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 07:08:48 | Completed after 1.98 secs</span></span></span>
 <span></span>
 <span><span class="co"># Add a threshold to this model by getting 05 percentile of values</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">modf</span>, method <span class="op">=</span> <span class="st">'percentile'</span>, value <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
@@ -220,8 +219,8 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_future</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from the model object.</span></span>
 <span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:10 | Adding scenario predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-02-26 23:31:10 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:48 | Adding scenario predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 07:08:48 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># This creates a scenario object</span></span>
 <span><span class="va">sc</span></span>
@@ -231,7 +230,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Threshold:      0.033 (percentile)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.034 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
 <span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
@@ -253,7 +252,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <code><a href="../reference/project.html">project()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-02-26 23:31:13 | Starting suitability projections for 85 timesteps.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-03-11 07:08:51 | Starting suitability projections for 85 timesteps.</span></span></span>
 <span><span class="co"># Note that an indication of fitted scenarios has been added to the object</span></span>
 <span><span class="va">sc.fit1</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
@@ -262,7 +261,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, Cultivated.land, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Threshold:      0.033 (percentile)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.034 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
 </div>
@@ -393,7 +392,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span>   <span class="fu"><a href="../reference/add_constraint.html">add_constraint</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-02-26 23:31:27 | Starting suitability projections for 85 timesteps.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-03-11 07:09:02 | Starting suitability projections for 85 timesteps.</span></span></span>
 <span></span>
 <span><span class="co"># Also fit one projection a nichelimit has been added</span></span>
 <span><span class="va">sc.fit3</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
@@ -401,7 +400,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span>   <span class="fu"><a href="../reference/add_constraint_adaptability.html">add_constraint_adaptability</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nichelimit"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>   <span class="co"># Directly fit the object</span></span>
 <span>   <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span>stabilize <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-02-26 23:31:45 | Starting suitability projections for 85 timesteps.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Scenario] 2023-03-11 07:09:18 | Starting suitability projections for 85 timesteps.</span></span></span>
 <span></span>
 <span><span class="co"># Note how constrains are indicated in the scenario object.</span></span>
 <span><span class="va">sc.fit3</span></span>
@@ -412,7 +411,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
-<span><span class="co">#&gt;   Threshold:      0.033 (percentile)</span></span>
+<span><span class="co">#&gt;   Threshold:      0.034 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
 <span></span>
@@ -456,19 +455,19 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 13 × 5</span></span></span>
 <span><span class="co">#&gt;    runname    category                  period       value unit      </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Simple PPM Current range             2016-01-01 415.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Simple PPM Future range              2100-01-01 405.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Simple PPM Unsuitable                84 years   206.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Simple PPM Loss                      84 years    11.3   ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Simple PPM Gain                      84 years     1.13  ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Simple PPM Stable                    84 years   404.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Simple PPM Percent loss              84 years     2.72  %         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Simple PPM Percent gain              84 years     0.272 %         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Simple PPM Range change              84 years   -<span style="color: #BB0000;">10.2</span>   ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Simple PPM Percent change            84 years    -<span style="color: #BB0000;">4.68</span>  %         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Simple PPM Sorensen index            84 years     0.987 similarity</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Simple PPM Centroid distance         84 years    14.1   km        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Simple PPM Centroid change direction 84 years    41.0   deg</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Simple PPM Current range             2016-01-01 411.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Simple PPM Future range              2100-01-01 397.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Simple PPM Unsuitable                84 years   209.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Simple PPM Loss                      84 years    15.4   ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Simple PPM Gain                      84 years     1.59  ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Simple PPM Stable                    84 years   396.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Simple PPM Percent loss              84 years     3.75  %         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Simple PPM Percent gain              84 years     0.386 %         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Simple PPM Range change              84 years   -<span style="color: #BB0000;">13.8</span>   ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Simple PPM Percent change            84 years    -<span style="color: #BB0000;">6.16</span>  %         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Simple PPM Sorensen index            84 years     0.982 similarity</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Simple PPM Centroid distance         84 years    19.1   km        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Simple PPM Centroid change direction 84 years    37.6   deg</span></span></code></pre></div>
 <p>Another option for constraining prediction is also by imposing a
 zonal limit (for instance climatically defined) on the projections (see
 alternatively <code><a href="../reference/add_constraint_boundary.html">add_constraint_boundary()</a></code> above). This has to
