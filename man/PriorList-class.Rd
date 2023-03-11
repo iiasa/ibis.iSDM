@@ -4,13 +4,16 @@
 \alias{PriorList-class}
 \alias{PriorList}
 \title{List of Priors supplied to an class}
+\value{
+A PriorList object.
+}
 \description{
 This class represents a collection of \code{\linkS4class{Prior}} objects.
 It provides methods for accessing, adding and removing priors from the list
 }
 \examples{
-{
- priors(
+\dontrun{
+priors(
     INLAPrior('var1','normal',c(0,0.1)),
     INLAPrior('var2','normal',c(0,0.1))
    )

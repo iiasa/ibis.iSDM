@@ -106,8 +106,6 @@ methods::setMethod(
 
   }
 )
-#' @include utils.R bdproto.R bdproto-priorlist.R bdproto-prior.R
-NULL
 
 #' Creates a new PriorList object
 #'

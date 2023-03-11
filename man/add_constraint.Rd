@@ -20,7 +20,7 @@ give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 should be performed.}
 
-\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
 
 \item{layer}{A \code{\link{Raster}} object that can be used for boundary constraints (Default: \code{NULL}).}
 
@@ -46,8 +46,8 @@ Currently supported are the following options:
 \itemize{
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
-\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{\link{kissmig}} package. Applied at each modelling time step.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{\link{MigClim}} package.
 }
 
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
@@ -94,7 +94,7 @@ constrain a projection within a certain area (e.g. a species range or an island)
 }
 }
 \seealso{
-\code{\link{add_constraint_dispersal}}, \code{\link{add_constraint_connectivity}}, \code{\link{add_constraint_adaptability}},\code{\link{add_constraint_boundary}}
+\code{\link{add_constraint_dispersal}}, \code{\link{add_constraint_connectivity}}, \code{\link{add_constraint_adaptability}}, \code{\link{add_constraint_boundary}}
 
 Other constraint: 
 \code{\link{add_constraint_adaptability}()},

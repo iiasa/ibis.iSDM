@@ -28,7 +28,6 @@ NULL
 #' @param variable A [`character`] matched against existing predictors.
 #' @param hyper A [`numeric`] estimate of the mean regression coefficients.
 #' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).
-#' @param ... Variables passed on to prior object.
 #' @references
 #' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster, Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection" Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
 #' @seealso [`Prior-class`]

@@ -14,7 +14,7 @@ NULL
 #'  and a precision of \code{0.001}.
 #'
 #' * \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
-#' so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
+#' so as that the coefficient is in a specified interval \code{"c(lower,upper)"}. Specified through hyper these values can be
 #' negative, positive or infinite.
 #'
 #' * \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of

@@ -15,14 +15,14 @@ NULL
 #' give the number of iteration steps (or within year migration steps).
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 #' should be performed.
-#' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
+#' @param type A [`character`] indicating the type used in the method. See for instance [`kissmig::kissmig`].
 #' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
 #' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonised,
 #' i.e., the species gets locally extinct (Default: \code{0.1}).
 #' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
 #' @param ... passed on parameters. See also the specific methods for adding constraints.
 #'
-#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`],[`add_constraint_boundary`]
+#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`], [`add_constraint_boundary`]
 #' @details
 #' Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
 #' target feature. This function acts as a wrapper to add these constraints.
@@ -30,8 +30,8 @@ NULL
 #' **Dispersal**:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
-#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
+#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [`kissmig`] package. Applied at each modelling time step.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [`MigClim`] package.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -122,7 +122,7 @@ methods::setMethod(
 # ------------------------ #
 #### Dispersal constraints ####
 
-#' @title Adds a dispersal constrain to a scenario object
+#' @title Adds a dispersal constrain to a scenario object.
 #' @name add_constraint_dispersal
 #' @aliases add_constraint_dispersal
 #' @inheritParams add_constraint
@@ -224,10 +224,10 @@ methods::setMethod(
 )
 
 #' Short-distance fixed dispersal function
-#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year
-#' @param new_suit A new [`RasterLayer`] object
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit 'meters'.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL)
+#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
+#' @param new_suit A new [`RasterLayer`] object.
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
@@ -261,10 +261,10 @@ methods::setMethod(
 
 #' Short-distance negative exponential kernel dispersal function
 #' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year
-#' @param new_suit A new [`RasterLayer`] object
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit 'meters'.
-#' @param normalize Should a normalising constant be used for the exponential dispersal parameter. (Default: FALSE)
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL)
+#' @param new_suit A new [`RasterLayer`] object.
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
+#' @param normalize Should a normalising constant be used for the exponential dispersal parameter (Default: \code{FALSE}).
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
@@ -306,7 +306,7 @@ methods::setMethod(
 #' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
 #' @param new_suit A new [`RasterLayer`] object.
 #' @param params A [vector] or [list] with passed on parameter values.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL).
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
@@ -354,7 +354,8 @@ methods::setMethod(
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
+#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in
+#' connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario
 #' @exportMethod add_constraint_connectivity

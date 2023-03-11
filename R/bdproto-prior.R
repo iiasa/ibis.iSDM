@@ -11,6 +11,7 @@ NULL
 #' inherited by any specific prior.
 #'
 #' @name Prior-class
+#' @return Defines a Prior object
 #' @aliases Prior
 #' @family bdproto
 #' @keywords bdproto

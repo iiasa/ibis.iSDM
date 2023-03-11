@@ -28,7 +28,7 @@ are a mean and a precision estimate provided to \code{"hyper"}. Note that precis
 (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of \code{0}
 and a precision of \code{0.001}.
 \item \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
-so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
+so as that the coefficient is in a specified interval \code{"c(lower,upper)"}. Specified through hyper these values can be
 negative, positive or infinite.
 \item \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
 penalized complexity priors which can be added to a SPDE spatial random effect added via \code{\link[=add_latent_spatial]{add_latent_spatial()}}.

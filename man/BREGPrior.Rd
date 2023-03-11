@@ -14,8 +14,6 @@ BREGPrior(variable, hyper = NULL, ip = NULL)
 \item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients.}
 
 \item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).}
-
-\item{...}{Variables passed on to prior object.}
 }
 \description{
 Function to include prior information via Zellner-style spike and slab prior for
