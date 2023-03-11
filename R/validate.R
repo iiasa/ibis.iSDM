@@ -124,6 +124,7 @@ methods::setMethod(
       point <- subset(point, select = c(point_column, "name", "type", attr(point, "sf_column") ))
     } else {
       # TODO: Think about how to do validation with non-point data
+      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
       point <- do.call(sf:::rbind.sf,
                         lapply(mod$model$biodiversity, function(y){
@@ -135,7 +136,6 @@ methods::setMethod(
       if(is.factor(point[[point_column]])){
         point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
       }
-      # Add ID
     }
     assertthat::assert_that(nrow(point)>0,
                             hasName(point, point_column))
@@ -382,17 +382,41 @@ methods::setMethod(
     out$value[out$metric=='n'] <- nrow(df2) # Number of records
     out$value[out$metric=='rmse'] <- RMSE(pred = df2$pred, obs = df2[[point_column]]) # RMSE
     out$value[out$metric=='mae'] <- MAE(pred = df2$pred, obs = df2[[point_column]]) # Mean absolute error
-    out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
     out$value[out$metric=='normgini'] <- NormalizedGini(y_pred = df2$pred, y_true = df2[[point_column]])
+
+    if(!is.null(mod)){
+      if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
+        LogLoss <- function(y_pred, y_true) {
+          LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
+          return(LogLoss)
+        }
+        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      } else {
+        out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      }
+    } else {
+      # Assume Poisson distributed values, calculate log-loss
+      out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+    }
+
+
     # Boyce index. Wrap in try since is known to crash
     try({
-      # Run boyce a few times as average sample ?
-      # obs <- df2[df2[[point_column]]>0,]
-      # abs <- df2[sample(which(df2[[point_column]]==0), size = nrow(obs)), ]
-      # test <- rbind(obs, abs)
-      boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, nclass = 0, PEplot = FALSE)
-    },silent = TRUE)
-    if(exists('boi')) out$value[out$metric=='cont.boyce'] <- boi$Spearman.cor
+      if("modEvA" %in% installed.packages()[,1]){
+        check_package("modEvA")
+        suppressWarnings(
+          boi <- modEvA::Boyce(obs = df2[[point_column]], pred = df2$pred, plot = FALSE)
+        )
+      } else {
+        # Run boyce a few times as average sample ?
+        # obs <- df2[df2[[point_column]]>0,]
+        # abs <- df2[sample(which(df2[[point_column]]==0), size = nrow(obs)), ]
+        # test <- rbind(obs, abs)
+        boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, nclass = 0, PEplot = FALSE)
+        boi$Boyce <- boi$Spearman.cor
+      }
+    }, silent = TRUE)
+    if(exists('boi')) out$value[out$metric=='cont.boyce'] <- boi$Boyce
 
   } else {
     # discrete evaluation
@@ -442,6 +466,7 @@ methods::setMethod(
     out$value[out$metric=='kappa'] <- (OA - Expected_accuracy) / (1 - Expected_accuracy)
 
     if("modEvA" %in% installed.packages()[,1]){
+      check_package("modEvA")
       # Calculate AUC
       out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
     }
@@ -453,12 +478,19 @@ methods::setMethod(
     if(!is.null(mod)){
       if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
         LogLoss <- function(y_pred, y_true) {
-          eps <- 1e-15
-          y_pred <- pmax(pmin(y_pred, 1 - eps), eps)
           LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
           return(LogLoss)
         }
-        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred_tr, y_true = df2[[point_column]])
+        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      } else {
+        # Function for log loss/cross-entropy loss.
+        Poisson_LogLoss <- function(y_pred, y_true) {
+          eps <- 1e-15
+          y_pred <- pmax(y_pred, eps)
+          Poisson_LogLoss <- mean(log(gamma(y_true + 1)) + y_pred - log(y_pred) * y_true)
+          return(Poisson_LogLoss)
+        }
+        out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred_tr, y_true = df2[[point_column]])
       }
     }
   } # End of discrete clause

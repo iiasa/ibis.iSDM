@@ -20,6 +20,9 @@ this parameter to \code{FALSE} replaces the current offsets with the new one (De
 calculate the probability that a cell has been sampled while accounting for area differences.
 (Default: \code{NULL}).}
 }
+\value{
+Adds a bias offset to a \code{\link{distribution}} object.
+}
 \description{
 Including offsets is another option to integrate spatial prior information
 in linear and additive regression models. Offsets shift the intercept of

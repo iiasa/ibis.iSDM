@@ -1,11 +1,11 @@
 Package: ibis.iSDM
 Type: Package
-Title: Modelling framework for Integrated Biodiversity distribution scenarios
+Title: Modelling Framework for Integrated Biodiversity Distribution Scenarios
 Version: 0.0.1
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            email = "jung@iiasa.ac.at",
            comment = c(ORCID = "0000-0002-7569-1390")),
       person(given = "Maximilian H.K.",
@@ -57,7 +57,8 @@ Suggests:
     rstantools (>= 2.1.1),
     BoomSpikeSlab (>= 1.2.4),
     rmarkdown,
-    knitr
+    knitr,
+    covr
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3

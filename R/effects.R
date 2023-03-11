@@ -26,4 +26,4 @@ NULL
 #' @method effects DistributionModel
 #' @keywords partial
 #' @export
-effects.DistributionModel <- function(x, ...) x$effects()
+effects.DistributionModel <- function(x, ...) x$effects(...)

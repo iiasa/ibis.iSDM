@@ -35,6 +35,7 @@ NULL
 #' @seealso
 #' See other functions for adding biodiversity data, e.g. [add_biodiversity]
 #' @family add_biodiversity
+#' @returns Adds biodiversity data to [distribution] object.
 #' @keywords biodiversity
 #' @examples
 #' \dontrun{
@@ -166,6 +167,7 @@ methods::setMethod(
 #' @references
 #' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+#' @returns Adds biodiversity data to [distribution] object.
 #' @examples
 #' \dontrun{
 #' # Define model
@@ -294,6 +296,7 @@ methods::setMethod(
 #' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
 #' @keywords biodiversity
+#' @returns Adds biodiversity data to [distribution] object.
 #'
 #' @examples
 #' \dontrun{
@@ -468,6 +471,7 @@ methods::setMethod(
 #' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
 #' @keywords biodiversity
+#' @returns Adds biodiversity data to [distribution] object.
 #'
 #' @examples
 #' \dontrun{

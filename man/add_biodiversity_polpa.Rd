@@ -63,6 +63,9 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 
 \item{...}{Other parameters passed down.}
 }
+\value{
+Adds biodiversity data to \link{distribution} object.
+}
 \description{
 This function can be used to add a \code{\link{sf}} polygon dataset to an existing
 distribution object. Presence-absence polygon data assumes that each area within the polygon

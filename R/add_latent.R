@@ -39,7 +39,7 @@ NULL
 #' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
 #' for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
-#'
+#' @returns Adds latent spatial effect to a [`distribution`] object.
 #' @references
 #' * Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
@@ -99,6 +99,11 @@ methods::setMethod(
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @seealso add_latent_spatial
+#' @returns Removes a latent spatial effect from a [`distribution`] object.
+#' @examples
+#' \dontrun{
+#'  rm_latent(model) -> model
+#' }
 #' @keywords latent, internal
 #' @name rm_latent
 NULL

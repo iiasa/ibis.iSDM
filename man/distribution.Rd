@@ -88,7 +88,7 @@ There are other functions as well but those are better accessed through their re
 }
 \references{
 \itemize{
-\item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. \url{https://doi.org/10.1002/ecy.2710}
+\item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
 \item Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
 }
 }

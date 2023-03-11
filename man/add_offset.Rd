@@ -18,6 +18,9 @@ this parameter to \code{FALSE} replaces the current offsets with the new one (De
 
 \item{...}{Other parameters or arguments (currently not supported)}
 }
+\value{
+Adds an offset to a \code{\link{distribution}} object.
+}
 \description{
 Including offsets is another option to integrate spatial prior information
 in linear and additive regression models. Offsets shift the intercept of

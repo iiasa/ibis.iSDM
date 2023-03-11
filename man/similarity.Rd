@@ -61,8 +61,8 @@ plot(
 }
 \references{
 \itemize{
-\item Elith, J., Kearney, M., and Phillips, S. (2010) \href{https://doi.org/10.1111/j.2041-210X.2010.00036.x}{The art of modelling range-shifting species}. \emph{Methods in Ecology and Evolution}, 1: 330-342
-\item Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) \href{https://doi.org/10.1111/ddi.12209}{Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models}. \emph{Diversity and Distributions}, 20: 1147-1159. doi:10.1111/ddi.12209
+\item Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting species" https://doi.org/10.1111/j.2041-210X.2010.00036.x \emph{Methods in Ecology and Evolution}, 1: 330-342
+\item Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models" https://doi.org/10.1111/ddi.12209 \emph{Diversity and Distributions}, 20: 1147-1159.
 }
 }
 \seealso{

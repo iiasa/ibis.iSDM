@@ -54,10 +54,19 @@ NULL
 #' the provide layer. Similar as specifying projection limits (see [`distribution`]), but can be used to specifically
 #' constrain a projection within a certain area (e.g. a species range or an island).
 #'
+#' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #' @references
 #' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' * Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+#' @examples
+#' \dontrun{
+#' # Assumes that a trained 'model' object exists
+#'  mod <- scenario(model) |>
+#'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+#'   add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+#'   project()
+#' }
 #' @name add_constraint
 #' @family constraint
 #' @aliases add_constraint

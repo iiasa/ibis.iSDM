@@ -10,7 +10,7 @@ NULL
 #' @param filename A [`character`] object.
 #' The destination must be writeable and filename ends with \code{'txt'}.
 #' @aliases add_log
-#'
+#' @returns Adds a log file to a [`distribution`] object.
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) %>%

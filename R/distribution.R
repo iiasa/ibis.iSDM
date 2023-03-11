@@ -65,7 +65,7 @@ NULL
 #' @seealso [`bdproto`] on the general definition of [`proto`] objects and in particular [`bdproto-biodiversitydistribution`].
 #'
 #' @references
-#' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. [https://doi.org/10.1002/ecy.2710](https://doi.org/10.1002/ecy.2710)
+#' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
 #' * Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
 #' @aliases distribution
 #' @exportMethod distribution

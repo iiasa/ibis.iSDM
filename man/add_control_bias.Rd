@@ -25,6 +25,9 @@ this parameter to \code{FALSE} replaces the current offsets with the new one (De
 
 \item{...}{Other parameters or arguments (currently not supported)}
 }
+\value{
+Adds bias control option to a \code{\link{distribution}} object.
+}
 \description{
 Sampling and other biases are pervasive drivers of the spatial location of
 biodiversity datasets. While the integration of other, presumably less biased

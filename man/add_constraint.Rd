@@ -29,6 +29,9 @@ i.e., the species gets locally extinct (Default: \code{0.1}).}
 
 \item{pcor}{\code{\link{numeric}} probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).}
 }
+\value{
+Adds constraints data to a \code{\link{BiodiversityScenario}} object.
+}
 \description{
 This function adds a constrain to a \code{\linkS4class{BiodiversityScenario}} object to
 constrain (future) projections. These constrains can for instance be constraints on a possible
@@ -72,6 +75,15 @@ can be particular useful to limit the influence of increasing marginal responses
 \item \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
 the provide layer. Similar as specifying projection limits (see \code{\link{distribution}}), but can be used to specifically
 constrain a projection within a certain area (e.g. a species range or an island).
+}
+}
+\examples{
+\dontrun{
+# Assumes that a trained 'model' object exists
+ mod <- scenario(model) |>
+  add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+  add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+  project()
 }
 }
 \references{

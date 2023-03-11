@@ -14,8 +14,16 @@ rm_offset(x, layer = NULL)
 \item{layer}{A \code{character} pointing to the specific layer to be removed. If set to \code{NULL}, then
 all offsets are removed from the object.}
 }
+\value{
+Removes an offset from a \code{\link{distribution}} object.
+}
 \description{
 This is just a wrapper function for removing specified offsets from a \code{\linkS4class{BiodiversityDistribution}}) object.
+}
+\examples{
+\dontrun{
+ rm_offset(model) -> model
+}
 }
 \seealso{
 Other offset: 
