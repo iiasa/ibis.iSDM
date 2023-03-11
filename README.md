@@ -3,7 +3,8 @@
 
 # The ibis framework - An **I**ntegrated model for **B**iod**I**versity distribution projection**S**
 
-<!-- <img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180"> -->
+<img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180">
+
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
 

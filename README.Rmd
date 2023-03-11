@@ -9,14 +9,13 @@ output:
 ```{r, echo = FALSE, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "vignettes/figures"
+  comment = "#>"
 )
 ```
 
 # The ibis framework - An **I**ntegrated model for **B**iod**I**versity distribution projection**S**
 
-<!-- <img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180"> -->
+<img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180">
 
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
