@@ -25,7 +25,7 @@ A \code{\link{Raster}} object with the same number of layers as the input.
 }
 \description{
 This method allows the homogenization of missing data across a set of environmental predictors.
-It is by default called when predictors are added to \link[=B4BiodiversityDistributionB4]{´BiodiversityDistribution´} object. Only grid cells with NAs that contain
+It is by default called when predictors are added to \link{´BiodiversityDistribution´} object. Only grid cells with NAs that contain
 values at some raster layers are homogenized.
 Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
 }
