@@ -135,4 +135,3 @@ Roxygen: list(markdown = TRUE)
 Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
-LazyData: true
