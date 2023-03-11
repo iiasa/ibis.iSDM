@@ -6,7 +6,7 @@ are a mean and a precision estimate provided to &quot;hyper&quot;. Note that pre
 (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of 0
 and a precision of 0.001.
 &quot;clinear&quot;: Prior that places a constraint on the linear coefficients of a model
-so as that the coefficient is in a specified interval [lower,upper]. Specified through hyper these values can be
+so as that the coefficient is in a specified interval &quot;c(lower,upper)&quot;. Specified through hyper these values can be
 negative, positive or infinite.
 &quot;spde&quot;, specifically 'prior.range' and 'prior.sigma': Specification of
 penalized complexity priors which can be added to a SPDE spatial random effect added via add_latent_spatial().
@@ -22,7 +22,7 @@ are a mean and a precision estimate provided to &quot;hyper&quot;. Note that pre
 (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of 0
 and a precision of 0.001.
 &quot;clinear&quot;: Prior that places a constraint on the linear coefficients of a model
-so as that the coefficient is in a specified interval [lower,upper]. Specified through hyper these values can be
+so as that the coefficient is in a specified interval &quot;c(lower,upper)&quot;. Specified through hyper these values can be
 negative, positive or infinite.
 &quot;spde&quot;, specifically 'prior.range' and 'prior.sigma': Specification of
 penalized complexity priors which can be added to a SPDE spatial random effect added via add_latent_spatial().
@@ -42,7 +42,7 @@ been tested!"><meta name="twitter:card" content="summary"><meta name="twitter:cr
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,7 +100,7 @@ are a mean and a precision estimate provided to <code>"hyper"</code>. Note that 
 (rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of <code>0</code>
 and a precision of <code>0.001</code>.</p></li>
 <li><p><code>"clinear"</code>: Prior that places a constraint on the linear coefficients of a model
-so as that the coefficient is in a specified interval <code>[lower,upper]</code>. Specified through hyper these values can be
+so as that the coefficient is in a specified interval <code>"c(lower,upper)"</code>. Specified through hyper these values can be
 negative, positive or infinite.</p></li>
 <li><p><code>"spde"</code>, specifically <code>'prior.range'</code> and <code>'prior.sigma'</code>: Specification of
 penalized complexity priors which can be added to a SPDE spatial random effect added via <code><a href="add_latent_spatial.html">add_latent_spatial()</a></code>.

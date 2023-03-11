@@ -35,7 +35,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -198,7 +198,7 @@ bias.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="co"># First we define a distribution object using the background layer</span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:21 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:57 | Creating distribution object...</span></span></span>
 <span></span>
 <span><span class="co"># Then lets add species data to it. </span></span>
 <span><span class="co"># This data needs to be in sf format and key information is that</span></span>
@@ -207,7 +207,7 @@ bias.</p>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">virtual_species</span>,</span>
 <span>                                      name <span class="op">=</span> <span class="st">"Virtual test species"</span>,</span>
 <span>                                      field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:21 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:57 | Adding poipo dataset...</span></span></span>
 <span></span>
 <span><span class="co"># Then lets add predictor information</span></span>
 <span><span class="co"># Here we are interested in basic transformations (scaling), but derivates (like quadratic)</span></span>
@@ -215,8 +215,8 @@ bias.</p>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">mod</span>, </span>
 <span>                      env <span class="op">=</span> <span class="va">predictors</span>,</span>
 <span>                      transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:21 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:21 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:57 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:57 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Finally define the engine for the model</span></span>
 <span><span class="co"># This uses the default data currently backed in the model,</span></span>
@@ -256,10 +256,10 @@ is being used.</p>
 <span>                              field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:22 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:22 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:23 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:23 | Transforming predictors...</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:58 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:58 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:58 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:07:58 | Transforming predictors...</span></span></span></code></pre></div>
 <p>Also very helpful to know is that this object contains a number of
 helper functions that allow easy summary or visualization of the
 contained data. For example, it is possible to plot and obtain any of
@@ -313,12 +313,12 @@ data types.</p>
 <span>             runname <span class="op">=</span>  <span class="st">"Test INLA run"</span>,</span>
 <span>             verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># Don't be chatty</span></span>
 <span>             <span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:23 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:23 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:24 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:25 | Starting fitting.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:30 | Starting prediction.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 11:24:43 | Completed after 20.09 secs</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:07:59 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:07:59 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:00 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:00 | Starting fitting.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:04 | Starting prediction.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 14:08:16 | Completed after 17.3 secs</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="summarizing-and-plotting-the-fitted-distribution-object">Summarizing and plotting the fitted distribution object<a class="anchor" aria-label="anchor" href="#summarizing-and-plotting-the-fitted-distribution-object"></a>
@@ -428,57 +428,57 @@ gathered data.</p>
 <code class="sourceCode R"><span><span class="co"># By Default validation statistics are continuous and evaluate the predicted estimates against the number of records per grid cell.</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">[Validation] 2023-03-11 11:24:50 | Validating model with non-independent training data. Results can be misleading!</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2023-03-11 11:24:50 | Calculating validation statistics</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">[Validation] 2023-03-11 14:08:23 | Validating model with non-independent training data. Results can be misleading!</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2023-03-11 14:08:23 | Calculating validation statistics</span></span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 1 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species continuous</span></span>
 <span><span class="co">#&gt;       metric        value</span></span>
 <span><span class="co">#&gt; 1          n 174.00000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.87166827</span></span>
-<span><span class="co">#&gt; 3        mae   0.66391810</span></span>
-<span><span class="co">#&gt; 4    logloss   1.71422831</span></span>
-<span><span class="co">#&gt; 5   normgini  -0.09925807</span></span>
-<span><span class="co">#&gt; 6 cont.boyce   0.26650024</span></span>
+<span><span class="co">#&gt; 2       rmse   0.86973168</span></span>
+<span><span class="co">#&gt; 3        mae   0.66128548</span></span>
+<span><span class="co">#&gt; 4    logloss   1.70896248</span></span>
+<span><span class="co">#&gt; 5   normgini  -0.09885703</span></span>
+<span><span class="co">#&gt; 6 cont.boyce   0.28230938</span></span>
 <span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">[Validation] 2023-03-11 11:24:51 | Validating model with non-independent training data. Results can be misleading!</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2023-03-11 11:24:51 | Calculating validation statistics</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">[Validation] 2023-03-11 11:24:51 | No absence data found for threshold. Generating random points.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">[Validation] 2023-03-11 14:08:23 | Validating model with non-independent training data. Results can be misleading!</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Validation] 2023-03-11 14:08:23 | Calculating validation statistics</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">[Validation] 2023-03-11 14:08:23 | No absence data found for threshold. Generating random points.</span></span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 5df89a08-f413-458a-bbe6-96384c666a06 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 9ee45e26-de30-4749-92b3-85090a0eb4d1 Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
 <span><span class="co">#&gt; 1                    n 522.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6824713</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7432950</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.3936652</span></span>
-<span><span class="co">#&gt; 5            precision   0.6492537</span></span>
+<span><span class="co">#&gt; 2                  auc   0.6709770</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7279693</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.3799127</span></span>
+<span><span class="co">#&gt; 5            precision   0.6126761</span></span>
 <span><span class="co">#&gt; 6          sensitivity   0.5000000</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8649425</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3649425</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5649351</span></span>
-<span><span class="co">#&gt; 10             logloss   6.0131677</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5810983</span></span>
-<span><span class="co">#&gt; 12               kappa   0.3871951</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2567050</span></span></code></pre></div>
+<span><span class="co">#&gt; 7          specificity   0.8419540</span></span>
+<span><span class="co">#&gt; 8                  tss   0.3419540</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5506329</span></span>
+<span><span class="co">#&gt; 10             logloss   6.0284934</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5759898</span></span>
+<span><span class="co">#&gt; 12               kappa   0.3584337</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2720307</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can
@@ -531,30 +531,30 @@ process).</p>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">8000</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:52 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:52 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:52 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:24:52 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:24 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:24 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:24 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:24 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
 <span><span class="va">mod_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Normal PPM projection'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:52 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:52 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:52 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:24:52 | Starting fitting: Virtual points</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:10 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 11:25:10 | Completed after 17.49 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:24 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:24 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:24 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:24 | Starting fitting: Virtual points</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:39 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 14:08:39 | Completed after 15.37 secs</span></span></span>
 <span><span class="co"># And with an added constrain</span></span>
 <span><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
 <span><span class="va">mod_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_latent_spatial.html">add_latent_spatial</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nnd"</span><span class="op">)</span>,</span>
 <span>                  runname <span class="op">=</span> <span class="st">'PPM with NND constrain'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:25:10 | Adding latent spatial terms...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:10 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:12 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:12 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:12 | Starting fitting: Virtual points</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:30 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 11:25:30 | Completed after 20.29 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:39 | Adding latent spatial terms...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:39 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:42 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:42 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:42 | Starting fitting: Virtual points</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:08:57 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 14:08:57 | Completed after 17.76 secs</span></span></span>
 <span></span>
 <span><span class="co"># Compare both</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">background</span>, main <span class="op">=</span> <span class="st">"Biodiversity data"</span><span class="op">)</span>; <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -585,19 +585,19 @@ effectively also limits the prediction background / output!</strong></p>
 <span>  <span class="co"># Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors</span></span>
 <span>  <span class="fu"><a href="../reference/rm_predictors.html">rm_predictors</a></span><span class="op">(</span><span class="st">"koeppen_50km"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">3000</span>, learning_rate <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:25:31 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:25:32 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:25:32 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 11:25:32 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:58 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:08:59 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:09:00 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-03-11 14:09:00 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Spatially limited prediction</span></span>
 <span><span class="va">mod_limited</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Limited prediction background'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:33 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:33 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:33 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:33 | Starting fitting: Virtual points</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 11:25:37 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 11:25:37 | Completed after 4.42 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:09:00 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:09:00 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:09:00 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:09:00 | Starting fitting: Virtual points</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-03-11 14:09:03 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-03-11 14:09:03 | Completed after 3.58 secs</span></span></span>
 <span></span>
 <span><span class="co"># Compare the output</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_limited</span><span class="op">)</span></span></code></pre></div>
