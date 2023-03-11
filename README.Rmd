@@ -33,8 +33,8 @@ The **ibis.iSDM** package provides a series of convenience functions to fit inte
 The latest version can be installed from GitHub. A CRAN release is planned.
 
 ```{r gh-installation, eval = FALSE, message=FALSE}
-# For CRAN installation
-install.packages("ibis.iSDM")
+# For CRAN installation (Not yet done)
+# install.packages("ibis.iSDM")
 
 # For Installation directly from github
 install.packages("remotes")
