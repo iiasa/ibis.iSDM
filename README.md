@@ -32,8 +32,8 @@ The latest version can be installed from GitHub. A CRAN release is
 planned.
 
 ``` r
-# For CRAN installation
-install.packages("ibis.iSDM")
+# For CRAN installation (Not yet done)
+# install.packages("ibis.iSDM")
 
 # For Installation directly from github
 install.packages("remotes")
