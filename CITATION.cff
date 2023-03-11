@@ -7,7 +7,7 @@ cff-version: 1.2.0
 message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
-title: 'ibis.iSDM: Modelling framework for Integrated Biodiversity distribution scenarios'
+title: 'ibis.iSDM: Modelling Framework for Integrated Biodiversity Distribution Scenarios'
 version: 0.0.1
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
@@ -352,7 +352,8 @@ references:
   authors:
   - family-names: Müller
     given-names: Kirill
-    email: krlmlr+r@mailbox.org
+    email: kirill@cynkra.com
+    orcid: https://orcid.org/0000-0002-1416-3412
   - family-names: Wickham
     given-names: Hadley
     email: hadley@rstudio.com
@@ -656,4 +657,15 @@ references:
     given-names: Yihui
     email: xie@yihui.name
     orcid: https://orcid.org/0000-0003-0645-5666
+  year: '2023'
+- type: software
+  title: covr
+  abstract: 'covr: Test Coverage for Packages'
+  notes: Suggests
+  url: https://covr.r-lib.org
+  repository: https://CRAN.R-project.org/package=covr
+  authors:
+  - family-names: Hester
+    given-names: Jim
+    email: james.f.hester@gmail.com
   year: '2023'
