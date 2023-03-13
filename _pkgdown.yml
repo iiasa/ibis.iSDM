@@ -116,21 +116,14 @@ reference:
       These functions are used by engines or spatial processing in the package. Most
       of them are for internal use, but can be of use if input needs to be reformatted.
     contents:
-      - is_comparable_raster
-      - explode_factorized_raster
       - find_correlated_predictors
       - posterior_predict_stanfit
-      - intersecting_extents
-      - point_in_polygon
-      - bbox2wkt
-      - extent_expand
       - alignRasters
       - emptyraster
       - get_ngbvalue
       - get_rastervalue
       - predictor_transform
       - predictor_derivate
-      - clean_rasterfile
       - run_stan
       - wrap_stanmodel
       - starts_with("stancode")

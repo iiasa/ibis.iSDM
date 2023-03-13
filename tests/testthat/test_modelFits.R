@@ -2,6 +2,7 @@
 test_that('Add further tests for model fits', {
 
   skip_if_not_installed('glmnet')
+  skip_if_not_installed('pdp')
   skip_on_travis()
   skip_on_cran()
 
