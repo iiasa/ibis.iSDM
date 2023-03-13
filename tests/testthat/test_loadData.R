@@ -37,6 +37,7 @@ test_that('Check that test scenarios can be loaded.',{
   expect_vector(ll)
   expect_length(ll,9)
   expect_true(all( assertthat::has_extension(ll,'nc') ))
+  expect_true(all( file.exists(ll) ))
 
   # Load stars files
   suppressWarnings( sc <- stars::read_stars(ll) )

@@ -52,6 +52,7 @@ jobs:
             brew install proj
             brew install geos
             brew install gdal
+            brew install netcdf
           else
             echo "Nothing to do"
           fi
