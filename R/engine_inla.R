@@ -850,7 +850,7 @@ engine_inla <- function(x,
               },
               # Partial response
               # FIXME: Create external function
-              partial = function(self, x, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE){
+              partial = function(self, x, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "response"){
                 # Goal is to create a sequence of value and constant and append to existing stack
                 # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
                 # model.matrix(~ vars, data = newDummydata) fed to make.lincomb

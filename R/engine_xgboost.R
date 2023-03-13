@@ -628,7 +628,7 @@ engine_xgboost <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = TRUE){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = TRUE, type = "response"){
             assertthat::assert_that(is.character(x.var) || is.null(x.var))
             if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")

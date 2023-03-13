@@ -529,13 +529,15 @@ engine_gdb <- function(x,
             return(temp)
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL){
             # Assert that variable(s) are in fitted model
             assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost'),
                                      is.numeric(variable_length) )
             # Unlike the effects function, build specific predictor for target variable(s) only
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
             assertthat::assert_that( all( x.var %in% variables), msg = 'x.var variable not found in model!' )
+
+            if(is.null(type)) type <- self$get_data('params')$type
 
             # Special treatment for factors
             if(any(model$predictors_types$type=="factor")){
@@ -590,7 +592,7 @@ engine_gdb <- function(x,
             # Now predict with model
             pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
                                          which = x.var,
-                                         type = self$get_data('params')$type, aggregate = 'sum')
+                                         type = type, aggregate = 'sum')
             # Combine with
             out <- data.frame(partial_effect = dummy[[x.var]],
                               mean = pp[,grep(x.var, colnames(pp))] )
@@ -602,7 +604,7 @@ engine_gdb <- function(x,
             return(out)
           },
           # Spatial partial effect plots
-          spartial = function(self, x.var, constant = NULL, plot = TRUE,...){
+          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = NULL, ...){
             assertthat::assert_that('fit_best' %in% names(self$fits),
                                     is.character(x.var), length(x.var) == 1)
             # Get model and make empty template
