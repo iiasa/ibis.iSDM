@@ -106,11 +106,15 @@ are therefore advised to cite if they make heavy use of BART.</p>
 
 
 <dt>chains</dt>
-<dd><p>A number of the number of chains to be used (Default: <code>4</code>)</p></dd>
+<dd><p>A number of the number of chains to be used (Default: <code>4</code>).</p></dd>
 
 
 <dt>type</dt>
 <dd><p>The mode used for creating posterior predictions. Either <code>"link"</code> or <code>"response"</code> (Default: <code>"response"</code>).</p></dd>
+
+
+<dt>...</dt>
+<dd><p>Other options.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -138,6 +142,14 @@ are therefore advised to cite if they make heavy use of BART.</p>
 <code><a href="engine_xgboost.html">engine_xgboost</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Add BART as an engine</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_bart</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

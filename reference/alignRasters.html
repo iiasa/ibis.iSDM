@@ -82,23 +82,23 @@ in order to reduce computation time.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p><code>Raster</code> object to be resampled</p></dd>
+<dd><p><code>Raster</code> object to be resampled.</p></dd>
 
 
 <dt>template</dt>
-<dd><p><code>Raster</code> or <code>Spatial</code> object from which geometry can be extracted</p></dd>
+<dd><p><code>Raster</code> or <code>Spatial</code> object from which geometry can be extracted.</p></dd>
 
 
 <dt>method</dt>
-<dd><p>method for resampling (Options: <code>"ngb"</code> or <code>"bilinear"</code>)</p></dd>
+<dd><p>method for resampling (Options: <code>"ngb"</code> or <code>"bilinear"</code>).</p></dd>
 
 
 <dt>func</dt>
-<dd><p>function for resampling (Default: <a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a>)</p></dd>
+<dd><p>function for resampling (Default: <a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a>).</p></dd>
 
 
 <dt>cl</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value if multicore computation should be used (Default: <code>TRUE</code>)</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value if multicore computation should be used (Default: <code>TRUE</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -113,6 +113,14 @@ in order to reduce computation time.</p>
 resampling for continuous data.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="co"># Align one raster to another</span></span></span>
+<span class="r-in"><span> <span class="va">ras1</span> <span class="op">&lt;-</span> <span class="fu">alignRasters</span><span class="op">(</span> <span class="va">ras1</span>, <span class="va">ras2</span>, method <span class="op">=</span> <span class="st">"ngb"</span>, cl <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

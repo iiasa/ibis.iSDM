@@ -79,7 +79,7 @@ a small buffer is applied to try and obtain the remaining values.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>coords</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/sp/man/Spatial-class.html" class="external-link">Spatial</a></code> or <code>sf</code> object.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/sp/man/Spatial-class.html" class="external-link">Spatial</a></code>, <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>, <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code> or <code>sf</code> object.</p></dd>
 
 
 <dt>env</dt>
@@ -96,7 +96,19 @@ a small buffer is applied to try and obtain the remaining values.</p>
 
 <p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> with the extracted covariate data from each provided data point.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>It is essentially a wrapper for <code><a href="https://rdrr.io/pkg/terra/man/extract.html" class="external-link">terra::extract</a></code>.</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Extract values</span></span></span>
+<span class="r-in"><span><span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu">get_rastervalue</span><span class="op">(</span><span class="va">coords</span>, <span class="va">env</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

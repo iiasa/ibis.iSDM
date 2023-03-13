@@ -193,16 +193,10 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/as.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/bbox2wkt.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/bivplot.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/clamp_predictions.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/clean_rasterfile.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/coef.html</loc>
@@ -250,9 +244,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/explode_factorized_raster.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/extent_expand.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/find_correlated_predictors.html</loc>
   </url>
   <url>
@@ -283,13 +274,7 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/intersecting_extents.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/is.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/is_comparable_raster.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/load_model.html</loc>
@@ -311,12 +296,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/plot.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/point_in_polygon.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/polynominal_transform.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/posterior_predict_stanfit.html</loc>
