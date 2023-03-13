@@ -54,7 +54,7 @@ methods::setMethod(
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
       assertthat::assert_that(is.character(point_column),
-                              hasName(point, point_column),
+                              utils::hasName(point, point_column),
                               anyNA(point[[point_column]])==FALSE
                               )
     }
@@ -111,15 +111,15 @@ methods::setMethod(
       assertthat::assert_that(
         unique(sf::st_geometry_type(point)) %in% c('POINT', 'MULTIPOINT'),
         # Check that the point data has presence-absence information
-        hasName(point, point_column),
+        utils::hasName(point, point_column),
         !is.na(sf::st_crs(point)$proj)
       )
       # If sf is different, reproject to prediction
       if(sf::st_crs(point)!= sf::st_crs(prediction)){
         point <- sf::st_transform(point, crs = sf::st_crs(prediction) )
       }
-      if(!hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
-      if(!hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
+      if(!utils::hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
+      if(!utils::hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
       # Ensure comparable columns
       point <- subset(point, select = c(point_column, "name", "type", attr(point, "sf_column") ))
     } else {
@@ -138,7 +138,7 @@ methods::setMethod(
       }
     }
     assertthat::assert_that(nrow(point)>0,
-                            hasName(point, point_column))
+                            utils::hasName(point, point_column))
     # --- #
     # Do the extraction
     df <- as.data.frame(point)
@@ -210,7 +210,7 @@ methods::setMethod(
       method <- 'continuous'
     }
     assertthat::assert_that(nrow(point)>0,
-                            hasName(point, point_column))
+                            utils::hasName(point, point_column))
     point <- subset(point, select = point_column)
 
     # Correct point column in case larger 1
@@ -248,8 +248,8 @@ methods::setMethod(
 
   if(method == 'continuous'){
     # continuous evaluation
-    assertthat::assert_that(hasName(df2, 'pred'),
-                            hasName(df2, point_column)
+    assertthat::assert_that(utils::hasName(df2, 'pred'),
+                            utils::hasName(df2, point_column)
     )
     #### Calculating Boyce index as in Hirzel et al. 2006
     # fit: A vector or Raster-Layer containing the predicted suitability values
@@ -331,7 +331,7 @@ methods::setMethod(
             col = "grey",
             cex = 0.75
           )
-          points(HS[r], f[r], pch = 19, cex = 0.75)
+          graphics::points(HS[r], f[r], pch = 19, cex = 0.75)
 
         }
 
@@ -402,7 +402,7 @@ methods::setMethod(
 
     # Boyce index. Wrap in try since is known to crash
     try({
-      if("modEvA" %in% installed.packages()[,1]){
+      if("modEvA" %in% utils::installed.packages()[,1]){
         check_package("modEvA")
         suppressWarnings(
           boi <- modEvA::Boyce(obs = df2[[point_column]], pred = df2$pred, plot = FALSE)
@@ -420,7 +420,7 @@ methods::setMethod(
 
   } else {
     # discrete evaluation
-    assertthat::assert_that(hasName(df2, 'pred_tr'),
+    assertthat::assert_that(utils::hasName(df2, 'pred_tr'),
                             length(unique(df2[[point_column]])) > 1,
                             msg = "It appears as either the observed data or the threshold does not allow discrete validation.")
     # For discrete functions to work correctly, ensure that all values are 0/1

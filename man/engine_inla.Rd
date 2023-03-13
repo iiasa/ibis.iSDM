@@ -18,6 +18,10 @@ engine_inla(
   barrier = FALSE,
   type = "response",
   area = "gpc2",
+  nonconvex.bdry = FALSE,
+  nonconvex.convex = -0.15,
+  nonconvex.concave = -0.05,
+  nonconvex.res = 40,
   ...
 )
 }
@@ -54,8 +58,6 @@ Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: 
 
 \item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).}
 
-\item{...}{Other variables}
-
 \item{nonconvex.bdry}{Create a non-convex boundary hulls instead (Default: \code{FALSE}) \strong{Not yet implemented}}
 
 \item{nonconvex.convex}{Non-convex minimal extension radius for convex curvature \strong{Not yet implemented}}
@@ -63,6 +65,8 @@ Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: 
 \item{nonconvex.concave}{Non-convex minimal extension radius for concave curvature \strong{Not yet implemented}}
 
 \item{nonconvex.res}{Computation resolution for nonconvex.hulls \strong{Not yet implemented}}
+
+\item{...}{Other options.}
 }
 \description{
 Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
@@ -74,7 +78,7 @@ All \code{INLA} engines require the specification of a mesh that needs to be pro
 \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
 data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
 
-\link{*}  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+\link{*} \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
 Lower bounds affect the density of triangles
 \link{*} \code{"offset"}: The automatic extension distance of the mesh
 If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter

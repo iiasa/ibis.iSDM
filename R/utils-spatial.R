@@ -8,6 +8,7 @@
 #' @keywords internal, utils
 #' @return [`logical`] indicating if the two [`Raster-class`] objects have the same
 #'   resolution, extent, dimensionality, and coordinate system.
+#' @noRd
 is_comparable_raster <- function(x, y) {
   assertthat::assert_that(inherits(x, "Raster"), inherits(y, "Raster")) &&
     sf::st_crs(x@crs) == sf::st_crs(y@crs) &&
@@ -23,6 +24,7 @@ is_comparable_raster <- function(x, y) {
 #' @param y [`Raster-class`], [`Spatial-class`] or [`sf::sf()`] object.
 #' @keywords internal, utils
 #' @return [`logical`].
+#' @noRd
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
     inherits(x, c("Raster", "Spatial", "sf")),
@@ -35,11 +37,12 @@ intersecting_extents <- function(x, y) {
 
 
 #' Extract polygon data from intersecting point data
-#' @param poly A [sf] object
-#' @param points A [`Spatial`] or [sf] object
+#' @param poly A [sf] object.
+#' @param points A [`Spatial`] or [sf] object.
 #' @param coords A [vector] pointing to the coordinate columns. (Default: \code{c("x", "y")})
-#' @keywords utils
+#' @keywords utils, internal
 #' @return An object with the spatial intersection
+#' @noRd
 point_in_polygon <- function(poly, points, coords = c('x','y')){
   assertthat::assert_that(
     inherits(poly,'sf'),
@@ -123,7 +126,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' type [`sf`].  (Default: \code{"limits"}).
 #' @param template An optional [`RasterLayer`] object on which which the zones should be rasterized (Default: \code{NULL}).
 #' @returns A [`sf`] or [`RasterLayer`] object.
-#' @keywords utils
+#' @keywords utils, internal
 #' @noRd
 create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
   assertthat::assert_that(
@@ -204,6 +207,7 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
 #' @return An object of class [`character`], a Well Known Text (WKT) string of the form
 #' 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
 #' @keywords internal, utils
+#' @noRd
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
   assertthat::assert_that(length(bbox)==4) #check for 4 digits
@@ -220,8 +224,9 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #' Expand an extent by a certain number
 #' @param e an [`extent`] object
 #' @param f [`numeric`] value to increase the extent (Default: \code{0.1})
-#' @keywords utils
+#' @keywords utils, internal
 #' @return Returns the unified total [`extent`] object
+#' @noRd
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'Extent'))
   xi <- (e@xmax-e@xmin)*(f/2)
@@ -240,7 +245,7 @@ extent_expand <- function(e,f=0.1){
 #' @param g A [`sf`] object containing some data.
 #' @param name A [`character`] with the new name for the geometry.
 #' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
-#' @keywords internal
+#' @keywords internal, utils
 #' @noRd
 rename_geometry <- function(g, name){
   assertthat::assert_that(
@@ -314,7 +319,7 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #' @param background A template [`Raster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
 #' @returns A [`RasterLayer`] with the density of point observations.
-#' @keywords utils
+#' @keywords utils, intenral
 #' @noRd
 st_kde <- function(points, background, bandwidth = 3){
   assertthat::assert_that(
@@ -357,7 +362,7 @@ st_kde <- function(points, background, bandwidth = 3){
 #' @param poly A \code{POLYGON} or \code{MULTIPOLYGON} [`sf`] object.
 #' @param template A template [`Raster`] object.
 #' @param field_occurrence A [`character`] specifying the occurrence field. Should contain information on the type.
-#' @keywords utils
+#' @keywords utils, internal
 #' @noRd
 polygon_to_points <- function(poly, template, field_occurrence ) {
   assertthat::assert_that(
@@ -385,11 +390,11 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' Calculate the dimensions from a provided extent object
 #'
 #' @description Calculate the dimensions of an extent
-#' (either an extent object orfour-element vector in the right order), either in projected or spherical space
+#' (either an extent object or four-element vector in the right order), either in projected or spherical space
 #' @param ex Either a [`vector`], a [`extent`] or alternatively a [`Raster`],[`Spatial*`] or [`sf`] object
 #' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: TRUE)
 #' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: 'km')
-#' @keywords utils
+#' @keywords utils, internal
 #' @noRd
 extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
   assertthat::assert_that(inherits(ex, 'Extent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'Raster') || inherits(ex, 'Spatial'),
@@ -452,16 +457,22 @@ extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
 #' projection, the data set will be cropped and aggregated prior to resampling
 #' in order to reduce computation time.
 #'
-#' @param data [`Raster-class`] object to be resampled
-#' @param template [`Raster-class`] or [`Spatial-class`] object from which geometry can be extracted
-#' @param method method for resampling (Options: \code{"ngb"} or \code{"bilinear"})
-#' @param func function for resampling (Default: [mean])
-#' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE})
+#' @param data [`Raster-class`] object to be resampled.
+#' @param template [`Raster-class`] or [`Spatial-class`] object from which geometry can be extracted.
+#' @param method method for resampling (Options: \code{"ngb"} or \code{"bilinear"}).
+#' @param func function for resampling (Default: [mean]).
+#' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE}).
 #' @keywords utils
 #' @details
 #' Nearest Neighbour resampling (ngb) is recommended for discrete and Bilinear
 #' resampling for continuous data.
 #' @return New [`Raster`] object aligned to the supplied template layer
+#' @examples
+#' \dontrun{
+#'  # Align one raster to another
+#'  ras1 <- alignRasters( ras1, ras2, method = "ngb", cl = FALSE)
+#' }
+#' @export
 alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TRUE){
   # Security checks
   assertthat::assert_that(
@@ -469,6 +480,8 @@ alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TR
     is.character(method),
     is.logical(cl)
   )
+  method <- match.arg(method, c("bilinear", "ngb"),several.ok = FALSE)
+
   # Start cluster if necessary
   if(cl) raster::beginCluster(parallel::detectCores()-1)
   if(raster::projection(data) == raster::projection(template)){
@@ -525,7 +538,8 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @param env A [`data.frame`] object with the predictors
 #' @param longlat A [`logical`] variable indicating whether the projection is long-lat
 #' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})
-#' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help
+#' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help.
+#' @param ... other options.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist})
 #' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
@@ -625,11 +639,18 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' This function simply extracts the values from a provided [`RasterLayer`],
 #' [`RasterStack`] or [`RasterBrick`] object. For points where or NA values were extracted
 #' a small buffer is applied to try and obtain the remaining values.
-#' @param coords A [`Spatial`] or [`sf`] object.
+#' @details
+#' It is essentially a wrapper for [`terra::extract`].
+#' @param coords A [`Spatial`], [`data.frame`], [`matrix`] or [`sf`] object.
 #' @param env A [`Raster`] object with the provided predictors.
 #' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @keywords utils
+#' @examples
+#' \dontrun{
+#' # Extract values
+#' vals <- get_rastervalue(coords, env)
+#' }
 #' @export
 get_rastervalue <- function(coords, env, rm.na = FALSE){
   assertthat::assert_that(
@@ -680,7 +701,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #'
 #' @description
 #' This function transforms a provided predictor variable with a hinge transformation,
-#' e.g. a new range of values where any values lower than a certain knot are set to 0,
+#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
 #' while the remainder is left at the original values.
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
@@ -895,6 +916,7 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
 #' @param A [`raster`] object.
 #' @param verbose Print progress (Default: \code{FALSE})
 #' @keywords utils
+#' @noRd
 clean_rasterfile <- function(x, verbose = FALSE)
 {
   stopifnot(grepl("Raster", class(x)))
@@ -1022,13 +1044,21 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
 #' and presence-absence occurrence points equally.
 #' @param background A [`RasterLayer`] object with the background of the study region. Use for assessing point density.
-#' @param env A [`Raster`] object with environmental covaraites. Needed when method is set to \code{"environmental"}
+#' @param env A [`Raster`] object with environmental covariates. Needed when method is set to \code{"environmental"}
 #' or \code{"bias"} (Default: \code{NULL}).
 #' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
 #' @param minpoints A [`numeric`] giving the number of data points at minimum to take (Default: \code{10}).
 #' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations (Default: \code{NULL}).
 #' @param zones A [`RasterLayer`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
 #' @param verbose [`logical`] of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).
+#' @examples
+#' \dontrun{
+#'  # Thin a certain number of observations
+#'  # At random
+#'  thin_points <- thin_observations(points, background, method = "random")
+#'  # using a bias layer
+#'  thin_points <- thin_observations(points, background, method = "bias", env = bias)
+#' }
 #' @references
 #' * Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., & Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
 #' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.

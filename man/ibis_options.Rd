@@ -20,4 +20,9 @@ Currently supported are:
 \item \code{'ibis.use_future'} : \code{\link{logical}} on whether the \pkg{future} package should be used for parallel computing.
 }
 }
+\examples{
+\dontrun{
+ ibis_options()
+}
+}
 \keyword{misc}

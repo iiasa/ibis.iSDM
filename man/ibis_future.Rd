@@ -15,8 +15,17 @@ ibis_future(
 \item{strategy}{A \code{\link{character}} denoting the strategy to be used for future. See help of \code{\link{future}} for options.
 (Default: \code{"multisession"}).}
 }
+\value{
+None
+}
 \description{
 Options to set up ibis for parallel processing with future
+}
+\examples{
+\dontrun{
+# Starts future job
+ibis_future(cores = 4)
+}
 }
 \seealso{
 \link{future}

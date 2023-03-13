@@ -43,19 +43,19 @@ NULL
 #' @method summary distribution
 #' @keywords summary
 #' @export
-summary.distribution <- function(x) x$summary()
+summary.distribution <- function(x, ...) x$summary()
 
 #' @rdname summary
 #' @method summary DistributionModel
 #' @keywords summary
 #' @export
-summary.DistributionModel <- function(x) x$summary()
+summary.DistributionModel <- function(x, ...) x$summary()
 
 #' @rdname summary
 #' @method summary PredictorDataset
 #' @keywords summary
 #' @export
-summary.PredictorDataset <- function(x) x$summary()
+summary.PredictorDataset <- function(x, ...) x$summary()
 
 #' @rdname summary
 #' @method summary BiodiversityScenario
@@ -67,13 +67,13 @@ summary.BiodiversityScenario <- function(x, ...) x$summary(...)
 #' @method summary PriorList
 #' @keywords summary
 #' @export
-summary.PriorList <- function(x) x$summary()
+summary.PriorList <- function(x, ...) x$summary()
 
 #' @rdname summary
 #' @method summary Settings
 #' @keywords summary
 #' @export
-summary.Settings <- function(x) x$summary()
+summary.Settings <- function(x, ...) x$summary()
 
 #' Obtains the coefficients of a trained model
 #'
@@ -95,4 +95,4 @@ NULL
 #' @method coef DistributionModel
 #' @keywords coef
 #' @export
-coef.DistributionModel <- function(x) x$get_coefficients()
+coef.DistributionModel <- function(x, ...) x$get_coefficients()

@@ -13,7 +13,7 @@ NULL
 #' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
 #' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
 #'
-#' [*]  \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
 #' Lower bounds affect the density of triangles
 #' [*] \code{"offset"}: The automatic extension distance of the mesh
 #' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
@@ -49,7 +49,7 @@ NULL
 #' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
 #' @param nonconvex.concave Non-convex minimal extension radius for concave curvature **Not yet implemented**
 #' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet implemented**
-#' @param ... Other variables
+#' @param ... Other options.
 #' @references
 #' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
 #' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
@@ -72,10 +72,11 @@ engine_inla <- function(x,
                         barrier = FALSE,
                         type = "response",
                         area = "gpc2",
-                        # nonconvex.bdry = FALSE,
-                        # nonconvex.convex = -0.15,
-                        # nonconvex.concave = -0.05,
-                        # nonconvex.res = 40,
+                        # Not yet implemented.
+                        nonconvex.bdry = FALSE,
+                        nonconvex.convex = -0.15,
+                        nonconvex.concave = -0.05,
+                        nonconvex.res = 40,
                         ...) {
 
   # Check whether INLA package is available

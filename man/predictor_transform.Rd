@@ -24,6 +24,8 @@ predictor_transform(
 \item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).}
 
 \item{method}{As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).}
+
+\item{...}{other options (Non specified).}
 }
 \value{
 Returns a adjusted \code{\link{Raster}} object of identical resolution.

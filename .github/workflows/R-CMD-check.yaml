@@ -49,10 +49,9 @@ jobs:
           elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install --cask xquartz
             brew install pkg-config
+            brew install gdal
             brew install proj
             brew install geos
-            brew install gdal
-            brew install netcdf
           else
             echo "Nothing to do"
           fi

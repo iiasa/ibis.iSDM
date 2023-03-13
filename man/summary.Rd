@@ -10,17 +10,17 @@
 \alias{summary.Settings}
 \title{Summarises a trained model or predictor object}
 \usage{
-\method{summary}{distribution}(x)
+\method{summary}{distribution}(x, ...)
 
-\method{summary}{DistributionModel}(x)
+\method{summary}{DistributionModel}(x, ...)
 
-\method{summary}{PredictorDataset}(x)
+\method{summary}{PredictorDataset}(x, ...)
 
 \method{summary}{BiodiversityScenario}(x, ...)
 
-\method{summary}{PriorList}(x)
+\method{summary}{PriorList}(x, ...)
 
-\method{summary}{Settings}(x)
+\method{summary}{Settings}(x, ...)
 }
 \arguments{
 \item{x}{Any prepared object.}

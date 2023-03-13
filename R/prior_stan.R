@@ -73,7 +73,7 @@ methods::setMethod(
 #' @description
 #' This is a helper function to specify several [STANPrior] with the same
 #' hyper-parameters, but different variables.
-#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects.
+#' @param variables A [`vector`] of [`character`] matched against existing predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
 #' @param ... Variables passed on to prior object

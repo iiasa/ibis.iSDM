@@ -5,12 +5,12 @@
 \alias{coef.DistributionModel}
 \title{Obtains the coefficients of a trained model}
 \usage{
-\method{coef}{DistributionModel}(x)
+\method{coef}{DistributionModel}(x, ...)
 }
 \arguments{
-\item{object}{Any prepared object.}
-
 \item{...}{not used.}
+
+\item{object}{Any prepared object.}
 }
 \description{
 Similar as \code{\link{summary}}, this helper function obtains the coefficients from

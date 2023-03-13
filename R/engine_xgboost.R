@@ -15,6 +15,7 @@ NULL
 #' XGBoost supports the specification of monotonic constraints on certain variables. Within
 #' ibis this is possible via [`XGBPrior`]. However constraints are available only for the
 #' \code{"gbtree"} baselearners.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param booster A [`character`] of the booster to use. Either \code{"gbtree"} or \code{"gblinear"} (Default: \code{gblinear})
 #' @param learning_rate [`numeric`] value indicating the learning rate (eta).
@@ -29,7 +30,8 @@ NULL
 #' tresting dataset (Default: \code{0.75}).
 #' @param colsample_bytree [`numeric`] Sub-sample ratio of columns when constructing each tree (Default: \code{0.4}).
 #' @param min_child_weight [`numeric`] Broadly related to the number of instances necessary for each node (Default: \code{3}).
-#' @param ... Other none specificed parameters.
+#' @param nthread [`numeric`] on the number of CPU-threads to use.
+#' @param ... Other none specified parameters.
 #' @note
 #' *'Machine learning is statistics minus any checking of models and assumptions‘* ~ Brian D. Ripley, useR! 2004, Vienna
 #' @seealso [xgboost::xgb.train]

@@ -46,7 +46,9 @@ tresting dataset (Default: \code{0.75}).}
 
 \item{min_child_weight}{\code{\link{numeric}} Broadly related to the number of instances necessary for each node (Default: \code{3}).}
 
-\item{...}{Other none specificed parameters.}
+\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use.}
+
+\item{...}{Other none specified parameters.}
 }
 \description{
 Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.

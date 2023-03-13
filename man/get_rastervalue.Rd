@@ -7,7 +7,7 @@
 get_rastervalue(coords, env, rm.na = FALSE)
 }
 \arguments{
-\item{coords}{A \code{\link{Spatial}} or \code{\link{sf}} object.}
+\item{coords}{A \code{\link{Spatial}}, \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object.}
 
 \item{env}{A \code{\link{Raster}} object with the provided predictors.}
 
@@ -20,5 +20,14 @@ A \code{\link{data.frame}} with the extracted covariate data from each provided 
 This function simply extracts the values from a provided \code{\link{RasterLayer}},
 \code{\link{RasterStack}} or \code{\link{RasterBrick}} object. For points where or NA values were extracted
 a small buffer is applied to try and obtain the remaining values.
+}
+\details{
+It is essentially a wrapper for \code{\link[terra:extract]{terra::extract}}.
+}
+\examples{
+\dontrun{
+# Extract values
+vals <- get_rastervalue(coords, env)
+}
 }
 \keyword{utils}

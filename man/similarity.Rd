@@ -4,7 +4,16 @@
 \alias{similarity}
 \title{Calculate environmental similarity of reference datasets to predictors.}
 \usage{
-similarity(obj, ref, ref_type = "poipo", method = "mess", ...)
+similarity(
+  obj,
+  ref,
+  ref_type = "poipo",
+  method = "mess",
+  predictor_names = NULL,
+  full = FALSE,
+  plot = TRUE,
+  ...
+)
 
 \S4method{similarity}{BiodiversityDistribution}(obj)
 
@@ -25,6 +34,8 @@ a \code{\link{data.frame}} with extracted values (corresponding to those given i
 \item{full}{should similarity values be returned for all variables (Default: \code{FALSE})?}
 
 \item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).}
+
+\item{...}{other options (Non specified).}
 }
 \value{
 This function returns a list containing:

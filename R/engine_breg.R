@@ -15,7 +15,7 @@ NULL
 #' specified in [train].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param iter [`numeric`] on the number of MCMC iterations to run (Default: \code{10000}).
-#' @param nthreads [`numeric`] on the number of CPU-threads to use for data augmentation.
+#' @param nthread [`numeric`] on the number of CPU-threads to use for data augmentation.
 #' @param type The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other none specified parameters passed on to the model.
 #' @references

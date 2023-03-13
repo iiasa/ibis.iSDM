@@ -20,13 +20,19 @@ NULL
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param iter A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation.
 #' @param nburn A [`numeric`] estimate of the burn in samples.
-#' @param chains A number of the number of chains to be used (Default: \code{4})
+#' @param chains A number of the number of chains to be used (Default: \code{4}).
 #' @param type The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param ... Other options.
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
 #' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
 #' @importFrom foreach %do% %dopar%
+#' @examples
+#' \dontrun{
+#' # Add BART as an engine
+#' x <- distribution(background) |> engine_bart(iter = 100)
+#' }
 #' @family engine
 #' @name engine_bart
 NULL

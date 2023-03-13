@@ -584,7 +584,7 @@ methods::setMethod(
 #' @name add_constraint_boundary
 #' @aliases add_constraint_boundary
 #' @inheritParams add_constraint
-#' @param layer A [`RasterLayer`] object with the same extent as the model background. Has to be binary and
+#' @param layer A [`Raster`] or [`sf`] object with the same extent as the model background. Has to be binary and
 #' is used for a posthoc masking of projected grid cells.
 #' @family constraint
 #' @keywords scenario

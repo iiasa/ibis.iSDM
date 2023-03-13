@@ -9,7 +9,7 @@ INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 \S4method{INLAPriors}{vector, character}(variables, type)
 }
 \arguments{
-\item{variables}{A \code{\link{vector}} of \code{\link{characters}} matched against existing predictors or latent effects.}
+\item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing predictors or latent effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 

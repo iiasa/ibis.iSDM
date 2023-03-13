@@ -22,7 +22,9 @@ get_ngbvalue(
 
 \item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})}
 
-\item{cheap}{A \code{\link{logical}} variable whether the dataset is considered to be large and faster computation could help}
+\item{cheap}{A \code{\link{logical}} variable whether the dataset is considered to be large and faster computation could help.}
+
+\item{...}{other options.}
 }
 \value{
 A \code{\link{data.frame}} with the extracted covariate data from each provided data point.

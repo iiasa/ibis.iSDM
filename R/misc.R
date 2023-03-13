@@ -75,11 +75,15 @@ ibis_colours <- list(
 #'  * \code{'ibis.use_future'} : [`logical`] on whether the \pkg{future} package should be used for parallel computing.
 #' @return The output of \code{getOptions} for all ibis related variables
 #' @keywords misc
+#' @examples
+#' \dontrun{
+#'  ibis_options()
+#' }
 #' @export
 ibis_options <- function(){
   what <- grep('ibis',names(options()),value = TRUE)
   items <- options()[what]
-  print(items)
+  items
 }
 
 #' Install ibis dependencies
@@ -96,7 +100,8 @@ ibis_options <- function(){
 #' @param deps A [`vector`] with the names of the packages to be installed (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
 #' @param update A [`logical`] flag of whether all (installed) packages should also be checked for updates (Default: \code{TRUE}).
 #' @returns Nothing. Packages will be installed.
-#' @examples \dontrun{
+#' @examples
+#' \dontrun{
 #'   # Install and update all dependencies
 #'   ibis_dependencies()
 #' }
@@ -109,7 +114,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
     is.logical(update)
   )
   # First check which packages are not installed and then do so.
-  new.packages <- deps[!(deps %in% installed.packages()[, "Package"])]
+  new.packages <- deps[!(deps %in% utils::installed.packages()[, "Package"])]
   if(length(new.packages)>0){
     if("INLA" %in% new.packages){
       suppressMessages(
@@ -126,7 +131,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   if(update){
     if("INLA" %in% deps){
       # For windows
-      if(length(grep("Windows", osVersion,ignore.case = TRUE)) && !("INLA" %in% installed.packages()[, "Package"])){
+      if(length(grep("Windows", osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
         # On windows we remove INLA and reinstall
         install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
       } else {
@@ -138,7 +143,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
     }
     # Update all the package excluding INLA
     suppressMessages(
-      update.packages(deps, ask = FALSE)
+      utils::update.packages(deps, ask = FALSE)
     )
   }
   invisible()
@@ -150,6 +155,12 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
 #' @param strategy A [`character`] denoting the strategy to be used for future. See help of [`future`] for options.
 #' (Default: \code{"multisession"}).
 #' @seealso [future]
+#' @return None
+#' @examples
+#' \dontrun{
+#' # Starts future job
+#' ibis_future(cores = 4)
+#' }
 #' @keywords misc
 #' @export
 ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy")) {

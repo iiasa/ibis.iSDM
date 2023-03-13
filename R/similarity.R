@@ -16,7 +16,9 @@ NULL
 #' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.
 #' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
 #' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
-#' @return This function returns a list containing:
+#' @param ... other options (Non specified).
+#' @return
+#'  This function returns a list containing:
 #'  * `similarity`: a `RasterStack` giving the environmental similarities for
 #'   each variable in `x` (only included when `full=TRUE`);
 #'  * `mis`: a `Raster` layer giving the minimum similarity value
@@ -56,7 +58,7 @@ NULL
 methods::setGeneric(
   "similarity",
   signature = methods::signature("obj"),
-  function(obj, ref, ref_type = 'poipo', method = 'mess', ...) standardGeneric("similarity"))
+  function(obj, ref, ref_type = 'poipo', method = 'mess', predictor_names = NULL, full = FALSE, plot = TRUE, ...) standardGeneric("similarity"))
 
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity

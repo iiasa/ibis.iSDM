@@ -46,7 +46,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
   new2 <- apply(new[,4:ncol(new)], 2, function(z){
     # if(inherits(z, "POSIXct")) return(z)
     if(all(is.na(z))) return(z)
-    approx(y = z, x = as.numeric(new$time), method = "linear")
+    stats::approx(y = z, x = as.numeric(new$time), method = "linear")
   })
 
   # Steps:
@@ -63,7 +63,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
       if (anyNA(x))
         NA_real_
       else
-        lm.fit(cbind(1, tt), x)$coefficients[2]
+        stats::lm.fit(cbind(1, tt), x)$coefficients[2]
     }
   )
 
@@ -408,7 +408,7 @@ summarise_change <- function(scenario){
   times <- stars::st_get_dimension_values(scenario, 3,center = TRUE)
   current <- ss[[1]]
   future <- ss[[length(ss)]]
-  times_length <- round(as.numeric(difftime(times[length(times)], times[1], unit="weeks"))/52.25,0)
+  times_length <- round(as.numeric(difftime(times[length(times)], times[1], units = "weeks"))/52.25,0)
   rm(ss)
 
   # Calculate the area and  units

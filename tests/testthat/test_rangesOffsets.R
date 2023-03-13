@@ -5,7 +5,7 @@ test_that('Load ranges and add them to distribution object', {
   skip_if_not_installed('INLA')
   skip_if_not_installed('igraph')
 
-  require(igraph)
+  requireNamespace("igraph")
 
   options("ibis.setupmessages" = FALSE)
 

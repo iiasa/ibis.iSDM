@@ -24,7 +24,7 @@ NULL
 methods::setGeneric(
   "partial",
   signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, ...) standardGeneric("partial"))
+  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
 
 #' @name partial
 #' @rdname partial
@@ -32,7 +32,7 @@ methods::setGeneric(
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, ...) {
+  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "response",...) {
     assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             is.character(x.var),
@@ -43,7 +43,7 @@ methods::setMethod(
     )
     # Work around to call partial response directly
     if(inherits(mod,'DistributionModel')){
-      partial.DistributionModel(mod, x.var, constant, variable_length, values, plot, ...)
+      partial.DistributionModel(mod, x.var, constant, variable_length, values, plot, type, ...)
     } else {
       stop('Partial response calculation not supported!')
     }
@@ -54,7 +54,7 @@ methods::setMethod(
 #' @method partial DistributionModel
 #' @keywords partial
 #' @export
-partial.DistributionModel <- function(x, ...) x$partial(...)
+partial.DistributionModel <- function(mod, ...) mod$partial(...)
 
 #' Obtain spatial partial effects of trained model
 #'
