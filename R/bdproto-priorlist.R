@@ -11,12 +11,14 @@ NULL
 #' It provides methods for accessing, adding and removing priors from the list
 #'
 #' @name PriorList-class
-#' @examples{
-#'  priors(
+#' @examples
+#' \dontrun{
+#' priors(
 #'     INLAPrior('var1','normal',c(0,0.1)),
 #'     INLAPrior('var2','normal',c(0,0.1))
 #'    )
 #' }
+#' @return A PriorList object.
 #' @aliases PriorList
 #' @family bdproto
 #' @keywords bdproto

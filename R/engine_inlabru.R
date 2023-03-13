@@ -1020,7 +1020,7 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = TRUE){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = TRUE, type = "response"){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
@@ -1105,7 +1105,7 @@ engine_inlabru <- function(x,
             return(o %>% as.data.frame() )
           },
           # (S)partial effect
-          spartial = function(self, x.var, constant = NULL, plot = TRUE){
+          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = "response"){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model

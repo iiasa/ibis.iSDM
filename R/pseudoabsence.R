@@ -192,7 +192,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   if(!is.Raster(background)){
     assertthat::assert_that(is.Raster(template),
                             msg = "No suitable RasterLayer was provided through Settings or as template!")
-    if("fasterize" %in% installed.packages()[,1]){
+    if("fasterize" %in% utils::installed.packages()[,1]){
       background <- fasterize::fasterize(sf = background, raster = emptyraster(template), field = NULL)
     } else {
       background <- raster::rasterize(background, emptyraster(template), field = 1)
@@ -254,7 +254,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance ,units::deparse_unit(un),' buffer'))
     # Calculate buffer
     buf <- sf::st_buffer(x = df, dist = buffer_distance)
-    if("fasterize" %in% installed.packages()[,1]){
+    if("fasterize" %in% utils::installed.packages()[,1]){
       buf <- fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)
     } else {
       buf <- raster::rasterize(buf, emptyraster(template), field = 1)

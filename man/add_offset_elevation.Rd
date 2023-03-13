@@ -22,6 +22,9 @@ decay to near zero probability at elevation above and below the expert limits.}
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 }
+\value{
+Adds a elevational offset to a \code{\link{distribution}} object.
+}
 \description{
 This function implements the elevation preferences offset defined in Ellis‐Soto et al. (2021).
 The code here was adapted from the Supporting materials script.
@@ -34,6 +37,12 @@ areas, with the \code{\link{rate}} parameter allowing to vary the steepness of d
 
 Note that all offsets created by this function are by default log-transformed before export. In addition
 this function also mean-centers the output as recommended by Ellis-Soto et al.
+}
+\examples{
+\dontrun{
+ # Adds the offset to a distribution object
+ distribution(background) |> add_offset_elevation(dem, pref = c(400, 1200))
+}
 }
 \references{
 \itemize{

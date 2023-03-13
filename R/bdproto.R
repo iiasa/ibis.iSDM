@@ -17,7 +17,7 @@ NULL
 #' @param ... A list of members to add to the new `bdproto` object.
 #' @source https://ggplot2.tidyverse.org/reference/ggproto.html#examples
 #' @note
-#' All [bdproto] objects have several functions that allow to access data and
+#' All [`bdproto`] objects have several functions that allow to access data and
 #' summarize information within them. Run \code{names(object)} to show the
 #' available functions.
 #' @examples
@@ -39,9 +39,9 @@ NULL
 #' Abacus$add(10)
 #' Abacus$subtract(10)
 #'
+#' @return A bdproto object.
 #' @keywords bdproto
 #' @family bdproto
-#' @export
 #' @noRd
 bdproto <- function(`_class` = NULL, `_inherit` = NULL, ...) {
   assertthat::assert_that(assertthat::is.string(`_class`) || is.null(`_class`),

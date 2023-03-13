@@ -13,9 +13,11 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 
 \item{nburn}{A \code{\link{numeric}} estimate of the burn in samples.}
 
-\item{chains}{A number of the number of chains to be used (Default: \code{4})}
+\item{chains}{A number of the number of chains to be used (Default: \code{4}).}
 
 \item{type}{The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).}
+
+\item{...}{Other options.}
 }
 \description{
 The Bayesian regression approach to a sum of complementary trees is to shrink
@@ -34,6 +36,12 @@ Prior distributions can furthermore be set for:
 \item probability that a tree stops at a node of a given depth (Not yet implemented)
 \item probability that a given variable is chosen for a splitting rule
 \item probability of splitting that variable at a particular value (Not yet implemented)
+}
+}
+\examples{
+\dontrun{
+# Add BART as an engine
+x <- distribution(background) |> engine_bart(iter = 100)
 }
 }
 \references{

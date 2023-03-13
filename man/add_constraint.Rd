@@ -20,7 +20,7 @@ give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 should be performed.}
 
-\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
 
 \item{layer}{A \code{\link{Raster}} object that can be used for boundary constraints (Default: \code{NULL}).}
 
@@ -28,6 +28,9 @@ should be performed.}
 i.e., the species gets locally extinct (Default: \code{0.1}).}
 
 \item{pcor}{\code{\link{numeric}} probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).}
+}
+\value{
+Adds constraints data to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
 This function adds a constrain to a \code{\linkS4class{BiodiversityScenario}} object to
@@ -43,8 +46,8 @@ Currently supported are the following options:
 \itemize{
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \link{kissmig} package. Applied at each modelling time step.
-\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \link{MigClim} package.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{\link{kissmig}} package. Applied at each modelling time step.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{\link{MigClim}} package.
 }
 
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
@@ -74,6 +77,15 @@ the provide layer. Similar as specifying projection limits (see \code{\link{dist
 constrain a projection within a certain area (e.g. a species range or an island).
 }
 }
+\examples{
+\dontrun{
+# Assumes that a trained 'model' object exists
+ mod <- scenario(model) |>
+  add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+  add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+  project()
+}
+}
 \references{
 \itemize{
 \item Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
@@ -82,7 +94,7 @@ constrain a projection within a certain area (e.g. a species range or an island)
 }
 }
 \seealso{
-\code{\link{add_constraint_dispersal}}, \code{\link{add_constraint_connectivity}}, \code{\link{add_constraint_adaptability}},\code{\link{add_constraint_boundary}}
+\code{\link{add_constraint_dispersal}}, \code{\link{add_constraint_connectivity}}, \code{\link{add_constraint_adaptability}}, \code{\link{add_constraint_boundary}}
 
 Other constraint: 
 \code{\link{add_constraint_adaptability}()},

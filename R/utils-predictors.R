@@ -31,6 +31,7 @@ NULL
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
 #' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
+#' @param ... other options (Non specified).
 #' @returns Returns a adjusted [`Raster`] object of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
@@ -252,6 +253,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @param deriv A [`vector`] with [`characters`] of specific derivates to create (Default: \code{NULL}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
+#' @param ... other options (Non specified).
 #' @return Returns the derived adjusted [`Raster`] objects of identical resolution.
 #' @seealso predictor_derivate
 #' @examples

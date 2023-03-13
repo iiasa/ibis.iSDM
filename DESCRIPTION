@@ -1,13 +1,19 @@
 Package: ibis.iSDM
 Type: Package
-Title: Modelling framework for Integrated Biodiversity distribution scenarios
-Version: 0.0.1
+Title: Modelling Framework for Integrated Biodiversity Distribution Scenarios
+Version: 0.0.2
 Authors@R: 
-    person(given = "Martin",
+    c(person(given = "Martin",
            family = "Jung",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            email = "jung@iiasa.ac.at",
-           comment = c(ORCID = "0000-0002-7569-1390"))
+           comment = c(ORCID = "0000-0002-7569-1390")),
+      person(given = "Maximilian H.K.",
+           family = "Hesselbarth",
+           role = c("ctb"),
+           email = "hesselbarth@iiasa.ac.at",
+           comment = c(ORCID = "0000-0003-1125-9918"))
+      )
 Maintainer: Martin Jung <jung@iiasa.ac.at>
 Description: Integrated framework of modelling the distribution of species and ecosystems in a suitability framing. This package allows the estimation of integrated species distribution models (iSDM) based on several sources of evidence and provided presence-only and presence-absence datasets. It makes heavy use of point-process models for estimating habitat suitability and allows to include spatial latent effects and priors in the estimation. To do so 'ibis.iSDM' supports a number of engines for Bayesian and more non-parametric machine learning estimation. Further, the 'ibis.iSDM' is specifically customized to support spatial-temporal projections of habitat suitability into the future.
 Language: en-GB
@@ -24,7 +30,6 @@ Imports:
     foreach,
     future (>= 1.23.0),
     doFuture (>= 0.12.2),
-    rgeos (>= 0.5-5),
     proto (>= 1.0.0),
     raster (>= 3.4-5),
     Rcpp (>= 0.12.0),
@@ -50,7 +55,10 @@ Suggests:
     doParallel,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    BoomSpikeSlab (>= 1.2.4)
+    BoomSpikeSlab (>= 1.2.4),
+    rmarkdown,
+    knitr,
+    covr
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
@@ -126,3 +134,4 @@ Collate:
 Roxygen: list(markdown = TRUE)
 Biarch: true
 SystemRequirements: GNU make
+VignetteBuilder: knitr

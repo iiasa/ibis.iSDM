@@ -29,6 +29,7 @@
 #' @param ... Other parameters or arguments (currently not supported)
 #' @references
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @returns Adds an offset to a [`distribution`] object.
 #' @family offset
 #' @keywords prior, offset
 #' @examples
@@ -101,6 +102,11 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param layer A `character` pointing to the specific layer to be removed. If set to \code{NULL}, then
 #' all offsets are removed from the object.
+#' @returns Removes an offset from a [`distribution`] object.
+#' @examples
+#' \dontrun{
+#'  rm_offset(model) -> model
+#' }
 #' @family offset
 #' @keywords prior, offset, internal
 #' @name rm_offset
@@ -172,6 +178,7 @@ methods::setMethod(
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @family offset
 #' @keywords prior, offset
+#' @returns Adds a bias offset to a [`distribution`] object.
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) %>%
@@ -291,6 +298,12 @@ methods::setMethod(
 #' @references
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @returns Adds a range offset to a [`distribution`] object.
+#' @examples
+#' \dontrun{
+#'  # Adds the offset to a distribution object
+#'  distribution(background) |> add_offset_range(species_range)
+#' }
 #' @keywords prior, offset
 #' @family offset
 #' @name add_offset_range
@@ -524,6 +537,12 @@ methods::setMethod(
 #' @references
 #' * Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale 1 km hummingbird diversity derived from fusing point records with lateral and elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' @returns Adds a elevational offset to a [`distribution`] object.
+#' @examples
+#' \dontrun{
+#'  # Adds the offset to a distribution object
+#'  distribution(background) |> add_offset_elevation(dem, pref = c(400, 1200))
+#' }
 #' @keywords prior, offset
 #' @family offset
 #' @name add_offset_elevation

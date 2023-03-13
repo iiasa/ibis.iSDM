@@ -27,6 +27,8 @@ predictor_derivate(
 \item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
 
 \item{method}{As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).}
+
+\item{...}{other options (Non specified).}
 }
 \value{
 Returns the derived adjusted \code{\link{Raster}} objects of identical resolution.

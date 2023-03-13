@@ -466,7 +466,7 @@ methods::setMethod(
     }
 
     # Rasterize the range
-    if( 'fasterize' %in% installed.packages()[,1] ){
+    if( 'fasterize' %in% utils::installed.packages()[,1] ){
       ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL) }, silent = TRUE)
       if(inherits(ras_range,"try-error")){
         myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
@@ -1252,7 +1252,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
     # Check that template is a raster, otherwise rasterize for GLOBIOM use
     if(inherits(template, "sf")){
       o <- sc %>% stars:::slice.stars("time" , 1) %>% as("Raster")
-      if("fasterize" %in% installed.packages()[,1]){
+      if("fasterize" %in% utils::installed.packages()[,1]){
         template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
       } else {
         template <- raster::rasterize(template, o, field = 1)

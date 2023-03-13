@@ -21,7 +21,7 @@ and presence-absence occurrence points equally.}
 
 \item{background}{A \code{\link{RasterLayer}} object with the background of the study region. Use for assessing point density.}
 
-\item{env}{A \code{\link{Raster}} object with environmental covaraites. Needed when method is set to \code{"environmental"}
+\item{env}{A \code{\link{Raster}} object with environmental covariates. Needed when method is set to \code{"environmental"}
 or \code{"bias"} (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
@@ -59,6 +59,15 @@ We then obtain an number equal to (\code{"minpoints"}) of observations for each 
 \item \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
 be set for this function to work.
+}
+}
+\examples{
+\dontrun{
+ # Thin a certain number of observations
+ # At random
+ thin_points <- thin_observations(points, background, method = "random")
+ # using a bias layer
+ thin_points <- thin_observations(points, background, method = "bias", env = bias)
 }
 }
 \references{

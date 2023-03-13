@@ -12,12 +12,13 @@ partial(
   variable_length = 100,
   values = NULL,
   plot = FALSE,
+  type = "response",
   ...
 )
 
 \S4method{partial}{ANY,character}(mod, x.var)
 
-\method{partial}{DistributionModel}(x, ...)
+\method{partial}{DistributionModel}(mod, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model within.}
@@ -33,9 +34,9 @@ partial(
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
-\item{...}{Other engine specific parameters}
-
 \item{type}{A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.}
+
+\item{...}{Other engine specific parameters}
 }
 \value{
 A \link{data.frame} with the created partial response.

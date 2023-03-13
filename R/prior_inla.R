@@ -14,7 +14,7 @@ NULL
 #'  and a precision of \code{0.001}.
 #'
 #' * \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
-#' so as that the coefficient is in a specified interval \code{[lower,upper]}. Specified through hyper these values can be
+#' so as that the coefficient is in a specified interval \code{"c(lower,upper)"}. Specified through hyper these values can be
 #' negative, positive or infinite.
 #'
 #' * \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
@@ -105,7 +105,7 @@ methods::setMethod(
 #' This is a helper function to specify several [INLAPrior] objects with the same
 #' hyper-parameters, but different variables.
 #' @name INLAPriors
-#' @param variables A [`vector`] of [`characters`] matched against existing predictors or latent effects.
+#' @param variables A [`vector`] of [`character`] matched against existing predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
 #' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
 #' @param ... Variables passed on to prior object.

@@ -280,7 +280,6 @@ methods::setMethod(
       # Optimized threshold statistics using the modEvA package
       # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
       check_package("modEvA")
-      assertthat::assert_that('modEvA' %in% installed.packages()[,1])
       # Assure that point data is correctly specified
       assertthat::assert_that(inherits(poi, 'sf'), hasName(poi, 'observed'))
       poi$observed <- ifelse(poi$observed>1,1,poi$observed) # Ensure that observed is <=1

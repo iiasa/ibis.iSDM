@@ -61,7 +61,7 @@ methods::setMethod(
         stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
       }
   } else if(is.data.frame(mod)){
-    write.csv(x = mod,file = fname,...)
+    utils::write.csv(x = mod,file = fname,...)
   } else {
     # Check that a save function exists for object
     assertthat::assert_that("save" %in%names(mod),
@@ -162,7 +162,7 @@ methods::setMethod(
 
     # data.frames will be written by default as csv files for consistency
     fname <- paste0( tools::file_path_sans_ext(fname), ".csv")
-    write.csv(x = mod, file = fname, ...)
+    utils::write.csv(x = mod, file = fname, ...)
     invisible()
   }
 )
@@ -202,11 +202,12 @@ methods::setMethod(
 #' @description Functions that acts as a wrapper to [raster::writeRaster].
 #' @param file A [`raster`] object to be saved.
 #' @param fname A [`character`] stating the output destination.
-#' @param dt The datatype to be written (Default: *Float64*)
+#' @param dt The datatype to be written (Default: *Float64*).
 #' @param varNA The nodata value to be used (Default: \code{-9999}).
+#' @param ... Other options.
 #' @keywords utils, internal
 #' @noRd
-writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
+writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   assertthat::assert_that(
     inherits(file,'Raster') || inherits(file, 'stars'),
     is.character(fname), is.character(dt),
@@ -225,23 +226,25 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999){
               datatype = dt,
               NAflag = varNA,
               options=c("COMPRESS=DEFLATE","PREDICTOR=2","ZLEVEL=9"),
-              overwrite= TRUE )
+              overwrite= TRUE,
+              ...)
 }
 
 #' Save a raster stack to a netcdf file
 #'
-#' @param file A [`raster`] object to be saved
-#' @param fname A [`character`] stating the output destination
+#' @param file A [`raster`] object to be saved.
+#' @param fname A [`character`] stating the output destination.
 #' @param varName Name for the NetCDF export variable.
 #' @param varUnit Units for the NetCDF export variable.
 #' @param varLong Long name for the NetCDF export variable.
 #' @param dt The datatype to be written. Default is Float64
-#' @param varNA The nodata value to be used. Default: -9999
+#' @param varNA The nodata value to be used. Default: \code{-9999}.
+#' @param ... Other options.
 #' @keywords utils, internal
 #' @noRd
 writeNetCDF <- function(file, fname,
                         varName, varUnit = NULL,
-                        varLong = NULL, dt = "FLT4S", varNA = -9999) {
+                        varLong = NULL, dt = "FLT4S", varNA = -9999, ...) {
   assertthat::assert_that(
     inherits(file,'Raster'),
     is.character(fname), is.character(dt),
@@ -262,7 +265,8 @@ writeNetCDF <- function(file, fname,
                       zname = "Time",
                       zunit = "Years since 2000-01-01", # FIXME: Load and format date if provided
                       bylayer = FALSE, # Don't save separate layers
-                      datatype = dt, NAflag = varNA
+                      datatype = dt, NAflag = varNA,
+                      ...
   )
 
   # Add common attributes

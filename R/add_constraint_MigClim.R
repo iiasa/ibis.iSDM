@@ -31,6 +31,16 @@ NULL
 #' @references
 #' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of dispersal constraints into projections of species distribution models. Ecography,
 #' * Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.
+#' @returns Adds a MigClim onstrain to a [`BiodiversityScenario`] object.
+#' @examples
+#' \dontrun{
+#' # Assumes that a trained 'model' object exists
+#'  mod <- scenario(model) |>
+#'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+#'   add_constrain_MigClim() |>
+#'   project()
+#' }
+#'
 #' @name add_constrain_MigClim
 #' @aliases add_constrain_MigClim
 #' @family constrain

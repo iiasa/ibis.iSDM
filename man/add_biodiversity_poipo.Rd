@@ -50,6 +50,9 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 
 \item{...}{Other parameters passed down to the object. Normally not used unless described in details.}
 }
+\value{
+Adds biodiversity data to \link{distribution} object.
+}
 \description{
 This function adds a presence-only biodiversity dataset to a
 distribution object.

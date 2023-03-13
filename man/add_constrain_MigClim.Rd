@@ -37,6 +37,9 @@ Must be set to the cell age in time units which are dispersal steps (Default: \c
 \item{propaguleProd}{Probability of a source cell to produce propagules as a function of time since colonization.
 Set as probability vector that defines the probability of a cell producing propagules.}
 }
+\value{
+Adds a MigClim onstrain to a \code{\link{BiodiversityScenario}} object.
+}
 \description{
 This function adds constrain as defined by the MigClimto approach (Engler et al. 2013)
 to a \code{\linkS4class{BiodiversityScenario}} object to
@@ -45,6 +48,16 @@ and the UserGuide. \strong{The default parameters chosen here are suggestions.}
 }
 \details{
 The barrier parameter is defined through \link{add_barrier}.
+}
+\examples{
+\dontrun{
+# Assumes that a trained 'model' object exists
+ mod <- scenario(model) |>
+  add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+  add_constrain_MigClim() |>
+  project()
+}
+
 }
 \references{
 \itemize{

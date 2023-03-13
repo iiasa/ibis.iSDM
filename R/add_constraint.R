@@ -15,14 +15,14 @@ NULL
 #' give the number of iteration steps (or within year migration steps).
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 #' should be performed.
-#' @param type A [`character`] indicating the type used in the method. See for instance [kissmig::kissmig].
+#' @param type A [`character`] indicating the type used in the method. See for instance [`kissmig::kissmig`].
 #' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
 #' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonised,
 #' i.e., the species gets locally extinct (Default: \code{0.1}).
 #' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
 #' @param ... passed on parameters. See also the specific methods for adding constraints.
 #'
-#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`],[`add_constraint_boundary`]
+#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`], [`add_constraint_boundary`]
 #' @details
 #' Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
 #' target feature. This function acts as a wrapper to add these constraints.
@@ -30,8 +30,8 @@ NULL
 #' **Dispersal**:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [kissmig] package. Applied at each modelling time step.
-#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [MigClim] package.
+#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [`kissmig`] package. Applied at each modelling time step.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [`MigClim`] package.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -54,10 +54,19 @@ NULL
 #' the provide layer. Similar as specifying projection limits (see [`distribution`]), but can be used to specifically
 #' constrain a projection within a certain area (e.g. a species range or an island).
 #'
+#' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #' @references
 #' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013). Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' * Nobis MP and Normand S (2014) KISSMig - a simple model for R to account for limited migration in analyses of species distributions. Ecography 37: 1282-1287.
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+#' @examples
+#' \dontrun{
+#' # Assumes that a trained 'model' object exists
+#'  mod <- scenario(model) |>
+#'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+#'   add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+#'   project()
+#' }
 #' @name add_constraint
 #' @family constraint
 #' @aliases add_constraint
@@ -113,7 +122,7 @@ methods::setMethod(
 # ------------------------ #
 #### Dispersal constraints ####
 
-#' @title Adds a dispersal constrain to a scenario object
+#' @title Adds a dispersal constrain to a scenario object.
 #' @name add_constraint_dispersal
 #' @aliases add_constraint_dispersal
 #' @inheritParams add_constraint
@@ -215,10 +224,10 @@ methods::setMethod(
 )
 
 #' Short-distance fixed dispersal function
-#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year
-#' @param new_suit A new [`RasterLayer`] object
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit 'meters'.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL)
+#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
+#' @param new_suit A new [`RasterLayer`] object.
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
@@ -252,10 +261,10 @@ methods::setMethod(
 
 #' Short-distance negative exponential kernel dispersal function
 #' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year
-#' @param new_suit A new [`RasterLayer`] object
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit 'meters'.
-#' @param normalize Should a normalising constant be used for the exponential dispersal parameter. (Default: FALSE)
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL)
+#' @param new_suit A new [`RasterLayer`] object.
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
+#' @param normalize Should a normalising constant be used for the exponential dispersal parameter (Default: \code{FALSE}).
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
@@ -297,7 +306,7 @@ methods::setMethod(
 #' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
 #' @param new_suit A new [`RasterLayer`] object.
 #' @param params A [vector] or [list] with passed on parameter values.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: NULL).
+#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
@@ -345,7 +354,8 @@ methods::setMethod(
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in connectivity constrains (Default: \code{NULL}).
+#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in
+#' connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario
 #' @exportMethod add_constraint_connectivity
@@ -574,7 +584,7 @@ methods::setMethod(
 #' @name add_constraint_boundary
 #' @aliases add_constraint_boundary
 #' @inheritParams add_constraint
-#' @param layer A [`RasterLayer`] object with the same extent as the model background. Has to be binary and
+#' @param layer A [`Raster`] or [`sf`] object with the same extent as the model background. Has to be binary and
 #' is used for a posthoc masking of projected grid cells.
 #' @family constraint
 #' @keywords scenario
@@ -620,16 +630,23 @@ methods::setMethod(
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
 methods::setMethod(
   "add_constraint_boundary",
-  methods::signature(mod = "BiodiversityScenario", layer = "RasterLayer"),
+  methods::signature(mod = "BiodiversityScenario", layer = "ANY"),
   function(mod, layer, method = "boundary", ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       is.Raster(layer),
       is.character(method)
     )
+
+    # Check that layer is a single RasterLayer
+    if(!inherits(layer, "RasterLayer")){
+      assertthat::assert_that(raster::nlayers(layer) == 1)
+      layer <- layer[[1]]
+    }
+
     # Add processing method #
     # --- #
     co <- list()

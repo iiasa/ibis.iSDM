@@ -54,7 +54,7 @@ methods::setMethod(
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
       assertthat::assert_that(is.character(point_column),
-                              hasName(point, point_column),
+                              utils::hasName(point, point_column),
                               anyNA(point[[point_column]])==FALSE
                               )
     }
@@ -111,19 +111,20 @@ methods::setMethod(
       assertthat::assert_that(
         unique(sf::st_geometry_type(point)) %in% c('POINT', 'MULTIPOINT'),
         # Check that the point data has presence-absence information
-        hasName(point, point_column),
+        utils::hasName(point, point_column),
         !is.na(sf::st_crs(point)$proj)
       )
       # If sf is different, reproject to prediction
       if(sf::st_crs(point)!= sf::st_crs(prediction)){
         point <- sf::st_transform(point, crs = sf::st_crs(prediction) )
       }
-      if(!hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
-      if(!hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
+      if(!utils::hasName(point, "name")) point$name <- "Validation data" # Assign a name for validation. Assuming only one dataset is present
+      if(!utils::hasName(point, "type")) point$type <- ifelse(length(unique(point[[point_column]]))>1, "poipa", "poipo") # Type depending on input
       # Ensure comparable columns
       point <- subset(point, select = c(point_column, "name", "type", attr(point, "sf_column") ))
     } else {
       # TODO: Think about how to do validation with non-point data
+      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
       point <- do.call(sf:::rbind.sf,
                         lapply(mod$model$biodiversity, function(y){
@@ -135,10 +136,9 @@ methods::setMethod(
       if(is.factor(point[[point_column]])){
         point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
       }
-      # Add ID
     }
     assertthat::assert_that(nrow(point)>0,
-                            hasName(point, point_column))
+                            utils::hasName(point, point_column))
     # --- #
     # Do the extraction
     df <- as.data.frame(point)
@@ -210,7 +210,7 @@ methods::setMethod(
       method <- 'continuous'
     }
     assertthat::assert_that(nrow(point)>0,
-                            hasName(point, point_column))
+                            utils::hasName(point, point_column))
     point <- subset(point, select = point_column)
 
     # Correct point column in case larger 1
@@ -248,8 +248,8 @@ methods::setMethod(
 
   if(method == 'continuous'){
     # continuous evaluation
-    assertthat::assert_that(hasName(df2, 'pred'),
-                            hasName(df2, point_column)
+    assertthat::assert_that(utils::hasName(df2, 'pred'),
+                            utils::hasName(df2, point_column)
     )
     #### Calculating Boyce index as in Hirzel et al. 2006
     # fit: A vector or Raster-Layer containing the predicted suitability values
@@ -331,7 +331,7 @@ methods::setMethod(
             col = "grey",
             cex = 0.75
           )
-          points(HS[r], f[r], pch = 19, cex = 0.75)
+          graphics::points(HS[r], f[r], pch = 19, cex = 0.75)
 
         }
 
@@ -382,21 +382,45 @@ methods::setMethod(
     out$value[out$metric=='n'] <- nrow(df2) # Number of records
     out$value[out$metric=='rmse'] <- RMSE(pred = df2$pred, obs = df2[[point_column]]) # RMSE
     out$value[out$metric=='mae'] <- MAE(pred = df2$pred, obs = df2[[point_column]]) # Mean absolute error
-    out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
     out$value[out$metric=='normgini'] <- NormalizedGini(y_pred = df2$pred, y_true = df2[[point_column]])
+
+    if(!is.null(mod)){
+      if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
+        LogLoss <- function(y_pred, y_true) {
+          LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
+          return(LogLoss)
+        }
+        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      } else {
+        out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      }
+    } else {
+      # Assume Poisson distributed values, calculate log-loss
+      out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+    }
+
+
     # Boyce index. Wrap in try since is known to crash
     try({
-      # Run boyce a few times as average sample ?
-      # obs <- df2[df2[[point_column]]>0,]
-      # abs <- df2[sample(which(df2[[point_column]]==0), size = nrow(obs)), ]
-      # test <- rbind(obs, abs)
-      boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, nclass = 0, PEplot = FALSE)
-    },silent = TRUE)
-    if(exists('boi')) out$value[out$metric=='cont.boyce'] <- boi$Spearman.cor
+      if("modEvA" %in% utils::installed.packages()[,1]){
+        check_package("modEvA")
+        suppressWarnings(
+          boi <- modEvA::Boyce(obs = df2[[point_column]], pred = df2$pred, plot = FALSE)
+        )
+      } else {
+        # Run boyce a few times as average sample ?
+        # obs <- df2[df2[[point_column]]>0,]
+        # abs <- df2[sample(which(df2[[point_column]]==0), size = nrow(obs)), ]
+        # test <- rbind(obs, abs)
+        boi <- ecospat.boyce(obs = df2[[point_column]], fit = df2$pred, nclass = 0, PEplot = FALSE)
+        boi$Boyce <- boi$Spearman.cor
+      }
+    }, silent = TRUE)
+    if(exists('boi')) out$value[out$metric=='cont.boyce'] <- boi$Boyce
 
   } else {
     # discrete evaluation
-    assertthat::assert_that(hasName(df2, 'pred_tr'),
+    assertthat::assert_that(utils::hasName(df2, 'pred_tr'),
                             length(unique(df2[[point_column]])) > 1,
                             msg = "It appears as either the observed data or the threshold does not allow discrete validation.")
     # For discrete functions to work correctly, ensure that all values are 0/1
@@ -442,6 +466,7 @@ methods::setMethod(
     out$value[out$metric=='kappa'] <- (OA - Expected_accuracy) / (1 - Expected_accuracy)
 
     if("modEvA" %in% installed.packages()[,1]){
+      check_package("modEvA")
       # Calculate AUC
       out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
     }
@@ -453,12 +478,19 @@ methods::setMethod(
     if(!is.null(mod)){
       if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
         LogLoss <- function(y_pred, y_true) {
-          eps <- 1e-15
-          y_pred <- pmax(pmin(y_pred, 1 - eps), eps)
           LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
           return(LogLoss)
         }
-        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred_tr, y_true = df2[[point_column]])
+        out$value[out$metric=='logloss'] <- LogLoss(y_pred = df2$pred, y_true = df2[[point_column]])
+      } else {
+        # Function for log loss/cross-entropy loss.
+        Poisson_LogLoss <- function(y_pred, y_true) {
+          eps <- 1e-15
+          y_pred <- pmax(y_pred, eps)
+          Poisson_LogLoss <- mean(log(gamma(y_true + 1)) + y_pred - log(y_pred) * y_true)
+          return(Poisson_LogLoss)
+        }
+        out$value[out$metric=='logloss'] <- Poisson_LogLoss(y_pred = df2$pred_tr, y_true = df2[[point_column]])
       }
     }
   } # End of discrete clause

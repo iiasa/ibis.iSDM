@@ -17,11 +17,11 @@ engine_breg(
 
 \item{iter}{\code{\link{numeric}} on the number of MCMC iterations to run (Default: \code{10000}).}
 
+\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use for data augmentation.}
+
 \item{type}{The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other none specified parameters passed on to the model.}
-
-\item{nthreads}{\code{\link{numeric}} on the number of CPU-threads to use for data augmentation.}
 }
 \description{
 Efficient MCMC algorithm for linear regression models that makes use of

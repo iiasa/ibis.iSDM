@@ -26,6 +26,9 @@ for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the 
 
 \item{...}{Other parameters passed down}
 }
+\value{
+Adds latent spatial effect to a \code{\link{distribution}} object.
+}
 \description{
 In general we understand under latent spatial effects the occurrence of spatial dependency in the observations, which
 might either be caused by spatial biases, similarities in the underlying sampling processes or unmeasured latent

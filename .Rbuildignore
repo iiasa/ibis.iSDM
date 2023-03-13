@@ -21,3 +21,11 @@ configure.ac
 ^docs$
 ^\.github$
 ^pkgdown$
+LICENSE.md
+README.Rmd
+^CITATION\.cff$
+^vignettes/articles$
+CONTRIBUTING.md
+^cran-comments\.md$
+^revdep$
+^codecov\.yml$

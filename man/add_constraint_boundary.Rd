@@ -6,12 +6,12 @@
 \usage{
 \S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
 
-\S4method{add_constraint_boundary}{BiodiversityScenario, Raster, character}(mod, layer, method)
+\S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{layer}{A \code{\link{RasterLayer}} object with the same extent as the model background. Has to be binary and
+\item{layer}{A \code{\link{Raster}} or \code{\link{sf}} object with the same extent as the model background. Has to be binary and
 is used for a posthoc masking of projected grid cells.}
 
 \item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more

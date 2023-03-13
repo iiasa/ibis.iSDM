@@ -650,7 +650,7 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
   cm <- cor(x, method = method)
 
   # Copied from the \code{caret} package to avoid further dependencies
-  if (any(!complete.cases(cm))) stop("The correlation matrix has some missing values.")
+  if (any(!stats::complete.cases(cm))) stop("The correlation matrix has some missing values.")
   averageCorr <- colMeans(abs(cm))
   averageCorr <- as.numeric(as.factor(averageCorr))
   cm[lower.tri(cm, diag = TRUE)] <- NA
@@ -801,7 +801,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
   # Get cell ids
   ce <- raster::cellFromXY(pres, df[,c("x","y")])
   # Remove any NA if present
-  if(anyNA(ce)) ce <- subset(ce, complete.cases(ce))
+  if(anyNA(ce)) ce <- subset(ce, stats::complete.cases(ce))
   # Get new presence data
   obs <- cbind(
     data.frame(observed = raster::values(pres)[ce],

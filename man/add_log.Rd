@@ -14,6 +14,9 @@ add_log(x, filename)
 \item{filename}{A \code{\link{character}} object.
 The destination must be writeable and filename ends with \code{'txt'}.}
 }
+\value{
+Adds a log file to a \code{\link{distribution}} object.
+}
 \description{
 This function allows to specify a file as \linkS4class{Log} file, which is used to save all
 console outputs, prints and messages.

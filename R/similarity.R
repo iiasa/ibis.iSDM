@@ -16,7 +16,9 @@ NULL
 #' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.
 #' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
 #' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
-#' @return This function returns a list containing:
+#' @param ... other options (Non specified).
+#' @return
+#'  This function returns a list containing:
 #'  * `similarity`: a `RasterStack` giving the environmental similarities for
 #'   each variable in `x` (only included when `full=TRUE`);
 #'  * `mis`: a `Raster` layer giving the minimum similarity value
@@ -33,8 +35,8 @@ NULL
 #'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references
-#' * Elith, J., Kearney, M., and Phillips, S. (2010) [The art of modelling range-shifting species](https://doi.org/10.1111/j.2041-210X.2010.00036.x). _Methods in Ecology and Evolution_, 1: 330-342
-#' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) [Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models](https://doi.org/10.1111/ddi.12209). _Diversity and Distributions_, 20: 1147-1159. doi:10.1111/ddi.12209
+#' * Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting species" https://doi.org/10.1111/j.2041-210X.2010.00036.x _Methods in Ecology and Evolution_, 1: 330-342
+#' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
 #' @importFrom raster stack nlayers init as.data.frame raster
 #' @importFrom methods is
 #' @importFrom stats na.omit
@@ -56,7 +58,7 @@ NULL
 methods::setGeneric(
   "similarity",
   signature = methods::signature("obj"),
-  function(obj, ref, ref_type = 'poipo', method = 'mess', ...) standardGeneric("similarity"))
+  function(obj, ref, ref_type = 'poipo', method = 'mess', predictor_names = NULL, full = FALSE, plot = TRUE, ...) standardGeneric("similarity"))
 
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity

@@ -7,15 +7,15 @@
 alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 }
 \arguments{
-\item{data}{\code{\linkS4class{Raster}} object to be resampled}
+\item{data}{\code{\linkS4class{Raster}} object to be resampled.}
 
-\item{template}{\code{\linkS4class{Raster}} or \code{\linkS4class{Spatial}} object from which geometry can be extracted}
+\item{template}{\code{\linkS4class{Raster}} or \code{\linkS4class{Spatial}} object from which geometry can be extracted.}
 
-\item{method}{method for resampling (Options: \code{"ngb"} or \code{"bilinear"})}
+\item{method}{method for resampling (Options: \code{"ngb"} or \code{"bilinear"}).}
 
-\item{func}{function for resampling (Default: \link{mean})}
+\item{func}{function for resampling (Default: \link{mean}).}
 
-\item{cl}{\code{\link{logical}} value if multicore computation should be used (Default: \code{TRUE})}
+\item{cl}{\code{\link{logical}} value if multicore computation should be used (Default: \code{TRUE}).}
 }
 \value{
 New \code{\link{Raster}} object aligned to the supplied template layer
@@ -29,5 +29,11 @@ in order to reduce computation time.
 \details{
 Nearest Neighbour resampling (ngb) is recommended for discrete and Bilinear
 resampling for continuous data.
+}
+\examples{
+\dontrun{
+ # Align one raster to another
+ ras1 <- alignRasters( ras1, ras2, method = "ngb", cl = FALSE)
+}
 }
 \keyword{utils}

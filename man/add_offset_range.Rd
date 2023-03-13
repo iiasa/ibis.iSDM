@@ -44,6 +44,9 @@ Can be used to for example to remove or reduce the expected value (Default: \cod
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 }
+\value{
+Adds a range offset to a \code{\link{distribution}} object.
+}
 \description{
 This function has additional options compared to the more generic
 \code{\link[=add_offset]{add_offset()}}, allowing customized options specifically for expert-based ranges as offsets or spatialized
@@ -58,6 +61,12 @@ in regression models are likelihood specific as they are added directly to the o
 
 Note that all offsets created by this function are by default log-transformed before export. Background values
 (e.g. beyond \code{\link{distance_max}}) are set to a very small constant (\code{1e-10}).
+}
+\examples{
+\dontrun{
+ # Adds the offset to a distribution object
+ distribution(background) |> add_offset_range(species_range)
+}
 }
 \references{
 \itemize{

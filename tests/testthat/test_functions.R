@@ -104,3 +104,12 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_lte(raster::cellStats(ex[[1]], "max"), 1)
 
 })
+
+# ---- #
+# Other generic functions in the package
+test_that('Test other generic functions', {
+
+  # Options working?
+  expect_type(ibis_options(), "list")
+
+})

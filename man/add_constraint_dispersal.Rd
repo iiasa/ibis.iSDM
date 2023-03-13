@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_dispersal}
 \alias{add_constraint_dispersal}
-\title{Adds a dispersal constrain to a scenario object}
+\title{Adds a dispersal constrain to a scenario object.}
 \usage{
 \S4method{add_constraint_dispersal}{BiodiversityScenario, character, numeric}(mod, method, value)
 }
@@ -18,12 +18,12 @@ give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 should be performed.}
 
-\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \link[kissmig:kissmig]{kissmig::kissmig}.}
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
 
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 }
 \description{
-Adds a dispersal constrain to a scenario object
+Adds a dispersal constrain to a scenario object.
 }
 \seealso{
 Other constraint: 

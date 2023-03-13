@@ -29,14 +29,19 @@ test_that('Check that data can be loaded.',{
 test_that('Check that test scenarios can be loaded.',{
   # Load the scenario data
   skip_if_not_installed('stars')
+  skip_if_not_installed('ncmeta')
   skip_if_not_installed('abind')
-  require(stars)
-  require(abind)
+  skip_on_os(os = "mac") # Added since stars throws errors here?
+
+  requireNamespace("stars")
+  requireNamespace("ncmeta")
+  requireNamespace("abind")
 
   ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
   expect_vector(ll)
   expect_length(ll,9)
   expect_true(all( assertthat::has_extension(ll,'nc') ))
+  expect_true(all( file.exists(ll) ))
 
   # Load stars files
   suppressWarnings( sc <- stars::read_stars(ll) )

@@ -29,7 +29,7 @@ during model fitting.
 }
 }
 \seealso{
-\code{\linkS4class{Prior}} and \code{\linkS4class{GDBPrior}}.
+\code{\linkS4class{Prior}} and \code{\link{GDBPrior}}.
 
 Other prior: 
 \code{\link{BARTPriors}()},

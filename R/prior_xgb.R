@@ -16,7 +16,7 @@ NULL
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
-#' @seealso [`Prior-class`] and [`GDBPrior-class`].
+#' @seealso [`Prior-class`] and [`GDBPrior`].
 #' @family prior
 #' @keywords priors
 #' @aliases XGBPrior
