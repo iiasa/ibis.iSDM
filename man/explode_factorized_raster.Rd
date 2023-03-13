@@ -14,6 +14,6 @@ can be supplied in which only factor variables are 'exploded'
 @param name An optional \code{\link{character}} name for the \link{raster}.
 @param ... Other parameters (not used).
 @returns A \code{\link{RasterStack}} object
-@keywords utils
+@keywords utils, internal
 @noRd
 }

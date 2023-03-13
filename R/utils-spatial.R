@@ -956,7 +956,7 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #'  @param name An optional [`character`] name for the [raster].
 #'  @param ... Other parameters (not used).
 #'  @returns A [`RasterStack`] object
-#'  @keywords utils
+#'  @keywords utils, internal
 #'  @noRd
 explode_factorized_raster <- function(ras, name = NULL, ...){
   assertthat::assert_that(is.Raster(ras),
