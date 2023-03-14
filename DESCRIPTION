@@ -48,7 +48,6 @@ Suggests:
     BoomSpikeSlab (>= 1.2.4),
     covr,
     inlabru,
-    cmdstanr,
     glmnet,
     glmnetUtils,
     dbarts (>= 0.9-22),
