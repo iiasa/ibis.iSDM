@@ -27,7 +27,6 @@ NULL
 #' @name %>%
 #' @rdname pipe
 #' @aliases pipe
-#' @importFrom magrittr %>%
 #' @export
 NULL
 
@@ -118,12 +117,12 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   if(length(new.packages)>0){
     if("INLA" %in% new.packages){
       suppressMessages(
-        install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
-                       dependencies = TRUE, quiet = TRUE)
+        utils::install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
+                                dependencies = TRUE, quiet = TRUE)
       )
     }
     suppressMessages(
-      install.packages(new.packages, dependencies = TRUE, quiet = TRUE)
+      utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE)
     )
   }
 
@@ -131,13 +130,13 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   if(update){
     if("INLA" %in% deps){
       # For windows
-      if(length(grep("Windows", osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
+      if(length(grep("Windows", utils::osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
         # On windows we remove INLA and reinstall
-        install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
+        utils::install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
       } else {
         require("INLA")
         suppressPackageStartupMessages(
-          inla.upgrade(ask = FALSE)
+          INLA::inla.upgrade(ask = FALSE)
         )
       }
     }

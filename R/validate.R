@@ -147,7 +147,7 @@ methods::setMethod(
     # Remove any sfc column if present
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
-    df <- subset(df, complete.cases(df))
+    df <- subset(df, stats::complete.cases(df))
     if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
     # --- #
     # Messenger
@@ -227,7 +227,7 @@ methods::setMethod(
     # Remove any sfc column if present
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
-    df <- subset(df, complete.cases(df))
+    df <- subset(df, stats::complete.cases(df))
     if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
     # --- #
     # Messenger
@@ -465,7 +465,7 @@ methods::setMethod(
     out$value[out$metric=='expected.accuracy'] <- Expected_accuracy <- Prob_1and1 + Prob_0and0 # Expected accuracy
     out$value[out$metric=='kappa'] <- (OA - Expected_accuracy) / (1 - Expected_accuracy)
 
-    if("modEvA" %in% installed.packages()[,1]){
+    if("modEvA" %in% utils::installed.packages()[,1]){
       check_package("modEvA")
       # Calculate AUC
       out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)

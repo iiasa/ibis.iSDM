@@ -158,7 +158,7 @@ capitalize_text <- function(x) {
 to_formula <- function(formula){
   # Convert to formula object
   if(!is.null(formula)) {
-    formula = as.formula(formula)
+    formula = stats::as.formula(formula)
   } else {
     # Asign a new waiver object
     formula = new_waiver()
@@ -413,8 +413,8 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     val_rw1 <- grep(pattern = 'rw1',x = te,value = TRUE)
     # Alternative quadratic variables in case rw1 fails
     if(length(val_rw1)>0){
-      val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
-    } else { val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
+      val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
+    } else { val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
     val_spde <- grep(pattern = 'spde',x = te,value = TRUE)
     val_ofs <- grep(pattern = 'offset',x = te,value = TRUE)
 
@@ -549,7 +549,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     assertthat::assert_that('purrr' %in% loadedNamespaces())
     # Construct all possible unique combinations
     varnames_comb <- 1:length(varnames) %>%
-      purrr::map(~ combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
+      purrr::map(~ utils::combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
       unlist(recursive = F)
 
     form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ",
@@ -601,11 +601,11 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
   if (any(z > t1, na.rm = TRUE)) {
     f <- which(z > t1)
     vals <- x[f]
-    if (vals < median(x, na.rm = TRUE)) {
+    if (vals < stats::median(x, na.rm = TRUE)) {
       xa <- (v2 <= vals) * 1
       out <- out + xa
     }
-    if (vals > median(x, na.rm = TRUE)) {
+    if (vals > stats::median(x, na.rm = TRUE)) {
       xb <- (v2 >= vals) * 1
       out <- out + xb
     }
@@ -647,7 +647,7 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
   if(length(singular_var)>0) x <- x[,-singular_var]
 
   # Calculate correlation matrix
-  cm <- cor(x, method = method)
+  cm <- stats::cor(x, method = method)
 
   # Copied from the \code{caret} package to avoid further dependencies
   if (any(!stats::complete.cases(cm))) stop("The correlation matrix has some missing values.")
@@ -725,7 +725,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
                             num.threads = 0
                           )
 
-  if(anyNA(coef(abess_fit)[,1]) ) {
+  if(anyNA(stats::coef(abess_fit)[,1]) ) {
     # Refit with minimum support size
     abess_fit <- abess::abess(x = env,
                               y = observed,
@@ -742,7 +742,7 @@ find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", 
 
   }
   # Get best vars
-  co <- coef(abess_fit, support.size = abess_fit[["best.size"]])
+  co <- stats::coef(abess_fit, support.size = abess_fit[["best.size"]])
   co <- names( which(co[,1] != 0))
   co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
   # Make some checks on the list of reduced variables

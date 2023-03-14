@@ -177,7 +177,7 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   for(tt in which){
     # Slice to a specific time frame for each
     o <- obj %>% stars:::slice.stars({{time_band}}, tt) |>
-      as("Raster")
+      methods::as("Raster")
 
     # Reset times to the correct ones
     o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
@@ -322,7 +322,7 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   fun <- match.arg(fun, c("mean", "sum"),several.ok = FALSE)
 
   # Convert to scenarios to data.frame
-  df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
+  df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., stats::complete.cases(.))
   names(df) <- c("x", "y", "band", "suitability")
   # Add grid cell grouping
   df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
@@ -418,7 +418,7 @@ summarise_change <- function(scenario){
     ar_unit <- "ha"
     mult <- 0.0001
   } else { mult <- 1}
-  ar <- as(ar, "Raster")
+  ar <- methods::as(ar, "Raster")
 
   # --- #
   val <- c("Current range", "Future range", "Unsuitable",

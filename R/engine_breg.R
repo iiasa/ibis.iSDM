@@ -35,7 +35,7 @@ engine_breg <- function(x,
 
   # Check whether xgboost package is available
   check_package('BoomSpikeSlab')
-  if(!("BoomSpikeSlab" %in% loadedNamespaces()) || ('BoomSpikeSlab' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("BoomSpikeSlab" %in% loadedNamespaces()) || ('BoomSpikeSlab' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('BoomSpikeSlab');attachNamespace("BoomSpikeSlab")},silent = TRUE)
   }
 
@@ -175,7 +175,7 @@ engine_breg <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -252,8 +252,8 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
 
           # Also update the formula
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
         }
 
         # Prediction container
@@ -413,7 +413,7 @@ engine_breg <- function(x,
 
           # Make a prediction, but do in parallel so as to not overuse memory
           full$rowid <- 1:nrow(full)
-          full_sub <- subset(full, complete.cases(full))
+          full_sub <- subset(full, stats::complete.cases(full))
           w_full_sub <- w_full[full_sub$rowid]
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
@@ -645,10 +645,10 @@ engine_breg <- function(x,
             suppressWarnings(
               df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
                                                        data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+                                                       proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
               )
             )
-            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
 
             # Add all others as constant
             if(is.null(constant)){
@@ -740,7 +740,7 @@ engine_breg <- function(x,
             }
 
             df$rowid <- 1:nrow(df)
-            df_sub <- subset(df, complete.cases(df))
+            df_sub <- subset(df, stats::complete.cases(df))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
             # For Integrated model, take the last one

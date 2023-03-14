@@ -106,7 +106,7 @@ engine_inlabru <- function(x,
     if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
 
     # Convert the study region
-    region.poly <- as(sf::st_geometry(x$background), "Spatial")
+    region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
 
     # Calculate area
     ar <- suppressWarnings(
@@ -160,7 +160,7 @@ engine_inlabru <- function(x,
         params <- self$get_data("params")
 
         # Convert the study region
-        region.poly <- as(sf::st_geometry(model$background), "Spatial")
+        region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
 
         # Convert to boundary object for later
         suppressWarnings(
@@ -280,7 +280,7 @@ engine_inlabru <- function(x,
           nc.nb <- spdep::poly2nb(ns, queen = TRUE)
           #Convert the adjacency matrix into a file in the INLA format
           adjmat <- spdep::nb2mat(nc.nb,style = "B")
-          adjmat <- as(adjmat, "dgTMatrix")
+          adjmat <- methods::as(adjmat, "dgTMatrix")
           # adjmat <- INLA::inla.graph2matrix(nc.nb)
           # Save the adjaceny matrix as output
           self$data$latentspatial <- adjmat
@@ -370,7 +370,7 @@ engine_inlabru <- function(x,
                                rm.na = FALSE)
           for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
           ips@data$Intercept <- 1
-          ips <- subset(ips, complete.cases(ips@data)) # Necessary as some integration points can fall outside land area
+          ips <- subset(ips, stats::complete.cases(ips@data)) # Necessary as some integration points can fall outside land area
           # Return results
           return(ips)
         } else if(mode == 'stack'){
@@ -383,7 +383,7 @@ engine_inlabru <- function(x,
                                               id = "istack",
                                               joint = FALSE)
           ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
-          ips <- subset(ips, complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
+          ips <- subset(ips, stats::complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
           # Convert to sp
           ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
                                             data = ips[, names(ips) %notin% c('x','y')],
@@ -391,7 +391,7 @@ engine_inlabru <- function(x,
           )
           # Select only the predictor names
           ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
-          ips <- subset(ips, complete.cases(ips@data))
+          ips <- subset(ips, stats::complete.cases(ips@data))
           abs_E <- ips$e; ips$e <- NULL
           # Return list of result
           return(list(ips = ips, E = abs_E))
@@ -433,11 +433,11 @@ engine_inlabru <- function(x,
           # ips <- self$calc_integration_points(model, mode = 'cp')
           #
           # # Log gaussian cox process
-          # lh <- inlabru::like(formula = update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+          # lh <- inlabru::like(formula = stats::update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
           #                     # include = model$biodiversity[[j]]$predictors_names,
           #                     family = "cp",
           #                     data = df,
-          #                     # samplers = as(model$background,"Spatial"),
+          #                     # samplers = methods::as(model$background,"Spatial"),
           #                     domain = list(coordinates = self$get_data("mesh")),
           #                     ips = ips,
           #                     options = o
@@ -489,7 +489,7 @@ engine_inlabru <- function(x,
         # --- #
         # Defining the component function
         if(length(model$biodiversity)>1){
-          comp <- as.formula(
+          comp <- stats::as.formula(
             paste(' ~ 0 + Intercept(1) ',
                   ifelse(model$biodiversity[[1]]$use_intercept,
                          paste("+",paste0('Intercept_',
@@ -501,7 +501,7 @@ engine_inlabru <- function(x,
                   )
           )
         } else {
-          comp <- as.formula(
+          comp <- stats::as.formula(
             paste0( "~ Intercept(1)")
           )
         }
@@ -509,7 +509,7 @@ engine_inlabru <- function(x,
         # Add Offset if set
         if(!is.Waiver(model$offset)){
           ovn <- "spatial_offset"
-          comp <- update.formula(comp,
+          comp <- stats::update.formula(comp,
                                  paste(c(' ~ . +', paste0(ovn,'(main = ', ovn, ', model = "offset")')), collapse = " ")
           )
         }
@@ -557,7 +557,7 @@ engine_inlabru <- function(x,
                 # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015, so we define it like this here
                 pp <- ', hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
             }
-            comp <- update.formula(comp,
+            comp <- stats::update.formula(comp,
                                    paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
                                                           pp,', model = "',m,'")'), collapse = " ")
             )
@@ -577,7 +577,7 @@ engine_inlabru <- function(x,
           if(inherits(spde, "inla.spde") ){
             for(i in 1:length(model$biodiversity)){
               # Add spatial component term
-              comp <- update.formula(comp,
+              comp <- stats::update.formula(comp,
                              paste0(c("~ . + "),
                                     paste0("spatial.field", i,
                                            "(main = coordinates,",
@@ -677,7 +677,7 @@ engine_inlabru <- function(x,
           test_form <- comp
           # Remove variables that are never removed
           if(!is.null(keep)){
-            test_form <- update.formula(test_form, paste0(". ~ . - ",
+            test_form <- stats::update.formula(test_form, paste0(". ~ . - ",
                                                           paste0(
                                                             grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
                                                             collapse = "-"
@@ -750,7 +750,7 @@ engine_inlabru <- function(x,
                 best_found <- results_base$form
               } else {
                 # Otherwise continue get best model
-                test_form <- as.formula(results$form[which.min(results$dic)])
+                test_form <- stats::as.formula(results$form[which.min(results$dic)])
               }
               rm(results_base, results)
             } else {
@@ -766,7 +766,7 @@ engine_inlabru <- function(x,
           # Make sure to add kept variables back
           if(!is.null(keep)){
             te <- attr(stats::terms.formula(comp),'term.label')
-            best_found <- update.formula(best_found, paste0(". ~ . + ",
+            best_found <- stats::update.formula(best_found, paste0(". ~ . + ",
                                                           paste0(
                                                             grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
                                                             collapse = "+"
@@ -774,7 +774,7 @@ engine_inlabru <- function(x,
             )
           }
           # Replace component to be tested with best found
-          comp <- as.formula(best_found)
+          comp <- stats::as.formula(best_found)
         }
 
         # --- #
@@ -862,7 +862,7 @@ engine_inlabru <- function(x,
             ofs <- paste0("", ovn," + ")
           } else { ofs <- ""}
 
-          pfo <- as.formula(
+          pfo <- stats::as.formula(
             paste0("~",fun,"( ",ii, " + ", ofs, paste0(vn, collapse = " + "),
                    # Add spatial latent effects
                    ifelse("latentspatial" %in% self$list_data(),
@@ -955,8 +955,8 @@ engine_inlabru <- function(x,
                                                   data = newdata[, names(newdata) %notin% c('x','y')],
                                                   proj4string = self$get_data('mesh')$crs
               )
-              newdata <- subset(newdata, complete.cases(newdata@data)) # Remove missing data
-              newdata <- as(newdata, 'SpatialPixelsDataFrame')
+              newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
+              newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
             }
             # Check that model variables are in prediction dataset
             assertthat::assert_that(
@@ -985,7 +985,7 @@ engine_inlabru <- function(x,
                 ii <- "Intercept"
               }
 
-              form <- as.formula(
+              form <- stats::as.formula(
                 paste0("~",backtransf,"( ",ii, " + ", paste0(vn, collapse = " + "),
                        ifelse(length(mod$summary.spde2.blc)>0, "+ spatial.field", ""),
                        ")")
@@ -1074,7 +1074,7 @@ engine_inlabru <- function(x,
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
             pred_cov <- inlabru:::predict.bru(mod,
                                 df_partial,
-                                as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+                                stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
                                 n.samples = 100,
                                 probs = c(0.05,0.5,0.95)
                                 )
@@ -1125,8 +1125,8 @@ engine_inlabru <- function(x,
                                                 data = model$predictors[, names(model$predictors) %notin% c('x','y')],
                                                 proj4string = self$get_data('mesh')$crs
             )
-            df_partial <- subset(df_partial, complete.cases(df_partial@data)) # Remove missing data
-            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+            df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
+            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
 
             # Add all others as constant
             if(is.null(constant)){
@@ -1144,7 +1144,7 @@ engine_inlabru <- function(x,
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
             pred_cov <- inlabru:::predict.bru(mod,
                                               df_partial,
-                                              as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
+                                              stats::as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
                                               n.samples = 100,
                                               probs = c(0.05,0.5,0.95)
             )
@@ -1190,7 +1190,7 @@ engine_inlabru <- function(x,
           plot_spatial = function(self, spat = NULL, type = "response", what = "spatial.field1", ...){
             # Get mesh, domain and model
             mesh <- self$get_data("mesh")
-            domain <- as(self$model$background, "Spatial")
+            domain <- methods::as(self$model$background, "Spatial")
             mod <- self$get_data('fit_best')
             type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
 
@@ -1222,7 +1222,7 @@ engine_inlabru <- function(x,
               suppressWarnings(
                 lambda <- inlabru:::predict.bru(mod,
                                                 spat,
-                                                as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
+                                                stats::as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
                                                 )
               )
 

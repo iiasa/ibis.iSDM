@@ -48,7 +48,7 @@ engine_bart <- function(x,
 
   # Check whether dbarts package is available
   check_package('dbarts')
-  if(!("dbarts" %in% loadedNamespaces()) || ('dbarts' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("dbarts" %in% loadedNamespaces()) || ('dbarts' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('dbarts');attachNamespace("dbarts")},silent = TRUE)
   }
 
@@ -185,7 +185,7 @@ engine_bart <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -248,8 +248,8 @@ engine_bart <- function(x,
           model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
 
           # Also update the formula
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
         }
 
         # Prediction container
@@ -323,7 +323,7 @@ engine_bart <- function(x,
         # Select predictors
         full <- subset(full, select = c('x','y', model$biodiversity[[1]]$predictors_names))
         full$cellid <- rownames(full) # Add rownames
-        full <- subset(full, complete.cases(full))
+        full <- subset(full, stats::complete.cases(full))
 
         # Clamp?
         if( settings$get("clamp") ) full <- clamp_predictions(model, full)
@@ -507,7 +507,7 @@ engine_bart <- function(x,
         # Compute end of computation time
         settings$set('end.time', Sys.time())
         # Also append boosting control option to settings
-        for(entry in slotNames(dc)) settings$set(entry, slot(dc,entry))
+        for(entry in methods::slotNames(dc)) settings$set(entry, methods::slot(dc,entry))
         for(entry in names(params)) settings$set(entry, params[[entry]])
         # Create output
         out <- bdproto(
@@ -563,7 +563,7 @@ engine_bart <- function(x,
             # Define rowids as those with no missing data
             rownames(newdata) <- 1:nrow(newdata)
             newdata$rowid <- as.numeric( rownames(newdata) )
-            newdata <- subset(newdata, complete.cases(newdata))
+            newdata <- stats::subset(newdata, stats::complete.cases(newdata))
 
             # Also get settings for bias values
             settings <- self$settings

@@ -430,7 +430,7 @@ methods::setMethod(
     if(nrow(layer)>1) layer <- layer |> sf::st_union() |> sf::st_as_sf()
 
     # Rasterize the range
-    if( 'fasterize' %in% installed.packages()[,1] ){
+    if( 'fasterize' %in% utils::installed.packages()[,1] ){
       ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL, background = NA) },silent = TRUE)
       if(inherits(ras_range,"try-error")){
         myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')

@@ -59,7 +59,7 @@ engine_xgboost <- function(x,
 
   # Check whether xgboost package is available
   check_package('xgboost')
-  if(!("xgboost" %in% loadedNamespaces()) || ('xgboost' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("xgboost" %in% loadedNamespaces()) || ('xgboost' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('xgboost');attachNamespace("xgboost")},silent = TRUE)
   }
 
@@ -208,7 +208,7 @@ engine_xgboost <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -508,8 +508,8 @@ engine_xgboost <- function(x,
               gamma = 0:5,
               min_child_weight = 0:6,
               # Randomness
-              subsample = runif(1, .7, 1),
-              colsample_bytree = runif(1, .6, 1),
+              subsample = stats::runif(1, .7, 1),
+              colsample_bytree = stats::runif(1, .6, 1),
               eval = NA
             )
           }

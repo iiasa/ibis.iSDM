@@ -82,7 +82,7 @@ BiodiversityDatasetCollection <- bdproto(
     o$y <- sf::st_coordinates(o)[,2]
 
     # Return coordinates
-    if(hasName(o,'geom')) sf::st_coordinates(o) else o[,c('x','y')]
+    if(utils::hasName(o,'geom')) sf::st_coordinates(o) else o[,c('x','y')]
   },
   # Remove a specific biodiversity dataset by id
   rm_data = function(self, id) {
@@ -178,7 +178,7 @@ BiodiversityDatasetCollection <- bdproto(
     # Get observed columns
     cols <- self$get_columns_occ()
 
-    par.ori <- par(no.readonly = TRUE)
+    par.ori <- graphics::par(no.readonly = TRUE)
     # Base plot
     g <- ggplot2::ggplot() + ggplot2::geom_sf() + ggplot2::labs( title = self$name())
     # Adding the other elements

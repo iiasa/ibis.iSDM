@@ -312,7 +312,7 @@ BiodiversityScenario <- bdproto(
     if(is.null(position)) position <- time[length(time)]
     final <- scenario %>%
       stars:::filter.stars(band == position) %>%
-      as('Raster')
+      methods::as('Raster')
     raster::projection(final) <- raster::projection(baseline)
     # -- #
     if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
@@ -372,10 +372,10 @@ BiodiversityScenario <- bdproto(
       ar <- stars:::st_area.stars(scenario)
       # Get the unit
       ar_unit <- units::deparse_unit(ar$area)
-      new <- as(scenario,"Raster") * as(ar, "Raster")
+      new <- methods::as(scenario,"Raster") * methods::as(ar, "Raster")
       new <- raster::setZ(new, time)
       # Convert to scenarios to data.frame
-      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., complete.cases(.))
+      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., stats::complete.cases(.))
       names(df)[4] <- "area"
       # --- #
       # Now calculate from this data.frame several metrics related to the area and change in area
@@ -389,7 +389,7 @@ BiodiversityScenario <- bdproto(
 
       # Total amount of area occupied for a given time step
       out <- df %>% dplyr::group_by(band) %>% dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
-      out$totarea <- raster::cellStats((new[[1]]>=0) * as(ar, "Raster"), "sum")
+      out$totarea <- raster::cellStats((new[[1]]>=0) * methods::as(ar, "Raster"), "sum")
       if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
         out$totarea <- out$totarea / 1e6
         out <- dplyr::rename(out, totarea_km2 = totarea)
@@ -399,7 +399,7 @@ BiodiversityScenario <- bdproto(
       totchange_occ <- df %>%
           dplyr::group_by(id) %>%
           dplyr::mutate(change = (area - dplyr::lag(area)) ) %>% dplyr::ungroup() %>%
-          subset(., complete.cases(.))
+          subset(., stats::complete.cases(.))
       o <- totchange_occ %>% dplyr::group_by(band) %>%
         dplyr::summarise(totchange_stable_km2 = sum(area[change == 0]),
                          totchange_gain_km2 = sum(change[change > 0]),
@@ -488,7 +488,7 @@ BiodiversityScenario <- bdproto(
     if(oftype == "stars"){
       if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     } else {
-      out <- as(out, "Raster")
+      out <- methods::as(out, "Raster")
       if(plot) plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     }
     return(out)
@@ -571,7 +571,7 @@ BiodiversityScenario <- bdproto(
         writeNetCDF(ras_migclim, fname = fname, varName = "MigCLIM output", dt = dt)
       }
     } else if(type %in% 'feather'){
-      assertthat::assert_that('feather' %in% installed.packages()[,1],
+      assertthat::assert_that('feather' %in% utils::installed.packages()[,1],
                               msg = 'Feather package not installed!')
       fname <- paste0( tools::file_path_sans_ext(fname), "__migclim", ".feather")
       feather::write_feather(ras, path = fname)

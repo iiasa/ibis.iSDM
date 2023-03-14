@@ -70,7 +70,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     dims <- stars::st_dimensions(env)
     # Convert to list
     env_list <- list()
-    for(name in lyrs) env_list[[name]] <- as(env[name], 'Raster')
+    for(name in lyrs) env_list[[name]] <- methods::as(env[name], 'Raster')
   } else {
     # Get times in case a stack is supplied (this can get lost depending on transformation)
     times <- raster::getZ(env)
@@ -183,7 +183,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
       # Check how many components are requested:
       if(pca.var<1){
-        sums <- loadings( summary(pca) )[]
+        sums <- stats::loadings( summary(pca) )[]
         props <- cumsum(colSums(sums^2) / nrow(sums)) # Cumulative explained variance
         nComp <- length( which(props <= pca.var) )
       }
@@ -303,7 +303,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Create a list to house the results
     env_list <- list()
     for(name in cutoffs$deriv){
-      env_list[[name]] <- as(env[cutoffs[which(cutoffs$deriv==name),2]], 'Raster') # Specify original raster
+      env_list[[name]] <- methods::as(env[cutoffs[which(cutoffs$deriv==name),2]], 'Raster') # Specify original raster
     }
     assertthat::assert_that(length(env_list) > 0)
   } else {cutoffs <- NULL}
@@ -443,7 +443,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 
     if(is.Raster(env)){
       # Make unique combinations
-      ind <- combn(int_variables, 2)
+      ind <- utils::combn(int_variables, 2)
 
       # Now for each combination build new variable
       new_env <- raster::stack()
@@ -465,7 +465,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   if(inherits(env, 'stars')){
     # Add the original layers back
     for(name in names(env)){
-      env_list[[name]] <- as(env[name], 'Raster') # Specify original raster
+      env_list[[name]] <- methods::as(env[name], 'Raster') # Specify original raster
     }
 
     # Convert list back to stars

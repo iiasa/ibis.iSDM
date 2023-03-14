@@ -595,7 +595,7 @@ methods::setMethod(
     # Make some checks #
     assertthat::assert_that(
       inherits(mod, "DistributionModel"),
-      hasName(mod, "model"),
+      utils::hasName(mod, "model"),
       !is.Waiver(mod$get_data("fit_best"))
     )
     # Check that model type is known

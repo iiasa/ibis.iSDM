@@ -121,21 +121,21 @@ methods::setMethod(
     # If plot is specified, make figures. Otherwise return the list of rasters
     if(plot){
       if(method == 'mess'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(2,2))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(2,2))
         raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
         raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
         raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
         raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
-        par(par.ori)
+        graphics::par(par.ori)
       } else if(method == 'nt'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(1,3))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(1,3))
         raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
         raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
         raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
         # FIXME: add categorical legend left to it
-        par(par.ori)
+        graphics::par(par.ori)
       }
     } else {
       return( out )
@@ -190,7 +190,7 @@ methods::setMethod(
                           df = TRUE)
     # Subset to variables in obj and remove missing rows
     ex <- subset.data.frame(ex, select = names(obj))
-    ex <- subset.data.frame(ex, complete.cases(ex))
+    ex <- subset.data.frame(ex, stats::complete.cases(ex))
 
     if(method == 'mess'){
       out <- .mess(covs = obj,
@@ -210,20 +210,20 @@ methods::setMethod(
     # If plot is specified, make figures. Otherwise return the list of rasters
     if(plot){
       if(method == 'mess'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(2,2))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(2,2))
         raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
         raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
         raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
         raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
-        par(par.ori)
+        graphics::par(par.ori)
       } else if(method == 'nt'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(1,3))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(1,3))
         raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
         raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
         raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
-        par(par.ori)
+        graphics::par(par.ori)
       }
     } else {
       return( out )

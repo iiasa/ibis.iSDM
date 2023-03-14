@@ -211,7 +211,7 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
   assertthat::assert_that(length(bbox)==4) #check for 4 digits
-  assertthat::assert_that(noNA(bbox)) #check for NAs
+  assertthat::assert_that(assertthat::noNA(bbox)) #check for NAs
   assertthat::assert_that(is.numeric(as.numeric(bbox))) #check for numeric-ness
 
   paste('POLYGON((',
@@ -584,13 +584,13 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
     coords_split <- ggplot2::cut_width(1:nrow(coords),10,boundary=0)
 
     cl <- doParallel::registerDoParallel(cores = getOption('ibis.nthread'))
-    out <- foreach(z = iterators::iter(unique(coords_split)),
-                       .combine = 'rbind',
-                       .inorder = FALSE,
-                       .multicombine = TRUE,
-                       .errorhandling = 'stop',
-                       .export = c('coords','coords_env','coords_split', 'disfun'),
-                       .packages = c('geodist')
+    out <- foreach::foreach(z = iterators::iter(unique(coords_split)),
+                            .combine = 'rbind',
+                            .inorder = FALSE,
+                            .multicombine = TRUE,
+                            .errorhandling = 'stop',
+                            .export = c('coords','coords_env','coords_split', 'disfun'),
+                            .packages = c('geodist')
     ) %dopar% {
       o <-
         apply(coords[which(coords_split==z),], 1, function(xy1, xy2){
@@ -689,7 +689,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
   }
 
   if(rm.na){
-    ex <- subset(ex, complete.cases(ex))
+    ex <- subset(ex, stats::complete.cases(ex))
   }
   assertthat::assert_that(is.data.frame(ex),
                           nrow(ex)>0,
@@ -895,7 +895,7 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
     coords <- sf::st_coordinates(coords)
   }
   # Polynomial transform
-  a0 <- poly(x = as.matrix( coords ), degree = degree, simple = TRUE)
+  a0 <- stats::poly(x = as.matrix( coords ), degree = degree, simple = TRUE)
   # Standardize colnames
   poly.names <- colnames(a0) # Column names for later
   poly.names <- paste0("spatialtrend_", gsub("\\.","_",poly.names) )
@@ -1114,7 +1114,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     ex <- data.frame(id = 1:nrow(coords),
                      cid = raster::extract(bg, coords)
     )
-    ex <- subset(ex, complete.cases(ex)) # Don't need missing points
+    ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
 
     ex <- dplyr::left_join(ex,
                            ex %>% dplyr::group_by(cid) %>% dplyr::summarise(N = dplyr::n()),
@@ -1153,7 +1153,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
                      pres = raster::extract(ras, coords),
                      bias = raster::extract(env, coords)
     )
-    ex <- subset(ex, complete.cases(ex)) # Don't need missing points
+    ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
     # Now identify those to be thinned
     ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$pres > totake[1]), 1, 0)
     assertthat::assert_that(dplyr::n_distinct(ex$tothin) == 2)
@@ -1215,11 +1215,11 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
       xy = TRUE)
 
     stk$cid <- 1:nrow(stk)
-    stk <- subset(stk, complete.cases(stk))
+    stk <- subset(stk, stats::complete.cases(stk))
 
     # Cluster
-    E <- kmeans(x = subset(stk, select = -cid),
-                centers = ncol(stk)-1, iter.max = 10)
+    E <- stats::kmeans(x = subset(stk, select = -cid),
+                       centers = ncol(stk)-1, iter.max = 10)
 
     stk$cluster <- E$cluster
 

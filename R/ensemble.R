@@ -350,7 +350,7 @@ methods::setMethod(
                    1, function(x) mean(x, na.rm = TRUE))
     } else if(method == 'median'){
       out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) median(x, na.rm = TRUE))
+                   1, function(x) stats::median(x, na.rm = TRUE))
     } else if(method == 'weighted.mean'){
       out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                    1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
@@ -534,7 +534,7 @@ methods::setMethod(
     } else if(method == 'median'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                        FUN = function(x = out[[layer]]) {
-                         return(cbind( median = median(x), mad = mad(x)))
+                         return(cbind( median = stats::median(x), mad = mad(x)))
                        }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "median", "mad")
     }

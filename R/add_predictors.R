@@ -1158,7 +1158,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
             make.names(unlist(class_units)) |> as.vector()
           )
 
-          ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
+          ff <- ff %>% stars:::split.stars(col_class) %>% stats::setNames(nm = class_units)
 
           # FIXME: Dirty hack to deal with the forest zone dimension
           # If there are more dimensions than 3, aggregate over them
@@ -1251,7 +1251,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   if(!is.null(template)){
     # Check that template is a raster, otherwise rasterize for GLOBIOM use
     if(inherits(template, "sf")){
-      o <- sc %>% stars:::slice.stars("time" , 1) %>% as("Raster")
+      o <- sc %>% stars:::slice.stars("time" , 1) %>% methods::as("Raster")
       if("fasterize" %in% utils::installed.packages()[,1]){
         template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
       } else {

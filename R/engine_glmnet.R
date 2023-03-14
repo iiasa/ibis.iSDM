@@ -52,11 +52,11 @@ engine_glmnet <- function(x,
 
   # Check whether glmnet package is available
   check_package('glmnet')
-  if(!("glmnet" %in% loadedNamespaces()) || ('glmnet' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("glmnet" %in% loadedNamespaces()) || ('glmnet' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('glmnet');attachNamespace("glmnet")},silent = TRUE)
   }
   check_package('glmnetUtils') # glmnetUtils is a helper functions for formulas
-  if(!("glmnetUtils" %in% loadedNamespaces()) || ('glmnetUtils' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("glmnetUtils" %in% loadedNamespaces()) || ('glmnetUtils' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('glmnetUtils');attachNamespace("glmnetUtils")},silent = TRUE)
   }
 
@@ -183,7 +183,7 @@ engine_glmnet <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -283,7 +283,7 @@ engine_glmnet <- function(x,
         li <- model$biodiversity[[1]]$link
         if(!is.null(li)){
           if(li %in% c("cloglog", "logit", "probit")){
-            fam <- binomial(link = li)
+            fam <- stats::binomial(link = li)
           } else {
             if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Custom link functions not supported!"))
           }
@@ -315,12 +315,12 @@ engine_glmnet <- function(x,
           p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
         }
         # Duplicate p.fac container for lower and upper limits
-        lowlim <- rep(-Inf, length(p.fac)) |> setNames(names(p.fac))
-        upplim <- rep(Inf, length(p.fac)) |> setNames(names(p.fac))
+        lowlim <- rep(-Inf, length(p.fac)) |> stats::setNames(names(p.fac))
+        upplim <- rep(Inf, length(p.fac)) |> stats::setNames(names(p.fac))
 
         # Trick for creation for some default lambda values for the regularization multiplier
         if(is.null(params$lambda)){
-          reg <- default.regularization(p = df$observed, m = model.matrix(form, df)) * c(1, p.fac) # add 1 for the intercept
+          reg <- default.regularization(p = df$observed, m = stats::model.matrix(form, df)) * c(1, p.fac) # add 1 for the intercept
           params$lambda <- 10^(seq(4, 0, length.out = 200)) * sum(p.fac)/length(p.fac) * sum(p.fac)/sum(w)
           if(anyNA(params$lambda)) params$lambda <- NULL
         }
@@ -345,7 +345,7 @@ engine_glmnet <- function(x,
           # linear_predictors <- attr(terms.formula(form), "term.labels")
           # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
           #
-          # form <- update.formula(form,
+          # form <- stats::update.formula(form,
           #                        paste0(
           #                          ". ~ . +",
           #                          paste0("I(", linear_predictors,"^2)",collapse = " + "),
@@ -403,22 +403,22 @@ engine_glmnet <- function(x,
         #   },silent = FALSE)
         # } else {
           cv_gn <- try({
-            cv.glmnet(formula = form,
-                      data = df,
-                      alpha = params$alpha, # Elastic net mixing parameter
-                      lambda = params$lambda, # Overwrite lambda
-                      weights = w, # Case weights
-                      offset = ofs,
-                      family = fam,
-                      penalty.factor = p.fac,
-                      # Option for limiting the coefficients
-                      lower.limits = lowlim,
-                      upper.limits = upplim,
-                      standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                      maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-                      parallel = getOption("ibis.runparallel"),
-                      trace.it = settings$get("verbose"),
-                      nfolds = 10  # number of folds for cross-validation
+            glmnetUtils::cv.glmnet(formula = form,
+                                   data = df,
+                                   alpha = params$alpha, # Elastic net mixing parameter
+                                   lambda = params$lambda, # Overwrite lambda
+                                   weights = w, # Case weights
+                                   offset = ofs,
+                                   family = fam,
+                                   penalty.factor = p.fac,
+                                   # Option for limiting the coefficients
+                                   lower.limits = lowlim,
+                                   upper.limits = upplim,
+                                   standardize = FALSE, # Don't standardize to avoid doing anything to weights
+                                   maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+                                   parallel = getOption("ibis.runparallel"),
+                                   trace.it = settings$get("verbose"),
+                                   nfolds = 10  # number of folds for cross-validation
             )
           },silent = FALSE)
         # }
@@ -441,7 +441,7 @@ engine_glmnet <- function(x,
           }
           # Make a subset of non-na values
           full$rowid <- 1:nrow(full)
-          full_sub <- subset(full, complete.cases(full))
+          full_sub <- subset(full, stats::complete.cases(full))
           w_full_sub <- w_full[full_sub$rowid]
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
@@ -493,7 +493,7 @@ engine_glmnet <- function(x,
             mod <- self$get_data('fit_best')
             model <- self$model
             df <- model$biodiversity[[length( model$biodiversity )]]$predictors
-            co <- coef(mod) |> row.names() # Get model coefficient names
+            co <- stats::coef(mod) |> row.names() # Get model coefficient names
             # Set type
             if(is.null(type)) type <- self$settings$get("type")
 
@@ -579,7 +579,7 @@ engine_glmnet <- function(x,
             df$rowid <- 1:nrow(df)
             # Match x.var to argument
             x.var <- match.arg(x.var, names(df), several.ok = FALSE)
-            df_sub <- subset(df, complete.cases(df))
+            df_sub <- subset(df, stats::complete.cases(df))
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
@@ -666,7 +666,7 @@ engine_glmnet <- function(x,
             df$w <- model$exposure # Also get exposure variable
             # Make a subset of non-na values
             df$rowid <- 1:nrow(df)
-            df_sub <- subset(df, complete.cases(df))
+            df_sub <- subset(df, stats::complete.cases(df))
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 

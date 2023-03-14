@@ -279,15 +279,15 @@ DistributionModel <- bdproto(
     assertthat::assert_that(is.character(what))
     if(inherits(self, 'GDB-Model')){
       # How many effects
-      n <- length( coef( self$get_data(x) ))
+      n <- length( stats::coef( self$get_data(x) ))
       # Use the base plotting
-      par.ori <- par(no.readonly = TRUE)
-      par(mfrow = c(ceiling(n/3),3))
+      par.ori <- graphics::par(no.readonly = TRUE)
+      graphics::par(mfrow = c(ceiling(n/3),3))
 
       mboost:::plot.mboost(x = self$get_data(x),
                            type = 'b',cex.axis=1.5, cex.lab=1.5)
 
-      par(par.ori)#dev.off()
+      graphics::par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = what)
     } else if(inherits(self, 'GLMNET-Model')) {

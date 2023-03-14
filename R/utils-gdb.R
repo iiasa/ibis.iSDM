@@ -82,10 +82,10 @@ built_formula_gdb <- function(model, id, x, settings){
     # Convert to formula
     form <- to_formula(form)
     # Add offset if specified
-    if(!is.Waiver(model$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+    if(!is.Waiver(model$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
     if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
       # Update with spatial term
-      form <- update.formula(form, paste0(" ~ . + ",
+      form <- stats::update.formula(form, paste0(" ~ . + ",
                                           x$engine$get_equation_latent_spatial())
       )
     }
@@ -93,25 +93,25 @@ built_formula_gdb <- function(model, id, x, settings){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(terms(form), "response")==0){
-      form <- update.formula(form, "observed ~ .")
+    if(attr(stats::terms(form), "response")==0){
+      form <- stats::update.formula(form, "observed ~ .")
     }
     # Check that bols/bbs are in terms and if not add them for each variable
     if( settings$get("only_linear") ){
-      if( length(grep("bols",attr(terms(form2), "term.labels") ))==0 ){
+      if( length(grep("bols",attr(stats::terms(form2), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
-        form <- as.formula(paste0("observed ~", paste0("bols(", obj$predictors_names, ")",collapse = " + ")))
+        form <- stats::as.formula(paste0("observed ~", paste0("bols(", obj$predictors_names, ")",collapse = " + ")))
       }
     } else {
-      if( length(grep("bbs",attr(terms(form2), "term.labels") ))==0 ){
+      if( length(grep("bbs",attr(stats::terms(form2), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
-        form <- as.formula(paste0("observed ~", paste0("bbs(", obj$predictors_names, ")",collapse = " + ")))
+        form <- stats::as.formula(paste0("observed ~", paste0("bbs(", obj$predictors_names, ")",collapse = " + ")))
       }
     }
 
     assertthat::assert_that(
       is.formula(form),
-      attr(terms(form), "response")==1, # Has Response
+      attr(stats::terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
     )
   }
@@ -139,7 +139,7 @@ predict_gdbclass <- function(fit, nd, template){
 
   # Remove missing data in newdata data.frame
   nd$cellid <- rownames(nd)
-  nd <- subset(nd, complete.cases(nd))
+  nd <- subset(nd, stats::complete.cases(nd))
 
   suppressWarnings(
     pred_gdb <- mboost::predict.mboost(object = fit, newdata = nd,

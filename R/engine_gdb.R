@@ -42,7 +42,7 @@ engine_gdb <- function(x,
                         ...) {
   # Check whether mboost package is available
   check_package('mboost')
-  if(!("mboost" %in% loadedNamespaces()) || ('mboost' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("mboost" %in% loadedNamespaces()) || ('mboost' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('mboost');attachNamespace("mboost")},silent = TRUE)
     }
 
@@ -184,7 +184,7 @@ engine_gdb <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Check that factors have been correctly set if any
@@ -269,8 +269,8 @@ engine_gdb <- function(x,
         fam <- switch (fam,
           "poisson" = mboost::Poisson(),
           "binomial" = mboost::Binomial(type = "glm", link = li),
-          "gaussian" = Gaussian(),
-          "hurdle" = Hurdle(nuirange = c(0,100))
+          "gaussian" = mboost::Gaussian(),
+          "hurdle" = mboost::Hurdle(nuirange = c(0,100))
         )
         self$data[['family']] <- fam
         assertthat::assert_that(inherits(fam,'boost_family'),msg = 'Family misspecified.')
@@ -312,7 +312,7 @@ engine_gdb <- function(x,
         full$cellid <- rownames(full) # Add row.names
         full$w <- model$exposure
         full$Intercept <- 1
-        full <- subset(full, complete.cases(full))
+        full <- subset(full, stats::complete.cases(full))
 
         # Clamp?
         if( settings$get("clamp") ) full <- clamp_predictions(model, full)
@@ -377,7 +377,7 @@ engine_gdb <- function(x,
           )
         },silent = FALSE)
         # If error, decrease step size by a factor of 10 and try again.
-        if(inherits(fit_gdb, "try-error") || length(names(coef(fit_gdb)))< 2){
+        if(inherits(fit_gdb, "try-error") || length(names(stats::coef(fit_gdb)))< 2){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
           bc$nu <- bc$nu * 0.01
           fit_gdb <- try({
@@ -402,7 +402,7 @@ engine_gdb <- function(x,
           # 5 fold Cross validation to prevent overfitting
           if(getOption("ibis.runparallel")){
             grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
-            cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+            cvf <- mboost::cv(stats::model.weights(fit_gdb),B = 5, type = "kfold")
 
             # Start cluster
             # cl <- parallel::makeCluster( getOption('ibis.nthread') )
@@ -416,7 +416,7 @@ engine_gdb <- function(x,
 
           } else {
             grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
-            cvf <- mboost::cv(model.weights(fit_gdb),B = 5, type = "kfold")
+            cvf <- mboost::cv(stats::model.weights(fit_gdb),B = 5, type = "kfold")
             try({cvm <- mboost::cvrisk(fit_gdb,
                                        folds = cvf, grid = grs,
                                        papply = pbapply::pblapply )
@@ -424,9 +424,9 @@ engine_gdb <- function(x,
             rm(cvf, grs)
           }
           # Check whether crossvalidation has run through successfully
-          if(exists('cvm') && mstop(cvm) > 0){
+          if(exists('cvm') && mboost::mstop(cvm) > 0){
             # Set the model to the optimal mstop to limit overfitting
-            fit_gdb[mstop(cvm)]
+            fit_gdb[mboost::mstop(cvm)]
           } else {cvm <- new_waiver()}
         } else {
           cvm <- new_waiver()
@@ -516,7 +516,7 @@ engine_gdb <- function(x,
             # Add rowid
             newdata$rowid <- 1:nrow(newdata)
             # Subset to non-missing data
-            newdata <- subset(newdata, complete.cases(newdata))
+            newdata <- subset(newdata, stats::complete.cases(newdata))
             # Make empty template
             temp <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
             # Predict
@@ -645,11 +645,11 @@ engine_gdb <- function(x,
 
             if(plot){
               # Plot both partial spatial partial
-              par.ori <- par(no.readonly = TRUE)
-              par(mfrow = c(1,3))
+              par.ori <- graphics::par(no.readonly = TRUE)
+              graphics::par(mfrow = c(1,3))
               raster::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen)
               mboost::plot.mboost(mod,which = x.var)
-              par(par.ori)
+              graphics::par(par.ori)
             }
             return(temp)
           },
