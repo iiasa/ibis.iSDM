@@ -124,16 +124,16 @@ print(mod)
 
 The `print` call at the end now shows some summary statistics contained in this object, such as the extent of the modelling background and the projection used, the number of biodiversity datasets added and statistics on the predictors, eventual priors and which engine is being used.
 
-Of course all of these steps can also be done in "pipe" using the ` %>% ` or `|>` syntax.
+Of course all of these steps can also be done in "pipe" using the `|>` syntax.
 
 ```{r, eval=TRUE, warning=FALSE}
 print("Create model")
 
-mod <- distribution(background) %>% 
+mod <- distribution(background) |> 
        add_biodiversity_poipo(virtual_species,
                               name = "Virtual test species",
-                              field_occurrence = "Observed") %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+                              field_occurrence = "Observed") |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
       engine_inlabru() 
 
 ```
@@ -263,7 +263,7 @@ predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_me
 predictors$koeppen_50km <- raster::ratify(predictors$koeppen_50km)
 
 # Create a distribution modelling pipeline
-x <- distribution(background) %>%
+x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   engine_xgboost(iter = 8000)
@@ -272,7 +272,7 @@ x <- distribution(background) %>%
 mod_null <- train(x, runname = 'Normal PPM projection', only_linear = TRUE, verbose = FALSE)
 # And with an added constrain
 # Calculated as nearest neighbour distance (NND) between all input points
-mod_dist <- train(x %>% add_latent_spatial(method = "nnd"),
+mod_dist <- train(x |> add_latent_spatial(method = "nnd"),
                   runname = 'PPM with NND constrain', only_linear = TRUE, verbose = FALSE)
 
 # Compare both
@@ -289,11 +289,11 @@ This approach can be particular suitable for current and future projections at l
 ```{r Prediction limits, fig.width = w, fig.height = h}
 # Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)
 # The zones layer must be a factor layer (e.g. is.factor(layer) )
-x <- distribution(background, limits = predictors$koeppen_50km) %>%
+x <- distribution(background, limits = predictors$koeppen_50km) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
-  rm_predictors("koeppen_50km") %>% 
+  rm_predictors("koeppen_50km") |> 
   engine_xgboost(iter = 3000, learning_rate = 0.01)
 
 # Spatially limited prediction

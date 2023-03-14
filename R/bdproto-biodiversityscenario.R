@@ -203,7 +203,7 @@ BiodiversityScenario <- bdproto(
       invisible()
     } else {
       # Get unique number of data values. Surely there must be an easier val
-      vals <- self$get_data()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique()
+      vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
       vals <- length(na.omit(vals))
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
@@ -310,8 +310,8 @@ BiodiversityScenario <- bdproto(
     time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
     if(is.numeric(position)) position <- time[position]
     if(is.null(position)) position <- time[length(time)]
-    final <- scenario %>%
-      stars:::filter.stars(band == position) %>%
+    final <- scenario |>
+      stars:::filter.stars(band == position) |>
       methods::as('Raster')
     raster::projection(final) <- raster::projection(baseline)
     # -- #
@@ -375,20 +375,20 @@ BiodiversityScenario <- bdproto(
       new <- methods::as(scenario,"Raster") * methods::as(ar, "Raster")
       new <- raster::setZ(new, time)
       # Convert to scenarios to data.frame
-      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., stats::complete.cases(.))
+      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
       names(df)[4] <- "area"
       # --- #
       # Now calculate from this data.frame several metrics related to the area and change in area
-      df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
-        dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
-        dplyr::mutate(area = dplyr::if_else(is.na(area), 0, area)) %>% # Convert missing data to 0
+      df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>
+        dplyr::ungroup() |> dplyr::select(-x,-y) |>
+        dplyr::mutate(area = dplyr::if_else(is.na(area), 0, area)) |> # Convert missing data to 0
         dplyr::arrange(id, band)
       df$area <- units::as_units(df$area, units::as_units(ar_unit))  # Set Units
       # Convert to km2 and remove units as this causes issues with dplyr
-      df$area <- units::set_units(df$area, "km2") %>% units::drop_units()
+      df$area <- units::set_units(df$area, "km2") |> units::drop_units()
 
       # Total amount of area occupied for a given time step
-      out <- df %>% dplyr::group_by(band) %>% dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
+      out <- df |> dplyr::group_by(band) |> dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
       out$totarea <- raster::cellStats((new[[1]]>=0) * methods::as(ar, "Raster"), "sum")
       if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
         out$totarea <- out$totarea / 1e6
@@ -396,15 +396,15 @@ BiodiversityScenario <- bdproto(
       }
 
       # Total amount of area lost / gained / stable since previous time step
-      totchange_occ <- df %>%
-          dplyr::group_by(id) %>%
-          dplyr::mutate(change = (area - dplyr::lag(area)) ) %>% dplyr::ungroup() %>%
-          subset(., stats::complete.cases(.))
-      o <- totchange_occ %>% dplyr::group_by(band) %>%
+      totchange_occ <- df |>
+          dplyr::group_by(id)  |>
+          dplyr::mutate(change = (area - dplyr::lag(area)) ) |> dplyr::ungroup() |>
+          (\(.) subset(., stats::complete.cases(.)))()
+      o <- totchange_occ |> dplyr::group_by(band) |>
         dplyr::summarise(totchange_stable_km2 = sum(area[change == 0]),
                          totchange_gain_km2 = sum(change[change > 0]),
                          totchange_loss_km2 = sum(change[change < 0]))
-      out <- out %>% dplyr::left_join(o, by = "band")
+      out <- out |> dplyr::left_join(o, by = "band")
 
       if(relative == TRUE){
         # Finally calculate relative change to baseline (first entry) for all entries where this is possible

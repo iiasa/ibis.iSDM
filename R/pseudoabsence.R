@@ -227,7 +227,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   } else { bias <- NULL }
 
   # Rasterize the presence estimates
-  bg1 <- raster::rasterize(df[,c('x','y')] %>% sf::st_drop_geometry(),
+  bg1 <- raster::rasterize(df[,c('x','y')] |> sf::st_drop_geometry(),
                            background, fun = 'count', background = 0)
   bg1 <- raster::mask(bg1, background)
 

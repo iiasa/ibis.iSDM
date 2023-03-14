@@ -13,7 +13,7 @@ NULL
 #' @returns Adds a log file to a [`distribution`] object.
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
+#'  x <- distribution(background) |>
 #'     add_log()
 #'  x
 #' }

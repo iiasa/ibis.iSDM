@@ -15,10 +15,10 @@
 #' @param ... Any other arguements passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
-#' x <- distribution(background) %>%
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-#'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
+#' x <- distribution(background)  |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_output(x, "testmodel.tif")
 #' }
 
@@ -307,10 +307,10 @@ writeNetCDF <- function(file, fname,
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
-#' x <- distribution(background) %>%
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-#'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
+#' x <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points')  |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_summary(x, "testmodel.rds")
 #' }
 #' @keywords utils

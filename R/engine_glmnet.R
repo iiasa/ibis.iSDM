@@ -163,7 +163,7 @@ engine_glmnet <- function(x,
                                        field_occurrence = 'observed',
                                        template = bg,
                                        settings = model$biodiversity[[1]]$pseudoabsence_settings)
-          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points

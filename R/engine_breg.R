@@ -155,7 +155,7 @@ engine_breg <- function(x,
                                        field_occurrence = 'observed',
                                        template = bg,
                                        settings = model$biodiversity[[1]]$pseudoabsence_settings)
-          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points
@@ -570,7 +570,7 @@ engine_breg <- function(x,
               df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
 
-            df_partial <- df_partial %>% as.data.frame()
+            df_partial <- df_partial |> as.data.frame()
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
               df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
@@ -594,7 +594,7 @@ engine_breg <- function(x,
               matrixStats::rowSds(pred_breg, na.rm = TRUE),
               matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
               apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
+            ) |> as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
             pred_part$cv <- pred_part$sd / pred_part$mean
             # And attach the variable
@@ -680,7 +680,7 @@ engine_breg <- function(x,
               matrixStats::rowSds(pred_breg, na.rm = TRUE),
               matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
               apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
+            ) |> as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
             pred_part$cv <- pred_part$sd / pred_part$mean
 

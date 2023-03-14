@@ -548,11 +548,11 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
   } else if(tolower(type) == 'all'){
     assertthat::assert_that('purrr' %in% loadedNamespaces())
     # Construct all possible unique combinations
-    varnames_comb <- 1:length(varnames) %>%
-      purrr::map(~ utils::combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
+    varnames_comb <- 1:length(varnames)  |>
+      purrr::map(~ utils::combn(varnames, .x) |> apply(2, list) |> unlist(recursive = F)) |>
       unlist(recursive = F)
 
-    form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ",
+    form_temp <- varnames_comb |> purrr::map(~paste0(response, " ~ ",
                                                       paste(val_int,collapse = '+'),'+',
                                                       paste(.x, collapse = " + ")) )
   }
@@ -636,7 +636,7 @@ find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method =
                           is.null(keep) || is.vector(keep)
   )
   keep <- keep[keep %in% names(env)] # Remove those not in the data.frame. For instance if a spatial effect is selected
-  if(!is.null(keep) || length(keep) == 0) x <- env %>% dplyr::select(-keep) else x <- env
+  if(!is.null(keep) || length(keep) == 0) x <- env |> dplyr::select(-keep) else x <- env
 
   # Removing non-numeric columns
   non.numeric.columns <- colnames(x)[!sapply(x, is.numeric)]
@@ -790,14 +790,14 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 
   } else {
     # Simply count them
-    if(inherits(df, 'sf')) df <- df %>% sf::st_drop_geometry()
+    if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
     pres <- raster::rasterize(df[,c("x","y")],
                               template, fun = 'count', background = 0)
   }
   assertthat::assert_that(
     is.Raster(pres), is.finite(raster::cellStats(pres, "max"))
   )
-  if(inherits(df, 'sf')) df <- df %>% sf::st_drop_geometry()
+  if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
   # Get cell ids
   ce <- raster::cellFromXY(pres, df[,c("x","y")])
   # Remove any NA if present
@@ -807,7 +807,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
     data.frame(observed = raster::values(pres)[ce],
                raster::xyFromCell(pres, ce) # Center of cell
     )
-  ) %>%
+  ) |>
     # Unique to remove any duplicate values (otherwise double counted cells)
     unique()
 

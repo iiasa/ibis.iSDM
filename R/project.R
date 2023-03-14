@@ -107,7 +107,7 @@ methods::setMethod(
       tr <- fit$get_data(n)[[1]]
       tr <- cbind( raster::coordinates(tr), data.frame(thresh = values(tr)))
       tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
-      tr <- tr %>% subset(., stats::complete.cases(thresh))
+      tr <- tr |> (\(.) subset(., stats::complete.cases(thresh)))()
 
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(

@@ -1,35 +1,6 @@
 #' @include utils.R
 NULL
 
-#' Pipe operator
-#'
-#' This package uses the pipe operator (`\%>\%`) to express nested code
-#' as a series of imperative procedures.
-#'
-#' @param lhs, rhs An object and a function.
-#' @seealso [magrittr::%>%()], [tee()].
-#' @return An object.
-#' @keywords internal
-#' @examples
-#' # set seed for reproducibility
-#' set.seed(500)
-#'
-#' # generate 100 random numbers and calculate the mean
-#' mean(runif(100))
-#'
-#' # reset the seed
-#' set.seed(500)
-#'
-#' # repeat the previous procedure but use the pipe operator instead of nesting
-#' # function calls inside each other.
-#' runif(100) %>% mean()
-#'
-#' @name %>%
-#' @rdname pipe
-#' @aliases pipe
-#' @export
-NULL
-
 #' Central colour repository
 #' @description This command contains all the colours
 #' specified for use in \pkg{ibis.iSDM}.
@@ -122,7 +93,8 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
       )
     }
     suppressMessages(
-      utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE)
+      utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE,
+                              repos = "https://cloud.r-project.org")
     )
   }
 
@@ -142,7 +114,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
     }
     # Update all the package excluding INLA
     suppressMessages(
-      utils::update.packages(deps, ask = FALSE)
+      utils::update.packages(deps, ask = FALSE, repos = "https://cloud.r-project.org")
     )
   }
   invisible()

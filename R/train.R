@@ -91,11 +91,11 @@ NULL
 #' @examples
 #' \dontrun{
 #'  # Fit a linear penalized logistic regression model via stan
-#'  x <- distribution(background) %>%
+#'  x <- distribution(background) |>
 #'         # Presence-absence data
-#'         add_biodiversity_poipa(surveydata) %>%
+#'         add_biodiversity_poipa(surveydata) |>
 #'         # Add predictors and scale them
-#'         add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+#'         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
 #'         # Use stan for estimation
 #'         engine_stan(chains = 2, iter = 1000, warmup = 500)
 #'  # Train the model
@@ -380,7 +380,7 @@ methods::setMethod(
       # --- #
       # Rename observation column to 'observed'. Needs to be consistent for INLA
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
-      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations %>% dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
+      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations |> dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
 
       # If the type is polygon, convert to regular sampled points per covered grid cells
@@ -488,7 +488,7 @@ methods::setMethod(
         fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
         co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         if(length(co)>0){
-          env %>% dplyr::select(-dplyr::all_of(co)) -> env
+          env |> dplyr::select(-dplyr::all_of(co)) -> env
         }
       } else { co <- NULL }
 
@@ -630,8 +630,8 @@ methods::setMethod(
       if(nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
-          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE)  %>%
-                              sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
+          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) |>
+                              sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
                               sf::st_cast("MULTIPOLYGON")
           )
         )

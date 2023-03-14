@@ -63,7 +63,7 @@ Available for all Engines.
 }
 \examples{
 \dontrun{
- distribution(background) \%>\% add_latent_spatial(method = "poly")
+ distribution(background) |> add_latent_spatial(method = "poly")
 }
 }
 \references{

@@ -672,7 +672,7 @@ engine_inla <- function(x,
                  ifelse(length(model$biodiversity)>1,"0 + ", ""),
                               paste0(sapply(model$biodiversity, function(x){
                                                 attr(stats::terms.formula(x$equation),"term.labels")
-                                              }) %>% c %>% unique(),collapse = " + ")
+                                              }) |> c() |> unique(),collapse = " + ")
           )
         )
 

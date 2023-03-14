@@ -83,7 +83,7 @@ For an integration of range data as predictor or offset, see \code{\link[=add_pr
 }
 \examples{
 \dontrun{
- x <- distribution(mod) \%>\%
+ x <- distribution(mod) |>
    add_biodiversity_polpo(protectedArea)
 }
 }

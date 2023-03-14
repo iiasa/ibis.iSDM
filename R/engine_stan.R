@@ -204,7 +204,7 @@ engine_stan <- function(x,
                                          field_occurrence = 'observed',
                                          template = bg,
                                          settings = model$biodiversity[[i]]$pseudoabsence_settings)
-            if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+            if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
             # Sample environmental points for absence only points
             abs <- subset(presabs, observed == 0)
             # Re-extract environmental information for absence points
@@ -695,7 +695,7 @@ engine_stan <- function(x,
             } else {
               df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
-            df_partial <- df_partial %>% as.data.frame()
+            df_partial <- df_partial |> as.data.frame()
 
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)

@@ -76,7 +76,7 @@ projection(pred_current) <- projection(background) # Same projection as backgrou
 
 # Get future predictors
 # These we will load in using the stars package and also ignoring the first time step
-pred_future <- stars::read_stars(ll) %>% stars:::slice.stars('Time', 2:86)
+pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', 2:86)
 st_crs(pred_future) <- st_crs(4326) # Set projection
 # Rename future predictors to those of current
 names(pred_future) <- names(pred_current)
@@ -93,10 +93,10 @@ For guidance on how distribution models are trained, see other vignettes ([1](01
 
 ```{r Train a basic model, eval = TRUE}
 # Train model adding the data loaded above
-x <- distribution(background) %>%
-  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+x <- distribution(background) |> 
+  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |> 
   # Note that we scale the predictors here
-  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
+  add_predictors(pred_current, transform = 'scale',derivates = 'none') |> 
   engine_glmnet(alpha = 0) 
 
 # Train the model
@@ -107,9 +107,9 @@ modf <- threshold(modf, method = 'percentile', value = 0.05)
 
 # -- #
 # Now lets create a scenarios object via scenarios
-sc <- scenario(modf) %>%
+sc <- scenario(modf) |> 
   # Apply the same variable transformations as above. 
-  add_predictors(pred_future, transform = 'scale') %>% 
+  add_predictors(pred_future, transform = 'scale') |> 
   # Calculate thresholds at each time step. The threshold estimate is taken from the model object.
   threshold()
 
@@ -187,15 +187,15 @@ Lastly there are also options to *stabilize* suitability projections via the `pr
 
 ```{r Add constraints and reproject, eval = TRUE, fig.width = w, fig.height = h}
 # Adding a simple negative exponential kernel to constrain the predictions
-sc.fit2 <- sc %>%  
-   add_constraint(method = "sdd_nex", value = 1e5) %>%
+sc.fit2 <- sc |>   
+   add_constraint(method = "sdd_nex", value = 1e5) |> 
    # Directly fit the object
    project(stabilize = F)
 
 # Also fit one projection a nichelimit has been added
-sc.fit3 <- sc %>%  
-   add_constraint(method = "sdd_nex", value = 1e5) %>%
-   add_constraint_adaptability(method = "nichelimit") %>% 
+sc.fit3 <- sc |>   
+   add_constraint(method = "sdd_nex", value = 1e5) |> 
+   add_constraint_adaptability(method = "nichelimit") |> 
    # Directly fit the object
    project(stabilize = F)
 
@@ -215,7 +215,7 @@ sc.fit3$plot(which = 40) # With dispersal limit and nichelimitation (within a st
 o1 <- sc.fit1$summary()
 o2 <- sc.fit2$summary()
 o3 <- sc.fit3$summary()
-arlim <- c(min(o1$area_km2, o2$area_km2, o3$area_km2),
+arlim <- c(min(o1$area_km2, o2$area_km2, o3$area_km2)-5000,
            max(o1$area_km2, o2$area_km2, o3$area_km2))
 
 plot(area_km2~band, data = o1, type = 'n',

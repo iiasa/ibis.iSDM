@@ -49,8 +49,8 @@ method to \code{"offset"} will automatically point to this option.
 }
 \examples{
 \dontrun{
- x <- distribution(background) \%>\%
-   add_predictors(covariates) \%>\%
+ x <- distribution(background) |>
+   add_predictors(covariates) |>
    add_control_bias(biasvariable, bias_value = NULL)
 }
 }

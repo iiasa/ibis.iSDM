@@ -34,8 +34,8 @@
 #' @keywords prior, offset
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
-#'    add_predictors(covariates) %>%
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
 #'    add_offset(nicheEstimate)
 #' }
 #' @name add_offset
@@ -181,8 +181,8 @@ methods::setMethod(
 #' @returns Adds a bias offset to a [`distribution`] object.
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
-#'    add_predictors(covariates) %>%
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
 #'    add_offset_bias(samplingBias)
 #' }
 #' @name add_offset_bias

@@ -93,8 +93,8 @@ We can define a generic model to use for any of the sections below.
 
 ```{r Create basemodel, eval = TRUE}
 # First define a generic model and engine using the available predictors
-basemodel <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+basemodel <- distribution(background) |> 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
       engine_inlabru() 
 ```
 
@@ -105,7 +105,7 @@ The most simple way of integrating prior observations into species distribution 
 ```{r Add range as predictor, eval = TRUE}
 
 # Here we simply add the range as simple binary predictor
-mod1 <- basemodel %>% 
+mod1 <- basemodel |>  
   add_predictor_range(virtual_range, method = "distance")
 
 # We can see that the range has been added to the predictors object
@@ -119,11 +119,11 @@ For instance suppose a species is known to occur between 300 and 800m above sea 
 
 ```{r add elevation as predictor, eval=TRUE}
 # Specification 
-basemodel <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+basemodel <- distribution(background) |> 
+      add_predictors(env = predictors, transform = "scale", derivates = "none")  |> 
       engine_inlabru() 
 
-mod1 <- basemodel %>% 
+mod1 <- basemodel |> 
   add_predictor_elevationpref(layer = predictors$elevation_mean_50km,
                               lower = 300, upper = 800)
 
@@ -142,11 +142,11 @@ Offsets can be specified as addition or as nuisance for a model, for instance ei
 ```{r Train model with range offset}
 
 # Specification 
-mod1 <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
-      add_offset_range(virtual_range, distance_max = 5e5) %>% 
-      engine_glmnet() %>% 
+mod1 <- distribution(background)  |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none")  |> 
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") |>  
+      add_offset_range(virtual_range, distance_max = 5e5) |>  
+      engine_glmnet() |>  
   # Train
   train(runname = "Prediction with range offset",only_linear = TRUE)
 
@@ -178,9 +178,9 @@ Prior specifications are specific to each engine and more information can be fou
 ```{r Specification of priors, eval = TRUE, fig.width = w, fig.height = h}
 
 # Set a clean base model with biodiversity data
-x <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      add_biodiversity_poipo(virtual_species, field_occurrence = "Observed") %>% 
+x <- distribution(background) |> 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
+      add_biodiversity_poipo(virtual_species, field_occurrence = "Observed") |>  
       engine_inlabru()
 
 # Make a first model
@@ -198,7 +198,7 @@ pp <- priors(p)
 pp$varnames()
 
 # Priors can then be added via 
-mod2 <- train(x %>% add_priors(pp), only_linear = TRUE)
+mod2 <- train(x |> add_priors(pp), only_linear = TRUE)
 # Or alternatively directly as parameter via add_predictors,
 # e.g. add_predictors(env = predictors, priors = pp)
 
@@ -219,19 +219,19 @@ Another very straight forward way for model-based integration is to simply fit t
 
 ```{r Model ensembles}
 # Create and fit two models
-mod1 <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      engine_glmnet() %>% 
+mod1 <- distribution(background) |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
+      engine_glmnet() |> 
       # Add dataset 1 
-      add_biodiversity_poipo(poipo = virtual_species, name = "Dataset1",field_occurrence = "Observed") %>% 
+      add_biodiversity_poipo(poipo = virtual_species, name = "Dataset1",field_occurrence = "Observed") |> 
       train(runname = "Test1", only_linear = TRUE)
 
-mod2 <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-      engine_xgboost(iter = 5000) %>% 
+mod2 <- distribution(background) |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
+      engine_xgboost(iter = 5000) |>  
       # Add dataset 2, Here we simple simulate presence-only points from a range
       add_biodiversity_polpo(virtual_range, name = "Dataset2",field_occurrence = "Observed",
-                             simulate = TRUE,simulate_points = 300) %>% 
+                             simulate = TRUE,simulate_points = 300) |>  
       train(runname = "Test1", only_linear = FALSE)
 
 # Show outputs of each model individually and combined
@@ -268,19 +268,21 @@ By default all engines that do not support any joint estimation (see below) will
 
 * "interaction": In the case of two datasets of the same type it also is possible to make use of factor interactions. In this case the prediction is made based on the first reference level (e.g. the first added dataset) with the others being "partialed" out during prediction. This method only works if one fits a model with multiple datasets on the same response (e.g. Bernoulli distributed). Can be used in projections (`scenario()`).
 
+* "weights": This type of integration works only for two biodiversity datasets of the same type. Here the datasets are combined into one, however the observations are weighted through a `weights` parameter in each add_biodiversity call. This can be for example used to give one dataset an arbitrary (or expert-defined) higher value compared to another.
+
 All of these can be specified as parameter in `train()`.
 
 <b>Note that for any of these methods (like "predictor" & "offset"), models are trained in the sequence at which datasets are added!</b>
 
 ```{r Combined integration}
 # Specification 
-mod1 <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+mod1 <- distribution(background) |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
     # A presence only dataset
-      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") |>  
     # A Presence absence dataset
-      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") %>% 
-      engine_xgboost() %>% 
+      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") |>  
+      engine_xgboost() |> 
   # Train
   train(runname = "Combined prediction",only_linear = TRUE,
         method_integration = "predictor")
@@ -324,15 +326,15 @@ See the [Engine comparison](04_engine_comparison.html) for an overview on which 
 ```{r, warning=FALSE, message=FALSE}
 
 # Define a model
-mod1 <- distribution(background) %>% 
-      add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
+mod1 <- distribution(background) |>  
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
     # A presence only dataset
-      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") %>% 
+      add_biodiversity_poipo(virtual_species,field_occurrence = "Observed") |>  
     # A Presence absence dataset
-      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") %>% 
+      add_biodiversity_poipa(virtual_pseudoabs,field_occurrence = "Observed") |>  
     # Use inlabru for estimation and default parameters.
     # INLA requires the specification of a mesh which in this example is generated from the data.
-      engine_inlabru() %>% 
+      engine_inlabru() |> 
   # Train
   train(runname = "Combined prediction", only_linear = TRUE,
         method_integration = "predictor")

@@ -6,7 +6,7 @@ test_that('Check that INLA works', {
   skip_if_not_installed('INLA')
 
   suppressWarnings(
-    suppressPackageStartupMessages( library(INLA) )
+    suppressPackageStartupMessages( requireNamespace("INLA") )
   )
   options("ibis.setupmessages" = FALSE)
 
@@ -47,9 +47,9 @@ test_that('Train a distribution model with INLA', {
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Now set them one up step by step
-  x <- distribution(background) %>%
-    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') %>%
+  x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') |>
     engine_inla(
       max.edge = c(.5, 3),
       offset = c(0.5, 1),

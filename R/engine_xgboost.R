@@ -187,7 +187,7 @@ engine_xgboost <- function(x,
                                          template = bg,
                                          settings = model$biodiversity[[1]]$pseudoabsence_settings)
           )
-          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
 
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
@@ -793,7 +793,7 @@ engine_xgboost <- function(x,
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data('fit_best')
             # Simply use the weights from the importance estimates
-            cofs <- xgboost:::xgb.importance(model = obj) %>%
+            cofs <- xgboost:::xgb.importance(model = obj) |>
               as.data.frame()
             cofs$Sigma <- NA
             if(!self$settings$get("only_linear")){

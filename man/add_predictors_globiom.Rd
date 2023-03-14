@@ -65,7 +65,7 @@ called directly via \code{formatGLOBIOM()}.
 }
 \examples{
 \dontrun{
- obj <- distribution(background) \%>\%
+ obj <- distribution(background) |>
         add_predictors_globiom(fname = "", transform = 'none')
  obj
 }

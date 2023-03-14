@@ -18,11 +18,11 @@ NULL
 #' @examples
 #' \dontrun{
 #' # Example with a trained model
-#' x <- distribution(background) %>%
+#' x <- distribution(background) |>
 #'         # Presence-absence data
-#'         add_biodiversity_poipa(surveydata) %>%
+#'         add_biodiversity_poipa(surveydata) |>
 #'         # Add predictors and scale them
-#'         add_predictors(env = predictors) %>%
+#'         add_predictors(env = predictors) |>
 #'         # Use glmnet and lasso regression for estimation
 #'         engine_glmnet(alpha = 1)
 #'  # Train the model

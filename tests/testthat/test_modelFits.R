@@ -29,9 +29,9 @@ test_that('Add further tests for model fits', {
   test_data <- virtual_points[ind,]
 
   # Now set them one up step by step
-  x <- distribution(background) %>%
-    add_biodiversity_poipa(train_data, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_predictors(predictors, transform = 'none',derivates = 'none') %>%
+  x <- distribution(background) |>
+    add_biodiversity_poipa(train_data, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors, transform = 'none',derivates = 'none') |>
     engine_glmnet()
 
   # Train the model

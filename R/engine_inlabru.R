@@ -516,8 +516,8 @@ engine_inlabru <- function(x,
 
         # --- #
         # Get unified predictors from likelihoods
-        pn <- lapply(lhl, function(x) all.vars(x$formula) ) %>% do.call(c,.) %>% unique()
-        # pn <- lapply(model$biodiversity, function(x) x$predictors_names ) %>% do.call(c,.) %>% unique()
+        pn <- lapply(lhl, function(x) all.vars(x$formula) ) |> (\(.) do.call(c,.))()  |>  unique()
+        # pn <- lapply(model$biodiversity, function(x) x$predictors_names ) |> do.call(c,.) |> unique()
         pn <- pn[grep("Intercept|coordinates", pn, invert = TRUE)]
         assertthat::assert_that(length(pn)>0)
         model$predictors_types <- model$predictors_types[which(model$predictors_types$predictors %in% pn),]
@@ -833,7 +833,7 @@ engine_inlabru <- function(x,
 
           # Get variables for inlabru
           if(length(model$biodiversity)>1){
-            vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
+            vn <- lapply(model$biodiversity, function(x) x$predictors_names) |> (\(.) do.call(c, .))() |> unique()
             ii <- paste("Intercept",
                         # # If multiple datasets, remove intercept
                         ifelse(length(model$biodiversity)>1,"+ 0", ""),
@@ -847,10 +847,10 @@ engine_inlabru <- function(x,
             )
             # Assert that variables are used in the likelihoods
             assertthat::assert_that(
-              all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
+              all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
             )
           } else {
-            # vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% unique()
+            # vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
             vn <- fit_bru$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
             ii <- "Intercept"
           }
@@ -969,17 +969,17 @@ engine_inlabru <- function(x,
 
               # Build the formula
               if(length(model$biodiversity)>1){
-                vn <- lapply(model$biodiversity, function(x) x$predictors_names) %>% do.call(c, .) %>% unique()
+                vn <- lapply(model$biodiversity, function(x) x$predictors_names) |>  (\(.) do.call(c, .))() |> unique()
                 ii <- paste("Intercept + ",paste0('Intercept_',
                                                   make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
                                                   sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
                 )
                 # Assert that variables are used in the likelihoods
                 assertthat::assert_that(
-                  all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) %>% do.call(c, .) %>% unique() ) )
+                  all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
                 )
               } else {
-                vn <- sapply(model$biodiversity, function(x) x$predictors_names) %>% unique()
+                vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
                 # vn <- mod$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
                 assertthat::assert_that(all(vn %in% mod$names.fixed))
                 ii <- "Intercept"
@@ -1062,7 +1062,7 @@ engine_inlabru <- function(x,
             } else {
               df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
-            df_partial <- df_partial %>% as.data.frame()
+            df_partial <- df_partial |> as.data.frame()
 
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
@@ -1102,7 +1102,7 @@ engine_inlabru <- function(x,
                 ggplot2::labs(x = x.var, y = "Partial effect")
               print(pm)
             }
-            return(o %>% as.data.frame() )
+            return(o |> as.data.frame() )
           },
           # (S)partial effect
           spartial = function(self, x.var, constant = NULL, plot = TRUE, type = "response"){

@@ -266,7 +266,7 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
         dfbin$value <- stats::pnorm(dfbin$value)
       }
       # FIXME: To replace with base::aggregate to get rid of dplyr dependency
-      dfbin <- dfbin %>% dplyr::group_by(variable) %>% dplyr::summarize(value = stats::median(value)) %>%
+      dfbin <- dfbin |> dplyr::group_by(variable) |> dplyr::summarize(value = stats::median(value)) |>
         data.frame()
       colnames(dfbin) <- c("is", "becomes")
       dfbin$is <- as.numeric(as.character(dfbin$is))

@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling Framework for Integrated Biodiversity Distribution Scenarios
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -21,18 +21,13 @@ License: CC BY 4.0
 Encoding: UTF-8
 Imports: 
     assertthat (>= 0.2.0),
-    cmdstanr,
     doFuture (>= 0.12.2),
     foreach,
     future (>= 1.23.0),
+    dplyr,
     geodist,
     ggplot2,
-    glmnet,
-    glmnetUtils,
     graphics,
-    INLA,
-    inlabru,
-    magrittr,
     methods,
     ncdf4,
     parallel,
@@ -47,11 +42,15 @@ Imports:
     uuid, 
     utils
 Depends:
-    R(>= 4.0.0)
+    R(>= 4.1.0)
 Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
     covr,
+    inlabru,
+    cmdstanr,
+    glmnet,
+    glmnetUtils,
     dbarts (>= 0.9-22),
     deldir,
     doParallel,
@@ -137,7 +136,6 @@ Collate:
     'utils-breg.R'
     'utils-gdb.R'
     'utils-glmnet.R'
-    'utils-pipe.R'
     'utils-predictors.R'
     'utils-scenario.R'
     'utils-stan.R'

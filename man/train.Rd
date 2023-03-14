@@ -125,11 +125,11 @@ be obtained from the same data and parameters and not all necessarily make sense
 \examples{
 \dontrun{
  # Fit a linear penalized logistic regression model via stan
- x <- distribution(background) \%>\%
+ x <- distribution(background) |>
         # Presence-absence data
-        add_biodiversity_poipa(surveydata) \%>\%
+        add_biodiversity_poipa(surveydata) |>
         # Add predictors and scale them
-        add_predictors(env = predictors, transform = "scale", derivates = "none") \%>\%
+        add_predictors(env = predictors, transform = "scale", derivates = "none") |>
         # Use stan for estimation
         engine_stan(chains = 2, iter = 1000, warmup = 500)
  # Train the model

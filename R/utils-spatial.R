@@ -69,7 +69,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
       # MC.cores does not work properly on windows. To be replaced with future
       if(Sys.info()['sysname']=="Windows") n_cores <- 1
       # Perform GIS analysis
-      split_results <- split(sf_df, split_vector) %>%
+      split_results <- split(sf_df, split_vector)  |>
         parallel::mclapply(function(x) sf_func(x, ...), mc.cores = n_cores)
 
       # Define the output_class. If length is greater than two, then grab the second variable.
@@ -1117,7 +1117,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
 
     ex <- dplyr::left_join(ex,
-                           ex %>% dplyr::group_by(cid) %>% dplyr::summarise(N = dplyr::n()),
+                           ex |> dplyr::group_by(cid) |> dplyr::summarise(N = dplyr::n()),
                            by = "cid"
     )
     # Points to take
@@ -1128,8 +1128,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     if(dplyr::n_distinct(ex$oversampled) > 1){
       # If there any oversampled
       # Now sample at random up to the maximum amount. Got tired of doing this outside tidyverse
-      o <- ex %>% dplyr::filter(oversampled == 1) %>%
-        dplyr::group_by(cid) %>%
+      o <- ex  |> dplyr::filter(oversampled == 1) |>
+        dplyr::group_by(cid) |>
         dplyr::slice_sample(n = min(totake))
       if(nrow(o)>0) sel <- append(sel, o$id)
       rm(o)

@@ -7,9 +7,8 @@ test_that('Scenarios and constraints', {
   skip_on_travis()
   skip_on_cran()
 
-  suppressWarnings( require('glmnet') )
-  suppressWarnings( require('igraph') )
-  suppressWarnings( library("ibis.iSDM") )
+  suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
+  suppressWarnings( requireNamespace('igraph', quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE) # Be less chatty
   options("ibis.seed" = 1234)
@@ -32,7 +31,7 @@ test_that('Scenarios and constraints', {
   for(i in ll) pred_current <- raster::addLayer(pred_current, raster::raster(i,layer = 1) )
   # Load the same files future ones
   suppressWarnings(
-    pred_future <- stars::read_stars(ll) %>% stars:::slice.stars('Time', seq(1, 86, by = 10))
+    pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', seq(1, 86, by = 10))
   )
   sf::st_crs(pred_future) <- sf::st_crs(4326)
 
@@ -43,8 +42,8 @@ test_that('Scenarios and constraints', {
 
   # --------------- #
   # Fit a model and add a threshold to it
-  fit <- distribution(background) %>%
-    add_biodiversity_poipa(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+  fit <- distribution(background) |>
+    add_biodiversity_poipa(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(pred_current) |>
     engine_glmnet(alpha = 0) |>
     train("test", inference_only = FALSE, verbose = FALSE) |>
@@ -104,8 +103,10 @@ test_that('Scenarios and constraints', {
 
   # Make a first projection
   mod <- sc |> add_predictors(pred_future) |> project()
-  expect_s3_class(summary(mod), "data.frame")
-  suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(), "stars") )
+  suppressWarnings( expect_s3_class(summary(mod), "data.frame") )
+  invisible(
+    suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(), "stars") )
+  )
 
   # These will throw errors as we haven't added thresholds
   expect_error(mod$plot_relative_change())

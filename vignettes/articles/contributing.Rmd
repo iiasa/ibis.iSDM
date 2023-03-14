@@ -25,9 +25,10 @@ For the latter, please get in touch with the package author or one of the mainta
 -   Don’t repeat yourself. Create new functions and if necessary
     classes. Equally try to reuse common names from R, e.g. *plot*,
     *summary*
--   Avoid using additional package dependencies where possible
+-   Please run code *checks* and *tests* regularly.
+-   Avoid using additional package dependencies where possible.
 -   Comment your code!!
--   Use assertions to verify inputs to functions
+-   Use assertions to verify inputs to functions.
 -   If bored, please write unit tests and ensure they all evaluate
     (CRTL+SHIFT+T)!
 

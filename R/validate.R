@@ -132,7 +132,7 @@ methods::setMethod(
                          o$name <- y$name; o$type <- y$type
                          subset(o, select = c(point_column, "name", "type", attr(o, "sf_column")))
                         } )
-                        ) %>% tibble::remove_rownames()
+                        )  |> tibble::remove_rownames()
       if(is.factor(point[[point_column]])){
         point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
       }

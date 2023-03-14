@@ -9,10 +9,10 @@ test_that('Setting up a distribution model',{
   skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
           message = "No cmdstan path")
 
-  suppressWarnings( library(raster) )
-  suppressWarnings( library(sf) )
-  suppressWarnings( library(rgeos) )
-  suppressWarnings( library(igraph) )
+  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
+  suppressWarnings( requireNamespace("sf", quietly = TRUE) )
+  suppressWarnings( requireNamespace("rgeos", quietly = TRUE) )
+  suppressWarnings( requireNamespace("igraph", quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE)
   # Background Raster
@@ -39,7 +39,7 @@ test_that('Setting up a distribution model',{
   expect_vector(names(x))
 
   # Now add one variable
-  x <- x %>% add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points')
+  x <- x |> add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points')
   expect_message(x$biodiversity,NA)
   expect_equal(x$biodiversity$length(),1)
   expect_equal(x$biodiversity$get_equations()[[1]],'<Default>')
@@ -47,7 +47,7 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  invisible( suppressWarnings( suppressMessages(x <- x %>% add_offset_range(virtual_range))) )
+  invisible( suppressWarnings( suppressMessages(x <- x |> add_offset_range(virtual_range))) )
   expect_equal(x$get_offset(),'range_distance')
   expect_s4_class(x$offset,'Raster')
 
@@ -56,25 +56,25 @@ test_that('Setting up a distribution model',{
   expect_true(is.Waiver( x$get_offset() ) )
 
   # Add Predictors
-  x <- x %>% add_predictors(predictors)
+  x <- x |> add_predictors(predictors)
   expect_s3_class(x$predictors, "PredictorDataset")
   expect_equal(x$predictors$length(),14)
   expect_true(is.vector(x$get_predictor_names()))
   # Try removing one
-  x <- x %>% rm_predictors('bio01_mean_50km')
+  x <- x |> rm_predictors('bio01_mean_50km')
   expect_equal(x$predictors$length(),13)
   expect_error( rm_predictors(x,'bio20_mean_50km') )
   # Finally select all predictors with CLC3
   n <- grep('CLC',x$get_predictor_names(),value = TRUE)
-  x <- x %>% sel_predictors(n)
+  x <- x |> sel_predictors(n)
   expect_equal(x$predictors$length(),5)
   expect_equal(x$get_predictor_names(), n)
 
   # Add brick object make derivatives
   pb <- raster::brick(predictors)
-  x <- distribution(background) %>% add_predictors(pb$aspect_mean_50km, derivates = 'quadratic')
+  x <- distribution(background) |> add_predictors(pb$aspect_mean_50km, derivates = 'quadratic')
   testthat::expect_equal(x$predictors$length(),2)
-  x <- distribution(background) %>% add_predictors(pb, derivates = c('quadratic','hinge'))
+  x <- distribution(background) |> add_predictors(pb, derivates = c('quadratic','hinge'))
   testthat::expect_equal(x$predictors$length(),84)
 
   # Interactions
@@ -83,7 +83,7 @@ test_that('Setting up a distribution model',{
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
-  x <- x %>% engine_inla()
+  x <- x |> engine_inla()
   # Mesh is not created yet
   expect_s3_class(x$engine$get_data("mesh"),'Waiver')
   expect_equal(x$engine$name,'<INLA>')
@@ -93,7 +93,7 @@ test_that('Setting up a distribution model',{
   expect_null(x$get_limits())
 
   # Add latent effect and see whether the attributes is changed
-  y <- x %>% add_latent_spatial(method = "spde")
+  y <- x |> add_latent_spatial(method = "spde")
   expect_vector( attr(y$get_latent(),'method'),'spde')
 
   # ---- #
@@ -103,19 +103,19 @@ test_that('Setting up a distribution model',{
   x <- distribution(background,limits = zones)
   expect_s3_class(x$get_limits(), "sf")
 
-  y <- x %>% engine_bart()
+  y <- x |> engine_bart()
   expect_equal( y$get_engine(), "<BART>")
-  y <- x %>% engine_breg()
+  y <- x |> engine_breg()
   expect_equal( y$get_engine(), "<BREG>")
-  y <- x %>% engine_gdb()
+  y <- x |> engine_gdb()
   expect_equal( y$get_engine(), "<GDB>")
-  y <- x %>% engine_inla()
+  y <- x |> engine_inla()
   expect_equal( y$get_engine(), "<INLA>")
-  y <- x %>% engine_inlabru()
+  y <- x |> engine_inlabru()
   expect_equal( y$get_engine(), "<INLABRU>")
-  y <- x %>% engine_stan()
+  y <- x |> engine_stan()
   expect_equal( y$get_engine(), "<STAN>")
-  y <- x %>% engine_xgboost()
+  y <- x |> engine_xgboost()
   expect_equal( y$get_engine(), "<XGBOOST>")
 
   # Normal x should still be none

@@ -141,10 +141,10 @@ methods::setMethod(
 #' @aliases get_priors
 #' @examples
 #' \dontrun{
-#'  mod <- distribution(background) %>%
-#'     add_predictors(covariates) %>%
-#'     add_biodiversity_poipo(points) %>%
-#'     engine_inlabru() %>%
+#'  mod <- distribution(background) |>
+#'     add_predictors(covariates) |>
+#'     add_biodiversity_poipo(points) |>
+#'     engine_inlabru() |>
 #'     train()
 #'  get_priors(mod, target_engine = "BART")
 #' }

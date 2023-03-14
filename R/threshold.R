@@ -107,7 +107,7 @@ methods::setMethod(
                        o$name <- y$name; o$type <- y$type
                        subset(o, select = c('observed', "name", "type", "geometry"))
                      } )
-    ) %>% tibble::remove_rownames()
+    ) |> tibble::remove_rownames()
     suppressWarnings(
       poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
     )

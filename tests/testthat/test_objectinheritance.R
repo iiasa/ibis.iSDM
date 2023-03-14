@@ -10,8 +10,8 @@ test_that('Check that distribution objects are properly inherited', {
           message = "No cmdstan path")
 
   # Load packages
-  require(raster)
-  require(sf)
+  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
+  suppressWarnings( requireNamespace("sf", quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE)
 
@@ -30,18 +30,18 @@ test_that('Check that distribution objects are properly inherited', {
 
   # Biodiversity
   expect_equal(x$biodiversity$length(),0)
-  x %>% add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points')
+  x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
   # Multiple
-  x %>% add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+  x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
-  x %>% add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+  x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
 
   # Offsets
-  suppressWarnings( x %>% add_offset_range(virtual_range) )
+  suppressWarnings( x |> add_offset_range(virtual_range) )
   expect_s3_class(x$offset, "Waiver")
 
   # -- #
@@ -69,29 +69,29 @@ test_that('Check that distribution objects are properly inherited', {
 
   # -- #
   # Latent effect check
-  x %>% add_latent_spatial(method = "spde",priors = NULL)
+  x |> add_latent_spatial(method = "spde",priors = NULL)
   expect_true(is.Waiver(x$latentfactors))
 
   # Engine
-  x %>% engine_gdb(boosting_iterations = 500)
+  x |> engine_gdb(boosting_iterations = 500)
   expect_true(is.Waiver(x$engine))
-  x %>% engine_stan()
+  x |> engine_stan()
   expect_true(is.Waiver(x$engine))
 
   # Priors
-  x %>% add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal')))
+  x |> add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal')))
   expect_true(is.Waiver(x$priors))
-  x %>% add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
+  x |> add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
   # Two different priors
-  x %>%
-    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal'))) %>%
+  x |>
+    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal'))) |>
     add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
 
   # Check variable removal
-  xx <- x %>% add_predictors(predictors)
-  xx %>% rm_predictors("hmi_mean_50km")
+  xx <- x |> add_predictors(predictors)
+  xx |> rm_predictors("hmi_mean_50km")
   expect_length(xx$get_predictor_names(), 14)
 
   # --- #

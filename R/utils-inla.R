@@ -351,7 +351,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     # Calculate area of each polygon in km2
     w <- sf::st_area(
        sf::st_as_sf(polys)
-    ) %>% units::set_units(km^2) %>% as.numeric()
+    ) |> units::set_units(km^2) |> as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
   }
@@ -382,13 +382,13 @@ mesh_as_sf <- function(mesh) {
       sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
       ID = index
       )
-  }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
+  }, points = mesh$loc[, c(1, 2)], pointindex = tv) |>
     # Convert the polygons to a SpatialPolygons object
-    sp::SpatialPolygons(., proj4string = mesh$crs) %>%
+    sp::SpatialPolygons(., proj4string = mesh$crs) |>
     # Convert to sf
     sf::st_as_sf(.)
   # Calculate and add area to the polygon
-  dp$areakm2 <- sf::st_area(dp) %>% units::set_units(km^2) %>% as.numeric()
+  dp$areakm2 <- sf::st_area(dp) |> units::set_units(km^2) |> as.numeric()
   dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
   return(dp)
 }
@@ -1054,7 +1054,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  # projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
 
   # TODO: Try and find an alternative to the splancs package to remove this dependent package
   suppressWarnings(
@@ -1282,8 +1282,8 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(length(w2)==1)
 
   # Format the output
-  o <- m[[w2]] %>%
-    tibble::rownames_to_column('variable') %>%
+  o <- m[[w2]]  |>
+    tibble::rownames_to_column('variable') |>
     tibble::as_tibble()
   if(what == "fixed"){
     names(o) <- c("variable", "mean", "sd", "q05", "q50", "q95", "mode", "kld")

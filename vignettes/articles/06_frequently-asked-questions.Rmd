@@ -80,9 +80,9 @@ in.
 
 ```{r, echo=TRUE,eval=FALSE}
 # Where zone is a provided raster
-mod <- distribution(background, limits = zone) %>% 
-  add_biodiversity_poipo(species_data) %>% 
-  engine_gdb() %>% 
+mod <- distribution(background, limits = zone) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_gdb() |>  
   train()
 plot(mod)
 ```
@@ -115,9 +115,9 @@ p <- list(
 pp <- priors(pp)
 
 # And can now added to the model
-mod <- distribution(background, limits = zone) %>% 
-  add_biodiversity_poipo(species_data) %>% 
-  add_predictors(covariates) %>% 
+mod <- distribution(background, limits = zone) |>  
+  add_biodiversity_poipo(species_data) |>  
+  add_predictors(covariates) |>  
   add_priors(priors = pp)
   engine_inlabru()
   
@@ -147,7 +147,7 @@ Alternatively one could think of specifying specific pseudo-absence sampling inf
 ss <- pseudoabs_settings(background = NULL, bias = bias_layer)
 
 # Assuming background and point data exists
-x <- distribution(background) %>% 
+x <- distribution(background) |>  
   add_biodiversity_poipo(points, pseudoabsence_settings = ss)
 ```
 
@@ -250,9 +250,9 @@ In addition, for Bayesian Engines other bands quantifying the posterior predicti
 
 **Example:**
 ```{r, echo=TRUE,eval=FALSE}
-mod <- distribution(background) %>% 
-  add_biodiversity_poipo(species_data) %>% 
-  engine_inlabru() %>% 
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_inlabru() |>  
   train()
 # To plot 
 plot(mod, "mean")

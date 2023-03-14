@@ -245,7 +245,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
-      varimp.bart(self$get_data(obj)) %>% tibble::remove_rownames()
+      varimp.bart(self$get_data(obj)) |> tibble::remove_rownames()
     } else if(inherits(self, 'STAN-Model')){
       vi <- rstan::summary(self$get_data(obj))$summary |> as.data.frame() |>
         tibble::rownames_to_column(var = "parameter") |> as.data.frame()

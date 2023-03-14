@@ -1,3 +1,7 @@
+# ibis.iSDM 0.0.3
+
+* Removed Magittr dependency #41
+
 # ibis.iSDM 0.0.2
 
 * Smaller documentation fixes, including to make sure examples and returns are in all exported function documentations.
