@@ -262,6 +262,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_rastervalue.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis.iSDM-package.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_dependencies.html</loc>
   </url>
   <url>
@@ -290,9 +293,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/partial.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/pipe.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/plot.html</loc>
