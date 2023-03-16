@@ -5,10 +5,12 @@
 \alias{effects.DistributionModel}
 \title{Plot effects of trained model}
 \usage{
-\method{effects}{DistributionModel}(x)
+\method{effects}{DistributionModel}(object, ...)
 }
 \arguments{
-\item{x}{Any fitted \link{distribution} object.}
+\item{object}{Any fitted \link{distribution} object.}
+
+\item{...}{Not used.}
 }
 \value{
 None.
