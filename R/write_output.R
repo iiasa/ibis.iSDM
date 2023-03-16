@@ -601,24 +601,26 @@ methods::setMethod(
     # Check that model type is known
     assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
     # Depending on engine, check package and load them
-    if(inherits(mod, "GDB-Model")){
-      check_package("mboost"); require("mboost")
-    } else if(inherits(mod, "BART-Model")){
-      check_package("dbarts"); require("dbarts")
-    } else if(inherits(mod, "INLABRU-Model")){
-      check_package("INLA"); require("INLA")
-      check_package("inlabru"); require("inlabru")
-    } else if(inherits(mod, "BREG-Model")){
-      check_package("BoomSpikeSlab"); require("BoomSpikeSlab")
-    } else if(inherits(mod, "GLMNET-Model")){
-      check_package("glmnet"); require("glmnet")
-      check_package("glmnetUtils"); require("glmnetUtils")
-    } else if(inherits(mod, "STAN-Model")){
-      check_package("rstan"); require("rstan")
-      check_package("cmdstanr"); require("cmdstanr")
-    } else if(inherits(mod, "XGBOOST-Model")){
-      check_package("xgboost"); require("xgboost")
+
+    if(inherits(mod, "GDB-Model") & !requireNamespace("mboost", quietly = TRUE)){
+     stop("Package 'mboost' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "BART-Model") & !requireNamespace("dbarts", quietly = TRUE)){
+      stop("Package 'dbarts' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "INLABRU-Model") & (!requireNamespace("INLA", quietly = TRUE) |
+              !requireNamespace("inlabru", quietly = TRUE))){
+      stop("Package 'INLA' and 'inlabru' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "BREG-Model") & !requireNamespace("BoomSpikeSlab", quietly = TRUE)){
+      stop("Package 'BoomSpikeSlab' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "GLMNET-Model") & (!requireNamespace("glmnet", quietly = TRUE) |
+              !requireNamespace("glmnetUtils", quietly = TRUE))){
+      stop("Package 'glmnet' and 'glmnetUtils' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "STAN-Model") & (!requireNamespace("rstan", quietly = TRUE) |
+              !requireNamespace("cmdstanr", quietly = TRUE))){
+      stop("Package 'rstan' and 'cmdstanr' needed for this function to work. Please install it.", .call = FALSE)
+    } else if(inherits(mod, "XGBOOST-Model") & !requireNamespace("xgboost", quietly = TRUE)){
+      stop("Package 'xgboost' needed for this function to work. Please install it.", .call = FALSE)
     }
+
     # --- #
     # Return the model
     return(mod)
