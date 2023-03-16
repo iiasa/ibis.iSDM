@@ -262,7 +262,7 @@ engine_inla <- function(x,
 
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA:::inla.mesh.assessment(
+          out <- INLA::inla.mesh.assessment(
               mesh = self$get_data('mesh'),
               spatial.range = 3,
               alpha = 2,

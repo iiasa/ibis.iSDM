@@ -301,7 +301,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLABRU-Model')) {
       # Use inlabru effect plot
       ggplot2::ggplot() +
-        inlabru:::gg(self$get_data(x)$summary.fixed, bar = TRUE)
+        inlabru::gg(self$get_data(x)$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)

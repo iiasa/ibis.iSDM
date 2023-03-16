@@ -317,7 +317,7 @@ methods::setMethod(
       # Format to table
       lmat <- do.call("rbind", mods) |> as.data.frame()
       # Get dimensions
-      lmat_dim <- stars:::st_dimensions(mods[[1]])
+      lmat_dim <- stars::st_dimensions(mods[[1]])
 
     } else {
       # Check that layers all have a prediction layer
@@ -335,7 +335,7 @@ methods::setMethod(
         sapply(mods, function(x) x$get_data()[layer])
       ) |> as.data.frame()
       # Get dimensions
-      lmat_dim <- stars:::st_dimensions(mods[[1]]$get_data())
+      lmat_dim <- stars::st_dimensions(mods[[1]]$get_data())
     }
     if(normalize){
       lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
@@ -369,7 +369,7 @@ methods::setMethod(
     # Convert to stars
     out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
     # Rename dimension names
-    out <- out |> stars:::st_set_dimensions(names = c("x", "y", "band"))
+    out <- out |> stars::st_set_dimensions(names = c("x", "y", "band"))
     # Rename
     names(out) <- paste0("ensemble_", layer)
     # Add attributes on the method of ensemble
@@ -390,7 +390,7 @@ methods::setMethod(
       # Convert to stars
       out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
       # Rename dimension names
-      out_uncertainty <- out_uncertainty |> stars:::st_set_dimensions(names = c("x", "y", "band"))
+      out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = c("x", "y", "band"))
       # Rename
       names(out_uncertainty) <- paste0(uncertainty, "_", layer)
       # Add attributes on the method of ensembling

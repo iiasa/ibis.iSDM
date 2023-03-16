@@ -9,7 +9,8 @@ NULL
 #' @note
 #' For some models, where default coefficients plots are not available,
 #' this function will attempt to generate [partial] dependency plots instead.
-#' @param x Any fitted [distribution] object.
+#' @param object Any fitted [distribution] object.
+#' @param ... Not used.
 #'
 #' @examples
 #' \dontrun{
@@ -26,4 +27,4 @@ NULL
 #' @method effects DistributionModel
 #' @keywords partial
 #' @export
-effects.DistributionModel <- function(x) x$effects()
+effects.DistributionModel <- function(object, ...) object$effects()

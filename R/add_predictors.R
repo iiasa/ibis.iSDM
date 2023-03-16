@@ -1091,7 +1091,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   sc <- vector() # For storing the scenario files
 
   # Now open the netcdf file with stats
-  if( length( grep("netcdf", stars:::detect.driver(fname), ignore.case = TRUE) )>0 ){
+  if( length( grep("netcdf", stars::detect.driver(fname), ignore.case = TRUE) )>0 ){
     if(verbose){
       myLog('[Predictor]','green',"Loading in predictor file...")
       pb <- progress::progress_bar$new(total = length(vars),
@@ -1207,7 +1207,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       grep("y|latitude",names(full_dis), ignore.case = TRUE,value = TRUE),
       grep("year|time",names(full_dis), ignore.case = TRUE,value = TRUE)
       )] # Order assumed to be correct
-    stars:::st_dimensions(sc) <- full_dis # Target dimensions
+    stars::st_dimensions(sc) <- full_dis # Target dimensions
 
   } else { stop("Fileformat not recognized!")}
 

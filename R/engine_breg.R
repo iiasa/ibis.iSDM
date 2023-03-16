@@ -423,7 +423,7 @@ engine_breg <- function(x,
           # Now depending on parallization setting use foreach
           if(getOption("ibis.runparallel")){
             # Check that future is registered
-            if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
+            if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
                                                             strategy = getOption("ibis.futurestrategy"))
 
             # Run the outgoing command

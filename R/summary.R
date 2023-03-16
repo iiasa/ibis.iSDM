@@ -11,7 +11,7 @@ NULL
 #'
 #' When unsure, it is usually a good strategy to run [summary] on any object.
 #'
-#' @param x Any prepared object.
+#' @param object Any prepared object.
 #' @param ... not used.
 #'
 #' @seealso [base::summary()].
@@ -43,37 +43,37 @@ NULL
 #' @method summary distribution
 #' @keywords summary
 #' @export
-summary.distribution <- function(x, ...) x$summary()
+summary.distribution <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary DistributionModel
 #' @keywords summary
 #' @export
-summary.DistributionModel <- function(x, ...) x$summary()
+summary.DistributionModel <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary PredictorDataset
 #' @keywords summary
 #' @export
-summary.PredictorDataset <- function(x, ...) x$summary()
+summary.PredictorDataset <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary BiodiversityScenario
 #' @keywords summary
 #' @export
-summary.BiodiversityScenario <- function(x, ...) x$summary(...)
+summary.BiodiversityScenario <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary PriorList
 #' @keywords summary
 #' @export
-summary.PriorList <- function(x, ...) x$summary()
+summary.PriorList <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary Settings
 #' @keywords summary
 #' @export
-summary.Settings <- function(x, ...) x$summary()
+summary.Settings <- function(object, ...) object$summary()
 
 #' Obtains the coefficients of a trained model
 #'
@@ -95,4 +95,4 @@ NULL
 #' @method coef DistributionModel
 #' @keywords coef
 #' @export
-coef.DistributionModel <- function(x, ...) x$get_coefficients()
+coef.DistributionModel <- function(object, ...) object$get_coefficients()

@@ -104,7 +104,7 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
     all(vars %in% names(obj))
   )
   # Future?
-  if(foreach:::getDoParRegistered()){
+  if(foreach::getDoParRegistered()){
     ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
     fut <- TRUE
   } else { fut <- FALSE }
@@ -322,7 +322,7 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   fun <- match.arg(fun, c("mean", "sum"),several.ok = FALSE)
 
   # Convert to scenarios to data.frame
-  df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) |> (\(.) subset(., stats::complete.cases(.)))()
+  df <- stars:::as.data.frame.stars(stars::st_as_stars(scenario)) |> (\(.) subset(., stats::complete.cases(.)))()
   names(df) <- c("x", "y", "band", "suitability")
   # Add grid cell grouping
   df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>

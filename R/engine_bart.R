@@ -563,7 +563,7 @@ engine_bart <- function(x,
             # Define rowids as those with no missing data
             rownames(newdata) <- 1:nrow(newdata)
             newdata$rowid <- as.numeric( rownames(newdata) )
-            newdata <- stats::subset(newdata, stats::complete.cases(newdata))
+            newdata <- subset(newdata, stats::complete.cases(newdata))
 
             # Also get settings for bias values
             settings <- self$settings
