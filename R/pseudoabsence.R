@@ -52,7 +52,8 @@ NULL
 #' @param ... Any other settings to be added to the pseudoabs settings.
 #' @examples
 #' \dontrun{
-#' # This setting generates 10000 pseudo-absence points outside the minimum convex polygon of presence points
+#' # This setting generates 10000 pseudo-absence points outside the minimum convex polygon
+#' of presence points
 #' ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
 #'
 #' # This setting would match the number of presence-absence points directly.
@@ -64,8 +65,10 @@ NULL
 #'                                      template = background, settings = ass1)
 #' }
 #' @references
-#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
-#' * Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point process models for species distribution modeling in ecology. Biometrics, 69(1), 274-281.
+#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process
+#' models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
+#' * Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
+#' process models for species distribution modeling in ecology. Biometrics, 69(1), 274-281.
 #' @name pseudoabs_settings
 #' @aliases pseudoabs_settings
 #' @keywords train
@@ -148,8 +151,11 @@ methods::setMethod(
 #' then \code{background} in the [`pseudoabs_settings()`] has to be a [`RasterLayer`] object.
 #' @param settings A [`pseudoabs_settings()`] objects. Absence settings are taken from [ibis_options] otherwise (Default).
 #' @references
-#' * Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in presence‐only species distribution modelling. Diversity and Distributions, 21(5), 595-608.
-#' * Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D., Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
+#' * Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in
+#' presence‐only species distribution modelling. Diversity and Distributions, 21(5), 595-608.
+#' * Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D.,
+#' Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions
+#' for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
 #' @keywords train
 #' @returns A [`data.frame`] containing the newly created pseudo absence points.
 #' @export
