@@ -64,15 +64,15 @@ jobs:
           extra-packages: |
             any::rcmdcheck,
             any::glmnet,
-             any::glmnetUtils,
-             any::pdp,
-             any::cmdstanr,
-             any::igraph,
-             any::xgboost,
-             any::dbarts,
-             any::mboost,
-             any::inlabru,
-             any::BoomSpikeSlab
+            any::glmnetUtils,
+            any::pdp,
+            stan-dev/cmdstanr,
+            any::igraph,
+            any::xgboost,
+            any::dbarts,
+            any::mboost,
+            any::inlabru,
+            any::BoomSpikeSlab
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
