@@ -793,7 +793,7 @@ engine_xgboost <- function(x,
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data('fit_best')
             # Simply use the weights from the importance estimates
-            cofs <- xgboost:::xgb.importance(model = obj) |>
+            cofs <- xgboost::xgb.importance(model = obj) |>
               as.data.frame()
             cofs$Sigma <- NA
             if(!self$settings$get("only_linear")){

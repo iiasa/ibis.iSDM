@@ -720,7 +720,7 @@ post_prediction <- function(mod, nsamples = 100,
   myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
 
   # evaluate_model Function
-  A <- inlabru::amatrix_eval(model, data = preds)
+  A <- inlabru:::amatrix_eval(model, data = preds)
   A <- x$engine$data$stk_pred$stk_proj$A
 
   effects <- evaluate_effect_multi(

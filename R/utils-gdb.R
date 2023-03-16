@@ -170,7 +170,7 @@ clean_mboost_summary <- function(obj){
   vi <- sort( vi[which(vi>0)],decreasing = TRUE )
 
   # Get coefficients
-  co <- mboost:::extract(obj, "coefficient")
+  co <- mboost::extract(obj, "coefficient")
   co <- co[names(vi)]
   assertthat::assert_that(all(names(vi) == names(co)))
   # Calculate coefficient. If smooth, calculate mean of the differential between knots

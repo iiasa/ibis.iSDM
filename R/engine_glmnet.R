@@ -375,7 +375,7 @@ engine_glmnet <- function(x,
         # --- #
         # Determine the optimal lambda through k-fold cross-validation
         if(getOption("ibis.runparallel")){
-          if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
+          if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
                                                           strategy = getOption("ibis.futurestrategy"))
         }
         # Depending if regularized should be set, specify this separately

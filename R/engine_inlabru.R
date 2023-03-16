@@ -240,7 +240,7 @@ engine_inlabru <- function(x,
         if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA:::inla.mesh.assessment(
+          out <- INLA::inla.mesh.assessment(
             mesh = self$get_data('mesh'),
             spatial.range = 3,
             alpha = 2,
@@ -451,7 +451,7 @@ engine_inlabru <- function(x,
             ips <- self$calc_integration_points(model, mode = 'stack')
             abs_E = ips$E; ips <- ips$ips
             assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
-            new <- sp:::rbind.SpatialPointsDataFrame(
+            new <- sp::rbind.SpatialPointsDataFrame(
               df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
               ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
             # Formulate the likelihood
@@ -1155,7 +1155,7 @@ engine_inlabru <- function(x,
               o <- pred_cov
               ggplot2::ggplot() +
                 ggplot2::theme_classic(base_size = 18) +
-                inlabru:::gg(o, ggplot2::aes(fill = mean)) +
+                inlabru::gg(o, ggplot2::aes(fill = mean)) +
                 ggplot2::scale_fill_gradientn(colours = ibis_colours$divg_bluegreen) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
             }
