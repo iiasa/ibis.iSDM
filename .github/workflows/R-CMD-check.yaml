@@ -61,24 +61,19 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"all"'
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck,
+            any::glmnet,
+             any::glmnetUtils,
+             any::pdp,
+             any::cmdstanr,
+             any::igraph,
+             any::xgboost,
+             any::dbarts,
+             any::mboost,
+             any::inlabru,
+             any::BoomSpikeSlab
           needs: check
-
-      - name: Install some optional dependencies for checks
-        run: |
-          install.packages("remotes")
-          remotes::install_cran("glmnet")
-          remotes::install_cran("glmnetUtils")
-          remotes::install_cran("pdp")
-          remotes::install_cran("cmdstanr")
-          remotes::install_cran("igraph")
-          remotes::install_cran("xgboost")
-          remotes::install_cran("dbarts")
-          remotes::install_cran("mboost")
-          remotes::install_cran("inlabru")
-          remotes::install_cran("BoomSpikeSlab")
-
-        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         env:
