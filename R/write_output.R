@@ -602,23 +602,23 @@ methods::setMethod(
     assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
     # Depending on engine, check package and load them
 
-    if(inherits(mod, "GDB-Model") & !requireNamespace("mboost", quietly = TRUE)){
-     stop("Package 'mboost' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "BART-Model") & !requireNamespace("dbarts", quietly = TRUE)){
-      stop("Package 'dbarts' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "INLABRU-Model") & (!requireNamespace("INLA", quietly = TRUE) |
-              !requireNamespace("inlabru", quietly = TRUE))){
-      stop("Package 'INLA' and 'inlabru' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "BREG-Model") & !requireNamespace("BoomSpikeSlab", quietly = TRUE)){
-      stop("Package 'BoomSpikeSlab' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "GLMNET-Model") & (!requireNamespace("glmnet", quietly = TRUE) |
-              !requireNamespace("glmnetUtils", quietly = TRUE))){
-      stop("Package 'glmnet' and 'glmnetUtils' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "STAN-Model") & (!requireNamespace("rstan", quietly = TRUE) |
-              !requireNamespace("cmdstanr", quietly = TRUE))){
-      stop("Package 'rstan' and 'cmdstanr' needed for this function to work. Please install it.", .call = FALSE)
-    } else if(inherits(mod, "XGBOOST-Model") & !requireNamespace("xgboost", quietly = TRUE)){
-      stop("Package 'xgboost' needed for this function to work. Please install it.", .call = FALSE)
+    if(inherits(mod, "GDB-Model")){
+      check_package("mboost")
+    } else if(inherits(mod, "BART-Model")){
+      check_package("dbarts")
+    } else if(inherits(mod, "INLABRU-Model")){
+      check_package("INLA")
+      check_package("inlabru")
+    } else if(inherits(mod, "BREG-Model")){
+      check_package("BoomSpikeSlab")
+    } else if(inherits(mod, "GLMNET-Model")){
+      check_package("glmnet")
+      check_package("glmnetUtils")
+    } else if(inherits(mod, "STAN-Model")){
+      check_package("rstan")
+      check_package("cmdstanr")
+    } else if(inherits(mod, "XGBOOST-Model")){
+      check_package("xgboost")
     }
 
     # --- #

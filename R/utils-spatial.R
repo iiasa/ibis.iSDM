@@ -577,8 +577,8 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   }
 
   if(process_in_parallel){
+
     check_package("doParallel")
-    suppressPackageStartupMessages(require(doParallel))
 
     # Split coordinates into equal size batches of 10
     coords_split <- ggplot2::cut_width(1:nrow(coords),10,boundary=0)
