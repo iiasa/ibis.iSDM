@@ -438,7 +438,7 @@ engine_breg <- function(x,
             out <- parallel::mclapply(unique(splits), function(s) {
               i <- which(splits == s)
               # -> external code in utils-boom
-              pred_breg <- ibis.iSDM:::predict_boom(
+              pred_breg <- predict_boom(
                 obj = fit_breg,
                 newdata = full_sub[i,],
                 w = w_full_sub[i],
