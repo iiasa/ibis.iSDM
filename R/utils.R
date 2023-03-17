@@ -546,15 +546,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     }
 
   } else if(tolower(type) == 'all'){
-    assertthat::assert_that('purrr' %in% loadedNamespaces())
     # Construct all possible unique combinations
-    varnames_comb <- 1:length(varnames)  |>
-      purrr::map(~ utils::combn(varnames, .x) |> apply(2, list) |> unlist(recursive = F)) |>
-      unlist(recursive = F)
+    varnames_comb <- lapply(1:length(varnames), function(i){
+      utils::combn(varnames, i) |> apply(2, list) |> unlist(recursive = F)
+    })|> unlist(recursive = F)
 
-    form_temp <- varnames_comb |> purrr::map(~paste0(response, " ~ ",
-                                                      paste(val_int,collapse = '+'),'+',
-                                                      paste(.x, collapse = " + ")) )
+    form_temp <- lapply(varnames_comb, function(i) {
+      paste0(response, " ~ ", paste(val_int,collapse = '+'),'+', paste(i, collapse = " + "))
+    })
   }
 
   return(form_temp)
