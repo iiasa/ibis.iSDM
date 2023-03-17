@@ -10,6 +10,8 @@ test_that('Check that INLA works', {
   )
   options("ibis.setupmessages" = FALSE)
 
+  library(INLA)
+
   # Use test data that comes with INLA
   data(Epil)
   observed <- Epil[1:30, 'y']

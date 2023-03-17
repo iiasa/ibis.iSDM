@@ -66,7 +66,7 @@ jobs:
             any::glmnet,
             any::glmnetUtils,
             any::pdp,
-            any::cmdstanr,
+            stan-dev/cmdstanr,
             any::igraph,
             any::xgboost,
             any::dbarts,
