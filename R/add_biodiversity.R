@@ -368,7 +368,7 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipo_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipo_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
         poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {
@@ -540,7 +540,7 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipa_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipa_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
         poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {

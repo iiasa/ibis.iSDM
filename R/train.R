@@ -199,7 +199,7 @@ methods::setMethod(
       } else {
         dummy <- raster::raster(extent(x$background),nrow=100,ncol=100,val=1);names(dummy) <- 'dummy'
       }
-      model[['predictors']] <- as.data.frame(dummy, xy = TRUE)
+      model[['predictors']] <- raster::as.data.frame(dummy, xy = TRUE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
       model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
@@ -280,7 +280,7 @@ methods::setMethod(
           # Then calculate
           ras <- st_kde(points = poi, background = bg, bandwidth = 3)
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(ras) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(ras) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(ras) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(ras),
@@ -307,7 +307,7 @@ methods::setMethod(
             rm(ras, o )
           }
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(cc) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(cc) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(cc) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(cc),
@@ -336,7 +336,7 @@ methods::setMethod(
         names(ras_of) <- "spatial_offset"
       }
       # Save overall offset
-      ofs <- as.data.frame(ras_of, xy = TRUE)
+      ofs <- raster::as.data.frame(ras_of, xy = TRUE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
       model[['offset']] <- ofs
       # Also add offset object for faster extraction
@@ -831,7 +831,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -841,7 +841,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -931,7 +931,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -941,7 +941,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1032,7 +1032,7 @@ methods::setMethod(
             names(new) <- "spatial_offset"
 
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1043,7 +1043,7 @@ methods::setMethod(
               news <- raster::mask(news, x$background)
               names(news) <- "spatial_offset"
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1152,7 +1152,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1162,7 +1162,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1245,7 +1245,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1255,7 +1255,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)

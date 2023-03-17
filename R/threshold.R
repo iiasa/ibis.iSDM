@@ -251,7 +251,7 @@ methods::setMethod(
       # minimum training presence
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
       # Minimum threshold
-      tr <- min( na.omit(pointVals) )
+      tr <- min( stats::na.omit(pointVals) )
 
     } else if(method == "percentile"){
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
@@ -270,7 +270,7 @@ methods::setMethod(
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
 
       # Get standard deviation and calculate percentile
-      tr <- min( na.omit(pointVals) )
+      tr <- min( stats::na.omit(pointVals) )
       names(tr) <- "tr"
       names(value) <- "min.cv"
       # Combine as a vector

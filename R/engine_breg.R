@@ -446,7 +446,7 @@ engine_breg <- function(x,
                 params = params
               )
               # Summarize the posterior
-              preds <- base::as.data.frame(
+              preds <- as.data.frame(
                   cbind(
                   matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
                   matrixStats::rowSds(pred_breg, na.rm = TRUE),
