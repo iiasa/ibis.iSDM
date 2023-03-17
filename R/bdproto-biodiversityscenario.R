@@ -204,7 +204,7 @@ BiodiversityScenario <- bdproto(
     } else {
       # Get unique number of data values. Surely there must be an easier val
       vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
-      vals <- length(na.omit(vals))
+      vals <- length(stats::na.omit(vals))
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
         stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
@@ -334,7 +334,7 @@ BiodiversityScenario <- bdproto(
       cols <- c("Unsuitable" = "gray92", "Loss" = "#DE646A", "Gain" = "cyan3", "Stable" = "gray60")
 
       # Convert to raster
-      diff_ff <- as.data.frame(diff_f, xy = TRUE)
+      diff_ff <- raster::as.data.frame(diff_f, xy = TRUE)
       names(diff_ff)[3] <- "Change"
       diff_ff$Change <- factor(diff_ff$Change, levels = names(cols))
 

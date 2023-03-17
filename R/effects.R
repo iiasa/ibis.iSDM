@@ -19,7 +19,6 @@ NULL
 #' }
 #' @return None.
 #' @keywords partial
-#' @importFrom stats effects
 #' @name effects
 NULL
 

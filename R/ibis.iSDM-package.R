@@ -1,6 +1,9 @@
 #' @keywords internal
 "_PACKAGE"
 
+#' @importFrom foreach %do% %dopar%
+#' @importFrom stats effects
+
 ## usethis namespace: start
 ## usethis namespace: end
 NULL

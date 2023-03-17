@@ -36,6 +36,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
 
   # Linearly approximate all attributes for new object
   # FIXME: Probably terribly memory inefficient but works
+  # MH: Should this be stars:::as.data.frame.stars?
   new <- as.data.frame(env)
   assertthat::assert_that(assertthat::has_name(new,c("x","y","time")))
   new <- dplyr::right_join(new, expand.grid(x = unique(new$x), y = unique(new$y), time = new_times),

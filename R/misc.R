@@ -105,8 +105,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
       if(length(grep("Windows", utils::osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
         # On windows we remove INLA and reinstall
         utils::install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
-      } else {
-        require("INLA")
+      } else if(requireNamespace("INLA", quietly = TRUE)) {
         suppressPackageStartupMessages(
           INLA::inla.upgrade(ask = FALSE)
         )
