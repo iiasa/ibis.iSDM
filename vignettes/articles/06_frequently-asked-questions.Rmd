@@ -236,8 +236,35 @@ Users are advised to use [`engine_inlabru`] by **default** in most cases and onl
 
 When creating predictive models such as SDMs it is often a concern to not predict to a variable range outside the environmental conditions for which a model was trained. The `ibis.iSDM` package supports variable 'clamping' of its predictions similar as the popular Maxent model, however for each [`engine`]. Clamping can be enabled by setting the parameter `clamp` in [`train`] to `TRUE`. This restricts any spatial (or spatial-temporal) projections to the combined `range` of predictor variables observed for each of the training localities.
 
-Similar functionalities are also available separately during scenario projections by setting adaptability constraints (see [`add_constraint_adaptability`]).
+Similar functionalities are also available separately during scenario projections by setting adaptability constraints (see [`add_constraint_adaptability`] or [`add_constraint_boundary`]).
 
+</details>
+
+<details>
+<summary><b>I am using (too) many predictors in my model. What options do I have ?</b>
+</summary>
+
+Having too many predictors in a SDM can be a cause of substantial over-parametrization and subsequently 
+overfitting (e.g. the model is reproducing the data it was trained with rather than projecting into areas unknown).
+
+It is recommended to (a) either use an engine with very strong regularization, such as for example [`engine_glmnet`] or [`engine_gdb`],
+(b) train a model with caution and have a minimum number of observations (arbitrary rule of thumb, have at least 10 observations for each additional predictor included), (c) make use of pre-estimation removal of predictor, such for example through variable importance criteria or colinearity. See code below for an example.
+
+```{r, echo=TRUE,eval=FALSE}
+# Prior to model fitting, remove highly collinear predictors through a pearson correlation assessment
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_glmnet() |>  
+  train(filter_predictors = "pearson")
+
+# Alternatively use a RandomForest estimator to remove the least important variables
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_glmnet() |>  
+  train(filter_predictors = "RF")
+
+
+```
 </details>
 
 <details>

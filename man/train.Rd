@@ -9,8 +9,8 @@
 train(
   x,
   runname,
-  rm_corPred = FALSE,
-  varsel = "none",
+  filter_predictors = "none",
+  optim_hyperparam = FALSE,
   inference_only = FALSE,
   only_linear = TRUE,
   method_integration = "predictor",
@@ -27,19 +27,20 @@ train(
 
 \item{runname}{A \code{\link{character}} name of the trained run.}
 
-\item{rm_corPred}{Remove highly correlated predictors (Default: \code{FALSE}). This option
-removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's \code{r >= 0.7}).}
-
-\item{varsel}{Perform a variable selection on the set of predictors either prior to building the model
-or via variable selection / regularization of the model. Available options are:
+\item{filter_predictors}{A \code{\link{character}} defining if and how highly correlated predictors are to be removed
+prior to any model estimation.
+Available options are:
 \itemize{
-\item \code{\link{none}} for no or default priors and no extensive hyperparameter search.
-\item \code{\link{reg}} Model selection either through DIC or regularization / hyperparameter tuning depending on the
-engine (Default).
-\item \code{\link{abess}} A-priori adaptive best subset selection of covariates via the \link{abess} package (see References).
-Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
-Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
+\item \code{"none"} No prior variable removal is performed (Default).
+\item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
+remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \link{abess} package (see References). Note that this
+effectively fits a separate generalized linear model to reduce the number of covariates.
+\item \code{"boruta"} Uses the \link{Boruta} package to identify non-informative features.
 }}
+
+\item{optim_hyperparam}{Perform a variable selection on the set of predictors either prior
+to building the model (Default: \code{FALSE}).}
 
 \item{inference_only}{By default the \link{engine} is used to create
 a spatial prediction of the suitability surface, which can take time. If only inferences of
@@ -55,6 +56,7 @@ How non-linearity is captured depends on the used \link{engine}.}
 than one \code{\linkS4class{BiodiversityDataset}} object is provided in \code{x}. Particular relevant for engines
 that do not support the integration of more than one dataset. Integration methods are generally sensitive
 to the order in which they have been added to the  \code{\link{BiodiversityDistribution}} object.
+
 Available options are:
 \itemize{
 \item \code{"predictor"} The predicted output of the first (or previously fitted) models are
@@ -101,20 +103,22 @@ The resulting object contains both a \code{\link{fit_best}} object of the estima
 a \link{RasterLayer} object named \code{\link{prediction}} that contains the spatial prediction of the model.
 These objects can be requested via \code{object$get_data("fit_best")}.
 
-Available options in this function include:
+Other parameters in this function:
 \itemize{
-\item \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
-prior to fitting.
-\item \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
-alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
-runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
-variables.
+\item \code{"filter_predictors"} The parameter can be set to various options to remove highly correlated variables or those
+with little additional information gain from the model prior to any estimation. Available options are \code{"none"} (Default) \code{"pearson"} for
+applying a \code{0.7} correlation cutoff, \code{"abess"} for the regularization framework by Zhu et al. (2020), or \code{"RF"} or \code{"randomforest"}
+for removing the least important variables according to a randomForest model. \strong{Note}: This function is only applied on
+predictors for which no prior has been provided (e.g. potentially non-informative ones).
+\item \code{"optim_hyperparam"} This option allows to make use of hyper-parameter search for several models, which can improve
+prediction accuracy although through the a substantial increase in computational cost.
 \item \code{"method_integration"} Only relevant if more than one \code{\link{BiodiversityDataset}} is supplied and when
 the engine does not support joint integration of likelihoods.
 See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 if users want more control about this aspect, another option is to fit separate models
 and make use of the \link{add_offset}, \link{add_offset_range} and \link{ensemble} functionalities.
-\item \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
+\item \code{"clamp"} Boolean parameter to support a clamping of the projection predictors to the range of values observed
+during model training.
 }
 }
 \note{
@@ -130,10 +134,10 @@ be obtained from the same data and parameters and not all necessarily make sense
         add_biodiversity_poipa(surveydata) |>
         # Add predictors and scale them
         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
-        # Use stan for estimation
+        # Use Stan for estimation
         engine_stan(chains = 2, iter = 1000, warmup = 500)
  # Train the model
- mod <- train(x, only_linear = TRUE, varsel = 'none')
+ mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
  mod
 }
 }

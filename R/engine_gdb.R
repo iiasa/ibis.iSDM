@@ -30,6 +30,12 @@ NULL
 #' * Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
 #' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
 #' @family engine
+#' @returns An[engine].
+#' @examples
+#' \dontrun{
+#' # Add GDB as an engine
+#' x <- distribution(background) |> engine_gdb(iter = 1000)
+#' }
 #' @name engine_gdb
 NULL
 #' @rdname engine_gdb
@@ -165,6 +171,7 @@ engine_gdb <- function(x,
                                    template = bg,
                                    settings = model$biodiversity[[1]]$pseudoabsence_settings)
           if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
+          +
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points
@@ -396,9 +403,9 @@ engine_gdb <- function(x,
           }
         }
 
-        if(settings$get('varsel') == "reg"){
+        if(settings$get('optim_hyperparam')){
 
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting cross.validation.')
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting parameter search for optimal stopping.')
           # 5 fold Cross validation to prevent overfitting
           if(getOption("ibis.runparallel")){
             grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)

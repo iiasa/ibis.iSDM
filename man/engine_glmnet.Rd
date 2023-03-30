@@ -28,6 +28,9 @@ determined deterministically (Default: \code{NULL}).}
 
 \item{...}{Other parameters passed on to glmnet.}
 }
+\value{
+An \link{engine}.
+}
 \description{
 This engine allows the estimation of linear coefficients using either ridge, lasso or elastic net regressions techniques.
 Backbone of this engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
@@ -51,6 +54,12 @@ fully from the final model that do not improve the loss function.
 of the two.
 The optimal lambda parameter can be determined via cross-validation. For this option set \code{"varsel"} in \code{train()}
 to \code{"reg"}.
+}
+\examples{
+\dontrun{
+# Add BREG as an engine
+x <- distribution(background) |> engine_glmnet(iter = 1000)
+}
 }
 \references{
 \itemize{

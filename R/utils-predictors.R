@@ -541,3 +541,275 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
   # Return the result
   return(env)
 }
+
+#### Filter predictor functions ----
+
+#' Filter a set of correlated predictors to fewer ones
+#'
+#' @description
+#' This function helps to remove highly correlated variables from a set of predictors. It supports multiple options
+#' some of which require both environmental predictors and observations, others only predictors.
+#'
+#' Some of the options require different packages to be pre-installed, such as [ranger] or [Boruta].
+#'
+#' @details
+#' Available options are:
+#'
+#' * \code{"none"} No prior variable removal is performed (Default).
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
+#' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [abess] package (see References). Note that this
+#' effectively fits a separate generalized linear model to reduce the number of covariates.
+#' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
+#'
+#' @note
+#' Using this function on predictors effectively means that a separate model is fitted on the data
+#' with all the assumptions that come with in (e.g. linearity, appropriateness of response, normality, etc).
+#'
+#' @param env A [`data.frame`] or [`matrix`] with extracted environmental covariates for a given species.
+#' @param obs A [`vector`] with observational records to use for determining variable importance. Can be \code{NULL}.
+#' @param keep A [`vector`] with variables to keep regardless. These are usually variables for which prior
+#' information is known.
+#' @param method Which method to use for constructing the correlation matrix (Options: \code{'pearson'} (Default),
+#'  \code{'spearman'}| \code{'kendal'}), \code{"abess"}, or \code{"boruta"}.
+#' @param ... Other options for a specific method
+#'
+#' @keywords utils
+#' @return A [`character`] [`vector`] of variable names to be excluded.
+#' If the function fails due to some reason return \code{NULL}.
+#' @examples
+#' \dontrun{
+#'  # Remove highly correlated predictors
+#'  env <- predictor_filter( env, option = "pearson")
+#' }
+#' @export
+predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
+  assertthat::assert_that(
+    is.data.frame(env) || is.matrix(env),
+    ncol(env) >2,
+    is.null(keep) || is.vector(keep),
+    is.character(method)
+  )
+  # Match the predictor names
+  method <- match.arg(method,
+                      c("none", "pearson", "spearman", "kendall", "abess", "boruta"),
+                      several.ok = FALSE)
+
+  # Now apply the filter depending on the option
+  if(method == "none"){
+    co <- NULL
+  } else if(method %in% c("pearson", "spearman", "kendall")){
+    # Simply collinearity check based on colinear predictors
+    co <- predictors_filter_collinearity(
+      env, keep = keep, method = method, ...
+    )
+  } else if(method == "abess"){
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
+    co <- predictors_filter_abess(
+      env = env, keep = keep, method = method, ...
+    )
+  } else if(method == "boruta"){
+    check_package("Boruta")
+    co <- predictors_filter_boruta(
+      env = env, keep = keep, method = method, ...
+    )
+
+  } else {
+    stop("Method not yet implemented!")
+  }
+
+  # Security checks and return
+  assertthat::assert_that(is.null(co) || is.character(co))
+  return(co)
+}
+
+#' Identify collinear predictors
+#'
+#' @inheritParams predictor_filter
+#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff.
+#' @concept Code inspired from the [`caret`] package
+#' @keywords utils, internal
+#' @returns [`vector`] of variable names to exclude
+predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption('ibis.corPred'), method = 'pearson', ...){
+  # Security checks
+  assertthat::assert_that(is.data.frame(env),
+                          is.character(method),
+                          is.numeric(cutoff),
+                          is.null(keep) || is.vector(keep)
+  )
+  keep <- keep[keep %in% names(env)] # Remove those not in the data.frame. For instance if a spatial effect is selected
+  if(!is.null(keep) || length(keep) == 0) x <- env |> dplyr::select(-keep) else x <- env
+
+  # Removing non-numeric columns
+  non.numeric.columns <- colnames(x)[!sapply(x, is.numeric)]
+  x <- x[, !(colnames(x) %in% non.numeric.columns)]
+
+  # Get all variables that are singular or unique in value
+  singular_var <- which(round( apply(x, 2, var),4) == 0)
+  if(length(singular_var)>0) x <- x[,-singular_var]
+
+  # Calculate correlation matrix
+  cm <- stats::cor(x, method = method)
+
+  # Copied from the \code{caret} package to avoid further dependencies
+  if (any(!stats::complete.cases(cm))) stop("The correlation matrix has some missing values.")
+  averageCorr <- colMeans(abs(cm))
+  averageCorr <- as.numeric(as.factor(averageCorr))
+  cm[lower.tri(cm, diag = TRUE)] <- NA
+
+  # Determine combinations over cutoff
+  combsAboveCutoff <- which(abs(cm) > cutoff)
+  colsToCheck <- ceiling(combsAboveCutoff/nrow(cm))
+  rowsToCheck <- combsAboveCutoff%%nrow(cm)
+
+  # Exclude columns with variables over average correlation
+  colsToDiscard <- averageCorr[colsToCheck] > averageCorr[rowsToCheck]
+  rowsToDiscard <- !colsToDiscard
+
+  # Get columns to discard
+  deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
+  deletecol <- unique(deletecol)
+
+  # Which variables to discard
+  o <- names(env)[deletecol]
+  if(length(singular_var)>0) o <- unique( c(o,  names(singular_var) ) )
+  o
+}
+
+#' Apply the adaptive best subset selection framework on a set of predictors
+#'
+#' @description
+#' This is a wrapper function to fit the adaptive subset selection procedure outlined
+#' in Zhu et al. (2021) and Zhu et al. (2020).
+#' @inheritParams predictor_filter
+#'
+#' @param family A [`character`] indicating the family the observational data originates from.
+#' @param tune.type [`character`] indicating the type used for subset evaluation.
+#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [abess].
+#' @param lambda A [`numeric`] single lambda value for regularized best subset selection (Default: \code{0}).
+#' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1} for each observation as default.
+#' @references
+#' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
+#' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
+#' @keywords utils, internal
+#' @returns A [`vector`] of variable names to exclude
+predictors_filter_abess <- function( env, observed, method, family, tune.type = "cv", lambda = 0,
+                                       weight = NULL, keep = NULL, ...){
+  # Security checks
+  assertthat::assert_that(is.data.frame(env) || is.matrix(env),
+                          is.vector(observed),
+                          is.numeric(lambda),
+                          is.character(tune.type),
+                          is.null(keep) || is.vector(keep),
+                          is.null(weight) || is.vector(weight)
+  )
+  assertthat::assert_that(
+    length(observed) == nrow(env), msg = "Number of observation unequal to number of covariate rows."
+  )
+  # Match family and type
+  family <- match.arg(family, c("gaussian", "binomial", "poisson", "cox", "mgaussian", "multinomial",
+                                "gamma"), several.ok = FALSE)
+  tune.type <- match.arg(tune.type, c("gic", "ebic", "bic", "aic", "cv"), several.ok = FALSE)
+
+  # Check that abess package is available
+  check_package("abess")
+  if(!isNamespaceLoaded("abess")) { attachNamespace("abess");requireNamespace('abess') }
+
+  # Build model
+  abess_fit <- abess::abess(x = env,
+                            y = observed,
+                            family = family,
+                            tune.type = tune.type,
+                            weight = weight,
+                            lambda = lambda,
+                            always.include = keep,
+                            nfolds = 100, # Increase from default 5
+                            num.threads = 0
+  )
+
+  if(anyNA(stats::coef(abess_fit)[,1]) ) {
+    # Refit with minimum support size
+    abess_fit <- abess::abess(x = env,
+                              y = observed,
+                              family = family,
+                              lambda = lambda,
+                              tune.type = tune.type,
+                              weight = weight,
+                              always.include = keep,
+                              nfolds = 100, # Increase from default 5
+                              # Minimum support site of 10% of number of covariates
+                              support.size = ceiling(ncol(env) * 0.1),
+                              num.threads = 0
+    )
+
+  }
+  # Get best vars
+  co <- stats::coef(abess_fit, support.size = abess_fit[["best.size"]])
+  co <- names( which(co[,1] != 0))
+  co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
+  # Make some checks on the list of reduced variables
+  if(length(co) <= 2) {
+    warning("Abess was likely to rigours. Likely to low signal-to-noise ratio.")
+    return(NULL)
+  } else {
+    co
+  }
+}
+
+#' All relevant feature selection using Boruta
+#'
+#' @description
+#' This function uses the [Boruta] package to identify predictor variables with little information content. It iteratively
+#' compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
+#' Attributes that have significantly worst importance than shadow ones are being consecutively dropped.
+#'
+#' @note
+#' This package depends on the [ranger] package to iteratively fit randomForest models.
+#'
+#' @inheritParams predictor_filter
+#' @param iter [`numeric`] on the number of maximal runs (Default: \code{100}). Increase if too many tentative left.
+#' @param verbose [`logical`] whether to be chatty.
+#' @references
+#' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
+#' @keywords utils, internal
+#' @returns A [`vector`] of variable names to exclude.
+predictors_filter_boruta <- function( env, observed, method, keep = NULL,
+                                      iter = 100, verbose = getOption('ibis.setupmessages'), ...){
+  # Security checks
+  assertthat::assert_that(is.data.frame(env) || is.matrix(env),
+                          is.null(observed) || is.vector(observed),
+                          is.null(keep) || is.vector(keep),
+                          is.numeric(iter), iter>10,
+                          is.logical(verbose)
+  )
+  check_package("Boruta")
+
+  # Get all variable names to test
+  vars <- names(env)
+
+  # Remove kept variables
+  if(!is.null(keep)){
+    keep <- keep[keep %in% vars] # Remove those not in the data.frame. For instance if a spatial effect is selected
+    if(!is.null(keep) || length(keep) == 0) {
+      env <- env |> dplyr::select(-keep)
+      vars <- names(env)
+    }
+  }
+
+  # Check for other common variables unlikely to be important
+  if("Intercept" %in% vars) vars <- vars[-which(vars == "Intercept")]
+  if("intercept" %in% vars) vars <- vars[-which(vars == "intercept")]
+  if("ID" %in% vars) vars <- vars[-which(vars == "ID")]
+
+  # Apply boruta
+  bo_test <- Boruta::Boruta(env, y = observed,
+                            maxRuns = iter,
+                            # Verbosity
+                            doTrace = ifelse(verbose, 1, 0))
+
+  # Get from the bo_test object all variables that are clearly rejected
+  res <- bo_test$finalDecision
+  co <- names(res)[which(res == "Rejected")]
+  if(length(co)==0) co <- NULL
+  return(co)
+}

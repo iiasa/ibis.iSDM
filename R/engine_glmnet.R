@@ -38,6 +38,12 @@ NULL
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add BREG as an engine
+#' x <- distribution(background) |> engine_glmnet(iter = 1000)
+#' }
 #' @name engine_glmnet
 NULL
 #' @rdname engine_glmnet
@@ -379,29 +385,29 @@ engine_glmnet <- function(x,
                                                           strategy = getOption("ibis.futurestrategy"))
         }
         # Depending if regularized should be set, specify this separately
-        # if( (settings$get('varsel') == "reg") ){
-        #   if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
-        #                                             'Finding optimal combinations of alpha and lambda.')
-        #   cv_gn <- try({
-        #     cva.glmnet(formula = form,
-        #               data = df,
-        #               alpha = params$alpha, # Elastic net mixing parameter
-        #               lambda = params$lambda, # Overwrite lambda
-        #               weights = w, # Case weights
-        #               offset = ofs,
-        #               family = fam,
-        #               penalty.factor = p.fac,
-        #               # Option for limiting the coefficients
-        #               lower.limits = lowlim,
-        #               upper.limits = upplim,
-        #               standardize = FALSE, # Don't standardize to avoid doing anything to weights
-        #               maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-        #               parallel = getOption("ibis.runparallel"),
-        #               trace.it = settings$get("verbose"),
-        #               nfolds = 10  # number of folds for cross-validation
-        #     )
-        #   },silent = FALSE)
-        # } else {
+        if( (settings$get('optim_hyperparam')) ){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
+                                                    'Finding optimal hyper parameters alpha and lambda.')
+          cv_gn <- try({
+            glmnetUtils::cva.glmnet(formula = form,
+                      data = df,
+                      alpha = params$alpha, # Elastic net mixing parameter
+                      lambda = params$lambda, # Overwrite lambda
+                      weights = w, # Case weights
+                      offset = ofs,
+                      family = fam,
+                      penalty.factor = p.fac,
+                      # Option for limiting the coefficients
+                      lower.limits = lowlim,
+                      upper.limits = upplim,
+                      standardize = FALSE, # Don't standardize to avoid doing anything to weights
+                      maxit = (10^5)*2, # Increase the maximum number of passes for lambda
+                      parallel = getOption("ibis.runparallel"),
+                      trace.it = settings$get("verbose"),
+                      nfolds = 10  # number of folds for cross-validation
+            )
+          },silent = FALSE)
+        } else {
           cv_gn <- try({
             glmnetUtils::cv.glmnet(formula = form,
                                    data = df,
@@ -421,7 +427,7 @@ engine_glmnet <- function(x,
                                    nfolds = 10  # number of folds for cross-validation
             )
           },silent = FALSE)
-        # }
+        }
         if(inherits(cv_gn, "try-error")) stop("Model failed to converge with provided input data!")
 
         # --- #

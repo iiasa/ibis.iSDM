@@ -117,7 +117,6 @@ reference:
       of them are for internal use, but can be of use if input needs to be reformatted.
     contents:
       - explode_factorized_raster
-      - find_correlated_predictors
       - posterior_predict_stanfit
       - alignRasters
       - emptyraster
@@ -125,6 +124,7 @@ reference:
       - get_rastervalue
       - predictor_transform
       - predictor_derivate
+      - predictor_filter
       - run_stan
       - wrap_stanmodel
       - starts_with("stancode")

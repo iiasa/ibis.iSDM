@@ -27,6 +27,9 @@ Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default
 
 \item{...}{Other variables or control parameters}
 }
+\value{
+An\link{engine}.
+}
 \description{
 Gradient descent boosting is an efficient way to optimize any loss function
 of a generalized linear or additive model (such as the GAMs available through the \link{mgcv} R-package).
@@ -44,6 +47,12 @@ however providing some additional desirable features that make estimation quicke
 particularly useful for spatial projections. Such as for instance the ability to specifically add
 spatial baselearners via \link{add_latent} or the specification of monotonically constrained priors
 via \link{GDBPrior}.
+}
+\examples{
+\dontrun{
+# Add GDB as an engine
+x <- distribution(background) |> engine_gdb(iter = 1000)
+}
 }
 \references{
 \itemize{

@@ -17,20 +17,25 @@ NULL
 #' a [RasterLayer] object named [`prediction`] that contains the spatial prediction of the model.
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
-#' Available options in this function include:
+#' Other parameters in this function:
 #'
-#' * \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
-#' prior to fitting.
-#' * \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
-#' alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
-#' runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
-#' variables.
+#' * \code{"filter_predictors"} The parameter can be set to various options to remove highly correlated variables or those
+#' with little additional information gain from the model prior to any estimation. Available options are \code{"none"} (Default) \code{"pearson"} for
+#' applying a \code{0.7} correlation cutoff, \code{"abess"} for the regularization framework by Zhu et al. (2020), or \code{"RF"} or \code{"randomforest"}
+#' for removing the least important variables according to a randomForest model. **Note**: This function is only applied on
+#' predictors for which no prior has been provided (e.g. potentially non-informative ones).
+#'
+#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter search for several models, which can improve
+#' prediction accuracy although through the a substantial increase in computational cost.
+#'
 #' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
 #' the engine does not support joint integration of likelihoods.
 #' See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 #' if users want more control about this aspect, another option is to fit separate models
 #' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
-#' * \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
+#'
+#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors to the range of values observed
+#' during model training.
 #'
 #' @note
 #' There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
@@ -39,16 +44,19 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
-#' @param rm_corPred Remove highly correlated predictors (Default: \code{FALSE}). This option
-#' removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's \code{r >= 0.7}).
-#' @param varsel Perform a variable selection on the set of predictors either prior to building the model
-#' or via variable selection / regularization of the model. Available options are:
-#' * [`none`] for no or default priors and no extensive hyperparameter search.
-#' * [`reg`] Model selection either through DIC or regularization / hyperparameter tuning depending on the
-#' engine (Default).
-#' * [`abess`] A-priori adaptive best subset selection of covariates via the [abess] package (see References).
-#' Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
-#' Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
+#' @param filter_predictors A [`character`] defining if and how highly correlated predictors are to be removed
+#' prior to any model estimation.
+#' Available options are:
+#' * \code{"none"} No prior variable removal is performed (Default).
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
+#' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [abess] package (see References). Note that this
+#' effectively fits a separate generalized linear model to reduce the number of covariates.
+#' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
+#'
+#' @param optim_hyperparam Perform a variable selection on the set of predictors either prior
+#' to building the model (Default: \code{FALSE}).
+#'
 #' @param inference_only By default the [engine] is used to create
 #' a spatial prediction of the suitability surface, which can take time. If only inferences of
 #' the strength of relationship between covariates and observations are required, this parameter
@@ -61,6 +69,7 @@ NULL
 #' than one [`BiodiversityDataset-class`] object is provided in \code{x}. Particular relevant for engines
 #' that do not support the integration of more than one dataset. Integration methods are generally sensitive
 #' to the order in which they have been added to the  [`BiodiversityDistribution`] object.
+#'
 #' Available options are:
 #' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
 #' added to the predictor stack and thus are predictors for subsequent models (Default).
@@ -96,10 +105,10 @@ NULL
 #'         add_biodiversity_poipa(surveydata) |>
 #'         # Add predictors and scale them
 #'         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
-#'         # Use stan for estimation
+#'         # Use Stan for estimation
 #'         engine_stan(chains = 2, iter = 1000, warmup = 500)
 #'  # Train the model
-#'  mod <- train(x, only_linear = TRUE, varsel = 'none')
+#'  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
 #'  mod
 #' }
 #' @name train
@@ -115,7 +124,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x"),
-  function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
+  function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
 
@@ -125,7 +134,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
+  function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
     if(missing(runname)) runname <- "Unnamed run"
@@ -134,7 +143,8 @@ methods::setMethod(
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
-      is.logical(rm_corPred),
+      is.logical(optim_hyperparam),
+      is.character(filter_predictors),
       is.logical(inference_only),
       is.logical(only_linear),
       is.character(method_integration),
@@ -150,15 +160,14 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
+    #filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
-    if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
-    varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
+    filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
-    settings$set('rm_corPred', rm_corPred)
-    settings$set('varsel', varsel)
+    settings$set('filter_predictors', filter_predictors)
+    settings$set('optim_hyperparam', optim_hyperparam)
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
@@ -465,9 +474,11 @@ methods::setMethod(
         all( apply(env, 1, function(x) all(!is.na(x) )) ),msg = 'Missing values in extracted environmental predictors.'
       )
 
-      # Check whether predictors should be refined and do so
-      if(settings$get('rm_corPred') && ('dummy' %in% model[['predictors_names']])){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Removing highly correlated variables...')
+      # Biodiversity dataset specific predictor refinement if the option is set
+      if(settings$get("filter_predictors")!= "none"){
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
+                                                                                  settings$get("filter_predictors"),'...'))
+        # Make backups
         test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
 
         # Ignore variables for which we have priors
@@ -476,72 +487,38 @@ methods::setMethod(
           if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
           test <- test[,-which(names(test) %in% keep)]
           assertthat::assert_that(!any(keep %in% names(test)))
-        } else keep <- NULL
+        } else {keep <- NULL}
 
-        co <- find_correlated_predictors(env = test,
-                                         keep = keep,
-                                         cutoff = getOption('ibis.corPred'), # Probably keep default, but maybe sth. to vary in the future
-                                         method = 'pearson')
+        # Filter the predictors
+        # Depending on the option this function returns the variables to be removed.
+        co <- predictor_filter(env = test,
+                               keep = keep,
+                               cutoff = getOption('ibis.corPred'), # Probably keep default, but maybe sth. to vary in the future
+                               method = settings$get("filter_predictors"),
+                               observed = model[['biodiversity']][[id]]$observations[['observed']],
+                               family = model[['biodiversity']][[id]]$family,
+                               tune.type = "gic",
+                               weight = NULL,
+                               verbose = getOption('ibis.setupmessages')
+                               )
 
         # For all factor variables, remove those with only the minimal value (e.g. 0)
         fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
         fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
         co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
+        # Remove variables if found
         if(length(co)>0){
           env |> dplyr::select(-dplyr::all_of(co)) -> env
         }
+
       } else { co <- NULL }
-
-      # Make use of adaptive best subset selection
-      if(settings$get("varsel") == "abess"){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
-        if(!is.Waiver(x$priors)){
-          keep <- unique( as.character(x$priors$varnames()) )
-          if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
-        } else keep <- NULL
-
-        # If PPM, calculate points per grid cell first
-        if(model[['biodiversity']][[id]]$family == "poisson"){
-          bg <- x$engine$get_data("template")
-          if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
-
-          obs <- aggregate_observations2grid(df = model[['biodiversity']][[id]]$observations,
-                                             template = bg, field_occurrence = "observed") |>
-            # Add pseudo absences
-            add_pseudoabsence(template = bg, settings = getOption("ibis.pseudoabsence"))
-
-          envs <- get_rastervalue(
-            coords = obs[,c('x','y')],
-            env = model$predictors_object$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
-            rm.na = T
-          )
-          # Assert observations match environmental data points
-          obs <- obs[envs$ID,]
-          envs$ID <- NULL
-          assertthat::assert_that(nrow(obs) == nrow(envs), nrow(obs)>0, nrow(envs)>0)
-        } else {
-          obs <- model[['biodiversity']][[id]]$observations
-          envs <- env[,model[['predictors_names']][which( model[['predictors_names']] %notin% co )]]
-          assertthat::assert_that(any(obs$observed == 0),
-                                  nrow(obs)==nrow(envs))
-        }
-        # Add abess here
-        co2 <- find_subset_of_predictors(
-          env = envs,
-          observed = obs$observed,
-          family = model[['biodiversity']][[id]]$family,
-          tune.type = "gic",
-          weight = NULL,
-          keep = keep
-        )
-        co <- c(co, co2) |> unique()
-      }
 
       # Save predictors extracted for biodiversity extraction
       model[['biodiversity']][[id]][['predictors']] <- env
       model[['biodiversity']][[id]][['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
       model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
-    }
+  }
+
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
@@ -577,9 +554,9 @@ methods::setMethod(
     }
 
     # Warning if Np is larger than Nb
-    if(settings$get("varsel") == "none"){
+    if(settings$get("filter_predictors") == "none"){
       if( sum(x$biodiversity$get_observations() )-1 <= length(model$predictors_names)){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'There are more predictors than observations! Consider setting varsel= to \"reg\" ')
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
       }
     }
 

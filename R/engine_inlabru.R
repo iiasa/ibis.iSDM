@@ -50,6 +50,12 @@ NULL
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add inlabru as an engine
+#' x <- distribution(background) |> engine_inlabru()
+#' }
 #' @name engine_inlabru
 NULL
 #' @rdname engine_inlabru
@@ -667,7 +673,7 @@ engine_inlabru <- function(x,
         # -------- #
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
 
-        if( settings$get(what='varsel') == "reg" ){
+        if( settings$get(what='optim_hyperparam')){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing incremental variable selection...')
 
           # Catch all variables with set priors and keep them!

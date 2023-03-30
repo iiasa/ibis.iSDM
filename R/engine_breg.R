@@ -22,6 +22,12 @@ NULL
 #' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
 #' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add BREG as an engine
+#' x <- distribution(background) |> engine_breg(iter = 1000)
+#' }
 #' @name engine_breg
 NULL
 #' @rdname engine_breg
@@ -128,7 +134,7 @@ engine_breg <- function(x,
         fam <- model$biodiversity[[1]]$family
 
         # Check whether regularization parameter is set to none, if yes, raise message
-        if(settings$get("varsel") != "none"){
+        if(settings$get('optim_hyperparam')){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
         }
 

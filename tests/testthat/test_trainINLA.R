@@ -8,10 +8,13 @@ test_that('Check that INLA works', {
   suppressWarnings(
     suppressPackageStartupMessages( requireNamespace("INLA") )
   )
+  suppressWarnings(
+    suppressPackageStartupMessages( attachNamespace("INLA") )
+  )
   options("ibis.setupmessages" = FALSE)
 
   # Use test data that comes with INLA
-  data(Epil)
+  data("Epil",package = "INLA")
   observed <- Epil[1:30, 'y']
 
   Epil <- rbind(Epil, Epil[1:30, ])
@@ -19,7 +22,7 @@ test_that('Check that INLA works', {
 
   # Set up formula and train
   formula = y ~ Trt + Age + V4 + f(Ind, model="iid") + f(rand,model="iid")
-  result = inla(formula, family="poisson", data = Epil, control.predictor = list(compute = TRUE, link = 1))
+  result = INLA::inla(formula, family="poisson", data = Epil, control.predictor = list(compute = TRUE, link = 1))
 
   expect_type(result,'list')
   expect_null(result$waic)

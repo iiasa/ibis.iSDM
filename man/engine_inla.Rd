@@ -68,6 +68,9 @@ Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: 
 
 \item{...}{Other options.}
 }
+\value{
+An \link{engine}.
+}
 \description{
 Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
 Engine has been largely superceded by the \link{engine_bru} package and users are advised to us this one,
@@ -91,6 +94,12 @@ domain boundary.
 created.
 
 Priors can be set via \link{INLAPrior}.
+}
+\examples{
+\dontrun{
+# Add INLA as an engine (with a custom mesh)
+x <- distribution(background) |> engine_inla(mesh = my_mesh)
+}
 }
 \references{
 \itemize{

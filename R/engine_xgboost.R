@@ -38,6 +38,12 @@ NULL
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add xgboost as an engine
+#' x <- distribution(background) |> engine_xgboost(iter = 4000)
+#' }
 #' @name engine_xgboost
 NULL
 #' @rdname engine_xgboost
@@ -491,8 +497,8 @@ engine_xgboost <- function(x,
         # Pass this parameter possibly on from upper level
         # This implements a simple grid search for optimal parameter values
         # Using the training data only (!)
-        if(settings$get('varsel') == "reg"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
+        if(settings$get('optim_hyperparam')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search...')
 
           # Create combinations of random hyper parameters
           set.seed(20)

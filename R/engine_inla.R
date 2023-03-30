@@ -55,6 +55,12 @@ NULL
 #' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add INLA as an engine (with a custom mesh)
+#' x <- distribution(background) |> engine_inla(mesh = my_mesh)
+#' }
 #' @name engine_inla
 NULL
 #' @rdname engine_inla
@@ -677,8 +683,8 @@ engine_inla <- function(x,
         )
 
         # Perform variable selection
-        if( settings$get(what='varsel') ==  "reg"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing variable selection...')
+        if( settings$get(what='optim_hyperparam')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing backstep variable selection (hacky)...')
 
           k <- NULL
           # Specify offsets and spde to be retained

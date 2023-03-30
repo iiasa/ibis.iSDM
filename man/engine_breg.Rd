@@ -23,6 +23,9 @@ engine_breg(
 
 \item{...}{Other none specified parameters passed on to the model.}
 }
+\value{
+An \link{engine}.
+}
 \description{
 Efficient MCMC algorithm for linear regression models that makes use of
 'spike-and-slab' priors for some modest regularization on the amount of posterior
@@ -34,6 +37,12 @@ that not all link and models functions are supported and certain functionalities
 not available.
 This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} option
 specified in \link{train}.
+}
+\examples{
+\dontrun{
+# Add BREG as an engine
+x <- distribution(background) |> engine_breg(iter = 1000)
+}
 }
 \references{
 \itemize{

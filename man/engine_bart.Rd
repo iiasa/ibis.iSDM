@@ -9,15 +9,18 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation.}
+\item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation (Default: \code{1000}).}
 
-\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples.}
+\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples (Default: \code{250}).}
 
 \item{chains}{A number of the number of chains to be used (Default: \code{4}).}
 
 \item{type}{The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other options.}
+}
+\value{
+An \link{engine}.
 }
 \description{
 The Bayesian regression approach to a sum of complementary trees is to shrink

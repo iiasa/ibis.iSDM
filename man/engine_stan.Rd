@@ -43,6 +43,9 @@ See \code{\link{cmdstanr}} package for more details. (Default: \code{"sampling"}
 
 \item{...}{Other variables}
 }
+\value{
+An \link{engine}.
+}
 \description{
 Stan is probabilistic programming language that can be used to
 specify most types of statistical linear and non-linear regression models.
@@ -58,6 +61,12 @@ approximate inference forms through penalized maximum likelihood estimation (see
 }
 \note{
 The function \code{obj$stancode()} can be used to print out the stancode of the model.
+}
+\examples{
+\dontrun{
+# Add Stan as an engine
+x <- distribution(background) |> engine_stan(iter = 1000)
+}
 }
 \references{
 \itemize{
