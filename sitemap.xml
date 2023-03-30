@@ -244,12 +244,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/explode_factorized_raster.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/find_correlated_predictors.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/find_subset_of_predictors.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/formatGLOBIOM.html</loc>
   </url>
   <url>
@@ -304,10 +298,22 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_derivate.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_filter.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_homogenize_na.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_abess.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_boruta.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_collinearity.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/print.html</loc>

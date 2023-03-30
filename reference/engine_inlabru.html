@@ -79,7 +79,7 @@ allowing full integrated inference."><meta name="twitter:card" content="summary"
     <p>Model components are specified with general inputs and mapping methods to the
 latent variables, and the predictors are specified via general R expressions,
 with separate expressions for each observation likelihood model in multi-likelihood models.
-The inlabru engine - similar as the <code><a href="engine_inla.html">engine_inla</a></code> function acts a wrapper for <a href="https://rdrr.io/pkg/INLA/man/inla.html" class="external-link">INLA::inla</a>,
+The inlabru engine - similar as the <code><a href="engine_inla.html">engine_inla</a></code> function acts a wrapper for INLA::inla,
 albeit inlabru has a number of convenience functions implemented that make in particular predictions
 with new data much more straight forward (e.g. via posterior simulation instead of fitting).
 Since more recent versions inlabru also supports the addition of multiple likelihoods, therefore
@@ -163,6 +163,12 @@ Default is an educated guess (Default: <code>NULL</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>An engine.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>All <code>INLA</code> engines require the specification of a mesh that needs to be provided to the
 <code>"optional_mesh"</code> parameter. Otherwise the mesh will be created based on best guesses of the
@@ -198,6 +204,14 @@ created.</p>
 <code><a href="engine_xgboost.html">engine_xgboost</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Add inlabru as an engine</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_inlabru</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -94,7 +94,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-03-17</h4>
+            <h4 data-toc-skip class="date">2023-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/06_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/06_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>06_frequently-asked-questions.Rmd</code></div>
@@ -377,7 +377,33 @@ projections to the combined <code>range</code> of predictor variables
 observed for each of the training localities.</p>
 <p>Similar functionalities are also available separately during scenario
 projections by setting adaptability constraints (see
-[<code>add_constraint_adaptability</code>]).</p>
+[<code>add_constraint_adaptability</code>] or
+[<code>add_constraint_boundary</code>]).</p>
+</details><details><summary><b>I am using (too) many predictors in my model. What options do I have
+?</b>
+</summary><p>Having too many predictors in a SDM can be a cause of substantial
+over-parametrization and subsequently overfitting (e.g. the model is
+reproducing the data it was trained with rather than projecting into
+areas unknown).</p>
+<p>It is recommended to (a) either use an engine with very strong
+regularization, such as for example [<code>engine_glmnet</code>] or
+[<code>engine_gdb</code>], (b) train a model with caution and have a
+minimum number of observations (arbitrary rule of thumb, have at least
+10 observations for each additional predictor included), (c) make use of
+pre-estimation removal of predictor, such for example through variable
+importance criteria or colinearity. See code below for an example.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Prior to model fitting, remove highly collinear predictors through a pearson correlation assessment</span></span>
+<span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">species_data</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>filter_predictors <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Alternatively use a RandomForest estimator to remove the least important variables</span></span>
+<span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">species_data</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>filter_predictors <span class="op">=</span> <span class="st">"RF"</span><span class="op">)</span></span></code></pre></div>
 </details><details><summary><b>Where can I find predictions created by <code>train</code> ? </b>
 </summary><p>After a <code>distribution</code> model has been trained and if the
 <code>inference_only</code> parameter in <code><a href="../reference/train.html">train()</a></code> has been
@@ -392,7 +418,7 @@ posterior predictive uncertainty might be available and can be plotted
 as well. The raster can also be saved a spatial GeoTiff to a given
 filename using the <code><a href="../reference/write_output.html">write_output()</a></code> function.</p>
 <p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">species_data</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
@@ -412,7 +438,7 @@ being too low or the learning_rate being to high. Try out different
 options in the parameters of the engine. A good way to check the
 performance is also to plot the evaluation log and
 <strong>logloss</strong>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Requires a fitted model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="st">"fit_best"</span><span class="op">)</span><span class="op">$</span><span class="va">evaluation_log</span><span class="op">)</span></span></code></pre></div>
 </details>
