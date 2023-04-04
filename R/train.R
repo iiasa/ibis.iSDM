@@ -488,6 +488,8 @@ methods::setMethod(
           test <- test[,-which(names(test) %in% keep)]
           assertthat::assert_that(!any(keep %in% names(test)))
         } else {keep <- NULL}
+        # Add bias variable to keep as we risk filtering it out otherwise
+        if(!is.Waiver(settings$get("bias_variable"))) keep <- c(keep, settings$get("bias_variable") )
 
         # Filter the predictors
         # Depending on the option this function returns the variables to be removed.
