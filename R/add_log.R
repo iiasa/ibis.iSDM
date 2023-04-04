@@ -40,7 +40,7 @@ methods::setMethod(
                             is.character(filename),
                             assertthat::has_extension(filename,'txt') )
 
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding log file...')
 
     # Check whether a log is already present in the distribution file

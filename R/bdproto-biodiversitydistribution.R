@@ -37,7 +37,6 @@ BiodiversityDistribution <- bdproto(
 
   # Self printing function
   print = function(self) {
-    # TODO: Prettify below
     # Query information from the distribution object
     ex <- self$show_background_info()
     pn <- ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
