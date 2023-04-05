@@ -1,40 +1,40 @@
-#' Are rasters comparable?
+#' Are SpatRasters comparable?
 #'
-#' This function checks if two `Raster-class` objects
+#' This function checks if two `SpatRaster-class` objects
 #' are comparable.
 #'
-#' @param x [`Raster-class`] object.
-#' @param y [`Raster-class`] object.
+#' @param x [`SpatRaster-class`] object.
+#' @param y [`SpatRaster-class`] object.
 #' @keywords internal, utils
-#' @return [`logical`] indicating if the two [`Raster-class`] objects have the same
+#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
 #'   resolution, extent, dimensionality, and coordinate system.
 #' @noRd
 is_comparable_raster <- function(x, y) {
-  assertthat::assert_that(inherits(x, "Raster"), inherits(y, "Raster")) &&
+  assertthat::assert_that(
+    (is.Raster(x) && is.Raster(y)),
     sf::st_crs(x@crs) == sf::st_crs(y@crs) &&
-    raster::compareRaster(x, y, crs = FALSE, res = TRUE, tolerance = 1e-5,
-                          stopiffalse = FALSE)
+    terra::compareGeom(x, y)
+  )
 }
 
 #' Do extents intersect?
 #'
 #' Verify if the extents of two spatial objects intersect or not.
 #'
-#' @param x [`Raster-class`], [`Spatial-class`] or [`sf::sf()`] object.
-#' @param y [`Raster-class`], [`Spatial-class`] or [`sf::sf()`] object.
+#' @param x [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
+#' @param y [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
 #' @keywords internal, utils
 #' @return [`logical`].
 #' @noRd
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
-    inherits(x, c("Raster", "Spatial", "sf")),
-    inherits(y, c("Raster", "Spatial", "sf")))
+    inherits(x, c("SpatRaster", "Spatial", "sf")),
+    inherits(y, c("SpatRaster", "Spatial", "sf")))
   isTRUE(sf::st_intersects(
-    sf::st_as_sf(methods::as(raster::extent(x), "SpatialPolygons")),
-    sf::st_as_sf(methods::as(raster::extent(y), "SpatialPolygons")),
+    terra::ext(x) |> vect() |> sf::st_as_sf(),
+    terra::ext(y) |> vect() |> sf::st_as_sf(),
     sparse = FALSE)[[1]])
 }
-
 
 #' Extract polygon data from intersecting point data
 #' @param poly A [sf] object.
@@ -111,8 +111,8 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' This function has options to create a mask based on provided point data. It is identical in functionality to
 #' the parameter \code{'limit'} in `train()`. Currently it has two available options:
 #'
-#' [*] It is either possible to provide a categorical zonal raster layer takes available point data and intersects it with a
-#' zonal layer. The output is a [`RasterLayer`] object with only those classes in which a point occurrence fell.
+#' [*] It is either possible to provide a categorical zonal [`SpatRaster`] layer takes available point data and intersects it with a
+#' zonal layer. The output is a [`SpatRaster`] object with only those classes in which a point occurrence fell.
 #' Typical example for instance is layer of the distribution of Biomes, Ecoregions or Climatic Zones.
 #'
 #' [*] Buffer, in which case a buffer in the units of the geographic projection are created. Buffer width have to
@@ -120,12 +120,12 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' to a spatial buffer of provided extent within any geovalid occurrence record.
 #'
 #' @param df A [`sf`] object with point information.
-#' @param zones A [`sf`] or [`RasterLayer`] object with polygons of the zones to be used for occurrence masking.
+#' @param zones A [`sf`] or [`SpatRaster`] object with polygons of the zones to be used for occurrence masking.
 #' @param buffer_width A [`numeric`] value specifying the buffer width. Ignored if a Zones layer is provided.
 #' @param column A [`character`] giving the column in which zonal ids are found. Only used when zones is of
-#' type [`sf`].  (Default: \code{"limits"}).
-#' @param template An optional [`RasterLayer`] object on which which the zones should be rasterized (Default: \code{NULL}).
-#' @returns A [`sf`] or [`RasterLayer`] object.
+#' type [`sf`] (Default: \code{"limits"}).
+#' @param template An optional [`SpatRaster`] object on which which the zones should be rasterized (Default: \code{NULL}).
+#' @returns A [`sf`] or [`SpatRaster`] object.
 #' @keywords utils, internal
 #' @noRd
 create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
@@ -156,16 +156,16 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
         )
       )
       # Extract values from zonal raster layer
-      limit <- raster::extract(zones, df) |> unique()
+      limit <- terra::extract(zones, df) |> unique()
 
       # Limit zones
       zones <- subset(zones, limit %in% unique(zones[[column]]) )
 
       # Finally rasterize if template is set
-      if(!is.null(template)) zones <- raster::rasterize(zones, template, field = column)
+      if(!is.null(template)) zones <- terra::rasterize(zones, template, field = column)
     } else {
       # Extract values from zonal raster layer
-      ex <- raster::extract(zones, df) |> unique()
+      ex <- terra::extract(zones, df) |> unique()
       # Remove NA if found
       if(anyNA(ex)) ex <- ex[-which(is.na(ex))]
 
@@ -175,8 +175,8 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       zones <- new
       # Align with template if set
       if(!is.null(template)){
-        if(raster::compareRaster(zones, template,stopiffalse = FALSE)){
-          zones <- raster::resample(zones, template, method = "ngb", func = raster::modal)
+        if(terra::compareGeom(zones, template, stopOnError = FALSE)){
+          zones <- terra::resample(zones, template, method = "near", threads = getOption("ibis.runparallel"))
         }
       }
     }
@@ -189,10 +189,10 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       buf <- sf::st_buffer(x = df, dist = buffer_width, nQuadSegs = 50)
     )
     # Rasterize
-    zones <- raster::rasterize(buf, background, field = 1, background = 0)
-    zones <- raster::mask(zones, background)
+    zones <- terra::rasterize(buf, background, field = 1, background = 0)
+    zones <- terra::mask(zones, background)
     # Ratify
-    zones <- raster::ratify(zones)
+    zones <- terra::droplevels(zones)
   }
   return(zones)
 }
@@ -222,10 +222,11 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 }
 
 #' Expand an extent by a certain number
-#' @param e an [`extent`] object
-#' @param f [`numeric`] value to increase the extent (Default: \code{0.1})
+#'
+#' @param e An [`extent`] object.
+#' @param f [`numeric`] value to increase the extent (Default: \code{0.1}).
 #' @keywords utils, internal
-#' @return Returns the unified total [`extent`] object
+#' @return Returns the unified total [`extent`] object.
 #' @noRd
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'Extent'))
@@ -263,6 +264,7 @@ rename_geometry <- function(g, name){
 #'
 #' @description This function tries to guess the coordinate field and converts a data.frame
 #' to a simple feature.
+#'
 #' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
 #' @param geom_name A [`character`] indicating the name of the geometry column (Default: \code{'geometry'}).
 #' @keywords internal, utils
@@ -316,10 +318,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #' @details
 #' Requires the `MASS` R-package to be installed!
 #' @param points A \code{POINTS} [`sf`] object.
-#' @param background A template [`Raster`] object describing the background.
+#' @param background A template [`SpatRaster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
-#' @returns A [`RasterLayer`] with the density of point observations.
-#' @keywords utils, intenral
+#' @returns A [`SpatRaster`] with the density of point observations.
+#' @keywords utils, internal
 #' @noRd
 st_kde <- function(points, background, bandwidth = 3){
   assertthat::assert_that(
@@ -329,7 +331,7 @@ st_kde <- function(points, background, bandwidth = 3){
   check_package("MASS")
 
   # Get extent and cellsize
-  cellsize <- raster::res(background)[1]
+  cellsize <- terra::res(background)[1]
   extent_vec <- sf::st_bbox(background)[c(1,3,2,4)]
 
   n_y <- ceiling((extent_vec[4]-extent_vec[3])/cellsize)
@@ -342,13 +344,13 @@ st_kde <- function(points, background, bandwidth = 3){
   coords <- sf::st_coordinates(points)
   matrix <- MASS::kde2d(coords[,1],coords[,2],
                         h = bandwidth, n = c(n_x, n_y), lims = extent_vec)
-  out <- raster::raster(matrix)
+  out <- terra::rast(matrix)
 
   # Resample output for small point mismatches
-  if(!raster::compareRaster(out, background,stopiffalse = FALSE)){
-    out <- raster::resample(out, background)
+  if(!terra::compareGeom(out, background, stopOnError = FALSE)){
+    out <- terra::resample(out, background)
   }
-  out <- raster::mask(out, background)
+  out <- terra::mask(out, background)
   names(out) <- "kde__coordinates"
   rm(matrix, coords)
   return( out )
@@ -358,9 +360,9 @@ st_kde <- function(points, background, bandwidth = 3){
 #'
 #' @description
 #' Converts a polygon [`sf`] layer to a point layer by rasterizing it
-#' over a provided Raster layer.
+#' over a provided [SpatRaster].
 #' @param poly A \code{POLYGON} or \code{MULTIPOLYGON} [`sf`] object.
-#' @param template A template [`Raster`] object.
+#' @param template A template [`SpatRaster`] object.
 #' @param field_occurrence A [`character`] specifying the occurrence field. Should contain information on the type.
 #' @keywords utils, internal
 #' @noRd
@@ -373,10 +375,10 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
   )
 
   # Rasterize the polygon to
-  out <- raster::rasterize(poly, template, field = field_occurrence)
+  out <- terra::rasterize(x = poly, y = template, field = field_occurrence)
 
   # Construct new point data
-  co <- raster::xyFromCell(out, cell = which(!is.na(out[])) ) |> as.data.frame()
+  co <- terra::xyFromCell(out, cell = which(!is.na(out[])) ) |> as.data.frame()
   co[[field_occurrence]] <- out[!is.na(out[])]
   co <- guess_sf(co) # Convert to sf and add coordinates
   co$x <- sf::st_coordinates(co)[,1]
@@ -390,25 +392,25 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' Calculate the dimensions from a provided extent object
 #'
 #' @description Calculate the dimensions of an extent
-#' (either an extent object or four-element vector in the right order), either in projected or spherical space
-#' @param ex Either a [`vector`], a [`extent`] or alternatively a [`Raster`],[`Spatial*`] or [`sf`] object
-#' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: TRUE)
-#' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: 'km')
+#' (either an extent object or four-element vector in the right order), either in projected or spherical space.
+#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`], [`Spatial*`] or [`sf`] object.
+#' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
+#' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: \code{'km'}).
 #' @keywords utils, internal
 #' @noRd
-extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
-  assertthat::assert_that(inherits(ex, 'Extent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'Raster') || inherits(ex, 'Spatial'),
+extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = 'km') {
+  assertthat::assert_that(inherits(ex, 'SpatExtent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'SpatRaster') || inherits(ex, 'Spatial'),
                           is.logical(lonlat),
                           is.character(output_unit) && output_unit %in% c('m','km'))
   # Coerce to vector if necessary
-  if(is.Raster(ex)) ex <- raster::extent(ex)
+  if(is.Raster(ex)) ex <- terra::ext(ex)
   if(is.vector(ex)) assertthat::assert_that(length(ex)==4, is.numeric(ex),msg = 'No valid extent object supplied!')
 
   # Convert to vector
   ex <- switch(class(ex)[1],
                Extent = as.vector(ex),
-               Raster = as.vector( raster::extent(ex) ),
-               sf = as.vector( raster::extent(ex) ),
+               Raster = as.vector( terra::ext(ex) ),
+               sf = as.vector( terra::ext(ex) ),
                numeric = ex
                )
   # Rename the vector
@@ -431,7 +433,7 @@ extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
       # upper left and lower right points
       p2 <- rbind(extent[c(1, 4)], extent[c(2, 3)])
       # get ratio between distances
-      dists <- raster::pointDistance(p1,p2,lonlat = TRUE)
+      dists <- terra::distance(p1, p2, lonlat = TRUE)
       ratio <- dists[1] / dists[2]
       return (ratio)
     }
@@ -442,7 +444,7 @@ extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
     if(output_unit == 'm') dim * 1000
   } else {
     # else assume a rectangle in m and convert to km
-    dim <- abs(diff(extent)[c(1, 3)])
+    dim <- abs(diff(ext)[c(1, 3)])
     if(output_unit=='km'){
       dim <- dim * 0.1 ^ 3
     }
@@ -450,82 +452,77 @@ extent_dimensions <- function(ex, lonlat = TRUE, output_unit = 'km') {
   return(dim)
 }
 
-#' Align a [`Raster-class`] object to another by harmonizing geometry and extend.
+#' Align a [`SpatRaster-class`] object to another by harmonizing geometry and extend.
 #'
 #' If the data is not in the same projection as the template, the alignment
 #' will be computed by reprojection only. If the data has already the same
 #' projection, the data set will be cropped and aggregated prior to resampling
 #' in order to reduce computation time.
 #'
-#' @param data [`Raster-class`] object to be resampled.
-#' @param template [`Raster-class`] or [`Spatial-class`] object from which geometry can be extracted.
-#' @param method method for resampling (Options: \code{"ngb"} or \code{"bilinear"}).
+#' @param data [`SpatRaster-class`] object to be resampled.
+#' @param template [`SpatRaster-class`] or [`Spatial-class`] object from which geometry can be extracted.
+#' @param method method for resampling (Options: \code{"near"} or \code{"bilinear"}).
 #' @param func function for resampling (Default: [mean]).
 #' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE}).
 #' @keywords utils
 #' @details
-#' Nearest Neighbour resampling (ngb) is recommended for discrete and Bilinear
-#' resampling for continuous data.
-#' @return New [`Raster`] object aligned to the supplied template layer
+#' Nearest Neighbour resampling (near) is recommended for discrete and bilinear
+#' resampling recommended for continuous data. See also help from [terra::resample] for other options.
+#' @return New [`SpatRaster`] object aligned to the supplied template layer.
 #' @examples
 #' \dontrun{
 #'  # Align one raster to another
-#'  ras1 <- alignRasters( ras1, ras2, method = "ngb", cl = FALSE)
+#'  ras1 <- alignRasters( ras1, ras2, method = "near", cl = FALSE)
 #' }
 #' @export
-alignRasters <- function(data, template, method = "bilinear",func = mean,cl = TRUE){
+alignRasters <- function(data, template, method = "bilinear", func = mean, cl = TRUE){
   # Security checks
   assertthat::assert_that(
-    inherits(data,'Raster'), inherits(template, c("Raster", "Spatial", "sf")),
+    is.Raster(data),
+    is.Raster(template),
     is.character(method),
     is.logical(cl)
   )
   method <- match.arg(method, c("bilinear", "ngb"),several.ok = FALSE)
 
-  # Start cluster if necessary
-  if(cl) raster::beginCluster(parallel::detectCores()-1)
-  if(raster::projection(data) == raster::projection(template)){
+  if(sf::st_crs(data) == sf::st_crs(template)){
     # Crop raster to template
-    data <- raster::crop(data, template, snap = "out")
-    if(inherits(template, "RasterLayer")){
-      # Aggregate to minimal scale
-      if(data@ncols / template@ncols >= 2){
-        factor <- floor(data@ncols/template@ncols)
-        data <- aggregate(data, fact = factor, fun = func,
-                          expand=TRUE)
-      }
-      # Resample with target method
-      data <- raster::resample(data, template, method = method)
+    data <- terra::crop(data, template, snap = "out")
+
+    # Aggregate to minimal scale
+    if(data@ncols / template@ncols >= 2){
+      factor <- floor(data@ncols/template@ncols)
+      data <- terra::aggregate(data, fact = factor, fun = func, cores = ifelse(cl, getOption("ibis.nthread"), 1))
     }
+    # Resample with target method
+    data <- terra::resample(data, template, method = method)
   } else {
     # Project Raster layer
-    data <- projectRaster(data, template, method = method)
+    data <- terra::project(data, template, method = method)
   }
-  # Stop cluster
-  if(cl) endCluster()
   return(data)
 }
 
-#' @title Create an empty \code{RasterLayer} based on a template
+#' @title Create an empty \code{SpatRaster} based on a template
 #'
 #' @description
-#' This function creates an empty copy of a provided \code{RasterLayer} object. It
+#' This function creates an empty copy of a provided \code{SpatRaster} object. It
 #' is primarily used in the package to create the outputs for the predictions.
-#' @param x a \code{Raster*} object corresponding.
-#' @param ... other arguments that can be passed to \code{\link{raster}}
-#' @return an empty raster, i.e. all cells are \code{NA}.
-#' @import raster
-#' @keywords raster, utils
+#' @param x A \code{SpatRaster*} object corresponding.
+#' @param ... other arguments that can be passed to \code{\link{terra}}
+#' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
+#' @import terra
+#' @keywords terra, utils
 #' @examples
-#' require(raster)
-#' r <- raster(matrix(1:100, 5, 20))
+#' require(terra)
+#' r <- rast(matrix(1:100, 5, 20))
 #' emptyraster(r)
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x))
-  raster::raster(nrows = nrow(x), ncols = ncol(x),
-                        crs = x@crs,
-                        ext = raster::extent(x), ...)
+  terra::rast(nrows = nrow(x), ncols = ncol(x),
+                        crs = sf::st_crs(ras),
+                        ext = terra::ext(x), ...)
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
@@ -535,14 +532,22 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' predictors, and operates directly on provided data.frames.
 #' **Note that despite being parallized this function can be rather slow for large data volumes of data!**
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
-#' @param env A [`data.frame`] object with the predictors
-#' @param longlat A [`logical`] variable indicating whether the projection is long-lat
-#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})
+#' @param env A [`data.frame`] object with the predictors.
+#' @param longlat A [`logical`] variable indicating whether the projection is long-lat.
+#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (Default: \code{c('x','y')}).
 #' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help.
 #' @param ... other options.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
-#' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist})
+#' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist}).
 #' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+#' @examples
+#' \dontrun{
+#'  # Create matchup table
+#' tab <- get_ngbvalue( coords = coords, # Coordinates
+#'                      env = env # Data.frame with covariates and coordinates
+#'                   )
+#' }
+#'
 #' @references
 #' * Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
 #' @keywords utils
@@ -552,7 +557,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   assertthat::assert_that(
     is.data.frame(coords) || inherits(coords,'sf') || inherits(coords,'matrix'),
     assertthat::is.flag(longlat),
-    is.data.frame(env),assertthat::has_name(env, field_space),
+    is.data.frame(env), assertthat::has_name(env, field_space),
     length(field_space) == 2, is.vector(field_space)
   )
   # Convert to matrices
@@ -571,9 +576,9 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   # Thus making this dependency suggested and optional
   # disfun <- geosphere::distHaversine
   if(longlat){
-    disfun <- function(x1,x2, m = ifelse(cheap,'cheap','haversine')) geodist::geodist(x1,x2, measure = m)
+    disfun <- function(x1,x2, m = ifelse(cheap,'cheap', 'haversine')) geodist::geodist(x1,x2, measure = m)
   } else {
-    disfun <- function(x1, x2) raster::pointDistance(x1, x2, lonlat = longlat)
+    disfun <- function(x1, x2) terra::distance(x1, x2, lonlat = longlat)
   }
 
   if(process_in_parallel){
@@ -636,13 +641,13 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' Function to extract directly the raster value of provided points
 #'
 #' @description
-#' This function simply extracts the values from a provided [`RasterLayer`],
-#' [`RasterStack`] or [`RasterBrick`] object. For points where or NA values were extracted
+#' This function simply extracts the values from a provided [`SpatRaster`], [`SpatRasterDataset`] or
+#' [`SpatRasterCollection`] object. For points where or NA values were extracted
 #' a small buffer is applied to try and obtain the remaining values.
 #' @details
 #' It is essentially a wrapper for [`terra::extract`].
 #' @param coords A [`Spatial`], [`data.frame`], [`matrix`] or [`sf`] object.
-#' @param env A [`Raster`] object with the provided predictors.
+#' @param env A [`SpatRaster`] object with the provided predictors.
 #' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @keywords utils
@@ -660,21 +665,21 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
     )
 
   # Try an extraction
-  try({ex <- raster::extract(x = env,
+  try({ex <- terra::extract(x = env,
                              y = coords,
                              method = "simple",
-                             df = TRUE)},silent = FALSE)
-  if(inherits(ex, "try-error")) stop(paste("Raster extraction failed: ", ex))
+                             raw = FALSE)}, silent = FALSE)
+  if(inherits(ex, "try-error")) stop(paste("SpatRaster valueextraction failed: ", ex))
   # Find those that have NA in there
   check_again <- apply(ex, 1, function(x) anyNA(x))
   if(any(check_again)){
     # Re-extract but with a small buffer
     coords_sub <- coords[which(check_again),]
-    try({ex_sub <- raster::extract(x = env,
+    try({ex_sub <- terra::extract(x = env,
                                y = coords_sub,
                                method = "simple",
-                               small = TRUE,
-                               df = TRUE)},silent = FALSE)
+                               touches = TRUE,
+                               raw = FALSE)}, silent = FALSE)
     if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed: ", ex_sub))
     ex[which(check_again),] <- ex_sub
   }
@@ -703,7 +708,7 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
 #' This function transforms a provided predictor variable with a hinge transformation,
 #' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
 #' while the remainder is left at the original values.
-#' @param v A [`Raster`] object.
+#' @param v A [`SpatRaster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
@@ -717,8 +722,8 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
                           is.numeric(nknots),
                           is.numeric(cutoffs) || is.null(cutoffs))
   # Get stats
-  v.min <- raster::cellStats(v, min)
-  v.max <- raster::cellStats(v, max)
+  v.min <- terra::global(v, "min")
+  v.max <- terra::global(v, "max")
   if(is.null(cutoffs)){
     k <- seq(v.min, v.max, length = nknots)
   } else {
@@ -745,8 +750,8 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
 #'
 #' @description
 #' This function transforms a provided predictor variable with a threshold transformation,
-#' e.g. a new range of values where any values lower than a certain knot are set to 0,
-#' while the remainder is set to 1.
+#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
+#' while the remainder is set to \code{1}.
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
@@ -762,8 +767,8 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
                           is.numeric(cutoffs) || is.null(cutoffs))
   if(is.null(cutoffs)){
     # Get min max
-    v.min <- raster::cellStats(v,min)
-    v.max <- raster::cellStats(v,max)
+    v.min <- terra::global(v, "min")
+    v.max <- terra::global(v, "max")
     k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
   } else {
     k <- cutoffs
@@ -781,7 +786,7 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
 #' @description
 #' This function takes predictor values and 'bins' them into categories based on a
 #' percentile split.
-#' @param v A [`Raster`] object.
+#' @param v A [`SpatRaster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
@@ -795,12 +800,12 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
                           is.numeric(cutoffs) || is.null(cutoffs))
   if(is.null(cutoffs)){
     # Calculate cuts
-    cu <- raster::quantile(v, probs = seq(0, 1, by = 1/nknots) )
+    cu <- terra::quantile(v, probs = seq(0, 1, by = 1/nknots) )
   } else { cu <- cutoffs}
 
   if(anyDuplicated(cu)){
     # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
-    cu <- raster::quantile(v, probs = seq(0, 1, by = 1/(nknots*2)) )
+    cu <- terra::quantile(v, probs = seq(0, 1, by = 1/(nknots*2)) )
     cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
     if(length(cu)<=2) return( NULL )
     if(length(cu) > nknots){
@@ -809,8 +814,8 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   }
   # Make cuts and explode
   out <- explode_factorized_raster(
-    raster::ratify(
-      raster::cut(v, cu)
+    terra::droplevels(
+      terra::classify(v, cu)
     )
   )
   # Format threshold names
@@ -819,7 +824,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   cu.brk <- gsub("\\(|\\]", "", cu.brk)
   # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
   names(out) <- paste0("bin__",n, "__", cu.brk )
-  for(i in 1:nlayers(out)){
+  for(i in 1:terra::nlyr(out)){
     attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
   }
   return(out)
@@ -828,15 +833,15 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' Create new raster stack from a given data.frame
 #'
 #' @param post A data.frame
-#' @param background A [`Raster-class`] object for the background raster
+#' @param background A [`SpatRaster-class`] object for the background raster.
 #' @keywords internal, utils
-#' @return A [`Raster-class`] object with number of columns equal to ncol(post)
+#' @return A [`SpatRaster-class`] object with number of columns equal to \code{ncol(post)}.
 #' @noRd
 fill_rasters <- function(post, background){
   assertthat::assert_that(
-    is.data.frame(post),ncol(post)>1,
-    inherits(background,'Raster'),
-    nrow(post) == ncell(background)
+    is.data.frame(post), ncol(post)>1,
+    is.Raster(background),
+    nrow(post) == terra::ncell(background)
   )
   # Make names to be sure
   names(post) <- base::make.names(names(post))
@@ -847,12 +852,12 @@ fill_rasters <- function(post, background){
     out[] <- post[,1]
   } else {
     # Loop through each column
-    out <- raster::stack()
+    out <- terra::rast()
     for(co in 1:ncol(post)){
       o <- emptyraster(background)
       o[] <- post[,co] # Assign values
       # Add to stack
-      out <- raster::addLayer(out, o)
+      suppressWarnings( out <- c(out, o) )
       rm(o)
     }
   }
@@ -861,13 +866,15 @@ fill_rasters <- function(post, background){
 
   # Check that derivate attributes if existing are passed
   if(length( grep("deriv", names(attributes(post)) ))>0){
-    attr(out, grep("deriv", names(attributes(post)),value = TRUE) ) <- attr(post, grep("deriv", names(attributes(post)),value = TRUE) )
+    attr(out, grep("deriv", names(attributes(post)), value = TRUE) ) <- attr(post,
+                                                                             grep("deriv", names(attributes(post)),
+                                                                                  value = TRUE) )
   }
 
   # Final check
   assertthat::assert_that(
-    inherits(out,'Raster'),
-    nlayers(out) == ncol(post)
+    is.Raster(out),
+    terra::nlyr(out) == ncol(post)
   )
   return(out)
 }
@@ -882,7 +889,8 @@ fill_rasters <- function(post, background){
 #' @returns A data.frame with transformed coordinates.
 #' @keywords utils
 #' @keywords internal
-#' @references Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
+#' @references
+#' * Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
 #' @noRd
 polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
   assertthat::assert_that(
@@ -913,24 +921,22 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
 
 #' Clean up raster layer from disk
 #'
-#' Completely deletes for instance a temporary created raster file.
-#' @param A [`raster`] object.
-#' @param verbose Print progress (Default: \code{FALSE})
+#' Completely deletes for instance a temporary created [`SpatRaster`] object.
+#' @param A [`SpatRaster`] object.
+#' @param verbose Print progress (Default: \code{FALSE}).
 #' @keywords utils
 #' @noRd
 clean_rasterfile <- function(x, verbose = FALSE)
 {
-  stopifnot(grepl("Raster", class(x)))
-  if (!fromDisk(x))
-    return(NULL)
+  stopifnot(grepl("SpatRaster", class(x)))
   sink(tempfile())
-  tdir = rasterOptions()[["tmpdir"]]
+  tdir = terra::terraOptions()[["tmpdir"]]
   sink(NULL)
-  if (inherits(x, "RasterLayer"))
-    files = basename(x@file@name)
-  if (inherits(x, "RasterStack"))
+  if (inherits(x, "SpatRaster"))
+    files = basename( x@ptr$filenames()[1] )
+  if (inherits(x, "SpatRaster") & terra::nlyr(x)>1)
     files = do.call(c, lapply(methods::slot(x, "layers"),
-                              function(x) x@file@name))
+                              function(x) x@ptr$filenames()[1]))
   files = files[file.exists(files)]
   if (length(files) == 0)
     return(NULL)
@@ -950,12 +956,12 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #' Split raster factor levels to stack
 #'
 #'  @description Takes a single raster that is a [`factor`] and creates
-#'  a new [`RasterStack`] that contains the individual levels.
-#'  @param ras A [`RasterLayer`] object that is a [`factor`]. Alternatively a [`RasterStack`] object
-#'  can be supplied in which only factor variables are 'exploded'
-#'  @param name An optional [`character`] name for the [raster].
+#'  a new [`SpatRaster`] that contains the individual levels.
+#'  @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a [`SpatRaster`] object
+#'  can be supplied in which only factor variables are 'exploded'.
+#'  @param name An optional [`character`] name for the [`SpatRaster`].
 #'  @param ... Other parameters (not used).
-#'  @returns A [`RasterStack`] object
+#'  @returns A [`SpatRaster`] object.
 #'  @keywords utils, internal
 #'  @noRd
 explode_factorized_raster <- function(ras, name = NULL, ...){
@@ -965,8 +971,8 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
   # Simply return the input if there are no factors
   if(!any(is.factor(ras))) return(ras)
 
-  # If input is a RasterLayer
-  if(inherits(ras, 'RasterLayer')){
+  # If input is a SpatRaster
+  if(inherits(ras, 'SpatRaster')){
     # Get name
     # Create output template
     temp <- emptyraster(ras)
@@ -981,15 +987,19 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
     )
 
     # Fill template rasters
-    out <- fill_rasters(f,temp)
+    out <- fill_rasters(f, temp)
     names(out) <- paste(name, levels(o[[name]]), sep = ".")
 
-  } else if(inherits(ras, 'RasterStack') || inherits(ras, 'RasterBrick')){
+  } else if(terra::nlyr(ras)>1){
     # Alternatively if input is stack
     fcts <- is.factor(ras)
 
     # Get non-factor variables
-    out <- ras[[which(!fcts)]]
+    if(length( which(!fcts) ) >0){
+      out <- ras[[which(!fcts)]]
+    } else {
+      out <- terra::rast()
+    }
     for(k in which(fcts)){
 
       sub <- ras[[k]]
@@ -1008,7 +1018,7 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
       # Fill template rasters
       new <- fill_rasters(f, temp)
       names(new) <- paste(new_name, levels(o[[new_name]]), sep = ".")
-      out <- raster::addLayer(out, new)
+      suppressWarnings( out <- c(out, new) )
     }
   }
   return(out) # Return the result
@@ -1044,13 +1054,13 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #'
 #' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
 #' and presence-absence occurrence points equally.
-#' @param background A [`RasterLayer`] object with the background of the study region. Use for assessing point density.
-#' @param env A [`Raster`] object with environmental covariates. Needed when method is set to \code{"environmental"}
+#' @param background A [`SpatRaster`] object with the background of the study region. Use for assessing point density.
+#' @param env A [`SpatRaster`] object with environmental covariates. Needed when method is set to \code{"environmental"}
 #' or \code{"bias"} (Default: \code{NULL}).
 #' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
 #' @param minpoints A [`numeric`] giving the number of data points at minimum to take (Default: \code{10}).
 #' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations (Default: \code{NULL}).
-#' @param zones A [`RasterLayer`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
+#' @param zones A [`SpatRaster`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
 #' @param verbose [`logical`] of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).
 #' @examples
 #' \dontrun{
@@ -1083,12 +1093,12 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
   # Label background with id
   bg <- background
-  bg[] <- 1:raster::ncell(bg)
-  bg <- raster::mask(bg, background)
+  bg[] <- 1:terra::ncell(bg)
+  bg <- terra::mask(bg, background)
 
   # Check that environment has the same projection
   if(is.Raster(env) && method == "environmental"){
-    assertthat::assert_that( raster::compareRaster(bg, env) )
+    assertthat::assert_that( terra::compareGeom(bg, env, stopOnError = FALSE) )
   }
   # Check that CRS is the same as background
   if(sf::st_crs(df) != sf::st_crs(bg)){
@@ -1098,10 +1108,10 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
   # Take coordinates of supplied data and rasterize
   coords <- sf::st_coordinates( df )
-  ras <- raster::rasterize(coords, bg) # Get the number of observations per grid cell
+  ras <- terra::rasterize(coords, bg) # Get the number of observations per grid cell
 
   # Bounds for thining
-  totake <- c(lower = minpoints, upper = max(raster::cellStats(ras,"min"), minpoints))
+  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min"), minpoints))
 
   # -- #
   if(method == "random"){
@@ -1112,7 +1122,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     sel <- vector()
 
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = raster::extract(bg, coords)
+                     cid = terra::extract(bg, coords)
     )
     ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
 
@@ -1139,19 +1149,18 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     try({rm(ex)},silent = TRUE)
   } else if(method == "bias"){
     assertthat::assert_that(is.Raster(env),
-                            raster::nlayers(env)==1,
+                            terra::nlyr(env)==1,
                             msg = "Bias requires a single Raster layer provided to env.")
-
     sel <- vector()
 
     # Convert bias layer into percentile (largest being)
-    bias_perc <- raster::quantile(env, c(.75))
+    bias_perc <- terra::quantile(env, c(.75))
 
     # Now extract
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = raster::extract(bg, coords),
-                     pres = raster::extract(ras, coords),
-                     bias = raster::extract(env, coords)
+                     cid = terra::extract(bg, coords),
+                     pres = terra::extract(ras, coords),
+                     bias = terra::extract(env, coords)
     )
     ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
     # Now identify those to be thinned
@@ -1173,16 +1182,16 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     assertthat::assert_that(is.Raster(zones),
                             is.factor(zones))
 
-    if(!raster::compareRaster(bg, zones,stopiffalse = FALSE)){
-      zones <- alignRasters(zones, bg, method = "ngb", func = raster::modal, cl = FALSE)
+    if(!terra::compareGeom(bg, zones, stopOnError = FALSE)){
+      zones <- alignRasters(zones, bg, method = "near", func = terra::modal, cl = FALSE)
     }
 
     # Output vector
     sel <- vector()
 
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = raster::extract(bg, coords),
-                     zones = raster::extract(zones, coords)
+                     cid = terra::extract(bg, coords),
+                     zones = terra::extract(zones, coords)
     )
     # Now for each zone, take the minimum amount at random
     ss <- ex |>
@@ -1197,8 +1206,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   } else if(method == "environmental"){
     # Environmental clustering
 
-    if(!raster::compareRaster(bg, env,stopiffalse = FALSE)){
-      env <- alignRasters(env, bg, method = "ngb", func = raster::modal, cl = FALSE)
+    if(!terra::compareGeom(bg, env, stopOnError = FALSE)){
+      env <- alignRasters(env, bg, method = "near", func = terra::modal, cl = FALSE)
     }
     # If there are any factors, explode
     if(any(is.factor(env))){
@@ -1210,7 +1219,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
     # Get a matrix of all environmental data, also with coordinates
     # However first normalize all data
-    stk <- raster::as.data.frame(
+    stk <- terra::as.data.frame(
         predictor_transform(env, option = "norm"),
       xy = TRUE)
 
@@ -1229,8 +1238,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
     # Now re-extract and sampling points
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = raster::extract(bg, coords),
-                     zones = raster::extract(new, coords)
+                     cid = terra::extract(bg, coords),
+                     zones = terra::extract(new, coords)
     )
 
     # Now for each zone, take the minimum amount at random
@@ -1246,7 +1255,6 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   } else if(method == "spatial"){
     # Spatial thinning
     stop("Not yet implemented!")
-
   }
 
   # Return subsampled coordinates

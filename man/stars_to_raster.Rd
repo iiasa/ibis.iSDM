@@ -12,14 +12,14 @@ stars_to_raster(obj, which = NULL, template = NULL)
 \item{which}{The time entry to use for subsetting. Can be single \code{\link{numeric}} or a \code{\link{vector}}
 of numeric time entries corresponding to the time dimension (Default: \code{NULL}).}
 
-\item{template}{An optional \code{\link{Raster}} template to which the output should be aligned too.}
+\item{template}{An optional \code{\link{SpatRaster}} template to which the output should be aligned too.}
 }
 \value{
-A \code{\link{list}} containing \code{\link{Raster}} objects.
+A \code{\link{list}} containing \code{\link{SpatRaster}} objects.
 }
 \description{
 This is a small helper function to convert a \code{\link{stars}} object
-to a \code{\link{Raster}} object. It is possible to select the time frame as well.
+to a \code{\link{SpatRaster}} object. It is possible to select the time frame as well.
 If multiple \code{"which"} entries are specified, then a \code{\link{list}} will be returned.
 }
 \keyword{internal}

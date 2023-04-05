@@ -27,4 +27,4 @@ This function is meant to be used within a certain \code{\link{engine}} or withi
 Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
 }
 \keyword{internal}
-\keyword{utils}
+\keyword{utils,}

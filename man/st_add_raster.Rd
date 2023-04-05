@@ -2,17 +2,17 @@
 % Please edit documentation in R/utils-scenario.R
 \name{st_add_raster}
 \alias{st_add_raster}
-\title{This function add layers from a RasterStack to a stars object}
+\title{This function add layers from a SpatRaster to a stars object}
 \usage{
 st_add_raster(obj, new)
 }
 \arguments{
 \item{obj}{A \code{\link{stars}} object with a time dimension (\code{"time"}).}
 
-\item{new}{A \code{\link{RasterStack}} object with additional covariates to be added.}
+\item{new}{A \code{\link{SpatRaster}} object with additional covariates to be added.}
 }
 \value{
-A \code{\link{stars}} object with the names of the \code{\link{Raster}} object added.
+A \code{\link{stars}} object with the names of the \code{\link{SpatRaster}} object added.
 }
 \description{
 Often it is necessary to add static variables to existing stars objects.

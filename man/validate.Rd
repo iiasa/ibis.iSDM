@@ -6,11 +6,11 @@
 \usage{
 \S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
 
-\S4method{validate}{RasterLayer, character, sf, character}(mod, method, point, point_column)
+\S4method{validate}{SpatRaster, character, sf, character}(mod, method, point, point_column)
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors. Alternatively one can also
-provide directly a \code{\link{RasterLayer}}, however in this case the \code{point} layer also needs to be provided.}
+provide directly a \code{\link{SpatRaster}}, however in this case the \code{point} layer also needs to be provided.}
 
 \item{method}{Should the validation be conducted on continuous metrics or thresholded? See Details.}
 

@@ -2,26 +2,26 @@
 % Please edit documentation in R/utils-spatial.R
 \name{emptyraster}
 \alias{emptyraster}
-\title{Create an empty \code{RasterLayer} based on a template}
+\title{Create an empty \code{SpatRaster} based on a template}
 \usage{
 emptyraster(x, ...)
 }
 \arguments{
-\item{x}{a \code{Raster*} object corresponding.}
+\item{x}{A \code{SpatRaster*} object corresponding.}
 
-\item{...}{other arguments that can be passed to \code{\link{raster}}}
+\item{...}{other arguments that can be passed to \code{\link{terra}}}
 }
 \value{
-an empty raster, i.e. all cells are \code{NA}.
+an empty \code{\link{SpatRaster}}, i.e. all cells are \code{NA}.
 }
 \description{
-This function creates an empty copy of a provided \code{RasterLayer} object. It
+This function creates an empty copy of a provided \code{SpatRaster} object. It
 is primarily used in the package to create the outputs for the predictions.
 }
 \examples{
-require(raster)
-r <- raster(matrix(1:100, 5, 20))
+require(terra)
+r <- rast(matrix(1:100, 5, 20))
 emptyraster(r)
 }
-\keyword{raster,}
+\keyword{terra,}
 \keyword{utils}

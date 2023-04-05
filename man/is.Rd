@@ -39,7 +39,7 @@ Is the provided object of type waiver?
 
 Check whether a formula is valid
 
-Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
+Tests if an input is a SpatRaster object.
 
 Tests if an input is a stars object.
 }
