@@ -100,7 +100,7 @@ the estimation is being done.
 This function acts as a generic training function that - based on the provided \code{\linkS4class{BiodiversityDistribution}}
 object creates a new distribution model.
 The resulting object contains both a \code{\link{fit_best}} object of the estimated model and, if \code{inference_only} is \code{FALSE}
-a \link{RasterLayer} object named \code{\link{prediction}} that contains the spatial prediction of the model.
+a \link{SpatRaster} object named \code{\link{prediction}} that contains the spatial prediction of the model.
 These objects can be requested via \code{object$get_data("fit_best")}.
 
 Other parameters in this function:

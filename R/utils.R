@@ -659,7 +659,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
     pres <- terra::rasterize(x = df[,c("x","y")],y = template, fun = 'length', background = 0)
   }
   assertthat::assert_that(
-    is.Raster(pres), is.finite( terra::global(pres, "max", na.rm=T)[1,1] )
+    is.Raster(pres), is.finite( terra::global(pres, "max", na.rm = TRUE)[1,1] )
   )
   if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
   # Get cell ids

@@ -12,21 +12,27 @@ predictor_homogenize_na(
 )
 }
 \arguments{
-\item{env}{A \code{\link{Raster}} object with the predictors}
+\item{env}{A \code{\link{SpatRaster}} object with the predictors.}
 
-\item{fill}{A \code{\link{logical}} value indicating whether missing data are to be filled (Default: FALSE).}
+\item{fill}{A \code{\link{logical}} value indicating whether missing data are to be filled (Default: \code{FALSE}).}
 
-\item{fill_method}{A \code{\link{character}} of the method for filling gaps to be used (Default: 'ngb')}
+\item{fill_method}{A \code{\link{character}} of the method for filling gaps to be used (Default: \code{'ngb'}).}
 
-\item{return_na_cells}{A \code{\link{logical}} value of whether the ids of grid cells with NA values is to be returned instead (Default: FALSE)}
+\item{return_na_cells}{A \code{\link{logical}} value of whether the ids of grid cells with NA values is to be returned instead (Default: \code{FALSE}).}
 }
 \value{
-A \code{\link{Raster}} object with the same number of layers as the input.
+A \code{\link{SpatRaster}} object with the same number of layers as the input.
 }
 \description{
 This method allows the homogenization of missing data across a set of environmental predictors.
 It is by default called when predictors are added to \link{´BiodiversityDistribution´} object. Only grid cells with NAs that contain
 values at some raster layers are homogenized.
 Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
+}
+\examples{
+\dontrun{
+ # Harmonize predictors
+ env <- predictor_homogenize_na(env)
+}
 }
 \keyword{utils}

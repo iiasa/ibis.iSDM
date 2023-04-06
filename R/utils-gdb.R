@@ -121,9 +121,9 @@ built_formula_gdb <- function(model, id, x, settings){
 
 #' Use a fitted model for creating a new class prediction in raster form
 #'
-#' @param fit A fitted [`mboost`] model with [`binomial`] distribution
-#' @param nd A new data.frame with all predictiors used in fit
-#' @param template A [`Raster`] object that can be used as spatial template.
+#' @param fit A fitted [`mboost`] model with [`binomial`] distribution.
+#' @param nd A new data.frame with all predictiors used in fit.
+#' @param template A [`SpatRaster`] object that can be used as spatial template.
 #' @returns A [`RasterLayer`] containing a presence-absence prediction.
 #' @keywords utils
 #' @noRd
@@ -132,7 +132,7 @@ predict_gdbclass <- function(fit, nd, template){
     inherits(fit, 'mboost'),
     !is.null( grep('Binomial', fit$family@name,ignore.case = TRUE) ),
     is.data.frame(nd),
-    inherits(template,'RasterLayer')
+    is.Raster(template)
   )
   # Redo a template to be sure
   template <- emptyraster(template)
@@ -202,10 +202,10 @@ clean_mboost_summary <- function(obj){
 #' on the number of unique values within.
 #' If fewer values than a given threshold (\code{'tr'}) is detected, then the predictor is removed, thus
 #' reducing complexity.
-#' @note Maybe in the future a more cleverer solution could be thought of, for instance using a singular value decompoistion?
-#' @param model A [`list`] of a model object containing the various predictors and biodiversity occurence information.
+#' @note Maybe in the future a more cleverer solution could be thought of, for instance using a singular value decomposition?
+#' @param model A [`list`] of a model object containing the various predictors and biodiversity occurrence information.
 #' @param tr A [`numeric`] value describing a threshold of minimum unique values to be retained.
-#' @returns A [`vector`] with the variables that fullfill the threshold.
+#' @returns A [`vector`] with the variables that full fill the threshold.
 #' @keywords internal
 #' @noRd
 rm_insufficient_covs <- function(model, tr = 5){
@@ -257,7 +257,7 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' @param use_area A [`logical`] on whether area is to be used instead of grid counts.
 #' @param weight A [`numeric`] weight to be used in down-weighted regressions.
 #' @param type Accepting either “Infinitely weighted logistic regression” \code{'IWLR'} for use with binomial
-#' logistic regressions or “Down-weighted Poisson regression” \code{"DWPR"} (Default).
+#' logistic regressions or “Down-weighted Poisson regression” \code{'DWPR'} (Default).
 #' @references
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
@@ -276,12 +276,12 @@ ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWP
   type <- match.arg(type, c("DWPR", "IWLR"),several.ok = FALSE)
 
   if(use_area){
-    suppressWarnings( ar <- raster::area(bg) )
-    ar <- raster::mask(ar, bg)
-    nc <- cellStats(ar, sum)
+    suppressWarnings( ar <- terra::area(bg) )
+    ar <- terra::mask(ar, bg)
+    nc <- terra::global(ar, "sum")
   } else {
     # number of non-NA cells
-    nc <- cellStats(!is.na(bg), sum)
+    nc <- terra::global(!is.na(bg), "sum")
   }
 
   # Set output weight as default

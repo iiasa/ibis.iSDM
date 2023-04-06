@@ -16,8 +16,8 @@ add_pseudoabsence(
 
 \item{field_occurrence}{A \code{\link{character}} name of the column containing the presence information (Default: \code{observed}).}
 
-\item{template}{A \code{\link{RasterLayer}} object that is aligned with the predictors (Default: \code{NULL}). If set to \code{NULL},
-then \code{background} in the \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} has to be a \code{\link{RasterLayer}} object.}
+\item{template}{A \code{\link{SpatRaster}} object that is aligned with the predictors (Default: \code{NULL}). If set to \code{NULL},
+then \code{background} in the \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} has to be a \code{\link{SpatRaster}} object.}
 
 \item{settings}{A \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} objects. Absence settings are taken from \link{ibis_options} otherwise (Default).}
 }

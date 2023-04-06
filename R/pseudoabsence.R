@@ -24,15 +24,15 @@ NULL
 #' points should be sampled inside or outside (Default) the minimum convex polygon.
 #' * \code{'range'} Absence points are created either inside or outside a provided additional
 #' layer that indicates for example a range of species (controlled through parameter \code{inside}).
-#' * \code{'zones'} A ratified (e.g. of type [factor]) [`RasterLayer`] layer depicting zones from which absence
+#' * \code{'zones'} A ratified (e.g. of type [factor]) [`SpatRaster`] layer depicting zones from which absence
 #' points are to be sampled. This method checks which points fall within which zones and then samples absence
 #' points either within or outside these zones exclusively. Both \code{'layer'} and \code{'inside'} have to be set
 #' for this option.
-#' * \code{'target'} Make use of a target background for sampling absence points. Here a [`RasterLayer`] object
+#' * \code{'target'} Make use of a target background for sampling absence points. Here a [`SpatRaster`] object
 #' has to be provided through the parameter \code{'layer'}. Absence points are then sampled exclusively within
 #' the target areas for grid cells with non-zero values.
 #'
-#' @param background A [`RasterLayer`] or [`sf`] object over which background points can be sampled. Default is
+#' @param background A [`SpatRaster`] or [`sf`] object over which background points can be sampled. Default is
 #' \code{NULL} (Default) and the background is then added when the sampling is first called.
 #' @param nrpoints A [`numeric`] given the number of absence points to be created. Has to be larger than \code{0} and
 #' normally points are not created in excess of the number of cells of the background (Default: \code{10 000}).
@@ -45,9 +45,9 @@ NULL
 #' @param min_ratio A [`numeric`] with the minimum ratio of background points relative to the presence points.
 #' Setting this value to \code{1} generates an equal amount of absence points relative to the presence points.
 #' Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).
-#' @param layer A [`sf`] or [`RasterLayer`] (in the case of method \code{'zones'}) object indicating the range of a species.
+#' @param layer A [`sf`] or [`SpatRaster`] (in the case of method \code{'zones'}) object indicating the range of a species.
 #' Only used with \code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).
-#' @param bias A [`RasterLayer`] with the same extent and projection and background. Absence points will
+#' @param bias A [`SpatRaster`] with the same extent and projection and background. Absence points will
 #' be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).
 #' @param ... Any other settings to be added to the pseudoabs settings.
 #' @examples
@@ -147,8 +147,8 @@ methods::setMethod(
 #' and the coordinate columns (which will be created if not already present).
 #' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
 #' @param field_occurrence A [`character`] name of the column containing the presence information (Default: \code{observed}).
-#' @param template A [`RasterLayer`] object that is aligned with the predictors (Default: \code{NULL}). If set to \code{NULL},
-#' then \code{background} in the [`pseudoabs_settings()`] has to be a [`RasterLayer`] object.
+#' @param template A [`SpatRaster`] object that is aligned with the predictors (Default: \code{NULL}). If set to \code{NULL},
+#' then \code{background} in the [`pseudoabs_settings()`] has to be a [`SpatRaster`] object.
 #' @param settings A [`pseudoabs_settings()`] objects. Absence settings are taken from [ibis_options] otherwise (Default).
 #' @references
 #' * Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in
@@ -198,11 +198,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   if(!is.Raster(background)){
     assertthat::assert_that(is.Raster(template),
                             msg = "No suitable RasterLayer was provided through Settings or as template!")
-    if("fasterize" %in% utils::installed.packages()[,1]){
-      background <- fasterize::fasterize(sf = background, raster = emptyraster(template), field = NULL)
-    } else {
-      background <- raster::rasterize(background, emptyraster(template), field = 1)
-    }
+    background <- terra::rasterize(background, emptyraster(template), field = 1)
     assertthat::assert_that(is.Raster(background))
   }
 
@@ -217,28 +213,28 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
 
   # If the nr of points is 0, set it equal to the number of min_ratio or presented presence points
   nrpoints <- max(nrpoints, round( nrow(df) * min_ratio ))
-  if(nrpoints > raster::ncell(background)) nrpoints <- raster::ncell(background)
+  if(nrpoints > terra::ncell(background)) nrpoints <- terra::ncell(background)
 
   if(!is.Waiver(settings$get("bias"))){
     bias <- settings$get("bias")
-    if(!compareRaster(bias, background, stopiffalse = FALSE)){
+    if(!terra::compareGeom(bias, background, stopOnError = FALSE)){
       # Resample to ensure same coverage
-      bias <- raster::crop(bias, raster::extent(background))
-      bias <- raster::resample(bias, background, method = "bilinear")
+      bias <- terra::crop(bias, terra::ext(background))
+      bias <- terra::resample(bias, background, method = "bilinear")
     }
     # Normalize if not already set
-    if(raster::cellStats(bias, 'max') > 1 || raster::cellStats(bias, 'min') < 0 ){
+    if(terra::global(bias, 'max', na.rm = TRUE) > 1 || terra::global(bias, 'min', na.rm = TRUE) < 0 ){
       bias <- predictor_transform(bias, option = "norm")
     }
   } else { bias <- NULL }
 
   # Rasterize the presence estimates
-  bg1 <- raster::rasterize(df[,c('x','y')] |> sf::st_drop_geometry(),
-                           background, fun = 'count', background = 0)
-  bg1 <- raster::mask(bg1, background)
+  bg1 <- terra::rasterize(df[,c('x','y')] |> sf::st_drop_geometry(),
+                           background, fun = 'length', background = 0)
+  bg1 <- terra::mask(bg1, background)
 
   assertthat::assert_that(
-    is.finite(raster::cellStats(bg1,'max',na.rm = T)[1])
+    is.finite(terra::global(bg1, 'max', na.rm = TRUE)[1])
   )
 
   # Generate pseudo absence data
@@ -260,13 +256,9 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance ,units::deparse_unit(un),' buffer'))
     # Calculate buffer
     buf <- sf::st_buffer(x = df, dist = buffer_distance)
-    if("fasterize" %in% utils::installed.packages()[,1]){
-      buf <- fasterize::fasterize(sf = buf, raster = emptyraster(template), field = NULL)
-    } else {
-      buf <- raster::rasterize(buf, emptyraster(template), field = 1)
-    }
-    bg2 <- raster::mask(template, buf, inverse = FALSE, updatevalue = 1)
-    assertthat::assert_that(cellStats(bg2, "max")>0,msg = "Considered buffer distance too big!")
+    buf <- terra::rasterize(buf, emptyraster(template), field = 1)
+    bg2 <- terra::mask(template, buf, inverse = FALSE, updatevalue = 1)
+    assertthat::assert_that(terra::global(bg2, "max", na.rm = TRUE) >0,msg = "Considered buffer distance too big!")
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
@@ -284,7 +276,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     # Now mask out this area from the background
     inside <- settings$get("inside")
     assertthat::assert_that(is.logical(inside), msg = "MCP inside / outside parameter has to be set.")
-    bg2 <- raster::mask(bg1, mask = pol, inverse = !inside)
+    bg2 <- terra::mask(bg1, mask = pol, inverse = !inside)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
       prob_bias <- bias[which(bg2[]==0)]
@@ -307,7 +299,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     inside <- settings$get("inside")
 
     # Now mask out from the sampling background the area from which to sample
-    bg2 <- raster::mask(bg1, mask = layer, inverse = !inside)
+    bg2 <- terra::mask(bg1, mask = layer, inverse = !inside)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
       prob_bias <- bias[which(bg2[]==0)]
@@ -323,14 +315,14 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
                             msg = "For method zones a factorized RasterLayer has to be specified!")
     # Get the layer
     layer <- settings$get("layer")
-    if(!raster::compareCRS(layer, bg1)){
-      layer <- raster::projectRaster(layer, bg1,method = "ngb")
+    if(sf::st_crs(layer) != sf::st_crs(bg1)){
+      layer <- terra::project(layer, bg1, method = "near")
     }
     # Get parameter on location
     inside <- settings$get("inside")
 
     # Cross-tabulate with presence raster
-    tab <- raster::crosstab(layer, bg1, long = TRUE)
+    tab <- terra::crosstab(layer, bg1, long = TRUE)
     tab <- tab[tab[,2]>0,] # Get only those zones where there are presence points
     # Remove any 0 class if there
     if(any(tab[,1] == 0)) tab <- tab[tab[,1]!=0,]
@@ -342,11 +334,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
       zones <- !layer %in% unique(tab[,1])
     }
     # Mask again to be sure
-    zones <- raster::mask(zones, bg1)
+    zones <- terra::mask(zones, bg1)
     zones[zones==0] <- NA
 
     # Now mask out from the sampling background the area from which to sample
-    bg2 <- raster::mask(bg1, mask = zones)
+    bg2 <- terra::mask(bg1, mask = zones)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
       prob_bias <- bias[which(bg2[]==0)]
@@ -361,11 +353,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
                             msg = "For method target a rasterized occurrence layer has to be specified!")
     # Get the layer
     layer <- settings$get("layer")
-    if(!raster::compareCRS(layer, bg1)){
-      layer <- raster::projectRaster(layer, bg1,method = "ngb")
+    if(sf::st_crs(layer) != sf::st_crs(bg1)){
+      layer <- terra::project(layer, bg1, method = "near")
     }
     # Now mask out from the sampling background the area from which to sample
-    bg2 <- raster::mask(bg1, mask = layer)
+    bg2 <- terra::mask(bg1, mask = layer)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
       prob_bias <- bias[which(bg2[]==0)]

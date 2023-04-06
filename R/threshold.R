@@ -9,7 +9,7 @@ NULL
 #' suitable habitat might or might not exist. This so called *threshold'ing*
 #' can be done in various ways which are further described in the details.
 #'
-#' In case a [RasterLayer] or [RasterBrick] is provided as input in this function
+#' In case a [`SpatRaster`] is provided as input in this function
 #' for \code{obj}, it is furthermore necessary to provide a [`sf`] object for validation as
 #' there is no [`DistributionModel`] to read this information from.
 #' **Note:** This of course also allows to estimate the threshold based on withheld data, for instance
@@ -18,7 +18,7 @@ NULL
 #' For [`BiodiversityScenario`] objects, adding this function to the processing pipeline
 #' stores a threshold attribute in the created [scenario] object.
 #'
-#' @param obj A trained [`DistributionModel`] or alternatively a [`Raster`] object.
+#' @param obj A trained [`DistributionModel`] or alternatively a [`SpatRaster`] object.
 #' @param method A specifc method for thresholding. See details for available options.
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
 #' @param poi A [`sf`] object containing observational data used for model training.
@@ -44,7 +44,7 @@ NULL
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
 #' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
 #' @seealso [modEvA]
-#' @returns A [RasterLayer] if used with a [Raster] object as input.
+#' @returns A [SpatRaster] if a [SpatRaster] object as input.
 #' Otherwise the threshold is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
 #' @examples
 #' \dontrun{
@@ -115,7 +115,7 @@ methods::setMethod(
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
     if((!any(poi$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(poi$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
-      bg <- raster::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
+      bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       abs <- add_pseudoabsence(df = poi,
                                    field_occurrence = 'observed',
                                    template = bg,
@@ -142,9 +142,9 @@ methods::setMethod(
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj
     new_obj <- obj
-    if(inherits(out,'RasterLayer')){
+    if(inherits(out,'SpatRaster')){
       new_obj <- new_obj$set_data(names(out), out)
-    } else if(inherits(out,'RasterStack')) {
+    } else if(inherits(out,'SpatRasterCollection')) {
       # When stack loop through and add
       new_obj <- new_obj$set_data(paste0("threshold_", method), out)
     }
@@ -175,23 +175,24 @@ methods::setMethod(
     names(out) <- names(obj)
   } else {
     # Return the raster instead
-    out <- raster::stack()
+    out <- terra::rast()
     if(method == "min.cv"){
       # If the coefficient of variation is to be minmized, mask first all values with the threshold only
-      assertthat::assert_that(raster::nlayers(obj)>2, "sd" %in% names(obj))
+      assertthat::assert_that(terra::nlyr(obj)>2, "sd" %in% names(obj))
       # Get global coefficient of variation
       errortr <- quantile(obj[["cv"]], .3)
       assertthat::assert_that(is.numeric(errortr))
       # Create mask
       mm <- obj[["cv"]]
       mm[mm > errortr] <- NA
-      obj <- raster::mask(obj, mm); rm(mm)
+      obj <- terra::mask(obj, mm); rm(mm)
       # Set the value to errortr
       value <- errortr
     }
     # Now loop
-    for(i in names(obj)) out <- raster::addLayer(out, threshold(obj[[i]], method = method,
-                                                                  value = value, poi = poi, format = format, return_threshold = return_threshold, ...) )
+    for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
+                                                 value = value, poi = poi, format = format,
+                                                 return_threshold = return_threshold, ...) )
   }
   return(out)
 }
@@ -199,20 +200,18 @@ methods::setMethod(
 #' @name threshold
 #' @rdname threshold
 #' @inheritParams threshold
-#' @usage \S4method{threshold}{RasterBrick}(obj)
-methods::setMethod("threshold",methods::signature(obj = "RasterBrick"),.stackthreshold)
-#' @usage \S4method{threshold}{RasterStack}(obj)
-methods::setMethod("threshold",methods::signature(obj = "RasterStack"),.stackthreshold)
+#' @usage \S4method{threshold}{SpatRasterDataset}(obj)
+methods::setMethod("threshold", methods::signature(obj = "SpatRasterDataset"), .stackthreshold)
 
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{RasterLayer}(obj)
+#' @usage \S4method{threshold}{SpatRaster}(obj)
 methods::setMethod(
   "threshold",
-  methods::signature(obj = "RasterLayer"),
+  methods::signature(obj = "SpatRaster"),
   function(obj, method = 'fixed', value = NULL, poi = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
     assertthat::assert_that(is.Raster(obj),
-                            inherits(obj,'RasterLayer'),
+                            inherits(obj,'SpatRaster'),
                             is.character(method),
                             is.null(value) || is.numeric(value),
                             is.character(format)
@@ -249,12 +248,12 @@ methods::setMethod(
       tr <- value
     } else if(method == "mtp"){
       # minimum training presence
-      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
       # Minimum threshold
       tr <- min( stats::na.omit(pointVals) )
 
     } else if(method == "percentile"){
-      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
       pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
       # percentile training threshold
       if(is.null(value)) value <- 0.1 # If value is not set, use 10%
@@ -267,7 +266,7 @@ methods::setMethod(
 
     } else if(method == "min.cv"){
       assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be set!")
-      pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
+      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
 
       # Get standard deviation and calculate percentile
       tr <- min( stats::na.omit(pointVals) )
@@ -282,11 +281,11 @@ methods::setMethod(
       check_package("modEvA")
       # Assure that point data is correctly specified
       assertthat::assert_that(inherits(poi, 'sf'), utils::hasName(poi, 'observed'))
-      poi$observed <- ifelse(poi$observed>1,1,poi$observed) # Ensure that observed is <=1
+      poi$observed <- ifelse(poi$observed>1, 1, poi$observed) # Ensure that observed is <=1
       assertthat::assert_that(all( unique(poi$observed) %in% c(0,1) ))
 
       # Re-extract point vals but with the full dataset
-      pointVals <- raster::extract(raster_thresh, poi)
+      pointVals <- terra::extract(raster_thresh, poi)
       assertthat::assert_that(length(pointVals)>2)
       # Calculate the optimal thresholds
       suppressWarnings(
@@ -316,20 +315,20 @@ methods::setMethod(
         # Default is to create a binary presence-absence. Otherwise truncated hinge
         raster_thresh[raster_thresh < tr[1]] <- 0
         raster_thresh[raster_thresh >= tr[1]] <- 1
-        raster_thresh <- raster::asFactor(raster_thresh)
+        raster_thresh <- terra::as.factor(raster_thresh)
       } else if(format == "normalize"){
         raster_thresh[raster_thresh < tr[1]] <- NA
         # If truncate, ensure that resulting values are normalized
         raster_thresh <- predictor_transform(raster_thresh, option = "norm")
         raster_thresh[is.na(raster_thresh)] <- 0
-        raster_thresh <- raster::mask(raster_thresh, obj)
+        raster_thresh <- terra::mask(raster_thresh, obj)
         base::attr(raster_thresh, 'truncate') <- TRUE
 
         base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
       } else if(format == "percentile") {
         raster_thresh[raster_thresh < tr[1]] <- NA
         raster_thresh <- predictor_transform(raster_thresh, option = "percentile")
-        raster_thresh <- raster::mask(raster_thresh, obj)
+        raster_thresh <- terra::mask(raster_thresh, obj)
         base::attr(raster_thresh, 'truncate') <- TRUE
       }
       names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)

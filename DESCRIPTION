@@ -33,7 +33,7 @@ Imports:
     parallel,
     posterior,
     proto (>= 1.0.0),
-    raster (>= 3.4-5),
+    terra (>= 1.7-10),
     rgeos (>= 0.5-5),
     sf (>= 0.9),
     stars (>= 0.5),

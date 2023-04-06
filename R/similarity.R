@@ -9,7 +9,7 @@ NULL
 #' Currently supported is Multivariate Environmental Similarity index
 #' and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
 #'
-#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`Raster`] object.
+#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`SpatRaster`] object.
 #' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively
 #' a [`data.frame`] with extracted values (corresponding to those given in `obj`).
 #' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`].
@@ -19,20 +19,20 @@ NULL
 #' @param ... other options (Non specified).
 #' @return
 #'  This function returns a list containing:
-#'  * `similarity`: a `RasterStack` giving the environmental similarities for
-#'   each variable in `x` (only included when `full=TRUE`);
-#'  * `mis`: a `Raster` layer giving the minimum similarity value
+#'  * `similarity`: A `SpatRaster` object with multiple layers giving the environmental
+#'  similarities for each variable in `x` (only included when `full=TRUE`);
+#'  * `mis`: a `SpatRaster` layer giving the minimum similarity value
 #'   across all variables for each location (i.e. the MESS);
-#'  * `exip`: a `Raster` layer indicating whether any model would interpolate
+#'  * `exip`: a `SpatRaster` layer indicating whether any model would interpolate
 #'   or extrapolate to this location based on environmental surface;
-#'  * `mod`: a factor `Raster` layer indicating which variable was most
+#'  * `mod`: a factor `SpatRaster` layer indicating which variable was most
 #'   dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
 #'   and
-#'  * `mos`: a factor `Raster` layer indicating which variable was most
+#'  * `mos`: a factor `SpatRaster` layer indicating which variable was most
 #'   similar to its reference range.
 #'
 #' @details [`similarity`] implements the MESS algorithm described in Appendix S3
-#'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
+#'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014).
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references
 #' * Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting
@@ -58,7 +58,8 @@ NULL
 methods::setGeneric(
   "similarity",
   signature = methods::signature("obj"),
-  function(obj, ref, ref_type = 'poipo', method = 'mess', predictor_names = NULL, full = FALSE, plot = TRUE, ...) standardGeneric("similarity"))
+  function(obj, ref, ref_type = 'poipo',
+           method = 'mess', predictor_names = NULL, full = FALSE, plot = TRUE, ...) standardGeneric("similarity"))
 
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity
@@ -94,12 +95,12 @@ methods::setMethod(
     #   coords = obj$biodiversity$get_coordinates(names(bid)),
     #   env = obj$predictors$get_data(df = TRUE),
     #   field_space = c('x','y'),
-    #   longlat = raster::isLonLat(covs)
+    #   longlat = terra::is.lonlat(covs)
     # )
     # Subset if necessary
     if(!is.null(predictor_names)){ covs <- covs[[predictor_names]]; ref <- ref[,predictor_names]}
 
-    assertthat::assert_that(nlayers(covs) == ncol(ref))
+    assertthat::assert_that( terra::nlyr(covs) == ncol(ref))
 
     # Run mess function
     if(method == 'mess'){
@@ -107,8 +108,9 @@ methods::setMethod(
                    ref  = ref,
                    full = full)
       # Calculate interpolation/extrapolated
-      rip <- raster::cut(out$mis,c(cellStats(out$mis,'min'),0,cellStats(out$mis,'max')),ordered_result = TRUE)
-      rip <- raster::ratify(rip)
+      rip <- terra::classify(out$mis,c( terra::global(out$mis,'min', na.rm = TRUE), 0,
+                                   terra::global(out$mis,'max', na.rm = TRUE)), ordered_result = TRUE)
+      rip <- terra::as.factor(rip)
       levels(rip) <- data.frame(ID = levels(rip)[[1]],
                                 what = c('Extrapolation','Interpolation'))
       out$exip <- rip;rm(rip)
@@ -123,17 +125,17 @@ methods::setMethod(
       if(method == 'mess'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(2,2))
-        raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
-        raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
-        raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
-        raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
+        terra::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
+        terra::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
+        terra::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
+        terra::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
         graphics::par(par.ori)
       } else if(method == 'nt'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(1,3))
-        raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
-        raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
-        raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
+        terra::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
+        terra::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
+        terra::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
         # FIXME: add categorical legend left to it
         graphics::par(par.ori)
       }
@@ -143,38 +145,17 @@ methods::setMethod(
   }
 )
 
-#' Similarity of used predictors by providing a RasterBrick directly
+#' Similarity of used predictors by providing a SpatRaster directly
 #' @name similarity
 #' @rdname similarity
-#' @usage \S4method{similarity}{RasterBrick}(obj)
+#' @usage \S4method{similarity}{SpatRaster}(obj)
 methods::setMethod(
   "similarity",
-  methods::signature(obj = "RasterBrick"),
+  methods::signature(obj = "SpatRaster"),
   function(obj, ref, method = 'mess', full = FALSE, plot = TRUE, ...) {
     assertthat::assert_that(!missing(ref),msg = 'Provide a sf object of reference sites')
-    assertthat::assert_that(inherits(obj, "RasterBrick"),
-                            inherits(ref, 'sf'),
-                            is.character(method)
-    )
-    # Convert RasterBrick to stack
-    obj <- raster::stack(obj)
-    # Now recall
-    similarity(obj = obj,ref = ref, method = method,
-               full = full,plot = plot, ...)
-  }
-)
-
-#' Similarity of used predictors by providing a RasterStack directly
-#' @name similarity
-#' @rdname similarity
-#' @usage \S4method{similarity}{RasterStack}(obj)
-methods::setMethod(
-  "similarity",
-  methods::signature(obj = "RasterStack"),
-  function(obj, ref, method = 'mess', full = FALSE, plot = TRUE, ...) {
-    assertthat::assert_that(!missing(ref),msg = 'Provide a sf object of reference sites')
-    assertthat::assert_that(inherits(obj, "RasterStack"),
-                            raster::nlayers(obj)>=1,
+    assertthat::assert_that(inherits(obj, "SpatRaster"),
+                            terra::nlyr(obj)>=1,
                             inherits(ref, 'sf'),
                             is.character(method)
     )
@@ -185,7 +166,7 @@ methods::setMethod(
     method <- match.arg(tolower(method), c('mess','nt2'), several.ok = FALSE)
 
     # Extract values for each provided value
-    ex <- raster::extract(x = obj,
+    ex <- terra::extract(x = obj,
                           y = ref,
                           df = TRUE)
     # Subset to variables in obj and remove missing rows
@@ -197,8 +178,10 @@ methods::setMethod(
                    ref  = ex,
                    full = full)
       # Calculate interpolation/extrapolated
-      rip <- raster::cut(out$mis,c(cellStats(out$mis,'min'),0,cellStats(out$mis,'max')),ordered_result = TRUE)
-      rip <- raster::ratify(rip)
+      rip <- terra::global(out$mis,
+                           c(terra::global(out$mis,'min', na.rm = TRUE), 0,
+                             terra::global(out$mis,'max', na.rm = TRUE)), na.rm = TRUE)
+      rip <- terra::as.factor(rip)
       levels(rip) <- data.frame(ID = levels(rip)[[1]],
                                 what = c('Extrapolation','Interpolation'))
       out$exip <- rip;rm(rip)
@@ -212,17 +195,17 @@ methods::setMethod(
       if(method == 'mess'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(2,2))
-        raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
-        raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
-        raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
-        raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
+        terra::plot(out$mis, col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
+        terra::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
+        terra::plot(out$mod, col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
+        terra::plot(out$mos, col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
         graphics::par(par.ori)
       } else if(method == 'nt'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(1,3))
-        raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
-        raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
-        raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
+        terra::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
+        terra::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
+        terra::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
         graphics::par(par.ori)
       }
     } else {
@@ -244,7 +227,7 @@ methods::setMethod(
 #' similar. Values larger than one are indicative of novel combinations"
 #' (Mesgaran et al. 2014).
 #'
-#' @param prodat A [`RasterStack`]. The projected values. The layer names must
+#' @param prodat A [`SpatRaster`]. The projected values. The layer names must
 #'   match the column names of \code{refdat}.
 #' @param refdat A numerical [`matrix`] or [`data.frame`]. The reference values of variables organized
 #'   in columns.
@@ -264,11 +247,11 @@ methods::setMethod(
   stopifnot(requireNamespace("matrixStats"))
   # Input checks
   assertthat::assert_that(is.Raster(prodat),
-                          nlayers(prodat) == ncol(refdat))
+                          terra::nlyr(prodat) == ncol(refdat))
   # Make a background layer for filling
   bg <- emptyraster(prodat)
   # Now convert both to matrix
-  prodat <- raster::as.matrix(prodat)
+  prodat <- terra::as.matrix(prodat)
   refdat <- as.matrix(refdat)
   # Further checks
   assertthat::assert_that(identical(colnames(refdat), colnames(prodat)),
@@ -332,8 +315,8 @@ methods::setMethod(
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
   nt_novel <- emptyraster(bg)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  or1 <- c(raster::cellStats(nt1,'min'), 0)
-  o_low <- raster::cut(nt1, or1, include.lowest=T)
+  or1 <- c(terra::global(nt1,'min', na.rm = TRUE), 0)
+  o_low <- terra::classify(nt1, or1, include.lowest = TRUE)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
   # non-analogous covariate combinations
@@ -341,13 +324,12 @@ methods::setMethod(
   nt_novel[o_low == 1] <- 1
   nt_novel[o_mid == 1] <- 2
   nt_novel[o_high == 1] <- 3
-  nt_novel <- raster::ratify(nt_novel)
+  nt_novel <- terra::as.factor(nt_novel)
   levels(nt_novel) <- data.frame(ID = levels(nt_novel)[[1]],
                             what = c('Outside reference','Within reference','Novel combinations'))
 
   # Create output stack
-  out <- raster::stack(nt1,nt2,nt_novel,
-                       quick = TRUE)
+  out <- c(nt1, nt2, nt_novel, quick = TRUE)
   names(out) <- c('NT1','NT2','novel')
   return(out)
 }
@@ -364,10 +346,9 @@ methods::setMethod(
   if(is(covs, 'Raster')) {
     r <- TRUE
     if(isTRUE(full)) {
-      out <- raster::stack(replicate(
-        raster::nlayers(covs), raster::init(covs, function(x) NA)))
+      out <- c(replicate( terra::nlyr(covs), terra::init(covs, function(x) NA)))
     } else {
-      out <- raster::init(covs, function(x) NA)
+      out <- terra::init(covs, function(x) NA)
     }
   } else r <- FALSE
   ref <- stats::na.omit(ref)   # Remove NAs
@@ -407,7 +388,7 @@ methods::setMethod(
 
   if(isTRUE(r)) {
     # Calculate most dissimilar surface
-    most_dissimilar <- raster::raster(out)
+    most_dissimilar <- terra::rast(out)
     most_dissimilar[] <- most_dissimilar_vec
     most_dissimilar <- as.factor(most_dissimilar)
     rat <- levels(most_dissimilar)[[1]]
@@ -415,7 +396,7 @@ methods::setMethod(
     levels(most_dissimilar) <- rat
 
     # Calculate most similar surface
-    most_similar <- raster::raster(out)
+    most_similar <- terra::rast(out)
     most_similar[] <- most_similar_vec
     most_similar <- as.factor(most_similar)
     rat <- levels(most_similar)[[1]]
@@ -423,7 +404,7 @@ methods::setMethod(
     levels(most_similar) <- rat
 
     # Fill template rasters
-    out_min <- raster::raster(out)
+    out_min <- terra::rast(out)
     out_min[] <- min_sim
     if(isTRUE(full)) {
       out[] <- sim

@@ -722,8 +722,8 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
                           is.numeric(nknots),
                           is.numeric(cutoffs) || is.null(cutoffs))
   # Get stats
-  v.min <- terra::global(v, "min")
-  v.max <- terra::global(v, "max")
+  v.min <- terra::global(v, "min", na.rm = TRUE)
+  v.max <- terra::global(v, "max", na.rm = TRUE)
   if(is.null(cutoffs)){
     k <- seq(v.min, v.max, length = nknots)
   } else {
@@ -767,8 +767,8 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
                           is.numeric(cutoffs) || is.null(cutoffs))
   if(is.null(cutoffs)){
     # Get min max
-    v.min <- terra::global(v, "min")
-    v.max <- terra::global(v, "max")
+    v.min <- terra::global(v, "min", na.rm= TRUE)
+    v.max <- terra::global(v, "max", na.rm= TRUE)
     k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
   } else {
     k <- cutoffs
@@ -1111,7 +1111,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   ras <- terra::rasterize(coords, bg) # Get the number of observations per grid cell
 
   # Bounds for thining
-  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min"), minpoints))
+  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min", na.rm = TRUE), minpoints))
 
   # -- #
   if(method == "random"){

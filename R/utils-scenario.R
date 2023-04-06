@@ -437,22 +437,22 @@ summarise_change <- function(scenario){
                                   times[length(times)] |> as.character(), rep(paste0(times_length, " years"), 11 ) ),
                        value = NA,
                        unit = c(rep(ar_unit,6), "%", "%", ar_unit, "%", "similarity", NA, "deg"))
-  change$value[1] <- terra::global((current) * terra::area(current), "sum") * mult
-  change$value[2] <- terra::global((future) * terra::area(future), "sum") * mult
+  change$value[1] <- terra::global((current) * terra::area(current), "sum", na.rm = TRUE) * mult
+  change$value[2] <- terra::global((future) * terra::area(future), "sum", na.rm = TRUE) * mult
 
   # Check that is binary thresholded
   rr <- terra::lapp(current, future, fun = function(x, y){x + y * 2})
-  change$value[3] <- terra::global((rr == 0) * terra::area(current), "sum") * mult
-  change$value[4] <- terra::global((rr == 1) * terra::area(current), "sum") * mult
-  change$value[5] <- terra::global((rr == 2) * terra::area(current), "sum") * mult
-  change$value[6] <- terra::global((rr == 3) * terra::area(current), "sum") * mult
+  change$value[3] <- terra::global((rr == 0) * terra::area(current), "sum", na.rm = TRUE) * mult
+  change$value[4] <- terra::global((rr == 1) * terra::area(current), "sum", na.rm = TRUE) * mult
+  change$value[5] <- terra::global((rr == 2) * terra::area(current), "sum", na.rm = TRUE) * mult
+  change$value[6] <- terra::global((rr == 3) * terra::area(current), "sum", na.rm = TRUE) * mult
   change$value[7] <- change$value[4] / change$value[1] * 100
   change$value[8] <- change$value[5] / change$value[1] * 100
   change$value[9] <- change$value[2] - change$value[1]
   change$value[10] <- change$value[9] / sum(c(change$value[3], change$value[4])) * 100
 
   # Sorensen similarity index
-  change$value[11] <- 2 * terra::global(rr == 3, "sum") / (terra::global(current, "sum") + terra::global(future, "sum"))
+  change$value[11] <- 2 * terra::global(rr == 3, "sum", na.rm = TRUE) / (terra::global(current, "sum", na.rm = TRUE) + terra::global(future, "sum", na.rm = TRUE))
 
   # Calculate distance between centroids
   sf1 <- calculate_range_centre(current, spatial = TRUE)
@@ -557,7 +557,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
   if(is.Raster(layer)){
     assertthat::assert_that(
       length( unique(layer) ) == 2,
-      terra::global(layer, 'max') == 1
+      terra::global(layer, 'max', na.rm = TRUE) == 1
     )
     # Calculate area-weighted centre
     r_wt <- terra::area(layer)
