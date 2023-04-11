@@ -14,13 +14,12 @@
 \item{method}{Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).}
 
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
-ignore any of the layer names in ensembles of \code{Raster} objects.}
+ignore any of the layer names in ensembles of \code{SpatRaster} objects.}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{TRUE}).}
 }
 \value{
-A \code{\link{RasterStack}} containing the ensemble of the provided predictions specified by \code{method} and a
-coefficient of variation across all models.
+A \link{data.frame} with the combined partial effects of the supplied models.
 }
 \description{
 Similar to the \code{ensemble()} function, this function creates an ensemble of
@@ -44,5 +43,11 @@ Possible options for creating an ensemble includes:
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
 Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}.
 By default the response functions of each model are normalized.
+}
+\examples{
+\dontrun{
+ # Assumes previously computed models
+ ex <- ensemble_partial(mod1, mod2, mod3, method = "mean")
+}
 }
 \keyword{train}

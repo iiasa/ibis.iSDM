@@ -29,14 +29,14 @@ partial(
 
 \item{variable_length}{\link{numeric} The interpolation depth (nr. of points) to be used (Default: \code{100}).}
 
-\item{values}{\link{numeric} Directly specified values to compute partial effects for. If set, ignores
-\code{"variable_length"} (Default: \code{NULL}).}
+\item{values}{\link{numeric} Directly specified values to compute partial effects for. If this parameter is set to anything other
+than \code{NULL}, the parameter \code{"variable_length"} is ignored (Default: \code{NULL}).}
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
 \item{type}{A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.}
 
-\item{...}{Other engine specific parameters}
+\item{...}{Other engine specific parameters.}
 }
 \value{
 A \link{data.frame} with the created partial response.
@@ -47,6 +47,12 @@ Create a partial response or effect plot of a trained model
 \details{
 By default the mean is calculated across all parameters that are not \code{x.var}.
 Instead a \emph{constant} can be set (for instance \code{0}) to be applied to the output.
+}
+\examples{
+\dontrun{
+ # Do a partial calculation of a trained model
+ partial(fit, x.var = "Forest.cover", plot = TRUE)
+}
 }
 \seealso{
 \link{partial}

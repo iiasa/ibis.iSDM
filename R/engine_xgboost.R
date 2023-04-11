@@ -84,9 +84,9 @@ engine_xgboost <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = sf::st_crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -97,7 +97,7 @@ engine_xgboost <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set up the parameter list
   params <- list(
@@ -152,7 +152,7 @@ engine_xgboost <- function(x,
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
           inherits(settings,'Settings') || is.null(settings),
-          nrow(model$predictors) == ncell(self$get_data('template')),
+          nrow(model$predictors) == terra::ncell(self$get_data('template')),
           !is.Waiver(self$get_data("params")),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -184,7 +184,7 @@ engine_xgboost <- function(x,
         if(fam == "count:poisson" && model$biodiversity[[1]]$type == "poipo"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(cellStats(bg,min)))
+          assertthat::assert_that(!is.na(terra::global(bg, "min", na.rm = TRUE)))
 
           # Add pseudo-absence points
           suppressMessages(
@@ -231,7 +231,7 @@ engine_xgboost <- function(x,
           if(!is.Waiver(model$offset)){
             # ofs <- get_ngbvalue(coords = df[,c('x','y')],
             #                     env =  model$offset,
-            #                     longlat = raster::isLonLat(bg),
+            #                     longlat = terra::is.lonlat(bg),
             #                     field_space = c('x','y')
             # )
             ofs <- get_rastervalue(coords = df[,c('x','y')],
@@ -254,8 +254,8 @@ engine_xgboost <- function(x,
           model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect)
 
           # Get for the full dataset
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
-                                    bg, fun = 'count', background = 0)
+          pres <- terra::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+                                    bg, fun = 'length', background = 0)
           w_full <- ppm_weights(df = model$predictors,
                                 pa = pres[],
                                 bg = bg,
@@ -408,7 +408,7 @@ engine_xgboost <- function(x,
           # of2 <- get_rastervalue(coords = model$biodiversity[[1]]$observations[ind_test,c("x","y")],
           #                        env = model$offset_object,
           #                        rm.na = FALSE
-          #                     # longlat = raster::isLonLat(self$get_data("template")),
+          #                     # longlat = terra::is.lonLat(self$get_data("template")),
           #                     # field_space = c('x','y')
           # )
           # names(of2)[which(names(of2)==names(model$offset_object))] <- "spatial_offset"
@@ -610,7 +610,7 @@ engine_xgboost <- function(x,
           # Fill output with summaries of the posterior
           prediction[] <- pred_xgb
           names(prediction) <- 'mean'
-          prediction <- raster::mask(prediction, self$get_data("template") )
+          prediction <- terra::mask(prediction, self$get_data("template") )
 
         } else {
           # No prediction done
@@ -708,9 +708,10 @@ engine_xgboost <- function(x,
             df <- subset(model$predictors, select = mod$feature_names)
             # Convert all non x.vars to the mean
             # Make template of target variable(s)
-            template <- raster::rasterFromXYZ(
-              raster::coordinates( model$predictors_object$get_data() ),
-              crs = raster::projection(model$background)
+            template <- terra::rast(
+              terra::crds( model$predictors_object$get_data() ),
+              type = "xyz",
+              crs = sf::st_crs(model$background)
             )
 
             # Set all variables other the target variable to constant
@@ -737,11 +738,11 @@ engine_xgboost <- function(x,
             # Fill output with summaries of the posterior
             template[] <- pp
             names(template) <- 'mean'
-            template <- raster::mask(template, model$background)
+            template <- terra::mask(template, model$background)
 
             if(plot){
               # Quick plot
-              raster::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+              terra::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
             }
             # Also return spatial
             return(template)
@@ -790,7 +791,7 @@ engine_xgboost <- function(x,
             # Fill output with summaries of the posterior
             prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
             prediction[] <- pred_xgb
-            prediction <- raster::mask(prediction, self$model$predictors_object$get_data()[[1]] )
+            prediction <- terra::mask(prediction, self$model$predictors_object$get_data()[[1]] )
 
             return(prediction)
           },

@@ -105,7 +105,7 @@ methods::setMethod(
       # Get prediction
       n <- fit$show_rasters()[grep("threshold",fit$show_rasters())]
       tr <- fit$get_data(n)[[1]]
-      tr <- cbind( raster::coordinates(tr), data.frame(thresh = values(tr)))
+      tr <- cbind( terra::crds(tr), data.frame(thresh = values(tr)))
       tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
       tr <- tr |> (\(.) subset(., stats::complete.cases(thresh)))()
 
@@ -135,11 +135,11 @@ methods::setMethod(
     thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
     if(!is.Waiver(scenario_threshold)){
-      if(is.na(raster::projection(baseline_threshold))) projection(baseline_threshold) <- raster::projection( fit$model$background )
+      if(is.na(sf::st_crs(baseline_threshold))) sf::st_crs(baseline_threshold) <- sf::st_crs( fit$model$background )
     }
 
-    if(inherits(baseline_threshold, 'RasterStack') || inherits(baseline_threshold, 'RasterBrick')){
-      baseline_threshold <- baseline_threshold[[grep(layer,names(baseline_threshold))]]
+    if(inherits(baseline_threshold, 'SpatRaster')){
+      baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
     }
     scenario_constraints <- mod$get_constraints()
 
@@ -180,8 +180,8 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability projections for ', length(unique(df$time)), ' timesteps.')
 
     # Now for each unique element, loop and project in order
-    proj <- raster::stack()
-    proj_thresh <- raster::stack()
+    proj <- terra::rast()
+    proj_thresh <- terra::rast()
 
     pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
                                      total = length(unique(df$time)))
@@ -205,7 +205,7 @@ methods::setMethod(
       # Project suitability
       out <- fit$project(newdata = nd, layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", step)
-      if(is.na(raster::projection(out))) raster::projection(out) <- raster::projection( fit$model$background )
+      if(is.na(sf::st_crs(out))) sf::st_crs(out) <- sf::st_crs( fit$model$background )
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
@@ -215,8 +215,8 @@ methods::setMethod(
           resistance <- scenario_constraints$connectivity$params$resistance
           # By definition a hard barrier removes all suitable again
           if(any(scenario_constraints$connectivity$method == "resistance")){
-            if(raster::nlayers(resistance)>1){
-              ind <- which( raster::getZ(resistance) == as.Date(step) ) # Get specific step
+            if(terra::nlyr(resistance)>1){
+              ind <- which( terra::time(resistance) == as.Date(step) ) # Get specific step
               assertthat::assert_that(is.numeric(ind))
               resistance <- resistance[[ind]]
             }
@@ -249,7 +249,7 @@ methods::setMethod(
             # Returns a layer of two with both the simulated threshold and the masked suitability raster
             names(out) <- paste0(c('threshold_', 'suitability_'), step)
             # Add threshold to result stack
-            proj_thresh <- raster::addLayer(proj_thresh, out[[1]] )
+            suppressWarnings( proj_thresh <- c(proj_thresh, out[[1]] ) )
             baseline_threshold <- out[[1]]
             out <- out[[2]]
           }
@@ -273,20 +273,20 @@ methods::setMethod(
         out_thresh[out_thresh < scenario_threshold] <- 0; out_thresh[out_thresh >= scenario_threshold] <- 1
         names(out_thresh) <-  paste0('threshold_', step)
         # If threshold is
-        if( cellStats(out_thresh, 'max') == 0){
+        if( terra::global(out_thresh, 'max', na.rm = TRUE) == 0){
           if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold
         } else { baseline_threshold <- out_thresh }
         # Add to result stack
-        proj_thresh <- raster::addLayer(proj_thresh, out_thresh)
+        suppressWarnings( proj_thresh <- c(proj_thresh, out_thresh) )
       }
       # Add to result stack
-      proj <- raster::addLayer(proj, out)
+      suppressWarnings( proj <- c(proj, out) )
       pb$tick()
     }
     rm(pb)
-    proj <- raster::setZ(proj, times )
-    if(raster::nlayers(proj_thresh)>1) proj_thresh <- raster::setZ(proj_thresh, times )
+    terra::time(proj) <- times
+    if(terra::nlyr(proj_thresh)>1) terra::time(proj_thresh) <- times
 
     # Apply MigClim and other post-hoc constraints if set
     # FIXME: Ideally make this whole setup more modular. So create suitability projections first
@@ -298,15 +298,15 @@ methods::setMethod(
           # Get Parameters
           params <- scenario_constraints$dispersal$params
 
-          pb <- progress::progress_bar$new(total = raster::nlayers(proj))
-          for(lyr in 1:raster::nlayers(proj)){
+          pb <- progress::progress_bar$new(total = terra::nlyr(proj))
+          for(lyr in 1:terra::nlyr(proj)){
             pb$tick()
             # Normalize the projected suitability rasters to be in range 0-1000 and save
             hsMap <- predictor_transform(env = proj[[lyr]], option = "norm") * 1000
             # Write as filename in the destined folder
             suppressWarnings(
-              raster::writeRaster(x = hsMap, filename = paste0( params[["hsMap"]],lyr,".tif"),
-                                  dt = "INT2S", varNA = -9999, prj = TRUE, overwrite = TRUE)
+              terra::writeRaster(x = hsMap, filename = paste0( params[["hsMap"]],lyr,".tif"),
+                                  datatype = "INT2S", NAflag = -9999, overwrite = TRUE)
               )
             rm(hsMap)
           };rm(pb)
@@ -321,7 +321,7 @@ methods::setMethod(
               iniDist = basename(params[["iniDist"]]),
               hsMap = basename(params[["hsMap"]]),
               rcThreshold = tr,
-              envChgSteps = raster::nlayers(proj), # Use number of projected suitability layers
+              envChgSteps = terra::nlyr(proj), # Use number of projected suitability layers
               dispSteps = params[["dispSteps"]],
               dispKernel = params[["dispKernel"]],
               barrier = "", # TBD. Loaded via another arguement
@@ -349,10 +349,10 @@ methods::setMethod(
           )
           # Get MigClim outputs
           ll <- list.files(basename(params[["simulName"]]),'asc',full.names = TRUE)
-          run_sims <- raster::stack(ll); names(run_sims) <- tools::file_path_sans_ext(basename(ll))
+          run_sims <- terra::rast(ll); names(run_sims) <- tools::file_path_sans_ext(basename(ll))
           # Condense the simulation runs into one modal prediction
-          run_sim <- raster::calc(run_sims, raster::modal)
-          raster::projection(run_sim) <- raster::projection(fit$get_data('prediction'))
+          run_sim <- terra::app(run_sims, terra::modal)
+          sf::st_crs(run_sim) <- sf::st_crs(fit$get_data('prediction'))
           all(sapply(list.files(getwd(),".tif"), file.remove)) # Cleanup
           setwd(dir.ori) # Flip back to original directory
 
@@ -375,22 +375,22 @@ methods::setMethod(
 
     # Apply boundary constraints if set
     if("boundary" %in% names(scenario_constraints)){
-      if(!raster::compareRaster(proj, scenario_constraints$boundary$params$layer, stopiffalse = FALSE)){
+      if(!terra::compareGeom(proj, scenario_constraints$boundary$params$layer, stopOnError = FALSE)){
         scenario_constraints$boundary$params$layer <- alignRasters(
           scenario_constraints$boundary$params$layer,
           proj,
-          method = "ngb", func = raster::modal, cl = FALSE
+          method = "near", func = terra::modal, cl = FALSE
         )
       }
-      proj <- raster::mask(proj, scenario_constraints$boundary$params$layer)
+      proj <- terra::mask(proj, scenario_constraints$boundary$params$layer)
       # Get background and ensure that all values outside are set to 0
       proj[is.na(proj)] <- 0
-      proj <- raster::mask(proj, fit$model$background )
+      proj <- terra::mask(proj, fit$model$background )
       # Also for thresholds if existing
-      if(raster::nlayers(proj_thresh)>0){
-        proj_thresh <- raster::mask(proj_thresh, scenario_constraints$boundary$params$layer)
+      if(terra::nlyr(proj_thresh)>0){
+        proj_thresh <- terra::mask(proj_thresh, scenario_constraints$boundary$params$layer)
         proj_thresh[is.na(proj_thresh)] <- 0
-        proj_thresh <- raster::mask(proj_thresh, fit$model$background )
+        proj_thresh <- terra::mask(proj_thresh, fit$model$background )
       }
     }
 
@@ -421,17 +421,17 @@ methods::setMethod(
           }
           return(y)
         }
-        new_proj <- raster::overlay(proj, fun = impute.loess, unstack = TRUE, forcefun = FALSE)
+        new_proj <- terra::lapp(proj, fun = impute.loess)
         # Rename again
         names(new_proj) <- names(proj)
-        new_proj <- raster::setZ(new_proj, times )
+        terra::time(new_proj) <- times
         proj <- new_proj; rm(new_proj)
         # Were thresholds calculated? If yes, recalculate on the smoothed estimates
-        if(raster::nlayers(proj_thresh)>0){
+        if(terra::nlyr(proj_thresh)>0){
           new_thresh <- proj
           new_thresh[new_thresh < scenario_threshold[1]] <- 0
           new_thresh[new_thresh >= scenario_threshold[1]] <- 1
-          names(new_thresh) <-  names(proj_thresh)
+          names(new_thresh) <- names(proj_thresh)
           thresh <- new_thresh; rm(new_thresh)
         }
       }
@@ -442,7 +442,7 @@ methods::setMethod(
                                crs = sf::st_crs(new_crs)
     ); names(proj) <- 'suitability'
 
-    if(raster::nlayers(proj_thresh)>0){
+    if(terra::nlyr(proj_thresh)>0){
       # Add the thresholded maps as well
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)

@@ -7,15 +7,15 @@
 ibis_options()
 }
 \value{
-The output of \code{getOptions} for all ibis related variables
+The output of \code{getOptions} for all ibis related variables.
 }
 \description{
 There are a number of hidden options that can be specified for ibis.iSDM.
 Currently supported are:
 \itemize{
-\item \code{'ibis.runparallel'} : \code{\link{logical}} value on whether processing should be run in parallel
-\item \code{'ibis.nthread'} : \code{\link{numeric}} value on how many cores should be used by default
-\item \code{'ibis.setupmessages'} : \code{\link{logical}} value indicating whether message during object creation should be shown
+\item \code{'ibis.runparallel'} : \code{\link{logical}} value on whether processing should be run in parallel.
+\item \code{'ibis.nthread'} : \code{\link{numeric}} value on how many cores should be used by default.
+\item \code{'ibis.setupmessages'} : \code{\link{logical}} value indicating whether message during object creation should be shown.
 \item \code{'ibis.engines'} : Returns a \code{\link{vector}} with all valid engines.
 \item \code{'ibis.use_future'} : \code{\link{logical}} on whether the \pkg{future} package should be used for parallel computing.
 }

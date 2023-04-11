@@ -43,7 +43,7 @@ NULL
 #' @param weights (*Optional*) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).
 #' @param min.value A [`numeric`] stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
-#' ignore any of the layer names in ensembles of `Raster` objects.
+#' ignore any of the layer names in ensembles of `SpatRaster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @param uncertainty A [`character`] indicating how the uncertainty among models should be calculated. Available options include
 #' \code{"none"}, the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default)
@@ -59,7 +59,7 @@ NULL
 #'  # Make a bivariate plot (might require other packages)
 #'  bivplot(ex)
 #' }
-#' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
+#' @returns A [`SpatRaster`] object containing the ensemble of the provided predictions specified by \code{method} and a
 #' coefficient of variation across all models.
 
 #' @name ensemble
@@ -98,7 +98,7 @@ methods::setMethod(
       mods2 <- mc[ sapply(mc, function(x) is.Raster(x) ) ]
       mods3 <- mc[  sapply(mc, function(x) inherits(x, "stars") ) ]
       assertthat::assert_that(length(mods1)>0 || length(mods2)>0 || length(mods3)>0,
-                              msg = "Ensemble only works with DistributionModel or BiodiversityScenario objects! Alternativel supply raster or stars objects.")
+                              msg = "Ensemble only works with DistributionModel or BiodiversityScenario objects! Alternativly supply SpatRaster or stars objects.")
       if(length(mods1)>0) mods <- mods1 else if(length(mods2)>0) mods <- mods2 else mods <- mods3
     }
 
@@ -141,14 +141,14 @@ methods::setMethod(
       # Get prediction stacks from all mods
       ll_ras <- sapply(mods, function(x) x$get_data('prediction')[[layer]])
       # Ensure that the layers have the same resolution, otherwise align
-      if(!compareRaster(ll_ras[[1]], ll_ras[[2]], stopiffalse = FALSE)){
+      if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
         if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
-        ll_ras[[2]] <- raster::resample(ll_ras[[2]], ll_ras[[1]])
+        ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
       }
       # Now ensemble per layer entry
-      out <- raster::stack()
+      out <- terra::rast()
       for(lyr in layer){
-        ras <- raster::stack(sapply(ll_ras, function(x) x[[lyr]]))
+        ras <- terra::rast(sapply(ll_ras, function(x) x[[lyr]]))
 
         # If normalize before running an ensemble if parameter set
         if(normalize) ras <- predictor_transform(ras, option = "norm")
@@ -158,11 +158,11 @@ methods::setMethod(
 
         # Now create the ensemble depending on the option
         if(method == 'mean'){
-          new <- mean( ras, na.rm = TRUE)
+          new <- terra::mean( ras, na.rm = TRUE)
         } else if(method == 'median'){
-          new <- raster::calc(ras, fun = median, na.rm = TRUE)
+          new <- terra::median(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
-          new <- weighted.mean( ras, w = weights, na.rm = TRUE)
+          new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
           # Check that thresholds are available
           assertthat::assert_that(
@@ -171,15 +171,15 @@ methods::setMethod(
           )
           n_tr <- sapply(mods, function(x) grep("threshold", x$show_rasters(),value = TRUE) )
           # Get layer of each threshold if there are multiple
-          ras_tr <- raster::stack()
+          ras_tr <- terra::rast()
           for(i in 1:length(n_tr)){
             o <- mods[[i]]$get_data(n_tr[i])
             # Grep layer name from the stack
-            ras_tr <- raster::addLayer(ras_tr, o[[grep(layer, names(o))]] )
+            ras_tr <- c(ras_tr, o[[grep(layer, names(o))]] )
           }
           # Calculate frequency
           new <- sum(ras_tr, na.rm = TRUE)
-          new <- raster::mask(new, ras_tr[[1]])
+          new <- terra::mask(new, ras_tr[[1]])
         } else if(method == 'min.sd'){
           # If method 'min.sd' furthermore check that there is a sd object for all of them
           assertthat::assert_that(
@@ -187,18 +187,18 @@ methods::setMethod(
             msg = "Method \'min.sd\' needs parametrized uncertainty (sd) for all objects."
           )
           # Also get SD prediction from models
-          ras_sd <- raster::stack( sapply(mods, function(x) x$get_data('prediction')[['sd']]))
+          ras_sd <- terra::rast( sapply(mods, function(x) x$get_data('prediction')[['sd']]))
           # Normalize the sds for each
           ras_sd <- predictor_transform(ras_sd, option = "norm")
           # Get the id of the layer where standard deviation is lower
-          min_sd <- raster::whiches.min(ras_sd)
+          min_sd <- terra::where.min(ras_sd)
           new <- emptyraster(ras)
-          for(cl in raster::unique(min_sd)){
+          for(cl in terra::unique(min_sd)){
             new[min_sd == cl] <- ras[[cl]][min_sd == cl]
           }
         } else if(method == 'pca'){
           # Calculate a pca on the layers and return the first axes
-          new <- predictor_transform(ras, option = "pca",pca.var = 1)[[1]]
+          new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
         }
 
         # Rename
@@ -206,20 +206,21 @@ methods::setMethod(
         # Add attributes on the method of ensembling
         attr(new, "method") <- method
         if(uncertainty!='none'){
+
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
-                                     "sd" = raster::calc(ras, sd, na.rm = TRUE),
-                                     "cv" = raster::cv(ras, na.rm = TRUE),
-                                     "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+                                     "sd" = terra::app(ras, sd, na.rm = TRUE),
+                                     "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, fun = cv, na.rm = TRUE),
+                                     "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
           )
           names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
           # Add attributes on the method of ensembling
           attr(ras_uncertainty, "method") <- uncertainty
 
           # Add all layers to out
-          out <- raster::stack(out, new, ras_uncertainty)
+          suppressWarnings( out <- c(out, new, ras_uncertainty) )
         } else {
-          out <- raster::stack(out, new)
+          suppressWarnings( out <- c(out, new) )
         }
       }
 
@@ -239,11 +240,11 @@ methods::setMethod(
     # Get prediction stacks from all mods
     ll_ras <- sapply(mods, function(x) x[[layer]])
     # Ensure that the layers have the same resolution, otherwise align
-    if(!compareRaster(ll_ras[[1]], ll_ras[[2]], stopiffalse = FALSE)){
+    if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
       if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
-      ll_ras[[2]] <- raster::resample(ll_ras[[2]], ll_ras[[1]])
+      ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
     }
-    ras <- raster::stack(ll_ras)
+    ras <- terra::rast(ll_ras)
     # If normalize before running an ensemble if parameter set
     if(normalize) ras <- predictor_transform(ras, option = "norm")
 
@@ -251,16 +252,16 @@ methods::setMethod(
     if(!is.null(min.value)) ras[ras < min.value] <- 0
 
     # Now ensemble per layer entry
-    out <- raster::stack()
+    out <- terra::rast()
     for(lyr in layer){
 
       # Now create the ensemble depending on the option
       if(method == 'mean'){
-        new <- mean( ras, na.rm = TRUE)
+        new <- terra::mean( ras, na.rm = TRUE)
       } else if(method == 'median'){
-        new <- median( ras, na.rm = TRUE)
+        new <- terra::median( ras, na.rm = TRUE)
       } else if(method == 'weighted.mean'){
-        new <- weighted.mean( ras, w = weights, na.rm = TRUE)
+        new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
       } else if(method == 'threshold.frequency'){
         # Check that thresholds are available
         stop("This function does not (yet) work with directly provided Raster objects.")
@@ -272,11 +273,11 @@ methods::setMethod(
           msg = "Method \'min.sd\' needs parametrized uncertainty (sd) for all objects."
         )
         # Also get SD prediction from models
-        ras_sd <- raster::stack( sapply(mods, function(x) x[['sd']]))
+        ras_sd <- c( sapply(mods, function(x) x[['sd']]))
         # Get the id of the layer where standard deviation is lower
-        min_sd <- raster::whiches.min(ras_sd)
+        min_sd <- terra::where.min(ras_sd)
         new <- emptyraster(ras)
-        for(cl in raster::unique(min_sd)){
+        for(cl in terra::unique(min_sd)){
           new[min_sd == cl] <- ras[[cl]][min_sd == cl]
         }
       } else if(method == 'pca'){
@@ -290,17 +291,17 @@ methods::setMethod(
       if(uncertainty != "none"){
         # Add uncertainty
         ras_uncertainty <- switch (uncertainty,
-                                   "sd" = raster::calc(ras, sd, na.rm = TRUE),
-                                   "cv" = raster::cv(ras, na.rm = TRUE),
-                                   "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+                                   "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
+                                   "cv" = terra::app(ras, fun = "sd", na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
+                                   "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
         )
         names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
         # Add attributes on the method of ensembling
         attr(ras_uncertainty, "method") <- uncertainty
         # Add all layers to out
-        out <- raster::stack(out, new, ras_uncertainty)
+        suppressWarnings( out <- c(out, new, ras_uncertainty) )
       } else {
-        out <- raster::stack(out, new)
+        suppressWarnings( out <- c(out, new) )
       }
     }
 
@@ -380,7 +381,7 @@ methods::setMethod(
       # Add uncertainty
       out_uncertainty <- switch (uncertainty,
                                  "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
-                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) raster::cv(x, na.rm = TRUE)),
+                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
                                  "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
       )
       if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
@@ -399,13 +400,13 @@ methods::setMethod(
       # Combine both ensemble and uncertainty
       ex <- stars:::c.stars(out, out_uncertainty)
       # Correct projection is unset
-      if(is.na(sf::st_crs(ex))) ex <- st_set_crs(ex, st_crs(mods[[1]]$get_data()))
+      if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
     } else {
       # Only the output
       ex <- out
     }
     # Correct projection is unset
-    if(is.na(sf::st_crs(ex))) ex <- st_set_crs(ex, st_crs(mods[[1]]$get_data()))
+    if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
     assertthat::assert_that(inherits(ex, "stars"))
     return(ex)
     }
@@ -437,11 +438,14 @@ methods::setMethod(
 #' @param x.var A [`character`] of the variable from which an ensemble is to be created.
 #' @param method Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).
 #' @param layer A [`character`] of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
-#' ignore any of the layer names in ensembles of `Raster` objects.
+#' ignore any of the layer names in ensembles of `SpatRaster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{TRUE}).
-#' @returns A [`RasterStack`] containing the ensemble of the provided predictions specified by \code{method} and a
-#' coefficient of variation across all models.
-
+#' @returns A [data.frame] with the combined partial effects of the supplied models.
+#' @examples
+#' \dontrun{
+#'  # Assumes previously computed models
+#'  ex <- ensemble_partial(mod1, mod2, mod3, method = "mean")
+#' }
 #' @name ensemble_partial
 #' @aliases ensemble_partial
 #' @keywords train
