@@ -8,11 +8,11 @@ NULL
 #' constrain future projections. For a detailed description of MigClim, please the respective reference
 #' and the UserGuide. **The default parameters chosen here are suggestions.**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
-#' @param rcThresholdMode A [`character`] of either **binary** or **continuous** value. Default: **continuous**
-#' @param dispSteps [`numeric`] parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer)
+#' @param rcThresholdMode A [`character`] of either **binary** or **continuous** value (Default: **continuous**).
+#' @param dispSteps [`numeric`] parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer).
 #' and ideally should be aligned with the number of steps for projection. Minimum is \code{1} (Default) and maximum is \code{99}.
 #' @param dispKernel A [`vector`] with the number of the dispersal Kernel to be applied.
-#' Can be set either to a uniform numeric [vector], e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default)
+#' Can be set either to a uniform numeric [vector], e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default).
 #' **Depending on the resolution of the raster, this parameter needs to be adapted**
 #' @param barrierType A [character] indicating whether any set barrier should be set as \code{'strong'} or \code{'weak'} barriers.
 #' Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole [dispKernel] length
@@ -105,10 +105,10 @@ methods::setMethod(
     # Alternatively save to temporary folder and pass pathname
     dir.create(dtmp, showWarnings = FALSE)
     r <- fit$get_data(tr)
-    if(is.factor(r)) r <- raster::deratify(r, complete = TRUE)
+    if(is.factor(r)) r <- terra::as.int(r)
     suppressWarnings(
-      raster::writeRaster(x = r, filename = file.path(dtmp, paste0(tr, ".tif")),
-                          dt = "INT2S", varNA = -9999, prj = TRUE, overwrite = TRUE)
+      terra::writeRaster(x = r, filename = file.path(dtmp, paste0(tr, ".tif")),
+                          dt = "INT2S", NAflag = -9999, overwrite = TRUE)
     )
     params[["iniDist"]] <- file.path(dtmp, paste0(tr, ".tif")); rm(r)
 
@@ -139,7 +139,7 @@ methods::setMethod(
     params[["propaguleProdProb"]]  <- propaguleProdProb
 
     # Simulation name
-    params[["simulName"]] <- paste0(raster::tmpDir(), "MigClim_", fit$model$runname )
+    params[["simulName"]] <- paste0( terra::terraOptions(print = F)$tempdir, "MigClim_", fit$model$runname )
 
     # Replicate number
     params[["replicateNb"]] <- replicateNb

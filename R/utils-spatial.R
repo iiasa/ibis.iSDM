@@ -13,8 +13,31 @@ is_comparable_raster <- function(x, y) {
   assertthat::assert_that(
     (is.Raster(x) && is.Raster(y)),
     sf::st_crs(x@crs) == sf::st_crs(y@crs) &&
-    terra::compareGeom(x, y)
+    terra::compareGeom(x, y, stopOnError = FALSE)
   )
+}
+
+#' Easy conversion function
+#'
+#' @description
+#' As a consequence of switching to [terra] from [raster], there might be situations
+#' where it is necessary to convert between them.
+#' This function does the job.
+#'
+#' @param input A [`SpatRaster`] object to convert to raster.
+#' @keywords internal, utils
+#' @noRd
+terra_to_raster <- function(input){
+  assertthat::assert_that(
+    is.Raster(input)
+  )
+  # Check that package is available
+  check_package("raster")
+  if(!isNamespaceLoaded("raster")) { attachNamespace("raster");requireNamespace("raster") }
+
+  out <- terra::as.raster(input)
+  if(raster::nlayers(out)>1) out <- raster::stack(out)
+  return(out)
 }
 
 #' Do extents intersect?

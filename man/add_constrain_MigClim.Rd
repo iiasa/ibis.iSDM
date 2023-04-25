@@ -9,13 +9,13 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{rcThresholdMode}{A \code{\link{character}} of either \strong{binary} or \strong{continuous} value. Default: \strong{continuous}}
+\item{rcThresholdMode}{A \code{\link{character}} of either \strong{binary} or \strong{continuous} value (Default: \strong{continuous}).}
 
-\item{dispSteps}{\code{\link{numeric}} parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer)
+\item{dispSteps}{\code{\link{numeric}} parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer).
 and ideally should be aligned with the number of steps for projection. Minimum is \code{1} (Default) and maximum is \code{99}.}
 
 \item{dispKernel}{A \code{\link{vector}} with the number of the dispersal Kernel to be applied.
-Can be set either to a uniform numeric \link{vector}, e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default)
+Can be set either to a uniform numeric \link{vector}, e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default).
 \strong{Depending on the resolution of the raster, this parameter needs to be adapted}}
 
 \item{barrierType}{A \link{character} indicating whether any set barrier should be set as \code{'strong'} or \code{'weak'} barriers.

@@ -241,7 +241,7 @@ raster_to_stars <- function(obj){
   prj <- sf::st_crs(terra::crs(obj))
 
   # Convert to RasterStack and reset time dimension
-  obj <- terra::stack(obj)
+  obj <- terra::rast(obj)
   obj <- terra::setZ(obj, times)
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 

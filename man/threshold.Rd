@@ -8,7 +8,7 @@ threshold(
   obj,
   method = "mtp",
   value = NULL,
-  poi = NULL,
+  point = NULL,
   format = "binary",
   return_threshold = FALSE,
   ...
@@ -29,7 +29,7 @@ threshold(
 
 \item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: \code{NULL}).}
 
-\item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
+\item{point}{A \code{\link{sf}} object containing observational data used for model training.}
 
 \item{format}{\code{\link{character}} indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
 formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}

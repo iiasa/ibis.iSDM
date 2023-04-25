@@ -235,7 +235,7 @@ BiodiversityScenario <- bdproto(
     ras <- mc$raster
 
     # Colour coding from MigClim::MigClim.plot
-    rstVals <- sort(raster::unique(ras))
+    rstVals <- sort(terra::unique(ras))
     negativeNb <- length(which(rstVals < 0))
     positiveNb <- length(which(rstVals > 1 & rstVals < 30000))
     zeroExists <- any(rstVals == 0)
@@ -254,7 +254,7 @@ BiodiversityScenario <- bdproto(
     # 30 0000 - Potentially suitable cells that remained uncolonized
     # <0 - Negative values indicate cells that were once occupied but have become decolonized. Code as for colonization
     dev.new(width = 7, height = 7 * ((ymax(ras) - ymin(ras))/(xmax(ras) - xmin(ras))))
-    plot(ras, col = Colors, breaks = c(min(rstVals) - 1, rstVals), legend = FALSE,
+    terra::plot(ras, col = Colors, breaks = c(min(rstVals) - 1, rstVals), legend = FALSE,
          main = "Newly colonized and stable habitats")
   },
   # Plot animation of scenarios
@@ -312,20 +312,20 @@ BiodiversityScenario <- bdproto(
     if(is.null(position)) position <- time[length(time)]
     final <- scenario |>
       stars:::filter.stars(band == position) |>
-      methods::as('Raster')
+      terra::rast()
     raster::projection(final) <- raster::projection(baseline)
     # -- #
-    if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
-    if(!compareRaster(baseline, final,stopiffalse = FALSE)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
+    if(!inherits(final, 'SpatRaster')) final <- final[[1]] # In case it is a rasterbrick or similar
+    if(!is_comparable_raster(baseline, final)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
 
     # Calculate overlays
-    diff_f <- raster::overlay(baseline, final, fun = function(x, y){x + y * 2})
-    diff_f <- raster::ratify(diff_f)
+    diff_f <- terra::lapp(c(baseline, final), fun = function(x, y){x + y * 2})
+    diff_f <- as.factor(diff_f)
     # 0 = Unsuitable | 1 = Loss | 2 = Gain | 3 = stable
     rat <- levels(diff_f)[[1]]
     rat <- merge.data.frame(rat, data.frame(ID = seq(0,3), diff = c("Unsuitable", "Loss", "Gain", "Stable")),all = TRUE)
     levels(diff_f) <- rat
-    diff_f <- raster::mask(diff_f, baseline)
+    diff_f <- terra::mask(diff_f, baseline)
     rm(baseline, final)
 
     # Plot
@@ -334,7 +334,7 @@ BiodiversityScenario <- bdproto(
       cols <- c("Unsuitable" = "gray92", "Loss" = "#DE646A", "Gain" = "cyan3", "Stable" = "gray60")
 
       # Convert to raster
-      diff_ff <- raster::as.data.frame(diff_f, xy = TRUE)
+      diff_ff <- terra::as.data.frame(diff_f, xy = TRUE)
       names(diff_ff)[3] <- "Change"
       diff_ff$Change <- factor(diff_ff$Change, levels = names(cols))
 
@@ -372,8 +372,8 @@ BiodiversityScenario <- bdproto(
       ar <- stars:::st_area.stars(scenario)
       # Get the unit
       ar_unit <- units::deparse_unit(ar$area)
-      new <- methods::as(scenario,"Raster") * methods::as(ar, "Raster")
-      new <- raster::setZ(new, time)
+      new <- (scenario |> terra::rast()) * (ar |> terra::rast())
+      terra::time(new) <- time
       # Convert to scenarios to data.frame
       df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
       names(df)[4] <- "area"
@@ -389,7 +389,7 @@ BiodiversityScenario <- bdproto(
 
       # Total amount of area occupied for a given time step
       out <- df |> dplyr::group_by(band) |> dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
-      out$totarea <- raster::cellStats((new[[1]]>=0) * methods::as(ar, "Raster"), "sum")
+      out$totarea <- terra::global((new[[1]]>=0) * (ar |> terra::rast()), "sum", na.rm = TRUE)
       if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
         out$totarea <- out$totarea / 1e6
         out <- dplyr::rename(out, totarea_km2 = totarea)
@@ -488,8 +488,8 @@ BiodiversityScenario <- bdproto(
     if(oftype == "stars"){
       if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     } else {
-      out <- methods::as(out, "Raster")
-      if(plot) plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+      out <- terra::rast(out)
+      if(plot) terra::plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     }
     return(out)
   },
@@ -509,7 +509,7 @@ BiodiversityScenario <- bdproto(
     if(file.exists(fname)) warning('Overwritting existing file...')
 
     # Respecify type if output filename has already been set
-    if(gsub('\\.','',raster::extension(fname)) != type) type <- gsub('\\.','',raster::extension(fname))
+    if(gsub('\\.','', tools::file_ext(fname)) != type) type <- gsub('\\.','', tools::file_ext(fname))
 
     # Change output type for stars
     dtstars <- switch(dt,
@@ -533,7 +533,7 @@ BiodiversityScenario <- bdproto(
       # Write stars output for every band
       for(i in 1:length(ras)){
         # Band specific output
-        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], raster::extension(fname))
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], tools::file_ext(fname))
         stars::write_stars(
           obj = ras,
           layer = i,
@@ -547,14 +547,14 @@ BiodiversityScenario <- bdproto(
         )
       }
       if(!is.Waiver(self$scenarios_migclim)){
-        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", tools::file_ext(fname))
         writeGeoTiff(ras_migclim, fname = fname, dt = dt)
       }
     } else if(type %in% c('nc','ncdf')) {
       # Save as netcdf, for now in individual files
       for(i in 1:length(ras)){
         # Band specific output
-        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], raster::extension(fname))
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], tools::file_ext(fname))
         stars::write_stars(
           obj = ras,
           layer = 1:length(ras),
@@ -567,7 +567,7 @@ BiodiversityScenario <- bdproto(
         )
       }
       if(!is.Waiver(self$scenarios_migclim)){
-        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", tools::file_ext(fname))
         writeNetCDF(ras_migclim, fname = fname, varName = "MigCLIM output", dt = dt)
       }
     } else if(type %in% 'feather'){
@@ -576,7 +576,7 @@ BiodiversityScenario <- bdproto(
       fname <- paste0( tools::file_path_sans_ext(fname), "__migclim", ".feather")
       feather::write_feather(ras, path = fname)
       if(!is.Waiver(self$scenarios_migclim)){
-        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", raster::extension(fname))
+        fname2 <- paste0( tools::file_path_sans_ext(fname), "__migclim", tools::file_ext(fname))
         feather::write_feather(ras, path = fname)
       }
     }

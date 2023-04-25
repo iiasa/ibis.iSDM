@@ -50,9 +50,9 @@ PredictorDataset <- bdproto(
         # Bugs for factors, so need
         out <- self$data[] |> as.data.frame()
         out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
-        cbind(raster::coordinates(self$data), out ) # Attach coordinates and return
+        cbind(terra::crds(self$data), out ) # Attach coordinates and return
       } else {
-        raster::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)
+        terra::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)
       }
     } else self$data
   },
@@ -63,7 +63,7 @@ PredictorDataset <- bdproto(
     if(is.Waiver(d)) return(new_waiver())
     if(!inherits(d, 'stars')){
       # Try and get a z dimension from the raster object
-      raster::getZ(d)
+      terra::time(d)
     } else {
       # Get dimensions
       o <- stars::st_dimensions(d)
@@ -84,7 +84,7 @@ PredictorDataset <- bdproto(
   get_resolution = function(self){
     assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
     if(is.Raster(self$data)){
-      raster::res(self$data)
+      terra::res(self$data)
     } else {
       stars::st_res(self$data)
     }
@@ -95,7 +95,7 @@ PredictorDataset <- bdproto(
                             inherits(pol, 'sf'),
                             all( unique(sf::st_geometry_type(pol)) %in% c("POLYGON","MULTIPOLYGON") )
                             )
-    self$data <- raster::crop(self$data, pol)
+    self$data <- terra::crop(self$data, pol)
     invisible()
   },
   # Add a new Predictor dataset to this collection
@@ -114,10 +114,10 @@ PredictorDataset <- bdproto(
     ind <- match(x, self$get_names())
     if(is.Raster(self$get_data() )){
       # Overwrite predictor dataset
-      self$data <- raster::dropLayer(self$get_data(), ind)
+      self$data <- terra::subset(self$get_data(), ind)
     } else {
       suppressWarnings(
-        self$data <- stars:::select.stars(self$data, -ind)
+        self$data <- terra::subset(self$data, -ind)
       )
     }
     invisible()
@@ -145,7 +145,7 @@ PredictorDataset <- bdproto(
         # Assume raster
         return(
           round(
-            raster::summary( d ), digits = digits
+            terra::summary( d ), digits = digits
           )
         )
       }
@@ -154,7 +154,7 @@ PredictorDataset <- bdproto(
   },
   # Has derivates?
   has_derivates = function(self){
-    if(inherits(self$get_data(),'Raster'))
+    if(inherits(self$get_data(),'SpatRaster'))
      return(
        length( grep("hinge__|bin__|quad__|thresh__", self$get_names() ) ) > 0
      )
@@ -163,8 +163,8 @@ PredictorDataset <- bdproto(
   },
   # Number of Predictors in object
   length = function(self) {
-    if(inherits(self$get_data(),'Raster'))
-      raster::nlayers(self$get_data())
+    if(inherits(self$get_data(),'SpatRaster'))
+      terra::nlyr(self$get_data())
     else
       ncol(self$get_data)
   },
@@ -172,7 +172,7 @@ PredictorDataset <- bdproto(
   plot = function(self){
     # Plot the predictors
     par.ori <- graphics::par(no.readonly = TRUE)
-    raster::plot( self$data, col = ibis_colours[['viridis_cividis']] )
+    terra::plot( self$data, col = ibis_colours[['viridis_cividis']] )
     graphics::par(par.ori)
   }
 )

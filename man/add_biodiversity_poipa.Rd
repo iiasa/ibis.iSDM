@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_biodiversity.R
 \name{add_biodiversity_poipa}
 \alias{add_biodiversity_poipa}
-\title{Add biodiversity point dataset to a distribution object (presence-absence)}
+\title{Add biodiversity point dataset to a distribution object (presence-absence).}
 \usage{
 add_biodiversity_poipa(
   x,
@@ -32,7 +32,7 @@ By default set to \code{"Observed"} and an error will be thrown if a \code{\link
 
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default (\code{NULL}) is to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{binomial}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'binomial'}).}
 
 \item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
@@ -45,7 +45,7 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
 
-\item{...}{Other parameters passed down}
+\item{...}{Other parameters passed down.}
 }
 \value{
 Adds biodiversity data to \link{distribution} object.

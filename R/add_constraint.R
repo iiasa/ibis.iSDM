@@ -16,7 +16,7 @@ NULL
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 #' should be performed.
 #' @param type A [`character`] indicating the type used in the method. See for instance [`kissmig::kissmig`].
-#' @param layer A [`Raster`] object that can be used for boundary constraints (Default: \code{NULL}).
+#' @param layer A [`SpatRaster`] object that can be used for boundary constraints (Default: \code{NULL}).
 #' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonised,
 #' i.e., the species gets locally extinct (Default: \code{0.1}).
 #' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
@@ -224,16 +224,16 @@ methods::setMethod(
 )
 
 #' Short-distance fixed dispersal function
-#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
-#' @param new_suit A new [`RasterLayer`] object.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param new_suit A new [`SpatRaster`] object.
 #' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
-    raster::compareRaster(baseline_threshold, new_suit),
+    is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
     is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
@@ -248,8 +248,9 @@ methods::setMethod(
   }
   # Grow baseline raster by the amount of value at max
   # Furthermore divide by value to get a normalized distance
-  dis <- raster::gridDistance(baseline_threshold, origin = 1, omit = resistance)
-  ras_dis <- raster::clamp(dis, lower = 0, upper = value) / value
+  baseline_threshold <- terra::mask(baseline_threshold, resistance)
+  dis <- terra::gridDistance(baseline_threshold, target = 1)
+  ras_dis <- terra::clamp(dis, lower = 0, upper = value) / value
   # Invert
   ras_dis <- abs(ras_dis - 1)
 
@@ -260,17 +261,17 @@ methods::setMethod(
 }
 
 #' Short-distance negative exponential kernel dispersal function
-#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year
-#' @param new_suit A new [`RasterLayer`] object.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param new_suit A new [`SpatRaster`] object.
 #' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
 #' @param normalize Should a normalising constant be used for the exponential dispersal parameter (Default: \code{FALSE}).
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
-    raster::compareRaster(baseline_threshold, new_suit),
+    is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
     is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
@@ -288,12 +289,13 @@ methods::setMethod(
   alpha <- 1/value
 
   # Grow baseline raster by using an exponentially weighted kernel
-  ras_dis <- raster::gridDistance(baseline_threshold, origin = 1, omit = resistance)
+  baseline_threshold <- terra::mask(baseline_threshold, resistance)
+  ras_dis <- terra::gridDistance(baseline_threshold, origin = 1)
   if(normalize){
     # Normalized (with a constant) negative exponential kernel
-    ras_dis <- raster::calc(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
+    ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
   } else {
-    ras_dis <- raster::calc(ras_dis, fun = function(x) exp(-alpha * x))
+    ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
   }
 
   # Now multiply the net suitability projection with this mask
@@ -303,16 +305,16 @@ methods::setMethod(
 }
 
 #' Keep it simple migration calculation.
-#' @param baseline_threshold The [`RasterLayer`] with presence/absence information from a previous year.
-#' @param new_suit A new [`RasterLayer`] object.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param new_suit A new [`SpatRaster`] object.
 #' @param params A [vector] or [list] with passed on parameter values.
-#' @param resistance A resistance [`RasterLayer`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
-    raster::compareRaster(baseline_threshold, new_suit),
+    is_comparable_raster(baseline_threshold, new_suit),
     is.vector(params) || is.list(params),
     is.null(resistance) || is.logical(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
@@ -328,7 +330,7 @@ methods::setMethod(
   }
 
   # Simulate kissmig for a given threshold and suitability raster
-  km <- kissmig::kissmig(O = baseline_threshold,
+  km <- kissmig::kissmig(O = terra_to_raster( baseline_threshold ),
                          # Rescale newsuit to 0-1
                          S = predictor_transform(new_suit, 'norm'),
                          it = as.numeric( params['iteration'] ),
@@ -336,14 +338,14 @@ methods::setMethod(
                          pext = as.numeric(params['pext']),
                          pcor = as.numeric(params['pcor'])
                         )
-  if(is.factor(km)) km <- raster::deratify(km, complete = TRUE)
+  if(is.factor(km)) km <- terra::as.int(km)
 
   # Now multiply the net suitability projection with this mask
   # Thus removing any non-suitable grid cells (0) and changing the value of those within reach
   ns <- new_suit * km
 
   return(
-    raster::stack(km, ns)
+    c(km, ns)
   )
 }
 
@@ -402,7 +404,7 @@ methods::setMethod(
       )
       # Check that resistance layer is a binary mask
       assertthat::assert_that(length(unique(resistance))<=2,
-                              raster::cellStats(resistance,'max')>0,
+                              terra::global(resistance,'max', na.rm = TRUE)>0,
                               msg = "Resistance layer should be a binary mark with values 0/1.")
       co[['connectivity']] <- list(method = method,
                                 params = c("resistance" = resistance))
@@ -413,21 +415,21 @@ methods::setMethod(
         !is.null(resistance), msg = "The method resistance requires a specified resistance raster."
       )
       # If raster is stack with multiple layers, ensure that time
-      if(raster::nlayers(resistance)>1){
+      if(terra::nlyr(resistance)>1){
         # Check that layers have a z dimension and fall within the timeperiod
         startend <- mod$get_timeperiod()
-        assertthat::assert_that( !is.null( raster::getZ(resistance) ),
-                                 all( range(raster::getZ(resistance))==startend ),
+        assertthat::assert_that( !is.null( terra::time(resistance) ),
+                                 all( range(terra::time(resistance))==startend ),
                                  msg = "If a stack of layers is supplied as resistance, it needs a Z value of equal length to the predictors!")
       }
-      times <- raster::getZ(resistance)
+      times <- terra::time(resistance)
       # If resistance layer is bigger than 1, normalize
-      if(any(raster::cellStats(resistance,'max')>1)){
+      if(any(terra::global(resistance, 'max', na.rm = TRUE)>1)){
         if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Resistance values larger than 1. Normalizing...')
         resistance <- predictor_transform(resistance, option = "norm")
       }
       resistance <- abs( resistance - 1 ) # Invert
-      if(!is.null(times)) resistance <- raster::setZ(resistance, times) # Reset times again if found
+      if(!is.null(times)) terra::time(resistance) <- times # Reset times again if found
 
       co[['connectivity']] <- list(method = method,
                                    params = c("resistance" = resistance))
@@ -534,7 +536,7 @@ methods::setMethod(
   # Check that names are present if set
   if(is.null(names) || is.na(names)) names <- model$predictors_names
   if(is.character(names) ) assertthat::assert_that(all(names %in% model$predictors_names))
-  # Convert numeric paramters to numeric to be sure
+  # Convert numeric parameters to numeric to be sure
   value <- as.numeric(value)
   increment <- as.numeric(increment)
   increment_step <- as.numeric(increment_step)
@@ -584,7 +586,7 @@ methods::setMethod(
 #' @name add_constraint_boundary
 #' @aliases add_constraint_boundary
 #' @inheritParams add_constraint
-#' @param layer A [`Raster`] or [`sf`] object with the same extent as the model background. Has to be binary and
+#' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the model background. Has to be binary and
 #' is used for a posthoc masking of projected grid cells.
 #' @family constraint
 #' @keywords scenario
@@ -618,7 +620,7 @@ methods::setMethod(
       ras <- mod$get_model()$get_data()
     }
     assertthat::assert_that(is.Raster(ras))
-    bb <- try({ raster::rasterize(layer, ras, 1)},silent = TRUE)
+    bb <- try({ terra::rasterize(layer, ras, 1)}, silent = TRUE)
     if(inherits(bb, "try-error")) stop("Provide a rasterized layer of the boundary constraint!")
 
     # Call again
@@ -641,9 +643,9 @@ methods::setMethod(
       is.character(method)
     )
 
-    # Check that layer is a single RasterLayer
-    if(!inherits(layer, "RasterLayer")){
-      assertthat::assert_that(raster::nlayers(layer) == 1)
+    # Check that layer is a single SpatRaster
+    if(!inherits(layer, "SpatRaster")){
+      assertthat::assert_that(terra::nlyr(layer) == 1)
       layer <- layer[[1]]
     }
 
@@ -658,7 +660,7 @@ methods::setMethod(
       # If length of values is greater than 1, remove everything else by setting it to NA
       if( length( unique( layer )) >1 ){
         layer[layer<1] <- NA
-      }
+    }
       co[['boundary']] <- list(method = method,
                                    params = c("layer" = layer))
     }

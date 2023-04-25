@@ -36,14 +36,14 @@ NULL
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param env A [`RasterStack-class`], [`RasterLayer-class`] or [`stars`] object.
+#' @param env A [`SpatRaster`] or [`stars`] object.
 #' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed.
 #' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
 #' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
 #' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of knots for derivate creation if relevant (Default: \code{4}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
-#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
+#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE}).
+#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE}).
 #' @param explode_factors [`logical`] of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
@@ -82,43 +82,26 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterBrick}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
 methods::setMethod(
   "add_predictors",
-  methods::signature(x = "BiodiversityDistribution", env = "RasterBrick"),
+  methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
-    env = raster::stack(env)
+    env = terra::rast(env)
     add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
   }
 )
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
 methods::setMethod(
   "add_predictors",
-  methods::signature(x = "BiodiversityDistribution", env = "RasterLayer"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
-           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            !missing(env))
-    # Convert env to stack if it is a single layer only
-    env = raster::stack(env)
-    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
-  }
-)
-
-# TODO: Support other objects other than Raster stacks such as data.frames and stars objects
-#' @name add_predictors
-#' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
-methods::setMethod(
-  "add_predictors",
-  methods::signature(x = "BiodiversityDistribution", env = "RasterStack"),
+  methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     # Try and match transform and derivatives arguments
@@ -138,7 +121,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
 
     if(!is.null(names)) {
-      assertthat::assert_that(nlayers(env)==length(names),
+      assertthat::assert_that(terra::nlyr(env) == length(names),
                               all(is.character(names)),
                                                 msg = 'Provided names not of same length as environmental data.')
       # Set names of env
@@ -165,21 +148,23 @@ methods::setMethod(
     # Don't transform or create derivatives of factor variables
     if(any(is.factor(env))){
       # Make subsets to join back later
-      env_f <- raster::subset(env, which(is.factor(env)))
-      env <- raster::subset(env, which(!is.factor(env)))
+      env_f <- terra::subset(env, which(is.factor(env)))
+      env <- terra::subset(env, which(!is.factor(env)))
       if(explode_factors){
         # Refactor categorical variables
-        if(inherits(env_f,'RasterLayer')){
+        if(inherits(env_f,'SpatRaster')){
           env_f <- explode_factorized_raster(env_f)
-          env <- addLayer(env, env_f)
+          env <- c(env, env_f)
         } else {
-          o <- raster::stack()
+          o <- terra::rast()
           for(layer in names(env_f)){
-            o <- raster::addLayer(o, explode_factorized_raster(env_f[[layer]]))
+            suppressWarnings(
+              o <-c(o, explode_factorized_raster(env_f[[layer]]))
+            )
           }
           env_f <- o;rm(o)
           # Joining back to full raster stack
-          env <- raster::stack(env, env_f);rm(env_f)
+          env <- c(env, env_f);rm(env_f)
         }
         has_factors <- FALSE # Set to false since factors have been exploded.
       } else { has_factors <- TRUE }
@@ -199,17 +184,21 @@ methods::setMethod(
         assertthat::assert_that(is.vector(int_variables), length(int_variables)>=2)
         attr(env, "int_variables") <- int_variables
       }
-      new_env <- raster::stack()
-      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
+      new_env <- terra::rast()
+      for(dd in derivates){
+        suppressWarnings(
+          new_env <- c(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
+        )
+      }
 
       # Add to env
-      env <- raster::addLayer(env, new_env)
+      env <- c(env, new_env)
     }
 
     # Add factors back in if there are any.
     # This is to avoid that they are transformed or similar
     if(has_factors){
-      env <- raster::addLayer(env, env_f)
+      env <- c(env, env_f)
     }
     attr(env, 'has_factors') <- has_factors
 
@@ -218,13 +207,13 @@ methods::setMethod(
 
     # Mask predictors with existing background layer
     if(bgmask){
-      env <- raster::mask(env, mask = x$background)
+      env <- terra::mask(env, mask = x$background)
       # Reratify, work somehow only on stacks
       if(has_factors && any(is.factor(env)) ){
-        new_env <- raster::stack(env)
-        new_env[[which(is.factor(env))]] <- raster::ratify(env[[which(is.factor(env))]])
+        new_env <- terra::rast(env)
+        new_env[[which(is.factor(env))]] <- as.factor(env[[which(is.factor(env))]])
         env <- new_env;rm(new_env)
-      } else env <- raster::stack(env)
+      } else env <- terra::rast(env)
     }
 
     # Check whether predictors already exist, if so overwrite
@@ -266,7 +255,7 @@ methods::setMethod(
 #' Create lower and upper limits for an elevational range and add them as separate predictors
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`character`] stating the elevational layer in the Distribution object or [`RasterLayer`] object.
+#' @param layer A [`character`] stating the elevational layer in the Distribution object or [`SpatRaster`] object.
 #' @param lower [`numeric`] value for a lower elevational preference of a species.
 #' @param upper [`numeric`] value for a upper elevational preference of a species.
 #' @param transform [`character`] Any optional transformation to be applied. Usually not needed (Default: \code{"none"}).
@@ -305,15 +294,15 @@ methods::setMethod(
     } else {
       # If it is a raster
       # Check that background and range align, otherwise raise error
-      if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+      if(is_comparable_raster(layer, x$background)){
         warning('Supplied range does not align with background! Aligning them now...')
         layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
     }
 
     # Format lower and upper preferences
-    if(is.na(lower)) lower <- raster::cellStats(layer, "min")
-    if(is.na(upper)) upper <- raster::cellStats(layer, "max")
+    if(is.na(lower)) lower <- terra::global(layer, "min", na.rm = TRUE)
+    if(is.na(upper)) upper <- terra::global(layer, "max", na.rm = TRUE)
 
     # Now create thresholded derivatives of lower and upper elevation
     ras1 <- layer
@@ -322,15 +311,15 @@ methods::setMethod(
     ras2 <- layer
     ras2[ras2 < upper] <- 0; ras2[ras2 > 0] <- 1
     # If the minimum of those layers have equal min and max
-    if(raster::cellStats(ras1, "min") == raster::cellStats(ras1, "max")){
+    if(terra::global(ras1, "min", na.rm = TRUE) == terra::global(ras1, "max", na.rm = TRUE)){
       o <- ras2
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- raster::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
       names(o) <- c('elev_high')
     } else {
-      o <- raster::stack(ras1, ras2)
+      o <- c(ras1, ras2)
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- raster::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
       names(o) <- c('elev_low', 'elev_high')
     }
     rm(ras1,ras2)
@@ -356,7 +345,7 @@ methods::setMethod(
 #'
 #' @description
 #' This function allows to add a species range which is usually drawn by experts in a separate process
-#' as spatial explicit prior. Both [`sf`] and [`Raster`]-objects are supported as input.
+#' as spatial explicit prior. Both [`sf`] and [`SpatRaster`]-objects are supported as input.
 #'
 #' Users are advised to look at the [`bossMaps`] R-package presented as part of Merow et al. (2017),
 #' which allows flexible calculation of non-linear distance transforms from the boundary of the range.
@@ -369,12 +358,12 @@ methods::setMethod(
 #' \code{"distance_max"} can be specified to constrain this distance transform.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`sf`] or [`Raster`] object with the range for the target feature.
+#' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target feature.
 #' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
 #' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
-#' @param fraction An optional [`RasterLayer`] object that is multiplied with digitized raster layer.
+#' @param fraction An optional [`SpatRaster`] object that is multiplied with digitized raster layer.
 #' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
-#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions.
 #' @references
 #' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
 #' @name add_predictor_range
@@ -392,10 +381,10 @@ methods::setGeneric(
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, raster}(x, layer)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster}(x, layer)
 methods::setMethod(
   "add_predictor_range",
-  methods::signature(x = "BiodiversityDistribution", layer = "RasterLayer"),
+  methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
   function(x, layer, method = 'precomputed_range', fraction = NULL, priors = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(layer),
@@ -406,7 +395,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
-    if(compareRaster(layer, x$background,stopiffalse = FALSE)){
+    if(is_comparable_raster(layer, x$background)){
       warning('Supplied range does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
@@ -415,7 +404,7 @@ methods::setMethod(
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
       # Rescale if necessary and set 0 to a small constant 1e-6
-      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      if(terra::global(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
       fraction[fraction==0] <- 1e-6
       layer <- layer * fraction
     }
@@ -462,53 +451,53 @@ methods::setMethod(
     } else {
       # TODO: Eventually make this work better
       myLog('[Setup]','red','CAREFUL - This might not work without predictors already in the model.')
-      temp <- raster::raster(extent(x$background),resolution = 1)
+      temp <- terra::rast( terra::ext(x$background), resolution = 1)
     }
 
     # Rasterize the range
-    if( 'fasterize' %in% utils::installed.packages()[,1] ){
-      ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL) }, silent = TRUE)
-      if(inherits(ras_range,"try-error")){
-        myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
-        ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
-      }
-    } else {
-      ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
-    }
+    # if( 'fasterize' %in% utils::installed.packages()[,1] ){
+    #   ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL) }, silent = TRUE)
+    #   if(inherits(ras_range,"try-error")){
+    #     myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')
+    #     ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
+    #   }
+    # } else {
+    ras_range <- terra::rasterize(layer, temp, field = 1, background = NA)
+    # }
 
     # -------------- #
     if(method == 'binary'){
       dis <- ras_range
       dis[is.na(dis)] <- 0
       # Mask with temp again
-      dis <- raster::mask(dis, x$background)
+      dis <- terra::mask(dis, x$background)
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # Calculate the linear distance from the range
-      dis <- raster::gridDistance(ras_range, origin = 1)
-      dis <- raster::mask(dis, x$background)
+      dis <- terra::gridDistance(ras_range, target = 1)
+      dis <- terra::mask(dis, x$background)
       # If max distance is specified
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
         attr(dis, "distance_max") <- distance_max
-      } else { distance_max <- raster::cellStats(dis, "max") }
+      } else { distance_max <- terra::global(dis, "max", na.rm = TRUE) }
       # Grow baseline raster by using an exponentially weighted kernel
       alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
       # Grow baseline raster by using an exponentially weighted kernel
-      dis <- raster::calc(dis, fun = function(x) exp(-alpha * x))
+      dis <- terra::app(dis, fun = function(x) exp(-alpha * x))
       # Convert to relative for better scaling in predictions
-      dis <- (dis / raster::cellStats(dis,'max'))
+      dis <- (dis / terra::global(dis, 'max', na.rm = TRUE))
 
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
-      dis <- raster::mask(dis, x$background)
+      dis <- terra::mask(dis, x$background)
       names(dis) <- 'distance_range'
     }
 
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
       # Rescale if necessary and set 0 to a small constant 1e-6
-      if(raster::cellStats(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      if( terra::global(fraction, "min", na.rm = TRUE) < 0) fraction <- predictor_transform(fraction, option = "norm")
       fraction[fraction==0] <- 1e-6
       layer <- layer * fraction
     }
@@ -635,50 +624,14 @@ methods::setMethod(
 # Add predictor actions for scenario objects ----
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterBrick}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityScenario, SpatRaster}(x, env)
 methods::setMethod(
   "add_predictors",
-  methods::signature(x = "BiodiversityScenario", env = "RasterBrick"),
+  methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
   function(x, env, names = NULL, transform = 'none', derivates = 'none',
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             !missing(env))
-    env <- raster_to_stars(env) # Convert to stars
-
-    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
-                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
-  }
-)
-
-#' @name add_predictors
-#' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterLayer}(x, env)
-methods::setMethod(
-  "add_predictors",
-  methods::signature(x = "BiodiversityScenario", env = "RasterLayer"),
-  function(x, env, names = NULL, transform = 'none', derivates = 'none',
-           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
-                            !missing(env))
-
-    env <- raster_to_stars(env) # Convert to stars
-
-    add_predictors(x, env, names = names, transform = transform, derivates = derivates,
-                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
-  }
-)
-
-#' @name add_predictors
-#' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario,RasterStack}(x, env)
-methods::setMethod(
-  "add_predictors",
-  methods::signature(x = "BiodiversityScenario", env = "RasterStack"),
-  function(x, env, names = NULL, transform = 'none', derivates = 'none',
-           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
-    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
-                            !missing(env))
-
     env <- raster_to_stars(env) # Convert to stars
 
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
@@ -695,10 +648,10 @@ methods::setMethod(
   function(x, env, names = NULL, transform = 'none', derivates = 'none',
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
-    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin') , several.ok = TRUE)
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor'), several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin'), several.ok = TRUE)
 
-    assertthat::validate_that(inherits(env,'stars'),msg = 'Projection rasters need to be stars stack!')
+    assertthat::validate_that(inherits(env,'stars'), msg = 'Projection rasters need to be stars stack!')
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             transform == 'none' || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
                             derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
@@ -869,10 +822,10 @@ methods::setMethod(
 
     if(is.list(env)) env <- env[[1]] # Take the first reference entry
     assertthat::assert_that(is.Raster(env),
-                            raster::nlayers(env)>0)
+                            terra::nlyr(env)>0)
 
     if(!is.null(names)) {
-      assertthat::assert_that(nlayers(env)==length(names),
+      assertthat::assert_that(terra::nlyr(env)==length(names),
                               all(is.character(names)),
                               msg = 'Provided names not of same length as environmental data.')
       # Set names of env
@@ -905,11 +858,14 @@ methods::setMethod(
     # Calculate derivates if set
     if('none' %notin% derivates){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
-      new_env <- raster::stack()
-      for(dd in derivates) new_env <- raster::addLayer(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
-
+      new_env <- terra::rast()
+      for(dd in derivates) {
+        suppressWarnings(
+          new_env <- c(new_env, predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables) )
+        )
+      }
       # Add to env
-      env <- raster::addLayer(env, new_env)
+      env <- c(env, new_env)
     }
 
     # Generally not relevant for GLOBIOM unless created as derivate
@@ -920,8 +876,8 @@ methods::setMethod(
 
     # Mask predictors with existing background layer
     if(bgmask){
-      env <- raster::mask(env, mask = x$background)
-      env <- raster::stack(env)
+      env <- terra::mask(env, mask = x$background)
+      env <- terra::rast(env)
     }
 
     # Check whether predictors already exist, if so overwrite
@@ -1054,6 +1010,7 @@ methods::setMethod(
 #' and \code{"all"} for all entries (Default: \code{"reference"}).
 #' @param template An optional [`RasterLayer`] object towards which projects should be transformed.
 #' @param verbose [`logical`] on whether to be chatty.
+#' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
 #'
 #' @examples \dontrun{
 #' # Expects a filename pointing to a netCDF file.
@@ -1121,7 +1078,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       if(!"time" %in% names(stars::st_dimensions(ff))) next()
 
       # Crop to background extent if set
-      if(!is.null(template)){
+      # if(!is.null(template)){
         # FIXME: Currently this code, while working clips too much of Europe.
         # Likely need to
         # bbox <- sf::st_bbox(template) |> sf::st_as_sfc() |>
@@ -1129,7 +1086,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
         # suppressMessages(
         # ff <- ff |> stars:::st_crop.stars(bbox)
         # )
-      }
+      # }
 
       # Record dimensions for later
       full_dis <- stars::st_dimensions(ff)
@@ -1251,12 +1208,8 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   if(!is.null(template)){
     # Check that template is a raster, otherwise rasterize for GLOBIOM use
     if(inherits(template, "sf")){
-      o <- sc |> stars:::slice.stars("time" , 1) |> methods::as("Raster")
-      if("fasterize" %in% utils::installed.packages()[,1]){
-        template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
-      } else {
-        template <- raster::rasterize(template, o, field = 1)
-      }
+      o <- sc |> stars:::slice.stars("time" , 1) |> terra::rast()
+      template <- terra::rasterize(template, o, field = 1)
       rm(o)
     }
   }

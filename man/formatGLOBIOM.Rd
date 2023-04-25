@@ -28,6 +28,9 @@ and \code{"all"} for all entries (Default: \code{"reference"}).}
 
 \item{verbose}{\code{\link{logical}} on whether to be chatty.}
 }
+\value{
+A \code{\link{SpatRaster}} stack with the formatted GLOBIOM predictors.
+}
 \description{
 This function expects a downscaled GLOBIOM output as created in the BIOCLIMA project.
 Likely of little use for anyone outside IIASA.

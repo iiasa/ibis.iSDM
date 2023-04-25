@@ -6,12 +6,12 @@
 \usage{
 add_offset_elevation(x, elev, pref, rate = 0.0089, add = TRUE)
 
-\S4method{add_offset_elevation}{BiodiversityDistribution, raster, numeric}(x, elev, pref)
+\S4method{add_offset_elevation}{BiodiversityDistribution, SpatRaster, numeric}(x, elev, pref)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{elev}{A \code{\link{RasterLayer}} with the elevation for a given background.}
+\item{elev}{A \code{\link{SpatRaster}} with the elevation for a given background.}
 
 \item{pref}{A \code{\link{numeric}} vector of length \code{2} giving the lower and upper bound of known elevational preferences.
 Can be set to \code{Inf} if unknown.}
@@ -31,7 +31,7 @@ The code here was adapted from the Supporting materials script.
 }
 \details{
 Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
-from elevation limits. It requires a \code{\link{RasterLayer}} with elevation information.
+from elevation limits. It requires a \code{\link{SpatRaster}} with elevation information.
 A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
 areas, with the \code{\link{rate}} parameter allowing to vary the steepness of decline.
 

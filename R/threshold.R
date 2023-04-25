@@ -21,7 +21,7 @@ NULL
 #' @param obj A trained [`DistributionModel`] or alternatively a [`SpatRaster`] object.
 #' @param method A specifc method for thresholding. See details for available options.
 #' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
-#' @param poi A [`sf`] object containing observational data used for model training.
+#' @param point A [`sf`] object containing observational data used for model training.
 #' @param format [`character`] indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
 #' formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
 #' @param ... other parameters not yet set.
@@ -62,7 +62,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, poi = NULL,  format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, point = NULL,  format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -101,7 +101,7 @@ methods::setMethod(
     if(method == "min.cv") assertthat::assert_that("cv" %in% names(ras), msg = "Method min.cv requires a posterior prediction and coefficient of variation!")
 
     # Get all point data in distribution model
-    poi <- do.call(sf:::rbind.sf,
+    point <- do.call(sf:::rbind.sf,
                      lapply(obj$model$biodiversity, function(y){
                        o <- guess_sf(y$observations)
                        o$name <- y$name; o$type <- y$type
@@ -109,14 +109,14 @@ methods::setMethod(
                      } )
     ) |> tibble::remove_rownames()
     suppressWarnings(
-      poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
+      point <- sf::st_set_crs(point, value = sf::st_crs(obj$get_data('prediction')))
     )
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if((!any(poi$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(poi$name)) > 1){
+    if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
-      abs <- add_pseudoabsence(df = poi,
+      abs <- add_pseudoabsence(df = point,
                                    field_occurrence = 'observed',
                                    template = bg,
                                    # Assuming that settings are comparable among objects
@@ -129,16 +129,16 @@ methods::setMethod(
       suppressWarnings(
         abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
       )
-      poi <- subset(poi, select = c("observed", "name", "type","geometry"))
+      point <- subset(point, select = c("observed", "name", "type","geometry"))
       abs <- subset(abs, select = c("observed", "name", "type","geometry"))
-      poi <- rbind(poi, abs);rm(abs)
+      point <- rbind(point, abs);rm(abs)
     }
 
     # Convert to sf
-    if(!inherits(poi,"sf")){ poi <- guess_sf(poi) }
+    if(!inherits(point,"sf")){ point <- guess_sf(point) }
 
     # Now self call threshold
-    out <- threshold(ras, method = method, value = value, poi = poi, format = format,...)
+    out <- threshold(ras, method = method, value = value, point = point, format = format,...)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj
     new_obj <- obj
@@ -156,10 +156,10 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            poi = NULL, format = "binary", return_threshold = FALSE, ...) {
+                            point = NULL, format = "binary", return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
-                          inherits(poi,'sf'),
+                          inherits(point,'sf'),
                           is.null(value) || is.numeric(value),
                           is.character(format)
   )
@@ -171,7 +171,7 @@ methods::setMethod(
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, poi = poi,  format = format, return_threshold = return_threshold, ...) )
+                                                                value = value, point = point,  format = format, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
@@ -191,7 +191,7 @@ methods::setMethod(
     }
     # Now loop
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                 value = value, poi = poi, format = format,
+                                                 value = value, point = point, format = format,
                                                  return_threshold = return_threshold, ...) )
   }
   return(out)
@@ -209,7 +209,7 @@ methods::setMethod("threshold", methods::signature(obj = "SpatRasterDataset"), .
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
-  function(obj, method = 'fixed', value = NULL, poi = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
+  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'SpatRaster'),
                             is.character(method),
@@ -220,12 +220,12 @@ methods::setMethod(
     format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
 
     # If poi is set, try to convert sf
-    if(!is.null(poi)) try({poi <- sf::st_as_sf(poi)}, silent = TRUE)
-    assertthat::assert_that(is.null(poi) || inherits(poi,'sf'))
+    if(!is.null(point)) try({point <- sf::st_as_sf(point)}, silent = TRUE)
+    assertthat::assert_that(is.null(point) || inherits(point,'sf'))
 
     # If observed is a factor, convert to numeric
-    if(is.factor(poi$observed)){
-      poi$observed <- as.numeric(as.character( poi$observed ))
+    if(is.factor(point$observed)){
+      point$observed <- as.numeric(as.character( point$observed ))
     }
 
     # Match to correct spelling mistakes
@@ -233,10 +233,10 @@ methods::setMethod(
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
-    if(!is.null(poi)) {
-      assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
-      assertthat::assert_that(utils::hasName(poi, 'observed'))
-      poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
+    if(!is.null(point)) {
+      assertthat::assert_that(unique(sf::st_geometry_type(point)) %in% c('POINT','MULTIPOINT'))
+      assertthat::assert_that(utils::hasName(point, 'observed'))
+      poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
     }
     # Get the raster layer
     raster_thresh <- obj
@@ -280,16 +280,16 @@ methods::setMethod(
       # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
       check_package("modEvA")
       # Assure that point data is correctly specified
-      assertthat::assert_that(inherits(poi, 'sf'), utils::hasName(poi, 'observed'))
-      poi$observed <- ifelse(poi$observed>1, 1, poi$observed) # Ensure that observed is <=1
-      assertthat::assert_that(all( unique(poi$observed) %in% c(0,1) ))
+      assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, 'observed'))
+      point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
+      assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
 
       # Re-extract point vals but with the full dataset
-      pointVals <- terra::extract(raster_thresh, poi)
+      pointVals <- terra::extract(raster_thresh, point)
       assertthat::assert_that(length(pointVals)>2)
       # Calculate the optimal thresholds
       suppressWarnings(
-        opt <- modEvA::optiThresh(obs = poi$observed, pred = pointVals,
+        opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
                                   measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
                                                "Sensitivity","Specificity"),
                                   optimize = "each", plot = plot)
