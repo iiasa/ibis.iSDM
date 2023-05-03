@@ -169,12 +169,14 @@ methods::setMethod(
         has_factors <- FALSE # Set to false since factors have been exploded.
       } else { has_factors <- TRUE }
     } else { has_factors <- FALSE }
+    assertthat::assert_that(is.Raster(env), terra::nlyr(env)>=1)
 
     # Standardization and scaling
     if('none' %notin% transform){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
+    assertthat::assert_that(is.Raster(env), terra::nlyr(env)>=1)
 
     # Calculate derivates if set
     if('none' %notin% derivates){
@@ -197,9 +199,7 @@ methods::setMethod(
 
     # Add factors back in if there are any.
     # This is to avoid that they are transformed or similar
-    if(has_factors){
-      env <- c(env, env_f)
-    }
+    if(has_factors) env <- c(env, env_f)
     attr(env, 'has_factors') <- has_factors
 
     # Assign an attribute to this object to keep track of it
@@ -213,7 +213,7 @@ methods::setMethod(
         new_env <- terra::rast(env)
         new_env[[which(is.factor(env))]] <- as.factor(env[[which(is.factor(env))]])
         env <- new_env;rm(new_env)
-      } else env <- terra::rast(env)
+      }
     }
 
     # Check whether predictors already exist, if so overwrite
@@ -293,10 +293,12 @@ methods::setMethod(
       layer <- x$predictors$get_data()[[layer]]
     } else {
       # If it is a raster
-      # Check that background and range align, otherwise raise error
-      if(is_comparable_raster(layer, x$background)){
-        warning('Supplied range does not align with background! Aligning them now...')
-        layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      if(is.Raster(x$background)){
+        # Check that background and range align, otherwise raise error
+        if(is_comparable_raster(layer, x$background)){
+          warning('Supplied range does not align with background! Aligning them now...')
+          layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+        }
       }
     }
 
@@ -392,12 +394,14 @@ methods::setMethod(
                             is.character(method)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+    if(getOption('ibis.setupmessages')) myLog('[Setup]', 'green', 'Adding range predictors...')
 
     # Check that background and range align, otherwise raise error
-    if(is_comparable_raster(layer, x$background)){
-      warning('Supplied range does not align with background! Aligning them now...')
-      layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+    if(is.Raster(layer)){
+      if(is_comparable_raster(layer, x$background)){
+        warning('Supplied range does not align with background! Aligning them now...')
+        layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      }
     }
     names(layer) <- method
 
@@ -462,7 +466,7 @@ methods::setMethod(
     #     ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
     #   }
     # } else {
-    ras_range <- terra::rasterize(layer, temp, field = 1, background = NA)
+    ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
     # }
 
     # -------------- #
@@ -474,19 +478,19 @@ methods::setMethod(
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # Calculate the linear distance from the range
-      dis <- terra::gridDistance(ras_range, target = 1)
+      dis <- terra::gridDist(ras_range, target = 1)
       dis <- terra::mask(dis, x$background)
       # If max distance is specified
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
         attr(dis, "distance_max") <- distance_max
-      } else { distance_max <- terra::global(dis, "max", na.rm = TRUE) }
+      } else { distance_max <- terra::global(dis, "max", na.rm = TRUE)[,1] }
       # Grow baseline raster by using an exponentially weighted kernel
       alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
       # Grow baseline raster by using an exponentially weighted kernel
       dis <- terra::app(dis, fun = function(x) exp(-alpha * x))
       # Convert to relative for better scaling in predictions
-      dis <- (dis / terra::global(dis, 'max', na.rm = TRUE))
+      dis <- (dis / terra::global(dis, 'max', na.rm = TRUE)[,1])
 
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
@@ -497,7 +501,7 @@ methods::setMethod(
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
       # Rescale if necessary and set 0 to a small constant 1e-6
-      if( terra::global(fraction, "min", na.rm = TRUE) < 0) fraction <- predictor_transform(fraction, option = "norm")
+      if( terra::global(fraction, "min", na.rm = TRUE)[,1] < 0) fraction <- predictor_transform(fraction, option = "norm")
       fraction[fraction==0] <- 1e-6
       layer <- layer * fraction
     }
@@ -1047,7 +1051,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   attrs <- list() # For storing the attributes
   sc <- vector() # For storing the scenario files
 
-  # Now open the netcdf file with stats
+  # Now open the netcdf file with stars
   if( length( grep("netcdf", stars::detect.driver(fname), ignore.case = TRUE) )>0 ){
     if(verbose){
       myLog('[Predictor]','green',"Loading in predictor file...")
@@ -1164,6 +1168,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       grep("y|latitude",names(full_dis), ignore.case = TRUE,value = TRUE),
       grep("year|time",names(full_dis), ignore.case = TRUE,value = TRUE)
       )] # Order assumed to be correct
+    assertthat::assert_that(length(names(full_dis))==3)
     stars::st_dimensions(sc) <- full_dis # Target dimensions
 
   } else { stop("Fileformat not recognized!")}

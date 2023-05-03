@@ -130,13 +130,20 @@ methods::setMethod(
     if(!is.null(limits)){
       # Convert to polygon if raster
       if(inherits(limits,'SpatRaster')){
-        if(is.factor(limits)) stop('Provided limit raster needs to be ratified (categorical)!')
-        limits <- sf::st_as_sf( terra::as.polygons(limits, dissolve = TRUE) )
+        assertthat::assert_that(terra::is.factor(limits),
+                                msg = 'Provided limit raster needs to be ratified (categorical)!')
+        limits <- sf::st_as_sf( terra::as.polygons(limits, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
       }
+      assertthat::assert_that(inherits(limits, "sf"))
+
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(background)) limits <- sf::st_transform(limits, background)
       # Ensure that limits is intersecting the background
-      if(suppressMessages(length( sf::st_intersects(limits, background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      if(is.Raster(background)){
+        if(suppressMessages(length( sf::st_intersects(limits, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      } else {
+        if(suppressMessages(length( sf::st_intersects(limits, background |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      }
 
       # Get fir column and rename
       limits <- limits[,1]; names(limits) <- c('limit','geometry')

@@ -202,12 +202,13 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
           },silent = TRUE)
           if(inherits(o2,"try-error")){
             o <- terra::resample(o, template,
-                                  method = "near")
+                                 method = "near",
+                                 threads = getOption("ibis.nthread"))
           } else { o <- o2; rm(o2)}
         }
       }
     } # End of template adjustments
-    out[[paste0("time",times[tt])]] <- o
+    out[[paste0("time", times[tt])]] <- o
   }
   return( out )
 }

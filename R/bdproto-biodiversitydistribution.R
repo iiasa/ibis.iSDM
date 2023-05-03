@@ -77,7 +77,7 @@ BiodiversityDistribution <- bdproto(
     r <- self$background
     o <- list()
     o[['extent']] <- round( sf::st_bbox(r), 3)
-    o[['proj']] <-  terra::crs(r)
+    o[['proj']] <-  sf::st_crs(r)$proj4string
     return(o)
   },
   # Set limits

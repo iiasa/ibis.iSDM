@@ -48,7 +48,7 @@ PredictorDataset <- bdproto(
     if(df) {
       if(any(is.factor(self$data))){
         # Bugs for factors, so need
-        out <- self$data[] |> as.data.frame()
+        out <- terra::as.data.frame(self$data)
         out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
         cbind(terra::crds(self$data), out ) # Attach coordinates and return
       } else {
@@ -103,7 +103,7 @@ PredictorDataset <- bdproto(
     assertthat::assert_that(assertthat::is.string(x),
                             is.Raster(value),
                             is_comparable_raster(self$get_data(), value))
-    bdproto(NULL, self, data = addLayer(self$get_data(), value))
+    bdproto(NULL, self, data = suppressWarnings( c(self$get_data(), value) ))
   },
   # Remove a specific Predictor by name
   rm_data = function(self, x) {
@@ -114,11 +114,19 @@ PredictorDataset <- bdproto(
     ind <- match(x, self$get_names())
     if(is.Raster(self$get_data() )){
       # Overwrite predictor dataset
-      self$data <- terra::subset(self$get_data(), ind)
+      if(base::length(ind) == base::length(self$get_names())){
+        self$data <- new_waiver()
+      } else {
+        self$data <- terra::subset(self$get_data(), ind, negate = TRUE)
+      }
     } else {
+      if(length(ind) == self$get_names()){
+        self$data <- new_waiver()
+      } else {
       suppressWarnings(
         self$data <- terra::subset(self$data, -ind)
       )
+      }
     }
     invisible()
   },

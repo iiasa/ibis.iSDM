@@ -4,17 +4,24 @@
 #' are comparable.
 #'
 #' @param x [`SpatRaster-class`] object.
-#' @param y [`SpatRaster-class`] object.
+#' @param y [`SpatRaster-class`] or [`sf`] object.
 #' @keywords internal, utils
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
 #'   resolution, extent, dimensionality, and coordinate system.
 #' @noRd
 is_comparable_raster <- function(x, y) {
-  assertthat::assert_that(
-    (is.Raster(x) && is.Raster(y)),
-    sf::st_crs(x@crs) == sf::st_crs(y@crs) &&
-    terra::compareGeom(x, y, stopOnError = FALSE)
-  )
+  if(inherits(y, "sf")){
+    assertthat::assert_that(
+      terra::same.crs(x, y) &&
+        sf::st_crs(x) == sf::st_crs(y)
+    )
+  } else {
+    assertthat::assert_that(
+      (is.Raster(x) && is.Raster(y)),
+      terra::same.crs(x, y) &&
+        terra::compareGeom(x, y, stopOnError = FALSE)
+    )
+  }
 }
 
 #' Easy conversion function
@@ -199,7 +206,7 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       # Align with template if set
       if(!is.null(template)){
         if(terra::compareGeom(zones, template, stopOnError = FALSE)){
-          zones <- terra::resample(zones, template, method = "near", threads = getOption("ibis.runparallel"))
+          zones <- terra::resample(zones, template, method = "near", threads = getOption("ibis.nthread"))
         }
       }
     }
@@ -371,7 +378,7 @@ st_kde <- function(points, background, bandwidth = 3){
 
   # Resample output for small point mismatches
   if(!terra::compareGeom(out, background, stopOnError = FALSE)){
-    out <- terra::resample(out, background)
+    out <- terra::resample(out, background, threads = getOption("ibis.nthread"))
   }
   out <- terra::mask(out, background)
   names(out) <- "kde__coordinates"
@@ -483,7 +490,7 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
 #' in order to reduce computation time.
 #'
 #' @param data [`SpatRaster-class`] object to be resampled.
-#' @param template [`SpatRaster-class`] or [`Spatial-class`] object from which geometry can be extracted.
+#' @param template [`SpatRaster-class`] or [`sf`] object from which geometry can be extracted.
 #' @param method method for resampling (Options: \code{"near"} or \code{"bilinear"}).
 #' @param func function for resampling (Default: [mean]).
 #' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE}).
@@ -502,26 +509,30 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
   # Security checks
   assertthat::assert_that(
     is.Raster(data),
-    is.Raster(template),
+    is.Raster(template) || inherits(template, "sf"),
     is.character(method),
     is.logical(cl)
   )
-  method <- match.arg(method, c("bilinear", "ngb"),several.ok = FALSE)
+  method <- match.arg(method, c("bilinear", "ngb"), several.ok = FALSE)
 
-  if(sf::st_crs(data) == sf::st_crs(template)){
-    # Crop raster to template
-    data <- terra::crop(data, template, snap = "out")
+  if(sf::st_crs(data) != sf::st_crs(template)){
+    # Project Raster layer
+    data <- terra::project(data, terra::crs(template), method = method, threads = getOption("ibis.nthread"))
+  }
 
-    # Aggregate to minimal scale
-    if(data@ncols / template@ncols >= 2){
+  # Crop raster to template
+  data <- terra::crop(data, template, snap = "out")
+
+  # Aggregate to minimal scale
+  if(is.Raster(template)){
+    if(terra::ncol(data) / terra::ncol(template) >= 2){
       factor <- floor(data@ncols/template@ncols)
       data <- terra::aggregate(data, fact = factor, fun = func, cores = ifelse(cl, getOption("ibis.nthread"), 1))
     }
-    # Resample with target method
-    data <- terra::resample(data, template, method = method)
   } else {
-    # Project Raster layer
-    data <- terra::project(data, template, method = method)
+    # Resample with target method
+    ras <- terra::rasterize(template, data)
+    data <- terra::resample(data, ras, method = method, threads = getOption("ibis.nthread"))
   }
   return(data)
 }
@@ -544,7 +555,7 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x))
   terra::rast(nrows = nrow(x), ncols = ncol(x),
-                        crs = sf::st_crs(ras),
+                        crs = terra::crs(x),
                         ext = terra::ext(x), ...)
 }
 
@@ -725,134 +736,6 @@ get_rastervalue <- function(coords, env, rm.na = FALSE){
   return(ex)
 }
 
-#' Hinge transformation of a given predictor
-#'
-#' @description
-#' This function transforms a provided predictor variable with a hinge transformation,
-#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
-#' while the remainder is left at the original values.
-#' @param v A [`SpatRaster`] object.
-#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
-#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
-#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @concept Concept taken from the [maxnet] package.
-#' @returns A hinge transformed [`data.frame`].
-#' @noRd
-makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
-  assertthat::assert_that(is.Raster(v),
-                          is.character(n),
-                          is.numeric(nknots),
-                          is.numeric(cutoffs) || is.null(cutoffs))
-  # Get stats
-  v.min <- terra::global(v, "min", na.rm = TRUE)
-  v.max <- terra::global(v, "max", na.rm = TRUE)
-  if(is.null(cutoffs)){
-    k <- seq(v.min, v.max, length = nknots)
-  } else {
-    k <- cutoffs
-  }
-  if(length(k)<=1) return(NULL)
-
-  # Hinge up to max
-  lh <- outer(v[], utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
-  # Hinge starting from min
-  rh <- outer(v[], k[-1], function(w, h) hingeval(w, v.min, h))
-  colnames(lh) <- paste0("hinge__",n,'__', round( utils::head(k, -1), 2),'_', round(v.max, 2))
-  colnames(rh) <- paste0("hinge__",n,'__', round( v.min, 2),'_', round(k[-1], 2))
-  o <- as.data.frame(
-    cbind(lh, rh)
-  )
-  # Kick out first (min) and last (max) col as those are perfectly correlated
-  o <- o[,-c(1,ncol(o))]
-  attr(o, "deriv.hinge") <- k
-  return(o)
-}
-
-#' Threshold transformation of a given predictor
-#'
-#' @description
-#' This function transforms a provided predictor variable with a threshold transformation,
-#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
-#' while the remainder is set to \code{1}.
-#' @param v A [`Raster`] object.
-#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
-#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
-#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @concept Concept taken from the [maxnet] package.
-#' @returns A threshold transformed [`data.frame`].
-#' @noRd
-makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
-  assertthat::assert_that(is.Raster(v),
-                          is.character(n),
-                          is.numeric(nknots),
-                          is.numeric(cutoffs) || is.null(cutoffs))
-  if(is.null(cutoffs)){
-    # Get min max
-    v.min <- terra::global(v, "min", na.rm= TRUE)
-    v.max <- terra::global(v, "max", na.rm= TRUE)
-    k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
-  } else {
-    k <- cutoffs
-  }
-  if(length(k)<=1) return(NULL)
-  f <- outer(v[], k, function(w, t) ifelse(w >= t, 1, 0))
-  colnames(f) <- paste0("thresh__", n, "__",  round(k, 2))
-  f <- as.data.frame(f)
-  attr(f, "deriv.thresh") <- k
-  return(f)
-}
-
-#' Binned transformation of a given predictor
-#'
-#' @description
-#' This function takes predictor values and 'bins' them into categories based on a
-#' percentile split.
-#' @param v A [`SpatRaster`] object.
-#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
-#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
-#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @returns A binned transformed [`data.frame`] with columns representing each bin.
-#' @noRd
-makeBin <- function(v, n, nknots, cutoffs = NULL){
-  assertthat::assert_that(is.Raster(v),
-                          is.character(n),
-                          is.numeric(nknots),
-                          is.numeric(cutoffs) || is.null(cutoffs))
-  if(is.null(cutoffs)){
-    # Calculate cuts
-    cu <- terra::quantile(v, probs = seq(0, 1, by = 1/nknots) )
-  } else { cu <- cutoffs}
-
-  if(anyDuplicated(cu)){
-    # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
-    cu <- terra::quantile(v, probs = seq(0, 1, by = 1/(nknots*2)) )
-    cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
-    if(length(cu)<=2) return( NULL )
-    if(length(cu) > nknots){
-      cu <- cu[(length(cu)-(nknots)):length(cu)]
-    }
-  }
-  # Make cuts and explode
-  out <- explode_factorized_raster(
-    terra::droplevels(
-      terra::classify(v, cu)
-    )
-  )
-  # Format threshold names
-  cu.brk <- as.character(cut(cu[-1], cu))
-  cu.brk <- gsub(",","_",cu.brk)
-  cu.brk <- gsub("\\(|\\]", "", cu.brk)
-  # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
-  names(out) <- paste0("bin__",n, "__", cu.brk )
-  for(i in 1:terra::nlyr(out)){
-    attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
-  }
-  return(out)
-}
-
 #' Create new raster stack from a given data.frame
 #'
 #' @param post A data.frame
@@ -1004,14 +887,23 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
     # Extract data
     o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
 
+    # Check if there is an NaN and remove if present.
+    if( any(is.nan( terra::levels(o[[name]]) ) | terra::levels(o[[name]]) == "NaN") ){
+      lvl <- terra::levels(o[[name]])
+      if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
+      if(any(lvl == "NaN")) lvl <- lvl[-which(lvl == "NaN")]
+    } else {
+      lvl <- terra::levels(o[[name]])
+    }
+
     # Make function that converts all factors to split rasters
     f <- as.data.frame(
-      outer(o[[name]], levels(o[[name]]), function(w, f) ifelse(w == f, 1, 0))
+      outer(o[[name]], lvl, function(w, f) ifelse(w == f, 1, 0))
     )
 
     # Fill template rasters
     out <- fill_rasters(f, temp)
-    names(out) <- paste(name, levels(o[[name]]), sep = ".")
+    names(out) <- paste(name, lvl, sep = ".")
 
   } else if(terra::nlyr(ras)>1){
     # Alternatively if input is stack
@@ -1033,14 +925,23 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
       # Extract data
       o <- data.frame(val = values(sub));names(o) <- new_name;o[[new_name]] <- factor(o[[new_name]])
 
+      # Check if there is an NaN and remove if present.
+      if( any(is.nan(terra::levels(o[[name]])) | terra::levels(o[[name]]) == "NaN") ){
+        lvl <- terra::levels(o[[name]])
+        if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
+        if(any(lvl == "Nan")) lvl <- lvl[-which(lvl == "NaN")]
+      } else {
+        lvl <- terra::levels(o[[name]])
+      }
+
       # Make function that converts all factors to split rasters
       f <- as.data.frame(
-        outer(o[[new_name]], levels(o[[new_name]]), function(w, f) ifelse(w == f, 1, 0))
+        outer(o[[new_name]], lvl, function(w, f) ifelse(w == f, 1, 0))
       )
 
       # Fill template rasters
       new <- fill_rasters(f, temp)
-      names(new) <- paste(new_name, levels(o[[new_name]]), sep = ".")
+      names(new) <- paste(new_name, lvl, sep = ".")
       suppressWarnings( out <- c(out, new) )
     }
   }

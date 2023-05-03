@@ -10,20 +10,20 @@ test_that('Check that distribution objects are properly inherited', {
           message = "No cmdstan path")
 
   # Load packages
-  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   suppressWarnings( requireNamespace("sf", quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE)
 
   # Get background
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
 
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
 
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Define distribution object
   x <- distribution(background)
@@ -91,7 +91,7 @@ test_that('Check that distribution objects are properly inherited', {
 
   # Check variable removal
   xx <- x |> add_predictors(predictors)
-  xx |> rm_predictors("hmi_mean_50km")
+  xx |> rm_predictors(names = "hmi_mean_50km")
   expect_length(xx$get_predictor_names(), 14)
 
   # --- #

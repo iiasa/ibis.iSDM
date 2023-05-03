@@ -229,12 +229,12 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   } else { bias <- NULL }
 
   # Rasterize the presence estimates
-  bg1 <- terra::rasterize(df[,c('x','y')] |> sf::st_drop_geometry(),
-                           background, fun = 'length', background = 0)
+  bg1 <- terra::rasterize(x = terra::vect( df[,c('x','y')] ) ,
+                          y = background, fun = 'length', background = 0)
   bg1 <- terra::mask(bg1, background)
 
   assertthat::assert_that(
-    is.finite(terra::global(bg1, 'max', na.rm = TRUE)[1])
+    is.finite(terra::global(bg1, 'max', na.rm = TRUE)[,1])
   )
 
   # Generate pseudo absence data

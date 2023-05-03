@@ -206,7 +206,9 @@ methods::setMethod(
         dummy <- emptyraster(x$engine$get_data("template"));names(dummy) <- "dummy"
         dummy[] <- 1 ; dummy <- terra::mask(dummy, x$background)
       } else {
-        dummy <- terra::rast( terra::ext(x$background), nrow=100,ncol=100,val=1);names(dummy) <- 'dummy'
+        dummy <- terra::rast( terra::ext(x$background),
+                              nrow=100, ncol=100, val=1,
+                              crs = terra::crs(x$background));names(dummy) <- 'dummy'
       }
       model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE)
       model[['predictors_names']] <- 'dummy'

@@ -67,7 +67,7 @@ methods::setMethod(
 
     # Check for infinite values
     assertthat::assert_that(
-      all( is.finite( terra::global(layer, "range", na.rm = TRUE)) ),
+      all( is.finite( terra::global(layer, "range", na.rm = TRUE)[,1]) ),
       msg = "Infinite values found in the layer (maybe log of 0?)."
     )
 
@@ -82,7 +82,7 @@ methods::setMethod(
     if(!is.Waiver(x$offset) && add){
       # Add to current object
       of <- x$offset
-      layer <- terra::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
       of <- c(terra::rast(of), layer)
       x <- x$set_offset(of)
@@ -231,7 +231,7 @@ methods::setMethod(
 
       ## Make zeros a very small number otherwise issues with log(0).
       r[r[]==0] <- 1e-6
-      suppressWarnings({ar <- terra::area(r)})
+      suppressWarnings({ar <- terra::cellSize(r)})
 
       ## Calculate the probability that a cell has been sampled while accounting for area differences in lat/lon
       ## Direction sign is negative and if area offset considered, use "+ offset(log(off.area)-log(off.bias))"
@@ -243,7 +243,7 @@ methods::setMethod(
 
     # Check for infinite values
     assertthat::assert_that(
-      all( is.finite( terra::global(layer, "range", na.rm = TRUE)) ),
+      all( is.finite( terra::global(layer, "range", na.rm = TRUE)[,1]) ),
       msg = "Infinite values found in the layer (maybe log of 0?)."
     )
 
@@ -251,7 +251,7 @@ methods::setMethod(
     if(!is.Waiver(x$offset) && add){
       # Add to current object
       of <- x$offset
-      layer <- terra::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
       of <- c( terra::rast(of), layer )
       x <- x$set_offset(of)
@@ -354,7 +354,7 @@ methods::setMethod(
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
       # Rescale if necessary and set 0 to a small constant 1e-6
-      if(terra::global(fraction, "min") < 0) fraction <- predictor_transform(fraction, option = "norm")
+      if(terra::global(fraction, "min")[,1] < 0) fraction <- predictor_transform(fraction, option = "norm")
       fraction[fraction==0] <- 1e-6
       layer <- layer * fraction
     }
@@ -363,9 +363,9 @@ methods::setMethod(
     if(!is.Waiver(x$offset) && add){
       # Add to current object
       of <- x$offset
-      layer <- terra::resample(layer, of, method = 'bilinear', func = mean, cl = FALSE)
+      layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
-      of <- c( terra::rast(of), layer )
+      suppressWarnings( of <- c( terra::rast(of), layer ) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -414,7 +414,7 @@ methods::setMethod(
       Add offset after predictors')
       temp <- terra::rast( extent = terra::ext(x$background),
                              resolution = diff(sf::st_bbox(x$background)[c(1,3)]) / 100,
-                             crs = sf::st_crs(x$background))
+                             crs = terra::crs(x$background))
     }
 
     # Check to make the entries valid
@@ -422,26 +422,26 @@ methods::setMethod(
       layer <- sf::st_make_valid(layer) # Check whether to make them valid
       if( any(!sf::st_is_valid(layer)) ){
         # If still has errors, combine
-        layer <- layer |> sf::st_combine() |> sf::st_as_sf()
+        suppressMessages( layer <- layer |> sf::st_combine() |> sf::st_as_sf() )
       }
     }
 
     # If layer has multiple entries join them
-    if(nrow(layer)>1) layer <- layer |> sf::st_union() |> sf::st_as_sf()
+    if(nrow(layer)>1) suppressMessages( layer <- layer |> sf::st_union() |> sf::st_as_sf() )
 
     # Rasterize the range
-    ras_range <- terra::rasterize(layer, temp, field = 1, background = NA)
+    ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
 
     # Calculate distance if required
     if(distance_max > 0){
-      # Calculate a distance raster
-      dis <- terra::gridDistance(ras_range, target = 1)
+      # Calculate a distance raster in km
+      dis <- terra::gridDist(ras_range, target = 1, scale = 1000)
       # If max distance is specified
       if(distance_clip && is.finite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to a very small constant
       }
       # Inverse of distance
-      if(is.infinite(distance_max)) distance_max <- terra::global(dis, "max", na.rm = TRUE)
+      if(is.infinite(distance_max)) distance_max <- terra::global(dis, "max", na.rm = TRUE)[,1]
       # ---- #
       alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
       # Grow baseline raster by using an exponentially weighted kernel
@@ -458,34 +458,37 @@ methods::setMethod(
 
     # Inside I want all X across the entire area for the PPMs,
     # indicating a lambda per area of at least X/A (per unit area) within the range
-    suppressWarnings( ar <- terra::area(ras_range) ) # Calculate area
-    pres <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE) / terra::global(ar, "sum", na.rm = TRUE)) * (presence_prop) )
-    abs <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE) / terra::global(ar, "sum", na.rm = TRUE)) * (1-presence_prop) )
+    suppressWarnings( ar <- terra::cellSize(ras_range, unit = "km") ) # Calculate area in km
+    pres <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (presence_prop) )
+    abs <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (1-presence_prop) )
     # Now set all values inside the range to pres and outside to abs
     ras_range[ras_range == 1] <- pres
-    ras_range[is.na(ras_range)] <- abs
+    ras_range[ras_range == 0] <- abs
     # Multiply with distance layer
     ras_range <- ras_range * dis
     # Normalize the result by dividing by the sum
-    ras_range <- ras_range / terra::global(ras_range, "sum", na.rm = TRUE)
+    ras_range <- ras_range / terra::global(ras_range, "sum", na.rm = TRUE)[,1]
 
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
       # Rescale if necessary and set 0 to a small constant 1e-6
-      if(terra::global(fraction, "min", na.rm = TRUE) < 0) fraction <- predictor_transform(fraction, option = "norm")
+      if(terra::global(fraction, "min", na.rm = TRUE)[,1] < 0) fraction <- predictor_transform(fraction, option = "norm")
       fraction[fraction==0] <- 1e-6
       ras_range <- ras_range * fraction
     }
 
     # -------------- #
-    # Log transform
-    ras_range  <- log(ras_range)
+    # Log transform for better scaling
+    ras_range <- switch (type,
+      "poisson" = terra::app(ras_range, log),
+      "binomial" = terra::app(ras_range, logistic)
+    )
     # Rescaling does not affect relative differences.
     ras_range <- terra::scale(ras_range, scale = FALSE)
     names(ras_range) <- "range_distance"
 
     assertthat::assert_that(
-      is.finite( terra::global(ras_range, "max", na.rm = TRUE) ),
+      is.finite( terra::global(ras_range, "max", na.rm = TRUE)[,1] ),
       msg = "Range offset has infinite values. Check parameters!"
     )
 
@@ -494,9 +497,9 @@ methods::setMethod(
       # Add to current object
       of <- x$offset
       ori.name <- names(ras_range)
-      ras_range <- terra::resample(ras_range, of, method = 'bilinear', func = mean, cl = FALSE)
+      ras_range <- terra::resample(ras_range, of, method = 'bilinear', threads = getOption("ibis.nthread") )
       names(ras_range) <- ori.name # In case the layer name got lost
-      of <- c(terra::rast(of), ras_range)
+      suppressWarnings( of <- c(terra::rast(of), ras_range) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -569,7 +572,7 @@ methods::setMethod(
 
     # Check for infinite values
     assertthat::assert_that(
-      all( is.finite( terra::global(elev, "range", na.rm = TRUE)) ),
+      all( is.finite( terra::global(elev, "range", na.rm = TRUE)[,1]) ),
       msg = "Infinite values found in the layer (maybe log of 0?)."
     )
 
@@ -597,11 +600,11 @@ methods::setMethod(
     rm(tmp.elev1,tmp.elev1.1,tmp.elev2,tmp.elev2.1) # clean up
 
     # Normalize the result by dividing by the sum
-    elev.prior <- elev.prior / terra::global(elev.prior, "sum", na.rm = TRUE)
+    elev.prior <- elev.prior / terra::global(elev.prior, "sum", na.rm = TRUE)[,1]
     # Mean center prior
     elev.prior <- log(elev.prior)
-    prior.means <- terra::global(elev.prior, "mean", na.rm = TRUE)
-    terra::values(elev.prior) <- do.call('cbind',lapply(1:length(prior.means), function(x) terra::values(elev.prior[[x]]) + abs(prior.means[x])))
+    prior.means <- terra::global(elev.prior, "mean", na.rm = TRUE)[,1]
+    terra::values(elev.prior) <- do.call('cbind', lapply(1:length(prior.means), function(x) terra::values(elev.prior[[x]]) + abs(prior.means[x])) )
     names(elev.prior) <- 'elev.prior'
 
     # if(getOption("ibis.runparallel")) raster::endCluster()
@@ -611,9 +614,9 @@ methods::setMethod(
     if(!is.Waiver(x$offset) && add){
       # Add to current object
       of <- x$offset
-      elev.prior <- terra::resample(elev.prior, of, method = 'bilinear', func = mean, cl = FALSE)
+      elev.prior <- terra::resample(elev.prior, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(elev.prior) <- 'elev.prior' # In case the layer name got lost
-      of <- c( terra::rast(of), elev.prior )
+      suppressWarnings( of <- c( terra::rast(of), elev.prior ) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset

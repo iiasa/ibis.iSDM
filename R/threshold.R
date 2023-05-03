@@ -223,21 +223,20 @@ methods::setMethod(
     if(!is.null(point)) try({point <- sf::st_as_sf(point)}, silent = TRUE)
     assertthat::assert_that(is.null(point) || inherits(point,'sf'))
 
-    # If observed is a factor, convert to numeric
-    if(is.factor(point$observed)){
-      point$observed <- as.numeric(as.character( point$observed ))
-    }
-
     # Match to correct spelling mistakes
     method <- match.arg(method, c('fixed','mtp','percentile','min.cv',
                                            'TSS','kappa','F1score','Sensitivity','Specificity'), several.ok = FALSE)
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(point)) {
+      # If observed is a factor, convert to numeric
+      if(is.factor(point$observed)){
+        point$observed <- as.numeric(as.character( point$observed ))
+      }
       assertthat::assert_that(unique(sf::st_geometry_type(point)) %in% c('POINT','MULTIPOINT'))
       assertthat::assert_that(utils::hasName(point, 'observed'))
       poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
-    }
+    } else poi_pres <- NULL
     # Get the raster layer
     raster_thresh <- obj
 
@@ -247,13 +246,16 @@ methods::setMethod(
       assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
       tr <- value
     } else if(method == "mtp"){
+      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
       # minimum training presence
       pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
       # Minimum threshold
       tr <- min( stats::na.omit(pointVals) )
 
     } else if(method == "percentile"){
-      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
+      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
+      assertthat::assert_that(value>=0, value <= 1)
+      pointVals <- terra::extract(raster_thresh, poi_pres)[[names(raster_thresh)]] # Extract point only estimates
       pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
       # percentile training threshold
       if(is.null(value)) value <- 0.1 # If value is not set, use 10%
@@ -265,7 +267,8 @@ methods::setMethod(
       tr <- rev(sort(pointVals))[perc] # Percentile threshold
 
     } else if(method == "min.cv"){
-      assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be set!")
+      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
+      assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be supplied as value!")
       pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
 
       # Get standard deviation and calculate percentile
@@ -322,9 +325,8 @@ methods::setMethod(
         raster_thresh <- predictor_transform(raster_thresh, option = "norm")
         raster_thresh[is.na(raster_thresh)] <- 0
         raster_thresh <- terra::mask(raster_thresh, obj)
-        base::attr(raster_thresh, 'truncate') <- TRUE
-
         base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
+
       } else if(format == "percentile") {
         raster_thresh[raster_thresh < tr[1]] <- NA
         raster_thresh <- predictor_transform(raster_thresh, option = "percentile")

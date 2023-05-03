@@ -81,7 +81,7 @@ methods::setMethod(
     # Check for infinite values
     assertthat::assert_that(
       terra::nlyr(layer) == length(bias_value),
-      all( is.finite( terra::global(layer, "range", na.rm = TRUE)) ),
+      all( terra::global(layer, "range", na.rm = TRUE) > 0),
       msg = "Infinite values found in the layer (maybe log of 0?)."
     )
 

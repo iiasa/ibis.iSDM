@@ -16,7 +16,7 @@ test_that('Scenarios and constraints', {
 
   # Load data
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
@@ -27,8 +27,9 @@ test_that('Scenarios and constraints', {
 
   # Load present and future predictors
   ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
-  pred_current <- raster::stack()
-  for(i in ll) pred_current <- raster::addLayer(pred_current, raster::raster(i,layer = 1) )
+  pred_current <- terra::rast()
+  for(i in ll) pred_current <- suppressWarnings( c(pred_current, terra::rast(i)[[1]] ) )
+  names(pred_current) <- tools::file_path_sans_ext( basename(ll) )
   # Load the same files future ones
   suppressWarnings(
     pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', seq(1, 86, by = 10))
@@ -71,7 +72,7 @@ test_that('Scenarios and constraints', {
   expect_equal(sc$modelid, fit$model$id)
 
   # Add covariates
-  x <- sc |> add_predictors(pred_future)
+  x <- sc |> add_predictors(pred_future, transform = "scale")
   expect_length(x$get_predictor_names(), 9)
   expect_equal(x$get_predictor_names(), names(pred_current))
   expect_length(x$get_timeperiod(), 2)

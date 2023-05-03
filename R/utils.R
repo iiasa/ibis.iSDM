@@ -202,11 +202,13 @@ to_POSIXct <- function(vec){
 
 #' Hingeval transformation
 #' @param x A [`vector`] with numeric values.
-#' @param min [`numeric`] minimum value for the hinge transformation
-#' @param max [`numeric`] maximum value for the hinge transformation
+#' @param min [`numeric`] minimum value for the hinge transformation.
+#' @param max [`numeric`] maximum value for the hinge transformation.
 #' @keywords internal
 #' @noRd
-hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+hingeval <- function (x, min, max){
+  ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+}
 
 #' Threshold transformation
 #' @param x A [`vector`] with numeric values.
