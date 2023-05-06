@@ -283,7 +283,7 @@ BiodiversityDistribution <- bdproto(
     prcol <- bdproto(NULL, self)
     # Set the object
     prcol$predictors$rm_data(names)
-    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
+    if(base::length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
     return(prcol)
   },
   # Remove priors

@@ -652,13 +652,11 @@ methods::setMethod(
   function(x, env, names = NULL, transform = 'none', derivates = 'none',
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
-    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor'), several.ok = TRUE)
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin'), several.ok = TRUE)
 
     assertthat::validate_that(inherits(env,'stars'), msg = 'Projection rasters need to be stars stack!')
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
-                            transform == 'none' || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
-                            derivates == 'none' || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin') ),
                             is.vector(derivate_knots) || is.numeric(derivate_knots),
                             is.null(int_variables) || is.character(int_variables),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),

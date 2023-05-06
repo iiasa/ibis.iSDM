@@ -657,7 +657,6 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 
   } else {
     # Simply count them
-    if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
     pres <- terra::rasterize(x = df[,c("x","y")],y = template, fun = 'length', background = 0)
   }
   assertthat::assert_that(

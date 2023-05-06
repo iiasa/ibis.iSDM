@@ -682,6 +682,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' It is essentially a wrapper for [`terra::extract`].
 #' @param coords A [`Spatial`], [`data.frame`], [`matrix`] or [`sf`] object.
 #' @param env A [`SpatRaster`] object with the provided predictors.
+#' @param ngb_fill [`logical`] on whether cells should be interpolated from neighbouring values.
 #' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @keywords utils
@@ -691,31 +692,35 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' vals <- get_rastervalue(coords, env)
 #' }
 #' @export
-get_rastervalue <- function(coords, env, rm.na = FALSE){
+get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   assertthat::assert_that(
     inherits(coords,"sf") || inherits(coords, "Spatial") || (is.data.frame(coords) || is.matrix(coords)),
     is.Raster(env),
+    is.logical(ngb_fill),
     is.logical(rm.na)
     )
 
   # Try an extraction
-  try({ex <- terra::extract(x = env,
-                             y = coords,
-                             method = "simple",
-                             raw = FALSE)}, silent = FALSE)
+  ex <- try({terra::extract(x = env,
+                            y = coords,
+                            method = "simple")}, silent = FALSE)
   if(inherits(ex, "try-error")) stop(paste("SpatRaster valueextraction failed: ", ex))
   # Find those that have NA in there
   check_again <- apply(ex, 1, function(x) anyNA(x))
   if(any(check_again)){
     # Re-extract but with a small buffer
-    coords_sub <- coords[which(check_again),]
-    try({ex_sub <- terra::extract(x = env,
-                               y = coords_sub,
-                               method = "simple",
-                               touches = TRUE,
-                               raw = FALSE)}, silent = FALSE)
-    if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed: ", ex_sub))
-    ex[which(check_again),] <- ex_sub
+    if(inherits(coords, "sf")){
+      coords_sub <- coords[check_again,]
+    } else {
+      coords_sub <- coords[which(check_again),] |> as.data.frame()
+    }
+    ex_sub <- try({terra::extract(x = env,
+                                  y = coords_sub,
+                                  # FIXME: This could fail if values are factors?
+                                  method = ifelse(ngb_fill, "bilinear", "simple"),
+                                  touches = TRUE)}, silent = FALSE)
+    if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed!"))
+    ex[which(check_again),] <- ex_sub[, names(ex)]
   }
   # Add coordinate fields to the predictors as these might be needed later
   if(!any(assertthat::has_name(ex, c("x", "y")))){

@@ -81,9 +81,9 @@ engine_glmnet <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -94,7 +94,7 @@ engine_glmnet <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set up the parameter list
   params <- list(
@@ -142,7 +142,7 @@ engine_glmnet <- function(x,
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
           inherits(settings,'Settings') || is.null(settings),
-          nrow(model$predictors) == raster::ncell(self$get_data('template')),
+          nrow(model$predictors) == terra::ncell(self$get_data('template')),
           !is.Waiver(self$get_data("params")),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -162,7 +162,7 @@ engine_glmnet <- function(x,
         if(fam == "poisson"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
+          assertthat::assert_that(!is.na( terra::global(bg, "min", na.rm = TRUE)[,1]))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -225,7 +225,7 @@ engine_glmnet <- function(x,
           model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect) # Multiply with prior weight
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+          pres <- terra::rasterize( guess_sf(model$biodiversity[[1]]$observations[,c("x","y")]),
                                     bg, fun = 'count', background = 0)
           # Get for the full dataset
           w_full <- ppm_weights(df = model$predictors,
@@ -463,7 +463,7 @@ engine_glmnet <- function(x,
           # Fill output with summaries of the posterior
           prediction[full_sub$rowid] <- out[,1]
           names(prediction) <- "mean"
-          prediction <- raster::mask(prediction, self$get_data("template"))
+          prediction <- terra::mask(prediction, self$get_data("template"))
           try({rm(out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done
@@ -672,11 +672,11 @@ engine_glmnet <- function(x,
             df$w <- model$exposure # Also get exposure variable
             # Make a subset of non-na values
             df$rowid <- 1:nrow(df)
-            df_sub <- subset(df, stats::complete.cases(df))
+            df_sub <- base::subset(df, stats::complete.cases(df))
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
-            pred_gn <- predict(
+            pred_gn <- glmnetUtils:::predict.cv.glmnet.formula(
               object = mod,
               newdata = df_sub,
               weights = df_sub$w, # The second entry of unique contains the non-observed variables
@@ -686,10 +686,13 @@ engine_glmnet <- function(x,
               type = type
             ) |> as.data.frame()
             names(pred_gn) <- layer
+            assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
             # Now create spatial prediction
             prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
-            prediction[df_sub$rowid] <- pred_gn[,1]
+            # cs <- terra::cellFromXY(prediction, xy = df_sub[, c("x", "y")])
+            # terra::values(prediction) <- pred_gn[, layer]
+            prediction[df_sub$rowid] <- pred_gn[, layer]
 
             return(prediction)
           }

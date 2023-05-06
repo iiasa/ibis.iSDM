@@ -254,7 +254,6 @@ methods::setMethod(
 
     } else if(method == "percentile"){
       assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
-      assertthat::assert_that(value>=0, value <= 1)
       pointVals <- terra::extract(raster_thresh, poi_pres)[[names(raster_thresh)]] # Extract point only estimates
       pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
       # percentile training threshold

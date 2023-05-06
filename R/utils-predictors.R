@@ -68,9 +68,13 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     lyrs <- names(env) # Names of predictors
     times <- stars::st_get_dimension_values(env, which = 3) # Assume this being the time attribute
     dims <- stars::st_dimensions(env)
+    # Drop units as it causes bugs with terra (5/5/2023)
+    env <- units::drop_units(env)
     # Convert to list
     env_list <- list()
-    for(name in lyrs) env_list[[name]] <- rast(env[name])
+    for(name in lyrs) env_list[[name]] <- terra::rast( env[[name]] )
+    # Make quick checks
+    assertthat::assert_that( all( diff(sapply(env_list, terra::nlyr))==0 ) )
   } else {
     # Get times in case a stack is supplied (this can get lost depending on transformation)
     times <- terra::time(env)
@@ -107,8 +111,12 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- lapply(env_list, function(x) {
         perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
         perc <- unique(perc)
-        terra::classify(x, t(perc))
+        # For terra need to loop here as classify does not support multiple columns
+        o <- terra::rast()
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) ))
+        return(o)
       })
+      assertthat::assert_that( all( sapply(out, function(z) all(is.factor(z))) ))
     }
   }
 
@@ -201,6 +209,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
   # If stars convert back to stars object
   if(inherits(env, 'stars')){
+    # Set crs to all
+    if(!is.na( sf::st_crs(env) )){
+      for(i in 1:length(out)) terra::set.crs(out[[i]], crs(sf::st_crs(env)$wkt))
+    }
     # Convert list back to stars
     out <- do.call(
       stars:::c.stars,

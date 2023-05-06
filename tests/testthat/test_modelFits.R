@@ -38,10 +38,10 @@ test_that('Add further tests for model fits', {
   suppressWarnings(
     mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
   )
-  expect_s4_class(mod$get_data(), "RasterLayer")
+  expect_s4_class(mod$get_data(), "SpatRaster")
 
   # Threshold with independent data
-  mod <- threshold(mod,method = "perc",format = "bin")
+  mod <- threshold(mod, method = "perc", format = "bin")
   expect_gt(mod$get_thresholdvalue(),0)
   expect_length(mod$show_rasters(), 2)
 
@@ -57,7 +57,7 @@ test_that('Add further tests for model fits', {
   expect_s3_class(val, "data.frame")
 
   # Validate with withold data
-  val <- validate(mod, method = "disc", point = test_data,point_column = "Observed")
+  val <- validate(mod, method = "disc", point = test_data, point_column = "Observed")
   expect_s3_class(val, "data.frame")
 
   # ----------- #
@@ -67,7 +67,7 @@ test_that('Add further tests for model fits', {
 
   # Spartial
   pp <- spartial(mod,x.var = "bio19_mean_50km",plot = FALSE)
-  expect_s4_class(pp, "RasterLayer")
+  expect_s4_class(pp, "SpatRaster")
 
 
   # ----------- #

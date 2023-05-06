@@ -210,7 +210,7 @@ methods::setMethod(
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
                                      "sd" = terra::app(ras, sd, na.rm = TRUE),
-                                     "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, fun = cv, na.rm = TRUE),
+                                     "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
                                      "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
           )
           names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)

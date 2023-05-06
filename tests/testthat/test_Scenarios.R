@@ -1,7 +1,6 @@
 # Test scenario creation and constraints
 test_that('Scenarios and constraints', {
 
-  skip_if_not_installed('INLA')
   skip_if_not_installed('stars')
   skip_if_not_installed('glmnet')
   skip_on_travis()
@@ -27,14 +26,15 @@ test_that('Scenarios and constraints', {
 
   # Load present and future predictors
   ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
-  pred_current <- terra::rast()
-  for(i in ll) pred_current <- suppressWarnings( c(pred_current, terra::rast(i)[[1]] ) )
-  names(pred_current) <- tools::file_path_sans_ext( basename(ll) )
+
   # Load the same files future ones
   suppressWarnings(
     pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', seq(1, 86, by = 10))
   )
   sf::st_crs(pred_future) <- sf::st_crs(4326)
+
+  pred_current <- stars_to_raster(pred_future, 1)[[1]]
+  names(pred_current) <- names(pred_future)
 
   # Basic validity checks
   expect_length(pred_future, 9)
@@ -71,22 +71,34 @@ test_that('Scenarios and constraints', {
   expect_s3_class(sc$get_model(),"DistributionModel")# Model correctly inherited?
   expect_equal(sc$modelid, fit$model$id)
 
-  # Add covariates
+  # Add covariates in various transformations
+  x <- sc |> add_predictors(pred_future, transform = "none")
+  expect_length(x$get_predictor_names(), 9)
   x <- sc |> add_predictors(pred_future, transform = "scale")
   expect_length(x$get_predictor_names(), 9)
+  x <- sc |> add_predictors(pred_future, transform = "norm")
+  expect_length(x$get_predictor_names(), 9)
+  # x <- sc |> add_predictors(pred_future, transform = "pca")
+  # expect_length(x$get_predictor_names(), 9)
+
   expect_equal(x$get_predictor_names(), names(pred_current))
   expect_length(x$get_timeperiod(), 2)
   expect_gt(x$get_timeperiod()[2],2050) # This might fail if I try to reformat the date
+  #  Check that predictors are right
+  expect_s3_class(x$get_predictors()$get_data(), "stars")
 
   invisible( x$rm_predictors() )
   expect_length(x$get_predictor_names(), 9) # Properly inherited?
   x <- x$rm_predictors()
+  expect_length(x$get_predictor_names(), 0) # Properly inherited?
 
   # Try and add Raster Layers for the projection
   obj <- pred_current
   # Set some Z values and correct projection
-  obj <- raster::setZ(obj, rep(as.Date("2015-01-01"), raster::nlayers(obj)))
-  projection(obj) <-  "+proj=longlat +datum=WGS84"
+  terra::time(obj) <- rep(as.Date("2015-01-01"), terra::nlyr(obj))
+  terra::set.crs(obj, terra::crs( "+proj=longlat +datum=WGS84") )
+  expect_false(is.na( terra::crs(obj) ))
+
   x <- sc |> add_predictors(obj, transform = "none")
   expect_length(x$get_predictor_names(), 9)
   expect_equal(x$get_predictor_names(), names(obj))
@@ -116,7 +128,7 @@ test_that('Scenarios and constraints', {
   mod <- sc |> add_predictors(pred_future) |> threshold() |> project()
   expect_s3_class(mod$summary_beforeafter(), "data.frame")
   expect_s3_class(mod$plot_relative_change(), "ggplot")
-  expect_true(inherits(mod$plot_relative_change(plot=F), "Raster"))
+  expect_true(inherits(mod$plot_relative_change(plot=F), "SpatRaster"))
 
   # identical
   expect_equal(as.numeric(mod$get_threshold()), fit$get_thresholdvalue())

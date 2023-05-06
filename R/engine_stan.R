@@ -83,9 +83,9 @@ engine_stan <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -95,7 +95,7 @@ engine_stan <- function(x,
     template <- emptyraster(x$predictors$get_data() )
   }
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set engine in distribution object
   x$set_engine(
@@ -168,11 +168,11 @@ engine_stan <- function(x,
             model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
             model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
             # Explode the columns in the raster object
-            model$predictors_object$data <- raster::addLayer(
+            model$predictors_object$data <- c(
               model$predictors_object$data,
               explode_factorized_raster(model$predictors_object$data[[k]])
             )
-            model$predictors_object$data <- raster::dropLayer(model$predictors_object$data, k)
+            model$predictors_object$data <- terra::subset(model$predictors_object$data, k, negate = TRUE)
           }
         }
 
@@ -203,7 +203,7 @@ engine_stan <- function(x,
 
             # Get background layer
             bg <- x$engine$get_data('template')
-            assertthat::assert_that(!is.na(cellStats(bg,min)))
+            assertthat::assert_that(!is.na(terra::global(bg, "min", na.rm = TRUE)[,1] ))
 
             # Add pseudo-absence points
             presabs <- add_pseudoabsence(df = model$biodiversity[[i]]$observations,
@@ -249,7 +249,7 @@ engine_stan <- function(x,
               of <- model$offset; of[, "spatial_offset" ] <- ifelse(is.na(of[, "spatial_offset" ]), 1, of[, "spatial_offset"])
               of1 <- get_ngbvalue(coords = model$biodiversity[[i]]$observations[,c("x","y")],
                                   env =  of,
-                                  longlat = raster::isLonLat(bg),
+                                  longlat = terra::is.lonlat(bg),
                                   field_space = c('x','y')
               )
               df[["spatial_offset"]] <- of1
@@ -577,10 +577,10 @@ engine_stan <- function(x,
           )
 
           # Convert full to raster
-          prediction <- raster::stack(full)
+          prediction <- terra::rast(full)
           # Fill output
           prediction <- fill_rasters(post = out, background = prediction)
-          prediction <- raster::mask(prediction, model$background) # Mask with background
+          prediction <- terra::mask(prediction, model$background) # Mask with background
           # plot(prediction$mean, col = ibis.iSDM:::ibis_colours$sdm_colour)
           try({ rm(out) })
         } else {

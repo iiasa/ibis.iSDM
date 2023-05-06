@@ -9,7 +9,7 @@ alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 \arguments{
 \item{data}{\code{\linkS4class{SpatRaster}} object to be resampled.}
 
-\item{template}{\code{\linkS4class{SpatRaster}} or \code{\linkS4class{Spatial}} object from which geometry can be extracted.}
+\item{template}{\code{\linkS4class{SpatRaster}} or \code{\link{sf}} object from which geometry can be extracted.}
 
 \item{method}{method for resampling (Options: \code{"near"} or \code{"bilinear"}).}
 

@@ -32,7 +32,7 @@ DistributionModel <- bdproto(
 
     # FIXME: Have engine-specific code moved to engine
     if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
-      if( length( self$fits ) != 0 ){
+      if( base::length( self$fits ) != 0 ){
         # Get strongest effects
         ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
                      select = c('variable', 'mean'))
@@ -95,8 +95,8 @@ DistributionModel <- bdproto(
       # Get variable names from model object
       # FIXME: This might not work for all possible modelling objects. For instance
       model <- self$model
-      assertthat::assert_that(nrow(vi) == length(model$predictors_names),
-                              length(vi$parameter) == length(model$predictors_names))
+      assertthat::assert_that(nrow(vi) == base::length(model$predictors_names),
+                              base::length(vi$parameter) == base::length(model$predictors_names))
       vi$parameter <- model$predictors_names
 
       vi <- vi[order(abs(vi$mean),decreasing = TRUE),]
@@ -178,7 +178,7 @@ DistributionModel <- bdproto(
   },
   # Plot the prediction
   plot = function(self, what = 'mean'){
-    if( length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
+    if( base::length( self$fits ) != 0 && !is.null( self$fits$prediction ) ){
       pred <- self$get_data('prediction')
       assertthat::assert_that(is.Raster(pred))
       # Check if median is requested but not present, change to q50
@@ -204,10 +204,10 @@ DistributionModel <- bdproto(
     assertthat::assert_that(is.numeric(what) || is.character(what))
     # Determines whether a threshold exists and plots it
     rl <- self$show_rasters()
-    if(length(grep('threshold',rl))>0){
+    if(base::length(grep('threshold',rl))>0){
 
       # Get stack of computed thresholds
-      ras <- terra::rast( self$get_data( grep('threshold',rl,value = TRUE)[[what]] ) )
+      ras <- self$get_data( grep('threshold',rl,value = TRUE)[[what]] )
       suppressWarnings(
         ras <- terra::droplevels(ras)
       )
@@ -253,8 +253,8 @@ DistributionModel <- bdproto(
       vi <- vi[grep("beta", vi$parameter,ignore.case = TRUE),]
       # FIXME: This might not work for all possible modelling objects. For instance
       model <- self$model
-      assertthat::assert_that(nrow(vi) == length(model$predictors_names),
-                              length(vi$parameter) == length(model$predictors_names))
+      assertthat::assert_that(nrow(vi) == base::length(model$predictors_names),
+                              base::length(vi$parameter) == base::length(model$predictors_names))
       vi$parameter <- model$predictors_names
       names(vi) <- make.names(names(vi))
       return( tibble::as_tibble( vi ) )
@@ -279,7 +279,7 @@ DistributionModel <- bdproto(
     assertthat::assert_that(is.character(what))
     if(inherits(self, 'GDB-Model')){
       # How many effects
-      n <- length( stats::coef( self$get_data(x) ))
+      n <- base::length( stats::coef( self$get_data(x) ))
       # Use the base plotting
       par.ori <- graphics::par(no.readonly = TRUE)
       graphics::par(mfrow = c(ceiling(n/3),3))
@@ -310,9 +310,9 @@ DistributionModel <- bdproto(
       if(what == "fixed") what <- "coefficients"
       what <- match.arg(what, choices = c("coefficients", "scaled.coefficients","residuals",
                                            "size", "fit", "help", "inclusion"), several.ok = FALSE)
-      if( length( grep("poisson", obj$call) ) > 0 ){
+      if( base::length( grep("poisson", obj$call) ) > 0 ){
         BoomSpikeSlab::plot.poisson.spike(obj, y = what)
-      } else if( length( grep("binomial", obj$call) ) > 0 ){
+      } else if( base::length( grep("binomial", obj$call) ) > 0 ){
         BoomSpikeSlab::plot.logit.spike(obj, y = what)
       } else {
         BoomSpikeSlab::plot.lm.spike(obj, y = what)
@@ -336,23 +336,27 @@ DistributionModel <- bdproto(
   },
   # Get specific fit from this Model
   get_data = function(self, x = "prediction") {
-    if (!x %in% names(self$fits))
-      return(new_waiver())
-    return(self$fits[[x]])
+    assertthat::assert_that(is.character(x))
+    if(length(x)==1){
+      if(!x %in% names(self$fits)) return(new_waiver())
+      return(self$fits[[x]])
+    } else {
+      return( self$fits[x] )
+    }
   },
   # Set fit for this Model
   set_data = function(self, x, value) {
     # Get biodiversity dataset collection
     ff <- self$fits
     # Set the object
-    ff[[x]] <- value
+    for(entry in x) ff[[entry]] <- value
     bdproto(NULL, self, fits = ff )
   },
   # Get the threshold value if calculated
   get_thresholdvalue = function(self){
     # Determines whether a threshold exists and plots it
     rl <- self$show_rasters()
-    if(length(grep('threshold',rl))==0) return( new_waiver() )
+    if(base::length(grep('threshold',rl))==0) return( new_waiver() )
 
     # Get the thresholded layer and return the respective attribute
     obj <- self$get_data( grep('threshold',rl,value = TRUE) )
@@ -383,7 +387,7 @@ DistributionModel <- bdproto(
   # Remove calculated thresholds
   rm_threshold = function(self){
     rl <- self$show_rasters()
-    if(length(grep('threshold',rl))>0){
+    if(base::length(grep('threshold',rl))>0){
       for(val in grep('threshold',rl,value = TRUE)){
         self$fits[[val]] <- NULL
       }

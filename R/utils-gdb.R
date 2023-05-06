@@ -276,12 +276,12 @@ ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWP
   type <- match.arg(type, c("DWPR", "IWLR"),several.ok = FALSE)
 
   if(use_area){
-    suppressWarnings( ar <- terra::area(bg) )
+    suppressWarnings( ar <- terra::cellSize(bg) )
     ar <- terra::mask(ar, bg)
-    nc <- terra::global(ar, "sum")
+    nc <- terra::global(ar, "sum", na.rm = TRUE)[,1]
   } else {
     # number of non-NA cells
-    nc <- terra::global(!is.na(bg), "sum")
+    nc <- terra::global(!is.na(bg), "sum", na.rm = TRUE)[,1]
   }
 
   # Set output weight as default
@@ -294,7 +294,8 @@ ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWP
 
   assertthat::assert_that(
     length(unique(w)) > 1,
-    length(w) == nrow(df)
+    length(w) == nrow(df),
+    is.vector(w) && is.numeric(w)
   )
   return(w)
 }

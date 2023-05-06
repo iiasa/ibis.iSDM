@@ -190,6 +190,7 @@ methods::setMethod(
     for(step in times){
       # Get data
       nd <- subset(df, time == step)
+      assertthat::assert_that( !all(is.na(nd[, mod_pred_names])) )
 
       # Apply adaptability constrain
       if("adaptability" %in% names(scenario_constraints)){

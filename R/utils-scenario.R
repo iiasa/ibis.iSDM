@@ -178,10 +178,10 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   for(tt in which){
     # Slice to a specific time frame for each
     o <- obj |> stars:::slice.stars({{time_band}}, tt) |>
-      terra::sds() # Or alternatively rast
+      terra::rast() # Or alternatively rast
 
     # Reset times to the correct ones
-    o <- terra::time(o, rep(times[tt], terra::nlyr(o)))
+    terra::time(o) <- as.Date( rep(times[tt], terra::nlyr(o)) )
 
     # Now transform the out put if template is set
     if(!is.null(template)){
@@ -239,11 +239,10 @@ raster_to_stars <- function(obj){
   # Get time dimension
   times <- terra::time(obj)
   if(!all(inherits(times, "Date"))) times <- as.Date(times)
-  prj <- sf::st_crs(terra::crs(obj))
+  prj <- sf::st_crs( terra::crs(obj) )
 
   # Convert to RasterStack and reset time dimension
-  obj <- terra::rast(obj)
-  obj <- terra::setZ(obj, times)
+  terra::time(obj) <- times
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 
   # Convert to stars step by step

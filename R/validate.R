@@ -142,8 +142,9 @@ methods::setMethod(
     # --- #
     # Do the extraction
     df <- as.data.frame(point)
-    df$pred <- terra::extract(prediction, point)
-    if(!is.null(threshold)) df$pred_tr <- terra::extract(threshold, point)
+    df$pred <- get_rastervalue(coords = point, env = prediction)[[layer]]
+
+    if(!is.null(threshold)) df$pred_tr <- get_rastervalue(coords = point, env = threshold)[[tr_lyr]]
     # Remove any sfc column if present
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
@@ -435,7 +436,7 @@ methods::setMethod(
     BS <- function(pred, obs, na.rm = TRUE) {
       if(assertthat::see_if(length(unique(pred)) <= 2,
                               length(unique(obs)) <= 2)){
-        mean( (pred - obs)^2, na.rm = na.rm)
+        mean( (as.numeric(as.character(pred)) - as.numeric(as.character(obs)))^2, na.rm = na.rm)
       } else return(NA)
     }
 

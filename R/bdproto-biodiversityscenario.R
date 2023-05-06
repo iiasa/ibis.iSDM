@@ -189,7 +189,7 @@ BiodiversityScenario <- bdproto(
     prcol <- bdproto(NULL, self)
     # Set the object
     prcol$predictors$rm_data(names)
-    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
+    if(base::length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
     return(prcol)
   },
   # Get scenario predictions
@@ -204,7 +204,7 @@ BiodiversityScenario <- bdproto(
     } else {
       # Get unique number of data values. Surely there must be an easier val
       vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
-      vals <- length(stats::na.omit(vals))
+      vals <- base::length(stats::na.omit(vals))
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
         stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
@@ -236,8 +236,8 @@ BiodiversityScenario <- bdproto(
 
     # Colour coding from MigClim::MigClim.plot
     rstVals <- sort(terra::unique(ras))
-    negativeNb <- length(which(rstVals < 0))
-    positiveNb <- length(which(rstVals > 1 & rstVals < 30000))
+    negativeNb <- base::length(which(rstVals < 0))
+    positiveNb <- base::length(which(rstVals > 1 & rstVals < 30000))
     zeroExists <- any(rstVals == 0)
     oneExists <- any(rstVals == 1)
     unilimtedExists <- any(rstVals == 30000)
@@ -290,7 +290,7 @@ BiodiversityScenario <- bdproto(
     obj <- self$get_model()
     thresh_reference <- grep('threshold',obj$show_rasters(),value = T)
     # If there is more than one threshold only use the one from variable
-    if(length(thresh_reference)>1) {
+    if(base::length(thresh_reference)>1) {
       warning('More than one baseline threshold. Using the first one.')
       thresh_reference <- grep(variable, thresh_reference,value = T)[1]
     }
@@ -298,7 +298,7 @@ BiodiversityScenario <- bdproto(
     assertthat::assert_that(
       !is.Waiver(self$get_data()),
       'threshold' %in% attributes(self$get_data())$names,
-      length(thresh_reference) >0 & is.character(thresh_reference),
+      base::length(thresh_reference) >0 & is.character(thresh_reference),
       is.Raster( self$get_model()$get_data('prediction') ),
       msg = "Threshold not found!"
     )
@@ -309,7 +309,7 @@ BiodiversityScenario <- bdproto(
     scenario <- self$get_data()['threshold']
     time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
     if(is.numeric(position)) position <- time[position]
-    if(is.null(position)) position <- time[length(time)]
+    if(is.null(position)) position <- time[base::length(time)]
     final <- scenario |>
       stars:::filter.stars(band == position) |>
       terra::rast()

@@ -254,8 +254,9 @@ engine_xgboost <- function(x,
           model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect)
 
           # Get for the full dataset
-          pres <- terra::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
-                                    bg, fun = 'length', background = 0)
+          pres <- terra::rasterize(x = guess_sf( model$biodiversity[[1]]$observations[,c("x","y")] ),
+                                   y = bg, fun = 'length', background = 0)
+
           w_full <- ppm_weights(df = model$predictors,
                                 pa = pres[],
                                 bg = bg,
@@ -708,11 +709,7 @@ engine_xgboost <- function(x,
             df <- subset(model$predictors, select = mod$feature_names)
             # Convert all non x.vars to the mean
             # Make template of target variable(s)
-            template <- terra::rast(
-              terra::crds( model$predictors_object$get_data() ),
-              type = "xyz",
-              crs = sf::st_crs(model$background)
-            )
+            template <- emptyraster( model$predictors_object$get_data() )
 
             # Set all variables other the target variable to constant
             if(is.null(constant)){
@@ -735,8 +732,10 @@ engine_xgboost <- function(x,
                 newdata = df
               )
             )
+            assertthat::assert_that(terra::ncell(pp) == length(pp))
+
             # Fill output with summaries of the posterior
-            template[] <- pp
+            terra::values(template) <- pp
             names(template) <- 'mean'
             template <- terra::mask(template, model$background)
 
