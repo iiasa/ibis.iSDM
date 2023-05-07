@@ -142,14 +142,16 @@ methods::setMethod(
     # --- #
     # Do the extraction
     df <- as.data.frame(point)
-    df$pred <- get_rastervalue(coords = point, env = prediction)[[layer]]
+    df$pred <- get_rastervalue(coords = point, env = prediction,rm.na = FALSE)[[layer]]
 
-    if(!is.null(threshold)) df$pred_tr <- get_rastervalue(coords = point, env = threshold)[[tr_lyr]]
+    if(!is.null(threshold)) df$pred_tr <- get_rastervalue(coords = point, env = threshold)[[grep("threshold", names(threshold),value = TRUE)]]
     # Remove any sfc column if present
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
     df <- subset(df, stats::complete.cases(df))
-    if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
+    assertthat::assert_that( nrow(df)> 2,
+                             length( unique(df[[point_column]]) )>1,
+                             msg = "Validation was not possible owing to missing data.")
     # --- #
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Validation]','green','Calculating validation statistics')
@@ -424,6 +426,9 @@ methods::setMethod(
     assertthat::assert_that(utils::hasName(df2, 'pred_tr'),
                             length(unique(df2[[point_column]])) > 1,
                             msg = "It appears as either the observed data or the threshold does not allow discrete validation.")
+    # Ensure that the threshold value is numeric
+    if(is.factor(df2$pred_tr)) df2$pred_tr <- as.numeric( as.character( df2$pred_tr ))
+
     # For discrete functions to work correctly, ensure that all values are 0/1
     df2[[point_column]] <- ifelse(df2[[point_column]] > 0, 1, 0 )
     # Build the confusion matrix

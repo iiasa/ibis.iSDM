@@ -71,7 +71,6 @@ methods::setMethod(
 
     # Check that background and range align, otherwise raise error
     if(is_comparable_raster(layer, x$background)) {
-      warning('Supplied layer does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
 

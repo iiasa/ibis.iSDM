@@ -86,7 +86,7 @@ engine_xgboost <- function(x,
     # Create from background
     template <- terra::rast(
       ext = terra::ext(x$background),
-      crs = sf::st_crs(x$background),
+      crs = terra::crs(sf::st_crs(x$background)$wkt),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )

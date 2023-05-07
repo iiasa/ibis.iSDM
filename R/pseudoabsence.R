@@ -197,7 +197,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   # Check that background is a raster, otherwise rasterize with identical resolution
   if(!is.Raster(background)){
     assertthat::assert_that(is.Raster(template),
-                            msg = "No suitable RasterLayer was provided through Settings or as template!")
+                            msg = "No suitable SpatRaster was provided through Settings or as template!")
     background <- terra::rasterize(background, emptyraster(template), field = 1)
     assertthat::assert_that(is.Raster(background))
   }

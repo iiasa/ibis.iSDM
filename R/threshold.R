@@ -140,14 +140,11 @@ methods::setMethod(
     # Now self call threshold
     out <- threshold(ras, method = method, value = value, point = point, format = format,...)
     assertthat::assert_that(is.Raster(out))
-    # Add result to new obj
+    # Add result to new obj and clean up old thresholds before
+    tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
     new_obj <- obj
-    if(inherits(out,'SpatRaster')){
-      new_obj <- new_obj$set_data(names(out), out)
-    } else if(inherits(out,'SpatRasterCollection')) {
-      # When stack loop through and add
-      new_obj <- new_obj$set_data(paste0("threshold_", method), out)
-    }
+    if(length(tr_lyr)>0) for(v in tr_lyr) new_obj$rm_threshold()
+    new_obj <- new_obj$set_data(paste0("threshold_", method), out)
     # Return altered object
     return(new_obj)
   }
@@ -287,7 +284,7 @@ methods::setMethod(
       assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
 
       # Re-extract point vals but with the full dataset
-      pointVals <- terra::extract(raster_thresh, point)
+      pointVals <- get_rastervalue(coords = point, env = raster_thresh)[[layer]]
       assertthat::assert_that(length(pointVals)>2)
       # Calculate the optimal thresholds
       suppressWarnings(

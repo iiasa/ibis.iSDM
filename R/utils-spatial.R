@@ -374,7 +374,10 @@ st_kde <- function(points, background, bandwidth = 3){
   coords <- sf::st_coordinates(points)
   matrix <- MASS::kde2d(coords[,1],coords[,2],
                         h = bandwidth, n = c(n_x, n_y), lims = extent_vec)
-  out <- terra::rast(matrix)
+
+  out <- expand.grid(x = matrix$x, y = matrix$y, KEEP.OUT.ATTRS = FALSE)
+  out$z <- as.vector(matrix$z)*(1e11)
+  out <- terra::rast(out, crs = terra::crs(background))
 
   # Resample output for small point mismatches
   if(!terra::compareGeom(out, background, stopOnError = FALSE)){
