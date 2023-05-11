@@ -50,7 +50,6 @@ NULL
 #' @name project
 #' @aliases project
 #' @keywords scenarios
-#' @exportMethod project
 #' @export
 NULL
 methods::setGeneric("project",

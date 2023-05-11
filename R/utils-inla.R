@@ -1040,7 +1040,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
 
   # Buffer the region to be sure
   # TODO: Adapt to sf in the future
-  suppressWarnings( background.g <- rgeos::gBuffer(methods::as(background,'Spatial'), width = 0) )
+  suppressWarnings( background.g <- sf::st_buffer(methods::as(background,'Spatial'), dist = 0) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -1206,10 +1206,12 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
                                         ylim = range(bdry[,2]),
                                         dims = Nxy)
   # Convert background to buffered land
-  suppressWarnings(
-    background.g <- sf::st_buffer(methods::as(background, 'Spatial') |> sf::st_as_sf(),
-                                   width = 0) |> as("Spatial")
+  suppressMessages(
+    suppressWarnings(
+      background.g <- sf::st_buffer(methods::as(background, 'Spatial') |> sf::st_as_sf(),
+                                    dist = 0) |> as("Spatial")
     )
+  )
   suppressWarnings(
     cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
                                                      proj4string = methods::as(background.g,'Spatial')@proj4string),

@@ -234,109 +234,121 @@ methods::setMethod(
       assertthat::assert_that(utils::hasName(point, 'observed'))
       poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
     } else poi_pres <- NULL
-    # Get the raster layer
-    raster_thresh <- obj
 
-    # Specify by type:
-    if(method == "fixed"){
-      # Fixed threshold. Confirm to be set
-      assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
-      tr <- value
-    } else if(method == "mtp"){
-      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
-      # minimum training presence
-      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
-      # Minimum threshold
-      tr <- min( stats::na.omit(pointVals) )
+    # Loop through each raster
+    if(return_threshold) out <- terra::rast() else out <- c()
+    for(val in names(obj)){
+      # Get the raster layer
+      raster_thresh <- subset(obj, val)
 
-    } else if(method == "percentile"){
-      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
-      pointVals <- terra::extract(raster_thresh, poi_pres)[[names(raster_thresh)]] # Extract point only estimates
-      pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
-      # percentile training threshold
-      if(is.null(value)) value <- 0.1 # If value is not set, use 10%
-      if(length(pointVals) < 10) {
-        perc <- floor(length(pointVals) * (1 - value))
+      # Specify by type:
+      if(method == "fixed"){
+        # Fixed threshold. Confirm to be set
+        assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
+        tr <- value
+      } else if(method == "mtp"){
+        assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
+        # minimum training presence
+        pointVals <- get_rastervalue(coords = poi_pres, env = raster_thresh)[[val]]
+        # Minimum threshold
+        tr <- min( stats::na.omit(pointVals) )
+
+      } else if(method == "percentile"){
+        assertthat::assert_that(!is.null(poi_pres), msg = "Threshold method requires supplied point data!")
+        pointVals <- get_rastervalue(coords = poi_pres, env = raster_thresh)[[val]]
+        pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
+        # percentile training threshold
+        if(is.null(value)) value <- 0.1 # If value is not set, use 10%
+        if(length(pointVals) < 10) {
+          perc <- floor(length(pointVals) * (1 - value))
+        } else {
+          perc <- ceiling(length(pointVals) * (1 - value))
+        }
+        tr <- rev(sort(pointVals))[perc] # Percentile threshold
+
+      } else if(method == "min.cv"){
+        assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
+        assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be supplied as value!")
+        pointVals <- get_rastervalue(coords = poi_pres, env = raster_thresh)[[val]] # Extract point only estimates
+
+        # Get standard deviation and calculate percentile
+        tr <- min( stats::na.omit(pointVals) )
+        names(tr) <- "tr"
+        names(value) <- "min.cv"
+        # Combine as a vector
+        tr <- c(tr, value)
+
       } else {
-        perc <- ceiling(length(pointVals) * (1 - value))
+        # Optimized threshold statistics using the modEvA package
+        # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
+        check_package("modEvA")
+        # Assure that point data is correctly specified
+        assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, 'observed'))
+        point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
+        assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
+
+        # Re-extract point vals but with the full dataset
+        pointVals <- get_rastervalue(coords = point, env = raster_thresh)[[val]]
+        assertthat::assert_that(length(pointVals)>2)
+        # Calculate the optimal thresholds
+        suppressWarnings(
+          opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
+                                    measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
+                                                 "Sensitivity","Specificity"),
+                                    optimize = "each", plot = plot)
+        )
+        if(method %in% opt$optimals.each$measure){
+          tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
+        } else {
+          # Returning a collection of them as vector
+          tr <- opt$optimals.each$threshold; names(tr) <- opt$optimals.each$measure
+        }
       }
-      tr <- rev(sort(pointVals))[perc] # Percentile threshold
+      # Security check
+      assertthat::assert_that(is.numeric(tr) || is.vector(tr))
 
-    } else if(method == "min.cv"){
-      assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
-      assertthat::assert_that(!is.null(value),msg = "Global minimum cv needs to be supplied as value!")
-      pointVals <- terra::extract(raster_thresh, poi_pres) # Extract point only estimates
-
-      # Get standard deviation and calculate percentile
-      tr <- min( stats::na.omit(pointVals) )
-      names(tr) <- "tr"
-      names(value) <- "min.cv"
-      # Combine as a vector
-      tr <- c(tr, value)
-
-    } else {
-      # Optimized threshold statistics using the modEvA package
-      # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
-      check_package("modEvA")
-      # Assure that point data is correctly specified
-      assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, 'observed'))
-      point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
-      assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
-
-      # Re-extract point vals but with the full dataset
-      pointVals <- get_rastervalue(coords = point, env = raster_thresh)[[layer]]
-      assertthat::assert_that(length(pointVals)>2)
-      # Calculate the optimal thresholds
-      suppressWarnings(
-        opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
-                                  measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
-                                               "Sensitivity","Specificity"),
-                                  optimize = "each", plot = plot)
-      )
-      if(method %in% opt$optimals.each$measure){
-        tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
+      # -- Threshold -- #
+      if(return_threshold){
+        o <- tr
+        names(o) <- method
+        out <- c(out, o)
       } else {
-        # Returning a collection of them as vector
-        tr <- opt$optimals.each$threshold; names(tr) <- opt$optimals.each$measure
+        # Finally threshold the raster
+        # Process depending on format
+        if(format == "binary"){
+          # Default is to create a binary presence-absence. Otherwise truncated hinge
+          raster_thresh[raster_thresh < tr[1]] <- 0
+          raster_thresh[raster_thresh >= tr[1]] <- 1
+          raster_thresh <- terra::as.factor(raster_thresh)
+        } else if(format == "normalize"){
+          raster_thresh[raster_thresh < tr[1]] <- NA
+          # If truncate, ensure that resulting values are normalized
+          raster_thresh <- predictor_transform(raster_thresh, option = "norm")
+          raster_thresh[is.na(raster_thresh)] <- 0
+          raster_thresh <- terra::mask(raster_thresh, obj[val]>=0)
+          base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
+
+        } else if(format == "percentile") {
+          raster_thresh[raster_thresh < tr[1]] <- NA
+          raster_thresh <- predictor_transform(raster_thresh, option = "percentile")
+          raster_thresh <- terra::mask(raster_thresh, obj[val]>=0)
+          base::attr(raster_thresh, 'truncate') <- TRUE
+        }
+
+        names(raster_thresh) <- paste0('threshold_',val,'_',method)
+        # Assign attributes
+        base::attr(raster_thresh, 'method') <- method
+        base::attr(raster_thresh, 'format') <- format
+        base::attr(raster_thresh, 'threshold') <- tr
+
+        # Append
+        suppressWarnings( out <- c(out, raster_thresh) )
       }
     }
-    # Security check
-    assertthat::assert_that(is.numeric(tr) || is.vector(tr))
 
-    # -- Threshold -- #
-    if(return_threshold){
-      names(tr) <- method
-      return(tr)
-    } else {
-      # Finally threshold the raster
-      # Process depending on format
-      if(format == "binary"){
-        # Default is to create a binary presence-absence. Otherwise truncated hinge
-        raster_thresh[raster_thresh < tr[1]] <- 0
-        raster_thresh[raster_thresh >= tr[1]] <- 1
-        raster_thresh <- terra::as.factor(raster_thresh)
-      } else if(format == "normalize"){
-        raster_thresh[raster_thresh < tr[1]] <- NA
-        # If truncate, ensure that resulting values are normalized
-        raster_thresh <- predictor_transform(raster_thresh, option = "norm")
-        raster_thresh[is.na(raster_thresh)] <- 0
-        raster_thresh <- terra::mask(raster_thresh, obj)
-        base::attr(raster_thresh, 'truncate') <- TRUE # Legacy truncate attribute
-
-      } else if(format == "percentile") {
-        raster_thresh[raster_thresh < tr[1]] <- NA
-        raster_thresh <- predictor_transform(raster_thresh, option = "percentile")
-        raster_thresh <- terra::mask(raster_thresh, obj)
-        base::attr(raster_thresh, 'truncate') <- TRUE
-      }
-      names(raster_thresh) <- paste0('threshold_',names(obj),'_',method)
-      # Assign attributes
-      base::attr(raster_thresh, 'method') <- method
-      base::attr(raster_thresh, 'format') <- format
-      base::attr(raster_thresh, 'threshold') <- tr
-    }
-    # Return result
-    return(raster_thresh)
+    # Return output
+    if(is.list(out)) out <- do.call(c, out)
+    return( out )
   }
 )
 

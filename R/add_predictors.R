@@ -91,7 +91,7 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
-    env = terra::rast(env)
+    if(!is.Raster(env)) env <- terra::rast(env)
     add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
   }
 )
@@ -169,7 +169,9 @@ methods::setMethod(
         has_factors <- FALSE # Set to false since factors have been exploded.
       } else { has_factors <- TRUE }
     } else { has_factors <- FALSE }
-    assertthat::assert_that(is.Raster(env), terra::nlyr(env)>=1)
+    assertthat::assert_that(is.Raster(env),
+                            is.logical(has_factors),
+                            terra::nlyr(env)>=1)
 
     # Standardization and scaling
     if('none' %notin% transform){
@@ -197,7 +199,6 @@ methods::setMethod(
       env <- c(env, new_env)
     }
 
-    # Add factors back in if there are any.
     # This is to avoid that they are transformed or similar
     if(has_factors) env <- c(env, env_f)
     attr(env, 'has_factors') <- has_factors
@@ -210,7 +211,7 @@ methods::setMethod(
       env <- terra::mask(env, mask = x$background)
       # Reratify, work somehow only on stacks
       if(has_factors && any(is.factor(env)) ){
-        new_env <- terra::rast(env)
+        new_env <- env
         new_env[[which(is.factor(env))]] <- as.factor(env[[which(is.factor(env))]])
         env <- new_env;rm(new_env)
       }

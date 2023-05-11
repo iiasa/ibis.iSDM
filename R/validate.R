@@ -176,7 +176,8 @@ methods::setMethod(
 
         abs <- list(); abs[[point_column]] <- o[[point_column]]
         abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
-        abs[["pred"]] <- terra::extract(prediction, o); abs[["pred_tr"]] <- terra::extract(threshold, o)
+        abs[["pred"]] <- get_rastervalue(coords = o, env = prediction)[[layer]]
+        abs[["pred_tr"]] <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
 
         df2 <- rbind(df2, as.data.frame(abs))
       }
@@ -474,7 +475,9 @@ methods::setMethod(
     if("modEvA" %in% utils::installed.packages()[,1]){
       check_package("modEvA")
       # Calculate AUC
-      out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
+      suppressWarnings(
+        out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
+      )
     }
     # Add brier score
     out$value[out$metric=='brier.score'] <- BS(obs = df2[[point_column]], pred = df2[['pred_tr']])

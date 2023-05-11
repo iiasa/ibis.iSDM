@@ -529,9 +529,17 @@ engine_glmnet <- function(x,
               }
               df2 <- df2 |> as.data.frame()
             } else {
-              df2 <- as.data.frame(seq(rr[1,x.var],rr[2,x.var], length.out = variable_length))
-              names(df2) <- x.var
+              df2 <- list()
+              for(i in x.var) {
+                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+              }
+              df2 <- do.call(cbind, df2); names(df2) <- x.var
             }
+
+            # Get offset if set
+            if(!is.Waiver(model$offset)){
+              of <- model$offset$spatial_offset
+            } else of <- new_waiver()
 
             # Check that variables are in
             assertthat::assert_that(all( x.var %in% colnames(df) ),
@@ -540,13 +548,21 @@ engine_glmnet <- function(x,
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
-              p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                 type = "regression",
-                                 plot = FALSE, rug = TRUE, train = df)
-              p1 <- p1[,c(x.var, "yhat")]
+              if(!is.Waiver(of)){
+                # Predict with offset
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   type = "regression", newoffset = of,
+                                   plot = FALSE, rug = TRUE, train = df)
+              } else {
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   type = "regression",
+                                   plot = FALSE, rug = TRUE, train = df)
+              }
+              p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
               p1$variable <- v
               pp <- rbind(pp, p1)
+              rm(p1)
               if(length(x.var) > 1) pb$tick()
             }
 
@@ -586,7 +602,7 @@ engine_glmnet <- function(x,
             # Match x.var to argument
             x.var <- match.arg(x.var, names(df), several.ok = FALSE)
             df_sub <- subset(df, stats::complete.cases(df))
-            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
+            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid,3] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
             # Add all others as constant
@@ -618,9 +634,8 @@ engine_glmnet <- function(x,
             names(prediction) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot){
-              plot(prediction, col = ibis_colours$viridis_orig)
-            }
+            if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
+
             return(prediction)
           },
           # Get coefficients from breg

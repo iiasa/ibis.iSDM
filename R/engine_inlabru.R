@@ -893,17 +893,16 @@ engine_inlabru <- function(x,
             )
           )
           pred_bru$cv <- pred_bru$sd / pred_bru$mean
+          # Convert to raster if not set already
+          if(!is.Raster(pred_bru)) pred_bru <- terra::rast(pred_bru)
+
           # Get only the predicted variables of interest
           if(utils::packageVersion("inlabru") <= '2.5.2'){
             # Older version where probs are ignored
-            prediction <- v(
-              pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
-            )
+            prediction <- subset(pred_bru, c("mean","sd","q0.025", "median", "q0.975", "cv"))
             names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
           } else {
-            prediction <- c(
-              pred_bru[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
-            )
+            prediction <- subset(pred_bru, c("mean","sd","q0.05", "q0.5", "q0.95", "cv") )
             names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
           }
 

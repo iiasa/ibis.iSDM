@@ -338,7 +338,7 @@ methods::setMethod(
       model <- mod$model
 
       # Model input summary in a tibble
-      output[["input"]][["extent"]] <- as.matrix( extent( model$background ) )
+      output[["input"]][["extent"]] <- as.matrix( terra::ext( model$background ) )
       output[["input"]][["predictors"]] <- model$predictors_types
       if(!is.Waiver(model$offset)) output[["input"]][["offset"]] <- names(model$offset) else output[["input"]][["offset"]] <- NA
       if(!is.Waiver(model$priors)){

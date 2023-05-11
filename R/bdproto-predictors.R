@@ -50,9 +50,7 @@ PredictorDataset <- bdproto(
       if(is.Raster(self$data)){
         if(any(is.factor(self$data))){
           # Bugs for factors, so need
-          out <- terra::as.data.frame(self$data)
-          out[,which(is.factor(self$data))] <- factor( out[,which(is.factor(self$data))] ) # Reformat factors variables
-          cbind(terra::crds(self$data), out ) # Attach coordinates and return
+          terra::as.data.frame(self$data, xy = TRUE, na.rm = FALSE, ...)
         } else {
           terra::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)
         }

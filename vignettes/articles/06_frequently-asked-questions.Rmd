@@ -18,7 +18,7 @@ This document contains a series of frequently asked questions when using the `ib
 <details>
 <summary><b>What are the necessary data preparation steps for `ibis.iSDM` ?</b>
 </summary>
-The `ibis.iSDM` R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`raster`] and [`stars`] packages to do much of the formatting and processing work.
+The `ibis.iSDM` R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`SpatRaster`] and [`stars`] packages to do much of the formatting and processing work.
 When adding [`biodiversity`] and [`predictor`] variables to a `distribution()` object a number of default validity checks and alignments are commonly conducted, for instance ensuring that provided points align in geographic projection.
 
 To ease up the modelling and to avoid any unfortunate errors or crashes, ideally ensure the following steps are taken:
@@ -271,7 +271,7 @@ mod <- distribution(background) |>
 <summary><b>Where can I find predictions created by `train` ? </b>
 </summary>
 
-After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `RasterStack`. By default all engines will produce a `Raster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
+After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `SpatRaster`. By default all engines will produce a `SpatRaster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
 
 In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename using the `write_output()` function.
 
