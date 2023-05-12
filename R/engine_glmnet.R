@@ -696,6 +696,7 @@ engine_glmnet <- function(x,
               newdata = df_sub,
               weights = df_sub$w, # The second entry of unique contains the non-observed variables
               newoffset = ofs,
+              na.action = "na.pass",
               s = determine_lambda(mod), # Determine best available lambda
               fam = fam,
               type = type
@@ -705,7 +706,7 @@ engine_glmnet <- function(x,
 
             # Now create spatial prediction
             prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
-            # cs <- terra::cellFromXY(prediction, xy = df_sub[, c("x", "y")])
+            # sf::st_as_sf(df_sub, coords = c("x","y") )
             # terra::values(prediction) <- pred_gn[, layer]
             prediction[df_sub$rowid] <- pred_gn[, layer]
 

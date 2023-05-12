@@ -5,7 +5,7 @@
 #' between 2010 and 2020 are filled with data for 2010, 2011, 2012, etc.
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events should be interpolated. See [`project()`].
-#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
+#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same.
 #' @keywords scenario
 #' @noRd
 approximate_gaps <- function(env, date_interpolation = "annual"){
@@ -17,7 +17,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
   date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
   if(date_interpolation=="none") return(env)
 
-  stop("Still in progress")
+  stop("Functionality still work in progress")
   # --- #
   # Get individual time steps at interval
   times <- stars::st_get_dimension_values(env, which = names(dim(env))[3], center = TRUE)
@@ -437,15 +437,15 @@ summarise_change <- function(scenario){
                                   times[length(times)] |> as.character(), rep(paste0(times_length, " years"), 11 ) ),
                        value = NA,
                        unit = c(rep(ar_unit,6), "%", "%", ar_unit, "%", "similarity", NA, "deg"))
-  change$value[1] <- terra::global((current) * terra::area(current), "sum", na.rm = TRUE) * mult
-  change$value[2] <- terra::global((future) * terra::area(future), "sum", na.rm = TRUE) * mult
+  change$value[1] <- terra::global((current) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE) * mult
+  change$value[2] <- terra::global((future) * terra::cellSize(future, unit = "km"), "sum", na.rm = TRUE) * mult
 
   # Check that is binary thresholded
   rr <- terra::lapp(current, future, fun = function(x, y){x + y * 2})
-  change$value[3] <- terra::global((rr == 0) * terra::area(current), "sum", na.rm = TRUE) * mult
-  change$value[4] <- terra::global((rr == 1) * terra::area(current), "sum", na.rm = TRUE) * mult
-  change$value[5] <- terra::global((rr == 2) * terra::area(current), "sum", na.rm = TRUE) * mult
-  change$value[6] <- terra::global((rr == 3) * terra::area(current), "sum", na.rm = TRUE) * mult
+  change$value[3] <- terra::global((rr == 0) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE) * mult
+  change$value[4] <- terra::global((rr == 1) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE) * mult
+  change$value[5] <- terra::global((rr == 2) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE) * mult
+  change$value[6] <- terra::global((rr == 3) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE) * mult
   change$value[7] <- change$value[4] / change$value[1] * 100
   change$value[8] <- change$value[5] / change$value[1] * 100
   change$value[9] <- change$value[2] - change$value[1]
@@ -560,7 +560,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
       terra::global(layer, 'max', na.rm = TRUE) == 1
     )
     # Calculate area-weighted centre
-    r_wt <- terra::area(layer)
+    r_wt <- terra::cellSize(layer, unit = "km")
     values(r_wt)[is.na(values(layer))] <- NA
 
     # Make a spatial point layer

@@ -31,12 +31,14 @@ BiodiversityScenario <- bdproto(
     # Check that model exists
     fit <- self$get_model()
     timeperiod <- self$get_timeperiod()
+    dur <- round(as.numeric(difftime(timeperiod[2], timeperiod[1], unit="weeks"))/52.25,1)
+    if(dur == 0) dur <- "< 1"
     # Get set predictors and time period
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
     tp = ifelse(is.Waiver(timeperiod),'None',
                 paste0(
                   paste0( timeperiod,collapse = ' -- '),
-                  ' (',round(as.numeric(difftime(self$get_timeperiod()[2],self$get_timeperiod()[1],unit="weeks"))/52.25,1),' years)'
+                  ' (',dur,' years)'
                 )
     )
     # Constrains
@@ -311,15 +313,15 @@ BiodiversityScenario <- bdproto(
     if(is.numeric(position)) position <- time[position]
     if(is.null(position)) position <- time[base::length(time)]
     final <- scenario |>
-      stars:::filter.stars(band == position) |>
+      stars:::filter.stars(time == position) |>
       terra::rast()
-    raster::projection(final) <- raster::projection(baseline)
+    if(is.na(terra::crs(final))) terra::crs(final) <- terra::crs(baseline)
     # -- #
     if(!inherits(final, 'SpatRaster')) final <- final[[1]] # In case it is a rasterbrick or similar
     if(!is_comparable_raster(baseline, final)) final <- alignRasters(final, baseline, cl = FALSE) # In case they somehow differ?
 
     # Calculate overlays
-    diff_f <- terra::lapp(c(baseline, final), fun = function(x, y){x + y * 2})
+    diff_f <- terra::lapp(c(baseline, final) |> as.numeric(), fun = function(x, y){x + y * 2})
     diff_f <- as.factor(diff_f)
     # 0 = Unsuitable | 1 = Loss | 2 = Gain | 3 = stable
     rat <- levels(diff_f)[[1]]
@@ -338,17 +340,11 @@ BiodiversityScenario <- bdproto(
       names(diff_ff)[3] <- "Change"
       diff_ff$Change <- factor(diff_ff$Change, levels = names(cols))
 
-      # Use ggplot
-      g <- ggplot2::ggplot() +
-        ggplot2::coord_equal() +
-        ggplot2::geom_raster(data = diff_ff, ggplot2::aes(x = x, y = y, fill = Change)) +
-        ggplot2::theme_light(base_size = 18) +
-        ggplot2::scale_x_discrete(expand=c(0,0)) +
-        ggplot2::scale_y_discrete(expand=c(0,0)) +
-        ggplot2::scale_fill_manual(values = cols, na.value = 'transparent') +
-        ggplot2::theme(legend.position = "bottom") +
-        ggplot2::labs(x = "", y = "", title = paste0('Change between baseline and ', position))
-      return(g)
+      terra::plot(diff_f, col = cols,
+                  buffer = TRUE,
+                  type = "classes", #legend = "right",
+                  levels = names(cols), all_levels = TRUE,
+                  main = paste0('Change between\n baseline and ', position))
     } else {
       # Return
       return(diff_f)
@@ -389,7 +385,7 @@ BiodiversityScenario <- bdproto(
 
       # Total amount of area occupied for a given time step
       out <- df |> dplyr::group_by(band) |> dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
-      out$totarea <- terra::global((new[[1]]>=0) * (ar |> terra::rast()), "sum", na.rm = TRUE)
+      out$totarea <- terra::global((new[[1]]>=0) * (ar |> terra::rast()), "sum", na.rm = TRUE)[,1]
       if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
         out$totarea <- out$totarea / 1e6
         out <- dplyr::rename(out, totarea_km2 = totarea)
@@ -415,7 +411,13 @@ BiodiversityScenario <- bdproto(
     } else {
       # Get the scenario predictions and from there the thresholds
       scenario <- self$get_data()['suitability']
-      times <- stars::st_get_dimension_values(scenario, which = 'band')
+      # If it has a time dimension also get that
+      if( length(stars::st_dimensions(scenario)) >2){
+        times <- stars::st_get_dimension_values(scenario, which = 'band')
+      } else {
+        times <- NULL
+        stop("Summary without time dimension not yet implemented!")
+      }
       # Get area
       ar <- stars:::st_area.stars(scenario)
       # Get the unit

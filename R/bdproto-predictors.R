@@ -46,10 +46,10 @@ PredictorDataset <- bdproto(
   # Get data
   get_data = function(self, df = FALSE, na.rm = TRUE, ...){
     if(df) {
-      # For raster
+      # For SpatRaster
       if(is.Raster(self$data)){
         if(any(is.factor(self$data))){
-          # Bugs for factors, so need
+          # Bugs out for factors, so need
           terra::as.data.frame(self$data, xy = TRUE, na.rm = FALSE, ...)
         } else {
           terra::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)

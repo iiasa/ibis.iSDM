@@ -8,6 +8,7 @@ test_that('Scenarios and constraints', {
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
   suppressWarnings( requireNamespace('igraph', quietly = TRUE) )
+  suppressWarnings( requireNamespace('stars', quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE) # Be less chatty
   options("ibis.seed" = 1234)
@@ -128,7 +129,7 @@ test_that('Scenarios and constraints', {
   mod <- sc |> add_predictors(pred_future) |> threshold() |> project()
   expect_s3_class(mod$summary_beforeafter(), "data.frame")
   expect_s3_class(mod$plot_relative_change(), "ggplot")
-  expect_true(inherits(mod$plot_relative_change(plot=F), "SpatRaster"))
+  expect_true(inherits(mod$plot_relative_change(plot=FALSE), "SpatRaster"))
 
   # identical
   expect_equal(as.numeric(mod$get_threshold()), fit$get_thresholdvalue())
@@ -157,7 +158,7 @@ test_that('Scenarios and constraints', {
 
   # Connectivity stuff
   res <- pred_current$Urban
-  mod2 <- mod |> add_constraint_connectivity(method = "resistance",resistance = res)
+  mod2 <- mod |> add_constraint_connectivity(method = "resistance", resistance = res)
   expect_equal(names(mod2$get_constraints()), "connectivity")
   expect_true(is.Raster(mod2$get_constraints()$connectivity$params$resistance))
 

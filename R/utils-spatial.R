@@ -556,10 +556,14 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' emptyraster(r)
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
-  assertthat::assert_that(is.Raster(x))
-  terra::rast(nrows = nrow(x), ncols = ncol(x),
-                        crs = terra::crs(x),
-                        ext = terra::ext(x), ...)
+  assertthat::assert_that(is.Raster(x) || inherits(x, "stars"))
+  if(is.Raster(x)){
+    terra::rast(nrows = nrow(x), ncols = ncol(x),
+                crs = terra::crs(x),
+                ext = terra::ext(x), ...)
+  } else {
+    emptyraster( terra::rast(x) )
+  }
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
@@ -717,6 +721,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
     } else {
       coords_sub <- coords[which(check_again),] |> as.data.frame()
     }
+    if(any(is.factor(env))) ngb_fill <- FALSE
     ex_sub <- try({terra::extract(x = env,
                                   y = coords_sub,
                                   # FIXME: This could fail if values are factors?
@@ -753,7 +758,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
 #' @noRd
 fill_rasters <- function(post, background){
   assertthat::assert_that(
-    is.data.frame(post), ncol(post)>1,
+    is.data.frame(post),
     is.Raster(background),
     nrow(post) == terra::ncell(background)
   )

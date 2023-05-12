@@ -741,7 +741,8 @@ engine_xgboost <- function(x,
 
             if(plot){
               # Quick plot
-              terra::plot(template, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+              terra::plot(template, col = ibis_colours$viridis_plasma,
+                          main = paste0(x.var, collapse ='|'))
             }
             # Also return spatial
             return(template)
@@ -788,9 +789,9 @@ engine_xgboost <- function(x,
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
             prediction[] <- pred_xgb
-            prediction <- terra::mask(prediction, self$model$predictors_object$get_data()[[1]] )
+            prediction <- terra::mask(prediction, model$predictors_object$get_data()[[1]] )
 
             return(prediction)
           },

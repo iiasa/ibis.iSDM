@@ -134,13 +134,16 @@ methods::setMethod(
     thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
     baseline_threshold <- mod$get_model()$get_data(thresh_reference)
     if(!is.Waiver(scenario_threshold)){
-      if(is.na(sf::st_crs(baseline_threshold))) sf::st_crs(baseline_threshold) <- sf::st_crs( fit$model$background )
+      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
     }
 
     if(inherits(baseline_threshold, 'SpatRaster')){
       baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
     }
     scenario_constraints <- mod$get_constraints()
+
+    # Create a template for use
+    template <- emptyraster( mod$get_predictors()$get_data() )
 
     #  --- Check that everything is there ---
     # Check that thresholds are set for constrains
@@ -186,7 +189,7 @@ methods::setMethod(
                                      total = length(unique(df$time)))
     # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
-    for(step in times){
+    for(step in times){ # step = times[1]
       # Get data
       nd <- subset(df, time == step)
       assertthat::assert_that( !all(is.na(nd[, mod_pred_names])) )
@@ -204,8 +207,8 @@ methods::setMethod(
 
       # Project suitability
       out <- fit$project(newdata = nd, layer = layer)
-      names(out) <- paste0("suitability", "_", layer, "_", step)
-      if(is.na(sf::st_crs(out))) sf::st_crs(out) <- sf::st_crs( fit$model$background )
+      names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
+      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( fit$model$background )
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
@@ -268,12 +271,12 @@ methods::setMethod(
       # Recalculate thresholds if set manually
       if(!is.Waiver(scenario_threshold)){
         # FIXME: Currently this works only for mean thresholds. Think of how the other are to be handled
-        scenario_threshold <- scenario_threshold[1]
+        scenario_threshold <- scenario_threshold[[1]]
         out_thresh <- out
         out_thresh[out_thresh < scenario_threshold] <- 0; out_thresh[out_thresh >= scenario_threshold] <- 1
         names(out_thresh) <-  paste0('threshold_', step)
         # If threshold is
-        if( terra::global(out_thresh, 'max', na.rm = TRUE) == 0){
+        if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold
         } else { baseline_threshold <- out_thresh }
@@ -442,7 +445,7 @@ methods::setMethod(
                                crs = sf::st_crs(new_crs)
     ); names(proj) <- 'suitability'
 
-    if(terra::nlyr(proj_thresh)>0){
+    if(terra::hasValues(proj_thresh)){
       # Add the thresholded maps as well
       proj_thresh <- stars::st_as_stars(proj_thresh,
                                        crs = sf::st_crs(new_crs)
