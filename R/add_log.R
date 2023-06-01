@@ -13,7 +13,7 @@ NULL
 #' @returns Adds a log file to a [`distribution`] object.
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
+#'  x <- distribution(background) |>
 #'     add_log()
 #'  x
 #' }
@@ -40,7 +40,7 @@ methods::setMethod(
                             is.character(filename),
                             assertthat::has_extension(filename,'txt') )
 
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding log file...')
 
     # Check whether a log is already present in the distribution file

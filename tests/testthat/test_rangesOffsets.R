@@ -5,7 +5,7 @@ test_that('Load ranges and add them to distribution object', {
   skip_if_not_installed('INLA')
   skip_if_not_installed('igraph')
 
-  requireNamespace("igraph")
+  suppressWarnings( requireNamespace("igraph", quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE)
 
@@ -26,7 +26,7 @@ test_that('Load ranges and add them to distribution object', {
   # This will raise a warning since projection is different
   suppressMessages(
     expect_warning(
-      x %>% add_predictor_range(virtual_range, method = 'distance') )
+      x |> add_predictor_range(virtual_range, method = 'distance') )
     )
 
   # Try and add a range as raster
@@ -35,12 +35,12 @@ test_that('Load ranges and add them to distribution object', {
   expect_s4_class(virtual_range_ras,'Raster')
 
   # Add the rasterized range
-  y <- x %>% add_predictor_range(virtual_range_ras)
+  y <- x |> add_predictor_range(virtual_range_ras)
   expect_vector(y$get_predictor_names(),'precomputed_range')
 
   # Artificially aggregate the range
   virtual_range_ras <- raster::aggregate(virtual_range_ras, 5)
-  expect_s3_class( x %>% add_predictor_range(virtual_range_ras),class = "BiodiversityDistribution" )
+  expect_s3_class( x |> add_predictor_range(virtual_range_ras),class = "BiodiversityDistribution" )
 
   # Add bias variable
   y <- x |> add_control_bias(layer = predictors$hmi_mean_50km)

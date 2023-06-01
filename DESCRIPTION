@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling Framework for Integrated Biodiversity Distribution Scenarios
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -21,48 +21,58 @@ License: CC BY 4.0
 Encoding: UTF-8
 Imports: 
     assertthat (>= 0.2.0),
+    doFuture (>= 0.12.2),
+    foreach,
+    future (>= 1.23.0),
+    dplyr,
     geodist,
     ggplot2,
-    magrittr,
+    graphics,
     methods,
     ncdf4,
     parallel,
-    foreach,
-    future (>= 1.23.0),
-    doFuture (>= 0.12.2),
+    posterior,
     proto (>= 1.0.0),
     raster (>= 3.4-5),
-    Rcpp (>= 0.12.0),
-    RcppParallel (>= 5.0.1),
     rgeos (>= 0.5-5),
-    rgdal (>= 1.5-32),
     sf (>= 0.9),
     stars (>= 0.5),
-    testthat (>= 3.0.0),
+    stats,
     tibble (>= 2.0.0),
-    uuid,
-    posterior
+    uuid, 
+    utils
 Depends:
-    R(>= 4.0.0)
+    R(>= 4.1.0)
 Suggests:
-    deldir,
-    mboost,
+    abind,
+    BoomSpikeSlab (>= 1.2.4),
+    covr,
+    inlabru,
+    glmnet,
+    glmnetUtils,
     dbarts (>= 0.9-22),
-    modEvA,
-    xgboost,
-    progress,
-    ellipsis,
+    deldir,
     doParallel,
+    ellipsis,
+    igraph,
+    knitr,
+    mboost,
+    modEvA,
+    ncmeta,
+    progress,
+    rmarkdown,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    BoomSpikeSlab (>= 1.2.4),
-    rmarkdown,
-    knitr,
-    covr
+    testthat,
+    xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Biarch: true
+SystemRequirements: GNU make
+VignetteBuilder: knitr
 Collate: 
     'utils.R'
     'bdproto.R'
@@ -101,6 +111,7 @@ Collate:
     'engine_stan.R'
     'engine_xgboost.R'
     'ensemble.R'
+    'ibis.iSDM-package.R'
     'misc.R'
     'partial.R'
     'plot.R'
@@ -131,7 +142,3 @@ Collate:
     'validate.R'
     'write_output.R'
     'zzz.R'
-Roxygen: list(markdown = TRUE)
-Biarch: true
-SystemRequirements: GNU make
-VignetteBuilder: knitr

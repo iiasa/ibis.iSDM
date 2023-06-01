@@ -203,8 +203,8 @@ BiodiversityScenario <- bdproto(
       invisible()
     } else {
       # Get unique number of data values. Surely there must be an easier val
-      vals <- self$get_data()[what] %>% stars:::pull.stars() %>% as.vector() %>% unique()
-      vals <- length(na.omit(vals))
+      vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
+      vals <- length(stats::na.omit(vals))
       if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
       if(is.null(which)){
         stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
@@ -310,9 +310,9 @@ BiodiversityScenario <- bdproto(
     time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
     if(is.numeric(position)) position <- time[position]
     if(is.null(position)) position <- time[length(time)]
-    final <- scenario %>%
-      stars:::filter.stars(band == position) %>%
-      as('Raster')
+    final <- scenario |>
+      stars:::filter.stars(band == position) |>
+      methods::as('Raster')
     raster::projection(final) <- raster::projection(baseline)
     # -- #
     if(!inherits(final, 'RasterLayer')) final <- final[[1]] # In case it is a rasterbrick or similar
@@ -334,7 +334,7 @@ BiodiversityScenario <- bdproto(
       cols <- c("Unsuitable" = "gray92", "Loss" = "#DE646A", "Gain" = "cyan3", "Stable" = "gray60")
 
       # Convert to raster
-      diff_ff <- as.data.frame(diff_f, xy = TRUE)
+      diff_ff <- raster::as.data.frame(diff_f, xy = TRUE)
       names(diff_ff)[3] <- "Change"
       diff_ff$Change <- factor(diff_ff$Change, levels = names(cols))
 
@@ -372,39 +372,39 @@ BiodiversityScenario <- bdproto(
       ar <- stars:::st_area.stars(scenario)
       # Get the unit
       ar_unit <- units::deparse_unit(ar$area)
-      new <- as(scenario,"Raster") * as(ar, "Raster")
+      new <- methods::as(scenario,"Raster") * methods::as(ar, "Raster")
       new <- raster::setZ(new, time)
       # Convert to scenarios to data.frame
-      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) %>% subset(., complete.cases(.))
+      df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
       names(df)[4] <- "area"
       # --- #
       # Now calculate from this data.frame several metrics related to the area and change in area
-      df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
-        dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
-        dplyr::mutate(area = dplyr::if_else(is.na(area), 0, area)) %>% # Convert missing data to 0
+      df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>
+        dplyr::ungroup() |> dplyr::select(-x,-y) |>
+        dplyr::mutate(area = dplyr::if_else(is.na(area), 0, area)) |> # Convert missing data to 0
         dplyr::arrange(id, band)
       df$area <- units::as_units(df$area, units::as_units(ar_unit))  # Set Units
       # Convert to km2 and remove units as this causes issues with dplyr
-      df$area <- units::set_units(df$area, "km2") %>% units::drop_units()
+      df$area <- units::set_units(df$area, "km2") |> units::drop_units()
 
       # Total amount of area occupied for a given time step
-      out <- df %>% dplyr::group_by(band) %>% dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
-      out$totarea <- raster::cellStats((new[[1]]>=0) * as(ar, "Raster"), "sum")
+      out <- df |> dplyr::group_by(band) |> dplyr::summarise(area_km2 = sum(area, na.rm = TRUE))
+      out$totarea <- raster::cellStats((new[[1]]>=0) * methods::as(ar, "Raster"), "sum")
       if(units::deparse_unit(units::as_units(ar_unit)) == "m2") {
         out$totarea <- out$totarea / 1e6
         out <- dplyr::rename(out, totarea_km2 = totarea)
       }
 
       # Total amount of area lost / gained / stable since previous time step
-      totchange_occ <- df %>%
-          dplyr::group_by(id) %>%
-          dplyr::mutate(change = (area - dplyr::lag(area)) ) %>% dplyr::ungroup() %>%
-          subset(., complete.cases(.))
-      o <- totchange_occ %>% dplyr::group_by(band) %>%
+      totchange_occ <- df |>
+          dplyr::group_by(id)  |>
+          dplyr::mutate(change = (area - dplyr::lag(area)) ) |> dplyr::ungroup() |>
+          (\(.) subset(., stats::complete.cases(.)))()
+      o <- totchange_occ |> dplyr::group_by(band) |>
         dplyr::summarise(totchange_stable_km2 = sum(area[change == 0]),
                          totchange_gain_km2 = sum(change[change > 0]),
                          totchange_loss_km2 = sum(change[change < 0]))
-      out <- out %>% dplyr::left_join(o, by = "band")
+      out <- out |> dplyr::left_join(o, by = "band")
 
       if(relative == TRUE){
         # Finally calculate relative change to baseline (first entry) for all entries where this is possible
@@ -488,7 +488,7 @@ BiodiversityScenario <- bdproto(
     if(oftype == "stars"){
       if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     } else {
-      out <- as(out, "Raster")
+      out <- methods::as(out, "Raster")
       if(plot) plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     }
     return(out)
@@ -571,7 +571,7 @@ BiodiversityScenario <- bdproto(
         writeNetCDF(ras_migclim, fname = fname, varName = "MigCLIM output", dt = dt)
       }
     } else if(type %in% 'feather'){
-      assertthat::assert_that('feather' %in% installed.packages()[,1],
+      assertthat::assert_that('feather' %in% utils::installed.packages()[,1],
                               msg = 'Feather package not installed!')
       fname <- paste0( tools::file_path_sans_ext(fname), "__migclim", ".feather")
       feather::write_feather(ras, path = fname)

@@ -49,8 +49,11 @@ and the coordinate columns (which will be created if not already present).
 }
 \references{
 \itemize{
-\item Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in presence‐only species distribution modelling. Diversity and Distributions, 21(5), 595-608.
-\item Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D., Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
+\item Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in
+presence‐only species distribution modelling. Diversity and Distributions, 21(5), 595-608.
+\item Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D.,
+Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions
+for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
 }
 }
 \keyword{train}

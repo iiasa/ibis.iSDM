@@ -51,6 +51,9 @@ Default is an educated guess (Default: \code{NULL}).}
 
 \item{...}{Other variables}
 }
+\value{
+An \link{engine}.
+}
 \description{
 Model components are specified with general inputs and mapping methods to the
 latent variables, and the predictors are specified via general R expressions,
@@ -79,6 +82,12 @@ domain boundary.
 created.
 
 Priors can be set via \link{INLAPrior}.
+}
+\examples{
+\dontrun{
+# Add inlabru as an engine
+x <- distribution(background) |> engine_inlabru()
+}
 }
 \references{
 \itemize{

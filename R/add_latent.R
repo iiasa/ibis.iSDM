@@ -47,7 +47,7 @@ NULL
 #' @keywords latent
 #' @examples
 #' \dontrun{
-#'  distribution(background) %>% add_latent_spatial(method = "poly")
+#'  distribution(background) |> add_latent_spatial(method = "poly")
 #' }
 #' @name add_latent_spatial
 NULL

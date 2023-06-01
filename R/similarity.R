@@ -35,11 +35,11 @@ NULL
 #'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references
-#' * Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting species" https://doi.org/10.1111/j.2041-210X.2010.00036.x _Methods in Ecology and Evolution_, 1: 330-342
-#' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
-#' @importFrom raster stack nlayers init as.data.frame raster
-#' @importFrom methods is
-#' @importFrom stats na.omit
+#' * Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting
+#' species" https://doi.org/10.1111/j.2041-210X.2010.00036.x _Methods in Ecology and Evolution_, 1: 330-342
+#' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool
+#' for quantifying novelty due to covariate range and correlation change when projecting
+#' species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
 #' @seealso [dismo] R-package
 #' @name similarity
 #' @export
@@ -121,21 +121,21 @@ methods::setMethod(
     # If plot is specified, make figures. Otherwise return the list of rasters
     if(plot){
       if(method == 'mess'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(2,2))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(2,2))
         raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
         raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
         raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
         raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
-        par(par.ori)
+        graphics::par(par.ori)
       } else if(method == 'nt'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(1,3))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(1,3))
         raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
         raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
         raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
         # FIXME: add categorical legend left to it
-        par(par.ori)
+        graphics::par(par.ori)
       }
     } else {
       return( out )
@@ -190,7 +190,7 @@ methods::setMethod(
                           df = TRUE)
     # Subset to variables in obj and remove missing rows
     ex <- subset.data.frame(ex, select = names(obj))
-    ex <- subset.data.frame(ex, complete.cases(ex))
+    ex <- subset.data.frame(ex, stats::complete.cases(ex))
 
     if(method == 'mess'){
       out <- .mess(covs = obj,
@@ -210,20 +210,20 @@ methods::setMethod(
     # If plot is specified, make figures. Otherwise return the list of rasters
     if(plot){
       if(method == 'mess'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(2,2))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(2,2))
         raster::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
         raster::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
         raster::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
         raster::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
-        par(par.ori)
+        graphics::par(par.ori)
       } else if(method == 'nt'){
-        par.ori <- par(no.readonly = TRUE)
-        par(mfrow=c(1,3))
+        par.ori <- graphics::par(no.readonly = TRUE)
+        graphics::par(mfrow=c(1,3))
         raster::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
         raster::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
         raster::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
-        par(par.ori)
+        graphics::par(par.ori)
       }
     } else {
       return( out )

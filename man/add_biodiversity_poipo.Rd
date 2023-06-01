@@ -71,7 +71,7 @@ regression. See Renner et al. 2015 for an overview.
  # Load virtual species
  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
 # Define model
-x <- distribution(background) \%>\%
+x <- distribution(background) |>
   add_biodiversity_poipo(virtual_species)
 x
 }

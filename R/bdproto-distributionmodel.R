@@ -245,7 +245,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'BART-Model')){
       # Number of times each variable is used by a tree split
       # Tends to become less informative with higher numbers of splits
-      varimp.bart(self$get_data(obj)) %>% tibble::remove_rownames()
+      varimp.bart(self$get_data(obj)) |> tibble::remove_rownames()
     } else if(inherits(self, 'STAN-Model')){
       vi <- rstan::summary(self$get_data(obj))$summary |> as.data.frame() |>
         tibble::rownames_to_column(var = "parameter") |> as.data.frame()
@@ -279,15 +279,15 @@ DistributionModel <- bdproto(
     assertthat::assert_that(is.character(what))
     if(inherits(self, 'GDB-Model')){
       # How many effects
-      n <- length( coef( self$get_data(x) ))
+      n <- length( stats::coef( self$get_data(x) ))
       # Use the base plotting
-      par.ori <- par(no.readonly = TRUE)
-      par(mfrow = c(ceiling(n/3),3))
+      par.ori <- graphics::par(no.readonly = TRUE)
+      graphics::par(mfrow = c(ceiling(n/3),3))
 
       mboost:::plot.mboost(x = self$get_data(x),
                            type = 'b',cex.axis=1.5, cex.lab=1.5)
 
-      par(par.ori)#dev.off()
+      graphics::par(par.ori)#dev.off()
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = what)
     } else if(inherits(self, 'GLMNET-Model')) {
@@ -301,7 +301,7 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLABRU-Model')) {
       # Use inlabru effect plot
       ggplot2::ggplot() +
-        inlabru:::gg(self$get_data(x)$summary.fixed, bar = TRUE)
+        inlabru::gg(self$get_data(x)$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
       self$partial(self$get_data(x), x.vars = what, ...)

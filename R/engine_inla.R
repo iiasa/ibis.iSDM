@@ -55,6 +55,12 @@ NULL
 #' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add INLA as an engine (with a custom mesh)
+#' x <- distribution(background) |> engine_inla(mesh = my_mesh)
+#' }
 #' @name engine_inla
 NULL
 #' @rdname engine_inla
@@ -111,7 +117,7 @@ engine_inla <- function(x,
     # Load a provided on
     mesh <- optional_mesh
     # Convert the study region
-    region.poly <- as(sf::st_geometry(x$background), "Spatial")
+    region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
 
     # Security check for projection and if not set, use the one from background
     if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
@@ -176,7 +182,7 @@ engine_inla <- function(x,
         params <- self$get_data("params")
 
         # Convert the study region
-        region.poly <- as(sf::st_geometry(model$background), "Spatial")
+        region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
 
         # Convert to boundary object for later
         suppressWarnings(
@@ -262,7 +268,7 @@ engine_inla <- function(x,
 
         if(assess){
           # For an INLA mesh assessment
-          out <- INLA:::inla.mesh.assessment(
+          out <- INLA::inla.mesh.assessment(
               mesh = self$get_data('mesh'),
               spatial.range = 3,
               alpha = 2,
@@ -302,7 +308,7 @@ engine_inla <- function(x,
           nc.nb <- spdep::poly2nb(ns, queen = TRUE)
           #Convert the adjacency matrix into a file in the INLA format
           adjmat <- spdep::nb2mat(nc.nb,style = "B")
-          adjmat <- as(adjmat, "dgTMatrix")
+          adjmat <- methods::as(adjmat, "dgTMatrix")
           # adjmat <- INLA::inla.graph2matrix(nc.nb)
           # Save the adjaceny matrix as output
           self$data$latentspatial <- adjmat
@@ -666,19 +672,19 @@ engine_inla <- function(x,
         }
         # ----------- #
         # Provided or default formula
-        master_form <- as.formula(
+        master_form <- stats::as.formula(
           paste0("observed ~ ",
                  # # If multiple datasets, remove intercept
                  ifelse(length(model$biodiversity)>1,"0 + ", ""),
                               paste0(sapply(model$biodiversity, function(x){
-                                                attr(terms.formula(x$equation),"term.labels")
-                                              }) %>% c %>% unique(),collapse = " + ")
+                                                attr(stats::terms.formula(x$equation),"term.labels")
+                                              }) |> c() |> unique(),collapse = " + ")
           )
         )
 
         # Perform variable selection
-        if( settings$get(what='varsel') ==  "reg"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing variable selection...')
+        if( settings$get(what='optim_hyperparam')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing backstep variable selection (hacky)...')
 
           k <- NULL
           # Specify offsets and spde to be retained
@@ -897,7 +903,7 @@ engine_inla <- function(x,
                 #                          compute = TRUE),  # Compute for marginals of the predictors.
 
                 print('Refitting model for partial effect')
-                ufit <- INLA::inla(formula = as.formula(mod$.args$formula), # The specified formula
+                ufit <- INLA::inla(formula = stats::as.formula(mod$.args$formula), # The specified formula
                                        data  = stk_inference,  # The data stack
                                        quantiles = c(0.05, 0.5, 0.95),
                                        E = INLA::inla.stack.data(stk_inference)$e, # Expectation (Eta) for Poisson model
@@ -981,7 +987,7 @@ engine_inla <- function(x,
 
                     # Get Mesh and distance between points
                     mesh <- self$get_data('mesh')
-                    D <- as.matrix( dist(mesh$loc[, 1:2]) )
+                    D <- as.matrix( stats::dist(mesh$loc[, 1:2]) )
 
                     # Distance vector.
                     dis.cor <- data.frame(distance = seq(0, max(D), length = 100))
@@ -993,15 +999,15 @@ engine_inla <- function(x,
                     dis.cor$cor[1] <- 1
                   # ---
                   # Build plot
-                  layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+                  graphics::layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
                   plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
                        xlab = 'Distance (proj. unit)', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
-                  abline(v = dis.max,lty = 'dotted')
+                  graphics::abline(v = dis.max,lty = 'dotted')
                   plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
                   plot(spatial_field[[2]], main = 'sd spatial effect')
                   } else {
                   # Just plot the SPDE
-                    par(mfrow=c(1,2))
+                    graphics::par(mfrow=c(1,2))
                     plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
                     plot(spatial_field[[2]], main = 'sd spatial effect')
                     # And return

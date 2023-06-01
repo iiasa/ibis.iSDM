@@ -67,8 +67,7 @@ unless the specific \link{engine} does not support generalised linear regression
 \examples{
 \dontrun{
 # Define model
-x <- distribution(background) \%>\%
-  add_biodiversity_poipa(virtual_species)
+x <- distribution(background) |> add_biodiversity_poipa(virtual_species)
 x
 }
 }

@@ -40,6 +40,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          extra-repositories: "https://inla.r-inla-download.org/R/testing"
 
       - name: Install gdal and igraph dependencies on Linux (gdal)
         run: |
@@ -60,7 +61,18 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"all"'
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck,
+            any::glmnet,
+            any::glmnetUtils,
+            any::pdp,
+            stan-dev/cmdstanr,
+            any::igraph,
+            any::xgboost,
+            any::dbarts,
+            any::mboost,
+            any::inlabru,
+            any::BoomSpikeSlab
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

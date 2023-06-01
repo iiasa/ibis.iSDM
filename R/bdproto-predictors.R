@@ -171,8 +171,8 @@ PredictorDataset <- bdproto(
   # Basic Plotting function
   plot = function(self){
     # Plot the predictors
-    par.ori <- par(no.readonly = TRUE)
+    par.ori <- graphics::par(no.readonly = TRUE)
     raster::plot( self$data, col = ibis_colours[['viridis_cividis']] )
-    par(par.ori)
+    graphics::par(par.ori)
   }
 )

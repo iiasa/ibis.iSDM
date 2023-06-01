@@ -3,7 +3,10 @@
 test_that('Custom functions - Test gridded transformations and ensembles', {
   skip_on_travis()
   skip_on_cran()
-  library(raster)
+
+  suppressWarnings(
+    requireNamespace("raster", quietly = TRUE)
+  )
 
   # --- #
   # Manipulating raster files #

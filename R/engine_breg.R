@@ -22,6 +22,12 @@ NULL
 #' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
 #' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add BREG as an engine
+#' x <- distribution(background) |> engine_breg(iter = 1000)
+#' }
 #' @name engine_breg
 NULL
 #' @rdname engine_breg
@@ -35,7 +41,7 @@ engine_breg <- function(x,
 
   # Check whether xgboost package is available
   check_package('BoomSpikeSlab')
-  if(!("BoomSpikeSlab" %in% loadedNamespaces()) || ('BoomSpikeSlab' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("BoomSpikeSlab" %in% loadedNamespaces()) || ('BoomSpikeSlab' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('BoomSpikeSlab');attachNamespace("BoomSpikeSlab")},silent = TRUE)
   }
 
@@ -128,7 +134,7 @@ engine_breg <- function(x,
         fam <- model$biodiversity[[1]]$family
 
         # Check whether regularization parameter is set to none, if yes, raise message
-        if(settings$get("varsel") != "none"){
+        if(settings$get('optim_hyperparam')){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
         }
 
@@ -155,7 +161,7 @@ engine_breg <- function(x,
                                        field_occurrence = 'observed',
                                        template = bg,
                                        settings = model$biodiversity[[1]]$pseudoabsence_settings)
-          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points
@@ -175,7 +181,7 @@ engine_breg <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -252,8 +258,8 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
 
           # Also update the formula
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
-          model$biodiversity[[1]]$equation <- update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . -", vf))
+          model$biodiversity[[1]]$equation <- stats::update.formula(model$biodiversity[[1]]$equation, paste0(". ~ . +", paste0(colnames(z),collapse = "+")))
         }
 
         # Prediction container
@@ -413,7 +419,7 @@ engine_breg <- function(x,
 
           # Make a prediction, but do in parallel so as to not overuse memory
           full$rowid <- 1:nrow(full)
-          full_sub <- subset(full, complete.cases(full))
+          full_sub <- subset(full, stats::complete.cases(full))
           w_full_sub <- w_full[full_sub$rowid]
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
@@ -423,7 +429,7 @@ engine_breg <- function(x,
           # Now depending on parallization setting use foreach
           if(getOption("ibis.runparallel")){
             # Check that future is registered
-            if(!foreach:::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
+            if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
                                                             strategy = getOption("ibis.futurestrategy"))
 
             # Run the outgoing command
@@ -438,7 +444,7 @@ engine_breg <- function(x,
             out <- parallel::mclapply(unique(splits), function(s) {
               i <- which(splits == s)
               # -> external code in utils-boom
-              pred_breg <- ibis.iSDM:::predict_boom(
+              pred_breg <- predict_boom(
                 obj = fit_breg,
                 newdata = full_sub[i,],
                 w = w_full_sub[i],
@@ -446,7 +452,7 @@ engine_breg <- function(x,
                 params = params
               )
               # Summarize the posterior
-              preds <- base::as.data.frame(
+              preds <- as.data.frame(
                   cbind(
                   matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
                   matrixStats::rowSds(pred_breg, na.rm = TRUE),
@@ -570,7 +576,7 @@ engine_breg <- function(x,
               df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
 
-            df_partial <- df_partial %>% as.data.frame()
+            df_partial <- df_partial |> as.data.frame()
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
               df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
@@ -594,7 +600,7 @@ engine_breg <- function(x,
               matrixStats::rowSds(pred_breg, na.rm = TRUE),
               matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
               apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
+            ) |> as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
             pred_part$cv <- pred_part$sd / pred_part$mean
             # And attach the variable
@@ -645,10 +651,10 @@ engine_breg <- function(x,
             suppressWarnings(
               df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
                                                        data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+                                                       proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
               )
             )
-            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
 
             # Add all others as constant
             if(is.null(constant)){
@@ -680,7 +686,7 @@ engine_breg <- function(x,
               matrixStats::rowSds(pred_breg, na.rm = TRUE),
               matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
               apply(pred_breg, 1, mode)
-            ) %>% as.data.frame()
+            ) |> as.data.frame()
             names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
             pred_part$cv <- pred_part$sd / pred_part$mean
 
@@ -740,7 +746,7 @@ engine_breg <- function(x,
             }
 
             df$rowid <- 1:nrow(df)
-            df_sub <- subset(df, complete.cases(df))
+            df_sub <- subset(df, stats::complete.cases(df))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
             # For Integrated model, take the last one

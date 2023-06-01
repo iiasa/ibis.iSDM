@@ -15,10 +15,10 @@
 #' @param ... Any other arguements passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
-#' x <- distribution(background) %>%
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-#'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
+#' x <- distribution(background)  |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_output(x, "testmodel.tif")
 #' }
 
@@ -307,10 +307,10 @@ writeNetCDF <- function(file, fname,
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
-#' x <- distribution(background) %>%
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') %>%
-#'  engine_xgboost(nrounds = 2000) %>%  train(varsel = FALSE, only_linear = TRUE)
+#' x <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points')  |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_summary(x, "testmodel.rds")
 #' }
 #' @keywords utils
@@ -595,30 +595,32 @@ methods::setMethod(
     # Make some checks #
     assertthat::assert_that(
       inherits(mod, "DistributionModel"),
-      hasName(mod, "model"),
+      utils::hasName(mod, "model"),
       !is.Waiver(mod$get_data("fit_best"))
     )
     # Check that model type is known
     assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
     # Depending on engine, check package and load them
+
     if(inherits(mod, "GDB-Model")){
-      check_package("mboost"); require("mboost")
+      check_package("mboost")
     } else if(inherits(mod, "BART-Model")){
-      check_package("dbarts"); require("dbarts")
+      check_package("dbarts")
     } else if(inherits(mod, "INLABRU-Model")){
-      check_package("INLA"); require("INLA")
-      check_package("inlabru"); require("inlabru")
+      check_package("INLA")
+      check_package("inlabru")
     } else if(inherits(mod, "BREG-Model")){
-      check_package("BoomSpikeSlab"); require("BoomSpikeSlab")
+      check_package("BoomSpikeSlab")
     } else if(inherits(mod, "GLMNET-Model")){
-      check_package("glmnet"); require("glmnet")
-      check_package("glmnetUtils"); require("glmnetUtils")
+      check_package("glmnet")
+      check_package("glmnetUtils")
     } else if(inherits(mod, "STAN-Model")){
-      check_package("rstan"); require("rstan")
-      check_package("cmdstanr"); require("cmdstanr")
+      check_package("rstan")
+      check_package("cmdstanr")
     } else if(inherits(mod, "XGBOOST-Model")){
-      check_package("xgboost"); require("xgboost")
+      check_package("xgboost")
     }
+
     # --- #
     # Return the model
     return(mod)

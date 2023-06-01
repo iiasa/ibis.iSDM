@@ -146,7 +146,7 @@ methods::setMethod(
     check_package('biscale')
     check_package('ggplot2')
     check_package("cowplot")
-    if(!("biscale" %in% loadedNamespaces()) || ('biscale' %notin% sessionInfo()$otherPkgs) ) {
+    if(!("biscale" %in% loadedNamespaces()) || ('biscale' %notin% utils::sessionInfo()$otherPkgs) ) {
       try({requireNamespace('biscale');attachNamespace("biscale")},silent = TRUE)
     }
 

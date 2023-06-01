@@ -20,8 +20,8 @@ See Examples.
 }
 \examples{
 \dontrun{
-distribution(background) \%>\%
- add_predictors(my_covariates) \%>\%
+distribution(background) |>
+ add_predictors(my_covariates) |>
  sel_predictors(names = c("Forest", "Elevation"))
 }
 }

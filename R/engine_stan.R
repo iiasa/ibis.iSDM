@@ -35,6 +35,12 @@ NULL
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' * Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add Stan as an engine
+#' x <- distribution(background) |> engine_stan(iter = 1000)
+#' }
 #' @name engine_stan
 NULL
 #' @rdname engine_stan
@@ -204,7 +210,7 @@ engine_stan <- function(x,
                                          field_occurrence = 'observed',
                                          template = bg,
                                          settings = model$biodiversity[[i]]$pseudoabsence_settings)
-            if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+            if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
             # Sample environmental points for absence only points
             abs <- subset(presabs, observed == 0)
             # Re-extract environmental information for absence points
@@ -224,7 +230,7 @@ engine_stan <- function(x,
               model$biodiversity[[i]]$expect <- c( model$biodiversity[[i]]$expect,
                                                    rep(1, nrow(presabs)-length(model$biodiversity[[i]]$expect) ))
             }
-            df <- subset(df, complete.cases(df))
+            df <- subset(df, stats::complete.cases(df))
             assertthat::assert_that(nrow(presabs) == nrow(df))
 
             # Overwrite observation data
@@ -276,7 +282,7 @@ engine_stan <- function(x,
                             "model","generated_quantities")
 
         # Has intercept?
-        has_intercept <- attr(terms.formula(model$biodiversity[[1]]$equation), "intercept") == 1
+        has_intercept <- attr(stats::terms.formula(model$biodiversity[[1]]$equation), "intercept") == 1
         # Family and link function
         fam <- model$biodiversity[[1]]$family
         li <- model$biodiversity[[1]]$link
@@ -473,7 +479,7 @@ engine_stan <- function(x,
         if(length(model$biodiversity)>1){
           stop("done")
         } else {
-          has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
+          has_intercept <- attr(stats::terms(model$biodiversity[[1]]$equation), "intercept")
           # Format data list
           if(has_intercept == 1){
             pn <- c("Intercept",model$biodiversity[[1]]$predictors_names)
@@ -485,7 +491,7 @@ engine_stan <- function(x,
             X = as.matrix( model$biodiversity[[1]]$predictors[, pn] ),
             K = length( pn ),
             offsets = log(model$biodiversity[[1]]$expect), # Notice that exposure is log-transformed here!
-            has_intercept = attr(terms(model$biodiversity[[1]]$equation), "intercept"),
+            has_intercept = attr(stats::terms(model$biodiversity[[1]]$equation), "intercept"),
             has_spatial = ifelse(is.null(self$get_equation_latent_spatial()), 0, 1),
             # Horseshoe prior default parameters
             # FIXME: Allow passing this one via a parameter
@@ -538,15 +544,15 @@ engine_stan <- function(x,
           # Add offset if set
           if(!is.Waiver(model$offset)) {
             # Offsets are simply added linearly (albeit transformed)
-            if(hasName(full,"w")) full$w <- full$w + model$offset[,"spatial_offset"] else full$w <- model$offset[,"spatial_offset"]
+            if(utils::hasName(full,"w")) full$w <- full$w + model$offset[,"spatial_offset"] else full$w <- model$offset[,"spatial_offset"]
           }
           suppressWarnings(
             full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
                                                data = full,
-                                               proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+                                               proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
             )
           )
-          full <- as(full, 'SpatialPixelsDataFrame')
+          full <- methods::as(full, 'SpatialPixelsDataFrame')
 
           # Set target variables to bias_value for prediction if specified
           if(!is.Waiver(settings$get('bias_variable'))){
@@ -639,15 +645,15 @@ engine_stan <- function(x,
             # Add offset if set
             if(!is.null(offset)) {
               # Offsets are simply added linearly (albeit transformed)
-              if(hasName(full,"w")) full$w <- full$w + offset else full$w <- offset
+              if(utils::hasName(full,"w")) full$w <- full$w + offset else full$w <- offset
             }
             suppressWarnings(
               full <- sp::SpatialPointsDataFrame(coords = full[,c("x","y")],
                                                  data = full,
-                                                 proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+                                                 proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
               )
             )
-            full <- as(full, 'SpatialPixelsDataFrame')
+            full <- methods::as(full, 'SpatialPixelsDataFrame')
 
             # Do the prediction by sampling from the posterior
             pred_stan <- posterior_predict_stanfit(obj = obj,
@@ -670,7 +676,7 @@ engine_stan <- function(x,
             # Get model and intercept if present
             mod <- self$get_data('fit_best')
             model <- self$model
-            has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
+            has_intercept <- attr(stats::terms(model$biodiversity[[1]]$equation), "intercept")
             if(is.null(type)) type <- self$settings$get("type")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
@@ -695,7 +701,7 @@ engine_stan <- function(x,
             } else {
               df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
             }
-            df_partial <- df_partial %>% as.data.frame()
+            df_partial <- df_partial |> as.data.frame()
 
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
@@ -712,7 +718,7 @@ engine_stan <- function(x,
             if(!is.Waiver(model$offset)) {
               # Offsets are simply added linearly (albeit transformed).
               # FIXME: Taken here as average. To be re-evaluated as use case develops!
-              if(hasName(df_partial,"w")) df_partial$w <- df_partial$w + mean(model$offset,na.rm = TRUE) else df_partial$w <- mean(model$offset,na.rm = TRUE)
+              if(utils::hasName(df_partial,"w")) df_partial$w <- df_partial$w + mean(model$offset,na.rm = TRUE) else df_partial$w <- mean(model$offset,na.rm = TRUE)
             }
             # Simulate from the posterior
             pred_part <- posterior_predict_stanfit(obj = mod,
@@ -744,7 +750,7 @@ engine_stan <- function(x,
             # Get model object and check that everything is in order
             mod <- self$get_data('fit_best')
             model <- self$model
-            has_intercept <- attr(terms(model$biodiversity[[1]]$equation), "intercept")
+            has_intercept <- attr(stats::terms(model$biodiversity[[1]]$equation), "intercept")
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     'model' %in% names(self),
                                     is.character(x.var),
@@ -758,10 +764,10 @@ engine_stan <- function(x,
             suppressWarnings(
               df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
                                                        data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                       proj4string = sp::CRS( sp::proj4string(as(model$background, "Spatial")) )
+                                                       proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
               )
             )
-            df_partial <- as(df_partial, 'SpatialPixelsDataFrame')
+            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
 
             # Add all others as constant
             if(is.null(constant)){

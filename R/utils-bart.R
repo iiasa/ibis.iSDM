@@ -29,16 +29,16 @@ built_formula_bart <- function(obj){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(terms(form), "response")==0){
+    if(attr(stats::terms(form), "response")==0){
       if(obj$type == "poipo"){
-        form <- update.formula(form, "observed/w ~ .")
+        form <- stats::update.formula(form, "observed/w ~ .")
       } else {
-        form <- update.formula(form, "observed ~ .")
+        form <- stats::update.formula(form, "observed ~ .")
       }
     }
     assertthat::assert_that(
       is.formula(form),
-      attr(terms(form), "response")==1, # Has Response
+      attr(stats::terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
     )
   }
@@ -170,7 +170,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
       )
     )
     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-    if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, pnorm)
+    if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, stats::pnorm)
     ms$cv <- ms$sd / ms$mean
     ms$variable <- pd$xlbs[[i]]
     df <- cbind(df, ms)
@@ -263,10 +263,10 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
       colnames(dfbin) <- c(0, 1)
       dfbin <- reshape2::melt(dfbin)
       if (transform == TRUE) {
-        dfbin$value <- pnorm(dfbin$value)
+        dfbin$value <- stats::pnorm(dfbin$value)
       }
       # FIXME: To replace with base::aggregate to get rid of dplyr dependency
-      dfbin <- dfbin %>% group_by(variable) %>% summarize(value = median(value)) %>%
+      dfbin <- dfbin |> dplyr::group_by(variable) |> dplyr::summarize(value = stats::median(value)) |>
         data.frame()
       colnames(dfbin) <- c("is", "becomes")
       dfbin$is <- as.numeric(as.character(dfbin$is))
@@ -287,8 +287,8 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
       }
     } else {
       # Nothing binary, calculate median
-      q50 <- pnorm(apply(pd$fd[[i]], 2, median))
-      if (transform == TRUE) { q50 <- pnorm(q50) }
+      q50 <- stats::pnorm(apply(pd$fd[[i]], 2, median))
+      if (transform == TRUE) { q50 <- stats::pnorm(q50) }
       df <- data.frame(x = pd$levs[[i]], med = q50)
       nmax <- length(df$x)
       xmeds <- (df$x[2:nmax] - df$x[1:(nmax - 1)])/2 + df$x[1:(nmax - 1)]

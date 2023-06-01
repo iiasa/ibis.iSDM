@@ -45,8 +45,8 @@ Offsets specified for non-supported engines are ignored during the estimation
 }
 \examples{
 \dontrun{
- x <- distribution(background) \%>\%
-   add_predictors(covariates) \%>\%
+ x <- distribution(background) |>
+   add_predictors(covariates) |>
    add_offset(nicheEstimate)
 }
 }

@@ -1,3 +1,10 @@
+# ibis.iSDM 0.0.3
+
+* Removed Magittr dependency #41
+* Smaller improvements to documentation and removing of CRAN preventing function calls.
+* Made the separation from hyperparameter search functions clearer and added new option to filter highly correlated covariates via `train`.
+* Added Boruta for iterative feature selection of predictor variables.
+
 # ibis.iSDM 0.0.2
 
 * Smaller documentation fixes, including to make sure examples and returns are in all exported function documentations.

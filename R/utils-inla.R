@@ -139,11 +139,11 @@ built_formula_inla <- function(model, id, x, settings){
       }
       form <- to_formula(form) # Convert to formula
       # Add offset if specified
-      if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+      if(!is.Waiver(x$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
       if( length( grep('Spatial', x$get_latent() ) ) > 0 ){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
-          form <- update.formula(form, paste0(" ~ . + ",
+          form <- stats::update.formula(form, paste0(" ~ . + ",
                                               x$engine$get_equation_latent_spatial(
                                                 method = attr(x$get_latent(),'method'),
                                                 vars = which(ids == id),
@@ -158,13 +158,13 @@ built_formula_inla <- function(model, id, x, settings){
       if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
       form <- to_formula( obj$equation )
       # If response is missing, add manually
-      if(attr(terms(form), "response")==0){
-        form <- update.formula(form, "observed ~ .")
+      if(attr(stats::terms(form), "response")==0){
+        form <- stats::update.formula(form, "observed ~ .")
       }
       # Security checks
       assertthat::assert_that(
         is.formula(form),
-        attr(terms(form), "response")==1, # Has Response
+        attr(stats::terms(form), "response")==1, # Has Response
         all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
       )
     }
@@ -193,11 +193,11 @@ built_formula_inla <- function(model, id, x, settings){
 
       # Add offset if specified
       # TODO: Not quite sure if this formulation works for inlabru predictor expressions
-      if(!is.Waiver(x$offset) ){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+      if(!is.Waiver(x$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
       if( length( grep('Spatial', x$get_latent() ) ) > 0 ){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
-          form <- update.formula(form, paste0(" ~ . + ",
+          form <- stats::update.formula(form, paste0(" ~ . + ",
                                               # For SPDE components, simply add spatial.field
                                               paste0("spatial.field", which(ids == id))
             )
@@ -214,11 +214,11 @@ built_formula_inla <- function(model, id, x, settings){
       # Convert to formula to be safe
       form <- to_formula( obj$equation )
       # Add generic Intercept if not set in formula
-      if("Intercept" %notin% all.vars(form)) form <- update.formula(form, ". ~ . + Intercept")
+      if("Intercept" %notin% all.vars(form)) form <- stats::update.formula(form, ". ~ . + Intercept")
       # If length of ids is larger than 1, add dataset specific intercept too
       # Check whether to use dataset specific intercepts
       if(length(types)>1 && obj$use_intercept){
-        form <- update.formula(form,
+        form <- stats::update.formula(form,
                                paste0(". ~ . + ",
                                       paste0('Intercept_',
                                              make.names(tolower( bionames )), '_', types)
@@ -231,7 +231,7 @@ built_formula_inla <- function(model, id, x, settings){
       if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
-          form <- update.formula(form, paste0(" ~ . + ",
+          form <- stats::update.formula(form, paste0(" ~ . + ",
                                               # For SPDE components, simply add spatial.field
                                               paste0("spatial.field",which(ids == id))
             )
@@ -299,15 +299,15 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     SP = sp::SpatialPolygons(polys, proj4string = sp::CRS(sp::proj4string(x)))
     voronoi = sp::SpatialPolygonsDataFrame(SP, data = data.frame(x = crds[,1],
                                                                  y = crds[, 2],
-                                                                 area = sapply(slot(SP, "polygons"),slot, "area"),
-                                                                 row.names = sapply(slot(SP, "polygons"),slot, "ID")))
+                                                                 area = sapply(methods::slot(SP, "polygons"), methods::slot, "area"),
+                                                                 row.names = sapply(methods::slot(SP, "polygons"), methods::slot, "ID")))
     if (!is.null(bounding.polygon)) {
       bounding.polygon <- rgeos::gUnion(bounding.polygon, bounding.polygon)
       voronoi.clipped <- rgeos::gIntersection(voronoi, bounding.polygon,
                                        byid = TRUE, id = row.names(voronoi))
       df <- data.frame(voronoi)
-      df$area <- sapply(slot(voronoi.clipped, "polygons"),
-                        slot, "area")
+      df$area <- sapply(methods::slot(voronoi.clipped, "polygons"),
+                        methods::slot, "area")
       voronoi <- sp::SpatialPolygonsDataFrame(voronoi.clipped,
                                           df)
     }
@@ -320,14 +320,14 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 
   if(variant == 'gpc'){
     # Try to convert to spatial already
-    if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
+    if(!inherits(region.poly, 'Spatial')) region.poly <- methods::as(region.poly,'Spatial')
 
-    poly.gpc <- as(region.poly@polygons[[1]]@Polygons[[1]]@coords,'gpc.poly')
-    w <- sapply(tiles, function(p) rgeos::area.poly(rgeos::intersect(as(cbind(p$x, p$y), 'gpc.poly'), poly.gpc)))
+    poly.gpc <- methods::as(region.poly@polygons[[1]]@Polygons[[1]]@coords,'gpc.poly')
+    w <- sapply(tiles, function(p) rgeos::area.poly(rgeos::intersect(methods::as(cbind(p$x, p$y), 'gpc.poly'), poly.gpc)))
     if(relative) w <- w / sum(w)
   } else if (variant == 'gpc2'){
     # Try to convert to spatial already
-    if(!inherits(region.poly, 'Spatial')) region.poly <- as(region.poly,'Spatial')
+    if(!inherits(region.poly, 'Spatial')) region.poly <- methods::as(region.poly,'Spatial')
     tiles <- voronoi.polygons(sp::SpatialPoints(mesh$loc[, 1:2]))
     w <- sapply(1:length(tiles), function(p) {
       aux <- tiles[p, ]
@@ -351,7 +351,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     # Calculate area of each polygon in km2
     w <- sf::st_area(
        sf::st_as_sf(polys)
-    ) %>% units::set_units(km^2) %>% as.numeric()
+    ) |> units::set_units(km^2) |> as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
   }
@@ -378,17 +378,17 @@ mesh_as_sf <- function(mesh) {
     # Retrieve the vertex coordinates of the current triangle
     cur <- pointindex[index, ]
     # Construct a Polygons object to contain the triangle
-    Polygons(list(
-             sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
-             ID = index
-             )
-  }, points = mesh$loc[, c(1, 2)], pointindex = tv) %>%
+    sp::Polygons(list(
+      sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
+      ID = index
+      )
+  }, points = mesh$loc[, c(1, 2)], pointindex = tv) |>
     # Convert the polygons to a SpatialPolygons object
-    sp::SpatialPolygons(., proj4string = mesh$crs) %>%
+    sp::SpatialPolygons(., proj4string = mesh$crs) |>
     # Convert to sf
     sf::st_as_sf(.)
   # Calculate and add area to the polygon
-  dp$areakm2 <- sf::st_area(dp) %>% units::set_units(km^2) %>% as.numeric()
+  dp$areakm2 <- sf::st_area(dp) |> units::set_units(km^2) |> as.numeric()
   dp$relarea <- dp$areakm2 / sum(dp$areakm2,na.rm = TRUE)
   return(dp)
 }
@@ -631,7 +631,7 @@ post_prediction <- function(mod, nsamples = 100,
   preds <- mod$model$predictors
   # Set any other existing intercept variables
   preds[,grep('Intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
-  preds <- SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
+  preds <- sp::SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
   preds_names <- mod$model$predictors_names
   preds_types <- mod$model$predictors_types
   ofs <- mod$model$offset
@@ -720,7 +720,7 @@ post_prediction <- function(mod, nsamples = 100,
   myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
 
   # evaluate_model Function
-  A <- inlabru::amatrix_eval(model, data = preds)
+  A <- inlabru:::amatrix_eval(model, data = preds)
   A <- x$engine$data$stk_pred$stk_proj$A
 
   effects <- evaluate_effect_multi(
@@ -735,7 +735,7 @@ post_prediction <- function(mod, nsamples = 100,
     return(effects)
   }
 
-  values <- evaluate_predictor(
+  values <- inlabru::evaluate_predictor(
     model,
     state = state,
     data = data,
@@ -1044,7 +1044,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   )
 
   # Buffer the region to be sure
-  suppressWarnings( background.g <- rgeos::gBuffer(as(background,'Spatial'), width = 0) )
+  suppressWarnings( background.g <- rgeos::gBuffer(methods::as(background,'Spatial'), width = 0) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -1054,12 +1054,12 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  # projpoints <- projgrid$lattice$loc %>% as.data.frame() %>% sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  # projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
 
   # TODO: Try and find an alternative to the splancs package to remove this dependent package
   suppressWarnings(
     cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
-                                       proj4string = as(background.g,'Spatial')@proj4string),
+                                       proj4string = methods::as(background.g,'Spatial')@proj4string),
                                y = background.g))
   )
 
@@ -1211,12 +1211,12 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
                                         dims = Nxy)
   # Convert background to buffered land
   suppressWarnings(
-    background.g <- rgeos::gBuffer(as(background,'Spatial'),
+    background.g <- rgeos::gBuffer(methods::as(background,'Spatial'),
                                    width = 0)
     )
   suppressWarnings(
     cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
-                                                     proj4string = as(background.g,'Spatial')@proj4string),
+                                                     proj4string = methods::as(background.g,'Spatial')@proj4string),
                                y = background.g))
   )
   # Get the cells that are in
@@ -1252,10 +1252,10 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
                                         proj4string = mesh$crs
     )
     # Remove missing data
-    preds <- subset(preds, complete.cases(preds@data))
-    preds <- as(preds, 'SpatialPixelsDataFrame')
+    preds <- subset(preds, stats::complete.cases(preds@data))
+    preds <- methods::as(preds, 'SpatialPixelsDataFrame')
   } else {
-    preds <- subset(preds, complete.cases(preds))
+    preds <- subset(preds, stats::complete.cases(preds))
   }
 
   return(preds)
@@ -1282,8 +1282,8 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(length(w2)==1)
 
   # Format the output
-  o <- m[[w2]] %>%
-    tibble::rownames_to_column('variable') %>%
+  o <- m[[w2]]  |>
+    tibble::rownames_to_column('variable') |>
     tibble::as_tibble()
   if(what == "fixed"){
     names(o) <- c("variable", "mean", "sd", "q05", "q50", "q95", "mode", "kld")
@@ -1301,15 +1301,15 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
   assertthat::assert_that(inherits(inla.model,'inla'),
                           is.character(what),
                           what %in% c('fixed','hyper'))
-  par.ori <- par(no.readonly = TRUE)
-  par(mfrow = c(4,3), mar = c(3,3,1,0.3), mgp = c(2,1,0))
+  par.ori <- graphics::par(no.readonly = TRUE)
+  graphics::par(mfrow = c(4,3), mar = c(3,3,1,0.3), mgp = c(2,1,0))
   if(what == 'fixed'){
     varnames <- names(inla.model$marginals.fixed)
     for(i in 1: length(varnames)){
       var.mar <- data.frame(inla.model$marginals.fixed[i])
       plot(x = var.mar[,1], y=var.mar[, 2], type="l",
            xlab=paste(names(var.mar)[1]), ylab=paste(names(var.mar)[2]))
-      abline(v=0, col="red")
+      graphics::abline(v=0, col="red")
     }
   } else {
     varnames <- names(inla.model$marginals.hyperpar)
@@ -1319,7 +1319,7 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
            xlab=paste(names(var.mar)[1]), ylab=paste(names(var.mar)[2]))
     }
   }
-  par(par.ori)
+  graphics::par(par.ori)
 }
 
 #' Additional INLA priors not already available.
@@ -1397,7 +1397,7 @@ inla.backstep <- function(master_form,
   if(!is.null(keep)){
     te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
     # Also remove keep from master_form as we won't use them below
-    master_form <- as.formula(paste0(response,' ~ ', paste0(te,collapse = " + ")," - 1"))
+    master_form <- stats::as.formula(paste0(response,' ~ ', paste0(te,collapse = " + ")," - 1"))
   }
 
   assertthat::assert_that(length(te)>0, !is.null(response), all(keep %notin% te ))
@@ -1490,7 +1490,7 @@ inla.backstep <- function(master_form,
         best_found <- o
       } else {
         # Get best model
-        test_form <- as.formula(oo$form[which.min(oo$cpo)])
+        test_form <- stats::as.formula(oo$form[which.min(oo$cpo)])
       }
       rm(o,oo)
     } else {

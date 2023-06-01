@@ -44,8 +44,8 @@ function \code{\link[=add_offset_range]{add_offset_range()}} or the \code{bossMa
 }
 \examples{
 \dontrun{
- x <- distribution(background) \%>\%
-   add_predictors(covariates) \%>\%
+ x <- distribution(background) |>
+   add_predictors(covariates) |>
    add_offset_bias(samplingBias)
 }
 }

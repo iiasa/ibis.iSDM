@@ -63,7 +63,7 @@ NULL
 #' @aliases add_predictors
 #' @examples
 #' \dontrun{
-#'  obj <- distribution(background) %>%
+#'  obj <- distribution(background) |>
 #'         add_predictors(covariates, transform = 'scale')
 #'  obj
 #' }
@@ -540,8 +540,8 @@ methods::setMethod(
 #' @param names [`vector`] A Vector of character names describing the environmental stack.
 #' @examples
 #' \dontrun{
-#' distribution(background) %>%
-#'  add_predictors(my_covariates) %>%
+#' distribution(background) |>
+#'  add_predictors(my_covariates) |>
 #'  rm_predictors(names = "Urban")
 #' }
 #' @name rm_predictors
@@ -589,8 +589,8 @@ methods::setMethod(
 #' @param names [`vector`] A Vector of character names describing the environmental stack.
 #' @examples
 #' \dontrun{
-#' distribution(background) %>%
-#'  add_predictors(my_covariates) %>%
+#' distribution(background) |>
+#'  add_predictors(my_covariates) |>
 #'  sel_predictors(names = c("Forest", "Elevation"))
 #' }
 #' @name sel_predictors
@@ -812,7 +812,7 @@ methods::setMethod(
 #' @seealso [add_predictors]
 #' @examples
 #' \dontrun{
-#'  obj <- distribution(background) %>%
+#'  obj <- distribution(background) |>
 #'         add_predictors_globiom(fname = "", transform = 'none')
 #'  obj
 #' }
@@ -1091,7 +1091,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   sc <- vector() # For storing the scenario files
 
   # Now open the netcdf file with stats
-  if( length( grep("netcdf", stars:::detect.driver(fname), ignore.case = TRUE) )>0 ){
+  if( length( grep("netcdf", stars::detect.driver(fname), ignore.case = TRUE) )>0 ){
     if(verbose){
       myLog('[Predictor]','green',"Loading in predictor file...")
       pb <- progress::progress_bar$new(total = length(vars),
@@ -1158,7 +1158,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
             make.names(unlist(class_units)) |> as.vector()
           )
 
-          ff <- ff %>% stars:::split.stars(col_class) %>% setNames(nm = class_units)
+          ff <- ff |> stars:::split.stars(col_class) |> stats::setNames(nm = class_units)
 
           # FIXME: Dirty hack to deal with the forest zone dimension
           # If there are more dimensions than 3, aggregate over them
@@ -1207,7 +1207,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       grep("y|latitude",names(full_dis), ignore.case = TRUE,value = TRUE),
       grep("year|time",names(full_dis), ignore.case = TRUE,value = TRUE)
       )] # Order assumed to be correct
-    stars:::st_dimensions(sc) <- full_dis # Target dimensions
+    stars::st_dimensions(sc) <- full_dis # Target dimensions
 
   } else { stop("Fileformat not recognized!")}
 
@@ -1235,13 +1235,13 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
     if(length(times)>1){
       # In case times got removed
       times_first <- stars::st_get_dimension_values(sc, "time")[1]
-      sc <- sc %>% stars:::filter.stars(time == times_first)
+      sc <- sc |> stars:::filter.stars(time == times_first)
       times <- times_first;rm(times_first)
     }
   } else if(period == "projection"){
     # Remove the first time entry instead, only using the last entries
     times_allbutfirst <- stars::st_get_dimension_values(sc, "time")[-1]
-    sc <- sc %>% stars:::filter.stars(time %in% times_allbutfirst)
+    sc <- sc |> stars:::filter.stars(time %in% times_allbutfirst)
     times <- times_allbutfirst; rm(times_allbutfirst)
   }
   assertthat::assert_that(length(times)>0,
@@ -1251,7 +1251,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   if(!is.null(template)){
     # Check that template is a raster, otherwise rasterize for GLOBIOM use
     if(inherits(template, "sf")){
-      o <- sc %>% stars:::slice.stars("time" , 1) %>% as("Raster")
+      o <- sc |> stars:::slice.stars("time" , 1) |> methods::as("Raster")
       if("fasterize" %in% utils::installed.packages()[,1]){
         template <- fasterize::fasterize(sf = template, raster = o, field = NULL)
       } else {

@@ -36,6 +36,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
 
   # Linearly approximate all attributes for new object
   # FIXME: Probably terribly memory inefficient but works
+  # MH: Should this be stars:::as.data.frame.stars?
   new <- as.data.frame(env)
   assertthat::assert_that(assertthat::has_name(new,c("x","y","time")))
   new <- dplyr::right_join(new, expand.grid(x = unique(new$x), y = unique(new$y), time = new_times),
@@ -104,7 +105,7 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
     all(vars %in% names(obj))
   )
   # Future?
-  if(foreach:::getDoParRegistered()){
+  if(foreach::getDoParRegistered()){
     ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
     fut <- TRUE
   } else { fut <- FALSE }
@@ -176,8 +177,8 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   out <- list()
   for(tt in which){
     # Slice to a specific time frame for each
-    o <- obj %>% stars:::slice.stars({{time_band}}, tt) |>
-      as("Raster")
+    o <- obj |> stars:::slice.stars({{time_band}}, tt) |>
+      methods::as("Raster")
 
     # Reset times to the correct ones
     o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
@@ -322,33 +323,33 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   fun <- match.arg(fun, c("mean", "sum"),several.ok = FALSE)
 
   # Convert to scenarios to data.frame
-  df <- stars:::as.data.frame.stars(stars:::st_as_stars(scenario)) %>% subset(., complete.cases(.))
+  df <- stars:::as.data.frame.stars(stars::st_as_stars(scenario)) |> (\(.) subset(., stats::complete.cases(.)))()
   names(df) <- c("x", "y", "band", "suitability")
   # Add grid cell grouping
-  df <- df %>% dplyr::group_by(x,y) %>% dplyr::mutate(id = dplyr::cur_group_id()) %>%
-    dplyr::ungroup() %>% dplyr::select(-x,-y) %>%
+  df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>
+    dplyr::ungroup() |> dplyr::select(-x,-y) |>
     dplyr::arrange(id, band)
 
   # Summarize the overall moments
   if(fun == "mean"){
     # Check if has unit, if so deparse
     if(inherits(df$suitability, 'units')) df$suitability <- as.numeric(df$suitability)
-    out <- df %>%
-      dplyr::filter(suitability > 0) %>%
-      dplyr::group_by(band) %>%
+    out <- df  |>
+      dplyr::filter(suitability > 0) |>
+      dplyr::group_by(band) |>
       dplyr::summarise(suitability_mean = mean(suitability, na.rm = TRUE),
                        suitability_q25 = quantile(suitability, .25),
                        suitability_q50 = quantile(suitability, .5),
                        suitability_q75 = quantile(suitability, .75))
     # Total amount of area lost / gained / stable since previous time step
-    totchange_occ <- df %>%
-      dplyr::group_by(id) %>%
-      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
-    o <- totchange_occ %>% dplyr::group_by(band) %>%
+    totchange_occ <- df |>
+      dplyr::group_by(id)  |>
+      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) )  |>  dplyr::ungroup()
+    o <- totchange_occ |> dplyr::group_by(band) |>
       dplyr::summarise(suitability_avggain = mean(change[change > 0]),
                        suitability_avgloss = mean(change[change < 0]))
 
-    out <- out %>% dplyr::left_join(o, by = "band")
+    out <- out |> dplyr::left_join(o, by = "band")
     if(relative){
       # Finally calculate relative change to baseline (first entry) for all entries where this is possible
       relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) *fac)
@@ -358,22 +359,22 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   } else if(fun == "sum") {
     # Check if has unit, if so deparse
     if(inherits(df$suitability, 'units')) df$suitability <- as.numeric(df$suitability)
-    out <- df %>%
-      dplyr::filter(suitability > 0) %>%
-      dplyr::group_by(band) %>%
+    out <- df |>
+      dplyr::filter(suitability > 0) |>
+      dplyr::group_by(band) |>
       dplyr::summarise(suitability_sum = sum(suitability, na.rm = TRUE),
                        suitability_q25 = quantile(suitability, .25),
                        suitability_q50 = quantile(suitability, .5),
                        suitability_q75 = quantile(suitability, .75))
     # Total amount of area lost / gained / stable since previous time step
-    totchange_occ <- df %>%
-      dplyr::group_by(id) %>%
-      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) %>% dplyr::ungroup()
-    o <- totchange_occ %>% dplyr::group_by(band) %>%
+    totchange_occ <- df |>
+      dplyr::group_by(id) |>
+      dplyr::mutate(change = (suitability - dplyr::lag(suitability)) ) |> dplyr::ungroup()
+    o <- totchange_occ |> dplyr::group_by(band) |>
       dplyr::summarise(suitability_avggain = sum(change[change > 0]),
                        suitability_avgloss = sum(change[change < 0]))
 
-    out <- out %>% dplyr::left_join(o, by = "band")
+    out <- out |> dplyr::left_join(o, by = "band")
     if(relative){
       # Finally calculate relative change to baseline (first entry) for all entries where this is possible
       relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) *fac)
@@ -418,7 +419,7 @@ summarise_change <- function(scenario){
     ar_unit <- "ha"
     mult <- 0.0001
   } else { mult <- 1}
-  ar <- as(ar, "Raster")
+  ar <- methods::as(ar, "Raster")
 
   # --- #
   val <- c("Current range", "Future range", "Unsuitable",

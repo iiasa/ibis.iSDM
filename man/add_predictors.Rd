@@ -112,7 +112,7 @@ will return an error message if these are used.
 }
 \examples{
 \dontrun{
- obj <- distribution(background) \%>\%
+ obj <- distribution(background) |>
         add_predictors(covariates, transform = 'scale')
  obj
 }

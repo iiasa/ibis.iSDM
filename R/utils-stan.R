@@ -51,13 +51,13 @@ built_formula_stan <- function(model, id, x, settings){
     )
 
     # Add offset if specified
-    if(!is.Waiver(x$offset)){ form <- update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+    if(!is.Waiver(x$offset)){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
     # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
   } else {
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
     form <- to_formula(model$biodiversity[[1]]$equation)
     # Update formula to weights if forgotten
-    if(model$biodiversity[[1]]$family=='poisson') form <- update.formula(form, 'observed ~ .')
+    if(model$biodiversity[[1]]$family=='poisson') form <- stats::update.formula(form, 'observed ~ .')
     assertthat::assert_that(
       all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
     )
@@ -104,13 +104,13 @@ ilink <- function(x, link = "log"){
   switch (link,
     identity = x,
     log = exp(x),
-    logm1 = expp1(x),
+    logm1 = exp(x) + 1,
     log1p = expm1(x),
     inverse = 1/x,
     sqrt = x^2,
     logit = ( 1 / (1 + exp(-x)) ),
-    probit = pnorm(x),
-    cauchit = pcauchy(x),
+    probit = stats::pnorm(x),
+    cauchit = stats::pcauchy(x),
     cloglog = (1 - exp(-exp(x)))
   )
 }
@@ -127,11 +127,11 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
   # Check if available
   if(!requireNamespace("cmdstanr", quietly = TRUE)){
     if(install){
-      if(ask){ a <- askYesNo("Install cmdstanr?") } else { a <- TRUE}
+      if(ask){ a <- utils::askYesNo("Install cmdstanr?") } else { a <- TRUE}
       if(a){
-        install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
-        check_cmdstan_toolchain()
-        install_cmdstan(cores = 2)
+        utils::install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+        cmdstanr::check_cmdstan_toolchain()
+        cmdstanr::install_cmdstan(cores = 2)
       }
     } else {
       check_package("cmdstanr")
@@ -357,11 +357,11 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   mode <- match.arg(mode, c("predictor", "response"), several.ok = FALSE)
   # Build model matrix
   # Note: This removes all NA cells from matrix
-  A <- model.matrix(object = delete.response(terms(form)),
-                     data = newdata)
+  A <- stats::model.matrix(object = stats::delete.response(stats::terms(form)),
+                           data = newdata)
   assertthat::assert_that(nrow(A)>0, inherits(A, "matrix") || inherits(A, "dgCMatrix"))
   # Remove intercept unless set
-  if(attr(terms(form),"intercept") == 1) {
+  if(attr(stats::terms(form),"intercept") == 1) {
     if(length(grep("Intercept", colnames(A), ignore.case = TRUE))>0){
         A <- A[,-(grep("(Intercept)", colnames(A),fixed = T))]
     }
@@ -380,7 +380,7 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   # Get only beta coefficients and Intercept if set
   if("Intercept" %in% colnames(pp)) what <- "beta|Intercept" else what <- "beta"
   suppressWarnings( pp <- pp[ c(grep(what, colnames(pp), value = TRUE)) ] )
-  if(hasName(pp, "b_Intercept")) pp <- pp[ grep("b_Intercept",colnames(pp), invert = T)]
+  if(utils::hasName(pp, "b_Intercept")) pp <- pp[ grep("b_Intercept",colnames(pp), invert = T)]
 
   # Prepare offset if set
   if(!is.null(offset)) {

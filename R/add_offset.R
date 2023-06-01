@@ -34,8 +34,8 @@
 #' @keywords prior, offset
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
-#'    add_predictors(covariates) %>%
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
 #'    add_offset(nicheEstimate)
 #' }
 #' @name add_offset
@@ -181,8 +181,8 @@ methods::setMethod(
 #' @returns Adds a bias offset to a [`distribution`] object.
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
-#'    add_predictors(covariates) %>%
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
 #'    add_offset_bias(samplingBias)
 #' }
 #' @name add_offset_bias
@@ -430,7 +430,7 @@ methods::setMethod(
     if(nrow(layer)>1) layer <- layer |> sf::st_union() |> sf::st_as_sf()
 
     # Rasterize the range
-    if( 'fasterize' %in% installed.packages()[,1] ){
+    if( 'fasterize' %in% utils::installed.packages()[,1] ){
       ras_range <- try({ fasterize::fasterize(layer, temp, field = NULL, background = NA) },silent = TRUE)
       if(inherits(ras_range,"try-error")){
         myLog('[Setup]','yellow','Fasterize package needs to be re-installed!')

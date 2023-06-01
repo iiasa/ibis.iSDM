@@ -17,20 +17,25 @@ NULL
 #' a [RasterLayer] object named [`prediction`] that contains the spatial prediction of the model.
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
-#' Available options in this function include:
+#' Other parameters in this function:
 #'
-#' * \code{"rm_corPred"} Setting this to \code{TRUE} removes highly correlated variables for the observation
-#' prior to fitting.
-#' * \code{"varsel"} This option allows to make use of hyper-parameter search for several models (\code{"reg"}) or
-#' alternatively of variable selection methods to further reduce model complexity. Generally substantially increases
-#' runtime. The option makes use of the \code{"abess"} approach (Zhu et al. 2020) to identify and remove the least-important
-#' variables.
+#' * \code{"filter_predictors"} The parameter can be set to various options to remove highly correlated variables or those
+#' with little additional information gain from the model prior to any estimation. Available options are \code{"none"} (Default) \code{"pearson"} for
+#' applying a \code{0.7} correlation cutoff, \code{"abess"} for the regularization framework by Zhu et al. (2020), or \code{"RF"} or \code{"randomforest"}
+#' for removing the least important variables according to a randomForest model. **Note**: This function is only applied on
+#' predictors for which no prior has been provided (e.g. potentially non-informative ones).
+#'
+#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter search for several models, which can improve
+#' prediction accuracy although through the a substantial increase in computational cost.
+#'
 #' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
 #' the engine does not support joint integration of likelihoods.
 #' See also Miller et al. (2019) in the references for more details on different types of integration. Of course,
 #' if users want more control about this aspect, another option is to fit separate models
 #' and make use of the [add_offset], [add_offset_range] and [ensemble] functionalities.
-#' * \code{"clamp"} Clamps the projection predictors to the range of values observed during model training.
+#'
+#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors to the range of values observed
+#' during model training.
 #'
 #' @note
 #' There are no silver bullets in (correlative) species distribution modelling and for each model the analyst has to
@@ -39,16 +44,19 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
-#' @param rm_corPred Remove highly correlated predictors (Default: \code{FALSE}). This option
-#' removes - based on pairwise comparisons - those covariates that are highly collinear (Pearson's \code{r >= 0.7}).
-#' @param varsel Perform a variable selection on the set of predictors either prior to building the model
-#' or via variable selection / regularization of the model. Available options are:
-#' * [`none`] for no or default priors and no extensive hyperparameter search.
-#' * [`reg`] Model selection either through DIC or regularization / hyperparameter tuning depending on the
-#' engine (Default).
-#' * [`abess`] A-priori adaptive best subset selection of covariates via the [abess] package (see References).
-#' Note that this effectively fits a separate generalized linear model to reduce the number of covariates.
-#' Can be helpful for engines that don't directly support efficient variable regularization and when \code{N>100}.
+#' @param filter_predictors A [`character`] defining if and how highly correlated predictors are to be removed
+#' prior to any model estimation.
+#' Available options are:
+#' * \code{"none"} No prior variable removal is performed (Default).
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
+#' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [abess] package (see References). Note that this
+#' effectively fits a separate generalized linear model to reduce the number of covariates.
+#' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
+#'
+#' @param optim_hyperparam Perform a variable selection on the set of predictors either prior
+#' to building the model (Default: \code{FALSE}).
+#'
 #' @param inference_only By default the [engine] is used to create
 #' a spatial prediction of the suitability surface, which can take time. If only inferences of
 #' the strength of relationship between covariates and observations are required, this parameter
@@ -61,6 +69,7 @@ NULL
 #' than one [`BiodiversityDataset-class`] object is provided in \code{x}. Particular relevant for engines
 #' that do not support the integration of more than one dataset. Integration methods are generally sensitive
 #' to the order in which they have been added to the  [`BiodiversityDistribution`] object.
+#'
 #' Available options are:
 #' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
 #' added to the predictor stack and thus are predictors for subsequent models (Default).
@@ -91,15 +100,15 @@ NULL
 #' @examples
 #' \dontrun{
 #'  # Fit a linear penalized logistic regression model via stan
-#'  x <- distribution(background) %>%
+#'  x <- distribution(background) |>
 #'         # Presence-absence data
-#'         add_biodiversity_poipa(surveydata) %>%
+#'         add_biodiversity_poipa(surveydata) |>
 #'         # Add predictors and scale them
-#'         add_predictors(env = predictors, transform = "scale", derivates = "none") %>%
-#'         # Use stan for estimation
+#'         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
+#'         # Use Stan for estimation
 #'         engine_stan(chains = 2, iter = 1000, warmup = 500)
 #'  # Train the model
-#'  mod <- train(x, only_linear = TRUE, varsel = 'none')
+#'  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
 #'  mod
 #' }
 #' @name train
@@ -115,7 +124,7 @@ NULL
 methods::setGeneric(
   "train",
   signature = methods::signature("x"),
-  function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
+  function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
 
@@ -125,7 +134,7 @@ methods::setGeneric(
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, runname, rm_corPred = FALSE, varsel = "none", inference_only = FALSE,
+  function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
            aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
     if(missing(runname)) runname <- "Unnamed run"
@@ -134,7 +143,8 @@ methods::setMethod(
     assertthat::assert_that(
       inherits(x, "BiodiversityDistribution"),
       is.character(runname),
-      is.logical(rm_corPred),
+      is.logical(optim_hyperparam),
+      is.character(filter_predictors),
       is.logical(inference_only),
       is.logical(only_linear),
       is.character(method_integration),
@@ -150,15 +160,14 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #rm_corPred = TRUE; varsel = "none"; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
+    #filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
-    if(is.logical(varsel)) varsel <- ifelse(varsel, "reg", "none")
-    varsel <- match.arg(varsel, c("none", "reg", "abess"), several.ok = FALSE)
+    filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
     # Define settings object for any other information
     settings <- bdproto(NULL, Settings)
-    settings$set('rm_corPred', rm_corPred)
-    settings$set('varsel', varsel)
+    settings$set('filter_predictors', filter_predictors)
+    settings$set('optim_hyperparam', optim_hyperparam)
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
@@ -199,7 +208,7 @@ methods::setMethod(
       } else {
         dummy <- raster::raster(extent(x$background),nrow=100,ncol=100,val=1);names(dummy) <- 'dummy'
       }
-      model[['predictors']] <- as.data.frame(dummy, xy = TRUE)
+      model[['predictors']] <- raster::as.data.frame(dummy, xy = TRUE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
       model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
@@ -280,7 +289,7 @@ methods::setMethod(
           # Then calculate
           ras <- st_kde(points = poi, background = bg, bandwidth = 3)
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(ras) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(ras) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(ras) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(ras),
@@ -307,12 +316,12 @@ methods::setMethod(
             rm(ras, o )
           }
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], as.data.frame(cc) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(cc) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(cc) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(cc),
                                                                      type = "numeric" )
-                                                          )
+          )
           if( !all(names(cc) %in% model[['predictors_object']]$get_names()) ){
             model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, cc)
           }
@@ -336,7 +345,7 @@ methods::setMethod(
         names(ras_of) <- "spatial_offset"
       }
       # Save overall offset
-      ofs <- as.data.frame(ras_of, xy = TRUE)
+      ofs <- raster::as.data.frame(ras_of, xy = TRUE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
       model[['offset']] <- ofs
       # Also add offset object for faster extraction
@@ -380,7 +389,7 @@ methods::setMethod(
       # --- #
       # Rename observation column to 'observed'. Needs to be consistent for INLA
       # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
-      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations %>% dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
+      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations |> dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
 
       # If the type is polygon, convert to regular sampled points per covered grid cells
@@ -389,7 +398,7 @@ methods::setMethod(
           poly = guess_sf(model$biodiversity[[id]]$observations),
           template = emptyraster(x$predictors$get_data(df = FALSE)),
           field_occurrence = "observed" # renamed above
-                               )
+        )
         model[['biodiversity']][[id]][['observations']] <- o |> as.data.frame()
         model[['biodiversity']][[id]][['type']] <- ifelse(model[['biodiversity']][[id]][['type']] == 'polpo', 'poipo', 'poipa')
         # Check and reset multiplication weights
@@ -431,7 +440,7 @@ methods::setMethod(
                              rm.na = FALSE)
 
       # Remove missing values as several engines can't deal with those easily
-      miss <- complete.cases(env)
+      miss <- stats::complete.cases(env)
       if(sum( !miss )>0 && getOption('ibis.setupmessages')) {
         myLog('[Setup]','yellow', 'Excluded ', sum( !miss ), ' observations owing to missing values in covariates!' )
       }
@@ -465,9 +474,11 @@ methods::setMethod(
         all( apply(env, 1, function(x) all(!is.na(x) )) ),msg = 'Missing values in extracted environmental predictors.'
       )
 
-      # Check whether predictors should be refined and do so
-      if(settings$get('rm_corPred') && ('dummy' %in% model[['predictors_names']])){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Removing highly correlated variables...')
+      # Biodiversity dataset specific predictor refinement if the option is set
+      if(settings$get("filter_predictors")!= "none"){
+        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
+                                                                                  settings$get("filter_predictors"),'...'))
+        # Make backups
         test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
 
         # Ignore variables for which we have priors
@@ -475,73 +486,41 @@ methods::setMethod(
           keep <- unique( as.character(x$priors$varnames()) )
           if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
           test <- test[,-which(names(test) %in% keep)]
-          assert_that(!any(keep %in% names(test)))
-        } else keep <- NULL
+          assertthat::assert_that(!any(keep %in% names(test)))
+        } else {keep <- NULL}
+        # Add bias variable to keep as we risk filtering it out otherwise
+        if(!is.Waiver(settings$get("bias_variable"))) keep <- c(keep, settings$get("bias_variable") )
 
-        co <- find_correlated_predictors(env = test,
-                                         keep = keep,
-                                         cutoff = getOption('ibis.corPred'), # Probably keep default, but maybe sth. to vary in the future
-                                         method = 'pearson')
+        # Filter the predictors
+        # Depending on the option this function returns the variables to be removed.
+        co <- predictor_filter(env = test,
+                               keep = keep,
+                               cutoff = getOption('ibis.corPred'), # Probably keep default, but maybe sth. to vary in the future
+                               method = settings$get("filter_predictors"),
+                               observed = model[['biodiversity']][[id]]$observations[['observed']],
+                               family = model[['biodiversity']][[id]]$family,
+                               tune.type = "gic",
+                               weight = NULL,
+                               verbose = getOption('ibis.setupmessages')
+                               )
 
         # For all factor variables, remove those with only the minimal value (e.g. 0)
         fac_min <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) min(x,na.rm = TRUE))
         fac_mean <- apply(test[,model$predictors_types$predictors[which(model$predictors_types$type=='factor')]], 2, function(x) mean(x,na.rm = TRUE))
         co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
+        # Remove variables if found
         if(length(co)>0){
-          env %>% dplyr::select(-dplyr::all_of(co)) -> env
+          env |> dplyr::select(-dplyr::all_of(co)) -> env
         }
+
       } else { co <- NULL }
-
-      # Make use of adaptive best subset selection
-      if(settings$get("varsel") == "abess"){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
-        if(!is.Waiver(x$priors)){
-          keep <- unique( as.character(x$priors$varnames()) )
-          if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
-        } else keep <- NULL
-
-        # If PPM, calculate points per grid cell first
-        if(model[['biodiversity']][[id]]$family == "poisson"){
-          bg <- x$engine$get_data("template")
-          if(!is.Raster(bg)) bg <- emptyraster(x$predictors$get_data() )
-
-          obs <- aggregate_observations2grid(df = model[['biodiversity']][[id]]$observations,
-                                              template = bg, field_occurrence = "observed") |>
-                                          # Add pseudo absences
-                      add_pseudoabsence(template = bg, settings = getOption("ibis.pseudoabsence"))
-
-          envs <- get_rastervalue(
-            coords = obs[,c('x','y')],
-            env = model$predictors_object$get_data(df = FALSE)[[ model[['predictors_names']][which( model[['predictors_names']] %notin% co )] ]],
-            rm.na = T
-          )
-          # Assert observations match environmental data points
-          obs <- obs[envs$ID,]
-          envs$ID <- NULL
-          assertthat::assert_that(nrow(obs) == nrow(envs), nrow(obs)>0, nrow(envs)>0)
-        } else {
-          obs <- model[['biodiversity']][[id]]$observations
-          envs <- env[,model[['predictors_names']][which( model[['predictors_names']] %notin% co )]]
-          assertthat::assert_that(any(obs$observed == 0),
-                                  nrow(obs)==nrow(envs))
-        }
-        # Add abess here
-        co2 <- find_subset_of_predictors(
-          env = envs,
-          observed = obs$observed,
-          family = model[['biodiversity']][[id]]$family,
-          tune.type = "gic",
-          weight = NULL,
-          keep = keep
-          )
-        co <- c(co, co2) |> unique()
-      }
 
       # Save predictors extracted for biodiversity extraction
       model[['biodiversity']][[id]][['predictors']] <- env
       model[['biodiversity']][[id]][['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
       model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
-    }
+  }
+
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
@@ -577,9 +556,9 @@ methods::setMethod(
     }
 
     # Warning if Np is larger than Nb
-    if(settings$get("varsel") == "none"){
+    if(settings$get("filter_predictors") == "none"){
       if( sum(x$biodiversity$get_observations() )-1 <= length(model$predictors_names)){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'There are more predictors than observations! Consider setting varsel= to \"reg\" ')
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
       }
     }
 
@@ -630,8 +609,8 @@ methods::setMethod(
       if(nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
-          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE)  %>%
-                              sf::st_buffer(dist = 0) %>% # 0 distance buffer trick
+          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) |>
+                              sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
                               sf::st_cast("MULTIPOLYGON")
           )
         )
@@ -678,7 +657,7 @@ methods::setMethod(
                             length(model[['biodiversity']][[1]][['expect']])>1,
                             all(c("predictors","background","biodiversity") %in% names(model) ),
                             length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
-                            )
+    )
     # --------------------------------------------------------------------- #
     #### Engine specific code starts below                               ####
     # --------------------------------------------------------------------- #
@@ -831,7 +810,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -841,7 +820,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -927,11 +906,11 @@ methods::setMethod(
             new <- out$get_data("prediction")
             # Back transforming offset to linear scale
             new[] <- switch (model$biodiversity[[id]]$family,
-              "binomial" = ilink(new[], link = "logit"),
-              "poisson" = ilink(new[], link = "log")
+                             "binomial" = ilink(new[], link = "logit"),
+                             "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -941,7 +920,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1032,7 +1011,7 @@ methods::setMethod(
             names(new) <- "spatial_offset"
 
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1043,7 +1022,7 @@ methods::setMethod(
               news <- raster::mask(news, x$background)
               names(news) <- "spatial_offset"
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1080,102 +1059,102 @@ methods::setMethod(
 
 
     } else if (inherits(x$engine,"BREG-Engine") ){
-    # ----------------------------------------------------------- #
-    #### BREG Engine ####
-    assertthat::assert_that(
-      !(method_integration == "offset" && any(types == "poipa")),
-      msg = "Due to engine limitations BREG models do not support offsets for presence-absence models!"
-    )
-    # For each formula, process in sequence
-    for(id in ids){
+      # ----------------------------------------------------------- #
+      #### BREG Engine ####
+      assertthat::assert_that(
+        !(method_integration == "offset" && any(types == "poipa")),
+        msg = "Due to engine limitations BREG models do not support offsets for presence-absence models!"
+      )
+      # For each formula, process in sequence
+      for(id in ids){
 
-      model$biodiversity[[id]]$equation <- built_formula_breg( model$biodiversity[[id]] )
+        model$biodiversity[[id]]$equation <- built_formula_breg( model$biodiversity[[id]] )
 
-      # Remove those not part of the modelling
-      model2 <- model
-      model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+        # Remove those not part of the modelling
+        model2 <- model
+        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-      # Run the engine setup script
-      model2 <- x$engine$setup(model2, settings)
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
-      # Now train the model and create a predicted distribution model
-      settings2 <- settings
-      if(id != ids[length(ids)] && method_integration == "prior") {
-        # No need to make predictions if we use priors only
-        settings2$set('inference_only', TRUE)
-      } else if(id != ids[length(ids)]){
-        # For predictors and offsets
-        settings2$set('inference_only', FALSE)
-      } else {
-        settings2$set('inference_only', inference_only)
-      }
-      out <- x$engine$train(model2, settings2)
-
-      # Add Prediction of model to next object if multiple are supplied
-      if(length(ids)>1 && id != ids[length(ids)]){
-        if(method_integration == "predictor"){
-          # Add to predictors frame
-          new <- out$get_data("prediction")[["mean"]]
-          pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
-          names(new) <- pred_name
-          # Add the object to the overall prediction object
-          model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
-
-          # Now for each biodiversity dataset and the overall predictors
-          # extract and add as variable
-          for(k in names(model$biodiversity)){
-            env <- as.data.frame(
-              raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
-            # Rename to current id dataset
-            names(env) <- pred_name
-            # Add
-            model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-            model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                          names(env) )
-            model$biodiversity[[k]]$predictors_types <- rbind(
-              model$biodiversity[[k]]$predictors_types,
-              data.frame(predictors = names(env), type = c('numeric'))
-            )
-          }
-          # Add to overall predictors
-          model$predictors <- cbind(model$predictors, as.data.frame(new))
-          model$predictors_names <- c(model$predictors_names, names(new))
-          model$predictors_types <- rbind(model$predictors_types,
-                                          data.frame(predictors = names(new), type = c('numeric')))
-
-        } else if(method_integration == "offset"){
-          # Adding the prediction as offset
-          new <- out$get_data("prediction")
-          # Back transforming offset to linear scale
-          new[] <- switch (model$biodiversity[[id]]$family,
-                           "binomial" = ilink(new[], link = "logit"),
-                           "poisson" = ilink(new[], link = "log")
-          )
-          if(is.Waiver(model$offset)){
-            ofs <- as.data.frame(new, xy = TRUE)
-            names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
-            model[['offset']] <- ofs
-            # Also add offset object for faster extraction
-            model[['offset_object']] <- new
-          } else {
-            # New offset
-            news <- sum( model[['offset_object']], new, na.rm = TRUE)
-            news <- raster::mask(news, x$background)
-            model[['offset_object']] <- news
-            ofs <- as.data.frame(news, xy = TRUE)
-            names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
-            model[['offset']] <- ofs
-            rm(news)
-          }
-          rm(new)
-        } else if(method_integration == "prior"){
-          # Use the previous model to define and set priors
-          po <- get_priors(out, x$engine$name)
-          model$priors <- po
+        # Now train the model and create a predicted distribution model
+        settings2 <- settings
+        if(id != ids[length(ids)] && method_integration == "prior") {
+          # No need to make predictions if we use priors only
+          settings2$set('inference_only', TRUE)
+        } else if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
         }
+        out <- x$engine$train(model2, settings2)
+
+        # Add Prediction of model to next object if multiple are supplied
+        if(length(ids)>1 && id != ids[length(ids)]){
+          if(method_integration == "predictor"){
+            # Add to predictors frame
+            new <- out$get_data("prediction")[["mean"]]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+            names(new) <- pred_name
+            # Add the object to the overall prediction object
+            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+
+            # Now for each biodiversity dataset and the overall predictors
+            # extract and add as variable
+            for(k in names(model$biodiversity)){
+              env <- as.data.frame(
+                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+              # Rename to current id dataset
+              names(env) <- pred_name
+              # Add
+              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
+              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
+                                                            names(env) )
+              model$biodiversity[[k]]$predictors_types <- rbind(
+                model$biodiversity[[k]]$predictors_types,
+                data.frame(predictors = names(env), type = c('numeric'))
+              )
+            }
+            # Add to overall predictors
+            model$predictors <- cbind(model$predictors, as.data.frame(new))
+            model$predictors_names <- c(model$predictors_names, names(new))
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = names(new), type = c('numeric')))
+
+          } else if(method_integration == "offset"){
+            # Adding the prediction as offset
+            new <- out$get_data("prediction")
+            # Back transforming offset to linear scale
+            new[] <- switch (model$biodiversity[[id]]$family,
+                             "binomial" = ilink(new[], link = "logit"),
+                             "poisson" = ilink(new[], link = "log")
+            )
+            if(is.Waiver(model$offset)){
+              ofs <- raster::as.data.frame(new, xy = TRUE)
+              names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
+              model[['offset']] <- ofs
+              # Also add offset object for faster extraction
+              model[['offset_object']] <- new
+            } else {
+              # New offset
+              news <- sum( model[['offset_object']], new, na.rm = TRUE)
+              news <- raster::mask(news, x$background)
+              model[['offset_object']] <- news
+              ofs <- raster::as.data.frame(news, xy = TRUE)
+              names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
+              model[['offset']] <- ofs
+              rm(news)
+            }
+            rm(new)
+          } else if(method_integration == "prior"){
+            # Use the previous model to define and set priors
+            po <- get_priors(out, x$engine$name)
+            model$priors <- po
+          }
 
         } # End of multiple ides
-    }
+      }
     } else if (inherits(x$engine,"GLMNET-Engine") ){
       # ----------------------------------------------------------- #
       #### GLMNET Engine ####
@@ -1245,7 +1224,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- as.data.frame(new, xy = TRUE)
+              ofs <- raster::as.data.frame(new, xy = TRUE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1255,7 +1234,7 @@ methods::setMethod(
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
               news <- raster::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- as.data.frame(news, xy = TRUE)
+              ofs <- raster::as.data.frame(news, xy = TRUE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1271,24 +1250,24 @@ methods::setMethod(
       # End of GLMNET engine
     } else { stop('Specified Engine not implemented yet.') }
 
-  if(is.null(out)) return(NULL)
+    if(is.null(out)) return(NULL)
 
-  if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
-  # Clip to limits again to be sure
-  if(!is.Waiver(x$limits)) {
-    if(settings$get('inference_only')==FALSE){
-      out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+    # Clip to limits again to be sure
+    if(!is.Waiver(x$limits)) {
+      if(settings$get('inference_only')==FALSE){
+        out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+      }
+      out$settings$set("has_limits", TRUE)
+    } else {
+      out$settings$set("has_limits", FALSE)
     }
-    out$settings$set("has_limits", TRUE)
-  } else {
-    out$settings$set("has_limits", FALSE)
-  }
 
-  # Stop logging if specified
-  if(!is.Waiver(x$log)) x$log$close()
+    # Stop logging if specified
+    if(!is.Waiver(x$log)) x$log$close()
 
-  # Return created object
-  return(out)
+    # Return created object
+    return(out)
   }
 )

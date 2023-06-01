@@ -171,7 +171,8 @@ test_that('Add and modify priors to existing object', {
   skip_if_not_installed('INLA')
   skip_on_cran()
   skip_on_ci()
-  library(raster)
+
+  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
   options("ibis.setupmessages" = FALSE)
 
   background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
@@ -187,10 +188,10 @@ test_that('Add and modify priors to existing object', {
 
   # Define a model
   invisible(
-    x <- distribution(background) %>%
-    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
+    x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]],
-                   transform = 'none',derivates = 'none') %>%
+                   transform = 'none',derivates = 'none') |>
     engine_inla(
       max.edge = c(.5, 3),
       offset = c(0.5, 1),
@@ -202,15 +203,15 @@ test_that('Add and modify priors to existing object', {
   expect_s3_class(x$get_priors(),'Waiver')
 
   # Add priors to it
-  x <- x %>% add_priors(priors = pp)
+  x <- x |>  add_priors(priors = pp)
 
   expect_s3_class( x$get_priors(), 'PriorList')
   expect_vector(x$get_prior_variables(), "CLC3_132_mean_50km" )
 
   # Remove priors from it
-  invisible( x %>% rm_priors() )
+  invisible( x |> rm_priors() )
   expect_s3_class( x$get_priors(), 'PriorList')
-  x <- x %>% rm_priors()
+  x <- x |> rm_priors()
   expect_s3_class(x$priors,'Waiver')
   expect_s3_class(x$get_priors(),'Waiver')
 
@@ -225,14 +226,14 @@ test_that('Add and modify priors to existing object', {
   expect_vector(pp$get('CLC3_132_mean_50km'), c(0, Inf))
 
   # With BREG engine
-  suppressWarnings( suppressMessages(x <- x %>% engine_breg()) )
+  suppressWarnings( suppressMessages(x <- x |> engine_breg()) )
   p1 <- BREGPrior("test", hyper = 0.5, ip = 1)
   p2 <- BREGPrior("test", hyper = 5, ip = .2)
   expect_equal(priors(p1,p2)$length(),1)
 
-  x <- x %>% add_priors(priors(p1,p2))
+  x <- x |> add_priors(priors(p1,p2))
   expect_equal(x$get_prior_variables() |> as.character(), "test")
-  x <- x %>% add_priors(priors(
+  x <- x |> add_priors(priors(
     BREGPrior("test2", hyper = 5, ip = .2)
   ))
   expect_true("test2" %in% x$get_prior_variables() )

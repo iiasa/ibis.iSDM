@@ -158,7 +158,7 @@ capitalize_text <- function(x) {
 to_formula <- function(formula){
   # Convert to formula object
   if(!is.null(formula)) {
-    formula = as.formula(formula)
+    formula = stats::as.formula(formula)
   } else {
     # Asign a new waiver object
     formula = new_waiver()
@@ -413,8 +413,8 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     val_rw1 <- grep(pattern = 'rw1',x = te,value = TRUE)
     # Alternative quadratic variables in case rw1 fails
     if(length(val_rw1)>0){
-      val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
-    } else { val_quad <- all.vars(as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
+      val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
+    } else { val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
     val_spde <- grep(pattern = 'spde',x = te,value = TRUE)
     val_ofs <- grep(pattern = 'offset',x = te,value = TRUE)
 
@@ -546,15 +546,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
     }
 
   } else if(tolower(type) == 'all'){
-    assertthat::assert_that('purrr' %in% loadedNamespaces())
     # Construct all possible unique combinations
-    varnames_comb <- 1:length(varnames) %>%
-      purrr::map(~ combn(varnames, .x) %>% apply(2, list) %>% unlist(recursive = F)) %>%
-      unlist(recursive = F)
+    varnames_comb <- lapply(1:length(varnames), function(i){
+      utils::combn(varnames, i) |> apply(2, list) |> unlist(recursive = F)
+    })|> unlist(recursive = F)
 
-    form_temp <- varnames_comb %>% purrr::map(~paste0(response, " ~ ",
-                                                      paste(val_int,collapse = '+'),'+',
-                                                      paste(.x, collapse = " + ")) )
+    form_temp <- lapply(varnames_comb, function(i) {
+      paste0(response, " ~ ", paste(val_int,collapse = '+'),'+', paste(i, collapse = " + "))
+    })
   }
 
   return(form_temp)
@@ -601,11 +600,11 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
   if (any(z > t1, na.rm = TRUE)) {
     f <- which(z > t1)
     vals <- x[f]
-    if (vals < median(x, na.rm = TRUE)) {
+    if (vals < stats::median(x, na.rm = TRUE)) {
       xa <- (v2 <= vals) * 1
       out <- out + xa
     }
-    if (vals > median(x, na.rm = TRUE)) {
+    if (vals > stats::median(x, na.rm = TRUE)) {
       xb <- (v2 >= vals) * 1
       out <- out + xb
     }
@@ -618,140 +617,6 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
     if(procedure == "missing") v2[found] <- NA else v2 <- v2[-found]
   }
   return(v2)
-}
-#' Filter a set of correlated predictors to fewer ones
-#'
-#' @param env A [`data.frame`] with extracted environmental covariates for a given species.
-#' @param keep A [`vector`] with variables to keep regardless.
-#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff.
-#' @param method Which method to use for constructing the correlation matrix (Options: \code{'pearson'}| \code{'spearman'}| \code{'kendal'})
-#' @concept Code inspired from the [`caret`] package
-#' @keywords utils
-#' @returns vector of variable names to exclude
-find_correlated_predictors <- function( env, keep = NULL, cutoff = 0.7, method = 'pearson'){
-  # Security checks
-  assertthat::assert_that(is.data.frame(env),
-                          is.character(method),
-                          is.numeric(cutoff),
-                          is.null(keep) || is.vector(keep)
-  )
-  keep <- keep[keep %in% names(env)] # Remove those not in the data.frame. For instance if a spatial effect is selected
-  if(!is.null(keep) || length(keep) == 0) x <- env %>% dplyr::select(-keep) else x <- env
-
-  # Removing non-numeric columns
-  non.numeric.columns <- colnames(x)[!sapply(x, is.numeric)]
-  x <- x[, !(colnames(x) %in% non.numeric.columns)]
-
-  # Get all variables that are singular or unique in value
-  singular_var <- which(round( apply(x, 2, var),4) == 0)
-  if(length(singular_var)>0) x <- x[,-singular_var]
-
-  # Calculate correlation matrix
-  cm <- cor(x, method = method)
-
-  # Copied from the \code{caret} package to avoid further dependencies
-  if (any(!stats::complete.cases(cm))) stop("The correlation matrix has some missing values.")
-  averageCorr <- colMeans(abs(cm))
-  averageCorr <- as.numeric(as.factor(averageCorr))
-  cm[lower.tri(cm, diag = TRUE)] <- NA
-
-  # Determine combinations over cutoff
-  combsAboveCutoff <- which(abs(cm) > cutoff)
-  colsToCheck <- ceiling(combsAboveCutoff/nrow(cm))
-  rowsToCheck <- combsAboveCutoff%%nrow(cm)
-
-  # Exclude columns with variables over average correlation
-  colsToDiscard <- averageCorr[colsToCheck] > averageCorr[rowsToCheck]
-  rowsToDiscard <- !colsToDiscard
-
-  # Get columns to discard
-  deletecol <- c(colsToCheck[colsToDiscard], rowsToCheck[rowsToDiscard])
-  deletecol <- unique(deletecol)
-
-  # Which variables to discard
-  o <- names(env)[deletecol]
-  if(length(singular_var)>0) o <- unique( c(o,  names(singular_var) ) )
-  o
-}
-
-#' Apply the adaptive best subset selection framework on a set of predictors
-#'
-#' @description
-#' This is a wrapper function to fit the adaptive subset selection procedure outlined
-#' in Zhu et al. (2021) and Zhu et al. (2020).
-#' @param env A [`data.frame`] with extracted environmental covariates for a given species.
-#' @param observed A [`vector`] with the observed response variable.
-#' @param family A [`character`] indicating the family the observational data originates from.
-#' @param tune.type [`character`] indicating the type used for subset evaluation.
-#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [abess].
-#' @param lambda A [`numeric`] single lambda value for regularized best subset selection (Default: \code{0}).
-#' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1} for each observation as default.
-#' @param keep A [`vector`] with variables to keep regardless (Default: \code{NULL}).
-#' @references
-#' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
-#' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
-#' @keywords utils, internal
-#' @returns vector of variable names to exclude
-find_subset_of_predictors <- function( env, observed, family, tune.type = "cv", lambda = 0,
-                                       weight = NULL, keep = NULL){
-  # Security checks
-  assertthat::assert_that(is.data.frame(env),
-                          is.vector(observed),
-                          is.numeric(lambda),
-                          is.character(tune.type),
-                          is.null(weight) || is.vector(weight)
-  )
-  assertthat::assert_that(
-    length(observed) == nrow(env), msg = "Number of observation unequal to number of covariate rows."
-  )
-  # Match family and type
-  family <- match.arg(family, c("gaussian", "binomial", "poisson", "cox", "mgaussian", "multinomial",
-                               "gamma"), several.ok = FALSE)
-  tune.type <- match.arg(tune.type, c("gic", "ebic", "bic", "aic", "cv"), several.ok = FALSE)
-
-  # Check that abess package is available
-  check_package("abess")
-  if(!isNamespaceLoaded("abess")) { attachNamespace("abess");requireNamespace('abess') }
-
-  # Build model
-  abess_fit <- abess::abess(x = env,
-                            y = observed,
-                            family = family,
-                            tune.type = tune.type,
-                            weight = weight,
-                            lambda = lambda,
-                            always.include = keep,
-                            nfolds = 100, # Increase from default 5
-                            num.threads = 0
-                          )
-
-  if(anyNA(coef(abess_fit)[,1]) ) {
-    # Refit with minimum support size
-    abess_fit <- abess::abess(x = env,
-                              y = observed,
-                              family = family,
-                              lambda = lambda,
-                              tune.type = tune.type,
-                              weight = weight,
-                              always.include = keep,
-                              nfolds = 100, # Increase from default 5
-                              # Minimum support site of 10% of number of covariates
-                              support.size = ceiling(ncol(env) * 0.1),
-                              num.threads = 0
-    )
-
-  }
-  # Get best vars
-  co <- coef(abess_fit, support.size = abess_fit[["best.size"]])
-  co <- names( which(co[,1] != 0))
-  co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
-  # Make some checks on the list of reduced variables
-  if(length(co) <= 2) {
-    warning("Abess was likely to rigours. Likely to low signal-to-noise ratio.")
-    return(NULL)
-  } else {
-    co
-  }
 }
 
 #' Aggregate count observations to a grid
@@ -790,14 +655,14 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 
   } else {
     # Simply count them
-    if(inherits(df, 'sf')) df <- df %>% sf::st_drop_geometry()
+    if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
     pres <- raster::rasterize(df[,c("x","y")],
                               template, fun = 'count', background = 0)
   }
   assertthat::assert_that(
     is.Raster(pres), is.finite(raster::cellStats(pres, "max"))
   )
-  if(inherits(df, 'sf')) df <- df %>% sf::st_drop_geometry()
+  if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
   # Get cell ids
   ce <- raster::cellFromXY(pres, df[,c("x","y")])
   # Remove any NA if present
@@ -807,7 +672,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
     data.frame(observed = raster::values(pres)[ce],
                raster::xyFromCell(pres, ce) # Center of cell
     )
-  ) %>%
+  ) |>
     # Unique to remove any duplicate values (otherwise double counted cells)
     unique()
 

@@ -1,36 +1,6 @@
 #' @include utils.R
 NULL
 
-#' Pipe operator
-#'
-#' This package uses the pipe operator (`\%>\%`) to express nested code
-#' as a series of imperative procedures.
-#'
-#' @param lhs, rhs An object and a function.
-#' @seealso [magrittr::%>%()], [tee()].
-#' @return An object.
-#' @keywords internal
-#' @examples
-#' # set seed for reproducibility
-#' set.seed(500)
-#'
-#' # generate 100 random numbers and calculate the mean
-#' mean(runif(100))
-#'
-#' # reset the seed
-#' set.seed(500)
-#'
-#' # repeat the previous procedure but use the pipe operator instead of nesting
-#' # function calls inside each other.
-#' runif(100) %>% mean()
-#'
-#' @name %>%
-#' @rdname pipe
-#' @aliases pipe
-#' @importFrom magrittr %>%
-#' @export
-NULL
-
 #' Central colour repository
 #' @description This command contains all the colours
 #' specified for use in \pkg{ibis.iSDM}.
@@ -118,12 +88,13 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   if(length(new.packages)>0){
     if("INLA" %in% new.packages){
       suppressMessages(
-        install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
-                       dependencies = TRUE, quiet = TRUE)
+        utils::install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
+                                dependencies = TRUE, quiet = TRUE)
       )
     }
     suppressMessages(
-      install.packages(new.packages, dependencies = TRUE, quiet = TRUE)
+      utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE,
+                              repos = "https://cloud.r-project.org")
     )
   }
 
@@ -131,19 +102,18 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   if(update){
     if("INLA" %in% deps){
       # For windows
-      if(length(grep("Windows", osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
+      if(length(grep("Windows", utils::osVersion, ignore.case = TRUE)) && !("INLA" %in% utils::installed.packages()[, "Package"])){
         # On windows we remove INLA and reinstall
-        install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
-      } else {
-        require("INLA")
+        utils::install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
+      } else if(requireNamespace("INLA", quietly = TRUE)) {
         suppressPackageStartupMessages(
-          inla.upgrade(ask = FALSE)
+          INLA::inla.upgrade(ask = FALSE)
         )
       }
     }
     # Update all the package excluding INLA
     suppressMessages(
-      utils::update.packages(deps, ask = FALSE)
+      utils::update.packages(deps, ask = FALSE, repos = "https://cloud.r-project.org")
     )
   }
   invisible()

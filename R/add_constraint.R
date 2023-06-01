@@ -622,7 +622,7 @@ methods::setMethod(
     if(inherits(bb, "try-error")) stop("Provide a rasterized layer of the boundary constraint!")
 
     # Call again
-    o <- add_constraint_boundary(mod, layer = bb, method = method, ..)
+    o <- add_constraint_boundary(mod, layer = bb, method = method, ...)
 
     return( o )
   }

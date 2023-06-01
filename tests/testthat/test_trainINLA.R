@@ -6,12 +6,15 @@ test_that('Check that INLA works', {
   skip_if_not_installed('INLA')
 
   suppressWarnings(
-    suppressPackageStartupMessages( library(INLA) )
+    suppressPackageStartupMessages( requireNamespace("INLA") )
+  )
+  suppressWarnings(
+    suppressPackageStartupMessages( attachNamespace("INLA") )
   )
   options("ibis.setupmessages" = FALSE)
 
   # Use test data that comes with INLA
-  data(Epil)
+  data("Epil",package = "INLA")
   observed <- Epil[1:30, 'y']
 
   Epil <- rbind(Epil, Epil[1:30, ])
@@ -19,7 +22,7 @@ test_that('Check that INLA works', {
 
   # Set up formula and train
   formula = y ~ Trt + Age + V4 + f(Ind, model="iid") + f(rand,model="iid")
-  result = inla(formula, family="poisson", data = Epil, control.predictor = list(compute = TRUE, link = 1))
+  result = INLA::inla(formula, family="poisson", data = Epil, control.predictor = list(compute = TRUE, link = 1))
 
   expect_type(result,'list')
   expect_null(result$waic)
@@ -47,9 +50,9 @@ test_that('Train a distribution model with INLA', {
   predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Now set them one up step by step
-  x <- distribution(background) %>%
-    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') %>%
-    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') %>%
+  x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors[[c('slope_mean_50km','bio01_mean_50km','CLC3_132_mean_50km')]], transform = 'none',derivates = 'none') |>
     engine_inla(
       max.edge = c(.5, 3),
       offset = c(0.5, 1),

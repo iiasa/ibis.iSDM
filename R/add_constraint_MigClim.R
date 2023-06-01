@@ -29,8 +29,10 @@ NULL
 #' @details The barrier parameter is defined through [add_barrier].
 #' @seealso [`MigClim.userGuide()`]
 #' @references
-#' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of dispersal constraints into projections of species distribution models. Ecography,
-#' * Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal into species distribution models. R package version 1.6.
+#' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of
+#' dispersal constraints into projections of species distribution models. Ecography,
+#' * Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal
+#' into species distribution models. R package version 1.6.
 #' @returns Adds a MigClim onstrain to a [`BiodiversityScenario`] object.
 #' @examples
 #' \dontrun{

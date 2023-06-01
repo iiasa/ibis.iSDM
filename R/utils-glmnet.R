@@ -29,13 +29,13 @@ built_formula_glmnet <- function(obj){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(terms(form), "response")==0){
-      form <- update.formula(form, "observed ~ .")
+    if(attr(stats::terms(form), "response")==0){
+      form <- stats::update.formula(form, "observed ~ .")
     }
     # Security checks
     assertthat::assert_that(
       is.formula(form),
-      attr(terms(form), "response")==1, # Has Response
+      attr(stats::terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
     )
   }
@@ -85,7 +85,7 @@ default.regularization <- function(p, m){
     lqpreg <- pregtable
   classregularization <- sapply(colnames(mm), function(n) {
     t <- regtable(n, lqpreg)
-    approx(t[[1]], t[[2]], np, rule = 2)$y
+    stats::approx(t[[1]], t[[2]], np, rule = 2)$y
   })/sqrt(np)
   ishinge <- grepl("^hinge\\(", colnames(mm))
   hmindev <- sapply(1:ncol(mm), function(i) {
@@ -147,7 +147,7 @@ tidy_glmnet_summary <- function(obj){
   lambda <- determine_lambda(obj)
 
   # Summarise coefficients within 1 standard deviation
-  ms <- coef(obj, s = lambda) |>
+  ms <- stats::coef(obj, s = lambda) |>
     as.matrix() |> as.data.frame()
   names(ms) <- "mean"
   ms$variable <- rownames(ms)

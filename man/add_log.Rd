@@ -23,7 +23,7 @@ console outputs, prints and messages.
 }
 \examples{
 \dontrun{
- x <- distribution(background) \%>\%
+ x <- distribution(background) |>
     add_log()
  x
 }

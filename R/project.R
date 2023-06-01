@@ -107,7 +107,7 @@ methods::setMethod(
       tr <- fit$get_data(n)[[1]]
       tr <- cbind( raster::coordinates(tr), data.frame(thresh = values(tr)))
       tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
-      tr <- tr %>% subset(., complete.cases(thresh))
+      tr <- tr |> (\(.) subset(., stats::complete.cases(thresh)))()
 
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
@@ -169,7 +169,7 @@ methods::setMethod(
     df <- new_preds$get_data(df = TRUE)
     names(df)[1:3] <- tolower(names(df)[1:3]) # Assuming the first three attributes are x,y,t
     assertthat::assert_that(nrow(df)>0,
-                            hasName(df,'x'), hasName(df,'y'), hasName(df,'time'),
+                            utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
     df$time <- to_POSIXct( df$time )
@@ -339,11 +339,11 @@ methods::setMethod(
             )
           })
           # Get average stats
-          run_stats <- read.table(
+          run_stats <- utils::read.table(
             file.path(basename(params[["simulName"]]), paste0(basename(params[["simulName"]]),"_stats.txt")),
                                   header = TRUE
             )
-          run_sums <- read.table(
+          run_sums <- utils::read.table(
             file.path(basename(params[["simulName"]]), paste0(basename(params[["simulName"]]),"_summary.txt")),
             header = TRUE
           )

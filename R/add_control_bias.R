@@ -37,8 +37,8 @@
 #' @keywords bias, offset
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
-#'    add_predictors(covariates) %>%
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
 #'    add_control_bias(biasvariable, bias_value = NULL)
 #' }
 #' @name add_control_bias

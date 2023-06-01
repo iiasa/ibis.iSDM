@@ -50,6 +50,9 @@ tresting dataset (Default: \code{0.75}).}
 
 \item{...}{Other none specified parameters.}
 }
+\value{
+An \link{engine}.
+}
 \description{
 Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.
 The XGBoost engine is a flexible, yet powerful engine with many customization options,
@@ -66,6 +69,12 @@ ibis this is possible via \code{\link{XGBPrior}}. However constraints are availa
 }
 \note{
 \emph{'Machine learning is statistics minus any checking of models and assumptions‘} ~ Brian D. Ripley, useR! 2004, Vienna
+}
+\examples{
+\dontrun{
+# Add xgboost as an engine
+x <- distribution(background) |> engine_xgboost(iter = 4000)
+}
 }
 \references{
 \itemize{

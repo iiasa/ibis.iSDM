@@ -29,13 +29,13 @@ built_formula_breg <- function(obj){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(terms(form), "response")==0){
-      form <- update.formula(form, "observed ~ .")
+    if(attr(stats::terms(form), "response")==0){
+      form <- stats::update.formula(form, "observed ~ .")
     }
     # Security checks
     assertthat::assert_that(
       is.formula(form),
-      attr(terms(form), "response")==1, # Has Response
+      attr(stats::terms(form), "response")==1, # Has Response
       all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
     )
   }
@@ -69,11 +69,11 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 
   # Check that all terms are in the data.frame
   assertthat::assert_that(
-    all( attr(terms.formula(form),"term.labels") %in% names(data) ),
+    all( attr(stats::terms.formula(form),"term.labels") %in% names(data) ),
     "observed" %in% names(data)
   )
   # Create model matrix
-  mm <- model.matrix.default(object = form, data = data)
+  mm <- stats::model.matrix.default(object = form, data = data)
 
   # Expected model size:
   # Conservatively just assume the priors are relevant (Default is 1)
@@ -111,21 +111,21 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
   # Create priors depending on input family
   if(family == "poisson"){
     assertthat::assert_that(!is.null(exposure))
-    pp <- PoissonZellnerPrior(predictors = mm,
-                              counts = data$observed,
-                              exposure = exposure,
-                              expected.model.size = esize,
-                              optional.coefficient.estimate = co,
-                              prior.inclusion.probabilities = co.ip
+    pp <- BoomSpikeSlab::PoissonZellnerPrior(predictors = mm,
+                                             counts = data$observed,
+                                             exposure = exposure,
+                                             expected.model.size = esize,
+                                             optional.coefficient.estimate = co,
+                                             prior.inclusion.probabilities = co.ip
     )
   } else {
     # For binomial
-    pp <- LogitZellnerPrior(predictors = mm,
-                            successes = data$observed,
-                            trials = exposure,
-                            expected.model.size = esize,
-                            optional.coefficient.estimate = co,
-                            prior.inclusion.probabilities = co.ip
+    pp <- BoomSpikeSlab::LogitZellnerPrior(predictors = mm,
+                                           successes = data$observed,
+                                           trials = exposure,
+                                           expected.model.size = esize,
+                                           optional.coefficient.estimate = co,
+                                           prior.inclusion.probabilities = co.ip
     )
   }
   # Return the created prior object

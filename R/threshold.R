@@ -107,7 +107,7 @@ methods::setMethod(
                        o$name <- y$name; o$type <- y$type
                        subset(o, select = c('observed', "name", "type", "geometry"))
                      } )
-    ) %>% tibble::remove_rownames()
+    ) |> tibble::remove_rownames()
     suppressWarnings(
       poi <- sf::st_set_crs(poi, value = sf::st_crs(obj$get_data('prediction')))
     )
@@ -236,7 +236,7 @@ methods::setMethod(
     # Check that raster has at least a mean prediction in name
     if(!is.null(poi)) {
       assertthat::assert_that(unique(sf::st_geometry_type(poi)) %in% c('POINT','MULTIPOINT'))
-      assertthat::assert_that(hasName(poi, 'observed'))
+      assertthat::assert_that(utils::hasName(poi, 'observed'))
       poi_pres <- subset(poi, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
     }
     # Get the raster layer
@@ -251,11 +251,11 @@ methods::setMethod(
       # minimum training presence
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
       # Minimum threshold
-      tr <- min( na.omit(pointVals) )
+      tr <- min( stats::na.omit(pointVals) )
 
     } else if(method == "percentile"){
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
-      pointVals <- subset(pointVals, complete.cases(pointVals)) # Remove any NA or NAN data here
+      pointVals <- subset(pointVals, stats::complete.cases(pointVals)) # Remove any NA or NAN data here
       # percentile training threshold
       if(is.null(value)) value <- 0.1 # If value is not set, use 10%
       if(length(pointVals) < 10) {
@@ -270,7 +270,7 @@ methods::setMethod(
       pointVals <- raster::extract(raster_thresh, poi_pres) # Extract point only estimates
 
       # Get standard deviation and calculate percentile
-      tr <- min( na.omit(pointVals) )
+      tr <- min( stats::na.omit(pointVals) )
       names(tr) <- "tr"
       names(value) <- "min.cv"
       # Combine as a vector
@@ -281,7 +281,7 @@ methods::setMethod(
       # FIXME: Could think of porting these functions but too much effort for now. Rather have users install the package here
       check_package("modEvA")
       # Assure that point data is correctly specified
-      assertthat::assert_that(inherits(poi, 'sf'), hasName(poi, 'observed'))
+      assertthat::assert_that(inherits(poi, 'sf'), utils::hasName(poi, 'observed'))
       poi$observed <- ifelse(poi$observed>1,1,poi$observed) # Ensure that observed is <=1
       assertthat::assert_that(all( unique(poi$observed) %in% c(0,1) ))
 

@@ -38,6 +38,12 @@ NULL
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @family engine
+#' @returns An [engine].
+#' @examples
+#' \dontrun{
+#' # Add xgboost as an engine
+#' x <- distribution(background) |> engine_xgboost(iter = 4000)
+#' }
 #' @name engine_xgboost
 NULL
 #' @rdname engine_xgboost
@@ -59,7 +65,7 @@ engine_xgboost <- function(x,
 
   # Check whether xgboost package is available
   check_package('xgboost')
-  if(!("xgboost" %in% loadedNamespaces()) || ('xgboost' %notin% sessionInfo()$otherPkgs) ) {
+  if(!("xgboost" %in% loadedNamespaces()) || ('xgboost' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('xgboost');attachNamespace("xgboost")},silent = TRUE)
   }
 
@@ -187,7 +193,7 @@ engine_xgboost <- function(x,
                                          template = bg,
                                          settings = model$biodiversity[[1]]$pseudoabsence_settings)
           )
-          if(inherits(presabs, 'sf')) presabs <- presabs %>% sf::st_drop_geometry()
+          if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
 
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
@@ -208,7 +214,7 @@ engine_xgboost <- function(x,
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, complete.cases(df))
+          df <- subset(df, stats::complete.cases(df))
           assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
@@ -491,8 +497,8 @@ engine_xgboost <- function(x,
         # Pass this parameter possibly on from upper level
         # This implements a simple grid search for optimal parameter values
         # Using the training data only (!)
-        if(settings$get('varsel') == "reg"){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
+        if(settings$get('optim_hyperparam')){
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search...')
 
           # Create combinations of random hyper parameters
           set.seed(20)
@@ -508,8 +514,8 @@ engine_xgboost <- function(x,
               gamma = 0:5,
               min_child_weight = 0:6,
               # Randomness
-              subsample = runif(1, .7, 1),
-              colsample_bytree = runif(1, .6, 1),
+              subsample = stats::runif(1, .7, 1),
+              colsample_bytree = stats::runif(1, .6, 1),
               eval = NA
             )
           }
@@ -793,7 +799,7 @@ engine_xgboost <- function(x,
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data('fit_best')
             # Simply use the weights from the importance estimates
-            cofs <- xgboost:::xgb.importance(model = obj) %>%
+            cofs <- xgboost::xgb.importance(model = obj) |>
               as.data.frame()
             cofs$Sigma <- NA
             if(!self$settings$get("only_linear")){

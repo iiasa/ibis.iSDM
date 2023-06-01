@@ -43,7 +43,7 @@ NULL
 #'  # Load virtual species
 #'  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
 #' # Define model
-#' x <- distribution(background) %>%
+#' x <- distribution(background) |>
 #'   add_biodiversity_poipo(virtual_species)
 #' x
 #' }
@@ -83,7 +83,7 @@ methods::setMethod(
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(poipo)){
-      poipo <- poipo %>% sf::st_transform(crs = sf::st_crs(x$background))
+      poipo <- poipo |> sf::st_transform(crs = sf::st_crs(x$background))
     }
 
     if(docheck){
@@ -171,8 +171,7 @@ methods::setMethod(
 #' @examples
 #' \dontrun{
 #' # Define model
-#' x <- distribution(background) %>%
-#'   add_biodiversity_poipa(virtual_species)
+#' x <- distribution(background) |> add_biodiversity_poipa(virtual_species)
 #' x
 #' }
 #' @name add_biodiversity_poipa
@@ -214,7 +213,7 @@ methods::setMethod(
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(poipa)){
-      poipa <- poipa %>% sf::st_transform(crs = sf::st_crs(x$background))
+      poipa <- poipa |> sf::st_transform(crs = sf::st_crs(x$background))
     }
 
     if(docheck){
@@ -300,7 +299,7 @@ methods::setMethod(
 #'
 #' @examples
 #' \dontrun{
-#'  x <- distribution(mod) %>%
+#'  x <- distribution(mod) |>
 #'    add_biodiversity_polpo(protectedArea)
 #' }
 #' @name add_biodiversity_polpo
@@ -350,7 +349,7 @@ methods::setMethod(
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(polpo)){
-      polpo <- polpo %>% sf::st_transform(crs = sf::st_crs(x$background))
+      polpo <- polpo |> sf::st_transform(crs = sf::st_crs(x$background))
     }
 
     # Simulate presence absence points rather than using the range directly
@@ -369,7 +368,7 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipo_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipo_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
         poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {
@@ -475,7 +474,7 @@ methods::setMethod(
 #'
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background) %>%
+#'  x <- distribution(background) |>
 #'    add_biodiversity_polpa(protectedArea)
 #' }
 #' @name add_biodiversity_polpa
@@ -522,7 +521,7 @@ methods::setMethod(
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(polpa)){
-      polpa <- polpa %>% sf::st_transform(crs = sf::st_crs(x$background))
+      polpa <- polpa |> sf::st_transform(crs = sf::st_crs(x$background))
     }
 
     # Simulate presence absence points rather than using the range directly
@@ -541,7 +540,7 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipa_on <- as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
+        poipa_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
         poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
 
       } else {
@@ -677,16 +676,16 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c("x","y
     assertthat::assert_that( all(assertthat::has_name(x, field_space)),
                              msg ='No spatial column found in the dataset. Specify manually or set to [x] and [y].')
     # Select and format
-    out <- subset(x, select = c(field_space, field_occurrence) ) %>%
+    out <- subset(x, select = c(field_space, field_occurrence) ) |>
       tibble::as_tibble()
   } else {
     if(inherits(x, "Spatial")) x <- sf::st_as_sf(x) # First convert to sf
-    #if(inherits(x,'sf')) coords <- sf::st_coordinates(x) %>% tibble::as_tibble()
+    #if(inherits(x,'sf')) coords <- sf::st_coordinates(x) |> tibble::as_tibble()
 
     if(unique(sf::st_geometry_type(x)) %in% c("POINT","MULTIPOINT")){
       # Take target column and append coordinates to it
       out <- cbind(subset(x, select = field_occurrence),
-                   sf::st_coordinates(x)) %>% tibble::as_tibble()
+                   sf::st_coordinates(x)) |> tibble::as_tibble()
     } else if(unique(sf::st_geometry_type(x)) %in% c('POLYGON','MULTIPOLYGON')){
       # Return target column and spatial object as such
       out <- subset(x, select = field_occurrence)

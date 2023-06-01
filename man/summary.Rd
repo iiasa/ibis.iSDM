@@ -10,20 +10,20 @@
 \alias{summary.Settings}
 \title{Summarises a trained model or predictor object}
 \usage{
-\method{summary}{distribution}(x, ...)
+\method{summary}{distribution}(object, ...)
 
-\method{summary}{DistributionModel}(x, ...)
+\method{summary}{DistributionModel}(object, ...)
 
-\method{summary}{PredictorDataset}(x, ...)
+\method{summary}{PredictorDataset}(object, ...)
 
-\method{summary}{BiodiversityScenario}(x, ...)
+\method{summary}{BiodiversityScenario}(object, ...)
 
-\method{summary}{PriorList}(x, ...)
+\method{summary}{PriorList}(object, ...)
 
-\method{summary}{Settings}(x, ...)
+\method{summary}{Settings}(object, ...)
 }
 \arguments{
-\item{x}{Any prepared object.}
+\item{object}{Any prepared object.}
 
 \item{...}{not used.}
 }
@@ -38,11 +38,11 @@ When unsure, it is usually a good strategy to run \link{summary} on any object.
 \examples{
 \dontrun{
 # Example with a trained model
-x <- distribution(background) \%>\%
+x <- distribution(background) |>
         # Presence-absence data
-        add_biodiversity_poipa(surveydata) \%>\%
+        add_biodiversity_poipa(surveydata) |>
         # Add predictors and scale them
-        add_predictors(env = predictors) \%>\%
+        add_predictors(env = predictors) |>
         # Use glmnet and lasso regression for estimation
         engine_glmnet(alpha = 1)
  # Train the model
