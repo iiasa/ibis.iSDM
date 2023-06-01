@@ -49,11 +49,10 @@ Note that the package is in active development and parameters of some
 functions might change.
 
 **Citation:**
-<summary>
+
 Jung, Martin. 2023. “An Integrated Species Distribution Modelling
 Framework for Heterogeneous Biodiversity Data.” Ecological Informatics,
 102127, ![DOI](https://doi.org/10.1016/j.ecoinf.2023.102127)
-</summary>
 
 ## Acknowledgement <a href="https://iiasa.ac.at"><img src="vignettes/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>
 
