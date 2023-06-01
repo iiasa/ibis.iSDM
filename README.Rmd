@@ -49,12 +49,12 @@ Note that the package is in active development and parameters of some functions 
 
 **Citation:**
 <summary>
-Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” OSF Preprints. February 19. [DOI](https://osf.io/vusz8)
+Jung, Martin. 2023. “An Integrated Species Distribution Modelling Framework for Heterogeneous Biodiversity Data.” Ecological Informatics, 102127, https://doi.org/10.1016/j.ecoinf.2023.102127 
 </summary>
 
 ## Acknowledgement <a href="https://iiasa.ac.at"><img src="vignettes/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>
 
-**ibis.iSDM** is developed by the Biodiversity, Ecology and Conservation group at the International Institute for Applied Systems Analysis (IIASA), Austria.
+**ibis.iSDM** is developed and maintained by the Biodiversity, Ecology and Conservation group at the International Institute for Applied Systems Analysis (IIASA), Austria.
 
 
 <!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
