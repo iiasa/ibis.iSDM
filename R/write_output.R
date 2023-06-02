@@ -221,13 +221,18 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   }
 
   # Save output
-  writeRaster(file, fname,
+  check <- try({
+    writeRaster(file, fname,
               format='GTiff',
               datatype = dt,
               NAflag = varNA,
               options=c("COMPRESS=DEFLATE","PREDICTOR=2","ZLEVEL=9"),
-              overwrite= TRUE,
-              ...)
+              overwrite= TRUE
+              # ...
+              )
+    },silent = TRUE)
+  # Safety writing of results
+  if(inherits(check, "try-error")) raster::writeRaster(raster::brick(file), fname, overwrite=TRUE)
 }
 
 #' Save a raster stack to a netcdf file

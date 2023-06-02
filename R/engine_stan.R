@@ -236,6 +236,13 @@ engine_stan <- function(x,
             # Overwrite observation data
             model$biodiversity[[i]]$observations <- presabs
 
+            # Will expectations with 1 for rest of data points
+            # if(length(model$biodiversity[[1]]$expect)!= nrow(model$biodiversity[[1]]$observations)){
+            #   model$biodiversity[[1]]$expect <- c(model$biodiversity[[1]]$expect,
+            #                                       rep(1, nrow(model$biodiversity[[1]]$observations) - length(model$biodiversity[[1]]$expect))
+            #   )
+            # }
+
             # Preprocessing security checks
             assertthat::assert_that( all( model$biodiversity[[i]]$observations[['observed']] >= 0 ),
                                      any(!is.na(presabs[['observed']])),

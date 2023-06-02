@@ -1,3 +1,7 @@
+# ibis.iSDM 0.0.4
+
+* Smaller bug fixes with regards to writing outputs and adding pseudo-absences.
+
 # ibis.iSDM 0.0.3
 
 * Removed Magittr dependency #41

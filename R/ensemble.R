@@ -300,7 +300,7 @@ methods::setMethod(
         # Add all layers to out
         out <- raster::stack(out, new, ras_uncertainty)
       } else {
-        out <- raster::stack(out, new)
+        out <- raster::addLayer(out, new)
       }
     }
 
