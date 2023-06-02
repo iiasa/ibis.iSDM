@@ -213,8 +213,8 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
 #' @param varName Name for the NetCDF export variable.
 #' @param varUnit Units for the NetCDF export variable.
 #' @param varLong Long name for the NetCDF export variable.
-#' @param dt The datatype to be written (Default \code{"FLT4S"}).
-#' @param varNA The nodata value to be used (Default \code{-9999}).
+#' @param dt The datatype to be written. Default is Float64
+#' @param varNA The nodata value to be used. Default: \code{-9999}.
 #' @param ... Other options.
 #' @keywords utils, internal
 #' @noRd
@@ -251,8 +251,8 @@ writeNetCDF <- function(file, fname,
   ncdf4::ncatt_put(ncout, 0,"title","Biodiversity suitability projection created with ibis.iSDM")
 
   history <- paste(Sys.info()['user'], date(), sep=", ")
-  ncdf4::ncatt_put(ncout, 0, "created", history)
-  ncdf4::ncatt_put(ncout, 0, "Conventions", "CF=1.5")
+  ncdf4::ncatt_put(ncout,0, "created", history)
+  ncdf4::ncatt_put(ncout,0, "Conventions", "CF=1.5")
 
   # close the file, writing data to disk
   ncdf4::nc_close(ncout)

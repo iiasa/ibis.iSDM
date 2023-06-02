@@ -1,7 +1,11 @@
-# ibis.iSDM 0.0.3
+# ibis.iSDM 0.0.4
 
+* Smaller bug fixes with regards to writing outputs and adding pseudo-absences.
 * Converted from `raster` to `terra` #17
 * Updated and added further unit checks and tests
+
+# ibis.iSDM 0.0.3
+
 * Removed Magittr dependency #41
 * Smaller improvements to documentation and removing of CRAN preventing function calls.
 * Made the separation from hyperparameter search functions clearer and added new option to filter highly correlated covariates via `train`.

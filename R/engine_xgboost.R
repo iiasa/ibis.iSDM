@@ -220,6 +220,12 @@ engine_xgboost <- function(x,
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
 
+          # Will expectations with 1 for rest of data points
+          if(length(model$biodiversity[[1]]$expect)!= nrow(model$biodiversity[[1]]$observations)){
+            model$biodiversity[[1]]$expect <- c(model$biodiversity[[1]]$expect,
+                                                rep(1, nrow(model$biodiversity[[1]]$observations) - length(model$biodiversity[[1]]$expect))
+                                               )
+          }
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
@@ -256,7 +262,6 @@ engine_xgboost <- function(x,
           # Get for the full dataset
           pres <- terra::rasterize(x = guess_sf( model$biodiversity[[1]]$observations[,c("x","y")] ),
                                    y = bg, fun = 'length', background = 0)
-
           w_full <- ppm_weights(df = model$predictors,
                                 pa = pres[],
                                 bg = bg,
@@ -612,7 +617,6 @@ engine_xgboost <- function(x,
           prediction[] <- pred_xgb
           names(prediction) <- 'mean'
           prediction <- terra::mask(prediction, self$get_data("template") )
-
         } else {
           # No prediction done
           prediction <- NULL
@@ -710,7 +714,6 @@ engine_xgboost <- function(x,
             # Convert all non x.vars to the mean
             # Make template of target variable(s)
             template <- emptyraster( model$predictors_object$get_data() )
-
             # Set all variables other the target variable to constant
             if(is.null(constant)){
               # Calculate mean
@@ -792,7 +795,6 @@ engine_xgboost <- function(x,
             prediction <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
             prediction[] <- pred_xgb
             prediction <- terra::mask(prediction, model$predictors_object$get_data()[[1]] )
-
             return(prediction)
           },
           # Get coefficients

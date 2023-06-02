@@ -149,7 +149,6 @@ methods::setMethod(
       out <- terra::rast()
       for(lyr in layer){
         ras <- terra::rast(sapply(ll_ras, function(x) x[[lyr]]))
-
         # If normalize before running an ensemble if parameter set
         if(normalize) ras <- predictor_transform(ras, option = "norm")
 
@@ -206,7 +205,6 @@ methods::setMethod(
         # Add attributes on the method of ensembling
         attr(new, "method") <- method
         if(uncertainty!='none'){
-
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
                                      "sd" = terra::app(ras, sd, na.rm = TRUE),
@@ -446,6 +444,7 @@ methods::setMethod(
 #'  # Assumes previously computed models
 #'  ex <- ensemble_partial(mod1, mod2, mod3, method = "mean")
 #' }
+
 #' @name ensemble_partial
 #' @aliases ensemble_partial
 #' @keywords train
