@@ -69,6 +69,10 @@ test_that('Add further tests for model fits', {
   pp <- spartial(mod,x.var = "bio19_mean_50km",plot = FALSE)
   expect_s4_class(pp, "RasterLayer")
 
+  # ----------- #
+  # Create a suitability index
+  o <- mod$calc_suitabilityindex()
+  expect_s4_class(o, "RasterLayer")
 
   # ----------- #
   # Write model outputs

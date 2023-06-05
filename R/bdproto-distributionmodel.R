@@ -390,6 +390,23 @@ DistributionModel <- bdproto(
     }
     invisible()
   },
+  # Calculate a suitability index
+  calc_suitabilityindex = function(self, method = "normalize"){
+    assertthat::assert_that(
+      is.character(method),
+      is.Raster(self$get_data())
+    )
+    method <- match.arg(method, c("normalize", "reltotal"), several.ok = FALSE)
+
+    # Get the raster of the mean prediction
+    ras <- self$get_data()[["mean"]]
+    if(method == "normalize"){
+      out <- predictor_transform(ras, option = "norm")
+    } else {
+      out <- ras / raster::cellStats(ras,"sum")
+    }
+    return(out)
+  },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){
     assertthat::assert_that(
