@@ -94,7 +94,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-06-02</h4>
+            <h4 data-toc-skip class="date">2023-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/06_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/06_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>06_frequently-asked-questions.Rmd</code></div>
@@ -510,6 +510,32 @@ Sorry to hear and unless the model or input data are grossely
 misspecified, this should not happen. Please report an <a href="https://github.com/iiasa/ibis.iSDM/issues" class="external-link">issue</a> with the
 concrete error message, your R session information (call
 <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>) and preferably some example data and code.
+</details>
+</div>
+<div class="section level3">
+<h3 id="any-other-questions-and-issues">Any other questions and issues<a class="anchor" aria-label="anchor" href="#any-other-questions-and-issues"></a>
+</h3>
+<details><summary><b>Can I transform the prediction output to a suitability index?</b>
+</summary><p>Often it is easier to communicate an index of suitability (scale
+[0-1]) to stakeholders and policy, which can in principle be derived
+from <em>ibis.iSDM</em> output. Especially when using Poisson Process
+models to infer the suitability of a given area, the units can be hard
+to interpret for non-scientists. An easy way to achieve this has been
+added as a function to each Biodiversity distribution object. See below
+for an example.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Train a model</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="co"># Presence-absence data</span></span>
+<span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">my_gbifpoints</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Make a transformed prediction of the suitability layer</span></span>
+<span><span class="co"># The output is a normalized prediction surface </span></span>
+<span><span class="co"># created via (x - min) / (max - min) or x/sum(x) respectively</span></span>
+<span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="fu">calc_suitabilityindex</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
 </div>
