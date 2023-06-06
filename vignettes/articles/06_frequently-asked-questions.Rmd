@@ -337,3 +337,28 @@ Sorry to hear and unless the model or input data are grossely misspecified, this
 Please report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the concrete error message, your R session information (call `sessionInfo()`) and preferably some example data and code.
 </details>
 
+## Any other questions and issues
+
+<details>
+<summary><b>Can I transform the prediction output to a suitability index?</b>
+</summary>
+
+Often it is easier to communicate an index of suitability (scale [0-1]) to stakeholders and policy, which can in principle be derived from *ibis.iSDM* output. Especially when using Poisson Process models to infer the suitability of a given area, the units can be hard to interpret for non-scientists. An easy way to achieve this has been added as a function to each Biodiversity distribution object. See below for an example.
+
+```{r, echo=TRUE,eval=FALSE}
+# Train a model
+fit <- distribution(background) |> 
+  # Presence-absence data
+  add_biodiversity_poipo(my_gbifpoints) |> 
+  add_predictors(predictors) |> 
+  engine_glmnet() |> 
+  train()
+
+# Make a transformed prediction of the suitability layer
+# The output is a normalized prediction surface 
+# created via (x - min) / (max - min) or x/sum(x) respectively
+pred <- fit$calc_suitabilityindex()
+
+```
+
+</details>
