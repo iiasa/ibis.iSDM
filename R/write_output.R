@@ -354,7 +354,7 @@ methods::setMethod(
                                 type = model$biodiversity[[i]]$type,
                                 family = model$biodiversity[[i]]$family,
                                 equation = deparse1(model$biodiversity[[i]]$equation),
-                                obs_pres = sum( model$biodiversity[[i]]$observations$observed > 0 ),
+                                obs_pres = sum( as.numeric( as.character(model$biodiversity[[i]]$observations$observed) ) > 0 ),
                                 obs_abs = sum( model$biodiversity[[i]]$observations$observed == 0 ),
                                 n_predictors = length( model$biodiversity[[i]]$predictors_names )
                        )

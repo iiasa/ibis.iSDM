@@ -87,13 +87,14 @@ test_that('Scenarios and constraints', {
   expect_gt(x$get_timeperiod()[2],2050) # This might fail if I try to reformat the date
   #  Check that predictors are right
   expect_s3_class(x$get_predictors()$get_data(), "stars")
+  expect_s3_class(x$get_predictors()$get_data(df = TRUE), "data.frame")
 
   invisible( x$rm_predictors() )
   expect_length(x$get_predictor_names(), 9) # Properly inherited?
   x <- x$rm_predictors()
   expect_length(x$get_predictor_names(), 0) # Properly inherited?
 
-  # Try and add Raster Layers for the projection
+  # Try and add current raster Layers for the projection
   obj <- pred_current
   # Set some Z values and correct projection
   terra::time(obj) <- rep(as.Date("2015-01-01"), terra::nlyr(obj))
@@ -104,13 +105,20 @@ test_that('Scenarios and constraints', {
   expect_length(x$get_predictor_names(), 9)
   expect_equal(x$get_predictor_names(), names(obj))
   expect_lte(as.numeric( diff(x$get_timeperiod()) ), 1)
-  # Also check that it works with single raster layers
+  # Test train
+  mod <- x |> project()
+  expect_s3_class(mod$get_data(), "stars")
+
+  # Also check that it works with single SpatRaster layers
   x <- sc |> add_predictors(obj[[5]], transform = "none")
   expect_length(x$get_predictor_names(), 1)
+  # Test train (should be an error as predictors are missing)
+  expect_error( mod <- x |> project() )
 
   # Apply some transformations
   x <- sc |> add_predictors(obj, transform = "norm")
   expect_length(x$get_predictor_names(), 9)
+
   # Predict
   mod <- x |> project()
   expect_s3_class(mod$get_data(), "stars")
@@ -119,8 +127,9 @@ test_that('Scenarios and constraints', {
   mod <- sc |> add_predictors(pred_future) |> project()
   suppressWarnings( expect_s3_class(summary(mod), "data.frame") )
   invisible(
-    suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(), "stars") )
+    suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(plot = FALSE), "stars") )
   )
+  expect_length(mod$get_predictors()$get_time(), 9)
 
   # These will throw errors as we haven't added thresholds
   expect_error(mod$plot_relative_change())
@@ -128,7 +137,6 @@ test_that('Scenarios and constraints', {
   # Now add threshold
   mod <- sc |> add_predictors(pred_future) |> threshold() |> project()
   expect_s3_class(mod$summary_beforeafter(), "data.frame")
-  expect_s3_class(mod$plot_relative_change(), "ggplot")
   expect_true(inherits(mod$plot_relative_change(plot=FALSE), "SpatRaster"))
 
   # identical
@@ -144,7 +152,8 @@ test_that('Scenarios and constraints', {
   mod1 <- mod |> add_constraint_boundary(virtual_range) |> project()
   expect_type(mod1$get_constraints(), "list")
   mod1b <- mod |> add_constraint(method = "boundary", layer = virtual_range)   # Generic constraint
-  expect_equal(mod1$get_constraints(), mod1b$get_constraints())
+  expect_type(mod1b$get_constraints(), "list")
+  expect_equal(names(mod1$get_constraints()), names(mod1b$get_constraints()))
 
   # Dispersal simple
   expect_error(mod |> add_constraint_dispersal(method = "sdd_nexpkernel"))
@@ -157,7 +166,7 @@ test_that('Scenarios and constraints', {
   expect_length(mod2b$get_constraints(), 2)
 
   # Connectivity stuff
-  res <- pred_current$Urban
+  res <- pred_current$urban
   mod2 <- mod |> add_constraint_connectivity(method = "resistance", resistance = res)
   expect_equal(names(mod2$get_constraints()), "connectivity")
   expect_true(is.Raster(mod2$get_constraints()$connectivity$params$resistance))

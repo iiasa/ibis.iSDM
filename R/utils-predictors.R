@@ -72,7 +72,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     env <- units::drop_units(env)
     # Convert to list
     env_list <- list()
-    for(name in lyrs) env_list[[name]] <- terra::rast( env[[name]] )
+    for(name in lyrs) env_list[[name]] <- Reduce(c, stars_to_raster( env[name] ))
+
     # Make quick checks
     assertthat::assert_that( all( diff(sapply(env_list, terra::nlyr))==0 ) )
   } else {

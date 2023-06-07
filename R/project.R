@@ -424,7 +424,7 @@ methods::setMethod(
           }
           return(y)
         }
-        new_proj <- terra::lapp(proj, fun = impute.loess)
+        new_proj <- terra::app(proj, fun = impute.loess)
         # Rename again
         names(new_proj) <- names(proj)
         terra::time(new_proj) <- times

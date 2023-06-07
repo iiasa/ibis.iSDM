@@ -31,8 +31,10 @@ BiodiversityScenario <- bdproto(
     # Check that model exists
     fit <- self$get_model()
     timeperiod <- self$get_timeperiod()
-    dur <- round(as.numeric(difftime(timeperiod[2], timeperiod[1], unit="weeks"))/52.25,1)
-    if(dur == 0) dur <- "< 1"
+    if(!is.Waiver(timeperiod)){
+      dur <- round(as.numeric(difftime(timeperiod[2], timeperiod[1], unit="weeks"))/52.25,1)
+      if(dur == 0) dur <- "< 1"
+    }
     # Get set predictors and time period
     pn = ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
     tp = ifelse(is.Waiver(timeperiod),'None',
@@ -362,7 +364,7 @@ BiodiversityScenario <- bdproto(
       check_package("dplyr")
       # Get the scenario predictions and from there the thresholds
       scenario <- self$get_data()['threshold']
-      time <- stars::st_get_dimension_values(scenario,which = 'band')
+      time <- stars::st_get_dimension_values(scenario, which = 3) # Assuming band 3 is the time dimension
       assertthat::assert_that(!is.na(sf::st_crs(scenario)), msg = "Scenario not correctly projected.")
       # HACK: Add area to stars
       ar <- stars:::st_area.stars(scenario)
@@ -372,7 +374,8 @@ BiodiversityScenario <- bdproto(
       terra::time(new) <- time
       # Convert to scenarios to data.frame
       df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
-      names(df)[4] <- "area"
+      # Rename
+      names(df)[3:4] <- c("band", "area")
       # --- #
       # Now calculate from this data.frame several metrics related to the area and change in area
       df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>
@@ -488,7 +491,11 @@ BiodiversityScenario <- bdproto(
     )
     names(out) <- 'linear_coefficient'
     if(oftype == "stars"){
-      if(plot) stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+      if(plot){
+        suppressWarnings(
+          stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+        )
+      }
     } else {
       out <- terra::rast(out)
       if(plot) terra::plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))

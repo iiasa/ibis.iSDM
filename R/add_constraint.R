@@ -245,11 +245,11 @@ methods::setMethod(
     baseline_threshold[resistance == 1] <- 2
     # Set resistance to the value omitted
     resistance <- 2
+    baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
   # Grow baseline raster by the amount of value at max
   # Furthermore divide by value to get a normalized distance
-  baseline_threshold <- terra::mask(baseline_threshold, resistance)
-  dis <- terra::gridDistance(baseline_threshold, target = 1)
+  dis <- terra::gridDist(baseline_threshold, target = 1)
   ras_dis <- terra::clamp(dis, lower = 0, upper = value) / value
   # Invert
   ras_dis <- abs(ras_dis - 1)
@@ -275,7 +275,7 @@ methods::setMethod(
     is.numeric(value),
     is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold))==2
+    length(unique(baseline_threshold)[,1])==2
   )
 
   # Set resistance layer to 0 if set to zero.
@@ -283,14 +283,14 @@ methods::setMethod(
     baseline_threshold[resistance == 1] <- 2
     # Set resistance to the value omitted
     resistance <- 2
+    baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
 
   # Inverse of mean dispersal distance
   alpha <- 1/value
 
   # Grow baseline raster by using an exponentially weighted kernel
-  baseline_threshold <- terra::mask(baseline_threshold, resistance)
-  ras_dis <- terra::gridDistance(baseline_threshold, origin = 1)
+  ras_dis <- terra::gridDist(baseline_threshold, target = 1)
   if(normalize){
     # Normalized (with a constant) negative exponential kernel
     ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )

@@ -34,7 +34,6 @@ Imports:
     posterior,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
-    rgeos (>= 0.5-5),
     sf (>= 0.9),
     stars (>= 0.5),
     stats,

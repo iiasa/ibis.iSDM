@@ -562,7 +562,7 @@ emptyraster <- function(x, ...) { # add name, filename,
                 crs = terra::crs(x),
                 ext = terra::ext(x), ...)
   } else {
-    emptyraster( terra::rast(x) )
+    emptyraster( stars_to_raster(x)[[1]] )
   }
 }
 

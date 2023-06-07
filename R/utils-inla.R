@@ -997,18 +997,20 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 #' @param mesh The background projection mesh.
 #' @param mesh.area The area calculate for the mesh.
 #' @param type Name to use.
+#' @param background A [`sf`] formatted background layer.
 #' @param spde An spde field if specified.
 #' @param res Approximate resolution to the projection grid (default: \code{NULL}).
 #' @param settings A settings object.
 #' @param joint Whether more than 2 likelihoods are estimated.
 #' @keywords utils, internal
 #' @noRd
-inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
+inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, background,
                                        res = NULL, spde = NULL, settings = NULL,joint = FALSE){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
     inherits(mesh,'inla.mesh'),
+    is.numeric(mesh.area),
     is.character(type),
     is.null(spde)  || 'spatial.field1' %in% names(spde),
     is.logical(joint)
@@ -1038,9 +1040,10 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
                                   dims = Nxy)
   )
 
+  if(!inherits(background, "sf")) background <- sf::st_as_sf( background )
+
   # Buffer the region to be sure
-  # TODO: Adapt to sf in the future
-  suppressWarnings( background.g <- sf::st_buffer(methods::as(background,'Spatial'), dist = 0) )
+  suppressMessages( suppressWarnings( background.g <- sf::st_buffer( background, dist = 0) ) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -1050,20 +1053,26 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  # projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  assertthat::assert_that(inherits(projpoints, "sf"), nrow(projpoints)>0)
 
-  # TODO: Try and find an alternative to the splancs package to remove this dependent package
-  suppressWarnings(
-    cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
-                                       proj4string = methods::as(background.g,'Spatial')@proj4string),
-                               y = background.g))
+  suppressMessages(
+    suppressWarnings(
+    # cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
+    #                                    proj4string = methods::as(background.g,'Spatial')@proj4string),
+    #                            y = background.g))
+    check <- sf::st_intersects(projpoints, background.g)
+    )
   )
+  assertthat::assert_that(is.list(check))
+  # Get the intersecting cells/points
+  cellsIn <- which( sapply(check, function(z) length(z)>0) |> unlist() )
 
   # Check for multipolygon and align grid if necessary
-  if(inherits(cellsIn,'matrix')){
-    cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
-  } else { cellsIn <- which(cellsIn) }
-  assertthat::assert_that(length(cellsIn)>0)
+  # if(inherits(cellsIn,'matrix')){
+  #   cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
+  # } else { cellsIn <- which(cellsIn) }
+  # assertthat::assert_that(length(cellsIn)>0)
 
   # Get prediction coordinates
   predcoords <- projgrid$lattice$loc[cellsIn,]

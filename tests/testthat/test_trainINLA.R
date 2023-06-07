@@ -58,7 +58,7 @@ test_that('Train a distribution model with INLA', {
     )
   # Train the model
   suppressWarnings(
-    mod <- train(x, "test", inference_only = TRUE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+    mod <- train(x, "test", inference_only = TRUE, only_linear = TRUE, varsel = "none", verbose = FALSE)
   )
 
   # Expect summary
@@ -67,7 +67,7 @@ test_that('Train a distribution model with INLA', {
   expect_equal(length(mod$show_rasters()), 0) # Now predictions found
   # Fit with predictions
   suppressWarnings(
-    mod <- train(x, "test", inference_only = FALSE,only_linear = TRUE, varsel = "none", verbose = FALSE)
+    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
   )
   expect_equal(length(mod$show_rasters()), 1) # Now predictions found
 

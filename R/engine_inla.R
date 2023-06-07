@@ -481,7 +481,7 @@ engine_inla <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Set number of threads via set.Options
@@ -609,6 +609,7 @@ engine_inla <- function(x,
             mesh.area  = self$get_data('mesh.area'),
             res        = self$get_data('params')$proj_stepsize,
             type       = model$biodiversity[[id]]$type,
+            background = model$background,
             spde       = spde,
             settings   = settings,
             joint      = ifelse(nty > 1, TRUE, FALSE)
@@ -782,24 +783,30 @@ engine_inla <- function(x,
           names(post) <- c("mean", "sd", "q05", "q50", "q95", "mode","cv")
 
           # Fill prediction
+          # suppressWarnings(
+          #   prediction <- terra::rast(
+          #     sp::SpatialPixelsDataFrame(
+          #       points = predcoords,
+          #       data = post,
+          #       proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+          #     )
+          #   )
+          # )
           suppressWarnings(
-            prediction <- terra::rast(
-              sp::SpatialPixelsDataFrame(
-                points = predcoords,
-                data = post,
-                proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
-              )
-            )
+            prediction <- terra::rast(cbind( as.data.frame(predcoords), post), type = "xyz",
+                                      crs = terra::crs(self$get_data('mesh')$crs@projargs) )
           )
+
           prediction <- terra::mask(prediction, model$background) # Mask with background
           # Align with background
-          temp <- terra::rast(
-            sp::SpatialPixelsDataFrame(
-              points = model$predictors[,c('x','y')],
-              data = model$predictors[,c('x','y')],
-              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
-            )
-          )
+          # temp <- terra::rast(
+          #   sp::SpatialPixelsDataFrame(
+          #     points = model$predictors[,c('x','y')],
+          #     data = model$predictors[,c('x','y')],
+          #     proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+          #   )
+          # )
+          temp <- emptyraster( model$predictors_object$get_data() )
           prediction <- terra::resample(prediction, temp, method = 'bilinear')
 
         } else {
