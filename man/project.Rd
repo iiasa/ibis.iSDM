@@ -2,8 +2,19 @@
 % Please edit documentation in R/project.R
 \name{project}
 \alias{project}
+\alias{project,}
+\alias{project-method}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
+project(
+  mod,
+  date_interpolation = "none",
+  stabilize = FALSE,
+  stabilize_method = "loess",
+  layer = "mean",
+  ...
+)
+
 \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 }
 \arguments{
@@ -58,6 +69,22 @@ be helpful in situations where environmental variables are quite dynamic, but ch
 are not expected to abruptly increase or decrease. It is thus a way to smoothen out outliers from the projection.
 Options are so far for instance \code{'loess'} which fits a \code{\link[=loess]{loess()}} model per pixel and time step. This is conducted at
 the very of the processing steps and any thresholds will be recalculated afterwards.
+}
+\examples{
+\dontrun{
+# Fit a model
+fit <- distribution(background) |>
+        add_biodiversity_poipa(surveydata) |>
+        add_predictors(env = predictors) |>
+        engine_breg() |>
+        train()
+
+# Fit a scenario
+sc <- scenario(fit) |>
+        add_predictors(env = future_predictors) |>
+        project()
+}
+
 }
 \seealso{
 \code{\link[=scenario]{scenario()}}

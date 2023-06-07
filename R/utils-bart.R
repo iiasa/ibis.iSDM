@@ -306,14 +306,14 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
 
       if(is.Raster(envs) && terra::nlyr(envs)>1) {
         lyrtmp <- envs[[pd$xlbs[[i]]]]
-        xmat <- data.frame(from = c(min( terra::global(lyrtmp, "min"), min(df$x)), xmeds),
-                           to = c(xmeds, max( terra::global(lyrtmp, "max"), max(df$x))), becomes = df$med)
+        xmat <- data.frame(from = c(min( terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
+                           to = c(xmeds, max( terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
         lyrtr <- terra::reclassify(lyrtmp, xmat, include.lowest = TRUE)
       } else if (inherits(x = envs, what = "list")) {
         lyrtr <- lapply(envs, function(x) {
           lyrtmp <- x[[pd$xlbs[[i]]]]
-          xmat <- data.frame(from = c(min(terra::global(lyrtmp, "min"), min(df$x)), xmeds),
-                             to = c(xmeds, max(terra::global(lyrtmp, "max"), max(df$x))), becomes = df$med)
+          xmat <- data.frame(from = c(min(terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
+                             to = c(xmeds, max(terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
           return(terra::reclassify(lyrtmp, xmat, include.lowest = TRUE))
         })
       }
@@ -327,6 +327,6 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
   }
   # Return the output
   if (exists("pdstack")) {
-    return(stack(pdstack))
+    return(pdstack)
   }
 }

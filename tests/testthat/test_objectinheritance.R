@@ -104,4 +104,11 @@ test_that('Check that distribution objects are properly inherited', {
   settings2 <- settings2$set('test2', 1, copy =TRUE) # This returns a settings object
   expect_equal(settings$length(), 1)
 
+  # --- #
+  # Add multiple offsets
+  xx <- x |> add_predictors(predictors) |>
+    add_offset_range(layer = virtual_range)
+  expect_length(xx$get_offset(), 1)
+  xx <- xx |> add_offset_bias(layer = predictors$hmi_mean_50km)
+  expect_length(xx$get_offset(), 2)
 })

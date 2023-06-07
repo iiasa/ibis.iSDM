@@ -246,7 +246,6 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
       abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      # raster::sampleStratified(bg1, nrpoints)[,1]
       abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE)
     }
   } else if(method == "buffer"){
@@ -266,7 +265,6 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
       abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      # raster::sampleStratified(bg1, nrpoints)[,1]
       abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE)
     }
     rm(bg2, buf)
@@ -372,7 +370,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   }
 
   # Append to the presence information.
-  abs <- sf::st_as_sf(data.frame(raster::xyFromCell(bg1, abs)),
+  abs <- sf::st_as_sf(data.frame(terra::xyFromCell(bg1, abs)),
                       coords = c("x", "y"), crs = sf::st_crs(df) )
   abs$x <- sf::st_coordinates(abs)[,1]; abs$y <- sf::st_coordinates(abs)[,2]
   abs$type <- "Pseudo-absence"; abs[[field_occurrence]] <- 0

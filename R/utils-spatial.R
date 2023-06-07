@@ -259,16 +259,19 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #' @return Returns the unified total [`extent`] object.
 #' @noRd
 extent_expand <- function(e,f=0.1){
-  assertthat::assert_that(inherits(e,'Extent'))
-  xi <- (e@xmax-e@xmin)*(f/2)
-  yi <- (e@ymax-e@ymin)*(f/2)
+  assertthat::assert_that(inherits(e,'SpatExtent'),
+                          is.numeric(f))
+  # Convert to vector
+  e <- as.vector(e)
+  xi <- (e['xmax']-e['xmin'])*(f/2)
+  yi <- (e['ymax']-e['ymin'])*(f/2)
 
-  xmin <- e@xmin-xi
-  xmax <- e@xmax+xi
-  ymin <- e@ymin-yi
-  ymax <- e@ymax+yi
+  xmin <- e['xmin']-xi
+  xmax <- e['xmax']+xi
+  ymin <- e['ymin']-yi
+  ymax <- e['ymax']+yi
 
-  return(extent(c(xmin,xmax,ymin,ymax)))
+  return(terra::ext(c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)))
 }
 
 #' Helper function rename the geometry of a provided
@@ -617,9 +620,9 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   # Thus making this dependency suggested and optional
   # disfun <- geosphere::distHaversine
   if(longlat){
-    disfun <- function(x1,x2, m = ifelse(cheap,'cheap', 'haversine')) geodist::geodist(x1,x2, measure = m)
+    disfun <- function(x1, x2, m = ifelse(cheap,'cheap', 'haversine')) geodist::geodist(x1,x2, measure = m)
   } else {
-    disfun <- function(x1, x2) terra::distance(x1, x2, lonlat = longlat)
+    disfun <- function(x1, x2, m = NULL) terra::distance(x1, x2, lonlat = longlat)
   }
 
   if(process_in_parallel){
@@ -860,7 +863,7 @@ clean_rasterfile <- function(x, verbose = FALSE)
   if (length(files) == 0)
     return(NULL)
   lapply(files, function(f) {
-    if (fromDisk(x) & file.exists(f))
+    if (file.exists(f))
       file.remove(f, sub("grd", "gri", f))
     if (verbose) {
       print(paste("Deleted: ", f))
@@ -1048,7 +1051,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   ras <- terra::rasterize(coords, bg) # Get the number of observations per grid cell
 
   # Bounds for thining
-  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min", na.rm = TRUE), minpoints))
+  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
 
   # -- #
   if(method == "random"){
@@ -1059,7 +1062,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     sel <- vector()
 
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords)
+                     cid = terra::extract(bg, coords)[,1]
     )
     ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
 
@@ -1087,33 +1090,34 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   } else if(method == "bias"){
     assertthat::assert_that(is.Raster(env),
                             terra::nlyr(env)==1,
-                            msg = "Bias requires a single Raster layer provided to env.")
+                            msg = "Bias requires a single SpatRaster layer given to env.")
     sel <- vector()
 
     # Convert bias layer into percentile (largest being)
-    bias_perc <- terra::quantile(env, c(.75))
+    bias_perc <- terra::global(env, fun = quantile, na.rm = TRUE)[["X75."]]
 
     # Now extract
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords),
-                     pres = terra::extract(ras, coords),
-                     bias = terra::extract(env, coords)
+                     cid = terra::extract(bg, coords)[,1],
+                     pres = terra::extract(ras, coords)[,1],
+                     bias = terra::extract(env, coords)[,1]
     )
     ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
     # Now identify those to be thinned
-    ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$pres > totake[1]), 1, 0)
-    assertthat::assert_that(dplyr::n_distinct(ex$tothin) == 2)
+    ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$pres < totake[1]), 1, 0)
     # Now thin those points that are to be thinned
-    ss <- ex |> dplyr::filter(tothin == 1) |>
-      dplyr::group_by(cid) |>
-      dplyr::slice_sample(n = totake[1], weight_by = bias, replace = T) |>
-      dplyr::distinct()
+    if(length(unique(ex$tothin))>1){
+      ss <- ex |> dplyr::filter(tothin == 1) |>
+        dplyr::group_by(cid) |>
+        dplyr::slice_sample(n = totake[1], weight_by = bias, replace = T) |>
+        dplyr::distinct()
 
-    # Points to take
-    sel <- append(sel, ex$id[ex$tothin==0] )
-    sel <- append(sel, ss$id )
+      # Points to take
+      sel <- append(sel, ex$id[ex$tothin==0] )
+      sel <- append(sel, ss$id )
+      try({rm(ss, ex)},silent = TRUE)
+    }
 
-    try({rm(ss, ex)},silent = TRUE)
   } else if(method == "zones"){
     # Thinning by zones
     assertthat::assert_that(is.Raster(zones),
@@ -1127,8 +1131,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     sel <- vector()
 
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords),
-                     zones = terra::extract(zones, coords)
+                     cid = terra::extract(bg, coords)[,1],
+                     zones = terra::extract(zones, coords)[,1]
     )
     # Now for each zone, take the minimum amount at random
     ss <- ex |>
@@ -1175,8 +1179,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
     # Now re-extract and sampling points
     ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords),
-                     zones = terra::extract(new, coords)
+                     cid = terra::extract(bg, coords)[,1],
+                     zones = terra::extract(new, coords)[,1]
     )
 
     # Now for each zone, take the minimum amount at random

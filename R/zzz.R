@@ -45,7 +45,11 @@
 
   # Set default settings for pseudo-absence sampling
   options('ibis.pseudoabsence' = pseudoabs_settings() )
+
   # Set S2 use for SF to false owing to the multiple bugs and errors with
   # 29/06 To be changed later eventually
   suppressMessages( sf::sf_use_s2(FALSE) )
+  # Use sf instead of sp where possible
+  # https://r-spatial.org/r/2023/05/15/evolution4.html
+  options("sp_evolution_status" = 2)
 }

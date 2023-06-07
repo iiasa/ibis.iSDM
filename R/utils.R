@@ -239,7 +239,7 @@ thresholdval <- function(x, knot) {
 #' }
 #' @keywords utils
 #' @noRd
-run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
+run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
   assertthat::assert_that(
     is.list(X) || is.data.frame(X) || is.matrix(X),
     is.function(FUN),
@@ -290,7 +290,7 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
           if(!is.null(export_packages)){
             # Send all specified packages to the cluster
             for(val in export_packages){
-              parallel::clusterExport(cl, varlist = package_function_names(val),
+              parallel::clusterExport(cl, varlist = val,
                                       envir = as.environment(asNamespace(val)))
             }
           }

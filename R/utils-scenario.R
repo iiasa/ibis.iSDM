@@ -407,7 +407,13 @@ summarise_change <- function(scenario){
   assertthat::assert_that(
     inherits(scenario, "stars")
   )
+  # Check that geosphere is installed and loaded
   check_package("geosphere")
+  if(!("geosphere" %in% loadedNamespaces()) || ('geosphare' %notin% utils::sessionInfo()$otherPkgs) ) {
+    try({requireNamespace('geosphere');attachNamespace("geosphere")},silent = TRUE)
+  } else {
+    if(getOption("ibis.setupmessages")) myLog("[Summary]","red","This summary function requires the geosphere package.")
+  }
 
   # Get the current and future
   ss <- stars_to_raster(scenario)

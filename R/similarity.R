@@ -343,7 +343,7 @@ methods::setMethod(
     ref <- as.data.frame(ref)
   }
   # Make dummy template rasters
-  if(is(covs, 'Raster')) {
+  if(is.Raster(covs)) {
     r <- TRUE
     if(isTRUE(full)) {
       out <- c(replicate( terra::nlyr(covs), terra::init(covs, function(x) NA)))

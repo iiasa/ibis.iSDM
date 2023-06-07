@@ -187,7 +187,7 @@ DistributionModel <- bdproto(
       # Match argument
       what <- match.arg(what, names(pred), several.ok = FALSE)
       assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
-      raster::plot(pred[[what]],
+      terra::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
            box = FALSE,
            axes = TRUE,
@@ -207,9 +207,9 @@ DistributionModel <- bdproto(
     if(length(grep('threshold',rl))>0){
 
       # Get stack of computed thresholds
-      ras <- raster::stack( self$get_data( grep('threshold',rl,value = TRUE)[[what]] ) )
+      ras <- self$get_data( grep('threshold', rl, value = TRUE)[[what]] )
       suppressWarnings(
-        ras <- raster::deratify(ras, complete = TRUE)
+        ras <- terra::droplevels(ras)
       )
       # Get colour palette
       format <- attr(ras[[1]], 'format') # Format attribute
@@ -221,7 +221,7 @@ DistributionModel <- bdproto(
         # Binary
         col <- c("grey", "black")
       }
-      raster::plot(ras,
+      terra::plot(ras,
                    box = FALSE,
                    axes = TRUE,
                    colNA = NA, col = col
@@ -374,7 +374,7 @@ DistributionModel <- bdproto(
   # Get resolution
   get_resolution = function(self){
     if(!is.Waiver(self$get_data())){
-      raster::res( self$get_data() )
+      terra::res( self$get_data() )
     } else {
       # Try to get it from the modelling object
       self$model$predictors_object$get_resolution()
@@ -422,7 +422,8 @@ DistributionModel <- bdproto(
     ras <- self$fits[[grep('raster', cl,ignore.case = T)]]
 
     # Check that no-data value is not present in ras
-    assertthat::assert_that(any(!cellStats(ras,min) <= -9999),msg = 'No data value -9999 is potentially in prediction!')
+    assertthat::assert_that(any(!terra::global(ras, "min", na.rm = TRUE)[,1] <= -9999),
+                            msg = 'No data value -9999 is potentially in prediction!')
 
     if(file.exists(fname)) warning('Overwritting existing file...')
     if(type %in% c('gtif','gtiff','tif')){

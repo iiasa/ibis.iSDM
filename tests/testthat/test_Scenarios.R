@@ -3,12 +3,14 @@ test_that('Scenarios and constraints', {
 
   skip_if_not_installed('stars')
   skip_if_not_installed('glmnet')
+  skip_if_not_installed('geosphere')
   skip_on_travis()
   skip_on_cran()
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
   suppressWarnings( requireNamespace('igraph', quietly = TRUE) )
   suppressWarnings( requireNamespace('stars', quietly = TRUE) )
+  suppressWarnings( requireNamespace('geosphere', quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE) # Be less chatty
   options("ibis.seed" = 1234)

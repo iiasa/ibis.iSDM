@@ -46,12 +46,33 @@ NULL
 #' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
 #' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
+#' @examples
+#' \dontrun{
+#' # Fit a model
+#' fit <- distribution(background) |>
+#'         add_biodiversity_poipa(surveydata) |>
+#'         add_predictors(env = predictors) |>
+#'         engine_breg() |>
+#'         train()
+#'
+#' # Fit a scenario
+#' sc <- scenario(fit) |>
+#'         add_predictors(env = future_predictors) |>
+#'         project()
+#' }
+#'
+#' @keywords scenarios
 #'
 #' @name project
-#' @aliases project
-#' @keywords scenarios
+#' @exportMethod project
+#' @aliases project, project-method
 #' @export
 NULL
+
+#' @name project
+#' @rdname project
+#' @exportMethod project
+#' @export
 methods::setGeneric("project",
                     signature = methods::signature("mod"),
                     function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",

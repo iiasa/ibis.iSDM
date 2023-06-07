@@ -39,8 +39,9 @@ effectively fits a separate generalized linear model to reduce the number of cov
 \item \code{"boruta"} Uses the \link{Boruta} package to identify non-informative features.
 }}
 
-\item{optim_hyperparam}{Perform a variable selection on the set of predictors either prior
-to building the model (Default: \code{FALSE}).}
+\item{optim_hyperparam}{Parameter to tune the model by iterating over input parameters or selection
+of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
+needed (Default: \code{FALSE}).}
 
 \item{inference_only}{By default the \link{engine} is used to create
 a spatial prediction of the suitability surface, which can take time. If only inferences of

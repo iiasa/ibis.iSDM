@@ -340,7 +340,7 @@ engine_stan <- function(x,
 
         # Transformed parameters
         # Add (gaussian) priors to model likelihood if set
-        if((!is.Waiver(model$priors) || settings$get(what='varsel') == "none")){
+        if((!is.Waiver(model$priors) || settings$get(what='optim_hyperparam') == FALSE)){
           # If no intercept is specified, add beta
           if(has_intercept){
             # Parameters
@@ -373,7 +373,7 @@ engine_stan <- function(x,
             }
           }
         } else
-          if( settings$get(what='varsel') == "reg" ){
+          if( settings$get(what='optim_hyperparam') == TRUE ){
             if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
             # Add regularized horseshoe prior
             # See brms::horseshoe

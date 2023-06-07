@@ -615,6 +615,8 @@ post_prediction <- function(mod, nsamples = 100,
     is.numeric(seed) || is.null(seed),
     msg = 'Not all data and parameters needed for prediction are present!'
   )
+  check_package("inlabru")
+
   # Get data from object #
   model <- mod$get_data('fit_best')
   mesh <- mod$get_data('mesh')
@@ -650,14 +652,6 @@ post_prediction <- function(mod, nsamples = 100,
   )
 
   # inlabru extract entries function and names standardization functions
-  extract.entries <- function (name, smpl) {
-    ename <- gsub("\\.", "\\\\.", name)
-    ename <- gsub("\\(", "\\\\(", ename)
-    ename <- gsub("\\)", "\\\\)", ename)
-    ptn <- paste("^", ename, "[\\:]*[\\.]*[0-9]*[\\.]*[0-9]*$",
-                 sep = "")
-    return(smpl[grep(ptn, rownames(smpl))])
-  }
   standardise.names <- function (x) {
     new_names <- vapply(x, function(x) {
       gsub("[-() ]", "_", x = x, fixed = FALSE)
@@ -681,7 +675,7 @@ post_prediction <- function(mod, nsamples = 100,
 
     # Extract simulated predictor and fixed effects
     for (name in unique(c("Predictor", preds_names))) {
-      vals[[name]] <- extract.entries(name, smpl.latent)
+      vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
     }
     # Remove any variables with no values (removed during model fit)
     vals <- vals[which(lapply(vals, length)>0)]
@@ -703,7 +697,7 @@ post_prediction <- function(mod, nsamples = 100,
     if (length(model$summary.random) > 0) {
       for (k in seq_along(model$summary.random)) {
         name <- unlist(names(model$summary.random[k]))
-        vals[[name]] <- extract.entries(name, smpl.latent)
+        vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
       }
     }
     if (length(smpl.hyperpar) > 0) {
@@ -722,7 +716,7 @@ post_prediction <- function(mod, nsamples = 100,
   A <- inlabru:::amatrix_eval(model, data = preds)
   A <- x$engine$data$stk_pred$stk_proj$A
 
-  effects <- evaluate_effect_multi(
+  effects <- inlabru:::evaluate_effect_multi_state(
     model$effects[included],
     state = vals,
     data = preds,
@@ -1218,7 +1212,7 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
   suppressMessages(
     suppressWarnings(
       background.g <- sf::st_buffer(methods::as(background, 'Spatial') |> sf::st_as_sf(),
-                                    dist = 0) |> as("Spatial")
+                                    dist = 0) |> methods::as("Spatial")
     )
   )
   suppressWarnings(

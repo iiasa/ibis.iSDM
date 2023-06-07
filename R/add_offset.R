@@ -83,7 +83,7 @@ methods::setMethod(
       of <- x$offset
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
-      of <- c(terra::rast(of), layer)
+      of <- c(of, layer)
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -251,7 +251,7 @@ methods::setMethod(
       of <- x$offset
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
-      of <- c( terra::rast(of), layer )
+      suppressWarnings( of <- c( of, layer ) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -363,7 +363,7 @@ methods::setMethod(
       of <- x$offset
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
-      suppressWarnings( of <- c( terra::rast(of), layer ) )
+      suppressWarnings( of <- c( of, layer ) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -497,7 +497,7 @@ methods::setMethod(
       ori.name <- names(ras_range)
       ras_range <- terra::resample(ras_range, of, method = 'bilinear', threads = getOption("ibis.nthread") )
       names(ras_range) <- ori.name # In case the layer name got lost
-      suppressWarnings( of <- c(terra::rast(of), ras_range) )
+      suppressWarnings( of <- c(of, ras_range) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset
@@ -614,7 +614,7 @@ methods::setMethod(
       of <- x$offset
       elev.prior <- terra::resample(elev.prior, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(elev.prior) <- 'elev.prior' # In case the layer name got lost
-      suppressWarnings( of <- c( terra::rast(of), elev.prior ) )
+      suppressWarnings( of <- c( of, elev.prior ) )
       x <- x$set_offset(of)
     } else {
       # Add as a new offset

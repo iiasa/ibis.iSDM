@@ -138,16 +138,16 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- lapply(env_list, function(x) win(x, windsor_props))
     }
   } else if(option == 'windsor_thresh'){
-    win <- function(x, windsor_thresh){
+    win_tr <- function(x, windsor_thresh){
       if(is.vector(env)) out <- units::drop_units(env) else out <- env
       out[out < windsor_thresh[1]] <- windsor_thresh[1]
       out[out > windsor_thresh[2]] <- windsor_thresh[2]
       out
     }
     if(is.Raster(env)){
-      out <- win(env, windsor_props )
+      out <- win_tr(env, windsor_props )
     } else {
-      out <- lapply(env_list, function(x) win(x, windsor_props))
+      out <- lapply(env_list, function(x) win_tr(x, windsor_props))
     }
   }
 
@@ -181,7 +181,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       nComp <- terra::nlyr(env)
       # Construct mask of all cells
       envMask <- !sum(terra::app(env, is.na))
-      assertthat::assert_that(terra::global(envMask, "sum")>0,msg = 'A predictor is either NA only or no valid values across all layers')
+      assertthat::assert_that(terra::global(envMask, "sum")[,1]>0,
+                              msg = 'A predictor is either NA only or no valid values across all layers')
       env <- terra::mask(env, envMask, maskvalues = 0)
 
       # Sample covariance from stack and fit PCA

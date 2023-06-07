@@ -1,9 +1,9 @@
 #' @include utils.R bdproto-biodiversityscenario.R
 NULL
 
-#' Add constrains to the modelled distribution projection through the MigClim approach
+#' Add constrains to the modelled distribution projection using the MigClim approach
 #'
-#' @description This function adds constrain as defined by the MigClimto approach (Engler et al. 2013)
+#' @description This function adds constrain as defined by the MigClim approach (Engler et al. 2013)
 #' to a [`BiodiversityScenario-class`] object to
 #' constrain future projections. For a detailed description of MigClim, please the respective reference
 #' and the UserGuide. **The default parameters chosen here are suggestions.**
@@ -39,36 +39,36 @@ NULL
 #' # Assumes that a trained 'model' object exists
 #'  mod <- scenario(model) |>
 #'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
-#'   add_constrain_MigClim() |>
+#'   add_constraint_MigClim() |>
 #'   project()
 #' }
 #'
-#' @name add_constrain_MigClim
-#' @aliases add_constrain_MigClim
+#' @name add_constraint_MigClim
+#' @aliases add_constraint_MigClim
 #' @family constrain
 #' @keywords scenario
-#' @exportMethod add_constrain_MigClim
+#' @exportMethod add_constraint_MigClim
 #' @export
 NULL
-methods::setGeneric("add_constrain_MigClim",
+methods::setGeneric("add_constraint_MigClim",
                     signature = methods::signature("mod"),
                     function(mod, rcThresholdMode = 'continuous', dispSteps = 1,
                              dispKernel = c(1.0, 0.4, 0.16, 0.06, 0.03), barrierType = "strong",
                              lddFreq = 0, lddRange = c(1000, 10000),
                              iniMatAge = 1, propaguleProdProb = c(0.2, 0.6,0.8, 0.95),
-                             replicateNb = 10, dtmp = raster::tmpDir() ) standardGeneric("add_constrain_MigClim"))
+                             replicateNb = 10, dtmp = terra::terraOptions(print = F)$tempdir ) standardGeneric("add_constraint_MigClim"))
 
-#' @name add_constrain_MigClim
-#' @rdname add_constrain_MigClim
-#' @usage \S4method{add_constrain_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange, iniMatAge, propaguleProdProb, replicateNb, dtmp)
+#' @name add_constraint_MigClim
+#' @rdname add_constraint_MigClim
+#' @usage \S4method{add_constraint_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange, iniMatAge, propaguleProdProb, replicateNb, dtmp)
 methods::setMethod(
-  "add_constrain_MigClim",
+  "add_constraint_MigClim",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, rcThresholdMode = 'continuous', dispSteps = 1,
            dispKernel = c(1.0, 0.4, 0.16, 0.06, 0.03), barrierType = "strong",
            lddFreq = 0, lddRange = c(1000, 10000),
            iniMatAge = 1, propaguleProdProb = c(0.2, 0.6, 0.8, 0.95),
-           replicateNb = 10, dtmp = raster::tmpDir()) {
+           replicateNb = 10, dtmp = terra::terraOptions(print = F)$tempdir ) {
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -99,9 +99,9 @@ methods::setMethod(
     assertthat::assert_that(length(tr)>0, msg = "No initial threshold has been found in the model object.")
 
     # Get Initial distribution object
-    # iniDist <- data.frame(X = raster::coordinates(fit$get_data(tr))[,1],
-    #                       Y = raster::coordinates(fit$get_data(tr))[,2],
-    #                       value = values(fit$get_data(tr)))
+    # iniDist <- data.frame(X = terra::crds(fit$get_data(tr))[,1],
+    #                       Y = terra::crds(fit$get_data(tr))[,2],
+    #                       value = terra::values(fit$get_data(tr)))
     # Alternatively save to temporary folder and pass pathname
     dir.create(dtmp, showWarnings = FALSE)
     r <- fit$get_data(tr)
