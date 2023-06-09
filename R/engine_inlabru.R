@@ -112,7 +112,7 @@ engine_inlabru <- function(x,
     # Load a provided on
     mesh <- optional_mesh
     # Security check for projection and if not set, use the one from background
-    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
+    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
 
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
