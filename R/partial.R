@@ -115,4 +115,4 @@ methods::setMethod(
 #' @method spartial DistributionModel
 #' @keywords partial
 #' @export
-spartial.DistributionModel <- function(x, ...) x$spartial(...)
+spartial.DistributionModel <- function(mod, ...) mod$spartial(...)

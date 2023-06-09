@@ -509,4 +509,4 @@ methods::setGeneric("stancode",
 #' @method stancode DistributionModel
 #' @keywords engine
 #' @export
-stancode.DistributionModel <- function(x, ...) x$stancode()
+stancode.DistributionModel <- function(obj, ...) obj$stancode()

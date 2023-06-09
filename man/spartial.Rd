@@ -9,7 +9,7 @@ spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
 \S4method{spartial}{ANY,character}(mod, x.var)
 
-\method{spartial}{DistributionModel}(x, ...)
+\method{spartial}{DistributionModel}(mod, ...)
 }
 \arguments{
 \item{mod}{A \code{\linkS4class{DistributionModel}} object with trained model.}
