@@ -4,22 +4,15 @@
 \alias{project}
 \alias{project,}
 \alias{project-method}
+\alias{project.BiodiversityScenario}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
-project(
-  mod,
-  date_interpolation = "none",
-  stabilize = FALSE,
-  stabilize_method = "loess",
-  layer = "mean",
-  ...
-)
+\method{project}{BiodiversityScenario}(x, ...)
 
 \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 }
 \arguments{
-\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
-Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
+\item{...}{passed on parameters.}
 
 \item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated. Options
 include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
@@ -30,7 +23,8 @@ include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{...}{passed on parameters.}
+\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
+Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.

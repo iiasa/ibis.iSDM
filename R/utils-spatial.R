@@ -604,6 +604,8 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
     is.data.frame(env), assertthat::has_name(env, field_space),
     length(field_space) == 2, is.vector(field_space)
   )
+  check_package("geodist")
+
   # Convert to matrices
   coords <- as.matrix(coords)
   coords_env <- as.matrix(env[,field_space])
@@ -616,18 +618,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   }
 
   # Pairwise distance function
-  # FIXME: Potentially evaluate whether sf::st_distance is of similar speed for very large matrices.
-  # Thus making this dependency suggested and optional
-  # disfun <- geosphere::distHaversine
-  # MH: Local functions must have the same arguments and default. But the following should work
-  # MH: I think. In case of the terra fun lonlat has to be FALSE cause if not the ELSE is not
-  # MH: entered anyhow. So we can "hard-code" that. The ifelse for measure in the geodist
-  # MH: can be used only if we are in that case anyhow
-  if(longlat){
-    disfun <- function(x1, x2) geodist::geodist(x1,x2, measure = ifelse(cheap,'cheap', 'haversine'))
-  } else {
-    disfun <- function(x1, x2) terra::distance(x1, x2, lonlat = FALSE)
-  }
+  disfun <- function(x1, x2) geodist::geodist(x1,x2, measure = ifelse(cheap,'cheap', 'haversine'))
 
   if(process_in_parallel){
 

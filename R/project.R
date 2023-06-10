@@ -69,23 +69,21 @@ NULL
 #' @export
 NULL
 
-#' @name project
 #' @rdname project
-#' @exportMethod project
+#' @method project BiodiversityScenario
+#' @keywords scenarios
 #' @export
-methods::setGeneric("project",
-                    signature = methods::signature("mod"),
-                    function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
-                             layer = "mean", ...) standardGeneric("project"))
+project.BiodiversityScenario <- function(x,...) project(x,...)
 
 #' @name project
 #' @rdname project
 #' @usage \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 methods::setMethod(
   "project",
-  methods::signature(mod = "BiodiversityScenario"),
-  function(mod, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
+  methods::signature(x = "BiodiversityScenario"),
+  function(x, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
            layer = "mean", ...){
+    mod <- x # MJ: Workaround to ensure project generic does not conflict with terra::project
     # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),

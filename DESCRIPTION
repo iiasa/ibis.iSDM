@@ -89,6 +89,7 @@ Collate:
     'add_offset.R'
     'bdproto-predictors.R'
     'add_predictors.R'
+    'add_predictors_globiom.R'
     'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-priorlist.R'

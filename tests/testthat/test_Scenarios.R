@@ -150,6 +150,10 @@ test_that('Scenarios and constraints', {
   mod <- sc |> add_predictors(pred_future) |> threshold()
   expect_invisible(mod$verify())
 
+  # Check summary
+  mod0 <- mod |> project()
+  expect_s3_class(mod0$summary_beforeafter(), 'data.frame')
+
   # Boundary
   mod1 <- mod |> add_constraint_boundary(virtual_range) |> project()
   expect_type(mod1$get_constraints(), "list")
