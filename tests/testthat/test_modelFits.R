@@ -1,4 +1,4 @@
-# Train a full distribution model with INLA
+# Further tests for model fits
 test_that('Add further tests for model fits', {
 
   skip_if_not_installed('glmnet')
@@ -6,16 +6,19 @@ test_that('Add further tests for model fits', {
   skip_on_travis()
   skip_on_cran()
 
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
+
   # Load data
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
   ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   # Load them as rasters
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Add pseudo absence
   abs <- pseudoabs_settings(nrpoints = 0,min_ratio = 1,method = "mcp")
@@ -38,10 +41,10 @@ test_that('Add further tests for model fits', {
   suppressWarnings(
     mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
   )
-  expect_s4_class(mod$get_data(), "RasterLayer")
+  expect_s4_class(mod$get_data(), "SpatRaster")
 
   # Threshold with independent data
-  mod <- threshold(mod,method = "perc",format = "bin")
+  mod <- threshold(mod, method = "perc", format = "bin")
   expect_gt(mod$get_thresholdvalue(),0)
   expect_length(mod$show_rasters(), 2)
 
@@ -62,20 +65,21 @@ test_that('Add further tests for model fits', {
 
   # ----------- #
   # Partial stuff
-  pp <- partial(mod,x.var = "bio19_mean_50km",plot = FALSE)
+  pp <- partial(mod, x.var = "bio19_mean_50km",plot = FALSE)
   expect_s3_class(pp, "data.frame")
 
   # Spartial
   pp <- spartial(mod,x.var = "bio19_mean_50km",plot = FALSE)
-  expect_s4_class(pp, "RasterLayer")
+  expect_s4_class(pp, "SpatRaster")
 
   # ----------- #
   # Create a suitability index
   o <- mod$calc_suitabilityindex()
-  expect_s4_class(o, "RasterLayer")
+  expect_s4_class(o, "SpatRaster")
 
   # ----------- #
   # Write model outputs
-  # expect_snapshot_file(write_summary(mod, "test.rds"), "test.rds")
-
+  tf <- base::tempfile()
+  expect_no_error(write_summary(mod, paste0(tf, ".rds")))
+  expect_no_error(write_model(mod, paste0(tf, ".rds")))
 })

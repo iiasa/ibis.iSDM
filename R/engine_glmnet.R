@@ -81,9 +81,9 @@ engine_glmnet <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -94,7 +94,7 @@ engine_glmnet <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set up the parameter list
   params <- list(
@@ -142,7 +142,7 @@ engine_glmnet <- function(x,
           assertthat::has_name(model, 'background'),
           assertthat::has_name(model, 'biodiversity'),
           inherits(settings,'Settings') || is.null(settings),
-          nrow(model$predictors) == raster::ncell(self$get_data('template')),
+          nrow(model$predictors) == terra::ncell(self$get_data('template')),
           !is.Waiver(self$get_data("params")),
           length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
@@ -162,7 +162,7 @@ engine_glmnet <- function(x,
         if(fam == "poisson"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
+          assertthat::assert_that(!is.na( terra::global(bg, "min", na.rm = TRUE)[,1]))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -195,13 +195,6 @@ engine_glmnet <- function(x,
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
 
-          # Will expectations with 1 for rest of data points
-          if(length(model$biodiversity[[1]]$expect)!= nrow(model$biodiversity[[1]]$observations)){
-            model$biodiversity[[1]]$expect <- c(model$biodiversity[[1]]$expect,
-                                                rep(1, nrow(model$biodiversity[[1]]$observations) - length(model$biodiversity[[1]]$expect))
-            )
-          }
-
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
@@ -232,7 +225,7 @@ engine_glmnet <- function(x,
           model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect) # Multiply with prior weight
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+          pres <- terra::rasterize( guess_sf(model$biodiversity[[1]]$observations[,c("x","y")]),
                                     bg, fun = 'count', background = 0)
           # Get for the full dataset
           w_full <- ppm_weights(df = model$predictors,
@@ -470,7 +463,7 @@ engine_glmnet <- function(x,
           # Fill output with summaries of the posterior
           prediction[full_sub$rowid] <- out[,1]
           names(prediction) <- "mean"
-          prediction <- raster::mask(prediction, self$get_data("template"))
+          prediction <- terra::mask(prediction, self$get_data("template"))
           try({rm(out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done
@@ -536,9 +529,17 @@ engine_glmnet <- function(x,
               }
               df2 <- df2 |> as.data.frame()
             } else {
-              df2 <- as.data.frame(seq(rr[1,x.var],rr[2,x.var], length.out = variable_length))
-              names(df2) <- x.var
+              df2 <- list()
+              for(i in x.var) {
+                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+              }
+              df2 <- do.call(cbind, df2); names(df2) <- x.var
             }
+
+            # Get offset if set
+            if(!is.Waiver(model$offset)){
+              of <- model$offset$spatial_offset
+            } else of <- new_waiver()
 
             # Check that variables are in
             assertthat::assert_that(all( x.var %in% colnames(df) ),
@@ -547,13 +548,21 @@ engine_glmnet <- function(x,
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
-              p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                 type = "regression",
-                                 plot = FALSE, rug = TRUE, train = df)
-              p1 <- p1[,c(x.var, "yhat")]
+              if(!is.Waiver(of)){
+                # Predict with offset
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   type = "regression", newoffset = of,
+                                   plot = FALSE, rug = TRUE, train = df)
+              } else {
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   type = "regression",
+                                   plot = FALSE, rug = TRUE, train = df)
+              }
+              p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
               p1$variable <- v
               pp <- rbind(pp, p1)
+              rm(p1)
               if(length(x.var) > 1) pb$tick()
             }
 
@@ -593,7 +602,7 @@ engine_glmnet <- function(x,
             # Match x.var to argument
             x.var <- match.arg(x.var, names(df), several.ok = FALSE)
             df_sub <- subset(df, stats::complete.cases(df))
-            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
+            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid,3] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
             # Add all others as constant
@@ -625,9 +634,8 @@ engine_glmnet <- function(x,
             names(prediction) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot){
-              plot(prediction, col = ibis_colours$viridis_orig)
-            }
+            if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
+
             return(prediction)
           },
           # Get coefficients from breg
@@ -679,24 +687,28 @@ engine_glmnet <- function(x,
             df$w <- model$exposure # Also get exposure variable
             # Make a subset of non-na values
             df$rowid <- 1:nrow(df)
-            df_sub <- subset(df, stats::complete.cases(df))
+            df_sub <- base::subset(df, stats::complete.cases(df))
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
-            pred_gn <- predict(
+            pred_gn <- glmnetUtils:::predict.cv.glmnet.formula(
               object = mod,
               newdata = df_sub,
               weights = df_sub$w, # The second entry of unique contains the non-observed variables
               newoffset = ofs,
+              na.action = "na.pass",
               s = determine_lambda(mod), # Determine best available lambda
               fam = fam,
               type = type
             ) |> as.data.frame()
             names(pred_gn) <- layer
+            assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
             # Now create spatial prediction
             prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
-            prediction[df_sub$rowid] <- pred_gn[,1]
+            # sf::st_as_sf(df_sub, coords = c("x","y") )
+            # terra::values(prediction) <- pred_gn[, layer]
+            prediction[df_sub$rowid] <- pred_gn[, layer]
 
             return(prediction)
           }

@@ -22,7 +22,7 @@ should be performed.}
 
 \item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
 
-\item{layer}{A \code{\link{Raster}} object that can be used for boundary constraints (Default: \code{NULL}).}
+\item{layer}{A \code{\link{SpatRaster}} object that can be used for boundary constraints (Default: \code{NULL}).}
 
 \item{pext}{\code{\link{numeric}} indicator for \code{\link{kissmig}} of the probability a colonized cell becomes uncolonised,
 i.e., the species gets locally extinct (Default: \code{0.1}).}

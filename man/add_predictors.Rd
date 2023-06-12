@@ -19,26 +19,20 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,RasterBrick}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
 
-\S4method{add_predictors}{BiodiversityDistribution,RasterLayer}(x, env)
-
-\S4method{add_predictors}{BiodiversityDistribution,RasterStack}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
 
 \S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
 
-\S4method{add_predictors}{BiodiversityScenario,RasterBrick}(x, env)
-
-\S4method{add_predictors}{BiodiversityScenario,RasterLayer}(x, env)
-
-\S4method{add_predictors}{BiodiversityScenario,RasterStack}(x, env)
+\S4method{add_predictors}{BiodiversityScenario, SpatRaster}(x, env)
 
 \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{env}{A \code{\linkS4class{RasterStack}}, \code{\linkS4class{RasterLayer}} or \code{\link{stars}} object.}
+\item{env}{A \code{\link{SpatRaster}} or \code{\link{stars}} object.}
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental stack in case they should be renamed.}
 
@@ -50,9 +44,9 @@ add_predictors(
 
 \item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
+\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE}).}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE}).}
 
 \item{explode_factors}{\code{\link{logical}} of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).}
 

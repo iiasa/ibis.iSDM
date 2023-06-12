@@ -77,7 +77,7 @@ BiodiversityDistribution <- bdproto(
     r <- self$background
     o <- list()
     o[['extent']] <- round( sf::st_bbox(r), 3)
-    o[['proj']] <-  raster::projection(r)
+    o[['proj']] <-  sf::st_crs(r)$proj4string
     return(o)
   },
   # Set limits
@@ -203,18 +203,18 @@ BiodiversityDistribution <- bdproto(
       bdproto(NULL, self, offset = new_waiver() )
     } else {
       of <- self$offset
-      of <- raster::dropLayer(of, what)
+      of <- terra::subset(of, -what)
       bdproto(NULL, self, offset = of )
     }
   },
   # Plot offset
   plot_offsets = function(self){
     if(is.Waiver(self$offset)) return( self$offset )
-    if(raster::nlayers(self$offset)>1){
+    if(terra::nlyr(self$offset)>1){
       of <- sum(self$offset, na.rm = TRUE)
-      of <- raster::mask(of, self$background)
+      of <- terra::mask(of, self$background)
     } else {of <- self$offset}
-    raster::plot(of, col = ibis_colours$viridis_orig, main = "Combined offset")
+    terra::plot(of, col = ibis_colours$viridis_orig, main = "Combined offset")
   },
   # set_biascontrol
   set_biascontrol = function(self, x, method, value){
@@ -233,7 +233,7 @@ BiodiversityDistribution <- bdproto(
   # Plot bias variable
   plot_bias = function(self){
     if(is.Waiver(self$bias)) return( self$bias )
-    raster::plot(self$bias$layer, col = ibis_colours$viridis_plasma, main = "Bias variable")
+    terra::plot(self$bias$layer, col = ibis_colours$viridis_plasma, main = "Bias variable")
   },
   # Get log
   get_log = function(self){
@@ -252,7 +252,7 @@ BiodiversityDistribution <- bdproto(
   # Get extent
   get_extent = function(self){
     # Calculate the extent from the background
-    if(!is.Waiver(self$background)) raster::extent(self$background) else NULL
+    if(!is.Waiver(self$background)) terra::ext(self$background) else NULL
   },
   # Get dimensions of extent
   get_extent_dimensions = function(self){
@@ -283,7 +283,7 @@ BiodiversityDistribution <- bdproto(
     prcol <- bdproto(NULL, self)
     # Set the object
     prcol$predictors$rm_data(names)
-    if(length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
+    if(base::length(prcol$get_predictor_names())==0) prcol$predictors <- new_waiver()
     return(prcol)
   },
   # Remove priors

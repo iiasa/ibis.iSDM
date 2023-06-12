@@ -67,7 +67,7 @@ regression. See Renner et al. 2015 for an overview.
 }
 \examples{
 \dontrun{
- background <- raster::raster("inst/extdata/europegrid_50km.tif")
+ background <- terra::rast("inst/extdata/europegrid_50km.tif")
  # Load virtual species
  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
 # Define model

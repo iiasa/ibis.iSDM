@@ -2,13 +2,17 @@
 % Please edit documentation in R/project.R
 \name{project}
 \alias{project}
+\alias{project,}
+\alias{project-method}
+\alias{project.BiodiversityScenario}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
+\method{project}{BiodiversityScenario}(x, ...)
+
 \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 }
 \arguments{
-\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
-Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
+\item{...}{passed on parameters.}
 
 \item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated. Options
 include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
@@ -19,7 +23,8 @@ include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{...}{passed on parameters.}
+\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
+Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.
@@ -58,6 +63,22 @@ be helpful in situations where environmental variables are quite dynamic, but ch
 are not expected to abruptly increase or decrease. It is thus a way to smoothen out outliers from the projection.
 Options are so far for instance \code{'loess'} which fits a \code{\link[=loess]{loess()}} model per pixel and time step. This is conducted at
 the very of the processing steps and any thresholds will be recalculated afterwards.
+}
+\examples{
+\dontrun{
+# Fit a model
+fit <- distribution(background) |>
+        add_biodiversity_poipa(surveydata) |>
+        add_predictors(env = predictors) |>
+        engine_breg() |>
+        train()
+
+# Fit a scenario
+sc <- scenario(fit) |>
+        add_predictors(env = future_predictors) |>
+        project()
+}
+
 }
 \seealso{
 \code{\link[=scenario]{scenario()}}

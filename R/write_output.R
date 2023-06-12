@@ -3,16 +3,16 @@
 #' @description
 #' The `write_output` function is a generic wrapper to writing any output files (e.g. projections) created with
 #' the [`ibis.iSDM-package`]. It is possible to write outputs of fitted [`DistributionModel`],
-#' [`BiodiversityScenario`] or individual [`Raster`] or [`stars`] objects. In case a [`data.frame`]
+#' [`BiodiversityScenario`] or individual [`terra`] or [`stars`] objects. In case a [`data.frame`]
 #' is supplied, the output is written as csv file.
 #' **For creating summaries of distribution and scenario parameters and performance, see `write_summary()`**
 #' @note
 #' By default output files will be overwritten if already existing!
-#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`Raster`] or [`stars`] object.
+#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`terra`] or [`stars`] object.
 #' @param fname A [`character`] depicting an output filename.
-#' @param dt A [`character`] for the output datatype. Following the [`raster::dataType()`] options (Default: \code{'FLT4S'}).
+#' @param dt A [`character`] for the output datatype. Following the [`terra::writeRaster`] options (Default: \code{'FLT4S'}).
 #' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
-#' @param ... Any other arguements passed on the individual functions.
+#' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
 #' x <- distribution(background)  |>
@@ -53,9 +53,9 @@ methods::setMethod(
     # FIXME: If errors occur, check harmonization of saving among engines.
     mod$save(fname = fname)
   } else if(is.Raster(mod)){
-      if(raster::extension(fname) %in% c('.tif', '.TIF')) {
+      if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
         writeGeoTiff(file = mod, fname = fname, dt = dt)
-      } else if(raster::extension(fname) %in% c('.nc', '.NC', '.ncdf', '.NCDF')){
+      } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
         writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
       } else {
         stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
@@ -94,10 +94,10 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{RasterLayer, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{SpatRaster, character, character, logical}(mod, fname, dt, verbose)
 methods::setMethod(
   "write_output",
-  methods::signature(mod = "RasterLayer"),
+  methods::signature(mod = "SpatRaster"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
@@ -108,36 +108,9 @@ methods::setMethod(
     )
 
     # Write output depending on type
-    if(raster::extension(fname) %in% c('.tif', '.TIF')) {
+    if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
       writeGeoTiff(file = mod, fname = fname, dt = dt)
-    } else if(raster::extension(fname) %in% c('.nc', '.NC', '.ncdf', '.NCDF')){
-      writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
-    } else {
-      stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
-    }
-    invisible()
-  }
-)
-
-#' @name write_output
-#' @rdname write_output
-#' @usage \S4method{write_output}{RasterStack, character, character, logical}(mod, fname, dt, verbose)
-methods::setMethod(
-  "write_output",
-  methods::signature(mod = "RasterStack"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
-    assertthat::assert_that(
-      !missing(mod),
-      is.Raster(mod),
-      is.character(fname),
-      is.character(dt),
-      is.logical(verbose)
-    )
-
-    # Write output depending on type
-    if(raster::extension(fname) %in% c('.tif', '.TIF')) {
-      writeGeoTiff(file = mod, fname = fname, dt = dt)
-    } else if(raster::extension(fname) %in% c('.nc', '.NC', '.ncdf', '.NCDF')){
+    } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
       writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
     } else {
       stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
@@ -199,8 +172,8 @@ methods::setMethod(
 
 #' Saves a raster file in Geotiff format
 #'
-#' @description Functions that acts as a wrapper to [raster::writeRaster].
-#' @param file A [`raster`] object to be saved.
+#' @description Functions that acts as a wrapper to [terra::writeRaster].
+#' @param file A [`terra`] SpatRaster object to be saved.
 #' @param fname A [`character`] stating the output destination.
 #' @param dt The datatype to be written (Default: *Float64*).
 #' @param varNA The nodata value to be used (Default: \code{-9999}).
@@ -209,7 +182,7 @@ methods::setMethod(
 #' @noRd
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   assertthat::assert_that(
-    inherits(file,'Raster') || inherits(file, 'stars'),
+    is.Raster(file) || inherits(file, 'stars'),
     is.character(fname), is.character(dt),
     is.numeric(varNA)
   )
@@ -217,27 +190,25 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
 
   # Check if layer is factor and deratify if so (causes error otherwise)
   if(any(is.factor(file))){
-    file <- raster::deratify(file, complete = TRUE)
+    file <- terra::droplevels(file)
   }
 
   # Save output
-  check <- try({
-    writeRaster(file, fname,
-              format='GTiff',
-              datatype = dt,
-              NAflag = varNA,
-              options=c("COMPRESS=DEFLATE","PREDICTOR=2","ZLEVEL=9"),
-              overwrite= TRUE
-              # ...
-              )
-    },silent = TRUE)
-  # Safety writing of results
-  if(inherits(check, "try-error")) raster::writeRaster(raster::brick(file), fname, overwrite=TRUE)
+  terra::writeRaster(
+    x = file,
+    filename = fname,
+    filetype = 'GTiff',
+    datatype = dt,
+    NAflag = varNA,
+    gdal = c("COMPRESS=DEFLATE","PREDICTOR=2","ZLEVEL=9"),
+    overwrite = TRUE,
+    ...
+  )
 }
 
 #' Save a raster stack to a netcdf file
 #'
-#' @param file A [`raster`] object to be saved.
+#' @param file A [`terra`] object to be saved.
 #' @param fname A [`character`] stating the output destination.
 #' @param varName Name for the NetCDF export variable.
 #' @param varUnit Units for the NetCDF export variable.
@@ -251,7 +222,7 @@ writeNetCDF <- function(file, fname,
                         varName, varUnit = NULL,
                         varLong = NULL, dt = "FLT4S", varNA = -9999, ...) {
   assertthat::assert_that(
-    inherits(file,'Raster'),
+    is.Raster(file),
     is.character(fname), is.character(dt),
     is.numeric(varNA)
   )
@@ -260,18 +231,17 @@ writeNetCDF <- function(file, fname,
   if(!assertthat::has_extension(fname,"nc")) fname <- paste0(fname,".nc")
 
   # Output NetCDF file
-  raster::writeRaster(x = file,
-                      filename = fname,format =  "CDF", overwrite = TRUE,
-                      varname = ifelse(is.null(varName),'Prediction',varName),
-                      varunit = ifelse(is.null(varUnit),'',varUnit),
-                      longname = ifelse(is.null(varLong),'',varLong),
-                      xname = ifelse(isLonLat(ras), "Longitude","x"),
-                      yname = ifelse(isLonLat(ras), "Latitude","y"),
-                      zname = "Time",
-                      zunit = "Years since 2000-01-01", # FIXME: Load and format date if provided
-                      bylayer = FALSE, # Don't save separate layers
-                      datatype = dt, NAflag = varNA,
-                      ...
+  terra::writeCDF(x = file,
+                  filename = fname,
+                  overwrite = TRUE,
+                  varname = ifelse(is.null(varName),'Prediction',varName),
+                  longname = ifelse(is.null(varLong),'',varLong),
+                  zname = "Time",
+                  unit = ifelse(is.null(varUnit),'',varUnit),
+                  prec = "float", #TODO: Map against standard GDAL units!
+                  compression = 9,
+                  missval = varNA,
+                  ...
   )
 
   # Add common attributes
@@ -327,7 +297,8 @@ writeNetCDF <- function(file, fname,
 NULL
 methods::setGeneric("write_summary",
                     signature = methods::signature("mod"),
-                    function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
+                    function(mod, fname, partial = FALSE,
+                             verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
 
 #' @name write_summary
 #' @rdname write_summary
@@ -367,7 +338,7 @@ methods::setMethod(
       model <- mod$model
 
       # Model input summary in a tibble
-      output[["input"]][["extent"]] <- as.matrix( extent( model$background ) )
+      output[["input"]][["extent"]] <- as.matrix( terra::ext( model$background ) )
       output[["input"]][["predictors"]] <- model$predictors_types
       if(!is.Waiver(model$offset)) output[["input"]][["offset"]] <- names(model$offset) else output[["input"]][["offset"]] <- NA
       if(!is.Waiver(model$priors)){
@@ -383,7 +354,7 @@ methods::setMethod(
                                 type = model$biodiversity[[i]]$type,
                                 family = model$biodiversity[[i]]$family,
                                 equation = deparse1(model$biodiversity[[i]]$equation),
-                                obs_pres = sum( model$biodiversity[[i]]$observations$observed > 0 ),
+                                obs_pres = sum( as.numeric( as.character(model$biodiversity[[i]]$observations$observed) ) > 0 ),
                                 obs_abs = sum( model$biodiversity[[i]]$observations$observed == 0 ),
                                 n_predictors = length( model$biodiversity[[i]]$predictors_names )
                        )
@@ -407,7 +378,7 @@ methods::setMethod(
       # Model summary in a tibble and formula
       output[["output"]][["summary"]] <- mod$summary()
       if(!is.null(mod$get_data("prediction") )){
-        output[["output"]][["resolution"]] <- raster::res( mod$get_data("prediction") )
+        output[["output"]][["resolution"]] <- terra::res( mod$get_data("prediction") )
         output[["output"]][["prediction"]] <- names( mod$get_data("prediction") )
       } else {
         output[["output"]][["resolution"]] <- NA
@@ -427,7 +398,7 @@ methods::setMethod(
       model <- mod$get_model()
 
       # Model input summary in a tibble
-      output[["input"]][["extent"]] <- as.matrix( raster::extent( model$model$background ) )
+      output[["input"]][["extent"]] <- as.matrix( terra::ext( model$model$background ) )
       output[["input"]][["predictors"]] <- mod$predictors$get_names()
       output[["input"]][["timerange"]] <- mod$get_timeperiod()
       output[["input"]][["predictor_time"]] <- mod$predictors$get_time()

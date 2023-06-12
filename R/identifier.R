@@ -79,7 +79,7 @@ is.Waiver <- function(x) inherits(x, "Waiver")
 #' @export
 is.formula <- function(x) inherits(x, "formula")
 
-#' Tests if an input is a RasterLayer, RasterBrick, or a RasterStack.
+#' Tests if an input is a SpatRaster object.
 #'
 #' @param x an R Object.
 #' @return Boolean evaluation with [logical] output.
@@ -88,7 +88,7 @@ is.formula <- function(x) inherits(x, "formula")
 #' @export
 is.Raster <- function(x)
 {
-  return((class(x)[1]=="RasterLayer" || class(x)[1]=="RasterBrick" || class(x)[1]=="RasterStack"))
+  return((class(x)[1]=="SpatRaster" || class(x)[1]=="SpatRasterDataset" || class(x)[1]=="SpatRasterCollection"))
 }
 
 #' Tests if an input is a stars object.

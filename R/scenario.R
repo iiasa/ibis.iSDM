@@ -7,7 +7,7 @@ NULL
 #' This function creates a new [BiodiversityScenario-class] object
 #' that contains the projections of a model.
 #' @param fit A [`BiodiversityDistribution`] object containing a trained model.
-#' @param limits A [`raster`] or [`sf`] object that limits the projection surface when
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection surface when
 #' intersected with the prediction data (Default: \code{NULL}). This can for instance be set
 #' as an expert-delineated constrain to limit spatial projections.
 #' @param copy_model A [`logical`] of whether the model object is to be copied to the scenario object. Note
@@ -34,7 +34,7 @@ methods::setMethod(
   function(fit, limits = NULL, copy_model = FALSE) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(fit) || inherits(fit,'DistributionModel'),
-                            inherits(limits,'Raster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits, 'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
                             is.logical(copy_model),
                             msg = 'No trained model supplied!')
 
@@ -50,11 +50,11 @@ methods::setMethod(
     # Convert limits if provided
     if(!is.null(limits)){
       # Convert to polygon if raster
-      if(inherits(limits,'Raster')){
-        if(is.null(levels(limits))) stop('Provided limit raster needs to be ratified (categorical)!')
+      if(inherits(limits,'SpatRaster')){
+        if(terra::is.factor(limits)) stop('Provided limit raster needs to be ratified (categorical)!')
         # Remove 0 from ratified raster assuming this is no-data
         limits[limits == 0] <- NA
-        limits <- sf::st_as_sf( raster::rasterToPolygons(limits, n = 16, dissolve = TRUE) )
+        limits <- sf::st_as_sf( terra::as.polygons(limits, trunc = TRUE, dissolve = TRUE) )
       }
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(fit$model$background)) limits <- sf::st_transform(limits, fit$model$background)

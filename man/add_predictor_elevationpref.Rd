@@ -11,7 +11,7 @@ add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{character}} stating the elevational layer in the Distribution object or \code{\link{RasterLayer}} object.}
+\item{layer}{A \code{\link{character}} stating the elevational layer in the Distribution object or \code{\link{SpatRaster}} object.}
 
 \item{lower}{\code{\link{numeric}} value for a lower elevational preference of a species.}
 

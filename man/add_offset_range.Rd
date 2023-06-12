@@ -15,14 +15,14 @@ add_offset_range(
   add = TRUE
 )
 
-\S4method{add_offset_range}{BiodiversityDistribution, raster}(x, layer)
+\S4method{add_offset_range}{BiodiversityDistribution, SpatRaster}(x, layer)
 
 \S4method{add_offset_range}{BiodiversityDistribution, sf}(x, layer)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
 
 \item{distance_max}{A \code{\link{numeric}} threshold on the maximum distance beyond the range that should be considered
 to have a high likelihood of containing species occurrences (Default: \code{Inf} \link{m}). Can be set to \code{NULL} or \code{0}
@@ -38,7 +38,7 @@ default this is set to \code{0.9} indicating that 10\% of all records are likely
 
 \item{distance_clip}{\code{\link{logical}} as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).}
 
-\item{fraction}{An optional \code{\link{RasterLayer}} object that is multiplied with digitized raster layer.
+\item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with digitized raster layer.
 Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
@@ -56,7 +56,7 @@ calculates - based on supplied point information - the probability of occurrence
 range map and can thus be used as a method to 'improve' the mapping of a species range.
 }
 \details{
-The output created by this function creates a \code{\link{RasterLayer}} to be added to a provided distribution object. Offsets
+The output created by this function creates a \code{\link{SpatRaster}} to be added to a provided distribution object. Offsets
 in regression models are likelihood specific as they are added directly to the overall estimate of \code{`y^hat`}.
 
 Note that all offsets created by this function are by default log-transformed before export. Background values

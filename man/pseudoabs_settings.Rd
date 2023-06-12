@@ -7,7 +7,7 @@
 \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, logical ANY}(background, nrpoints, min_ratio, method, buffer_distance, inside, layer, bias)
 }
 \arguments{
-\item{background}{A \code{\link{RasterLayer}} or \code{\link{sf}} object over which background points can be sampled. Default is
+\item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background points can be sampled. Default is
 \code{NULL} (Default) and the background is then added when the sampling is first called.}
 
 \item{nrpoints}{A \code{\link{numeric}} given the number of absence points to be created. Has to be larger than \code{0} and
@@ -26,10 +26,10 @@ Note that units follow the units of the projection (e.g. \code{m} or \code{°}).
 minimum convex polygon or range provided the respective method is chosen (parameter \code{method = "mcp"} or
 \code{method = "range"}).}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} (in the case of method \code{'zones'}) object indicating the range of a species.
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method \code{'zones'}) object indicating the range of a species.
 Only used with \code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).}
 
-\item{bias}{A \code{\link{RasterLayer}} with the same extent and projection and background. Absence points will
+\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and background. Absence points will
 be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
@@ -55,11 +55,11 @@ minimum convex polygon of the presence points. The parameter \code{inside} speci
 points should be sampled inside or outside (Default) the minimum convex polygon.
 \item \code{'range'} Absence points are created either inside or outside a provided additional
 layer that indicates for example a range of species (controlled through parameter \code{inside}).
-\item \code{'zones'} A ratified (e.g. of type \link{factor}) \code{\link{RasterLayer}} layer depicting zones from which absence
+\item \code{'zones'} A ratified (e.g. of type \link{factor}) \code{\link{SpatRaster}} layer depicting zones from which absence
 points are to be sampled. This method checks which points fall within which zones and then samples absence
 points either within or outside these zones exclusively. Both \code{'layer'} and \code{'inside'} have to be set
 for this option.
-\item \code{'target'} Make use of a target background for sampling absence points. Here a \code{\link{RasterLayer}} object
+\item \code{'target'} Make use of a target background for sampling absence points. Here a \code{\link{SpatRaster}} object
 has to be provided through the parameter \code{'layer'}. Absence points are then sampled exclusively within
 the target areas for grid cells with non-zero values.
 }

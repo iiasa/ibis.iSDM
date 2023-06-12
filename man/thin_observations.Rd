@@ -19,9 +19,9 @@ thin_observations(
 \item{df}{A \code{\link{sf}} or \code{\link{data.frame}} object with observed occurrence points. All methods threat presence-only
 and presence-absence occurrence points equally.}
 
-\item{background}{A \code{\link{RasterLayer}} object with the background of the study region. Use for assessing point density.}
+\item{background}{A \code{\link{SpatRaster}} object with the background of the study region. Use for assessing point density.}
 
-\item{env}{A \code{\link{Raster}} object with environmental covariates. Needed when method is set to \code{"environmental"}
+\item{env}{A \code{\link{SpatRaster}} object with environmental covariates. Needed when method is set to \code{"environmental"}
 or \code{"bias"} (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
@@ -30,7 +30,7 @@ or \code{"bias"} (Default: \code{NULL}).}
 
 \item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring observations (Default: \code{NULL}).}
 
-\item{zones}{A \code{\link{RasterLayer}} to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).}
+\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).}
 
 \item{verbose}{\code{\link{logical}} of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).}
 }

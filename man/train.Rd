@@ -39,8 +39,9 @@ effectively fits a separate generalized linear model to reduce the number of cov
 \item \code{"boruta"} Uses the \link{Boruta} package to identify non-informative features.
 }}
 
-\item{optim_hyperparam}{Perform a variable selection on the set of predictors either prior
-to building the model (Default: \code{FALSE}).}
+\item{optim_hyperparam}{Parameter to tune the model by iterating over input parameters or selection
+of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
+needed (Default: \code{FALSE}).}
 
 \item{inference_only}{By default the \link{engine} is used to create
 a spatial prediction of the suitability surface, which can take time. If only inferences of
@@ -100,7 +101,7 @@ the estimation is being done.
 This function acts as a generic training function that - based on the provided \code{\linkS4class{BiodiversityDistribution}}
 object creates a new distribution model.
 The resulting object contains both a \code{\link{fit_best}} object of the estimated model and, if \code{inference_only} is \code{FALSE}
-a \link{RasterLayer} object named \code{\link{prediction}} that contains the spatial prediction of the model.
+a \link{SpatRaster} object named \code{\link{prediction}} that contains the spatial prediction of the model.
 These objects can be requested via \code{object$get_data("fit_best")}.
 
 Other parameters in this function:

@@ -57,7 +57,7 @@ library(ibis.iSDM)
 library(inlabru)
 library(glmnet)
 library(xgboost)
-library(raster)
+library(terra)
 library(igraph)
 library(assertthat)
 ```
@@ -67,7 +67,7 @@ several datasets.
 
 ```{r Load data}
 # Background layer
-background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
+background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
 virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points", quiet = TRUE) 
 virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'range', quiet = TRUE)
@@ -80,7 +80,7 @@ virtual_pseudoabs <- add_pseudoabsence(df = virtual_species, field_occurrence = 
                                        settings = ass)
 
 # Predictors
-predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
+predictors <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 # Make use only of a few of them
 predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
                                             "CLC3_112_mean_50km","CLC3_132_mean_50km",

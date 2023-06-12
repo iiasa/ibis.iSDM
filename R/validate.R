@@ -4,7 +4,7 @@
 #' either on the fitted point data or any supplied independent.
 #' **Currently only supporting point datasets. For validation of integrated models more work is needed.**
 #' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
-#' provide directly a [`RasterLayer`], however in this case the `point` layer also needs to be provided.
+#' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.
 #' @param method Should the validation be conducted on continuous metrics or thresholded? See Details.
 #' @param layer In case multiple layers exist, which one to use? (Default: \code{'mean'}).
 #' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
@@ -91,15 +91,15 @@ methods::setMethod(
     if(settings$get("has_limits")){
       temp <- mod$model$predictors_object$get_data()[[1]]; temp[!is.na(temp)] <- 0
       if(!is.null(threshold)){
-        new <- sum(threshold, temp, na.rm = TRUE); new <- raster::mask(new, temp)
+        new <- sum(threshold, temp, na.rm = TRUE); new <- terra::mask(new, temp)
         attr(new,'format') <- attr(threshold,'format')
-        if(attr(threshold,'format')=="binary") new <- raster::ratify(new)
+        if(attr(threshold,'format')=="binary") new <- terra::droplevels(new)
         threshold <- new
         rm(new)
       }
       # Same for prediction layer, where missing data are set to 0 for validation
       prediction <- sum(prediction, temp, na.rm = TRUE)
-      prediction <- raster::mask(prediction, temp)
+      prediction <- terra::mask(prediction, temp)
       rm(temp)
     }
 
@@ -142,13 +142,16 @@ methods::setMethod(
     # --- #
     # Do the extraction
     df <- as.data.frame(point)
-    df$pred <- raster::extract(prediction, point)
-    if(!is.null(threshold)) df$pred_tr <- raster::extract(threshold, point)
+    df$pred <- get_rastervalue(coords = point, env = prediction,rm.na = FALSE)[[layer]]
+
+    if(!is.null(threshold)) df$pred_tr <- get_rastervalue(coords = point, env = threshold)[[grep("threshold", names(threshold),value = TRUE)]]
     # Remove any sfc column if present
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
     df <- subset(df, stats::complete.cases(df))
-    if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
+    assertthat::assert_that( nrow(df)> 2,
+                             length( unique(df[[point_column]]) )>1,
+                             msg = "Validation was not possible owing to missing data.")
     # --- #
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Validation]','green','Calculating validation statistics')
@@ -173,7 +176,8 @@ methods::setMethod(
 
         abs <- list(); abs[[point_column]] <- o[[point_column]]
         abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
-        abs[["pred"]] <- raster::extract(prediction, o); abs[["pred_tr"]] <- raster::extract(threshold, o)
+        abs[["pred"]] <- get_rastervalue(coords = o, env = prediction)[[layer]]
+        abs[["pred_tr"]] <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
 
         df2 <- rbind(df2, as.data.frame(abs))
       }
@@ -191,10 +195,10 @@ methods::setMethod(
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{RasterLayer, character, sf, character}(mod, method, point, point_column)
+#' @usage \S4method{validate}{SpatRaster, character, sf, character}(mod, method, point, point_column)
 methods::setMethod(
   "validate",
-  methods::signature(mod = "RasterLayer"),
+  methods::signature(mod = "SpatRaster"),
   function(mod, method = 'continuous', layer = NULL, point = NULL, point_column = 'observed', ...){
     assertthat::assert_that(
       is.Raster(mod),
@@ -252,8 +256,8 @@ methods::setMethod(
                             utils::hasName(df2, point_column)
     )
     #### Calculating Boyce index as in Hirzel et al. 2006
-    # fit: A vector or Raster-Layer containing the predicted suitability values
-    # obs: A vector containing the predicted suitability values or xy-coordinates (if fit is a Raster-Layer) of the validation points (presence records)
+    # fit: A vector or SpatRaster containing the predicted suitability values
+    # obs: A vector containing the predicted suitability values or xy-coordinates (if fit is a SpatRaster) of the validation points (presence records)
     # nclass : number of classes or vector with classes threshold. If nclass=0, Boyce index is calculated with a moving window (see next parameters)
     # windows.w : width of the moving window (by default 1/10 of the suitability range)
     # res : resolution of the moving window (by default 101 focals)
@@ -423,6 +427,9 @@ methods::setMethod(
     assertthat::assert_that(utils::hasName(df2, 'pred_tr'),
                             length(unique(df2[[point_column]])) > 1,
                             msg = "It appears as either the observed data or the threshold does not allow discrete validation.")
+    # Ensure that the threshold value is numeric
+    if(is.factor(df2$pred_tr)) df2$pred_tr <- as.numeric( as.character( df2$pred_tr ))
+
     # For discrete functions to work correctly, ensure that all values are 0/1
     df2[[point_column]] <- ifelse(df2[[point_column]] > 0, 1, 0 )
     # Build the confusion matrix
@@ -435,7 +442,7 @@ methods::setMethod(
     BS <- function(pred, obs, na.rm = TRUE) {
       if(assertthat::see_if(length(unique(pred)) <= 2,
                               length(unique(obs)) <= 2)){
-        mean( (pred - obs)^2, na.rm = na.rm)
+        mean( (as.numeric(as.character(pred)) - as.numeric(as.character(obs)))^2, na.rm = na.rm)
       } else return(NA)
     }
 
@@ -468,7 +475,9 @@ methods::setMethod(
     if("modEvA" %in% utils::installed.packages()[,1]){
       check_package("modEvA")
       # Calculate AUC
-      out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
+      suppressWarnings(
+        out$value[out$metric=='auc'] <- modEvA::AUC(obs = df2[[point_column]], pred = df2[['pred_tr']], simplif = TRUE, plot = FALSE)
+      )
     }
     # Add brier score
     out$value[out$metric=='brier.score'] <- BS(obs = df2[[point_column]], pred = df2[['pred_tr']])

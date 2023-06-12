@@ -5,12 +5,12 @@
 \alias{stancode.DistributionModel}
 \title{Show the stan code from a trained model}
 \usage{
-\method{stancode}{DistributionModel}(x, ...)
+\method{stancode}{DistributionModel}(obj, ...)
 }
 \arguments{
-\item{...}{not used.}
-
 \item{obj}{Any prepared object.}
+
+\item{...}{not used.}
 }
 \value{
 None.

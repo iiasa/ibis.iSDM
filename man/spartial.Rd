@@ -9,7 +9,7 @@ spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 
 \S4method{spartial}{ANY,character}(mod, x.var)
 
-\method{spartial}{DistributionModel}(x, ...)
+\method{spartial}{DistributionModel}(mod, ...)
 }
 \arguments{
 \item{mod}{A \code{\linkS4class{DistributionModel}} object with trained model.}
@@ -23,16 +23,22 @@ spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \link{RasterLayer} containing the mapped partial response of the variable.
+A \link{SpatRaster} containing the mapped partial response of the variable.
 }
 \description{
 Similar as \link{partial} this function calculates a partial response of a trained model for a given variable.
-Differently from \link{partial} in space. However the result is a \code{raster}
-showing the spatial magnitude of the partial response.
+Differently from \link{partial} in space. However the result is a \code{\link{SpatRaster}} showing the spatial magnitude
+of the partial response.
 }
 \details{
 By default the \link{mean} is calculated across all parameters that are not \code{x.var}.
 Instead a \emph{constant} can be set (for instance \code{0}) to be applied to the output.
+}
+\examples{
+\dontrun{
+ # Create and visualize the spartial effect
+ spartial(fit, x.var = "Forest.cover", plot = TRUE)
+}
 }
 \seealso{
 \link{partial}

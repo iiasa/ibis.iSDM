@@ -7,13 +7,19 @@
 raster_to_stars(obj)
 }
 \arguments{
-\item{obj}{A \code{\link{Raster}} object with a \code{"time"} dimension at least (checked via \code{\link{getZ}}).}
+\item{obj}{A \code{\link{SpatRaster}} object with a \code{"time"} dimension at least (checked via \code{\link{time}}).}
 }
 \value{
-A \code{\link{stars}} object with the formatted data
+A \code{\link{stars}} object with the formatted data.
 }
 \description{
-This is a small helper function to convert a to a \code{\link{Raster}} object.
+This is a small helper function to convert a to a \code{\link{SpatRaster}} object.
+}
+\examples{
+\dontrun{
+ # Convert stars to SpatRaster
+ stars_to_raster(obj)
+}
 }
 \seealso{
 \code{stars_to_raster}

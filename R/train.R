@@ -14,7 +14,7 @@ NULL
 #' This function acts as a generic training function that - based on the provided [`BiodiversityDistribution-class`]
 #' object creates a new distribution model.
 #' The resulting object contains both a [`fit_best`] object of the estimated model and, if \code{inference_only} is \code{FALSE}
-#' a [RasterLayer] object named [`prediction`] that contains the spatial prediction of the model.
+#' a [SpatRaster] object named [`prediction`] that contains the spatial prediction of the model.
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
 #' Other parameters in this function:
@@ -54,8 +54,9 @@ NULL
 #' effectively fits a separate generalized linear model to reduce the number of covariates.
 #' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
 #'
-#' @param optim_hyperparam Perform a variable selection on the set of predictors either prior
-#' to building the model (Default: \code{FALSE}).
+#' @param optim_hyperparam Parameter to tune the model by iterating over input parameters or selection
+#' of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
+#' needed (Default: \code{FALSE}).
 #'
 #' @param inference_only By default the [engine] is used to create
 #' a spatial prediction of the suitability surface, which can take time. If only inferences of
@@ -204,11 +205,13 @@ methods::setMethod(
       # Check if the engine has a template and if so use that one
       if(is.Raster(x$engine$get_data("template"))){
         dummy <- emptyraster(x$engine$get_data("template"));names(dummy) <- "dummy"
-        dummy[] <- 1 ; dummy <- raster::mask(dummy, x$background)
+        dummy[] <- 1 ; dummy <- terra::mask(dummy, x$background)
       } else {
-        dummy <- raster::raster(extent(x$background),nrow=100,ncol=100,val=1);names(dummy) <- 'dummy'
+        dummy <- terra::rast( terra::ext(x$background),
+                              nrow=100, ncol=100, val=1,
+                              crs = terra::crs(x$background));names(dummy) <- 'dummy'
       }
-      model[['predictors']] <- raster::as.data.frame(dummy, xy = TRUE)
+      model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
       model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
@@ -284,46 +287,46 @@ methods::setMethod(
           }
           # Ensure we have a backgroudn raster
           if(inherits(x$background, "sf")){
-            bg <- raster::rasterize(x$background, model$predictors_object$get_data(), 1)
+            bg <- terra::rasterize(x$background, model$predictors_object$get_data(), 1)
           } else {bg <- x$background }
           # Then calculate
           ras <- st_kde(points = poi, background = bg, bandwidth = 3)
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(ras) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], terra::as.data.frame(ras, na.rm = FALSE) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(ras) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(ras),
                                                                      type = "numeric" )
           )
           if( !all(names(ras) %in% model[['predictors_object']]$get_names()) ){
-            model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, ras)
+            model[['predictors_object']]$data <- c(model[['predictors_object']]$data, ras)
           }
 
         } else if(m == "nnd") {
           # Nearest neighbour
           biodiversity_ids <- as.character( x$biodiversity$get_ids() )
-          cc <- raster::stack()
+          cc <- terra::rast()
           for(id in biodiversity_ids) {
             # Get presence points
             o <- guess_sf( x$biodiversity$get_data(id) )
             o <- o[ which( o[[x$biodiversity$get_columns_occ()[[id]]]] > 0 ), ]
             # Calculate point distance
-            ras <- raster::distanceFromPoints(emptyraster( model$predictors_object$get_data() ),
-                                              sf::st_coordinates( o )[,1:2])
-            ras <- raster::mask(ras, model$background)
+            ras <- terra::distance(x = emptyraster( model$predictors_object$get_data() ),
+                                   y = o)
+            ras <- terra::mask(ras, model$background)
             names(ras) <- paste0("nearestpoint_", which(biodiversity_ids == id))
-            cc <- raster::addLayer(cc, ras)
+            suppressWarnings( cc <- c(cc, ras) )
             rm(ras, o )
           }
           # Add to predictor objects, names, types and the object
-          model[['predictors']] <- cbind.data.frame( model[['predictors']], raster::as.data.frame(cc) )
+          model[['predictors']] <- cbind.data.frame( model[['predictors']], terra::as.data.frame(cc, na.rm = FALSE) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(cc) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
                                                           data.frame(predictors = names(cc),
                                                                      type = "numeric" )
           )
           if( !all(names(cc) %in% model[['predictors_object']]$get_names()) ){
-            model[['predictors_object']]$data <- raster::addLayer(model[['predictors_object']]$data, cc)
+            model[['predictors_object']]$data <- c(model[['predictors_object']]$data, cc)
           }
           rm(cc, biodiversity_ids)
 
@@ -334,7 +337,7 @@ methods::setMethod(
     # Set offset if existing
     if(!is.Waiver(x$offset)){
       # Aggregate offset if necessary
-      if(raster::nlayers(x$offset)>1){
+      if(terra::nlyr(x$offset)>1){
         # As log(x) + log(y) == log( x * y )
         ras_of <- sum(x$offset, na.rm = TRUE)
         # Normalize the result
@@ -345,7 +348,7 @@ methods::setMethod(
         names(ras_of) <- "spatial_offset"
       }
       # Save overall offset
-      ofs <- raster::as.data.frame(ras_of, xy = TRUE)
+      ofs <- terra::as.data.frame(ras_of, xy = TRUE, na.rm = FALSE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
       model[['offset']] <- ofs
       # Also add offset object for faster extraction
@@ -369,7 +372,7 @@ methods::setMethod(
           lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
           model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu, 'factor', 'numeric') )
         }
-        assertthat::assert_that(nrow(model[['predictors']]) == raster::ncell(model$predictors_object$get_data()))
+        assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
       }
     }
 
@@ -620,12 +623,12 @@ methods::setMethod(
           # Using the raster operations is generally faster than point in polygon tests
           pred_ov <- model$predictors_object$get_data(df = FALSE)
           # Make a rasterized mask of the background
-          pred_ov <- raster::mask( pred_ov, model$background )
+          pred_ov <- terra::mask( pred_ov, model$background )
           # Convert Predictors to data.frame, including error catching for raster errors
           # FIXME: This could be outsourced
-          o <- try({ raster::as.data.frame(pred_ov, xy = TRUE) },silent = TRUE)
+          o <- try({ terra::as.data.frame(pred_ov, xy = TRUE, na.rm = FALSE) },silent = TRUE)
           if(inherits(o, "try-error")){
-            o <- as.data.frame( cbind( raster::coordinates(pred_ov),
+            o <- as.data.frame( cbind( terra::crds(pred_ov),
                                        as.matrix( pred_ov )) )
             if(any(is.factor(pred_ov))){
               o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
@@ -778,15 +781,15 @@ methods::setMethod(
             names(new) <- pred_name
 
             # Add the object to the overall prediction object
-            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
             # Now for each biodiversity dataset and the overall predictors
             # extract and add as variable
             for(k in names(model$biodiversity)){
-              env <- as.data.frame(
-                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
               # Rename to current id dataset
-              names(env) <- pred_name
+              env <- env[names(new)]
               # Add
               model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
               model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -797,7 +800,7 @@ methods::setMethod(
               )
             }
             # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new))
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
             model$predictors_names <- c(model$predictors_names, names(new))
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
@@ -810,7 +813,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- raster::as.data.frame(new, xy = TRUE)
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -818,9 +821,9 @@ methods::setMethod(
             } else {
               # New offset
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
-              news <- raster::mask(news, x$background)
+              news <- terra::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- raster::as.data.frame(news, xy = TRUE)
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -878,14 +881,14 @@ methods::setMethod(
             pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
             # Add the object to the overall prediction object
-            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
             # Now for each biodiversity dataset and the overall predictors
             # extract and add as variable
             for(k in names(model$biodiversity)){
-              env <- as.data.frame(
-                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
               # Rename to current id dataset
-              names(env) <- pred_name
+              env <- env[names(new)]
               # Add
               model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
               model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -896,7 +899,7 @@ methods::setMethod(
               )
             }
             # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new) )
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
             model$predictors_names <- c(model$predictors_names, names(new))
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
@@ -910,7 +913,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- raster::as.data.frame(new, xy = TRUE)
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -918,9 +921,9 @@ methods::setMethod(
             } else {
               # New offset
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
-              news <- raster::mask(news, x$background)
+              news <- terra::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- raster::as.data.frame(news, xy = TRUE)
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -977,15 +980,16 @@ methods::setMethod(
             pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
             # Add the object to the overall prediction object
-            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
             # Now for each biodiversity dataset and the overall predictors
             # extract and add as variable
             for(k in names(model$biodiversity)){
-              env <- as.data.frame(
-                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
               # Rename to current id dataset
-              names(env) <- pred_name
+              env <- env[names(new)]
+
               # Add
               model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
               model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -996,7 +1000,7 @@ methods::setMethod(
               )
             }
             # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new) )
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
             model$predictors_names <- c(model$predictors_names, names(new))
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
@@ -1011,7 +1015,7 @@ methods::setMethod(
             names(new) <- "spatial_offset"
 
             if(is.Waiver(model$offset)){
-              ofs <- raster::as.data.frame(new, xy = TRUE)
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1019,10 +1023,10 @@ methods::setMethod(
             } else {
               # New offset
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
-              news <- raster::mask(news, x$background)
+              news <- terra::mask(news, x$background)
               names(news) <- "spatial_offset"
               model[['offset_object']] <- news
-              ofs <- raster::as.data.frame(news, xy = TRUE)
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1098,15 +1102,15 @@ methods::setMethod(
             pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
             # Add the object to the overall prediction object
-            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
             # Now for each biodiversity dataset and the overall predictors
             # extract and add as variable
             for(k in names(model$biodiversity)){
-              env <- as.data.frame(
-                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
+              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
               # Rename to current id dataset
-              names(env) <- pred_name
+              env <- env[names(new)]
               # Add
               model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
               model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -1117,7 +1121,7 @@ methods::setMethod(
               )
             }
             # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new))
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
             model$predictors_names <- c(model$predictors_names, names(new))
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
@@ -1131,7 +1135,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- raster::as.data.frame(new, xy = TRUE)
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1139,9 +1143,9 @@ methods::setMethod(
             } else {
               # New offset
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
-              news <- raster::mask(news, x$background)
+              news <- terra::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- raster::as.data.frame(news, xy = TRUE)
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1191,15 +1195,14 @@ methods::setMethod(
             pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
             # Add the object to the overall prediction object
-            model$predictors_object$data <- raster::addLayer(model$predictors_object$get_data(), new)
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
             # Now for each biodiversity dataset and the overall predictors
             # extract and add as variable
             for(k in names(model$biodiversity)){
-              env <- as.data.frame(
-                raster::extract(new, model$biodiversity[[k]]$observations[,c('x','y')]) )
-              # Rename to current id dataset
-              names(env) <- pred_name
+              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
+              env <- env[names(new)]
               # Add
               model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
               model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
@@ -1210,7 +1213,7 @@ methods::setMethod(
               )
             }
             # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new))
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
             model$predictors_names <- c(model$predictors_names, names(new))
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
@@ -1224,7 +1227,7 @@ methods::setMethod(
                              "poisson" = ilink(new[], link = "log")
             )
             if(is.Waiver(model$offset)){
-              ofs <- raster::as.data.frame(new, xy = TRUE)
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
               model[['offset']] <- ofs
               # Also add offset object for faster extraction
@@ -1232,9 +1235,9 @@ methods::setMethod(
             } else {
               # New offset
               news <- sum( model[['offset_object']], new, na.rm = TRUE)
-              news <- raster::mask(news, x$background)
+              news <- terra::mask(news, x$background)
               model[['offset_object']] <- news
-              ofs <- raster::as.data.frame(news, xy = TRUE)
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
               names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
               model[['offset']] <- ofs
               rm(news)
@@ -1257,7 +1260,7 @@ methods::setMethod(
     # Clip to limits again to be sure
     if(!is.Waiver(x$limits)) {
       if(settings$get('inference_only')==FALSE){
-        out <- out$set_data("prediction", raster::mask(out$get_data("prediction"), model$background))
+        out <- out$set_data("prediction", terra::mask(out$get_data("prediction"), model$background))
       }
       out$settings$set("has_limits", TRUE)
     } else {

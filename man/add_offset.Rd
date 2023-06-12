@@ -6,17 +6,17 @@
 \usage{
 add_offset(x, layer, add = TRUE)
 
-\S4method{add_offset}{BiodiversityDistribution, raster}(x, layer)
+\S4method{add_offset}{BiodiversityDistribution, SpatRaster}(x, layer)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 
-\item{...}{Other parameters or arguments (currently not supported)}
+\item{...}{Other parameters or arguments (currently not supported).}
 }
 \value{
 Adds an offset to a \code{\link{distribution}} object.
@@ -30,7 +30,7 @@ one offset by calculating the sum of all spatial-explicit layers.
 }
 \details{
 This function allows to set any specific offset to a regression model. The offset
-has to be provided as spatial \code{\link{RasterLayer}} object. This function simply adds the layer to
+has to be provided as spatial \code{\link{SpatRaster}} object. This function simply adds the layer to
 a \code{\link[=distribution]{distribution()}} object.
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 
