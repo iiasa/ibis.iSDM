@@ -60,4 +60,34 @@ Framework for Heterogeneous Biodiversity Data.” Ecological Informatics,
 and Conservation group at the International Institute for Applied
 Systems Analysis (IIASA), Austria.
 
-<!-- get_contributors(org = "IIASA", repo = "ibis.iSDM") -->
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+All contributions to this project are gratefully acknowledged using the
+[`allcontributors`
+package](https://github.com/ropenscilabs/allcontributors) following the
+[all-contributors](https://allcontributors.org) specification.
+Contributions of any kind are welcome!
+
+<table>
+<tr>
+<td align="center">
+<a href="https://github.com/Martin-Jung">
+<img src="https://avatars.githubusercontent.com/u/3788377?v=4" width="100px;" alt=""/>
+</a><br>
+<a href="https://github.com/iiasa/ibis.iSDM/commits?author=Martin-Jung">Martin-Jung</a>
+</td>
+<td align="center">
+<a href="https://github.com/mhesselbarth">
+<img src="https://avatars.githubusercontent.com/u/29225293?v=4" width="100px;" alt=""/>
+</a><br>
+<a href="https://github.com/iiasa/ibis.iSDM/commits?author=mhesselbarth">mhesselbarth</a>
+</td>
+</tr>
+</table>
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
