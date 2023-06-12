@@ -8,24 +8,22 @@
 
 \S4method{write_output}{BiodiversityScenario, character, character, logical}(mod, fname, dt, verbose)
 
-\S4method{write_output}{RasterLayer, character, character, logical}(mod, fname, dt, verbose)
-
-\S4method{write_output}{RasterStack, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{SpatRaster, character, character, logical}(mod, fname, dt, verbose)
 
 \S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
 
 \S4method{write_output}{stars, character, character, logical}(mod, fname, dt, verbose)
 }
 \arguments{
-\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{Raster}} or \code{\link{stars}} object.}
+\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{terra}} or \code{\link{stars}} object.}
 
 \item{fname}{A \code{\link{character}} depicting an output filename.}
 
-\item{dt}{A \code{\link{character}} for the output datatype. Following the \code{\link[raster:dataType]{raster::dataType()}} options (Default: \code{'FLT4S'}).}
+\item{dt}{A \code{\link{character}} for the output datatype. Following the \code{\link[terra:writeRaster]{terra::writeRaster}} options (Default: \code{'FLT4S'}).}
 
 \item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 
-\item{...}{Any other arguements passed on the individual functions.}
+\item{...}{Any other arguments passed on the individual functions.}
 }
 \value{
 No R-output is created. A file is written to the target direction.
@@ -33,7 +31,7 @@ No R-output is created. A file is written to the target direction.
 \description{
 The \code{write_output} function is a generic wrapper to writing any output files (e.g. projections) created with
 the \code{\link{ibis.iSDM-package}}. It is possible to write outputs of fitted \code{\link{DistributionModel}},
-\code{\link{BiodiversityScenario}} or individual \code{\link{Raster}} or \code{\link{stars}} objects. In case a \code{\link{data.frame}}
+\code{\link{BiodiversityScenario}} or individual \code{\link{terra}} or \code{\link{stars}} objects. In case a \code{\link{data.frame}}
 is supplied, the output is written as csv file.
 \strong{For creating summaries of distribution and scenario parameters and performance, see \code{write_summary()}}
 }

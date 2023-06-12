@@ -83,6 +83,9 @@ created.
 
 Priors can be set via \link{INLAPrior}.
 }
+\note{
+\strong{How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).}
+}
 \examples{
 \dontrun{
 # Add inlabru as an engine
@@ -93,6 +96,7 @@ x <- distribution(background) |> engine_inlabru()
 \itemize{
 \item Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
 \item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
+\item Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 }
 }
 \seealso{

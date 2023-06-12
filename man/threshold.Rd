@@ -8,7 +8,7 @@ threshold(
   obj,
   method = "mtp",
   value = NULL,
-  poi = NULL,
+  point = NULL,
   format = "binary",
   return_threshold = FALSE,
   ...
@@ -16,20 +16,20 @@ threshold(
 
 \S4method{threshold}{ANY}(obj)
 
-\S4method{threshold}{RasterBrick}(obj)
+\S4method{threshold}{SpatRasterDataset}(obj)
 
-\S4method{threshold}{RasterLayer}(obj)
+\S4method{threshold}{SpatRaster}(obj)
 
 \S4method{threshold}{BiodiversityScenario}(obj)
 }
 \arguments{
-\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object.}
+\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
 
 \item{method}{A specifc method for thresholding. See details for available options.}
 
 \item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: \code{NULL}).}
 
-\item{poi}{A \code{\link{sf}} object containing observational data used for model training.}
+\item{point}{A \code{\link{sf}} object containing observational data used for model training.}
 
 \item{format}{\code{\link{character}} indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
 formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}
@@ -39,7 +39,7 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 \item{...}{other parameters not yet set.}
 }
 \value{
-A \link{RasterLayer} if used with a \link{Raster} object as input.
+A \link{SpatRaster} if a \link{SpatRaster} object as input.
 Otherwise the threshold is added to the respective \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.
 }
 \description{
@@ -48,7 +48,7 @@ continuous suitability surfaces are converted into discrete representations of w
 suitable habitat might or might not exist. This so called \emph{threshold'ing}
 can be done in various ways which are further described in the details.
 
-In case a \link{RasterLayer} or \link{RasterBrick} is provided as input in this function
+In case a \code{\link{SpatRaster}} is provided as input in this function
 for \code{obj}, it is furthermore necessary to provide a \code{\link{sf}} object for validation as
 there is no \code{\link{DistributionModel}} to read this information from.
 \strong{Note:} This of course also allows to estimate the threshold based on withheld data, for instance

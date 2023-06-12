@@ -2,16 +2,16 @@
 % Please edit documentation in R/add_control_bias.R
 \name{add_control_bias}
 \alias{add_control_bias}
-\title{Add a specified variable that the model should control for}
+\title{Add a specified variable which should be controlled for somehow.}
 \usage{
 add_control_bias(x, layer, method = "partial", bias_value = NULL, add = TRUE)
 
-\S4method{add_control_bias}{BiodiversityDistribution, raster}(x, layer)
+\S4method{add_control_bias}{BiodiversityDistribution, SpatRaster}(x, layer)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{RasterLayer}} object with the range for the target feature. Specify a variable that is not
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature. Specify a variable that is not
 already added to \code{"x"} to avoid issues with duplications.}
 
 \item{method}{A \code{\link{character}} vector describing the method used for bias control. Available
@@ -23,7 +23,7 @@ to the target value during projection. By default the value is set to the minimu
 \item{add}{\code{\link{logical}} specifying whether a new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
 
-\item{...}{Other parameters or arguments (currently not supported)}
+\item{...}{Other parameters or arguments (currently not supported).}
 }
 \value{
 Adds bias control option to a \code{\link{distribution}} object.

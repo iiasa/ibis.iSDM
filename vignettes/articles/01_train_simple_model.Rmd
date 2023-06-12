@@ -62,8 +62,7 @@ install(c("inlabru", "xgboost", "rgeos", "igraph"))
 library(ibis.iSDM)
 library(inlabru)
 library(xgboost)
-library(raster)
-library(rgdal)
+library(terra)
 library(uuid)
 library(assertthat)
 ```
@@ -74,11 +73,11 @@ So first lets load the data:
 
 ```{r Load data, message=FALSE}
 # Background layer
-background <- raster::raster(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
+background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
 virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "ibis.iSDM", mustWork = TRUE), "points") 
 # Predictors
-predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
+predictors <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 # Make use only of a few of them
 predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
                                             "CLC3_112_mean_50km","CLC3_132_mean_50km",
@@ -253,14 +252,14 @@ Currently the `ibis.iSDM` package supports the addition of only spatial latent e
 # We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.
 
 # Load the predictors again
-predictors <- raster::stack(list.files(system.file("extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
+predictors <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM"), "*.tif",full.names = TRUE))
 predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
                                             "CLC3_112_mean_50km","CLC3_132_mean_50km",
                                             "CLC3_211_mean_50km","CLC3_312_mean_50km",
                                             "elevation_mean_50km",
                                    "koeppen_50km"))
 # One of them (Köppen) is a factor, we will now convert this to a true factor variable
-predictors$koeppen_50km <- raster::ratify(predictors$koeppen_50km)
+predictors$koeppen_50km <- terra::as.factor(predictors$koeppen_50km)
 
 # Create a distribution modelling pipeline
 x <- distribution(background) |> 

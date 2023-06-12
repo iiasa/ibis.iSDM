@@ -67,9 +67,9 @@ engine_bart <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -80,7 +80,7 @@ engine_bart <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set up dbarts control with some parameters, rest default
   dc <- dbarts::dbartsControl(keepTrees	= TRUE, # Keep trees
@@ -158,7 +158,7 @@ engine_bart <- function(x,
 
           # Get background layer
           bg <- self$get_data('template')
-          assertthat::assert_that(!is.na(raster::cellStats(bg, min)))
+          assertthat::assert_that(!is.na(terra::global(bg, "min", na.rm = TRUE)[,1]))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -205,7 +205,7 @@ engine_bart <- function(x,
                                    rm.na = FALSE)
             # ofs <- get_ngbvalue(coords = df[,c('x','y')],
             #                     env =  model$offset,
-            #                     longlat = raster::isLonLat(bg),
+            #                     longlat = terra::is.lonlat(bg),
             #                     field_space = c('x','y')
             # )
             model$biodiversity[[1]]$offset <- ofs
@@ -491,11 +491,11 @@ engine_bart <- function(x,
                                   nrow(ms) == nrow(full))
 
           # Add them through a loop since the cellid changed
-          prediction <- raster::stack()
+          prediction <- terra::rast()
           for(post in names(ms)){
             prediction2 <- self$get_data('template')
             prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
-            prediction <- raster::addLayer(prediction, prediction2)
+            suppressWarnings( prediction <- c(prediction, prediction2) )
             rm(prediction2)
           }
           # plot(prediction$mean, col = ibis_colours$sdm_colour)
@@ -541,7 +541,7 @@ engine_bart <- function(x,
             # Calculate
             p <- bart_partial_space(model, predictors, x.var, equal, smooth, transform)
 
-            raster::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+            terra::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
             # Also return spatial
             return(p)
           },

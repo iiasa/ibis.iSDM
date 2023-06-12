@@ -18,7 +18,7 @@ This document contains a series of frequently asked questions when using the `ib
 <details>
 <summary><b>What are the necessary data preparation steps for `ibis.iSDM` ?</b>
 </summary>
-The `ibis.iSDM` R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`raster`] and [`stars`] packages to do much of the formatting and processing work.
+The `ibis.iSDM` R-package can handle most standard spatial formats in R (such as vector or raster formats) and works predominantly with the [`sf`], [`SpatRaster`] and [`stars`] packages to do much of the formatting and processing work.
 When adding [`biodiversity`] and [`predictor`] variables to a `distribution()` object a number of default validity checks and alignments are commonly conducted, for instance ensuring that provided points align in geographic projection.
 
 To ease up the modelling and to avoid any unfortunate errors or crashes, ideally ensure the following steps are taken:
@@ -271,7 +271,7 @@ mod <- distribution(background) |>
 <summary><b>Where can I find predictions created by `train` ? </b>
 </summary>
 
-After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `RasterStack`. By default all engines will produce a `Raster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
+After a `distribution` model has been trained and if the `inference_only` parameter in `train()` has been set to `FALSE` (Default), the outputs of the prediction be found in the created object as a `SpatRaster`. By default all engines will produce a `SpatRaster` object with at least one band called "mean" which is the average prediction by the engine. This is also the result returned when the created model object is plotted. 
 
 In addition, for Bayesian Engines other bands quantifying the posterior predictive uncertainty might be available and can be plotted as well. The raster can also be saved a spatial GeoTiff to a given filename using the `write_output()` function.
 
@@ -337,3 +337,28 @@ Sorry to hear and unless the model or input data are grossely misspecified, this
 Please report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the concrete error message, your R session information (call `sessionInfo()`) and preferably some example data and code.
 </details>
 
+## Any other questions and issues
+
+<details>
+<summary><b>Can I transform the prediction output to a suitability index?</b>
+</summary>
+
+Often it is easier to communicate an index of suitability (scale [0-1]) to stakeholders and policy, which can in principle be derived from *ibis.iSDM* output. Especially when using Poisson Process models to infer the suitability of a given area, the units can be hard to interpret for non-scientists. An easy way to achieve this has been added as a function to each Biodiversity distribution object. See below for an example.
+
+```{r, echo=TRUE,eval=FALSE}
+# Train a model
+fit <- distribution(background) |> 
+  # Presence-absence data
+  add_biodiversity_poipo(my_gbifpoints) |> 
+  add_predictors(predictors) |> 
+  engine_glmnet() |> 
+  train()
+
+# Make a transformed prediction of the suitability layer
+# The output is a normalized prediction surface 
+# created via (x - min) / (max - min) or x/sum(x) respectively
+pred <- fit$calc_suitabilityindex()
+
+```
+
+</details>

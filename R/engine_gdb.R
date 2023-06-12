@@ -69,9 +69,9 @@ engine_gdb <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(background),
-      crs = raster::projection(background),
+    template <- terra::rast(
+      ext = terra::ext(background),
+      crs = terra::crs(background),
       res = c(diff( (sf::st_bbox(background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(background)[c(1,3)]) ) / 100
              )
@@ -82,7 +82,7 @@ engine_gdb <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(background, template, field = 0)
+  template <- terra::rasterize(background, template, field = 0)
 
   # Set up boosting control
   bc <- mboost::boost_control(mstop = iter,
@@ -150,7 +150,7 @@ engine_gdb <- function(x,
          assertthat::has_name(model, 'biodiversity'),
          inherits(settings,'Settings') || is.null(settings),
          # Check that all predictors are present
-         nrow(model$predictors) == raster::ncell(self$get_data('template')),
+         nrow(model$predictors) == terra::ncell(self$get_data('template')),
          length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
         )
         # Add in case anything needs to be further prepared here
@@ -163,7 +163,7 @@ engine_gdb <- function(x,
 
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(is.Raster(bg), !is.na(raster::cellStats(bg,min)))
+          assertthat::assert_that(is.Raster(bg), !is.na(terra::global(bg, "min", na.rm = TRUE)[,1]))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -201,6 +201,13 @@ engine_gdb <- function(x,
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
 
+          # Will expectations with 1 for rest of data points
+          if(length(model$biodiversity[[1]]$expect)!= nrow(model$biodiversity[[1]]$observations)){
+            model$biodiversity[[1]]$expect <- c(model$biodiversity[[1]]$expect,
+                                                rep(1, nrow(model$biodiversity[[1]]$observations) - length(model$biodiversity[[1]]$expect))
+            )
+          }
+
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
@@ -216,7 +223,7 @@ engine_gdb <- function(x,
             names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
             # ofs <- get_ngbvalue(coords = df[,c('x','y')],
             #                     env =  model$offset,
-            #                     longlat = raster::isLonLat(bg),
+            #                     longlat = terra::is.lonlat(bg),
             #                     field_space = c('x','y')
             #                     )
             model$biodiversity[[1]]$offset <- ofs
@@ -233,7 +240,7 @@ engine_gdb <- function(x,
           model$biodiversity[[1]]$expect <- df$w
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+          pres <- terra::rasterize( guess_sf( model$biodiversity[[1]]$observations[,c("x","y")] ),
                                     bg, fun = 'count', background = 0)
           # Get for the full dataset
           w_full <- ppm_weights(df = model$predictors,
@@ -653,7 +660,7 @@ engine_gdb <- function(x,
               # Plot both partial spatial partial
               par.ori <- graphics::par(no.readonly = TRUE)
               graphics::par(mfrow = c(1,3))
-              raster::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen)
+              terra::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen)
               mboost::plot.mboost(mod,which = x.var)
               graphics::par(par.ori)
             }
@@ -676,28 +683,30 @@ engine_gdb <- function(x,
             assertthat::assert_that('fit_best' %in% names(self$fits) )
             # Get model and make empty template
             mod <- self$get_data('fit_best')
+            model <- self$model
+
             # Also check that what is present in coefficients of model
             vars <- as.character( mboost::extract(mod,'bnames') )
             assertthat::assert_that(length(grep('bspatial',vars))>0,
                                     msg = 'No spatial effect found in model!')
 
             # Make template of target variable(s)
-            temp <- raster::rasterFromXYZ(cbind(self$model$predictors$x,self$model$predictors$y))
+            temp <- emptyraster( model$predictors_object$get_data() )
             # Get target variables and predict
             target <- self$model$predictors[,c('x','y')]
 
             y <- suppressWarnings(
-              mboost::predict.mboost(mod,newdata = target, which = c('x','y'))
+              mboost::predict.mboost(mod, newdata = target, which = c('x','y'))
             )
             assertthat::assert_that(nrow(target)==nrow(y))
             temp[] <- y[,2]
             names(temp) <- paste0('partial__','space')
             # Mask with background
-            temp <- raster::mask(temp, self$model$background )
+            temp <- terra::mask(temp, self$model$background )
 
             if(plot){
               # Plot both partial spatial partial
-              raster::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen )
+              terra::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen )
             }
 
             return(temp)

@@ -24,8 +24,8 @@ NULL
 #' as well as a specified [engine].**
 #'
 #' @param background Specification of the modelling background. Must be a
-#' [`raster`], [`sf`] or [`extent`] object.
-#' @param limits A [`raster`] or [`sf`] object that limits the prediction surface when
+#' [`SpatRaster`], [`sf`] or [`extent`] object.
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction surface when
 #' intersected with input data (Default: \code{NULL}).
 #'
 #' @details
@@ -50,15 +50,13 @@ NULL
 #' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`] object contents. Can also be called via [print].
 #' * \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
 #' * \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
-#' * \code{object$get_extent()} Outputs the [raster::extent] of the modelling region.
-#' * \code{object$show_background_info()} Returns a [`list`] with the [raster::extent] and the [sp::proj4string].
-#' * \code{object$get_extent_dimensions()} Outputs the [raster::extent] dimension by calling the [`extent_dimensions()`] function.
+#' * \code{object$get_extent()} Outputs the [terra::ext] of the modelling region.
+#' * \code{object$show_background_info()} Returns a [`list`] with the [terra::ext] and the [sp::proj4string].
+#' * \code{object$get_extent_dimensions()} Outputs the [terra::ext] dimension by calling the [`extent_dimensions()`] function.
 #' * \code{object$get_predictor_names()} Returns a [character] vector with the names of all added predictors.
 #' * \code{object$get_prior_variables()} Returns a description of [`priors`] added.
 #'
 #' There are other functions as well but those are better accessed through their respective wrapper functions.
-#'
-#'
 #'
 #' @returns [`BiodiversityDistribution-class`] object containing data for building a biodiversity distribution modelling problem.
 #'
@@ -74,7 +72,7 @@ NULL
 #' @examples
 #' \dontrun{
 #'  # Load background raster
-#'  background <- raster::raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+#'  background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
 #'  # Define model
 #'  x <- distribution(background)
 #'  x
@@ -88,21 +86,21 @@ methods::setGeneric("distribution",
                     function(background, limits = NULL) standardGeneric("distribution"))
 
 #' @name distribution
-#' @usage \S4method{distribution}{raster}(background)
+#' @usage \S4method{distribution}{SpatRaster}(background)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
-  methods::signature(background = "Raster"),
+  methods::signature(background = "SpatRaster"),
   function(background, limits = NULL) {
     assertthat::assert_that(!missing(background) || !exists('background'),
-                            inherits(limits,'Raster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
                             msg = 'No background file supplied!')
     # Check that arguments are valid
-    assertthat::assert_that( inherits(background,'Raster')  )
+    assertthat::assert_that( inherits(background,'SpatRaster')  )
 
     # Convert raster to dissolved polygons to get a study boundary
     newbg <- sf::st_as_sf(
-      raster::rasterToPolygons(background, dissolve = TRUE)
+      terra::as.polygons(background, dissolve = TRUE)
     )
 
     # Rerun the distribution call with the object
@@ -118,27 +116,34 @@ methods::setMethod(
   function(background, limits = NULL) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(background) || !exists('background'),
-                            inherits(limits,'Raster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
                             msg = 'No background file supplied!')
     assertthat::assert_that(
       inherits(background,'sf'),
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
 
-    # Messager
+    # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating distribution object...')
 
     # Convert limits if provided
     if(!is.null(limits)){
       # Convert to polygon if raster
-      if(inherits(limits,'Raster')){
-        if(is.null(levels(limits))) stop('Provided limit raster needs to be ratified (categorical)!')
-        limits <- sf::st_as_sf( raster::rasterToPolygons(limits, n = 16, dissolve = TRUE) )
+      if(inherits(limits,'SpatRaster')){
+        assertthat::assert_that(terra::is.factor(limits),
+                                msg = 'Provided limit raster needs to be ratified (categorical)!')
+        limits <- sf::st_as_sf( terra::as.polygons(limits, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
       }
+      assertthat::assert_that(inherits(limits, "sf"))
+
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(background)) limits <- sf::st_transform(limits, background)
       # Ensure that limits is intersecting the background
-      if(suppressMessages(length( sf::st_intersects(limits, background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      if(is.Raster(background)){
+        if(suppressMessages(length( sf::st_intersects(limits, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      } else {
+        if(suppressMessages(length( sf::st_intersects(limits, background |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      }
 
       # Get fir column and rename
       limits <- limits[,1]; names(limits) <- c('limit','geometry')

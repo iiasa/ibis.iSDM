@@ -1,14 +1,14 @@
 # -----------------------------------------------------------
-# CITATION file created with {cffr} R package, v0.4.1
+# CITATION file created with {cffr} R package, v0.5.0
 # See also: https://docs.ropensci.org/cffr/
 # -----------------------------------------------------------
- 
+
 cff-version: 1.2.0
 message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling Framework for Integrated Biodiversity Distribution Scenarios'
-version: 0.0.3
+version: 0.0.4
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -65,8 +65,7 @@ references:
   version: '>= 0.2.0'
 - type: software
   title: doFuture
-  abstract: 'doFuture: A Universal Foreach Parallel Adapter using the Future API of
-    the ''future'' Package'
+  abstract: 'doFuture: Use Foreach to Parallelize via the Future Framework'
   notes: Imports
   url: https://doFuture.futureverse.org
   repository: https://CRAN.R-project.org/package=doFuture
@@ -253,33 +252,18 @@ references:
   year: '2023'
   version: '>= 1.0.0'
 - type: software
-  title: raster
-  abstract: 'raster: Geographic Data Analysis and Modeling'
+  title: terra
+  abstract: 'terra: Spatial Data Analysis'
   notes: Imports
-  url: https://rspatial.org/raster
-  repository: https://CRAN.R-project.org/package=raster
+  url: https://rspatial.org/
+  repository: https://CRAN.R-project.org/package=terra
   authors:
   - family-names: Hijmans
     given-names: Robert J.
     email: r.hijmans@gmail.com
     orcid: https://orcid.org/0000-0001-5872-2872
   year: '2023'
-  version: '>= 3.4-5'
-- type: software
-  title: rgeos
-  abstract: 'rgeos: Interface to Geometry Engine - Open Source (''GEOS'')'
-  notes: Imports
-  url: https://libgeos.org
-  repository: https://CRAN.R-project.org/package=rgeos
-  authors:
-  - family-names: Bivand
-    given-names: Roger
-    email: Roger.Bivand@nhh.no
-    orcid: https://orcid.org/0000-0003-2392-6140
-  - family-names: Rundel
-    given-names: Colin
-  year: '2023'
-  version: '>= 0.5-5'
+  version: '>= 1.7-10'
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
@@ -508,11 +492,28 @@ references:
   title: igraph
   abstract: 'igraph: Network Analysis and Visualization'
   notes: Suggests
-  url: https://igraph.org
+  url: https://r.igraph.org/
   repository: https://CRAN.R-project.org/package=igraph
   authors:
-  - family-names: file.
-    given-names: See AUTHORS
+  - family-names: Csárdi
+    given-names: Gábor
+    email: csardi.gabor@gmail.com
+  - family-names: Nepusz
+    given-names: Tamás
+    email: ntamas@gmail.com
+  - family-names: Traag
+    given-names: Vincent
+  - family-names: Horvát
+    given-names: Szabolcs
+    email: szhorvat@gmail.com
+  - family-names: Zanini
+    given-names: Fabio
+    email: fabio.zanini@unsw.edu.au
+  - family-names: Noom
+    given-names: Daniel
+  - family-names: Müller
+    given-names: Kirill
+    email: kirill@cynkra.com
   year: '2023'
 - type: software
   title: knitr
@@ -598,35 +599,38 @@ references:
   authors:
   - family-names: Allaire
     given-names: JJ
-    email: jj@rstudio.com
+    email: jj@posit.co
   - family-names: Xie
     given-names: Yihui
     email: xie@yihui.name
     orcid: https://orcid.org/0000-0003-0645-5666
+  - family-names: Dervieux
+    given-names: Christophe
+    email: cderv@posit.co
+    orcid: https://orcid.org/0000-0003-4474-2498
   - family-names: McPherson
     given-names: Jonathan
-    email: jonathan@rstudio.com
+    email: jonathan@posit.co
   - family-names: Luraschi
     given-names: Javier
-    email: javier@rstudio.com
   - family-names: Ushey
     given-names: Kevin
-    email: kevin@rstudio.com
+    email: kevin@posit.co
   - family-names: Atkins
     given-names: Aron
-    email: aron@rstudio.com
+    email: aron@posit.co
   - family-names: Wickham
     given-names: Hadley
-    email: hadley@rstudio.com
+    email: hadley@posit.co
   - family-names: Cheng
     given-names: Joe
-    email: joe@rstudio.com
+    email: joe@posit.co
   - family-names: Chang
     given-names: Winston
-    email: winston@rstudio.com
+    email: winston@posit.co
   - family-names: Iannone
     given-names: Richard
-    email: rich@rstudio.com
+    email: rich@posit.co
     orcid: https://orcid.org/0000-0003-3925-190X
   year: '2023'
 - type: software
@@ -679,7 +683,7 @@ references:
   authors:
   - family-names: Wickham
     given-names: Hadley
-    email: hadley@rstudio.com
+    email: hadley@posit.co
   year: '2023'
 - type: software
   title: xgboost

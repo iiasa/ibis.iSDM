@@ -12,7 +12,7 @@
 #' @description
 #' This functions prints a message with a custom header and colour.
 #' @param title The title in the log output
-#' @param col A [`character`] indicating the text colour to be used. Supported are 'green' / 'yellow' / 'red'
+#' @param col A [`character`] indicating the text colour to be used. Supported are \code{'green'} / \code{'yellow'} / \code{'red'}
 #' @param ... Any additional outputs or words for display
 #' @examples
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
@@ -202,11 +202,13 @@ to_POSIXct <- function(vec){
 
 #' Hingeval transformation
 #' @param x A [`vector`] with numeric values.
-#' @param min [`numeric`] minimum value for the hinge transformation
-#' @param max [`numeric`] maximum value for the hinge transformation
+#' @param min [`numeric`] minimum value for the hinge transformation.
+#' @param max [`numeric`] maximum value for the hinge transformation.
 #' @keywords internal
 #' @noRd
-hingeval <- function (x, min, max) ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+hingeval <- function (x, min, max){
+  ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
+}
 
 #' Threshold transformation
 #' @param x A [`vector`] with numeric values.
@@ -237,7 +239,7 @@ thresholdval <- function(x, knot) {
 #' }
 #' @keywords utils
 #' @noRd
-run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
+run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
   assertthat::assert_that(
     is.list(X) || is.data.frame(X) || is.matrix(X),
     is.function(FUN),
@@ -288,7 +290,7 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
           if(!is.null(export_packages)){
             # Send all specified packages to the cluster
             for(val in export_packages){
-              parallel::clusterExport(cl, varlist = package_function_names(val),
+              parallel::clusterExport(cl, varlist = val,
                                       envir = as.environment(asNamespace(val)))
             }
           }
@@ -330,8 +332,7 @@ run_parallel <- function (X, FUN, cores = 1, approach = "parallel", export_packa
 #' @param model A [`list`] with the input data used for inference. Created during model setup.
 #' @param pred An optional [`data.frame`] of the prediction container.
 #' @returns A [`data.frame`] with the clamped predictors.
-#' @keywords utils
-#' @keywords internal
+#' @keywords utils, internal
 #' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
 clamp_predictions <- function(model, pred){
   assertthat::assert_that(
@@ -626,7 +627,7 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 #' depending on the type, either counting the number of observations per grid cell
 #' or aggregating them via a sum.
 #' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
-#' @param template A [`RasterLayer`] object that is aligned with the predictors.
+#' @param template A [`SpatRaster`] object that is aligned with the predictors.
 #' @param field_occurrence A [`character`] name of the column containing the presence information (Default: \code{observed}).
 #' @returns A [`sf`] object with the newly aggregated points.
 #' @keywords internal
@@ -650,27 +651,26 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
   # First take presence observations and rasterize them to reduce them to a count per grid cell
   if( max(df[[field_occurrence]],na.rm = TRUE) > 1){
     # Count the sum of them
-    pres <- raster::rasterize(df, field = field_occurrence,
-                              template, fun = 'sum', background = 0)
+    pres <- terra::rasterize(x = df, y =  template,
+                             field = field_occurrence,
+                             fun = 'sum', background = 0)
 
   } else {
     # Simply count them
-    if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
-    pres <- raster::rasterize(df[,c("x","y")],
-                              template, fun = 'count', background = 0)
+    pres <- terra::rasterize(x = df[,c("x","y")],y = template, fun = 'length', background = 0)
   }
   assertthat::assert_that(
-    is.Raster(pres), is.finite(raster::cellStats(pres, "max"))
+    is.Raster(pres), is.finite( terra::global(pres, "max", na.rm = TRUE)[1,1] )
   )
   if(inherits(df, 'sf')) df <- df |> sf::st_drop_geometry()
   # Get cell ids
-  ce <- raster::cellFromXY(pres, df[,c("x","y")])
+  ce <- terra::cellFromXY(pres, df[,c("x","y")])
   # Remove any NA if present
   if(anyNA(ce)) ce <- subset(ce, stats::complete.cases(ce))
   # Get new presence data
   obs <- cbind(
-    data.frame(observed = raster::values(pres)[ce],
-               raster::xyFromCell(pres, ce) # Center of cell
+    data.frame(observed = terra::values(pres)[ce],
+               terra::xyFromCell(pres, ce) # Center of cell
     )
   ) |>
     # Unique to remove any duplicate values (otherwise double counted cells)

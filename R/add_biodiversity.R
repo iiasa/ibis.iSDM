@@ -39,7 +39,7 @@ NULL
 #' @keywords biodiversity
 #' @examples
 #' \dontrun{
-#'  background <- raster::raster("inst/extdata/europegrid_50km.tif")
+#'  background <- terra::rast("inst/extdata/europegrid_50km.tif")
 #'  # Load virtual species
 #'  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
 #' # Define model
@@ -130,7 +130,7 @@ methods::setMethod(
   }
 )
 
-#' Add biodiversity point dataset to a distribution object (presence-absence)
+#' Add biodiversity point dataset to a distribution object (presence-absence).
 #'
 #' @description
 #' This function adds a presence-absence biodiversity dataset to a distribution object.
@@ -152,7 +152,7 @@ methods::setMethod(
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence.
 #' By default set to \code{"Observed"} and an error will be thrown if a [`numeric`] column with that name does not exist.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default (\code{NULL}) is to use all covariates (if specified).
-#' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
+#' @param family A [`character`] stating the family to be used (Default: \code{'binomial'}).
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
@@ -160,7 +160,7 @@ methods::setMethod(
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in.
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
-#' @param ... Other parameters passed down
+#' @param ... Other parameters passed down.
 #'
 #' @family add_biodiversity
 #' @keywords biodiversity
@@ -273,10 +273,10 @@ methods::setMethod(
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
 #' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpo`].
-#' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE})
+#' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
-#' @param simulate_bias A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
-#' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either
+#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
+#' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
 #' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
@@ -332,7 +332,7 @@ methods::setMethod(
                             is.character(family),
                             is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
-                            is.null(simulate_bias) || inherits(simulate_bias, "Raster"),
+                            is.null(simulate_bias) || inherits(simulate_bias, "SpatRaster"),
                             is.logical(separate_intercept),
                             is.numeric(weight) && all(weight > 0)
     )
@@ -359,7 +359,7 @@ methods::setMethod(
 
       if(!is.null(simulate_bias)){
         # Crop to target range
-        simulate_bias <- raster::crop(simulate_bias, polpo)
+        simulate_bias <- terra::crop(simulate_bias, polpo)
         # Normalize the weight layer if is not a factorized, else set everything to 1
         if(is.null(levels(simulate_bias))) simulate_bias <- predictor_transform(simulate_bias, "norm") else simulate_bias[simulate_bias>0] <- 1
 
@@ -368,8 +368,8 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipo_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
-        poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
+        poipo_on <- terra::as.data.frame(terra::xyFromCell(simulate_bias, ptscell))
+        poipo_on <- sf::st_as_sf(poipo_on, coords = c("x","y"), crs = sf::st_crs(simulate_bias))
 
       } else {
       # Simply sample presence points within as determined
@@ -380,9 +380,9 @@ methods::setMethod(
         )
       }
 
-      names(poipo_on) <- "geometry"; st_geometry(poipo_on) <- "geometry"
+      names(poipo_on) <- "geometry"; sf::st_geometry(poipo_on) <- "geometry"
       poipo_on[[field_occurrence]] <- 1
-      poipo_on$x <- st_coordinates(poipo_on)[,1];poipo_on$y <- st_coordinates(poipo_on)[,2]
+      poipo_on$x <- sf::st_coordinates(poipo_on)[,1];poipo_on$y <- sf::st_coordinates(poipo_on)[,2]
       poipo <- poipo_on
 
       # Check that weights are correctly set
@@ -451,7 +451,7 @@ methods::setMethod(
 #' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpa`].
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation.
-#' @param simulate_bias A [`Raster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
+#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
@@ -507,13 +507,13 @@ methods::setMethod(
                             is.character(family),
                             is.null(link) || is.character(link),
                             assertthat::is.flag(simulate), is.numeric(simulate_points),
-                            is.null(simulate_bias) || inherits(simulate_bias, "Raster"),
+                            is.null(simulate_bias) || inherits(simulate_bias, "SpatRaster"),
                             is.numeric(weight) && all(weight > 0),
                             is.logical(separate_intercept)
     )
 
     # Check type and ensure that is a polygon
-    assertthat::assert_that(all( unique( st_geometry_type(polpa) ) %in% c("POLYGON","MULTIPOLYGON") ),
+    assertthat::assert_that(all( unique( sf::st_geometry_type(polpa) ) %in% c("POLYGON","MULTIPOLYGON") ),
                             msg = "This method works for spatial data of type polygon only.")
 
     assertthat::assert_that(length(unique(polpa[[field_occurrence]])) <= 2,
@@ -531,7 +531,7 @@ methods::setMethod(
 
       if(!is.null(simulate_bias)){
         # Crop to target range
-        simulate_bias <- raster::crop(simulate_bias, polpa)
+        simulate_bias <- terra::crop(simulate_bias, polpa)
         # Normalize the weight layer if is not a factorized, else set everything to 1
         if(is.null(levels(simulate_bias))) simulate_bias <- predictor_transform(simulate_bias, "norm") else simulate_bias[simulate_bias>0] <- 1
 
@@ -540,8 +540,8 @@ methods::setMethod(
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
                           replace = TRUE)
-        poipa_on <- raster::as.data.frame(raster::xyFromCell(simulate_bias, ptscell))
-        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"),crs = sf::st_crs(simulate_bias))
+        poipa_on <- terra::as.data.frame(terra::xyFromCell(simulate_bias, ptscell))
+        poipa_on <- sf::st_as_sf(poipa_on, coords = c("x","y"), crs = sf::st_crs(simulate_bias))
 
       } else {
         # Simply sample presence points within as determined
@@ -552,13 +552,13 @@ methods::setMethod(
         )
       }
 
-      names(poipa_on) <- "geometry"; st_geometry(poipa_on) <- "geometry"
+      names(poipa_on) <- "geometry"; sf::st_geometry(poipa_on) <- "geometry"
       poipa_on[[field_occurrence]] <- 1
-      poipa_on$x <- st_coordinates(poipa_on)[,1];poipa_on$y <- st_coordinates(poipa_on)[,2]
+      poipa_on$x <- sf::st_coordinates(poipa_on)[,1]; poipa_on$y <- sf::st_coordinates(poipa_on)[,2]
 
       # Get absence data for poipa data, masking out the range of first
       if(is.Raster(x$background)){
-        bg_masked <- raster::mask(x$background, polpa, inverse = TRUE)
+        bg_masked <- terra::mask(x$background, polpa, inverse = TRUE)
       } else bg_masked <- x$background
 
       suppressMessages(
@@ -566,7 +566,7 @@ methods::setMethod(
           sf::st_sample(x = bg_masked, size = simulate_points, type = "random")
         )
       )
-      names(poipa_off) <- "geometry"; st_geometry(poipa_off) <- "geometry"
+      names(poipa_off) <- "geometry"; sf::st_geometry(poipa_off) <- "geometry"
 
       if(!is.Raster(x$background)){
         # Remove points on the range
@@ -578,7 +578,7 @@ methods::setMethod(
 
       # Remove points on the range
       poipa_off[[field_occurrence]] <- 0
-      poipa_off$x <- st_coordinates(poipa_off)[,1];poipa_off$y <- st_coordinates(poipa_off)[,2]
+      poipa_off$x <- sf::st_coordinates(poipa_off)[,1];poipa_off$y <- sf::st_coordinates(poipa_off)[,2]
 
       poipa <- rbind(poipa_on,poipa_off)
 
@@ -638,10 +638,10 @@ methods::setMethod(
 
 #' Format biodiversity dataset to standardized format
 #'
-#' @param x A [`data.frame`], [`sf`] or [`Spatial`]) object of biodiversity information
+#' @param x A [`data.frame`], [`sf`] or [`Spatial`]) object of biodiversity information.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
-#' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'})
-#' @param ... Other parameters passed down
+#' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'}).
+#' @param ... Other parameters passed down.
 #'
 #' @import sf
 #' @name format_biodiversity_data

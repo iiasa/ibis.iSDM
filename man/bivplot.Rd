@@ -17,7 +17,7 @@ bivplot(
 \S4method{bivplot}{ANY}(mod)
 }
 \arguments{
-\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object with \code{prediction} model within.}
+\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object with \code{prediction} model within.}
 
 \item{xvar}{A \code{\link{character}} denoting the value on the x-axis (Default: \code{'mean'}).}
 

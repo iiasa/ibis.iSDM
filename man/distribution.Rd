@@ -6,15 +6,15 @@
 \usage{
 distribution(background, limits = NULL)
 
-\S4method{distribution}{raster}(background)
+\S4method{distribution}{SpatRaster}(background)
 
 \S4method{distribution}{sf}(background)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link{raster}}, \code{\link{sf}} or \code{\link{extent}} object.}
+\code{\link{SpatRaster}}, \code{\link{sf}} or \code{\link{extent}} object.}
 
-\item{limits}{A \code{\link{raster}} or \code{\link{sf}} object that limits the prediction surface when
+\item{limits}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the prediction surface when
 intersected with input data (Default: \code{NULL}).}
 }
 \value{
@@ -65,9 +65,9 @@ Useful high-level functions to address those objects are for instance:
 \item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}} object contents. Can also be called via \link{print}.
 \item \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
 \item \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
-\item \code{object$get_extent()} Outputs the \link[raster:extent]{raster::extent} of the modelling region.
-\item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[raster:extent]{raster::extent} and the \link[sp:is.projected]{sp::proj4string}.
-\item \code{object$get_extent_dimensions()} Outputs the \link[raster:extent]{raster::extent} dimension by calling the \code{\link[=extent_dimensions]{extent_dimensions()}} function.
+\item \code{object$get_extent()} Outputs the \link[terra:ext]{terra::ext} of the modelling region.
+\item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[terra:ext]{terra::ext} and the \link[sp:is.projected]{sp::proj4string}.
+\item \code{object$get_extent_dimensions()} Outputs the \link[terra:ext]{terra::ext} dimension by calling the \code{\link[=extent_dimensions]{extent_dimensions()}} function.
 \item \code{object$get_predictor_names()} Returns a \link{character} vector with the names of all added predictors.
 \item \code{object$get_prior_variables()} Returns a description of \code{\link{priors}} added.
 }
@@ -77,7 +77,7 @@ There are other functions as well but those are better accessed through their re
 \examples{
 \dontrun{
  # Load background raster
- background <- raster::raster(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+ background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
  # Define model
  x <- distribution(background)
  x

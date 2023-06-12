@@ -26,6 +26,8 @@ NULL
 #' created.
 #'
 #' Priors can be set via [INLAPrior].
+#' @note
+#' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
@@ -54,6 +56,7 @@ NULL
 #' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
 #' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
+#' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @family engine
 #' @returns An [engine].
 #' @examples
@@ -120,7 +123,7 @@ engine_inla <- function(x,
     region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
 
     # Security check for projection and if not set, use the one from background
-    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
+    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
 
     # Calculate area
     ar <- suppressWarnings(
@@ -275,12 +278,12 @@ engine_inla <- function(x,
               dims = c(300, 300)
             )
           # Convert to raster stack
-          out <- raster::stack(
+          out <- c(
               sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
                                       proj4string = self$get_data('mesh')$crs )
             )
 
-          raster::plot(out[[c('sd','sd.dev','edge.len')]],
+          terra::plot(out[[c('sd','sd.dev','edge.len')]],
                col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
                )
         } else {
@@ -478,7 +481,7 @@ engine_inla <- function(x,
           length(model$biodiversity)>=1,
           msg = 'Some internal checks failed while setting up the model.'
         )
-        # Messager
+        # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Set number of threads via set.Options
@@ -529,11 +532,11 @@ engine_inla <- function(x,
             # FIXME: Hacky solution as to not overwrite predictor object
             ras_back <- model$predictors_object$data
             # Explode the columns in the raster object
-            model$predictors_object$data <- raster::addLayer(
+            model$predictors_object$data <- c(
               model$predictors_object$data,
               explode_factorized_raster(model$predictors_object$data[[k]])
             )
-            model$predictors_object$data <- raster::dropLayer(model$predictors_object$data, k)
+            model$predictors_object$data <- terra::subset(model$predictors_object$data, -k)
           }
         } else { ras_back <- new_waiver() }
 
@@ -606,6 +609,7 @@ engine_inla <- function(x,
             mesh.area  = self$get_data('mesh.area'),
             res        = self$get_data('params')$proj_stepsize,
             type       = model$biodiversity[[id]]$type,
+            background = model$background,
             spde       = spde,
             settings   = settings,
             joint      = ifelse(nty > 1, TRUE, FALSE)
@@ -779,25 +783,31 @@ engine_inla <- function(x,
           names(post) <- c("mean", "sd", "q05", "q50", "q95", "mode","cv")
 
           # Fill prediction
+          # suppressWarnings(
+          #   prediction <- terra::rast(
+          #     sp::SpatialPixelsDataFrame(
+          #       points = predcoords,
+          #       data = post,
+          #       proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+          #     )
+          #   )
+          # )
           suppressWarnings(
-            prediction <- raster::stack(
-              sp::SpatialPixelsDataFrame(
-                points = predcoords,
-                data = post,
-                proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
-              )
-            )
+            prediction <- terra::rast(cbind( as.data.frame(predcoords), post), type = "xyz",
+                                      crs = terra::crs(self$get_data('mesh')$crs@projargs) )
           )
-          prediction <- raster::mask(prediction, model$background) # Mask with background
+
+          prediction <- terra::mask(prediction, model$background) # Mask with background
           # Align with background
-          temp <- raster::raster(
-            sp::SpatialPixelsDataFrame(
-              points = model$predictors[,c('x','y')],
-              data = model$predictors[,c('x','y')],
-              proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
-            )
-          )
-          prediction <- raster::resample(prediction, temp, method = 'bilinear')
+          # temp <- terra::rast(
+          #   sp::SpatialPixelsDataFrame(
+          #     points = model$predictors[,c('x','y')],
+          #     data = model$predictors[,c('x','y')],
+          #     proj4string = sp::CRS( self$get_data('mesh')$crs@projargs ) # x$engine$data$mesh$crs@projargs
+          #   )
+          # )
+          temp <- emptyraster( model$predictors_object$get_data() )
+          prediction <- terra::resample(prediction, temp, method = 'bilinear')
 
         } else {
           # No prediction to be conducted
@@ -949,24 +959,24 @@ engine_inla <- function(x,
                   # Convert to rasters
                   g.mean <- t(g.mean)
                   g.mean <- g.mean[rev(1:length(g.mean[,1])),]
-                  r.m <- raster::raster(g.mean,
-                                      xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
-                                      ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
-                                      crs = self$get_data('mesh')$crs
+                  r.m <- terra::rast(g.mean,
+                                      xmin = range(gproj$x)[1], xmax = range(gproj$x)[2],
+                                      ymin = range(gproj$y)[1], ymax = range(gproj$y)[2],
+                                      crs = terra::crs(self$get_data('mesh')$crs)
                   )
                   g.sd  <- t(g.sd)
                   g.sd <- g.sd[rev(1:length(g.sd[,1])),]
-                  r.sd <- raster::raster(g.sd,
+                  r.sd <- terra::rast(g.sd,
                                       xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
                                       ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
-                                      crs = self$get_data('mesh')$crs
+                                      crs = terra::crs( self$get_data('mesh')$crs)
                   )
 
-                  spatial_field <- raster::stack(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
+                  spatial_field <- c(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
                   # Mask with prediction if exists
                   if(!is.null(self$get_data('prediction'))){
-                    spatial_field <- raster::resample(spatial_field, self$get_data('prediction')[[1]])
-                    spatial_field <- raster::mask(spatial_field, self$get_data('prediction')[[1]])
+                    spatial_field <- terra::resample(spatial_field, self$get_data('prediction')[[1]])
+                    spatial_field <- terra::mask(spatial_field, self$get_data('prediction')[[1]])
                   }
 
                   # -- #

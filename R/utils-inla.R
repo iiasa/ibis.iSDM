@@ -362,7 +362,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 
 #' Mesh to polygon script
 #' @param mesh [`inla.mesh`] mesh object.
-#' @returns A [`sf`] object
+#' @returns A [`sf`] object.
 #' @keywords utils
 #' @noRd
 mesh_as_sf <- function(mesh) {
@@ -406,7 +406,8 @@ mesh_boundary <- function(mesh){
 
 #' Create a barrier representation of a mesh
 #'
-#' Work in progress for creating a physical barrier model for INLA
+#' @description
+#' **Work in progress* Creating a physical barrier model for INLA
 #'
 #' @param mesh A [`inla.mesh`] object.
 #' @param region.poly A [`SpatialPolygons`] object.
@@ -452,7 +453,7 @@ mesh_barrier <- function(mesh, region.poly){
 #' @param mesh A [`inla.mesh`] object.
 #' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
 #' @keywords utils
-#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh
+#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
 #' @noRd
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
@@ -466,7 +467,7 @@ coords_in_mesh <- function(mesh, coords) {
   } else if(inherits(coords, 'sf')){
     loc <- sf::st_coordinates(coords)
   } else if(inherits(coords, 'matrix') || inherits(coords, 'data.frame') ){
-    assertthat::assert_that(ncol(coords)==2,msg = 'Supplied coordinate matrix is larger than 2 columns.')
+    assertthat::assert_that(ncol(coords)==2, msg = 'Supplied coordinate matrix is larger than 2 columns.')
     loc <- coords[,c(1,2)]
   }
   loc <- as.matrix(loc)
@@ -492,8 +493,8 @@ coords_in_mesh <- function(mesh, coords) {
 #' @param mesh x A [`distribution`] object used for fitting an [`INLA`] model.
 #' @param mod A trained [`distribution`] model.
 #' @param type The summary statistic to use.
-#' @param backtransf Either NULL or a function
-#' @param coords A [matrix] with coordinates or NULL. If NULL coordinates are recreated from predictors
+#' @param backtransf Either NULL or a function.
+#' @param coords A [matrix] with coordinates or \code{NULL}. If \code{NULL} coordinates are recreated from predictors.
 #' @keywords utils
 #' @noRd
 coef_prediction <- function(mesh, mod, type = 'mean',
@@ -546,7 +547,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
       preds[[val]] <- 1
     }
   }
-  temp = rasterFromXYZ(coords,crs = projection(mesh$crs))
+  temp = terra::rast(coords, type = "xyz")
 
   # remake the A matrix for prediction
   Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
@@ -577,7 +578,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
       # Recalculate average predictors for new coordinates
       ofs <- get_ngbvalue(coords = coords,
                             env = ofs,
-                            longlat = isLonLat(mesh$crs),
+                            longlat = terra::is.lonlat(mesh$crs),
                             field_space = c('x','y'))
     }
     # ofs[is.na(ofs[,3]),3] <- 0
@@ -586,9 +587,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 
   # Fill output raster
   temp[] <- out[, 1]
-  if(!is.null(backtransf)){
-    temp <- raster::calc(temp, backtransf)
-  }
+  if(!is.null(backtransf)) temp <- terra::app(temp, backtransf)
   # plot(temp, col = cols)
   return( temp )
 }
@@ -596,9 +595,9 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 #' Direct prediction by posterior simulation
 #'
 #' @param mod A trained distribution model.
-#' @param nsamples [`numeric`] on the number of samples to be taken from the posterior
+#' @param nsamples [`numeric`] on the number of samples to be taken from the posterior.
 #' @param backtransf Either \code{NULL} or a function.
-#' @param seed A random seed that can be specified
+#' @param seed A random seed that can be specified.
 #' @keywords utils
 #' @noRd
 post_prediction <- function(mod, nsamples = 100,
@@ -616,6 +615,8 @@ post_prediction <- function(mod, nsamples = 100,
     is.numeric(seed) || is.null(seed),
     msg = 'Not all data and parameters needed for prediction are present!'
   )
+  check_package("inlabru")
+
   # Get data from object #
   model <- mod$get_data('fit_best')
   mesh <- mod$get_data('mesh')
@@ -651,14 +652,6 @@ post_prediction <- function(mod, nsamples = 100,
   )
 
   # inlabru extract entries function and names standardization functions
-  extract.entries <- function (name, smpl) {
-    ename <- gsub("\\.", "\\\\.", name)
-    ename <- gsub("\\(", "\\\\(", ename)
-    ename <- gsub("\\)", "\\\\)", ename)
-    ptn <- paste("^", ename, "[\\:]*[\\.]*[0-9]*[\\.]*[0-9]*$",
-                 sep = "")
-    return(smpl[grep(ptn, rownames(smpl))])
-  }
   standardise.names <- function (x) {
     new_names <- vapply(x, function(x) {
       gsub("[-() ]", "_", x = x, fixed = FALSE)
@@ -682,7 +675,7 @@ post_prediction <- function(mod, nsamples = 100,
 
     # Extract simulated predictor and fixed effects
     for (name in unique(c("Predictor", preds_names))) {
-      vals[[name]] <- extract.entries(name, smpl.latent)
+      vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
     }
     # Remove any variables with no values (removed during model fit)
     vals <- vals[which(lapply(vals, length)>0)]
@@ -704,7 +697,7 @@ post_prediction <- function(mod, nsamples = 100,
     if (length(model$summary.random) > 0) {
       for (k in seq_along(model$summary.random)) {
         name <- unlist(names(model$summary.random[k]))
-        vals[[name]] <- extract.entries(name, smpl.latent)
+        vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
       }
     }
     if (length(smpl.hyperpar) > 0) {
@@ -723,7 +716,7 @@ post_prediction <- function(mod, nsamples = 100,
   A <- inlabru:::amatrix_eval(model, data = preds)
   A <- x$engine$data$stk_pred$stk_proj$A
 
-  effects <- evaluate_effect_multi(
+  effects <- inlabru:::evaluate_effect_multi_state(
     model$effects[included],
     state = vals,
     data = preds,
@@ -758,20 +751,16 @@ post_prediction <- function(mod, nsamples = 100,
     if (inherits(x, "SpatialPixels") && !inherits(x, "SpatialPixelsDataFrame")) {
       result <- sp::SpatialPixelsDataFrame(x, data = data)
     }
-    else if (inherits(x, "SpatialGrid") && !inherits(x,
-                                                     "SpatialGridDataFrame")) {
+    else if (inherits(x, "SpatialGrid") && !inherits(x, "SpatialGridDataFrame")) {
       result <- sp::SpatialGridDataFrame(x, data = data)
     }
-    else if (inherits(x, "SpatialLines") && !inherits(x,
-                                                      "SpatialLinesDataFrame")) {
+    else if (inherits(x, "SpatialLines") && !inherits(x, "SpatialLinesDataFrame")) {
       result <- sp::SpatialLinesDataFrame(x, data = data)
     }
-    else if (inherits(x, "SpatialPolygons") && !inherits(x,
-                                                         "SpatialPolygonsDataFrame")) {
+    else if (inherits(x, "SpatialPolygons") && !inherits(x, "SpatialPolygonsDataFrame")) {
       result <- sp::SpatialPolygonsDataFrame(x, data = data)
     }
-    else if (inherits(x, "SpatialPoints") && !inherits(x,
-                                                       "SpatialPointsDataFrame")) {
+    else if (inherits(x, "SpatialPoints") && !inherits(x, "SpatialPointsDataFrame")) {
       result <- sp::SpatialPointsDataFrame(x, data = data)
     }
     else if (inherits(x, "Spatial")) {
@@ -882,10 +871,10 @@ post_prediction <- function(mod, nsamples = 100,
     # Recalculate average predictors for new coordinates
     preds <- get_ngbvalue(coords = coords,
                           env = preds,
-                          longlat = isLonLat(mesh$crs),
+                          longlat = terra::is.lonlat(mesh$crs),
                           field_space = c('x','y'))
   }
-  temp = rasterFromXYZ(coords)
+  temp = terra::rast(coords, type = "xyz")
 
   # remake the A matrix for prediction
   Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
@@ -916,7 +905,7 @@ post_prediction <- function(mod, nsamples = 100,
       # Recalculate average predictors for new coordinates
       ofs <- get_ngbvalue(coords = coords,
                           env = ofs,
-                          longlat = isLonLat(mesh$crs),
+                          longlat = terra::is.lonlat(mesh$crs),
                           field_space = c('x','y'))
     }
     out <- out + ofs[,"spatial_offset"]
@@ -925,18 +914,18 @@ post_prediction <- function(mod, nsamples = 100,
   # Fill output raster
   temp[] <- out[, 1]
   if(!is.null(backtransf)){
-    temp <- raster::calc(temp, backtransf)
+    temp <- terra::app(temp, backtransf)
   }
   # plot(temp, col = cols)
   return( temp )
 }
 
 #' Make Integration stack
-#' @param mesh The background projection mesh
-#' @param mesh.area The area of the mesh, has to match the number of integration points
+#' @param mesh The background projection mesh.
+#' @param mesh.area The area of the mesh, has to match the number of integration points.
 #' @param model A prepared model object.
 #' @param id A id supplied to name this object.
-#' @param joint Whether a model with multiple likelihood functions is to be specified
+#' @param joint Whether a model with multiple likelihood functions is to be specified.
 #' @keywords utils, internal
 #' @noRd
 inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALSE){
@@ -997,23 +986,25 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 
 #' Create a projection stack
 #'
-#' @param stk_resp A inla stack object
+#' @param stk_resp A inla stack object.
 #' @param model A prepared model object.
-#' @param mesh The background projection mesh
-#' @param mesh.area The area calculate for the mesh
-#' @param type Name to use
-#' @param spde An spde field if specified
-#' @param res Approximate resolution to the projection grid (default: null)
-#' @param settings A settings object
-#' @param joint Whether more than 2 likelihoods are estimated
+#' @param mesh The background projection mesh.
+#' @param mesh.area The area calculate for the mesh.
+#' @param type Name to use.
+#' @param background A [`sf`] formatted background layer.
+#' @param spde An spde field if specified.
+#' @param res Approximate resolution to the projection grid (default: \code{NULL}).
+#' @param settings A settings object.
+#' @param joint Whether more than 2 likelihoods are estimated.
 #' @keywords utils, internal
 #' @noRd
-inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
+inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, background,
                                        res = NULL, spde = NULL, settings = NULL,joint = FALSE){
   # Security checks
   assertthat::assert_that(
     inherits(stk_resp, 'inla.data.stack'),
     inherits(mesh,'inla.mesh'),
+    is.numeric(mesh.area),
     is.character(type),
     is.null(spde)  || 'spatial.field1' %in% names(spde),
     is.logical(joint)
@@ -1043,8 +1034,10 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
                                   dims = Nxy)
   )
 
+  if(!inherits(background, "sf")) background <- sf::st_as_sf( background )
+
   # Buffer the region to be sure
-  suppressWarnings( background.g <- rgeos::gBuffer(methods::as(background,'Spatial'), width = 0) )
+  suppressMessages( suppressWarnings( background.g <- sf::st_buffer( background, dist = 0) ) )
   # # Get and append coordinates from each polygon
   # background.bdry <- unique(
   #   do.call('rbind', lapply(background.g@polygons[[1]]@Polygons, function(x) return(x@coords) ) )
@@ -1054,20 +1047,26 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
   #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  # projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  assertthat::assert_that(inherits(projpoints, "sf"), nrow(projpoints)>0)
 
-  # TODO: Try and find an alternative to the splancs package to remove this dependent package
-  suppressWarnings(
-    cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
-                                       proj4string = methods::as(background.g,'Spatial')@proj4string),
-                               y = background.g))
+  suppressMessages(
+    suppressWarnings(
+    # cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
+    #                                    proj4string = methods::as(background.g,'Spatial')@proj4string),
+    #                            y = background.g))
+    check <- sf::st_intersects(projpoints, background.g)
+    )
   )
+  assertthat::assert_that(is.list(check))
+  # Get the intersecting cells/points
+  cellsIn <- which( sapply(check, function(z) length(z)>0) |> unlist() )
 
   # Check for multipolygon and align grid if necessary
-  if(inherits(cellsIn,'matrix')){
-    cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
-  } else { cellsIn <- which(cellsIn) }
-  assertthat::assert_that(length(cellsIn)>0)
+  # if(inherits(cellsIn,'matrix')){
+  #   cellsIn <- which(apply(cellsIn,1,function(x) any(x == TRUE)))
+  # } else { cellsIn <- which(cellsIn) }
+  # assertthat::assert_that(length(cellsIn)>0)
 
   # Get prediction coordinates
   predcoords <- projgrid$lattice$loc[cellsIn,]
@@ -1149,7 +1148,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type,
     # Note, order adding this is important apparently...
     # ll_effects[['Intercept']] <- rep(1, nrow(nearest_cov))
     ll_effects[['predictors']] <- nearest_cov
-    ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1,mesh$n) )
+    ll_effects[['spatial.field1']] <- list(spatial.field1 = seq(1, mesh$n) )
     # if(!is.null(spde)) ll_effects[['spatial.field']] <- c(ll_effects[['spatial.field']], spde)
 
     # Set A
@@ -1210,10 +1209,12 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
                                         ylim = range(bdry[,2]),
                                         dims = Nxy)
   # Convert background to buffered land
-  suppressWarnings(
-    background.g <- rgeos::gBuffer(methods::as(background,'Spatial'),
-                                   width = 0)
+  suppressMessages(
+    suppressWarnings(
+      background.g <- sf::st_buffer(methods::as(background, 'Spatial') |> sf::st_as_sf(),
+                                    dist = 0) |> methods::as("Spatial")
     )
+  )
   suppressWarnings(
     cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
                                                      proj4string = methods::as(background.g,'Spatial')@proj4string),
@@ -1237,7 +1238,7 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
   } else {
     preds <- get_ngbvalue(coords = predcoords,
                           env = cov,
-                          longlat = raster::isLonLat(background),
+                          longlat = terra::is.lonlat(background),
                           field_space = c('x','y'))
   }
 
@@ -1263,9 +1264,9 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
 
 #' Tidy up summary information from a INLA model
 #'
-#' @param m A trained INLA model object
-#' @param what A [`character`]
-#' @param ... Other options to based on
+#' @param m A trained INLA model object.
+#' @param what A [`character`].
+#' @param ... Other options to based on.
 #' @keywords utils
 #' @noRd
 #TODO: Lot more to add here, including options on what to extract
@@ -1293,8 +1294,8 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
 }
 
 #' Plot marginal distributions of effects or hyperparameters from INLA model
-#' @param A INLA model
-#' @param what Either 'fixed' or 'hyper'
+#' @param A INLA model.
+#' @param what Either \code{'fixed'} or \code{'hyper'}.
 #' @keywords utils
 #' @noRd
 plot_inla_marginals = function(inla.model, what = 'fixed'){

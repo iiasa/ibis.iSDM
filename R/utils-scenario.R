@@ -5,7 +5,7 @@
 #' between 2010 and 2020 are filled with data for 2010, 2011, 2012, etc.
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events should be interpolated. See [`project()`].
-#' @return [`logical`] indicating if the two [`Raster-class`] objects have the same
+#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same.
 #' @keywords scenario
 #' @noRd
 approximate_gaps <- function(env, date_interpolation = "annual"){
@@ -17,7 +17,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
   date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
   if(date_interpolation=="none") return(env)
 
-  stop("Still in progress")
+  stop("Functionality still work in progress")
   # --- #
   # Get individual time steps at interval
   times <- stars::st_get_dimension_values(env, which = names(dim(env))[3], center = TRUE)
@@ -147,13 +147,13 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
 #'
 #' @description
 #' This is a small helper function to convert a [`stars`] object
-#' to a [`Raster`] object. It is possible to select the time frame as well.
+#' to a [`SpatRaster`] object. It is possible to select the time frame as well.
 #' If multiple \code{"which"} entries are specified, then a [`list`] will be returned.
 #' @param obj A [`stars`] object with a \code{"time"} dimension at least.
 #' @param which The time entry to use for subsetting. Can be single [`numeric`] or a [`vector`]
 #' of numeric time entries corresponding to the time dimension (Default: \code{NULL}).
-#' @param template An optional [`Raster`] template to which the output should be aligned too.
-#' @returns A [`list`] containing [`Raster`] objects.
+#' @param template An optional [`SpatRaster`] template to which the output should be aligned too.
+#' @returns A [`list`] containing [`SpatRaster`] objects.
 #' @keywords scenario, internal
 stars_to_raster <- function(obj, which = NULL, template = NULL){
   assertthat::assert_that(
@@ -178,35 +178,37 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   for(tt in which){
     # Slice to a specific time frame for each
     o <- obj |> stars:::slice.stars({{time_band}}, tt) |>
-      methods::as("Raster")
+      terra::rast() # Or alternatively rast
 
     # Reset times to the correct ones
-    o <- raster::setZ(o, rep(times[tt], raster::nlayers(o)))
+    terra::time(o) <- as.Date( rep(times[tt], terra::nlyr(o)) )
 
     # Now transform the out put if template is set
     if(!is.null(template)){
       if(is.Raster(template)){
         # Check again if necessary to rotate
-        if(!raster::compareCRS(o, template)){
-          o <- raster::projectRaster(from = o, crs = template, method = "ngb")
+        if(sf::st_crs(o) != sf::st_crs(template)){
+          o <- terra::project(x = o, y = template, method = "near")
           names(o) <- names(obj)
         }
         # Now crop and resample to target extent if necessary
-        if(!compareRaster(o, template, stopiffalse = FALSE)){
-          o <- raster::crop(o, template)
+        if(!terra::compareGeom(o, template, stopOnError = FALSE)){
+          o <- terra::crop(o, template)
           o2 <- try({alignRasters(data = o,
                                   template = template,
-                                  method = "ngb",
-                                  func = "mean", cl = FALSE)
+                                  method = "near",
+                                  func = "mean",
+                                  cl = FALSE)
           },silent = TRUE)
           if(inherits(o2,"try-error")){
-            o <- raster::resample(o, template,
-                                  method = "ngb")
+            o <- terra::resample(o, template,
+                                 method = "near",
+                                 threads = getOption("ibis.nthread"))
           } else { o <- o2; rm(o2)}
         }
       }
     } # End of template adjustments
-    out[[paste0("time",times[tt])]] <- o
+    out[[paste0("time", times[tt])]] <- o
   }
   return( out )
 }
@@ -214,9 +216,14 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
 #' Converts a raster object to stars
 #'
 #' @description
-#' This is a small helper function to convert a to a [`Raster`] object.
-#' @param obj A [`Raster`] object with a \code{"time"} dimension at least (checked via [`getZ`]).
-#' @returns A [`stars`] object with the formatted data
+#' This is a small helper function to convert a to a [`SpatRaster`] object.
+#' @param obj A [`SpatRaster`] object with a \code{"time"} dimension at least (checked via [`time`]).
+#' @returns A [`stars`] object with the formatted data.
+#' @examples
+#' \dontrun{
+#'  # Convert stars to SpatRaster
+#'  stars_to_raster(obj)
+#' }
 #' @seealso `stars_to_raster`
 #' @keywords scenario, internal
 raster_to_stars <- function(obj){
@@ -224,24 +231,23 @@ raster_to_stars <- function(obj){
     is.Raster(obj)
   )
   # Check that time dimension exist
-  assertthat::assert_that( !is.null( raster::getZ(obj) ),
+  assertthat::assert_that( !is.null( terra::time(obj) ),
                            msg = "The supplied object requires a z dimension! Preferably provide a stars object.")
-  assertthat::assert_that(!is.na(raster::crs(obj)),
+  assertthat::assert_that(!is.na(terra::crs(obj)),
                            msg = "Uniform projection for input raster is missing!")
 
   # Get time dimension
-  times <- raster::getZ(obj)
-  if(!all(inherits(times,"Date"))) times <- as.Date(times)
-  prj <- sf::st_crs(raster::crs(obj))
+  times <- terra::time(obj)
+  if(!all(inherits(times, "Date"))) times <- as.Date(times)
+  prj <- sf::st_crs( terra::crs(obj) )
 
   # Convert to RasterStack and reset time dimension
-  obj <- raster::stack(obj)
-  obj <- raster::setZ(obj, times)
+  terra::time(obj) <- times
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 
   # Convert to stars step by step
   new_env <- list()
-  for(i in 1:raster::nlayers(obj)){
+  for(i in 1:terra::nlyr(obj)){
     suppressWarnings(  o <- stars::st_as_stars(obj[[i]]) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
@@ -261,27 +267,27 @@ raster_to_stars <- function(obj){
   return(new_env)
 }
 
-#' This function add layers from a RasterStack to a stars object
+#' This function add layers from a SpatRaster to a stars object
 #'
 #' @description
 #' Often it is necessary to add static variables to existing stars objects.
 #' These will be replicated across the time dimension. This function is a small helper function
 #' that allows the addition of said raster stacks to a stars object.
 #' @param obj A [`stars`] object with a time dimension (\code{"time"}).
-#' @param new A [`RasterStack`] object with additional covariates to be added.
-#' @returns A [`stars`] object with the names of the [`Raster`] object added.
+#' @param new A [`SpatRaster`] object with additional covariates to be added.
+#' @returns A [`stars`] object with the names of the [`SpatRaster`] object added.
 #' @keywords scenario, internal
 st_add_raster <- function(obj, new){
   assertthat::assert_that(
     inherits(obj, "stars"),
     is.Raster(new),
-    raster::nlayers(new) >= 1
+    terra::nlyr(new) >= 1
   )
 
   # Check whether there are any variables in the stars object already, if so drop
   if(any(names(new) %in% names(obj))){
     myLog("[Starting]", "yellow", "Duplicate variables in stars and new objects.")
-    new <- raster::dropLayer(new, which( names(new) %in% names(obj) ) )
+    new <- new[[ which( names(new) %in% names(obj)) ]]
   }
 
   full_dims <- stars::st_dimensions(obj)
@@ -291,7 +297,7 @@ st_add_raster <- function(obj, new){
 
   # Now loop through each layer and add it to the target file
   for(lyr in names(new)){
-    s <- raster::stack(replicate(length(times), new[[lyr]])) |>
+    s <- terra::rast(replicate(length(times), new[[lyr]])) |>
       stars::st_as_stars()
     names(s) <- lyr
 
@@ -401,7 +407,13 @@ summarise_change <- function(scenario){
   assertthat::assert_that(
     inherits(scenario, "stars")
   )
+  # Check that geosphere is installed and loaded
   check_package("geosphere")
+  if(!("geosphere" %in% loadedNamespaces()) || ('geosphare' %notin% utils::sessionInfo()$otherPkgs) ) {
+    try({requireNamespace('geosphere');attachNamespace("geosphere")},silent = TRUE)
+  } else {
+    if(getOption("ibis.setupmessages")) myLog("[Summary]","red","This summary function requires the geosphere package.")
+  }
 
   # Get the current and future
   ss <- stars_to_raster(scenario)
@@ -419,7 +431,7 @@ summarise_change <- function(scenario){
     ar_unit <- "ha"
     mult <- 0.0001
   } else { mult <- 1}
-  ar <- methods::as(ar, "Raster")
+  ar <- terra::rast(ar) # or sds if that one fails
 
   # --- #
   val <- c("Current range", "Future range", "Unsuitable",
@@ -431,22 +443,23 @@ summarise_change <- function(scenario){
                                   times[length(times)] |> as.character(), rep(paste0(times_length, " years"), 11 ) ),
                        value = NA,
                        unit = c(rep(ar_unit,6), "%", "%", ar_unit, "%", "similarity", NA, "deg"))
-  change$value[1] <- raster::cellStats((current) * raster::area(current), "sum") * mult
-  change$value[2] <- raster::cellStats((future) * raster::area(future), "sum") * mult
+  change$value[1] <- terra::global((current) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
+  change$value[2] <- terra::global((future) * terra::cellSize(future, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
+  assertthat::assert_that(is.numeric(change$value))
 
   # Check that is binary thresholded
-  rr <- raster::overlay(current, future, fun = function(x, y){x + y * 2})
-  change$value[3] <- raster::cellStats((rr == 0) * raster::area(current), "sum") * mult
-  change$value[4] <- raster::cellStats((rr == 1) * raster::area(current), "sum") * mult
-  change$value[5] <- raster::cellStats((rr == 2) * raster::area(current), "sum") * mult
-  change$value[6] <- raster::cellStats((rr == 3) * raster::area(current), "sum") * mult
+  rr <- terra::lapp(c(current, future), fun = function(x, y){x + y * 2})
+  change$value[3] <- terra::global((rr == 0) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
+  change$value[4] <- terra::global((rr == 1) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
+  change$value[5] <- terra::global((rr == 2) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
+  change$value[6] <- terra::global((rr == 3) * terra::cellSize(current, unit = "km"), "sum", na.rm = TRUE)[,1] * mult
   change$value[7] <- change$value[4] / change$value[1] * 100
   change$value[8] <- change$value[5] / change$value[1] * 100
   change$value[9] <- change$value[2] - change$value[1]
   change$value[10] <- change$value[9] / sum(c(change$value[3], change$value[4])) * 100
 
   # Sorensen similarity index
-  change$value[11] <- 2 * raster::cellStats(rr == 3, "sum") / (raster::cellStats(current, "sum") + raster::cellStats(future, "sum"))
+  change$value[11] <- 2 * terra::global(rr == 3, "sum", na.rm = TRUE)[,1] / (terra::global(current, "sum", na.rm = TRUE)[,1] + terra::global(future, "sum", na.rm = TRUE)[,1])
 
   # Calculate distance between centroids
   sf1 <- calculate_range_centre(current, spatial = TRUE)
@@ -472,7 +485,7 @@ summarise_change <- function(scenario){
 #' The reprojection of WGS84 currently fails due to some unforeseen bug.
 #' This function is meant to reproject back the lasyer
 #' @param obj A ['stars'] object to be clipped and cropped.
-#' @param template A ['Raster'] or ['sf'] object to which the object should be projected.
+#' @param template A ['SpatRaster'] or ['sf'] object to which the object should be projected.
 #' @keywords internal, scenario
 #' @noRd
 hack_project_stars <- function(obj, template){
@@ -481,14 +494,14 @@ hack_project_stars <- function(obj, template){
     is.Raster(template) || inherits(template, "sf")
   )
   # Get tempdir
-  td <- raster::tmpDir()
+  td <- terra::terraOptions(print = FALSE)[['tempdir']]
 
   # Get resolution
   bg <- stars::st_as_stars(template)
 
   # Get full dis
   full_dis <- stars::st_dimensions(obj)
-  assertthat::assert_that(length(full_dis)<=3,msg = "Stars object can only have x,y,z dimension.")
+  assertthat::assert_that(length(full_dis)<=3, msg = "Stars object can only have x,y,z dimension.")
 
   # Output
   out <- c()
@@ -500,8 +513,8 @@ hack_project_stars <- function(obj, template){
       gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
                           dstfile = file.path(td, "ReprojectedStars_temp.tif"),
                           s_srs = "EPSG:4296",
-                          tr = raster::res(template),
-                          te = raster::bbox(template),
+                          tr = terra::res(template),
+                          te = terra::ext(template) |> st_bbox(),
                           t_srs = sp::proj4string(template))
     )
     oo <- stars::read_stars(file.path(td, "ReprojectedStars_temp.tif"),proxy = F)
@@ -537,9 +550,9 @@ hack_project_stars <- function(obj, template){
 
 #' Quick handy function to calculate an area-weighted centre of a range
 #'
-#' @param layer A [`RasterLayer`] or [`sf`] object for which the centre of the range is to be calculated.
+#' @param layer A [`SpatRaster`] or [`sf`] object for which the centre of the range is to be calculated.
 #' If the distribution is continuous, then the centre is calculated as the value centre to all non-NA values.
-#' @param spatial A [`logical`] of whether outputs should be returned as spatial
+#' @param spatial A [`logical`] of whether outputs should be returned as spatial.
 #' @keywords scenario, internal
 #' @noRd
 calculate_range_centre <- function(layer, spatial = TRUE) {
@@ -550,15 +563,15 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
   # If layer is a raster
   if(is.Raster(layer)){
     assertthat::assert_that(
-      length( unique(layer) ) == 2,
-      raster::cellStats(layer, 'max') == 1
+      length( unique(layer)[,1] ) == 2,
+      terra::global(layer, 'max', na.rm = TRUE) == 1
     )
     # Calculate area-weighted centre
-    r_wt <- raster::area(layer)
+    r_wt <- terra::cellSize(layer, unit = "km")
     values(r_wt)[is.na(values(layer))] <- NA
 
     # Make a spatial point layer
-    spdf <- raster::rasterToPoints( raster::stack(layer, r_wt), spatial = TRUE) |> sf::st_as_sf()
+    spdf <- terra::as.points( c(layer, r_wt)) |> sf::st_as_sf()
     spdf <- spdf[which(spdf[[1]]>0), ] # Get only non-zero values
 
     if(is.na(sf::st_crs(spdf))) stop("Unprojected layer found. Check projections throughout!")

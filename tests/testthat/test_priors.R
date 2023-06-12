@@ -172,15 +172,15 @@ test_that('Add and modify priors to existing object', {
   skip_on_cran()
   skip_on_ci()
 
-  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   options("ibis.setupmessages" = FALSE)
 
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE), 'points',quiet = TRUE)
   ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
 
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   # Create list of priors
   pp <- priors( INLAPrior(variable = 'CLC3_132_mean_50km',type = 'normal',
@@ -258,4 +258,8 @@ test_that('Add and modify priors to existing object', {
   # Now reverse and add again. Should still be 2 priors
   x <- x |> add_priors(priors(spde2, spde1))
   expect_equal(x$priors$length(), 2)
+
+  # Summarize priors
+  pp <- x$get_priors()
+  expect_s3_class(summary(pp), "data.frame")
 })

@@ -9,7 +9,7 @@ myLog(title = "[Processing]", col = "green", ...)
 \arguments{
 \item{title}{The title in the log output}
 
-\item{col}{A \code{\link{character}} indicating the text colour to be used. Supported are 'green' / 'yellow' / 'red'}
+\item{col}{A \code{\link{character}} indicating the text colour to be used. Supported are \code{'green'} / \code{'yellow'} / \code{'red'}}
 
 \item{...}{Any additional outputs or words for display}
 }

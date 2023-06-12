@@ -58,9 +58,9 @@ engine_breg <- function(x,
   # Create a background raster
   if(is.Waiver(x$predictors)){
     # Create from background
-    template <- raster::raster(
-      ext = raster::extent(x$background),
-      crs = raster::projection(x$background),
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
       res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
               diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
       )
@@ -71,7 +71,7 @@ engine_breg <- function(x,
   }
 
   # Burn in the background
-  template <- raster::rasterize(x$background, template, field = 0)
+  template <- terra::rasterize(x$background, template, field = 0)
 
   # Set up the parameter list
   params <- list(
@@ -154,7 +154,7 @@ engine_breg <- function(x,
         if(fam == "poisson"){
           # Get background layer
           bg <- self$get_data("template")
-          assertthat::assert_that(!is.na(cellStats(bg,min)))
+          assertthat::assert_that(!is.na( terra::global(bg, "min", na.rm = TRUE)[,1] ))
 
           # Add pseudo-absence points
           presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
@@ -203,7 +203,7 @@ engine_breg <- function(x,
             names(ofs)[which(names(ofs)==names(model$offset_object))] <- "spatial_offset"
             # ofs <- get_ngbvalue(coords = df[,c('x','y')],
             #                     env =  model$offset,
-            #                     longlat = raster::isLonLat(bg),
+            #                     longlat = terra::is.lonlat(bg),
             #                     field_space = c('x','y')
             # )
             model$biodiversity[[1]]$offset <- ofs
@@ -221,7 +221,7 @@ engine_breg <- function(x,
           model$biodiversity[[1]]$expect <- w * (1/model$biodiversity[[1]]$expect)
 
           # Rasterize observed presences
-          pres <- raster::rasterize(model$biodiversity[[1]]$observations[,c("x","y")],
+          pres <- terra::rasterize( guess_sf( model$biodiversity[[1]]$observations[,c("x","y")] ),
                                     bg, fun = 'count', background = 0)
           # Get for the full dataset
           w_full <- ppm_weights(df = model$predictors,
@@ -496,15 +496,15 @@ engine_breg <- function(x,
           assertthat::assert_that(is.data.frame(out), nrow(out)>0,
                                   msg = "Something went wrong withe prediction. Output empty!")
           # Fill output with summaries of the posterior
-          stk <- raster::stack()
+          stk <- terra::rast()
           for(v in colnames(out)){
             temp <- emptyraster(prediction)
             temp[full_sub$rowid] <- out[,v]
             names(temp) <- v
-            stk <- raster::addLayer(stk, temp)
+            suppressWarnings( stk <- c(stk, temp) )
           }
           prediction <- stk;rm(stk)
-          prediction <- raster::mask(prediction, self$get_data("template"))
+          prediction <- terra::mask(prediction, self$get_data("template"))
           try({rm(out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done

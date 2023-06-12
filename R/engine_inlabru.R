@@ -29,6 +29,8 @@ NULL
 #' created.
 #'
 #' Priors can be set via [INLAPrior].
+#' @note
+#' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
@@ -48,6 +50,7 @@ NULL
 #' @references
 #' * Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
+#' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
 #' @returns An [engine].
@@ -109,7 +112,7 @@ engine_inlabru <- function(x,
     # Load a provided on
     mesh <- optional_mesh
     # Security check for projection and if not set, use the one from background
-    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( proj4string(region.poly) )
+    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
 
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
@@ -253,12 +256,12 @@ engine_inlabru <- function(x,
             dims = c(300, 300)
           )
           # Convert to raster stack
-          out <- raster::stack(
+          out <- terra::rast(
             sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                        proj4string = self$get_data('mesh')$crs )
+                                        proj4string = terra::crs(self$get_data('mesh')$crs) )
           )
 
-          raster::plot(out[[c('sd','sd.dev','edge.len')]],
+          terra::plot(out[[c('sd','sd.dev','edge.len')]],
                        col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
           )
         } else {
@@ -890,17 +893,16 @@ engine_inlabru <- function(x,
             )
           )
           pred_bru$cv <- pred_bru$sd / pred_bru$mean
+          # Convert to raster if not set already
+          if(!is.Raster(pred_bru)) pred_bru <- terra::rast(pred_bru)
+
           # Get only the predicted variables of interest
           if(utils::packageVersion("inlabru") <= '2.5.2'){
             # Older version where probs are ignored
-            prediction <- raster::stack(
-              pred_bru[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
-            )
+            prediction <- subset(pred_bru, c("mean","sd","q0.025", "median", "q0.975", "cv"))
             names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
           } else {
-            prediction <- raster::stack(
-              pred_bru[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
-            )
+            prediction <- subset(pred_bru, c("mean","sd","q0.05", "q0.5", "q0.95", "cv") )
             names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
           }
 
@@ -1012,12 +1014,12 @@ engine_inlabru <- function(x,
             # Get only the predicted variables of interest
             if(utils::packageVersion("inlabru") <= '2.5.2'){
               # Older version where probs are ignored
-              out <- raster::stack(
+              out <- terra::rast(
                 out[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
               )
               names(out) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
             } else {
-              out <- raster::stack(
+              out <- terra::rast(
                 out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
               )
               names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
@@ -1170,13 +1172,13 @@ engine_inlabru <- function(x,
             if(utils::packageVersion("inlabru") <= '2.5.2'){
               # Older version where probs are ignored
               return(
-                raster::stack(
+                terra::rast(
                   pred_cov[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
                 )
               )
             } else {
               return(
-                raster::stack(
+                terra::rast(
                   pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
                 )
               )
@@ -1233,7 +1235,7 @@ engine_inlabru <- function(x,
               )
 
               # Convert to raster stack
-              lambda <- raster::stack(lambda)
+              lambda <- terra::rast(lambda)
 
               # Also get SPDE posteriors of the matern correlation and coveriance function
               corplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +

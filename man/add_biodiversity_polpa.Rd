@@ -48,7 +48,7 @@ one dataset is added. A \code{\link{vector}} is also supported but must be of th
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation.}
 
-\item{simulate_bias}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
+\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
 \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}

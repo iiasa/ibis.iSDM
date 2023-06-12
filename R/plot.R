@@ -7,7 +7,7 @@ NULL
 #' Plots information from a given object where a plotting object is available.
 #'
 #' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection], [PredictorDataset] or [BiodiversityScenario].
-#' @param what In case a [RasterLayer] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
+#' @param what In case a [SpatRaster] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
 #' @param ... Further arguments passed on to \code{x$plot}.
 #'
 #' @details
@@ -79,7 +79,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' the output of an [`ensemble()`] call. In both cases, users have to make sure that \code{"xvar"} and
 #' \code{"yvar"} are set accordingly.
 #'
-#' @param mod A trained [`DistributionModel`] or alternatively a [`Raster`] object with \code{prediction} model within.
+#' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`] object with \code{prediction} model within.
 #' @param xvar A [`character`] denoting the value on the x-axis (Default: \code{'mean'}).
 #' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted (Default: \code{TRUE})?
@@ -120,10 +120,10 @@ methods::setMethod(
     )
     # Check whether object is a raster, otherwise extract object
     if(is.Raster(mod)){
-      assertthat::assert_that(raster::nlayers(mod)>1)
+      assertthat::assert_that(terra::nlyr(mod)>1)
       obj <- mod
       # If number of layers equal to 2 (output from ensemble?), change xvar and yvar
-      if(raster::nlayers(mod)==2 && !(xvar %in% names(obj))){
+      if(terra::nlyr(mod)==2 && !(xvar %in% names(obj))){
         if(getOption('ibis.setupmessages')) myLog('[Parameter]','yellow','Variable not found. Changing to layer names...')
         xvar <- names(obj)[1]; yvar <- names(obj)[2]
       }
@@ -172,7 +172,7 @@ methods::setMethod(
 
     # Create data for plotting
     df <- obj[[c(xvar,yvar)]] |> predictor_transform(option = "norm") |>
-      raster::as.data.frame(xy = TRUE)
+      terra::as.data.frame(xy = TRUE)
     names(df)[3:4] <- c("var1", "var2")
     suppressWarnings(
       df <- biscale::bi_class(df, x = var1, y = var2, dim = 3, style = "quantile")
@@ -206,4 +206,3 @@ methods::setMethod(
     return(finalPlot)
   }
 )
-

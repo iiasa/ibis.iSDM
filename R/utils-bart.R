@@ -83,8 +83,8 @@ varimp.bart <- function(model){
 #' Partial effects for bart models adapted from embarcadero package
 #'
 #' @param model A fitted [dbarts::bart] model.
-#' @param envs A [`raster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: \code{All}).
+#' @param envs A [`SpatRaster`] stack of predictors used in the model.
+#' @param x.vars The predictor variables to be mapped (Default: \code{"All"}).
 #' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
 #' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
 #' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response was not binomial.
@@ -93,7 +93,17 @@ varimp.bart <- function(model){
 #' @concept Function taken and adapted from the [embarcadero] package.
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-#' @return A [`Raster`] layer containing the partial effect
+#' @examples
+#' \dontrun{
+#' mod <- distribution(background) |>
+#'           add_biodiversity(speciesdata) |>
+#'           add_predictors(covariates) |>
+#'           engine_bart()
+#'
+#' bart_partial_effect(mod, "bio01mean.tif")
+#'
+#' }
+#' @return A [`SpatRaster`] layer containing the partial effect
 #' @keywords utils
 #' @noRd
 bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
@@ -201,21 +211,22 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
 #' Spatial partial effects for bart models adapted from embarcadero package
 #'
 #' @param model A fitted [dbarts::bart] model.
-#' @param envs A [`raster`] stack of predictors used in the model.
+#' @param envs A [`SpatRaster`] stack of predictors used in the model.
 #' @param x.vars The predictor variables to be mapped (Default: All).
 #' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
 #' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
 #' @param transform Backtransform using pnorm or not. Set to FALSE if response was not Binomial.
 #' @concept Taken and adapted from embarcadero package.
-#' @references  Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-#' @return A [`raster`] layer containing the partial effect.
+#' @references
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' @return A [`SpatRaster`] layer containing the partial effect.
 #' @keywords utils
 #' @noRd
 bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(
     inherits(model,'bart'),
-    inherits(envs, 'Raster'),
+    is.Raster(envs),
     is.null(x.vars) || is.character(x.vars),
     is.logical(equal), is.numeric(smooth),
     is.logical(transform)
@@ -270,13 +281,13 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
         data.frame()
       colnames(dfbin) <- c("is", "becomes")
       dfbin$is <- as.numeric(as.character(dfbin$is))
-      if (is.Raster(envs) && (inherits(envs, "RasterStack") || inherits(envs, "RasterBrick")) ) {
+      if (is.Raster(envs) && (terra::nlyr(envs)>1) ) {
         lyrtmp <- envs[[pd$xlbs[[i]]]]
-        lyrtr <- raster::reclassify(lyrtmp, as.matrix(dfbin))
+        lyrtr <- terra::reclassify(lyrtmp, as.matrix(dfbin))
       } else if (inherits(envs, "list")) {
         lyrtr <- lapply(envs, function(x) {
         lyrtmp <- x[[pd$xlbs[[i]]]]
-          return(raster::reclassify(lyrtmp, as.matrix(dfbin)))
+          return(terra::reclassify(lyrtmp, as.matrix(dfbin)))
         })
       }
       if (exists("pdstack")) {
@@ -293,19 +304,17 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
       nmax <- length(df$x)
       xmeds <- (df$x[2:nmax] - df$x[1:(nmax - 1)])/2 + df$x[1:(nmax - 1)]
 
-      if (class(envs) %in% c("RasterStack", "RasterBrick")) {
+      if(is.Raster(envs) && terra::nlyr(envs)>1) {
         lyrtmp <- envs[[pd$xlbs[[i]]]]
-        xmat <- data.frame(from = c(min(cellStats(lyrtmp,
-                                                  min), min(df$x)), xmeds), to = c(xmeds, max(cellStats(lyrtmp,
-                                                                                                        max), max(df$x))), becomes = df$med)
-        lyrtr <- raster::reclassify(lyrtmp, xmat, include.lowest = TRUE)
+        xmat <- data.frame(from = c(min( terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
+                           to = c(xmeds, max( terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
+        lyrtr <- terra::reclassify(lyrtmp, xmat, include.lowest = TRUE)
       } else if (inherits(x = envs, what = "list")) {
         lyrtr <- lapply(envs, function(x) {
           lyrtmp <- x[[pd$xlbs[[i]]]]
-          xmat <- data.frame(from = c(min(cellStats(lyrtmp,
-                                                    min), min(df$x)), xmeds), to = c(xmeds, max(cellStats(lyrtmp,
-                                                                                                          max), max(df$x))), becomes = df$med)
-          return(raster::reclassify(lyrtmp, xmat, include.lowest = TRUE))
+          xmat <- data.frame(from = c(min(terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
+                             to = c(xmeds, max(terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
+          return(terra::reclassify(lyrtmp, xmat, include.lowest = TRUE))
         })
       }
       # Check if stack exists, otherwise create
@@ -318,6 +327,6 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
   }
   # Return the output
   if (exists("pdstack")) {
-    return(stack(pdstack))
+    return(pdstack)
   }
 }

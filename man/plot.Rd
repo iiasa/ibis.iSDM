@@ -24,7 +24,7 @@
 
 \item{...}{Further arguments passed on to \code{x$plot}.}
 
-\item{what}{In case a \link{RasterLayer} is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).}
+\item{what}{In case a \link{SpatRaster} is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).}
 }
 \value{
 Graphical output

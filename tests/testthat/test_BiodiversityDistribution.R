@@ -2,31 +2,29 @@
 test_that('Setting up a distribution model',{
   testthat::skip_on_cran()
   skip_if_not_installed('igraph')
-  skip_if_not_installed('rgeos')
 
   # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
   skip_if_not_installed("cmdstanr")
   skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
           message = "No cmdstan path")
 
-  suppressWarnings( requireNamespace("raster", quietly = TRUE) )
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   suppressWarnings( requireNamespace("sf", quietly = TRUE) )
-  suppressWarnings( requireNamespace("rgeos", quietly = TRUE) )
   suppressWarnings( requireNamespace("igraph", quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE)
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
   ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
   # Load them as rasters
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
   expect_equal(nrow(virtual_points), 208)
-  expect_equal(ncell(predictors), 7313)
+  expect_equal(terra::ncell(predictors), 7313)
 
   # Now set them one up step by step
   x <- distribution(background)
@@ -47,12 +45,12 @@ test_that('Setting up a distribution model',{
   expect_error(train(x)) # Try to solve without solver
 
   # And a range off
-  invisible( suppressWarnings( suppressMessages(x <- x |> add_offset_range(virtual_range))) )
-  expect_equal(x$get_offset(),'range_distance')
-  expect_s4_class(x$offset,'Raster')
+  invisible( suppressWarnings( suppressMessages(y <- x |> add_offset_range(virtual_range))) )
+  expect_equal(y$get_offset(),'range_distance')
+  expect_s4_class(y$offset,'SpatRaster')
 
   # remove again
-  x <- x$rm_offset()
+  x <- y$rm_offset()
   expect_true(is.Waiver( x$get_offset() ) )
 
   # Add Predictors
@@ -71,15 +69,29 @@ test_that('Setting up a distribution model',{
   expect_equal(x$get_predictor_names(), n)
 
   # Add brick object make derivatives
-  pb <- raster::brick(predictors)
-  x <- distribution(background) |> add_predictors(pb$aspect_mean_50km, derivates = 'quadratic')
+  x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'quadratic')
   testthat::expect_equal(x$predictors$length(),2)
-  x <- distribution(background) |> add_predictors(pb, derivates = c('quadratic','hinge'))
+  x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'hinge')
+  testthat::expect_equal(x$predictors$length(),5)
+  x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'bin')
+  testthat::expect_equal(x$predictors$length(),5)
+  x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'none')
+  testthat::expect_equal(x$predictors$length(),1)
+  x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'thresh')
+  testthat::expect_equal(x$predictors$length(),4)
+  # For interactions
+  expect_error( x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'interaction') )
+  expect_error( x <- distribution(background) |> add_predictors(predictors$aspect_mean_50km, derivates = 'interaction',int_variables = "aspect_mean_50km"))
+  x <- distribution(background) |> add_predictors(predictors, derivates = 'interaction',int_variables = c("aspect_mean_50km", "bio01_mean_50km"))
+  testthat::expect_equal(x$predictors$length(), terra::nlyr(predictors) + 1)
+
+  # Try multiple on all
+  x <- distribution(background) |> add_predictors(predictors, derivates = c('quadratic','hinge'))
   testthat::expect_equal(x$predictors$length(),84)
 
   # Interactions
-  suppressMessages( expect_error(x |> add_predictors(pb, derivates = "interaction")) )
-  suppressMessages(y <- (x |> add_predictors(pb, derivates = "interaction",int_variables = c(1,2)) ) )
+  suppressMessages( expect_error(x |> add_predictors(predictors, derivates = "interaction")) )
+  suppressMessages(y <- (x |> add_predictors(predictors, derivates = "interaction",int_variables = c(1,2)) ) )
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
@@ -99,8 +111,8 @@ test_that('Setting up a distribution model',{
   # ---- #
   # Check that all engines can be added with default options
   # Also add a zonal layer for limits
-  zones <- raster::ratify( predictors$koeppen_50km )
-  x <- distribution(background,limits = zones)
+  zones <- terra::as.factor( predictors$koeppen_50km )
+  x <- distribution(background, limits = zones)
   expect_s3_class(x$get_limits(), "sf")
 
   y <- x |> engine_bart()

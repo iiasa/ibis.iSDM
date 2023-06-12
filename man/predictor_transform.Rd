@@ -14,7 +14,7 @@ predictor_transform(
 )
 }
 \arguments{
-\item{env}{A \code{\link{Raster}} object.}
+\item{env}{A \code{\link{SpatRaster}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},
 \code{'scale'}, \code{'norm'}, \code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.}
@@ -28,12 +28,12 @@ predictor_transform(
 \item{...}{other options (Non specified).}
 }
 \value{
-Returns a adjusted \code{\link{Raster}} object of identical resolution.
+Returns a adjusted \code{\link{SpatRaster}} object of identical resolution.
 }
 \description{
-This function allows the transformation of provided environmental predictors (in \code{\link{Raster}} format).
+This function allows the transformation of provided environmental predictors (in \code{\link{SpatRaster}} format).
 A common use case is for instance the standardization (or scaling) of all predictors prior to model fitting.
-This function works both with \code{\link{Raster}} as well as with \code{\link{stars}} objects.
+This function works both with \code{\link{SpatRaster}} as well as with \code{\link{stars}} objects.
 }
 \details{
 Available options are:
@@ -57,7 +57,7 @@ Identified outliers are by default set to \code{NA}.
 }
 \examples{
 \dontrun{
-# Where x is a rasterstack
+# Where x is a SpatRaster
 new_x <- predictor_transform(x, option = 'scale')
 }
 }

@@ -16,11 +16,11 @@ get_ngbvalue(
 \arguments{
 \item{coords}{A \code{\link{matrix}}, \code{\link{data.frame}} or \code{\link{sf}} object.}
 
-\item{env}{A \code{\link{data.frame}} object with the predictors}
+\item{env}{A \code{\link{data.frame}} object with the predictors.}
 
-\item{longlat}{A \code{\link{logical}} variable indicating whether the projection is long-lat}
+\item{longlat}{A \code{\link{logical}} variable indicating whether the projection is long-lat.}
 
-\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (default: \code{c('x','y')})}
+\item{field_space}{A \code{\link{vector}} highlight the columns from which coordinates are to be extracted (Default: \code{c('x','y')}).}
 
 \item{cheap}{A \code{\link{logical}} variable whether the dataset is considered to be large and faster computation could help.}
 
@@ -35,10 +35,19 @@ predictors, and operates directly on provided data.frames.
 \strong{Note that despite being parallized this function can be rather slow for large data volumes of data!}
 }
 \details{
-Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodist::geodist})
+Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodist::geodist}).
 }
 \note{
 If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+}
+\examples{
+\dontrun{
+ # Create matchup table
+tab <- get_ngbvalue( coords = coords, # Coordinates
+                     env = env # Data.frame with covariates and coordinates
+                  )
+}
+
 }
 \references{
 \itemize{

@@ -4,9 +4,9 @@ NULL
 #' Spatial adjustment of environmental predictors and raster stacks
 #'
 #' @description
-#' This function allows the transformation of provided environmental predictors (in [`Raster`] format).
+#' This function allows the transformation of provided environmental predictors (in [`SpatRaster`] format).
 #' A common use case is for instance the standardization (or scaling) of all predictors prior to model fitting.
-#' This function works both with [`Raster`] as well as with [`stars`] objects.
+#' This function works both with [`SpatRaster`] as well as with [`stars`] objects.
 #' @details
 #' Available options are:
 #' * \code{'none'} The original layer(s) are returned.
@@ -25,25 +25,25 @@ NULL
 #' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
 #' Identified outliers are by default set to \code{NA}.
 #'
-#' @param env A [`Raster`] object.
+#' @param env A [`SpatRaster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},
 #' \code{'scale'}, \code{'norm'}, \code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).
 #' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @param ... other options (Non specified).
-#' @returns Returns a adjusted [`Raster`] object of identical resolution.
+#' @returns Returns a adjusted [`SpatRaster`] object of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
 #' \dontrun{
-#' # Where x is a rasterstack
+#' # Where x is a SpatRaster
 #' new_x <- predictor_transform(x, option = 'scale')
 #' }
 #' @keywords utils
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
   assertthat::assert_that(
-    inherits(env,'Raster') || inherits(env, 'stars'),
+    is.Raster(env) || inherits(env, 'stars'),
     # Support multiple options
     is.numeric(windsor_props) & length(windsor_props)==2,
     is.numeric(pca.var)
@@ -68,49 +68,56 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     lyrs <- names(env) # Names of predictors
     times <- stars::st_get_dimension_values(env, which = 3) # Assume this being the time attribute
     dims <- stars::st_dimensions(env)
+    # Drop units as it causes bugs with terra (5/5/2023)
+    env <- units::drop_units(env)
     # Convert to list
     env_list <- list()
-    for(name in lyrs) env_list[[name]] <- methods::as(env[name], 'Raster')
+    for(name in lyrs) env_list[[name]] <- Reduce(c, stars_to_raster( env[name] ))
+
+    # Make quick checks
+    assertthat::assert_that( all( diff(sapply(env_list, terra::nlyr))==0 ) )
   } else {
     # Get times in case a stack is supplied (this can get lost depending on transformation)
-    times <- raster::getZ(env)
+    times <- terra::time(env)
   }
 
   # Normalization
   if(option == 'norm'){
     if(is.Raster(env)){
-      out <- (env - raster::cellStats(env, stat="min")) /
-        (raster::cellStats(env, stat="max") -
-           raster::cellStats(env, stat="min"))
+      nx <- terra::minmax(env)
+      out <- (env - nx[1,]) / (nx[2,] - nx[1,])
     } else {
       out <- lapply(env_list, function(x) {
-        (x - raster::cellStats(x, stat="min")) /
-          (raster::cellStats(x, stat="max") -
-             raster::cellStats(x, stat="min"))
+        nx <- terra::minmax(x)
+        (x - nx[1,]) / (nx[2,] - nx[1,])
       })
     }
   }
   # Scaling
   if(option == 'scale'){
     if(is.Raster(env)){
-      out <- raster::scale(env, center = TRUE, scale = TRUE)
+      out <- terra::scale(env, center = TRUE, scale = TRUE)
     } else {
-      out <- lapply(env_list, function(x) raster::scale(x, center = TRUE, scale = TRUE))
+      out <- lapply(env_list, function(x) terra::scale(x, center = TRUE, scale = TRUE))
     }
   }
 
   # Percentile cutting
   if(option == 'percentile'){
     if(is.Raster(env)){
-      perc <- raster::quantile(env, seq(0,1, length.out = 11))
+      perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
       perc <- unique(perc)
-      out <- raster::cut(env, perc)
+      out <- terra::classify(env, t(perc))
     } else {
       out <- lapply(env_list, function(x) {
-        perc <- raster::quantile(x, seq(0,1, length.out = 11))
+        perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
         perc <- unique(perc)
-        raster::cut(x, perc)
+        # For terra need to loop here as classify does not support multiple columns
+        o <- terra::rast()
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) ))
+        return(o)
       })
+      assertthat::assert_that( all( sapply(out, function(z) all(is.factor(z))) ))
     }
   }
 
@@ -131,16 +138,16 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- lapply(env_list, function(x) win(x, windsor_props))
     }
   } else if(option == 'windsor_thresh'){
-    win <- function(x, windsor_thresh){
+    win_tr <- function(x, windsor_thresh){
       if(is.vector(env)) out <- units::drop_units(env) else out <- env
       out[out < windsor_thresh[1]] <- windsor_thresh[1]
       out[out > windsor_thresh[2]] <- windsor_thresh[2]
       out
     }
     if(is.Raster(env)){
-      out <- win(env, windsor_props )
+      out <- win_tr(env, windsor_props )
     } else {
-      out <- lapply(env_list, function(x) win(x, windsor_props))
+      out <- lapply(env_list, function(x) win_tr(x, windsor_props))
     }
   }
 
@@ -152,9 +159,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       return(o)
     }
     if(is.Raster(env)){
-      out <- raster::stack()
-      for(n in 1:nlayers(env)){
-        out <- raster::addLayer(out, rj(env[[n]]) )
+      out <- terra::rast()
+      for(n in 1:terra::nlyr(env)){
+        suppressWarnings( out <- c(out, rj(env[[n]]) ) )
       }
     } else {
       out <- lapply(env_list, function(x) rj(x))
@@ -165,21 +172,25 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Inspiration taken from RSToolbox package
   if(option == 'pca'){
     if(is.Raster(env)){
-      assertthat::assert_that(raster::nlayers(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
+      assertthat::assert_that(terra::nlyr(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
+
+      # Check that there are no duplicates in the layer names, if so append numbers to them
+      if(anyDuplicated(names(env))>0) names(env) <- make.unique(names(env))
 
       # FIXME: Allow a reduction to few components than nr of layers?
-      nComp <- nlayers(env)
+      nComp <- terra::nlyr(env)
       # Construct mask of all cells
-      envMask <- !sum(raster::calc(env, is.na))
-      assertthat::assert_that(cellStats(envMask, sum)>0,msg = 'A predictor is either NA only or no valid values across all layers')
-      env <- raster::mask(env, envMask, maskvalue = 0)
+      envMask <- !sum(terra::app(env, is.na))
+      assertthat::assert_that(terra::global(envMask, "sum")[,1]>0,
+                              msg = 'A predictor is either NA only or no valid values across all layers')
+      env <- terra::mask(env, envMask, maskvalues = 0)
 
       # Sample covariance from stack and fit PCA
-      covMat <- raster::layerStats(env, stat = "cov", na.rm = TRUE)
+      covMat <- terra::layerCor(env, fun = "cov", na.rm = TRUE)
       pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
       # Add means and grid cells
       pca$center <- covMat$mean
-      pca$n.obs <- raster::ncell(env)
+      pca$n.obs <- terra::ncell(env)
 
       # Check how many components are requested:
       if(pca.var<1){
@@ -188,7 +199,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         nComp <- length( which(props <= pca.var) )
       }
       # Predict principle components
-      out <- raster::predict(env, pca,na.rm = TRUE, index = 1:nComp)
+      out <- terra::predict(env, pca,na.rm = TRUE, index = 1:nComp)
       names(out) <- paste0("PC", 1:nComp)
 
       return(out)
@@ -200,6 +211,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
   # If stars convert back to stars object
   if(inherits(env, 'stars')){
+    # Set crs to all
+    if(!is.na( sf::st_crs(env) )){
+      for(i in 1:length(out)) terra::set.crs(out[[i]], crs(sf::st_crs(env)$wkt))
+    }
     # Convert list back to stars
     out <- do.call(
       stars:::c.stars,
@@ -216,11 +231,13 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   } else {
     # Final security checks
     assertthat::assert_that(
-      raster::nlayers(env) == raster::nlayers(out),
+      terra::nlyr(env) == terra::nlyr(out),
       is_comparable_raster(out, env)
     )
     # Reset times
-    if(!is.null(times)) out <- raster::setZ(out, times)
+    if(!all(is.na(terra::time(env))) ){
+      if(!is.null(times)) terra::time(out) <- times
+    }
 
     return(out)
   }
@@ -246,7 +263,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' The number of thresholds and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
 #' * \code{'bin'} - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
 #' The number of percentile cuts and thus new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
-#' @param env A [`Raster`] object.
+#' @param env A [`SpatRaster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way
 #' (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
@@ -254,18 +271,18 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @param ... other options (Non specified).
-#' @return Returns the derived adjusted [`Raster`] objects of identical resolution.
+#' @return Returns the derived adjusted [`SpatRaster`] objects of identical resolution.
 #' @seealso predictor_derivate
 #' @examples
 #' \dontrun{
-#' # Create a hinge transformation of one or multiple RasterLayers.
+#' # Create a hinge transformation of one or multiple SpatRaster.
 #' predictor_derivate(covs, option = "hinge", knots = 4)
 #' }
 #' @keywords utils
 #' @export
 predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, method = NULL, ...){
   assertthat::assert_that(
-    inherits(env,'Raster') || inherits(env, "stars"),
+    is.Raster(env) || inherits(env, "stars"),
     !missing(env),
     is.numeric(nknots) && nknots > 1,
     is.null(deriv) || is.character(deriv),
@@ -303,7 +320,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Create a list to house the results
     env_list <- list()
     for(name in cutoffs$deriv){
-      env_list[[name]] <- methods::as(env[cutoffs[which(cutoffs$deriv==name),2]], 'Raster') # Specify original raster
+      env_list[[name]] <- terra::rast(env[cutoffs[which(cutoffs$deriv==name),2]]) # Specify original raster
     }
     assertthat::assert_that(length(env_list) > 0)
   } else {cutoffs <- NULL}
@@ -311,16 +328,16 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   # Simple quadratic transformation
   if(option == 'quadratic'){
     if(is.Raster(env)){
-      if(raster::nlayers(env)==1){
+      if(terra::nlyr(env)==1){
         new_env <- env^2
       } else {
-        new_env <- raster::calc(env, function(x) I(x^2))
+        new_env <- terra::app(env, function(x) I(x^2))
       }
       names(new_env) <- paste0('quad__', names(env))
     } else {
       # Stars processing
       new_env <- lapply(env_list, function(x) {
-        raster::calc(x, function(z) I(z^2))
+        terra::app(x, function(z) I(z^2))
       })
     }
   }
@@ -330,13 +347,11 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   if(option == 'hinge'){
     if(is.Raster(env)){
       # Build new stacks
-      new_env <- raster::stack()
+      new_env <- terra::rast()
       for(val in names(env)){
         o <- makeHinge(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
         if(is.null(o)) next()
-        new_env <- raster::addLayer(new_env,
-                                    fill_rasters(o, emptyraster(env) )
-        )
+        new_env <- c(new_env, fill_rasters(o, emptyraster(env) ) )
         rm(o)
       }
     } else {
@@ -351,7 +366,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         }
         cu <- as.numeric(cu)
         assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:nlayers(env_list[[val]])){
+        for(k in 1:terra::nlyr(env_list[[val]])){
           o <- emptyraster(env_list[[val]][[k]])
           o[] <- hingeval(env_list[[val]][[k]][], cu[1], cu[2])
           env_list[[val]][[k]] <- o
@@ -366,13 +381,11 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   # Take functionality in maxnet package
   if(option == 'thresh'){
     if(is.Raster(env)){
-      new_env <- raster::stack()
+      new_env <- terra::rast()
       for(val in names(env)){
         o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
         if(is.null(o)) next()
-        new_env <- raster::addLayer(new_env,
-                                    fill_rasters(o, emptyraster(env))
-        )
+        new_env <- c(new_env, fill_rasters(o, emptyraster(env)) )
         rm(o)
       }
     } else {
@@ -387,7 +400,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         }
         cu <- as.numeric(cu)
         assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:nlayers(env_list[[val]])){
+        for(k in 1:terra::nlyr(env_list[[val]])){
           o <- emptyraster(env_list[[val]][[k]])
           o[] <- thresholdval(env_list[[val]][[k]][], cu)
           env_list[[val]][[k]] <- o
@@ -401,11 +414,11 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   # For binning, calculate cuts of thresholds
   if(option == 'bin'){
     if(is.Raster(env)){
-      new_env <- raster::stack()
+      new_env <- terra::rast()
       for(val in names(env)){
-        o <- makeBin(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
+        o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
         if(is.null(o)) next()
-        new_env <- raster::addLayer(new_env, o)
+        new_env <- c(new_env, o)
         rm(o)
       }
     } else {
@@ -420,11 +433,11 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         }
         cu <- as.numeric(cu)
         assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:nlayers(env_list[[val]])){
+        for(k in 1:terra::nlyr(env_list[[val]])){
           o <- emptyraster(env_list[[val]][[k]])
-          o <- raster::cut(env_list[[val]][[k]], cu)
+          o <- terra::classify(env_list[[val]][[k]], cu)
           o[is.na(o)] <- 0
-          o <- raster::mask(o, env_list[[val]][[k]] )
+          o <- terra::mask(o, env_list[[val]][[k]] )
           env_list[[val]][[k]] <- o
           rm(o)
         }
@@ -446,13 +459,13 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       ind <- utils::combn(int_variables, 2)
 
       # Now for each combination build new variable
-      new_env <- raster::stack()
+      new_env <- terra::rast()
 
       for(i in 1:ncol(ind)){
         # Multiply first with second entry
-        o <- env[[ind[1,1]]] * env[[ind[2,1]]]
-        names(o) <- paste0('inter__', names(env)[ind[1,1]],".",names(env)[ind[2,1]])
-        new_env <- raster::addLayer(new_env,o)
+        o <- env[[ind[1,i]]] * env[[ind[2,i]]]
+        names(o) <- paste0('inter__', ind[1, i],".", ind[2, i])
+        new_env <- c(new_env, o)
         rm(o)
       }
     } else {
@@ -465,7 +478,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
   if(inherits(env, 'stars')){
     # Add the original layers back
     for(name in names(env)){
-      env_list[[name]] <- methods::as(env[name], 'Raster') # Specify original raster
+      env_list[[name]] <- terra::rast(env[name]) # Specify original raster
     }
 
     # Convert list back to stars
@@ -486,11 +499,16 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 #' It is by default called when predictors are added to [´BiodiversityDistribution´] object. Only grid cells with NAs that contain
 #' values at some raster layers are homogenized.
 #' Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
-#' @param env A [`Raster`] object with the predictors
-#' @param fill A [`logical`] value indicating whether missing data are to be filled (Default: FALSE).
-#' @param fill_method A [`character`] of the method for filling gaps to be used (Default: 'ngb')
-#' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: FALSE)
-#' @returns A [`Raster`] object with the same number of layers as the input.
+#' @param env A [`SpatRaster`] object with the predictors.
+#' @param fill A [`logical`] value indicating whether missing data are to be filled (Default: \code{FALSE}).
+#' @param fill_method A [`character`] of the method for filling gaps to be used (Default: \code{'ngb'}).
+#' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: \code{FALSE}).
+#' @returns A [`SpatRaster`] object with the same number of layers as the input.
+#' @examples
+#' \dontrun{
+#'  # Harmonize predictors
+#'  env <- predictor_homogenize_na(env)
+#' }
 #' @keywords utils
 #' @export
 predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
@@ -502,7 +520,10 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
   )
   # Workflow for raster layers
   if(is.Raster(env)){
-    nl <- raster::nlayers(env)
+    nl <- terra::nlyr(env)
+
+    if(anyDuplicated(names(env))>0) names(env) <- make.unique(names(env))
+
     # If the number of layers is 1, no need for homogenization
     if(nl > 1){
       # Calculate number of NA grid cells per stack
@@ -510,17 +531,16 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
       # Remove grid cells that are equal to the number of layers (all values NA)
       none_area <- mask_na == nl
       none_area[none_area == 0 ] <- NA
-      mask_na <- raster::mask(mask_na,
-                              mask = none_area,inverse = TRUE)
+      mask_na <- terra::mask(mask_na, mask = none_area, inverse = TRUE)
 
       # Should any fill be conducted?
       if(fill){
         stop('Not yet implemented!')
       } else {
         # Otherwise just homogenize NA values across predictors
-        if(cellStats(mask_na,'max')>0){
+        if(terra::global(mask_na,'max',na.rm = TRUE)[,1] > 0){
           mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
-          env <- raster::mask(env, mask = mask_all)
+          env <- terra::mask(env, mask = mask_all)
         }
       }
       # Should NA coordinates of cells where 1 or more predictor is NA be returned?
@@ -540,6 +560,136 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
   )
   # Return the result
   return(env)
+}
+
+#' Hinge transformation of a given predictor
+#'
+#' @description
+#' This function transforms a provided predictor variable with a hinge transformation,
+#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
+#' while the remainder is left at the original values.
+#' @param v A [`SpatRaster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
+#' @keywords utils, internal
+#' @concept Concept taken from the [maxnet] package.
+#' @returns A hinge transformed [`data.frame`].
+#' @noRd
+makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
+  # Get stats
+  v.min <- terra::global(v, "min", na.rm = TRUE)[,1]
+  v.max <- terra::global(v, "max", na.rm = TRUE)[,1]
+  assertthat::assert_that(is.numeric(v.min), is.numeric(v.max))
+
+  if(is.null(cutoffs)){
+    k <- seq(v.min, v.max, length = nknots)
+  } else {
+    k <- cutoffs
+  }
+  if(length(k)<=1) return(NULL)
+
+  # Hinge up to max
+  lh <- outer(v[] |> as.vector(), utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
+  # Hinge starting from min
+  rh <- outer(v[] |> as.vector(), k[-1], function(w, h) hingeval(w, v.min, h))
+  colnames(lh) <- paste0("hinge__",n,'__', round( utils::head(k, -1), 2),'_', round(v.max, 2))
+  colnames(rh) <- paste0("hinge__",n,'__', round( v.min, 2),'_', round(k[-1], 2))
+  o <- as.data.frame(
+    cbind(lh, rh)
+  )
+  # Kick out first (min) and last (max) col as those are perfectly correlated
+  o <- o[,-c(1,ncol(o))]
+  attr(o, "deriv.hinge") <- k
+  return(o)
+}
+
+#' Threshold transformation of a given predictor
+#'
+#' @description
+#' This function transforms a provided predictor variable with a threshold transformation,
+#' e.g. a new range of values where any values lower than a certain knot are set to \code{0},
+#' while the remainder is set to \code{1}.
+#' @param v A [`Raster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
+#' @keywords utils, internal
+#' @concept Concept taken from the [maxnet] package.
+#' @returns A threshold transformed [`data.frame`].
+#' @noRd
+makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
+  if(is.null(cutoffs)){
+    # Get min max
+    v.min <- terra::global(v, "min", na.rm= TRUE)[,1]
+    v.max <- terra::global(v, "max", na.rm= TRUE)[,1]
+    k <- seq(v.min, v.max, length = nknots + 2)[2:nknots + 1]
+  } else {
+    k <- cutoffs
+  }
+  if(length(k)<=1) return(NULL)
+  f <- outer(v[] |> as.vector(), k, function(w, t) ifelse(w >= t, 1, 0))
+  colnames(f) <- paste0("thresh__", n, "__",  round(k, 2))
+  f <- as.data.frame(f)
+  attr(f, "deriv.thresh") <- k
+  return(f)
+}
+
+#' Binned transformation of a given predictor
+#'
+#' @description
+#' This function takes predictor values and 'bins' them into categories based on a
+#' percentile split.
+#' @param v A [`SpatRaster`] object.
+#' @param n A [`character`] describing the name of the variable. Used as basis for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead (Default: \code{NULL}).
+#' @keywords utils, internal
+#' @returns A binned transformed [`data.frame`] with columns representing each bin.
+#' @noRd
+makeBin <- function(v, n, nknots, cutoffs = NULL){
+  assertthat::assert_that(is.Raster(v),
+                          is.character(n),
+                          is.numeric(nknots),
+                          is.numeric(cutoffs) || is.null(cutoffs))
+  if(is.null(cutoffs)){
+    # Calculate cuts
+    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/nknots), na.rm = TRUE )
+    assertthat::assert_that(all(is.numeric(cu)), length(cu)>1)
+  } else { cu <- cutoffs }
+
+  if(anyDuplicated(cu)){
+    # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
+    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/(nknots*2)) )
+    cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
+    if(length(cu)<=2) return( NULL )
+    if(length(cu) > nknots){
+      cu <- cu[(length(cu)-(nknots)):length(cu)]
+    }
+  }
+  # Make cuts and explode
+  out <- explode_factorized_raster(
+      terra::classify(v, cu)
+  )
+
+  # Format threshold names
+  cu.brk <- as.character(cut(cu[-1], cu))
+  cu.brk <- gsub(",","_",cu.brk)
+  cu.brk <- gsub("\\(|\\]", "", cu.brk)
+  # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
+  names(out) <- paste0("bin__",n, "__", cu.brk )
+  for(i in 1:terra::nlyr(out)){
+    attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
+  }
+  return(out)
 }
 
 #### Filter predictor functions ----

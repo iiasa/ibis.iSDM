@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling Framework for Integrated Biodiversity Distribution Scenarios
-Version: 0.0.3
+Version: 0.0.4
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -33,8 +33,7 @@ Imports:
     parallel,
     posterior,
     proto (>= 1.0.0),
-    raster (>= 3.4-5),
-    rgeos (>= 0.5-5),
+    terra (>= 1.7-10),
     sf (>= 0.9),
     stars (>= 0.5),
     stats,
@@ -90,6 +89,7 @@ Collate:
     'add_offset.R'
     'bdproto-predictors.R'
     'add_predictors.R'
+    'add_predictors_globiom.R'
     'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-priorlist.R'

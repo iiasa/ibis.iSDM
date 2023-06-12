@@ -50,7 +50,7 @@ built_formula_glmnet <- function(obj){
 #' default lambda values for the regularization.
 #'
 #' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for background).
-#' @param m A [`model.matrix`] object
+#' @param m A [`model.matrix`] object.
 #' @references
 #' * Phillips S (2021). _maxnet: Fitting 'Maxent' Species Distribution Models with 'glmnet'_. R package version 0.1.4, <https://CRAN.R-project.org/package=maxnet>.
 #' @source maxnet
@@ -109,8 +109,7 @@ default.regularization <- function(p, m){
 #' For glmnet fits the variables are often overregularized. This helper function picks
 #' the best lambda estimate from the model.
 #' By default use the one within 1 SE of minimum lambda, unless it falls on the very first value,
-#' likely indicating an overregularized model. In this case take the minimum value
-#' of all lambda's.
+#' likely indicating an overregularized model. In this case take the minimum value of all lambda's.
 #' @param obj A \code{"glmnet"} object.
 #' @keywords internal, utils
 #' @noRd

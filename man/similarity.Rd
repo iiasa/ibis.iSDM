@@ -17,12 +17,10 @@ similarity(
 
 \S4method{similarity}{BiodiversityDistribution}(obj)
 
-\S4method{similarity}{RasterBrick}(obj)
-
-\S4method{similarity}{RasterStack}(obj)
+\S4method{similarity}{SpatRaster}(obj)
 }
 \arguments{
-\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{Raster}} object.}
+\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
 
 \item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively
 a \code{\link{data.frame}} with extracted values (corresponding to those given in \code{obj}).}
@@ -40,16 +38,16 @@ a \code{\link{data.frame}} with extracted values (corresponding to those given i
 \value{
 This function returns a list containing:
 \itemize{
-\item \code{similarity}: a \code{RasterStack} giving the environmental similarities for
-each variable in \code{x} (only included when \code{full=TRUE});
-\item \code{mis}: a \code{Raster} layer giving the minimum similarity value
+\item \code{similarity}: A \code{SpatRaster} object with multiple layers giving the environmental
+similarities for each variable in \code{x} (only included when \code{full=TRUE});
+\item \code{mis}: a \code{SpatRaster} layer giving the minimum similarity value
 across all variables for each location (i.e. the MESS);
-\item \code{exip}: a \code{Raster} layer indicating whether any model would interpolate
+\item \code{exip}: a \code{SpatRaster} layer indicating whether any model would interpolate
 or extrapolate to this location based on environmental surface;
-\item \code{mod}: a factor \code{Raster} layer indicating which variable was most
+\item \code{mod}: a factor \code{SpatRaster} layer indicating which variable was most
 dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
 and
-\item \code{mos}: a factor \code{Raster} layer indicating which variable was most
+\item \code{mos}: a factor \code{SpatRaster} layer indicating which variable was most
 similar to its reference range.
 }
 }
@@ -61,7 +59,7 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
 }
 \details{
 \code{\link{similarity}} implements the MESS algorithm described in Appendix S3
-of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)
+of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014).
 }
 \examples{
  \dontrun{

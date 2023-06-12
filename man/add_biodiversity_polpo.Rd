@@ -44,13 +44,13 @@ add_biodiversity_polpo(
 Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
 one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{polpo}}.}
 
-\item{simulate}{Simulate poipo points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE})}
+\item{simulate}{Simulate poipo points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation (Default: \code{100}).}
 
-\item{simulate_bias}{A \code{\link{Raster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
+\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
-\item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either
+\item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
 \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}
 parameter.}
 

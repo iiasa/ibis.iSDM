@@ -1,3 +1,10 @@
+# ibis.iSDM 0.0.4
+
+* Smaller bug fixes with regards to writing outputs and adding pseudo-absences.
+* Added short convenience function to convert prediction outputs #48
+* Converted from `raster` to `terra` #17
+* Updated and added further unit checks and tests
+
 # ibis.iSDM 0.0.3
 
 * Removed Magittr dependency #41

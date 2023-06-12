@@ -38,12 +38,12 @@ ibis_colours <- list(
 #'
 #' @description There are a number of hidden options that can be specified for ibis.iSDM.
 #' Currently supported are:
-#'  * \code{'ibis.runparallel'} : [`logical`] value on whether processing should be run in parallel
-#'  * \code{'ibis.nthread'} : [`numeric`] value on how many cores should be used by default
-#'  * \code{'ibis.setupmessages'} : [`logical`] value indicating whether message during object creation should be shown
+#'  * \code{'ibis.runparallel'} : [`logical`] value on whether processing should be run in parallel.
+#'  * \code{'ibis.nthread'} : [`numeric`] value on how many cores should be used by default.
+#'  * \code{'ibis.setupmessages'} : [`logical`] value indicating whether message during object creation should be shown.
 #'  * \code{'ibis.engines'} : Returns a [`vector`] with all valid engines.
 #'  * \code{'ibis.use_future'} : [`logical`] on whether the \pkg{future} package should be used for parallel computing.
-#' @return The output of \code{getOptions} for all ibis related variables
+#' @return The output of \code{getOptions} for all ibis related variables.
 #' @keywords misc
 #' @examples
 #' \dontrun{
@@ -167,4 +167,3 @@ ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption(
   doFuture::registerDoFuture()
   invisible()
 }
-

@@ -2,8 +2,8 @@
 test_that('Check that data can be loaded.',{
 
   # Background Raster
-  background <- raster::raster(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
-  expect_s4_class(background,'Raster')
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  expect_s4_class(background,'SpatRaster')
 
   # Get test species
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
@@ -19,11 +19,10 @@ test_that('Check that data can be loaded.',{
   expect_true(all( assertthat::has_extension(ll,'tif') ))
 
   # Load them as rasters
-  predictors <- raster::stack(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
-  expect_s4_class(predictors,'Raster')
-  expect_s4_class(predictors,'RasterStack')
-  expect_true(nlayers(predictors)>1)
-  expect_true(is_comparable_raster(background,predictors))
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  expect_s4_class(predictors,'SpatRaster')
+  expect_true(terra::nlyr(predictors)>1)
+  expect_true(is_comparable_raster(background, predictors))
 })
 
 test_that('Check that test scenarios can be loaded.',{
