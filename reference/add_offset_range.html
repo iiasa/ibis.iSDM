@@ -20,7 +20,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
 <span>  add <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution, raster</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution, SpatRaster</span></span>
 <span><span class="fu">add_offset_range</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityDistribution, sf</span></span>
@@ -107,7 +107,7 @@ range map and can thus be used as a method to 'improve' the mapping of a species
 
 
 <dt>layer</dt>
-<dd><p>A <code>sf</code> or <code>RasterLayer</code> object with the range for the target feature.</p></dd>
+<dd><p>A <code>sf</code> or <code>SpatRaster</code> object with the range for the target feature.</p></dd>
 
 
 <dt>distance_max</dt>
@@ -133,7 +133,7 @@ default this is set to <code>0.9</code> indicating that 10% of all records are l
 
 
 <dt>fraction</dt>
-<dd><p>An optional <code>RasterLayer</code> object that is multiplied with digitized raster layer.
+<dd><p>An optional <code>SpatRaster</code> object that is multiplied with digitized raster layer.
 Can be used to for example to remove or reduce the expected value (Default: <code>NULL</code>).</p></dd>
 
 
@@ -150,7 +150,7 @@ this parameter to <code>FALSE</code> replaces the current offsets with the new o
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The output created by this function creates a <code>RasterLayer</code> to be added to a provided distribution object. Offsets
+    <p>The output created by this function creates a <code>SpatRaster</code> to be added to a provided distribution object. Offsets
 in regression models are likelihood specific as they are added directly to the overall estimate of <code>`y^hat`</code>.</p>
 <p>Note that all offsets created by this function are by default log-transformed before export. Background values
 (e.g. beyond <code>distance_max</code>) are set to a very small constant (<code>1e-10</code>).</p>

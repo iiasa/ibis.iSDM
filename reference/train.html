@@ -18,7 +18,7 @@ the estimation is being done."><meta name="twitter:card" content="summary"><meta
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,8 +120,9 @@ effectively fits a separate generalized linear model to reduce the number of cov
 
 
 <dt>optim_hyperparam</dt>
-<dd><p>Perform a variable selection on the set of predictors either prior
-to building the model (Default: <code>FALSE</code>).</p></dd>
+<dd><p>Parameter to tune the model by iterating over input parameters or selection
+of predictors included in each iteration. Can be set to <code>TRUE</code> if extra precision is
+needed (Default: <code>FALSE</code>).</p></dd>
 
 
 <dt>inference_only</dt>
@@ -187,7 +188,7 @@ and weighted respectively, thus giving for example presence-only records less we
     <p>This function acts as a generic training function that - based on the provided <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>
 object creates a new distribution model.
 The resulting object contains both a <code>fit_best</code> object of the estimated model and, if <code>inference_only</code> is <code>FALSE</code>
-a RasterLayer object named <code>prediction</code> that contains the spatial prediction of the model.
+a <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> object named <code>prediction</code> that contains the spatial prediction of the model.
 These objects can be requested via <code>object$get_data("fit_best")</code>.</p>
 <p>Other parameters in this function:</p><ul><li><p><code>"filter_predictors"</code> The parameter can be set to various options to remove highly correlated variables or those
 with little additional information gain from the model prior to any estimation. Available options are <code>"none"</code> (Default) <code>"pearson"</code> for

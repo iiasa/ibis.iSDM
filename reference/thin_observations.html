@@ -22,7 +22,7 @@ data prior to any estimation and its use should be considered with care (see als
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,11 +105,11 @@ and presence-absence occurrence points equally.</p></dd>
 
 
 <dt>background</dt>
-<dd><p>A <code>RasterLayer</code> object with the background of the study region. Use for assessing point density.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object with the background of the study region. Use for assessing point density.</p></dd>
 
 
 <dt>env</dt>
-<dd><p>A <code>Raster</code> object with environmental covariates. Needed when method is set to <code>"environmental"</code>
+<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object with environmental covariates. Needed when method is set to <code>"environmental"</code>
 or <code>"bias"</code> (Default: <code>NULL</code>).</p></dd>
 
 
@@ -126,7 +126,7 @@ or <code>"bias"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>zones</dt>
-<dd><p>A <code>RasterLayer</code> to be supplied when option <code>"method"</code> is chosen (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> to be supplied when option <code>"method"</code> is chosen (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>verbose</dt>

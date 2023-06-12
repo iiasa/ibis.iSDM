@@ -12,7 +12,7 @@ The code here was adapted from the Supporting materials script."><meta name="twi
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@ The code here was adapted from the Supporting materials script.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span>, rate <span class="op">=</span> <span class="fl">0.0089</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution, raster, numeric</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution, SpatRaster, numeric</span></span>
 <span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,7 +83,7 @@ The code here was adapted from the Supporting materials script.</p>
 
 
 <dt>elev</dt>
-<dd><p>A <code>RasterLayer</code> with the elevation for a given background.</p></dd>
+<dd><p>A <code>SpatRaster</code> with the elevation for a given background.</p></dd>
 
 
 <dt>pref</dt>
@@ -110,7 +110,7 @@ this parameter to <code>FALSE</code> replaces the current offsets with the new o
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
-from elevation limits. It requires a <code>RasterLayer</code> with elevation information.
+from elevation limits. It requires a <code>SpatRaster</code> with elevation information.
 A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
 areas, with the <code>rate</code> parameter allowing to vary the steepness of decline.</p>
 <p>Note that all offsets created by this function are by default log-transformed before export. In addition

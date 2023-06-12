@@ -16,7 +16,7 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,17 +90,14 @@ and the multivariate combination novelty index (NT2) based on the Mahalanobis di
 <span><span class="co"># S4 method for BiodiversityDistribution</span></span>
 <span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for RasterBrick</span></span>
-<span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for RasterStack</span></span>
+<span><span class="co"># S4 method for SpatRaster</span></span>
 <span><span class="fu">similarity</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>obj</dt>
-<dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>, <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code>Raster</code> object.</p></dd>
+<dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>, <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object.</p></dd>
 
 
 <dt>ref</dt>
@@ -132,22 +129,22 @@ a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">d
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>This function returns a list containing:</p><ul><li><p><code>similarity</code>: a <code>RasterStack</code> giving the environmental similarities for
-each variable in <code>x</code> (only included when <code>full=TRUE</code>);</p></li>
-<li><p><code>mis</code>: a <code>Raster</code> layer giving the minimum similarity value
+<p>This function returns a list containing:</p><ul><li><p><code>similarity</code>: A <code>SpatRaster</code> object with multiple layers giving the environmental
+similarities for each variable in <code>x</code> (only included when <code>full=TRUE</code>);</p></li>
+<li><p><code>mis</code>: a <code>SpatRaster</code> layer giving the minimum similarity value
 across all variables for each location (i.e. the MESS);</p></li>
-<li><p><code>exip</code>: a <code>Raster</code> layer indicating whether any model would interpolate
+<li><p><code>exip</code>: a <code>SpatRaster</code> layer indicating whether any model would interpolate
 or extrapolate to this location based on environmental surface;</p></li>
-<li><p><code>mod</code>: a factor <code>Raster</code> layer indicating which variable was most
+<li><p><code>mod</code>: a factor <code>SpatRaster</code> layer indicating which variable was most
 dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
 and</p></li>
-<li><p><code>mos</code>: a factor <code>Raster</code> layer indicating which variable was most
+<li><p><code>mos</code>: a factor <code>SpatRaster</code> layer indicating which variable was most
 similar to its reference range.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>similarity</code> implements the MESS algorithm described in Appendix S3
-of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014)</p>
+of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -32,7 +32,7 @@ can be due to many factors including simply differences in model complexity."><m
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -124,7 +124,7 @@ can be due to many factors including simply differences in model complexity.</p>
 
 <dt>layer</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the layer to be taken from each prediction (Default: <code>'mean'</code>). If set to <code>NULL</code>
-ignore any of the layer names in ensembles of <code>Raster</code> objects.</p></dd>
+ignore any of the layer names in ensembles of <code>SpatRaster</code> objects.</p></dd>
 
 
 <dt>normalize</dt>
@@ -141,7 +141,7 @@ or the range between the lowest and highest value (<code>"range"</code>).</p></d
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>RasterStack</code> containing the ensemble of the provided predictions specified by <code>method</code> and a
+<p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object containing the ensemble of the provided predictions specified by <code>method</code> and a
 coefficient of variation across all models.</p>
     </div>
     <div class="section level2">
@@ -160,7 +160,7 @@ other summary statistics from the posterior (e.g. <code>'sd'</code>) can be spec
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>If a list is supplied, then it is assumed that each entry in the list is a fitted <code><a href="DistributionModel-class.html">DistributionModel</a></code> object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs <a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a>. In this case
+Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs <a href="https://rdrr.io/pkg/terra/man/math-generics.html" class="external-link">log</a>. In this case
 the <code>"normalize"</code> parameter has to be set.</p>
     </div>
     <div class="section level2">

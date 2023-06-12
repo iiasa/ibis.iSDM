@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -195,7 +195,7 @@
           
           <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa()</a></code> 
         </dt>
-        <dd>Add biodiversity point dataset to a distribution object (presence-absence)</dd>
+        <dd>Add biodiversity point dataset to a distribution object (presence-absence).</dd>
       </dl><dl><dt>
           
           <code><a href="add_biodiversity_poipo.html">add_biodiversity_poipo()</a></code> 
@@ -213,14 +213,14 @@
         <dd>Add biodiversity polygon dataset to a distribution object (presence-only)</dd>
       </dl><dl><dt>
           
-          <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
-        </dt>
-        <dd>Add constrains to the modelled distribution projection through the MigClim approach</dd>
-      </dl><dl><dt>
-          
           <code><a href="add_constraint.html">add_constraint(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Add a constraint to an existing <code>scenario</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constraint_MigClim.html">add_constraint_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+        </dt>
+        <dd>Add constrains to the modelled distribution projection using the MigClim approach</dd>
       </dl><dl><dt>
           
           <code><a href="add_constraint_adaptability.html">add_constraint_adaptability(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
@@ -245,7 +245,7 @@
           
           <code><a href="add_control_bias.html">add_control_bias()</a></code> 
         </dt>
-        <dd>Add a specified variable that the model should control for</dd>
+        <dd>Add a specified variable which should be controlled for somehow.</dd>
       </dl><dl><dt>
           
           <code><a href="add_latent_spatial.html">add_latent_spatial()</a></code> 
@@ -410,19 +410,19 @@
         <dd>Create a new scenario based on trained model parameters</dd>
       </dl><dl><dt>
           
-          <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+          <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>)</a></code> <code><a href="project.html">project(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Project a fitted model to a new environment and covariates</dd>
-      </dl><dl><dt>
-          
-          <code><a href="add_constrain_MigClim.html">add_constrain_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
-        </dt>
-        <dd>Add constrains to the modelled distribution projection through the MigClim approach</dd>
       </dl><dl><dt>
           
           <code><a href="add_constraint.html">add_constraint(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Add a constraint to an existing <code>scenario</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_constraint_MigClim.html">add_constraint_MigClim(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+        </dt>
+        <dd>Add constrains to the modelled distribution projection using the MigClim approach</dd>
       </dl><dl><dt>
           
           <code><a href="add_constraint_adaptability.html">add_constraint_adaptability(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; numeric&gt;</i>,<i>&lt; numeric&gt;</i>)</a></code> 
@@ -476,7 +476,7 @@
         <dd>Obtains the coefficients of a trained model</dd>
       </dl><dl><dt>
           
-          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="validate.html">validate(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
+          <code><a href="validate.html">validate(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>)</a></code> <code><a href="validate.html">validate(<i>&lt;SpatRaster&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; sf&gt;</i>,<i>&lt; character&gt;</i>)</a></code> 
         </dt>
         <dd>Validation of distribution object</dd>
       </dl><dl><dt>
@@ -539,12 +539,12 @@
           
           <code><a href="alignRasters.html">alignRasters()</a></code> 
         </dt>
-        <dd>Align a <code>Raster</code> object to another by harmonizing geometry and extend.</dd>
+        <dd>Align a <code>SpatRaster</code> object to another by harmonizing geometry and extend.</dd>
       </dl><dl><dt>
           
           <code><a href="emptyraster.html">emptyraster()</a></code> 
         </dt>
-        <dd>Create an empty <code>RasterLayer</code> based on a template</dd>
+        <dd>Create an empty <code>SpatRaster</code> based on a template</dd>
       </dl><dl><dt>
           
           <code><a href="get_ngbvalue.html">get_ngbvalue()</a></code> 
@@ -592,7 +592,7 @@
         <dd>Save a model for later use</dd>
       </dl><dl><dt>
           
-          <code><a href="write_output.html">write_output(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterLayer&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;RasterStack&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;data.frame&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;stars&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
+          <code><a href="write_output.html">write_output(<i>&lt;ANY&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;BiodiversityScenario&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;SpatRaster&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;data.frame&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> <code><a href="write_output.html">write_output(<i>&lt;stars&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
         </dt>
         <dd>Generic function to write spatial outputs</dd>
       </dl><dl><dt>
@@ -610,11 +610,6 @@
           <code><a href="load_model.html">load_model(<i>&lt;character&gt;</i>,<i>&lt; logical&gt;</i>)</a></code> 
         </dt>
         <dd>Load a pre-computed model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="clamp_predictions.html">clamp_predictions()</a></code> 
-        </dt>
-        <dd>Clamp a predictor matrix by given values</dd>
       </dl><dl><dt>
           
           <code><a href="formatGLOBIOM.html">formatGLOBIOM()</a></code> 

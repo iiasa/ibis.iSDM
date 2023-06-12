@@ -72,7 +72,7 @@ Available options for creating derivates are:
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -169,25 +169,16 @@ extreme outliers.</p></li>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,RasterBrick</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution,SpatRasterCollection</span></span>
 <span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,RasterLayer</span></span>
-<span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,RasterStack</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution, SpatRaster</span></span>
 <span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityDistribution, stars</span></span>
 <span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,RasterBrick</span></span>
-<span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,RasterLayer</span></span>
-<span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,RasterStack</span></span>
+<span><span class="co"># S4 method for BiodiversityScenario, SpatRaster</span></span>
 <span><span class="fu">add_predictors</span><span class="op">(</span><span class="va">x</span>, <span class="va">env</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityScenario, stars</span></span>
@@ -201,7 +192,7 @@ extreme outliers.</p></li>
 
 
 <dt>env</dt>
-<dd><p>A <code>RasterStack</code>, <code>RasterLayer</code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
+<dd><p>A <code>SpatRaster</code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
 
 
 <dt>names</dt>
@@ -225,11 +216,11 @@ extreme outliers.</p></li>
 
 
 <dt>bgmask</dt>
-<dd><p>Check whether the environmental data should be masked with the background layer (Default: <code>TRUE</code>)</p></dd>
+<dd><p>Check whether the environmental data should be masked with the background layer (Default: <code>TRUE</code>).</p></dd>
 
 
 <dt>harmonize_na</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: <code>FALSE</code>)</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should be harmonized among predictors (Default: <code>FALSE</code>).</p></dd>
 
 
 <dt>explode_factors</dt>

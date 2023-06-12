@@ -38,7 +38,7 @@ as well as a specified engine.'><meta name="twitter:card" content="summary"><met
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@ as well as a specified engine.</strong></p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">distribution</span><span class="op">(</span><span class="va">background</span>, limits <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for raster</span></span>
+<span><span class="co"># S4 method for SpatRaster</span></span>
 <span><span class="fu">distribution</span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for sf</span></span>
@@ -122,11 +122,11 @@ as well as a specified engine.</strong></p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>background</dt>
 <dd><p>Specification of the modelling background. Must be a
-<code>raster</code>, <code>sf</code> or <code>extent</code> object.</p></dd>
+<code>SpatRaster</code>, <code>sf</code> or <code>extent</code> object.</p></dd>
 
 
 <dt>limits</dt>
-<dd><p>A <code>raster</code> or <code>sf</code> object that limits the prediction surface when
+<dd><p>A <code>SpatRaster</code> or <code>sf</code> object that limits the prediction surface when
 intersected with input data (Default: <code>NULL</code>).</p></dd>
 
 </dl></div>
@@ -155,9 +155,9 @@ if some datasets are not set, then a <code>Waiver</code> object is returned inst
 </ul><p>Useful high-level functions to address those objects are for instance:</p><ul><li><p><code>object$show()</code> A generic summary of the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object contents. Can also be called via <a href="print.html">print</a>.</p></li>
 <li><p><code>object$get_biodiversity_equations()</code> Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.</p></li>
 <li><p><code>object$get_biodiversity_types()</code> Lists the type of each specified biodiversity dataset with given id.</p></li>
-<li><p><code>object$get_extent()</code> Outputs the <a href="https://rdrr.io/pkg/raster/man/extent.html" class="external-link">raster::extent</a> of the modelling region.</p></li>
-<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rdrr.io/pkg/raster/man/extent.html" class="external-link">raster::extent</a> and the <a href="https://rdrr.io/pkg/sp/man/is.projected.html" class="external-link">sp::proj4string</a>.</p></li>
-<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rdrr.io/pkg/raster/man/extent.html" class="external-link">raster::extent</a> dimension by calling the <code>extent_dimensions()</code> function.</p></li>
+<li><p><code>object$get_extent()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> of the modelling region.</p></li>
+<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> and the <a href="https://rdrr.io/pkg/sp/man/is.projected.html" class="external-link">sp::proj4string</a>.</p></li>
+<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> dimension by calling the <code>extent_dimensions()</code> function.</p></li>
 <li><p><code>object$get_predictor_names()</code> Returns a <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> vector with the names of all added predictors.</p></li>
 <li><p><code>object$get_prior_variables()</code> Returns a description of <code><a href="priors.html">priors</a></code> added.</p></li>
 </ul><p>There are other functions as well but those are better accessed through their respective wrapper functions.</p>
@@ -177,7 +177,7 @@ if some datasets are not set, then a <code>Waiver</code> object is returned inst
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span> <span class="co"># Load background raster</span></span></span>
-<span class="r-in"><span> <span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"inst/extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"inst/extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span> <span class="co"># Define model</span></span></span>
 <span class="r-in"><span> <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">distribution</span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span></span>
 <span class="r-in"><span> <span class="va">x</span></span></span>

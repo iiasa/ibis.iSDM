@@ -14,7 +14,7 @@ Currently only supporting point datasets. For validation of integrated models mo
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,7 @@ either on the fitted point data or any supplied independent.
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY, character, sf, character, character</span></span>
 <span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>, <span class="va">method</span>, <span class="va">point</span>, <span class="va">layer</span>, <span class="va">point_column</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for RasterLayer, character, sf, character</span></span>
+<span><span class="co"># S4 method for SpatRaster, character, sf, character</span></span>
 <span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>, <span class="va">method</span>, <span class="va">point</span>, <span class="va">point_column</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,7 +84,7 @@ either on the fitted point data or any supplied independent.
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mod</dt>
 <dd><p>A fitted <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object with set predictors. Alternatively one can also
-provide directly a <code>RasterLayer</code>, however in this case the <code>point</code> layer also needs to be provided.</p></dd>
+provide directly a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code>, however in this case the <code>point</code> layer also needs to be provided.</p></dd>
 
 
 <dt>method</dt>

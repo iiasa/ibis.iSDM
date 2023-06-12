@@ -3,7 +3,7 @@
 continuous suitability surfaces are converted into discrete representations of where
 suitable habitat might or might not exist. This so called threshold'ing
 can be done in various ways which are further described in the details.
-In case a RasterLayer or RasterBrick is provided as input in this function
+In case a SpatRaster is provided as input in this function
 for obj, it is furthermore necessary to provide a sf object for validation as
 there is no DistributionModel to read this information from.
 Note: This of course also allows to estimate the threshold based on withheld data, for instance
@@ -13,7 +13,7 @@ stores a threshold attribute in the created scenario object."><title>Threshold a
 continuous suitability surfaces are converted into discrete representations of where
 suitable habitat might or might not exist. This so called threshold'ing
 can be done in various ways which are further described in the details.
-In case a RasterLayer or RasterBrick is provided as input in this function
+In case a SpatRaster is provided as input in this function
 for obj, it is furthermore necessary to provide a sf object for validation as
 there is no DistributionModel to read this information from.
 Note: This of course also allows to estimate the threshold based on withheld data, for instance
@@ -30,7 +30,7 @@ stores a threshold attribute in the created scenario object."><meta name="twitte
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,7 @@ stores a threshold attribute in the created scenario object."><meta name="twitte
 continuous suitability surfaces are converted into discrete representations of where
 suitable habitat might or might not exist. This so called <em>threshold'ing</em>
 can be done in various ways which are further described in the details.</p>
-<p>In case a RasterLayer or RasterBrick is provided as input in this function
+<p>In case a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> is provided as input in this function
 for <code>obj</code>, it is furthermore necessary to provide a <code>sf</code> object for validation as
 there is no <code><a href="DistributionModel-class.html">DistributionModel</a></code> to read this information from.
 <strong>Note:</strong> This of course also allows to estimate the threshold based on withheld data, for instance
@@ -101,7 +101,7 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 <span>  <span class="va">obj</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"mtp"</span>,</span>
 <span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  poi <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format <span class="op">=</span> <span class="st">"binary"</span>,</span>
 <span>  return_threshold <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -110,10 +110,10 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 <span><span class="co"># S4 method for ANY</span></span>
 <span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for RasterBrick</span></span>
+<span><span class="co"># S4 method for SpatRasterDataset</span></span>
 <span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for RasterLayer</span></span>
+<span><span class="co"># S4 method for SpatRaster</span></span>
 <span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityScenario</span></span>
@@ -123,7 +123,7 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>obj</dt>
-<dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code>Raster</code> object.</p></dd>
+<dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object.</p></dd>
 
 
 <dt>method</dt>
@@ -134,7 +134,7 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value for thresholding if method is fixed (Default: <code>NULL</code>).</p></dd>
 
 
-<dt>poi</dt>
+<dt>point</dt>
 <dd><p>A <code>sf</code> object containing observational data used for model training.</p></dd>
 
 
@@ -155,7 +155,7 @@ formatted thresholds are to be created (Default: <code>"binary"</code>). Also se
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A RasterLayer if used with a Raster object as input.
+<p>A <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> if a <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> object as input.
 Otherwise the threshold is added to the respective <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p>
     </div>
     <div class="section level2">

@@ -18,7 +18,7 @@ one offset by calculating the sum of all spatial-explicit layers."><meta name="t
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@ one offset by calculating the sum of all spatial-explicit layers.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_offset_bias</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, points <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution, raster</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution, SpatRaster</span></span>
 <span><span class="fu">add_offset_bias</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,7 +92,7 @@ one offset by calculating the sum of all spatial-explicit layers.</p>
 
 
 <dt>layer</dt>
-<dd><p>A <code>sf</code> or <code>RasterLayer</code> object with the range for the target feature.</p></dd>
+<dd><p>A <code>sf</code> or <code>SpatRaster</code> object with the range for the target feature.</p></dd>
 
 
 <dt>add</dt>
