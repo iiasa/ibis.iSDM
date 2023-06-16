@@ -55,6 +55,9 @@ methods::setMethod(
     )
     assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use XGBPriors')
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+
     # Create new prior object
     bdproto(
       'BARTPrior',

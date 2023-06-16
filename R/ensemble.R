@@ -123,7 +123,10 @@ methods::setMethod(
     # Check that weight lengths is equal to provided distribution objects
     if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
     # If weights vector is numeric, standardize the weights
-    if(is.numeric(weights)) weights <- weights / sum(weights)
+    if(is.numeric(weights)) {
+      if(any(weights < 0)) weights[weights < 0] <- 0 # Assume those contribute anything
+      weights <- weights / sum(weights)
+    }
 
     # For Distribution model ensembles
     if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){

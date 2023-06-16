@@ -152,6 +152,9 @@ methods::setMethod(
     # Check whether predictors already exist, if so overwrite
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
       bdproto(NULL, PredictorDataset,
@@ -253,6 +256,9 @@ methods::setMethod(
     # Check whether predictors already exist, if so overwrite
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+
     # Finally set the data to the BiodiversityScenario object
     x$set_predictors(
       bdproto(NULL, PredictorDataset,
@@ -283,7 +289,7 @@ methods::setMethod(
 #'
 #' @examples \dontrun{
 #' # Expects a filename pointing to a netCDF file.
-#' covariates <- formatBIOCLIMA(fname)
+#' covariates <- formatGLOBIOM(fname)
 #' }
 #' @keywords internal, utils
 formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
@@ -315,6 +321,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
 
   attrs <- list() # For storing the attributes
   sc <- vector() # For storing the scenario files
+  sc_area <- new_waiver() # For storing any area information if set
 
   # Now open the netcdf file with stars
   if( length( grep("netcdf", stars::detect.driver(fname), ignore.case = TRUE) )>0 ){
@@ -489,5 +496,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
     # Output type raster, use function from utils_scenario
     out <- stars_to_raster(sc, which = NULL, template = template)
     return(out)
-  } else { return( sc ) }
+  } else {
+    return( sc )
+    }
 }

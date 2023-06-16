@@ -164,6 +164,12 @@ test_that('Create and add priors', {
   expect_invisible(pp1$combine(pp2))
   expect_equal(pp1$get("forest"), c(0,100))
 
+  # --- #
+  # Check that name sanitation works.
+  pg <- priors(GDBPrior('FunckyName--Test__f','positive'))
+  expect_equal(as.character(pg$varnames()), "FunckyName_Test_f")
+
+
 })
 
 test_that('Add and modify priors to existing object', {

@@ -1,3 +1,7 @@
+# ibis.iSDM 0.0.5
+
+* Smaller bug fixes, addition of variable name sanitization by default.
+
 # ibis.iSDM 0.0.4
 
 * Smaller bug fixes with regards to writing outputs and adding pseudo-absences.

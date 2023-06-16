@@ -75,14 +75,17 @@ methods::setMethod(
     }
 
     # Calculate a default bias value if not already set
-    if(is.null(bias_value)) bias_value <- terra::global(layer, stat = "min", na.rm = TRUE)
+    if(is.null(bias_value)) bias_value <- terra::global(layer, stat = "min", na.rm = TRUE)[,1]
 
     # Check for infinite values
     assertthat::assert_that(
       terra::nlyr(layer) == length(bias_value),
-      all( terra::global(layer, "range", na.rm = TRUE) > 0),
-      msg = "Infinite values found in the layer (maybe log of 0?)."
+      all( terra::global(layer, "max", na.rm = TRUE)[,1] > 0),
+      msg = "Infinite values found in the bias layer (maybe log of 0?)."
     )
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
     # Now precede depending on method
     if(method == "partial"){

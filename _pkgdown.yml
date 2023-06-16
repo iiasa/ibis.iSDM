@@ -127,6 +127,7 @@ reference:
       - predictor_filter
       - run_stan
       - wrap_stanmodel
+      - sanitize_names
       - starts_with("stancode")
       - starts_with("write_")
       - starts_with("load_")

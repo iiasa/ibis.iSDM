@@ -76,6 +76,9 @@ methods::setMethod(
       msg = "Lower or upper limits specified incorrectly! They have to be negative/positive or zero each."
                             )
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+
     # Create new prior object
     bdproto(
       'GLMNETPrior',

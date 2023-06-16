@@ -172,6 +172,7 @@ methods::setMethod(
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
+    settings$set('ibis.cleannames', getOption("ibis.cleannames"))
     settings$set('verbose', verbose)
     settings$set('seed', getOption("ibis.seed"))
     # Other settings

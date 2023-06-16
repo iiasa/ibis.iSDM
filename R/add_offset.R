@@ -63,6 +63,9 @@ methods::setMethod(
     )
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit offset...')
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check for infinite values
@@ -210,6 +213,9 @@ methods::setMethod(
     )
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit bias offset...')
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check that background and range align, otherwise raise error
@@ -333,7 +339,8 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
 
-    # Save name
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check for infinite values
@@ -490,6 +497,9 @@ methods::setMethod(
       msg = "Range offset has infinite values. Check parameters!"
     )
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -607,6 +617,9 @@ methods::setMethod(
 
     # if(getOption("ibis.runparallel")) raster::endCluster()
     # ---- #
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(elev.prior) <- sanitize_names(names(elev.prior))
 
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){

@@ -243,5 +243,12 @@ test_that('Test data preparation convenience functions', {
   o <- st_kde(points = virtual_points,background = background)
   expect_s4_class(o, "SpatRaster")
 
+  # --- #
+  # Correct variable names
+  vars <- c("Climate-temperature2015", "Elevation__sealevel", "Landuse.forest..meanshare")
+  newvars <- sanitize_names(vars)
+  expect_length(newvars, 3)
+  expect_type(newvars, "character")
+
 })
 

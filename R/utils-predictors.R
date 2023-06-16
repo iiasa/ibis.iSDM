@@ -351,7 +351,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       for(val in names(env)){
         o <- makeHinge(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
         if(is.null(o)) next()
-        new_env <- c(new_env, fill_rasters(o, emptyraster(env) ) )
+        suppressWarnings( new_env <- c(new_env, fill_rasters(o, emptyraster(env) ) ) )
         rm(o)
       }
     } else {
@@ -383,7 +383,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.Raster(env)){
       new_env <- terra::rast()
       for(val in names(env)){
-        o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
+        suppressWarnings( o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
         new_env <- c(new_env, fill_rasters(o, emptyraster(env)) )
         rm(o)
@@ -416,7 +416,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.Raster(env)){
       new_env <- terra::rast()
       for(val in names(env)){
-        o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
+        suppressWarnings( o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
         new_env <- c(new_env, o)
         rm(o)
@@ -465,7 +465,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         # Multiply first with second entry
         o <- env[[ind[1,i]]] * env[[ind[2,i]]]
         names(o) <- paste0('inter__', ind[1, i],".", ind[2, i])
-        new_env <- c(new_env, o)
+        suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {

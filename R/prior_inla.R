@@ -74,6 +74,9 @@ methods::setMethod(
     # Match supplied type in case someone has been lazy
     type <- match.arg(type, c('clinear','prior.range','prior.sigma',names(INLA::inla.models()$prior) ), several.ok = FALSE)
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+
     # Other supplied arguments
     #args <- as.list(match.call())
 
