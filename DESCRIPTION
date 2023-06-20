@@ -30,6 +30,7 @@ Imports:
     graphics,
     methods,
     ncdf4,
+    ncmeta,
     parallel,
     posterior,
     proto (>= 1.0.0),

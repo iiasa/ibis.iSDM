@@ -257,6 +257,7 @@ raster_to_stars <- function(obj){
 
   # Get time dimension
   times <- terra::time(obj)
+  if(all(is.na( as.character(times) ))) stop("Predictor covariates are missing a time dimension! See terra::time() ")
   if(!all(inherits(times, "Date"))) times <- as.Date(times)
   prj <- sf::st_crs( terra::crs(obj) )
 
@@ -267,7 +268,8 @@ raster_to_stars <- function(obj){
   # Convert to stars step by step
   new_env <- list()
   for(i in 1:terra::nlyr(obj)){
-    suppressWarnings(  o <- stars::st_as_stars(obj[[i]]) )
+    oo <- subset(obj, i)
+    suppressWarnings(  o <- stars::st_as_stars(oo) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
 

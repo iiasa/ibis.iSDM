@@ -792,9 +792,12 @@ engine_xgboost <- function(x,
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+                emptyraster()
+            }
             prediction[] <- pred_xgb
-            prediction <- terra::mask(prediction, model$predictors_object$get_data()[[1]] )
             return(prediction)
           },
           # Get coefficients

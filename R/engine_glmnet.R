@@ -704,7 +704,11 @@ engine_glmnet <- function(x,
             assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
             # Now create spatial prediction
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- try({emptyraster( self$model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+                emptyraster()
+            }
             # sf::st_as_sf(df_sub, coords = c("x","y") )
             # terra::values(prediction) <- pred_gn[, layer]
             prediction[df_sub$rowid] <- pred_gn[, layer]

@@ -665,7 +665,11 @@ engine_stan <- function(x,
             )
 
             # Fill output with summaries of the posterior
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- try({emptyraster( self$model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+                emptyraster()
+            }
             prediction <- fill_rasters(pred_stan, prediction)
 
             return(prediction)
