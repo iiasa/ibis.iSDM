@@ -218,6 +218,17 @@ references:
     email: dpierce@ucsd.edu
   year: '2023'
 - type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Imports
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2023'
+- type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -511,22 +522,28 @@ references:
   - family-names: Csárdi
     given-names: Gábor
     email: csardi.gabor@gmail.com
+    orcid: https://orcid.org/0000-0001-7098-9676
   - family-names: Nepusz
     given-names: Tamás
     email: ntamas@gmail.com
+    orcid: https://orcid.org/0000-0002-1451-338X
   - family-names: Traag
     given-names: Vincent
+    orcid: https://orcid.org/0000-0003-3170-3879
   - family-names: Horvát
     given-names: Szabolcs
     email: szhorvat@gmail.com
+    orcid: https://orcid.org/0000-0002-3100-523X
   - family-names: Zanini
     given-names: Fabio
     email: fabio.zanini@unsw.edu.au
+    orcid: https://orcid.org/0000-0001-7097-8539
   - family-names: Noom
     given-names: Daniel
   - family-names: Müller
     given-names: Kirill
     email: kirill@cynkra.com
+    orcid: https://orcid.org/0000-0002-1416-3412
   year: '2023'
 - type: software
   title: knitr
@@ -579,17 +596,6 @@ references:
     given-names: Jimenez-Valverde
   - family-names: R.
     given-names: Real
-  year: '2023'
-- type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Suggests
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
   year: '2023'
 - type: software
   title: progress
