@@ -519,8 +519,8 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
     is.character(method),
     is.logical(cl)
   )
-  method <- match.arg(method, c("bilinear", "ngb"), several.ok = FALSE)
-
+  method <- match.arg(method, c("bilinear", "ngb", "near", "cubic", "lanczos", "sum", "max", "average", "mode"), several.ok = FALSE)
+  if(method == "ngb") method <- "near"
   if(sf::st_crs(data) != sf::st_crs(template)){
     # Project Raster layer
     data <- terra::project(data, terra::crs(template), method = method, threads = getOption("ibis.nthread"))

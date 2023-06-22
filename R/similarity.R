@@ -83,20 +83,22 @@ methods::setMethod(
 
     # Get biodiversity data
     bid <- obj$biodiversity$get_id_byType(ref_type)
+    if(length(bid)==0){
+      # Try and find an alternative layer
+      if(obj$biodiversity$length() == 1){
+        bid <- obj$biodiversity$get_types()
+      } else stop("No biodiversity layer found of the given type. Please check biodversity data!")
+    }
 
     # Get covariates
     covs <- obj$predictors$get_data()
+    assertthat::assert_that(is.Raster(covs), msg = "No Raster layer found!")
     # Extract covariates for reference data
     ref <- get_rastervalue(coords = obj$biodiversity$get_coordinates(names(bid)),
                            env = covs,
                            rm.na = FALSE)
     ref <- ref[,names(covs)]
-    # ref <- get_ngbvalue(
-    #   coords = obj$biodiversity$get_coordinates(names(bid)),
-    #   env = obj$predictors$get_data(df = TRUE),
-    #   field_space = c('x','y'),
-    #   longlat = terra::is.lonlat(covs)
-    # )
+
     # Subset if necessary
     if(!is.null(predictor_names)){ covs <- covs[[predictor_names]]; ref <- ref[,predictor_names]}
 
@@ -108,12 +110,21 @@ methods::setMethod(
                    ref  = ref,
                    full = full)
       # Calculate interpolation/extrapolated
-      rip <- terra::classify(out$mis,c( terra::global(out$mis,'min', na.rm = TRUE), 0,
-                                   terra::global(out$mis,'max', na.rm = TRUE)), ordered_result = TRUE)
+      rip <- terra::classify(out$mis,
+                             c( terra::global(out$mis,'min', na.rm = TRUE)[,1], 0,
+                                   terra::global(out$mis,'max', na.rm = TRUE)[,1]))
       rip <- terra::as.factor(rip)
-      levels(rip) <- data.frame(ID = levels(rip)[[1]],
-                                what = c('Extrapolation','Interpolation'))
+      for(i in 1:terra::nlyr(rip)){
+        ca <- data.frame(ID = levels(rip[[i]])[[1]][,1])
+        ca[names(rip[[i]])] <- c('Extrapolation','Interpolation')
+        levels(rip[[i]]) <- ca
+      }
       out$exip <- rip;rm(rip)
+
+      # Relabel most important
+      out$mod <- terra::as.factor(out$mod)
+      levels(out$mod) <- data.frame(ID = levels(out$mod)[[1]][,1],
+                                    variable = names(covs))
 
     } else if(method == 'nt') {
       out <- .nt12(prodat = covs,
@@ -179,12 +190,20 @@ methods::setMethod(
                    full = full)
       # Calculate interpolation/extrapolated
       rip <- terra::global(out$mis,
-                           c(terra::global(out$mis,'min', na.rm = TRUE), 0,
-                             terra::global(out$mis,'max', na.rm = TRUE)), na.rm = TRUE)
+                           c(terra::global(out$mis,'min', na.rm = TRUE)[,1], 0,
+                             terra::global(out$mis,'max', na.rm = TRUE)[,1]), na.rm = TRUE)
       rip <- terra::as.factor(rip)
-      levels(rip) <- data.frame(ID = levels(rip)[[1]],
-                                what = c('Extrapolation','Interpolation'))
+      for(i in 1:terra::nlyr(rip)){
+        ca <- data.frame(ID = levels(rip[[i]])[[1]][,1])
+        ca[names(rip[[i]])] <- c('Extrapolation','Interpolation')
+        levels(rip[[i]]) <- ca
+      }
       out$exip <- rip;rm(rip)
+
+      # Relabel most important
+      out$mod <- terra::as.factor(out$mod)
+      levels(out$mod) <- data.frame(ID = levels(out$mod)[[1]][,1],
+                                    variable = names(covs))
 
     } else {
       stop('Not yet implemented!')
@@ -315,7 +334,7 @@ methods::setMethod(
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
   nt_novel <- emptyraster(bg)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  or1 <- c(terra::global(nt1,'min', na.rm = TRUE), 0)
+  or1 <- c(terra::global(nt1,'min', na.rm = TRUE)[,1], 0)
   o_low <- terra::classify(nt1, or1, include.lowest = TRUE)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
@@ -340,20 +359,20 @@ methods::setMethod(
 .mess <- function(covs, ref, full=FALSE) {
   # Convert to data.frame
   if(!methods::is(ref, 'data.frame')) {
-    ref <- as.data.frame(ref)
+    ref <- as.data.frame(ref,na.rm = FALSE)
   }
   # Make dummy template rasters
   if(is.Raster(covs)) {
     r <- TRUE
     if(isTRUE(full)) {
-      out <- c(replicate( terra::nlyr(covs), terra::init(covs, function(x) NA)))
+      out <- c(replicate( terra::nlyr(covs), terra::init(covs, NA)))
     } else {
-      out <- terra::init(covs, function(x) NA)
+      out <- terra::init(covs, NA)
     }
   } else r <- FALSE
   ref <- stats::na.omit(ref)   # Remove NAs
   if(!methods::is(covs, 'data.frame')) {
-    covs <- as.data.frame(covs)
+    covs <- as.data.frame(covs, na.rm = FALSE)
   }
   # Calculate dimensions (range)
   if(is.null(dim(ref))) {
@@ -388,7 +407,7 @@ methods::setMethod(
 
   if(isTRUE(r)) {
     # Calculate most dissimilar surface
-    most_dissimilar <- terra::rast(out)
+    most_dissimilar <- emptyraster(out)
     most_dissimilar[] <- most_dissimilar_vec
     most_dissimilar <- as.factor(most_dissimilar)
     rat <- levels(most_dissimilar)[[1]]

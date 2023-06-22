@@ -1,7 +1,8 @@
 # ibis.iSDM 0.0.5
 
-* Bug with with `write_model`, now converting `terra` objects to `data.frames` between impport/export.
-* Smaller bug fixes, addition of variable name sanitization by default.
+* Further smaller fixes to get towards a CRAN submission #38
+* Bug with with `write_model`, now converting `terra` objects to `data.frames` between import/export.
+* Smaller bug fixes, for example in `similarity`, addition of variable name sanitization to predictors by default.
 
 # ibis.iSDM 0.0.4
 

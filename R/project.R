@@ -401,15 +401,18 @@ methods::setMethod(
         scenario_constraints$boundary$params$layer <- alignRasters(
           scenario_constraints$boundary$params$layer,
           proj,
-          method = "near", func = terra::modal, cl = FALSE
+          method = "ngb", func = terra::modal, cl = FALSE
         )
+        scenario_constraints$boundary$params$layer <- terra::extend(scenario_constraints$boundary$params$layer,
+                                                                    proj)
+
       }
       proj <- terra::mask(proj, scenario_constraints$boundary$params$layer)
       # Get background and ensure that all values outside are set to 0
       proj[is.na(proj)] <- 0
       proj <- terra::mask(proj, fit$model$background )
       # Also for thresholds if existing
-      if(terra::nlyr(proj_thresh)>0){
+      if(terra::nlyr(proj_thresh)>0 && terra::hasValues(proj_thresh) ){
         proj_thresh <- terra::mask(proj_thresh, scenario_constraints$boundary$params$layer)
         proj_thresh[is.na(proj_thresh)] <- 0
         proj_thresh <- terra::mask(proj_thresh, fit$model$background )
@@ -449,7 +452,7 @@ methods::setMethod(
         terra::time(new_proj) <- times
         proj <- new_proj; rm(new_proj)
         # Were thresholds calculated? If yes, recalculate on the smoothed estimates
-        if(terra::nlyr(proj_thresh)>0){
+        if(terra::nlyr(proj_thresh)>0 && terra::hasValues(proj_thresh)){
           new_thresh <- proj
           new_thresh[new_thresh < scenario_threshold[1]] <- 0
           new_thresh[new_thresh >= scenario_threshold[1]] <- 1

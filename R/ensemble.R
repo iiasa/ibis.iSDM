@@ -46,8 +46,8 @@ NULL
 #' ignore any of the layer names in ensembles of `SpatRaster` objects.
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).
 #' @param uncertainty A [`character`] indicating how the uncertainty among models should be calculated. Available options include
-#' \code{"none"}, the standard deviation (\code{"sd"}), the coefficient of variation (\code{"cv"}, Default)
-#' or the range between the lowest and highest value (\code{"range"}).
+#' \code{"none"}, the standard deviation (\code{"sd"}), the average of all PCA axes except the first \code{"pca"},
+#' the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).
 #' @references
 #' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
 #' @examples
@@ -118,7 +118,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
-    uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range'), several.ok = FALSE)
+    uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
 
     # Check that weight lengths is equal to provided distribution objects
     if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
@@ -208,11 +208,17 @@ methods::setMethod(
         # Add attributes on the method of ensembling
         attr(new, "method") <- method
         if(uncertainty!='none'){
+          if(uncertainty == "pca") {
+            # If PCA selected, calculate uncertainty based as average of all PCA axes (except first)
+            rasp <- predictor_transform(ras, option = "pca")
+            rasp <- subset(rasp, 2:terra::nlyr(rasp))
+          } else rasp <- NULL
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
                                      "sd" = terra::app(ras, sd, na.rm = TRUE),
                                      "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                     "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
+                                     "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE),
+                                     "pca" = terra::mean(rasp, na.rm = TRUE)
           )
           names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
           # Add attributes on the method of ensembling
