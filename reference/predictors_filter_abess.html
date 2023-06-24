@@ -89,6 +89,10 @@ in Zhu et al. (2021) and Zhu et al. (2020).</p>
 <dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code> with extracted environmental covariates for a given species.</p></dd>
 
 
+<dt>observed</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with observational records to use for determining variable importance.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>Which method to use for constructing the correlation matrix (Options: <code>'pearson'</code> (Default),
 <code>'spearman'</code>| <code>'kendal'</code>), <code>"abess"</code>, or <code>"boruta"</code>.</p></dd>
@@ -100,7 +104,7 @@ in Zhu et al. (2021) and Zhu et al. (2020).</p>
 
 <dt>tune.type</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indicating the type used for subset evaluation.
-Options are <code>c("gic", "ebic", "bic", "aic", "cv")</code> as listed in abess.</p></dd>
+Options are <code>c("gic", "ebic", "bic", "aic", "cv")</code> as listed in <code>abess</code>.</p></dd>
 
 
 <dt>lambda</dt>

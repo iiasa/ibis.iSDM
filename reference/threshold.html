@@ -150,6 +150,10 @@ formatted thresholds are to be created (Default: <code>"binary"</code>). Also se
 <dt>...</dt>
 <dd><p>other parameters not yet set.</p></dd>
 
+
+<dt>tr</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifiying the specific threshold for scenarios.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -164,12 +168,12 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 <li><p><code>'mtp'</code> = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.</p></li>
 <li><p><code>'percentile'</code> = For a percentile threshold. A <code>value</code> as parameter has to be set here.</p></li>
 <li><p><code>'min.cv'</code> = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.</p></li>
-<li><p><code>'TSS'</code> = Determines the optimal TSS (True Skill Statistic). Requires the modEvA package to be installed.</p></li>
-<li><p><code>'kappa'</code> = Determines the optimal kappa value (Kappa). Requires the modEvA package to be installed.</p></li>
-<li><p><code>'F1score'</code> = Determines the optimal F1score (also known as Sorensen similarity). Requires the modEvA package to be installed.</p></li>
-<li><p><code>'F1score'</code> = Determines the optimal sensitivity of presence records. Requires the modEvA package to be installed.</p></li>
-<li><p><code>'Sensitivity'</code> = Determines the optimal sensitivity of presence records. Requires the modEvA package to be installed.</p></li>
-<li><p><code>'Specificity'</code> = Determines the optimal sensitivity of presence records. Requires the modEvA package to be installed.</p></li>
+<li><p><code>'TSS'</code> = Determines the optimal TSS (True Skill Statistic). Requires the <code>modEvA</code> package to be installed.</p></li>
+<li><p><code>'kappa'</code> = Determines the optimal kappa value (Kappa). Requires the <code>modEvA</code> package to be installed.</p></li>
+<li><p><code>'F1score'</code> = Determines the optimal F1score (also known as Sorensen similarity). Requires the <code>modEvA</code> package to be installed.</p></li>
+<li><p><code>'F1score'</code> = Determines the optimal sensitivity of presence records. Requires the <code>modEvA</code> package to be installed.</p></li>
+<li><p><code>'Sensitivity'</code> = Determines the optimal sensitivity of presence records. Requires the <code>modEvA</code> package to be installed.</p></li>
+<li><p><code>'Specificity'</code> = Determines the optimal sensitivity of presence records. Requires the <code>modEvA</code> package to be installed.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -180,7 +184,7 @@ Otherwise the threshold is added to the respective <code><a href="DistributionMo
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>modEvA</p></div>
+    <div class="dont-index"><p><code>modEvA</code></p></div>
     </div>
 
     <div class="section level2">

@@ -94,7 +94,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-06-22</h4>
+            <h4 data-toc-skip class="date">2023-06-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/06_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/06_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>06_frequently-asked-questions.Rmd</code></div>
@@ -507,7 +507,13 @@ principle</a>.</li>
 </ul></details><details><summary><b>My model keeps crashing, what can I do?</b>
 </summary>
 Sorry to hear and unless the model or input data are grossely
-misspecified, this should not happen. Please report an <a href="https://github.com/iiasa/ibis.iSDM/issues" class="external-link">issue</a> with the
+misspecified, this should not happen. Consider changing the input
+covariates. Often scaling the covariates (see
+<code><a href="../reference/add_predictors.html">add_predictors()</a></code>) can help with model convergence.
+Similarly if the use of discrete variables (e.g. `<code>factor</code>
+predictors) results in errors, consider setting the parameter
+“explode_factors” to TRUE in <code><a href="../reference/add_predictors.html">add_predictors()</a></code>. This will
+create additional covariates for every factor level. Please report an <a href="https://github.com/iiasa/ibis.iSDM/issues" class="external-link">issue</a> with the
 concrete error message, your R session information (call
 <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>) and preferably some example data and code.
 </details>
@@ -536,6 +542,15 @@ for an example.</p>
 <span><span class="co"># The output is a normalized prediction surface </span></span>
 <span><span class="co"># created via (x - min) / (max - min) or x/sum(x) respectively</span></span>
 <span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="fu">calc_suitabilityindex</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</details><details><summary><b>The names of my variables are slightly changing when added to a
+model?</b>
+</summary><p>This is a feature, not a bug ;) Many covariates often come with
+unusual characters and symbols that can not be readily used in equations
+or in queries of tabular data. The <code><a href="../reference/sanitize_names.html">sanitize_names()</a></code>
+function cleans those variable names and removes / resets non conform
+symbols.</p>
+<pre><code><span><span class="co"># It can be disabled by setting the following option to false at the start of the script.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'ibis.cleannames'</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
 </details>
 </div>
 </div>

@@ -66,7 +66,7 @@ Attributes that have significantly worst importance than shadow ones are being c
     </div>
 
     <div class="ref-description section level2">
-    <p>This function uses the Boruta package to identify predictor variables with little information content. It iteratively
+    <p>This function uses the <code>Boruta</code> package to identify predictor variables with little information content. It iteratively
 compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
 Attributes that have significantly worst importance than shadow ones are being consecutively dropped.</p>
     </div>
@@ -75,7 +75,7 @@ Attributes that have significantly worst importance than shadow ones are being c
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictors_filter_boruta</span><span class="op">(</span></span>
 <span>  <span class="va">env</span>,</span>
-<span>  <span class="va">observed</span>,</span>
+<span>  <span class="va">obs</span>,</span>
 <span>  <span class="va">method</span>,</span>
 <span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  iter <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -111,6 +111,10 @@ information is known.</p></dd>
 <dt>...</dt>
 <dd><p>Other options for a specific method</p></dd>
 
+
+<dt>observed</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with observational records to use for determining variable importance.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -120,7 +124,7 @@ information is known.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>This package depends on the ranger package to iteratively fit randomForest models.</p>
+    <p>This package depends on the <code>ranger</code> package to iteratively fit randomForest models.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

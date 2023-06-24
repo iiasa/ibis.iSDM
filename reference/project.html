@@ -91,7 +91,12 @@ Any constrains specified in the scenario object are applied during the projectio
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>...</dt>
+    <dl><dt>x</dt>
+<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with set predictors.
+Note that some constrains such as <code>MigClim</code> can still simulate future change without projections.</p></dd>
+
+
+<dt>...</dt>
 <dd><p>passed on parameters.</p></dd>
 
 
@@ -101,7 +106,7 @@ include <code>"none"</code> (Default), <code>"annual"</code>, <code>"monthly"</c
 
 
 <dt>stabilize</dt>
-<dd><p>A <code>boolean</code> value indicating whether the suitability projection should be stabilized (Default: <code>FALSE</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating whether the suitability projection should be stabilized (Default: <code>FALSE</code>).</p></dd>
 
 
 <dt>stabilize_method</dt>
@@ -110,11 +115,6 @@ include <code>"none"</code> (Default), <code>"annual"</code>, <code>"monthly"</c
 
 <dt>layer</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> specifying the layer to be projected (Default: <code>"mean"</code>).</p></dd>
-
-
-<dt>mod</dt>
-<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with set predictors.
-Note that some constrains such as MigClim can still simulate future change without projections.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -126,7 +126,7 @@ Note that some constrains such as MigClim can still simulate future change witho
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>In the background the function <code>x$project()</code> for the respective model object is called, where
-<code>x</code> is fitted model object. For specifics on the constrains, see the relevant constrain functions,
+<code>x</code> is fitted model object. For specifics on the constrains, see the relevant <code>constrain</code> functions,
 respectively:</p><ul><li><p><code>add_constrain()</code> for generic wrapper to add any of the available constrains.</p></li>
 <li><p><code>add_constrain_dispersal()</code> for specifying dispersal constrain on the temporal projections at each step.</p></li>
 <li><p><code>add_constrain_MigClim()</code> Using the <span class="pkg">MigClim</span> R-package to simulate dispersal in projections.</p></li>

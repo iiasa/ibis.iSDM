@@ -68,7 +68,7 @@ Some of the options require different packages to be pre-installed, such as rang
     <div class="ref-description section level2">
     <p>This function helps to remove highly correlated variables from a set of predictors. It supports multiple options
 some of which require both environmental predictors and observations, others only predictors.</p>
-<p>Some of the options require different packages to be pre-installed, such as ranger or Boruta.</p>
+<p>Some of the options require different packages to be pre-installed, such as <code>ranger</code> or <code>Boruta</code>.</p>
     </div>
 
     <div class="section level2">
@@ -95,10 +95,6 @@ information is known.</p></dd>
 <dt>...</dt>
 <dd><p>Other options for a specific method</p></dd>
 
-
-<dt>obs</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with observational records to use for determining variable importance. Can be <code>NULL</code>.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -114,9 +110,9 @@ If the function fails due to some reason return <code>NULL</code>.</p>
     <p>Available options are:</p><ul><li><p><code>"none"</code> No prior variable removal is performed (Default).</p></li>
 <li><p><code>"pearson"</code>, <code>"spearman"</code> or <code>"kendall"</code> Makes use of pairwise comparisons to identify and
 remove highly collinear predictors (Pearson's <code>r &gt;= 0.7</code>).</p></li>
-<li><p><code>"abess"</code> A-priori adaptive best subset selection of covariates via the abess package (see References). Note that this
+<li><p><code>"abess"</code> A-priori adaptive best subset selection of covariates via the <code>abess</code> package (see References). Note that this
 effectively fits a separate generalized linear model to reduce the number of covariates.</p></li>
-<li><p><code>"boruta"</code> Uses the Boruta package to identify non-informative features.</p></li>
+<li><p><code>"boruta"</code> Uses the <code>Boruta</code> package to identify non-informative features.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
