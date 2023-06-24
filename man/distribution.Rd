@@ -6,9 +6,9 @@
 \usage{
 distribution(background, limits = NULL)
 
-\S4method{distribution}{SpatRaster}(background)
+\S4method{distribution}{SpatRaster, ANY}(background, limits)
 
-\S4method{distribution}{sf}(background)
+\S4method{distribution}{sf, ANY}(background, limits)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a

@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 #' @importFrom foreach %do% %dopar%
+#' @importFrom methods as
 #' @importFrom stats effects
 
 ## usethis namespace: start

@@ -75,7 +75,7 @@ methods::setGeneric("ensemble",
 
 #' @name ensemble
 #' @rdname ensemble
-#' @usage \S4method{ensemble}{ANY}(...)
+#' @usage \S4method{ensemble}{ANY, character, numeric, numeric, character, logical, character}(..., method, weights, min.value, layer, normalize, uncertainty)
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
@@ -466,7 +466,7 @@ methods::setGeneric("ensemble_partial",
 
 #' @name ensemble_partial
 #' @rdname ensemble_partial
-#' @usage \S4method{ensemble_partial}{ANY}(...)
+#' @usage \S4method{ensemble_partial}{ANY, character, character, character, logical}(..., x.var, method, layer, normalize)
 methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),

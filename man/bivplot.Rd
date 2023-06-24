@@ -10,6 +10,7 @@ bivplot(
   yvar = "sd",
   plot = TRUE,
   fname = NULL,
+  title = NULL,
   col = "BlueGold",
   ...
 )
@@ -27,12 +28,12 @@ bivplot(
 
 \item{fname}{A \code{\link{character}} specifying the output filename a created figure should be written to.}
 
+\item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
+
 \item{col}{A \code{\link{character}} stating the colour palette to use. Has to be either a predefined value or a
 vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
 
 \item{...}{Other engine specific parameters.}
-
-\item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
 }
 \value{
 Saved bivariate plot in \code{'fname'} if specified, otherwise plot.

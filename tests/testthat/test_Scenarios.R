@@ -35,6 +35,8 @@ test_that('Scenarios and constraints', {
   )
   sf::st_crs(pred_future) <- sf::st_crs(4326)
 
+  expect_true(is.stars(pred_future))
+
   pred_current <- stars_to_raster(pred_future, 1)[[1]]
   names(pred_current) <- names(pred_future)
 

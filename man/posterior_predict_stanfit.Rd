@@ -15,7 +15,7 @@ posterior_predict_stanfit(
 )
 }
 \arguments{
-\item{obj}{A \code{\link{stanfit}} object (as used by \link{rstan}).}
+\item{obj}{A \code{"stanfit"} object (as used by \code{\link{rstan}}).}
 
 \item{form}{A \code{\link{formula}} object created for the \link{DistributionModel}.}
 
@@ -37,6 +37,6 @@ to project coefficients obtained from Bayesian models to new/novel contexts.
 \references{
 \itemize{
 \item \url{https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed}.
-\item The \link{brms} R-package.
+\item The \code{\link{brms}} R-package.
 }
 }

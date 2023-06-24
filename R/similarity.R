@@ -14,13 +14,14 @@ NULL
 #' a [`data.frame`] with extracted values (corresponding to those given in `obj`).
 #' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`].
 #' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.
+#' @param predictor_names An optional [`character`] specifying the covariates to be used (Default: \code{NULL}).
 #' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
 #' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
 #' @param ... other options (Non specified).
 #' @return
 #'  This function returns a list containing:
 #'  * `similarity`: A `SpatRaster` object with multiple layers giving the environmental
-#'  similarities for each variable in `x` (only included when `full=TRUE`);
+#'  similarities for each variable in `x` (only included when \code{"full=TRUE"});
 #'  * `mis`: a `SpatRaster` layer giving the minimum similarity value
 #'   across all variables for each location (i.e. the MESS);
 #'  * `exip`: a `SpatRaster` layer indicating whether any model would interpolate
@@ -40,7 +41,7 @@ NULL
 #' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool
 #' for quantifying novelty due to covariate range and correlation change when projecting
 #' species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
-#' @seealso [dismo] R-package
+#' @seealso [`dismo`] R-package.
 #' @name similarity
 #' @export
 #' @examples
@@ -64,7 +65,7 @@ methods::setGeneric(
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity
 #' @rdname similarity
-#' @usage \S4method{similarity}{BiodiversityDistribution}(obj)
+#' @usage \S4method{similarity}{BiodiversityDistribution, character, character, character, logical, logical}(obj, ref_type, method, predictor_names, full, plot)
 methods::setMethod(
   "similarity",
   methods::signature(obj = "BiodiversityDistribution"),
@@ -75,6 +76,7 @@ methods::setMethod(
                             is.character(method),
                             is.null(predictor_names) || is.character(predictor_names)
     )
+    # ref_type = 'poipo'; method = 'mess'; predictor_names = NULL; full = FALSE
     # Check that data and predictors are there
     assertthat::assert_that(!is.Waiver(obj$biodiversity),!is.Waiver(obj$predictors))
     assertthat::assert_that(is.null(predictor_names) || all(predictor_names %in% obj$get_predictor_names()) )
@@ -125,6 +127,11 @@ methods::setMethod(
       out$mod <- terra::as.factor(out$mod)
       levels(out$mod) <- data.frame(ID = levels(out$mod)[[1]][,1],
                                     variable = names(covs))
+      # Reduce to SpatRaster if not one already
+      if(!is.Raster(out)){
+        out <- Reduce(c, out)
+        names(out) <- c("mis", "mod", "mos", "exip")
+      }
 
     } else if(method == 'nt') {
       out <- .nt12(prodat = covs,
@@ -136,18 +143,17 @@ methods::setMethod(
       if(method == 'mess'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(2,2))
-        terra::plot(out$mis,col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
+        terra::plot(exp(out$mis),col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface\n (method: ',method,', exp. transformed)'))
         terra::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
-        terra::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
-        terra::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
+        terra::plot(out$mod,col = ibis_colours[['distinct_random']][1:length(unique(out$mod)[,1])], main = paste0('Most dissimilar from reference'))
+        terra::plot(out$mos,col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)[,1]))], main = paste0('Most similar to reference'))
         graphics::par(par.ori)
       } else if(method == 'nt'){
         par.ori <- graphics::par(no.readonly = TRUE)
-        graphics::par(mfrow=c(1,3))
-        terra::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
-        terra::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
-        terra::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
-        # FIXME: add categorical legend left to it
+        graphics::par(mfrow=c(3,1))
+        terra::plot(exp(out$NT1),col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation\n(exp. transformed)'))
+        terra::plot(log(out$NT2),col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity\n(log. transformed)'))
+        terra::plot(out$novel,col = ibis_colours[['distinct_random']][4:6],main = paste0('Novel conditions (method: ',method,')'))
         graphics::par(par.ori)
       }
     } else {
@@ -214,17 +220,26 @@ methods::setMethod(
       if(method == 'mess'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(2,2))
-        terra::plot(out$mis, col = ibis_colours[['viridis_plasma']],main = paste0('Similarity surface (method: ',method,')'))
-        terra::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],main = paste0('Extrapolated vs interpolated conditions'))
-        terra::plot(out$mod, col = ibis_colours[['distinct_random']][1:length(unique(out$mod))], main = paste0('Most dissimilar from reference'))
-        terra::plot(out$mos, col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))], main = paste0('Most similar to reference'))
+        terra::plot(out$mis, col = ibis_colours[['viridis_plasma']],
+                    main = paste0('Similarity surface (method: ',method,')'))
+        terra::plot(out$exip,col = ibis_colours[['distinct_random']][1:2],
+                    main = paste0('Extrapolated vs interpolated conditions'))
+        terra::plot(out$mod,
+                    col = ibis_colours[['distinct_random']][1:length(unique(out$mod))],
+                    main = paste0('Most dissimilar from reference'))
+        terra::plot(out$mos,
+                    col = ibis_colours[['distinct_random']][length(ibis_colours[['distinct_random']]):(length(ibis_colours[['distinct_random']])-length(unique(out$mos)))],
+                    main = paste0('Most similar to reference'))
         graphics::par(par.ori)
       } else if(method == 'nt'){
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow=c(1,3))
-        terra::plot(out$NT1,col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation'))
-        terra::plot(out$NT2,col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity'))
-        terra::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],main = paste0('Novel conditions (method: ',method,')'))
+        terra::plot(out$NT1,col = ibis_colours[['viridis_plasma']],
+                    main = paste0('Univariate extrapolation'))
+        terra::plot(out$NT2,col = ibis_colours[['viridis_orig']],
+                    main = paste0('Non-analogous dissimilarity'))
+        terra::plot(out$novel,col = ibis_colours[['distinct_random']][1:3],
+                    main = paste0('Novel conditions (method: ',method,')'))
         graphics::par(par.ori)
       }
     } else {
@@ -334,8 +349,7 @@ methods::setMethod(
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
   nt_novel <- emptyraster(bg)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  or1 <- c(terra::global(nt1,'min', na.rm = TRUE)[,1], 0)
-  o_low <- terra::classify(nt1, or1, include.lowest = TRUE)
+  o_low <- nt1 < 0
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
   # non-analogous covariate combinations
@@ -344,34 +358,40 @@ methods::setMethod(
   nt_novel[o_mid == 1] <- 2
   nt_novel[o_high == 1] <- 3
   nt_novel <- terra::as.factor(nt_novel)
-  levels(nt_novel) <- data.frame(ID = levels(nt_novel)[[1]],
+  levels(nt_novel) <- data.frame(ID = levels(nt_novel)[[1]][,1],
                             what = c('Outside reference','Within reference','Novel combinations'))
 
   # Create output stack
-  out <- c(nt1, nt2, nt_novel, quick = TRUE)
+  out <- c(nt1, nt2, nt_novel)
   names(out) <- c('NT1','NT2','novel')
   return(out)
 }
 
 #' Function to calculate Multivariate Environmental Similarity index
+#' @description
+#' Internal function to calculate the MESS
+#' @param covs A [`SpatRaster`] with the covariates.
+#' @param ref A [`data.frame`] with the covariates for the reference values.
+#' @param full A [`logical`] indication whether the full extent be calculated.
+#' @returns Á [`SpatRaster`] object.
 #' @noRd
 #' @keywords internal
 .mess <- function(covs, ref, full=FALSE) {
   # Convert to data.frame
-  if(!methods::is(ref, 'data.frame')) {
+  if(!is.data.frame(ref)) {
     ref <- as.data.frame(ref,na.rm = FALSE)
   }
   # Make dummy template rasters
   if(is.Raster(covs)) {
     r <- TRUE
     if(isTRUE(full)) {
-      out <- c(replicate( terra::nlyr(covs), terra::init(covs, NA)))
-    } else {
       out <- terra::init(covs, NA)
+    } else {
+      out <- emptyraster(covs)
     }
   } else r <- FALSE
   ref <- stats::na.omit(ref)   # Remove NAs
-  if(!methods::is(covs, 'data.frame')) {
+  if(!is.data.frame(covs)) {
     covs <- as.data.frame(covs, na.rm = FALSE)
   }
   # Calculate dimensions (range)

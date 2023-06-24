@@ -17,6 +17,7 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   r3 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .2,sd = .7))
 
   expect_s4_class(r1, "SpatRaster")
+  expect_true(is.Raster(r1))
   expect_true( is_comparable_raster(r1,r2) )
 
   # Predictor transformations
@@ -120,47 +121,25 @@ test_that('Test other generic functions', {
   # Colours working
   expect_type(ibis.iSDM:::ibis_colours, "list")
 
-})
+  # New id
+  expect_no_error(id <- new_id() )
+  expect_true(is.Id(id))
+  expect_type(as.character(id), "character")
+  expect_true( as.Id(as.character(id)) |> is.Id() )
 
-# ---- #
-# Other generic functions in the package
-test_that('Test various thresholds calculations', {
+  # New waivers
+  expect_no_error(new <- new_waiver())
+  expect_true(is.Waiver(new))
 
-  suppressWarnings(
-    requireNamespace("terra", quietly = TRUE)
-  )
-  # Dummy layer
-  r1 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+  # New form
+  expect_no_error(form <- y ~ x)
+  expect_true(is.formula(form))
 
-  # Make some dummy points
-  ss <- terra::spatSample(r1, size = 10, as.points = TRUE) |> sf::st_as_sf()
-  expect_s3_class(ss, "sf")
-  ss$observed <- rbinom(10, 1, .5)
-  if(length(unique(ss$observed))<2) ss$observed <- c(0,0,0,1,0,1,1,1,0,0) # Resample
-
-  expect_error( tr <- threshold(r1, method = "fixed") )
-  tr1 <- threshold(r1, method = "fixed", value = .5)
-  expect_s4_class(tr1, "SpatRaster")
-
-  # Try different formats
-  tr1a <- threshold(r1, method = "fixed", value = .5,format = "binary")
-  expect_s4_class(tr1a, "SpatRaster")
-  tr1b <- threshold(r1, method = "fixed", value = .5,format = "norm")
-  expect_s4_class(tr1b, "SpatRaster")
-  tr1c <- threshold(r1, method = "fixed", value = .5,format = "perc")
-  expect_s4_class(tr1c, "SpatRaster")
-  expect_true(is.factor(tr1c))
-
-  expect_error( tr2 <- threshold(r1, method = "perc", value = .1) )
-  tr2 <- threshold(r1, method = "perc", value = .1, point = ss)
-  expect_s4_class(tr2, "SpatRaster")
-
-  tr3 <- threshold(r1, method = "mtp", point = ss)
-  expect_s4_class(tr3, "SpatRaster")
-
-  expect_error(tr4 <- threshold(r1, method = "min.cv", point = ss))
-  tr4 <- threshold(r1, method = "min.cv",value = .2, point = ss)
-  expect_s4_class(tr4, "SpatRaster")
+  # Form functions
+  expect_type(logistic(5), "double")
+  expect_warning(logit(5))
+  suppressWarnings( expect_true( is.nan(logit(5)) ) )
+  expect_length(logisticRichard(rpois(10,.5)), 10)
 
 })
 
@@ -249,6 +228,18 @@ test_that('Test data preparation convenience functions', {
   newvars <- sanitize_names(vars)
   expect_length(newvars, 3)
   expect_type(newvars, "character")
+
+  # --- #
+  # Similarity function test
+  x <- distribution(background) |> add_predictors(predictors)
+  expect_error( m1 <- similarity(x, method = "mess") )
+  x <- x |> add_biodiversity_poipo(virtual_points)
+  m1 <- similarity(x, method = "mess", plot = FALSE)
+  expect_true(is.Raster(m1))
+  expect_true(any(is.factor(m1)))
+  m2 <- similarity(x, method = "nt", plot = FALSE)
+  expect_true(is.Raster(m2))
+  expect_true(any(is.factor(m2)))
 
 })
 

@@ -1,6 +1,7 @@
 # ibis.iSDM 0.0.5
 
-* Further smaller fixes to get towards a CRAN submission #38
+* Addition of 5 parameter logistic curve offsets with parameter search to `add_offset`.
+* Further smaller documentation fixes towards a CRAN submission #38
 * Bug with with `write_model`, now converting `terra` objects to `data.frames` between import/export.
 * Smaller bug fixes, for example in `similarity`, addition of variable name sanitization to predictors by default.
 

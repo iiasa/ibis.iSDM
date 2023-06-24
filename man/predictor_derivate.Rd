@@ -22,7 +22,7 @@ predictor_derivate(
 
 \item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
 
-\item{deriv}{A \code{\link{vector}} with \code{\link{characters}} of specific derivates to create (Default: \code{NULL}).}
+\item{deriv}{A \code{\link{vector}} with \code{\link{character}} of specific derivates to create (Default: \code{NULL}).}
 
 \item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).}
 

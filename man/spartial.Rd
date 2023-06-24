@@ -5,7 +5,7 @@
 \alias{spartial.DistributionModel}
 \title{Obtain spatial partial effects of trained model}
 \usage{
-spartial(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...)
+spartial(mod, x.var, constant = NULL, plot = FALSE, ...)
 
 \S4method{spartial}{ANY,character}(mod, x.var)
 

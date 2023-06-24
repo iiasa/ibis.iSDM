@@ -10,7 +10,7 @@ sanitize_names(names)
 \item{names}{A \code{\link{vector}} of \code{\link{character}} vectors to be sanitized.}
 }
 \value{
-A \code{\link{vector}} of sanitized \code{\link{characters}}.
+A \code{\link{vector}} of sanitized \code{\link{character}}.
 }
 \description{
 Prepared covariates often have special characters in their variable names

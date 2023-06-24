@@ -227,7 +227,7 @@ thresholdval <- function(x, knot) {
 #' This function converts special characters of variable names into a format
 #'
 #' @param names A [`vector`] of [`character`] vectors to be sanitized.
-#' @returns A [`vector`] of sanitized [`characters`].
+#' @returns A [`vector`] of sanitized [`character`].
 #' @concept Inspired from [`inlabru`] \code{"bru_standardise_names"} function.
 #' @examples
 #' # Correct variable names

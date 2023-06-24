@@ -47,8 +47,8 @@ Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
     covr,
-    inlabru,
-    glmnet,
+    inlabru (>= 2.6.0),
+    glmnet (>= 4.1),
     glmnetUtils,
     dbarts (>= 0.9-22),
     deldir,
@@ -58,11 +58,11 @@ Suggests:
     knitr,
     mboost,
     modEvA,
-    ncmeta,
     progress,
     rmarkdown,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
+    gnlm,
     testthat,
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
@@ -134,6 +134,7 @@ Collate:
     'train.R'
     'utils-bart.R'
     'utils-breg.R'
+    'utils-form.R'
     'utils-gdb.R'
     'utils-glmnet.R'
     'utils-predictors.R'

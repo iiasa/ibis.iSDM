@@ -1,19 +1,52 @@
-#' Validation of distribution object
+#' Validation of a fitted distribution object
 #'
-#' @description This function conducts a comprehensive model evaluation based on
+#' @description
+#' This function conducts a model evaluation based on
 #' either on the fitted point data or any supplied independent.
 #' **Currently only supporting point datasets. For validation of integrated models more work is needed.**
+#'
+#' @details
+#' The \code{'validate'} function calculates different validation metrics
+#' depending on the output type.
+#'
+#' The output metrics for each type are defined as follows:
+#' **Continuous:**
+#'
+#' * \code{'n'} = Number of observations.
+#' * \code{'rmse'} = Root Mean Square Error, \deqn{ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} }
+#' * \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
+#' * \code{'logloss'} = Log loss, TBD
+#' * \code{'normgini'} = Normalized Gini index, TBD
+#' * \code{'cont.boyce'} = Continuous Boyce index, TBD
+#'
+#' **Discrete:**
+#'
+#' * \code{'n'} = Number of observations.
+#' * \code{'auc'} = Area under the curve, TBD
+#' * \code{'overall.accuracy'} = Overall Accuracy, TBD
+#' * \code{'true.presence.ratio'} = True presence ratio or Jaccard index, TBD
+#' * \code{'precision'} = Precision, TBD
+#' * \code{'sensitivity'} = Sensitivity, TBD
+#' * \code{'specificity'} = Specifivity, TBD
+#' * \code{'tss'} = True Skill Statistics, TBD
+#' * \code{'f1'} = F1 Score or Positive predictive value, TBD
+#' * \code{'logloss'} = Log loss, TBD
+#' * \code{'expected.accuracy'} = Expected Accuracy, TBD
+#' * \code{'kappa'} = Kappa value, TBD
+#' * \code{'brier.score'} = Brier score, TBD
+#'
 #' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
 #' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.
-#' @param method Should the validation be conducted on continuous metrics or thresholded? See Details.
+#' @param method Should the validation be conducted on the continious prediction or a
+#' (previously calculated) thresholded layer in binary format? Note that depending
+#' on the method different metrics can be computed. See Details.
 #' @param layer In case multiple layers exist, which one to use? (Default: \code{'mean'}).
 #' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
 #' @param point_column A [`character`] vector with the name of the column containing the independent observations.
 #' (Default: \code{'observed'}).
 #' @param ... Other parameters that are passed on. Currently unused.
 #' @returns Return a tidy [`tibble`] with validation results.
-#' @details The \code{validate} function does not work for all datasets equally.
-#' @note If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
+#' @note If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 #'
 #' @references
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
@@ -80,8 +113,8 @@ methods::setMethod(
       method <- 'continuous'
     }
     # If mode truncate was used, also switch to continuous data
-    if((attr(threshold,'format')!="binary") && method == "discrete"){
-      if(attr(threshold,'format')!="binary"){
+    if(method == "discrete"){
+      if((attr(threshold,'format')!="binary")){
         if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
         method <- 'continuous'
       }
@@ -209,9 +242,18 @@ methods::setMethod(
     method <- match.arg(method, c("discrete", "continuous"),several.ok = FALSE)
 
     # If mode truncate was used, also switch to continuous data
-    if( attr(threshold,'format')!="binary" && method == "discrete"){
-      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
-      method <- 'continuous'
+    if(method == "discrete"){
+      # Get parameter if there
+      fm <- attr(mod,'format')!="binary"
+      if(isTRUE(fm)){
+        if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
+        method <- 'continuous'
+      } else {
+        if(length( unique(mod)[,1] )>2){
+          if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Non-discrete layer found. Switching to continuous validation metrics.')
+          method <- 'continuous'
+        }
+      }
     }
     assertthat::assert_that(nrow(point)>0,
                             utils::hasName(point, point_column))

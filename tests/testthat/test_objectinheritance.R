@@ -40,7 +40,7 @@ test_that('Check that distribution objects are properly inherited', {
   expect_equal(x$biodiversity$length(),0)
 
   # Offsets
-  suppressWarnings( x |> add_offset_range(virtual_range) )
+  suppressMessages( suppressWarnings( x |> add_offset_range(virtual_range) ) )
   expect_s3_class(x$offset, "Waiver")
 
   # -- #

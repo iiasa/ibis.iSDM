@@ -15,8 +15,6 @@ add_offset(x, layer, add = TRUE)
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
-
-\item{...}{Other parameters or arguments (currently not supported).}
 }
 \value{
 Adds an offset to a \code{\link{distribution}} object.

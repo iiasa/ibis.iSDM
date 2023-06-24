@@ -7,7 +7,6 @@ NULL
 #' Plots information from a given object where a plotting object is available.
 #'
 #' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection], [PredictorDataset] or [BiodiversityScenario].
-#' @param what In case a [SpatRaster] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
 #' @param ... Further arguments passed on to \code{x$plot}.
 #'
 #' @details
@@ -31,9 +30,10 @@ NULL
 
 #' @rdname plot
 #' @method plot DistributionModel
+#' @param what In case a [SpatRaster] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
 #' @keywords misc
 #' @export
-plot.DistributionModel <- function(x, ...) x$plot(...)
+plot.DistributionModel <- function(x, what = "mean", ...) x$plot(what,...)
 
 #' @rdname plot
 #' @method plot BiodiversityDatasetCollection
@@ -59,7 +59,6 @@ plot.Engine <- function(x,...) x$plot(...)
 #' @export
 plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
-# ------------ '
 #' Bivariate plot wrapper for distribution objects
 #'
 #' @description
@@ -100,7 +99,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 methods::setGeneric(
   "bivplot",
   signature = methods::signature("mod"),
-  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, col = "BlueGold",...) standardGeneric("bivplot"))
+  function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, title = NULL, col = "BlueGold",...) standardGeneric("bivplot"))
 
 #' @name bivplot
 #' @rdname bivplot

@@ -53,7 +53,8 @@ The barrier parameter is defined through \link{add_barrier}.
 \dontrun{
 # Assumes that a trained 'model' object exists
  mod <- scenario(model) |>
-  add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
+  add_predictors(env = predictors, transform = 'scale',
+                 derivates = "none") |>
   add_constraint_MigClim() |>
   project()
 }

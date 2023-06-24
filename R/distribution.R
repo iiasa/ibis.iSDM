@@ -86,7 +86,7 @@ methods::setGeneric("distribution",
                     function(background, limits = NULL) standardGeneric("distribution"))
 
 #' @name distribution
-#' @usage \S4method{distribution}{SpatRaster}(background)
+#' @usage \S4method{distribution}{SpatRaster, ANY}(background, limits)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -108,7 +108,7 @@ methods::setMethod(
   })
 
 #' @name distribution
-#' @usage \S4method{distribution}{sf}(background)
+#' @usage \S4method{distribution}{sf, ANY}(background, limits)
 #' @rdname distribution
 methods::setMethod(
   "distribution",

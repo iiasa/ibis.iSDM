@@ -9,7 +9,7 @@
 \alias{plot.BiodiversityScenario}
 \title{Plot wrappers}
 \usage{
-\method{plot}{DistributionModel}(x, ...)
+\method{plot}{DistributionModel}(x, what = "mean", ...)
 
 \method{plot}{BiodiversityDatasetCollection}(x, ...)
 
@@ -22,9 +22,9 @@
 \arguments{
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection}, \link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{...}{Further arguments passed on to \code{x$plot}.}
-
 \item{what}{In case a \link{SpatRaster} is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).}
+
+\item{...}{Further arguments passed on to \code{x$plot}.}
 }
 \value{
 Graphical output

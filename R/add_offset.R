@@ -26,7 +26,6 @@
 #' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target feature.
 #' @param add [`logical`] specifying whether new offset is to be added. Setting
 #' this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).
-#' @param ... Other parameters or arguments (currently not supported).
 #' @references
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds an offset to a [`distribution`] object.
@@ -272,30 +271,38 @@ methods::setMethod(
 #'
 #' @description
 #' This function has additional options compared to the more generic
-#' [`add_offset()`], allowing customized options specifically for expert-based ranges as offsets or spatialized
-#' polygon information on species occurrences.
-#' If even more control is needed, the user is informed of the \pkg{bossMaps} package Merow et al. (2017). The \pkg{bossMaps} package
-#' calculates - based on supplied point information - the probability of occurrences being inside vs outside the
-#' range map and can thus be used as a method to 'improve' the mapping of a species range.
+#' [`add_offset()`], allowing customized options specifically for expert-based
+#' ranges as offsets or spatialized polygon information on species occurrences.
+#' If even more control is needed, the user is informed of the \pkg{bossMaps}
+#' package Merow et al. (2017).
 #'
 #' @details
-#' The output created by this function creates a [`SpatRaster`] to be added to a provided distribution object. Offsets
-#' in regression models are likelihood specific as they are added directly to the overall estimate of \code{`y^hat`}.
+#' The output created by this function creates a [`SpatRaster`] to be added to
+#' a provided distribution object. Offsets in regression models are likelihood
+#' specific as they are added directly to the overall estimate of \code{`y^hat`}.
 #'
-#' Note that all offsets created by this function are by default log-transformed before export. Background values
-#' (e.g. beyond [`distance_max`]) are set to a very small constant (\code{1e-10}).
+#' Note that all offsets created by this function are by default log-transformed before export.
+#' Background values (e.g. beyond [`distance_max`]) are set to a very small
+#' constant (\code{1e-10}).
 #'
 #' @inheritParams add_offset
 #' @param distance_max A [`numeric`] threshold on the maximum distance beyond the range that should be considered
 #' to have a high likelihood of containing species occurrences (Default: \code{Inf} [m]). Can be set to \code{NULL} or \code{0}
 #' to indicate that no distance should be calculated.
-#' @param type A [`character`] denoting the type of model to which this offset is to be added. By default
+#' @param family A [`character`] denoting the type of model to which this offset is to be added. By default
 #' it assumes a \code{'poisson'} distributed model and as a result the output created by this function will be log-transformed.
 #' If however a \code{'binomial'} distribution is chosen, than the output will be \code{`logit`} transformed.
 #' For integrated models leave at default.
 #' @param presence_prop [`numeric`] giving the proportion of all records expected to be inside the range. By
 #' default this is set to \code{0.9} indicating that 10% of all records are likely outside the range.
 #' @param distance_clip [`logical`] as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).
+#' @param distance_function A [`character`] specifying the distance function to
+#' be used. Available are negative exponential kernels (\code{"negexp"}, default)
+#' and a five parameters logistic curve (code{"logcurve"}) as proposed by
+#' Merow et al. 2017.
+#' @param point An optional [`sf`] layer with points or [`logical`] argument.
+#' In the case of the latter the point data is ignored (Default: \code{FALSE}).
+#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param fraction An optional [`SpatRaster`] object that is multiplied with digitized raster layer.
 #' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
 #' @seealso [`bossMaps`]
@@ -320,8 +327,10 @@ NULL
 methods::setGeneric(
   "add_offset_range",
   signature = methods::signature("x", "layer"),
-  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9,
-           distance_clip = FALSE, fraction = NULL, add = TRUE) standardGeneric("add_offset_range"))
+  function(x, layer, distance_max = Inf, family = "poisson", presence_prop = 0.9,
+           distance_clip = FALSE, distance_function = "negexp",
+           field_occurrence = "Observed", fraction = NULL,
+           point = FALSE, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
@@ -386,19 +395,36 @@ methods::setMethod(
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
-  function(x, layer, distance_max = Inf, type = "poisson", presence_prop = 0.9,
-           distance_clip = FALSE, fraction = NULL, add = TRUE ) {
+  function(x, layer, distance_max = Inf, family = "poisson", presence_prop = 0.9,
+           distance_clip = FALSE, distance_function = "negexp",
+           field_occurrence = "Observed", fraction = NULL, point = FALSE, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(layer, 'sf'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
                             is.numeric(presence_prop),
                             is.logical(distance_clip),
+                            is.character(distance_function),
                             is.null(fraction) || is.Raster(fraction),
-                            is.character(type),
+                            is.character(family),
+                            inherits(point, "sf") || is.logical(point),
+                            is.character(field_occurrence),
                             is.logical(add)
     )
+    # distance_max = Inf; family = "poisson"; presence_prop = 0.9; distance_clip = FALSE; distance_function = "negexp"; field_occurrence = "Observed"; fraction = NULL; add = TRUE
     # Match the type if set
-    type <- match.arg(type, c("poisson", "binomial"), several.ok = FALSE)
+    family <- match.arg(family, c("poisson", "binomial"), several.ok = FALSE)
+
+    # Distance function
+    distance_function <- match.arg(distance_function, c("negexp", "logcurve"), several.ok = FALSE)
+
+    # Check that necessary dependency is present for log curve
+    if(distance_function=="logcurve"){
+      check_package("gnlm")
+      if(!("gnlm" %in% loadedNamespaces()) || ('gnlm' %notin% utils::sessionInfo()$otherPkgs) ) {
+        try({requireNamespace('gnlm');attachNamespace("gnlm")},silent = TRUE)
+      }
+      assertthat::assert_that(isTRUE(point) || inherits(point, "sf"))
+    }
 
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
@@ -434,8 +460,31 @@ methods::setMethod(
     # If layer has multiple entries join them
     if(nrow(layer)>1) suppressMessages( layer <- layer |> sf::st_union() |> sf::st_as_sf() )
 
+    # Get Point information if set
+    if(isTRUE(point)){
+      assertthat::assert_that(length(x$get_biodiversity_types()) > 0)
+      #TODO: Collate point from x
+      stop("Automatic point collation not yet implemented. Please supply a sf layer to point!")
+    } else if(inherits(point, 'sf')){
+      assertthat::assert_that( assertthat::has_name(point, field_occurrence),
+                               nrow(point)>1)
+      # Transform to be sure
+      point <- point |> sf::st_transform(crs = sf::st_crs(layer))
+      # If family is poisson distributed, add some pseudo-absence points
+      if(family=="poisson"){
+        point <- add_pseudoabsence(point, field_occurrence = field_occurrence,
+                                   template = terra::init(temp,1),
+                                   settings = pseudoabs_settings(nrpoints = 0,
+                                                                 min_ratio = 1,
+                                                                 layer = layer,
+                                                                 method = "range",
+                                                                 inside = FALSE))
+      }
+    }
+
     # Rasterize the range
     ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
+    ras_range <- terra::mask(ras_range, x$background)
 
     # Calculate distance if required
     if(distance_max > 0){
@@ -448,31 +497,66 @@ methods::setMethod(
       # Inverse of distance
       if(is.infinite(distance_max)) distance_max <- terra::global(dis, "max", na.rm = TRUE)[,1]
       # ---- #
-      alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
-      # Grow baseline raster by using an exponentially weighted kernel
-      dis <- terra::app(dis, fun = function(x) exp(-alpha * x))
-      # Set the remaining ones to very small constant
-      dis[is.na(dis)] <- 1e-10 # Background values
-      dis <- terra::mask(dis, x$background)
+      if(distance_function == "negexp"){
+        alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
+        # Grow baseline raster by using an exponentially weighted kernel
+        dis <- terra::app(dis, fun = function(x) exp(-alpha * x))
+        # Set the remaining ones to very small constant
+        dis[is.na(dis)] <- 1e-10 # Background values
+        dis <- terra::mask(dis, x$background)
+
+        # Inside I want all X across the entire area for the PPMs,
+        # indicating a lambda per area of at least X/A (per unit area) within the range
+        suppressWarnings( ar <- terra::cellSize(ras_range, unit = "km") ) # Calculate area in km
+        pres <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (presence_prop) )
+        abs <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (1-presence_prop) )
+        # Now set all values inside the range to pres and outside to abs
+        ras_range[ras_range == 1] <- pres
+        ras_range[ras_range == 0] <- abs
+        # Multiply with distance layer
+        ras_range <- ras_range * dis
+        # Normalize the result by dividing by the sum
+        ras_range <- ras_range / terra::global(ras_range, "sum", na.rm = TRUE)[,1]
+
+      } else if(distance_function == "logcurve"){
+        # Extract the point values from the raster
+        ex <- get_rastervalue(coords = point, env = dis)
+        obs <- point[[field_occurrence]]
+        ex <- ex[,names(dis)]
+        # Get only valid observation
+        if(any(is.na(ex))){
+          obs <- obs[which(is.finite(ex))]
+          ex <- ex[which(is.finite(ex))]
+        }
+
+        if(family == "binomial"){
+          assertthat::assert_that( length(unique(obs)) == 2)
+          y <- cbind(obs, 1-obs)
+        } else y <- cbind(obs)
+
+        # Grid search for optimal parameters
+        co <- .searchLogisticCurve(y = y, x = ex,
+                                    family = family,
+                                    search = TRUE)
+
+        # Convert output to SpatRaster using logistic Richard curve
+        ras_range <- logisticRichard(x = dis,
+                               upper = co["upper"],
+                               lower = co["lower"],
+                               rate = co["rate"],
+                               shift = co["shift"],
+                               skew = co["skew"])
+        attr(ras_range, "logistic_coefficients") <- co
+
+      } else {
+        stop("Distance method not yet implemented.")
+      }
 
     } else {
       dis <- ras_range
       dis[is.na(dis)] <- 1e-10 # Background values
       dis <- terra::mask(dis, x$background)
     }
-
-    # Inside I want all X across the entire area for the PPMs,
-    # indicating a lambda per area of at least X/A (per unit area) within the range
-    suppressWarnings( ar <- terra::cellSize(ras_range, unit = "km") ) # Calculate area in km
-    pres <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (presence_prop) )
-    abs <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (1-presence_prop) )
-    # Now set all values inside the range to pres and outside to abs
-    ras_range[ras_range == 1] <- pres
-    ras_range[ras_range == 0] <- abs
-    # Multiply with distance layer
-    ras_range <- ras_range * dis
-    # Normalize the result by dividing by the sum
-    ras_range <- ras_range / terra::global(ras_range, "sum", na.rm = TRUE)[,1]
 
     # Multiply with fraction layer if set
     if(!is.null(fraction)){
@@ -484,10 +568,12 @@ methods::setMethod(
 
     # -------------- #
     # Log transform for better scaling
-    ras_range <- switch (type,
-      "poisson" = terra::app(ras_range, log),
-      "binomial" = terra::app(ras_range, logistic)
-    )
+    if(family == "negexp"){
+      ras_range <- switch (family,
+                           "poisson" = terra::app(ras_range, log),
+                           "binomial" = terra::app(ras_range, logistic)
+      )
+    }
     # Rescaling does not affect relative differences.
     ras_range <- terra::scale(ras_range, scale = FALSE)
     names(ras_range) <- "range_distance"
@@ -499,6 +585,12 @@ methods::setMethod(
 
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+
+    # Set some attributes
+    attr(ras_range, "distance_function") <- distance_function
+    attr(ras_range, "distance_max") <- distance_max
+
+    ras_range <- terra::mask(ras_range, x$background)
 
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
@@ -516,6 +608,137 @@ methods::setMethod(
     return(x)
   }
 )
+
+#' Function to calculate the best logistic Richard's curve given a distance
+#' @description
+#' Internal function not to be used outside `add_offset_range`.
+#'
+#' @param y A [`numeric`] of the response.
+#' @param x A [`numeric`] of the variable.
+#' @param family A [`character`] with the family. Default is `binomial`.
+#' @param search A [`logical`] whether grid search by AIC be conducted
+#' (Default: \code{TRUE}).
+#' @param iniParam The initial parameters for the logistic curve.
+#' @returns A [`numeric`] vector with the coefficients of regression.
+#' @keywords internal
+#' @noRd
+.searchLogisticCurve <- function(y, x, family, search = TRUE,
+                                 iniParam = c(upper = 1,
+                                              lower = 0,
+                                              rate = 0.04,
+                                              shift = 1,
+                                              skew = 0.2)){
+  assertthat::assert_that(
+    is.numeric(y),
+    is.numeric(x),
+    length(y)>2, length(x)>2,
+    is.character(family),
+    is.logical(search),
+    is.vector(iniParam) && length(iniParam)==5
+  )
+  # Check package
+  check_package("gnlm")
+
+  family <- match.arg(family, c("binomial", "poisson"), several.ok = FALSE)
+
+  if(family == "binomial"){
+    if(is.vector(y)) y <- cbind(y, 1 - y)
+  } else if(family == "poisson"){
+    family <- "Poisson"
+    y <- y[,1]
+  }
+
+  # Define search grid parameters
+  if(search){
+    pp <- expand.grid(upper = 1,
+                      lower = seq(0, .75, .15),
+                      rate = seq(0.01, 0.3, 0.03),
+                      shift = 1,
+                      skew = seq(0.1, 0.3, 0.05) )
+  } else {pp <- rbind(data.frame(t(iniParam))) }
+  assertthat::assert_that(ncol(pp)==5)
+
+  # Now find the best parameter combinations for the given set
+  result <- data.frame(i = 1:nrow(pp))
+  result$aic <- NA
+
+  # Progress
+  pb <- progress::progress_bar$new(total = nrow(pp))
+  for(i in 1:nrow(pp)){
+    pb$tick()
+    # Default starting
+    # holdEnv <- list(y = y,
+    #                 x = x,
+    #                 iniParam = pp[i,])
+    # suppressMessages( attach(holdEnv) )
+    # on.exit(detach("holdEnv"))
+    xx <- pp[i,] |> as.list()
+    xx$x <- x
+
+    # Fit Model
+    if(family == "binomial"){
+      suppressMessages(
+        suppressWarnings(
+          logisticParam <- try({
+            gnlm::bnlr(y = y, link = "logit",
+                                        mu = ~ (upper - ((upper - lower)/(1 + exp(-rate * ( - shift)))^(1/skew))),
+                                        pmu = xx)
+          }, silent = TRUE)
+        )
+      )
+    } else {
+      suppressMessages(
+        suppressWarnings(
+          logisticParam <- try({
+            gnlm::gnlr(y = y, distribution = family,
+                       mu = ~ (upper - ((upper - lower)/(1 + exp(-rate * (x - shift)))^(1/skew))),
+                       pmu = xx)
+          }, silent = TRUE)
+        )
+      )
+    }
+    if(!inherits(logisticParam, "try-error")){
+      result[i,"aic"] <- logisticParam$aic
+    }
+    rm(logisticParam)
+  }
+
+  # Now get the best combination and refit
+  # holdEnv <- list(y = y,
+  #                 x = x,
+  #                 iniParam = pp[which.min(result$aic),])
+  # suppressMessages( attach(holdEnv) )
+  # on.exit(detach("holdEnv"))
+  xx <- pp[which.min(result$aic),] |> as.list()
+  xx$x <- x
+  # Fit Model
+  if(family == "binomial"){
+    suppressMessages(
+      suppressWarnings(
+        logisticParam <- try({
+          gnlm::bnlr(y = y, link = "logit",
+                     mu = ~ (upper - ((upper - lower)/(1 + exp(-rate * ( - shift)))^(1/skew))),
+                     pmu = xx)
+        }, silent = TRUE)
+      )
+    )
+  } else {
+    suppressMessages(
+      suppressWarnings(
+        logisticParam <- try({
+          gnlm::gnlr(y = y, distribution = family,
+                     mu = ~ (upper - ((upper - lower)/(1 + exp(-rate * (x - shift)))^(1/skew))),
+                     pmu = xx)
+        }, silent = TRUE)
+      )
+    )
+  }
+
+  # Get the coefficients of the best model
+  co <- logisticParam$coefficients
+  names(co) <- c("upper", "lower", "rate", "shift", "skew")
+  return(co)
+}
 
 #' Specify elevational preferences as offset
 #'
@@ -589,20 +812,16 @@ methods::setMethod(
       warning('Supplied range does not align with background! Aligning them now...')
       elev <- alignRasters(elev, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
-    # Generalized logistic transform (aka Richard's curve) function from bossMaps.
-    genLogit <- function(x, lower = 0, upper = 1, rate = 0.04, skew = 0.2, shift = 0){
-      upper - ((upper - lower)/((1 + exp(-rate * (x - shift)))^(1/skew)))
-    }
 
     # ---- #
     # if(getOption("ibis.runparallel")) raster::beginCluster(n = getOption("ibis.nthread"))
     # Now calculate the elevation offset by projecting the values onto the elevation layer
     # max avail > min expert
     tmp.elev1 <- -1 * (elev - pref[1])
-    tmp.elev1.1 <- terra::app(tmp.elev1, function(x) genLogit(x, 1,100, rate, .2 ))
+    tmp.elev1.1 <- terra::app(tmp.elev1, function(x) logisticRichard(x, 1,100, rate, .2 ))
     # min avail < max expert
     tmp.elev2 <- elev - pref[2]
-    tmp.elev2.1 <- terra::app(tmp.elev2, function(x) genLogit(x, 1,100, rate, .2))
+    tmp.elev2.1 <- terra::app(tmp.elev2, function(x) logisticRichard(x, 1,100, rate, .2))
     # Combine both and calculate the minimum
     elev.prior <- min( c(tmp.elev1.1, tmp.elev2.1))
     rm(tmp.elev1,tmp.elev1.1,tmp.elev2,tmp.elev2.1) # clean up

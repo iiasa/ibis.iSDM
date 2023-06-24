@@ -13,7 +13,7 @@ NULL
 #'
 #' @details
 #' In the background the function \code{x$project()} for the respective model object is called, where
-#' \code{x} is fitted model object. For specifics on the constrains, see the relevant [constrain] functions,
+#' \code{x} is fitted model object. For specifics on the constrains, see the relevant [`constrain`] functions,
 #' respectively:
 #' * [`add_constrain()`] for generic wrapper to add any of the available constrains.
 #' * [`add_constrain_dispersal()`] for specifying dispersal constrain on the temporal projections at each step.
@@ -37,11 +37,11 @@ NULL
 #' the very of the processing steps and any thresholds will be recalculated afterwards.
 #'
 #' @seealso [`scenario()`]
-#' @param mod A [`BiodiversityScenario`] object with set predictors.
-#' Note that some constrains such as [MigClim] can still simulate future change without projections.
+#' @param x A [`BiodiversityScenario`] object with set predictors.
+#' Note that some constrains such as [`MigClim`] can still simulate future change without projections.
 #' @param date_interpolation A [`character`] on whether dates should be interpolated. Options
 #' include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
-#' @param stabilize A [`boolean`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
+#' @param stabilize A [`logical`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
 #' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
 #' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
 #' @param ... passed on parameters.

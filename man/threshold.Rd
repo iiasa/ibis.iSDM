@@ -37,6 +37,8 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 \item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
 
 \item{...}{other parameters not yet set.}
+
+\item{tr}{A \code{\link{numeric}} value specifiying the specific threshold for scenarios.}
 }
 \value{
 A \link{SpatRaster} if a \link{SpatRaster} object as input.
@@ -64,12 +66,12 @@ The following options are currently implemented:
 \item \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
 \item \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 \item \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
-\item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \link{modEvA} package to be installed.
-\item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \link{modEvA} package to be installed.
-\item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \link{modEvA} package to be installed.
-\item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
-\item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
-\item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \link{modEvA} package to be installed.
+\item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
 }
 }
 \examples{
@@ -87,5 +89,5 @@ The following options are currently implemented:
 }
 }
 \seealso{
-\link{modEvA}
+\code{\link{modEvA}}
 }

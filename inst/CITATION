@@ -21,5 +21,5 @@ citEntry(
         as.person("Maximilian H.K. Hesselbarth")
         ),
   year     = "2023",
-  version  = "0.0.4",
-  textVersion = "Jung, M., Hesselbarth, H.K.M. (2023). An integrated species distribution modelling framework for heterogeneous biodiversity data. R package version 0.0.4")
+  version  = "0.0.5",
+  textVersion = "Jung, M., Hesselbarth, H.K.M. (2023). An integrated species distribution modelling framework for heterogeneous biodiversity data. R package version 0.0.5")
