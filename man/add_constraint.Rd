@@ -20,11 +20,11 @@ give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 should be performed.}
 
-\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{`kissmig`}.}
 
 \item{layer}{A \code{\link{SpatRaster}} object that can be used for boundary constraints (Default: \code{NULL}).}
 
-\item{pext}{\code{\link{numeric}} indicator for \code{\link{kissmig}} of the probability a colonized cell becomes uncolonised,
+\item{pext}{\code{\link{numeric}} indicator for \code{`kissmig`} of the probability a colonized cell becomes uncolonised,
 i.e., the species gets locally extinct (Default: \code{0.1}).}
 
 \item{pcor}{\code{\link{numeric}} probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).}
@@ -46,7 +46,7 @@ Currently supported are the following options:
 \itemize{
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{\link{kissmig}} package. Applied at each modelling time step.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 \item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{\link{MigClim}} package.
 }
 

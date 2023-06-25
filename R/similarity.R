@@ -278,7 +278,8 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .nt12 <- function(prodat, refdat){
-  stopifnot(requireNamespace("matrixStats"))
+  check_package("matrixStats")
+
   # Input checks
   assertthat::assert_that(is.Raster(prodat),
                           terra::nlyr(prodat) == ncol(refdat))
@@ -349,11 +350,12 @@ methods::setMethod(
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
   nt_novel <- emptyraster(bg)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  o_low <- nt1 < 0
+  if(terra::hasValues(nt1)) o_low <- nt1 < 0 else o_low <- terra::init(nt1, FALSE)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
   # non-analogous covariate combinations
   o_high <- nt2 > 1
+
   nt_novel[o_low == 1] <- 1
   nt_novel[o_mid == 1] <- 2
   nt_novel[o_high == 1] <- 3
