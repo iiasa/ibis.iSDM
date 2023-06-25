@@ -87,7 +87,7 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 methods::setGeneric(
   "spartial",
   signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, plot = FALSE, ...) standardGeneric("spartial"))
+  function(mod, x.var, constant = NULL, plot = FALSE, ...) standardGeneric("spartial"))
 
 #' @name spartial
 #' @rdname spartial

@@ -220,6 +220,9 @@ methods::setMethod(
     # Check whether predictors already exist, if so overwrite
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+
     # Finally set the data to the BiodiversityDistribution object
     x$set_predictors(
         bdproto(NULL, PredictorDataset,
@@ -327,6 +330,9 @@ methods::setMethod(
     }
     rm(ras1,ras2)
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(o) <- sanitize_names(names(o))
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
       x <- add_predictors(x, env = o, transform = transform, derivates = 'none')
@@ -413,6 +419,9 @@ methods::setMethod(
       fraction[fraction==0] <- 1e-6
       layer <- layer * fraction
     }
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -513,6 +522,9 @@ methods::setMethod(
       assertthat::assert_that( all( priors$varnames() %in% names(dis) ) )
       x <- x$set_priors(priors)
     }
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(dis) <- sanitize_names(names(dis))
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -719,6 +731,9 @@ methods::setMethod(
     # Check whether predictors already exist, if so overwrite
     # TODO: In the future one could think of supplying predictors of varying grain
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
     x$set_predictors(

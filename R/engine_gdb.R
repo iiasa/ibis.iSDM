@@ -531,7 +531,11 @@ engine_gdb <- function(x,
             # Subset to non-missing data
             newdata <- subset(newdata, stats::complete.cases(newdata))
             # Make empty template
-            temp <- emptyraster( model$predictors_object$get_data()[[1]] ) # Background
+            temp <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            if(inherits(temp, "try-error")){
+              temp <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+                emptyraster()
+            }
             # Predict
             y <- suppressWarnings(
               mboost::predict.mboost(object = mod, newdata = newdata,

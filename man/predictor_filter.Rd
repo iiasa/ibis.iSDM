@@ -16,8 +16,6 @@ information is known.}
 \code{'spearman'}| \code{'kendal'}), \code{"abess"}, or \code{"boruta"}.}
 
 \item{...}{Other options for a specific method}
-
-\item{obs}{A \code{\link{vector}} with observational records to use for determining variable importance. Can be \code{NULL}.}
 }
 \value{
 A \code{\link{character}} \code{\link{vector}} of variable names to be excluded.
@@ -27,7 +25,7 @@ If the function fails due to some reason return \code{NULL}.
 This function helps to remove highly correlated variables from a set of predictors. It supports multiple options
 some of which require both environmental predictors and observations, others only predictors.
 
-Some of the options require different packages to be pre-installed, such as \link{ranger} or \link{Boruta}.
+Some of the options require different packages to be pre-installed, such as \code{\link{ranger}} or \code{\link{Boruta}}.
 }
 \details{
 Available options are:
@@ -35,9 +33,9 @@ Available options are:
 \item \code{"none"} No prior variable removal is performed (Default).
 \item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \link{abess} package (see References). Note that this
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{\link{abess}} package (see References). Note that this
 effectively fits a separate generalized linear model to reduce the number of covariates.
-\item \code{"boruta"} Uses the \link{Boruta} package to identify non-informative features.
+\item \code{"boruta"} Uses the \code{\link{Boruta}} package to identify non-informative features.
 }
 }
 \note{

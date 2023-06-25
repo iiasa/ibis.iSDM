@@ -34,9 +34,8 @@ Log <- bdproto(
 
     if(class(output)[1]=='try-error') { stop('Log file could not be opened!')}
 
-    #sink(output, append = TRUE, type = "output") # Writing console output to log file
+    sink(output, append = TRUE, type = "output") # Writing console output to log file
     sink(output, append = TRUE, type = "message") # Writing messages to the log file
-    # TODO: Check capture.output() which works with cat?
 
     self$output <- output
     invisible()

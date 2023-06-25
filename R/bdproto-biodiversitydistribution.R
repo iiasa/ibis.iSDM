@@ -216,6 +216,17 @@ BiodiversityDistribution <- bdproto(
     } else {of <- self$offset}
     terra::plot(of, col = ibis_colours$viridis_orig, main = "Combined offset")
   },
+  # Offset type
+  get_offset_type = function(self){
+    if(is.Waiver(self$offset)) return( self$offset )
+    # Get attributes
+    at <- list()
+    at[['distance_function']] <- attr(self$offset, 'distance_function')
+    at[['distance_max']] <- attr(self$offset, 'distance_function')
+    if(!is.null(attr(self$offset,"logistic_coefficients")))
+      at[['logistic_coefficients']] <- attr(self$offset, "logistic_coefficients")
+    return(at)
+  },
   # set_biascontrol
   set_biascontrol = function(self, x, method, value){
     assertthat::assert_that(is.Raster(x), is.numeric(value))

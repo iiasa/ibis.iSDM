@@ -8,10 +8,13 @@ add_offset_range(
   x,
   layer,
   distance_max = Inf,
-  type = "poisson",
+  family = "poisson",
   presence_prop = 0.9,
   distance_clip = FALSE,
+  distance_function = "negexp",
+  field_occurrence = "Observed",
   fraction = NULL,
+  point = FALSE,
   add = TRUE
 )
 
@@ -28,7 +31,7 @@ add_offset_range(
 to have a high likelihood of containing species occurrences (Default: \code{Inf} \link{m}). Can be set to \code{NULL} or \code{0}
 to indicate that no distance should be calculated.}
 
-\item{type}{A \code{\link{character}} denoting the type of model to which this offset is to be added. By default
+\item{family}{A \code{\link{character}} denoting the type of model to which this offset is to be added. By default
 it assumes a \code{'poisson'} distributed model and as a result the output created by this function will be log-transformed.
 If however a \code{'binomial'} distribution is chosen, than the output will be \code{`logit`} transformed.
 For integrated models leave at default.}
@@ -38,8 +41,18 @@ default this is set to \code{0.9} indicating that 10\% of all records are likely
 
 \item{distance_clip}{\code{\link{logical}} as to whether distance should be clipped after the maximum distance (Default: \code{FALSE}).}
 
+\item{distance_function}{A \code{\link{character}} specifying the distance function to
+be used. Available are negative exponential kernels (\code{"negexp"}, default)
+and a five parameters logistic curve (code{"logcurve"}) as proposed by
+Merow et al. 2017.}
+
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
+
 \item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with digitized raster layer.
 Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).}
+
+\item{point}{An optional \code{\link{sf}} layer with points or \code{\link{logical}} argument.
+In the case of the latter the point data is ignored (Default: \code{FALSE}).}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
@@ -49,18 +62,19 @@ Adds a range offset to a \code{\link{distribution}} object.
 }
 \description{
 This function has additional options compared to the more generic
-\code{\link[=add_offset]{add_offset()}}, allowing customized options specifically for expert-based ranges as offsets or spatialized
-polygon information on species occurrences.
-If even more control is needed, the user is informed of the \pkg{bossMaps} package Merow et al. (2017). The \pkg{bossMaps} package
-calculates - based on supplied point information - the probability of occurrences being inside vs outside the
-range map and can thus be used as a method to 'improve' the mapping of a species range.
+\code{\link[=add_offset]{add_offset()}}, allowing customized options specifically for expert-based
+ranges as offsets or spatialized polygon information on species occurrences.
+If even more control is needed, the user is informed of the \pkg{bossMaps}
+package Merow et al. (2017).
 }
 \details{
-The output created by this function creates a \code{\link{SpatRaster}} to be added to a provided distribution object. Offsets
-in regression models are likelihood specific as they are added directly to the overall estimate of \code{`y^hat`}.
+The output created by this function creates a \code{\link{SpatRaster}} to be added to
+a provided distribution object. Offsets in regression models are likelihood
+specific as they are added directly to the overall estimate of \code{`y^hat`}.
 
-Note that all offsets created by this function are by default log-transformed before export. Background values
-(e.g. beyond \code{\link{distance_max}}) are set to a very small constant (\code{1e-10}).
+Note that all offsets created by this function are by default log-transformed before export.
+Background values (e.g. beyond \code{\link{distance_max}}) are set to a very small
+constant (\code{1e-10}).
 }
 \examples{
 \dontrun{

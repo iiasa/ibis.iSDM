@@ -219,6 +219,45 @@ thresholdval <- function(x, knot) {
     ifelse(x >= knot, 1, 0)
 }
 
+#' Sanitize variable names
+#'
+#' @description
+#' Prepared covariates often have special characters in their variable names
+#' which can or can not be used in formulas or cause errors for certain engines.
+#' This function converts special characters of variable names into a format
+#'
+#' @param names A [`vector`] of [`character`] vectors to be sanitized.
+#' @returns A [`vector`] of sanitized [`character`].
+#' @concept Inspired from [`inlabru`] \code{"bru_standardise_names"} function.
+#' @examples
+#' # Correct variable names
+#' vars <- c("Climate-temperature2015", "Elevation__sealevel", "Landuse.forest..meanshare")
+#' sanitize_names(vars)
+#'
+#' @keywords utils
+#' @export
+sanitize_names <- function(names){
+  assertthat::assert_that(
+    length(names) > 0
+  )
+  # Convert the variable names
+  new_names <- vapply(names, function(x) {
+    gsub("[-() ]", "_", x = x, fixed = FALSE)
+  }, "name")
+
+  not_ok <- grepl("__", x = new_names)
+  while (any(not_ok)) {
+    new_names[not_ok] <- vapply(new_names[not_ok], function(x) {
+      gsub("__", "_", x = x, fixed = FALSE)
+    }, "name")
+    not_ok <- grepl("__", x = new_names)
+  }
+  assertthat::assert_that(length(new_names) == length(names))
+  return(
+    as.character(new_names)
+    )
+}
+
 #' Parallel computation of function
 #'
 #' @description

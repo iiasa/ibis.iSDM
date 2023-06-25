@@ -22,8 +22,6 @@ to the target value during projection. By default the value is set to the minimu
 
 \item{add}{\code{\link{logical}} specifying whether a new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
-
-\item{...}{Other parameters or arguments (currently not supported).}
 }
 \value{
 Adds bias control option to a \code{\link{distribution}} object.

@@ -27,8 +27,6 @@ test_that('Check that data can be loaded.',{
 
 test_that('Check that test scenarios can be loaded.',{
   # Load the scenario data
-  skip_if_not_installed('stars')
-  skip_if_not_installed('ncmeta')
   skip_if_not_installed('abind')
   skip_on_os(os = "mac") # Added since stars throws errors here?
 

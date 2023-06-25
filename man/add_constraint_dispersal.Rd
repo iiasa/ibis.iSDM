@@ -18,7 +18,7 @@ give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 should be performed.}
 
-\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{\link[kissmig:kissmig]{kissmig::kissmig}}.}
+\item{type}{A \code{\link{character}} indicating the type used in the method. See for instance \code{`kissmig`}.}
 
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 }

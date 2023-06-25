@@ -501,9 +501,20 @@ methods::setMethod(
     # And model format
     assertthat::assert_that( assertthat::has_extension(fname, "rds"))
 
-    # If slim, remove some balast
+    # Don't save the predictors object as it has distinct memory points
+    if(inherits(mod$model$predictors_object, "PredictorDataset")){
+      ats <- attributes( mod$model$predictors_object$get_data() )
+      mod$model$predictors_object <- ats
+    }
+
+    # If slim, remove some ballast
     if(slim){
       if(!is.Waiver(mod$get_data("prediction"))) mod$fits$prediction <- NULL
+    } else {
+      # Save the prediction as data.frame if set
+      if(!is.Waiver(mod$get_data("prediction"))){
+        mod$fits$prediction <- terra::as.data.frame(mod$get_data(), xy = TRUE, na.rm = NA)
+      }
     }
 
     # Save output
@@ -566,6 +577,34 @@ methods::setMethod(
     if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,' MB)'))
     # Load file
     mod <- readRDS(fname)
+
+    # Convert predictions back to terra if data.frame
+    model <- mod$model
+    if(is.list( model$predictors_object ) ){
+      ras <- terra::rast(model$predictors, type = "xyz", crs = terra::crs(model$background))
+      assertthat::assert_that(all(names(ras) %in% model$predictors_names))
+      # Get any previously set attributes
+      ats <- model$predictors_object
+      attr(ras, "int_variables") <- ats[['int_variables']]
+      attr(ras, 'has_factors') <- ats[['has_factors']]
+      attr(ras,'transform') <- ats[['transform']]
+
+      # Make a new predictors object
+      o <- bdproto(NULL, PredictorDataset,
+              id = new_id(),
+              data = ras
+      )
+      assertthat::assert_that(all( o$get_names() %in% model$predictors_names ))
+      if(is.Raster(ras)) mod$model$predictors_object <- o
+      rm(o)
+    }
+
+    # Reload prediction if data.frame found
+    if(is.data.frame(mod$fits$prediction)){
+      ras <- terra::rast(mod$fits$prediction, type = "xyz", crs = terra::crs(model$background))
+      mod$fits$prediction <- ras
+      rm(ras)
+    }
 
     # --- #
     # Make some checks #

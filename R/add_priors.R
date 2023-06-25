@@ -33,11 +33,11 @@ methods::setGeneric(
 
 #' @name add_priors
 #' @rdname add_priors
-#' @usage \S4method{add_priors}{BiodiversityDistribution}(x)
+#' @usage \S4method{add_priors}{BiodiversityDistribution, ANY}(x, priors)
 methods::setMethod(
   "add_priors",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, priors = NULL ) {
+  function(x, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.null(priors) || inherits(priors, "PriorList") || class(x)[1] %in% getOption("ibis.priors")
     )
@@ -71,7 +71,7 @@ methods::setGeneric(
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, priors = NULL ) {
+  function(x, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
     )
@@ -112,7 +112,7 @@ methods::setGeneric(
 methods::setMethod(
   "rm_priors",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x, names = NULL ) {
+  function(x, names = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.null(names) || is.vector(names) || is.character(names)
     )

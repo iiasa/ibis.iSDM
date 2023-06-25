@@ -66,17 +66,21 @@ the target areas for grid cells with non-zero values.
 }
 \examples{
 \dontrun{
-# This setting generates 10000 pseudo-absence points outside the minimum convex polygon
-of presence points
+# This setting generates 10000 pseudo-absence points outside the
+# minimum convex polygon of presence points
 ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
 
 # This setting would match the number of presence-absence points directly.
 ass2 <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
 
-# These settings can then be used to add pseudo-absence data to a presence-only dataset
-# this effectively adds these simulated absence points to the resulting model
-all_my_points <- add_pseudoabsence(df = virtual_points, field_occurrence = 'Observed',
-                                     template = background, settings = ass1)
+# These settings can then be used to add pseudo-absence data to a
+# presence-only dataset. This effectively adds these simulated absence
+# points to the resulting model
+all_my_points <- add_pseudoabsence(
+                     df = virtual_points,
+                      field_occurrence = 'Observed',
+                      template = background,
+                      settings = ass1)
 }
 }
 \references{

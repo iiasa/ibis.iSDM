@@ -15,7 +15,7 @@ similarity(
   ...
 )
 
-\S4method{similarity}{BiodiversityDistribution}(obj)
+\S4method{similarity}{BiodiversityDistribution, character, character, character, logical, logical}(obj, ref_type, method, predictor_names, full, plot)
 
 \S4method{similarity}{SpatRaster}(obj)
 }
@@ -29,6 +29,8 @@ a \code{\link{data.frame}} with extracted values (corresponding to those given i
 
 \item{method}{A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.}
 
+\item{predictor_names}{An optional \code{\link{character}} specifying the covariates to be used (Default: \code{NULL}).}
+
 \item{full}{should similarity values be returned for all variables (Default: \code{FALSE})?}
 
 \item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).}
@@ -39,7 +41,7 @@ a \code{\link{data.frame}} with extracted values (corresponding to those given i
 This function returns a list containing:
 \itemize{
 \item \code{similarity}: A \code{SpatRaster} object with multiple layers giving the environmental
-similarities for each variable in \code{x} (only included when \code{full=TRUE});
+similarities for each variable in \code{x} (only included when \code{"full=TRUE"});
 \item \code{mis}: a \code{SpatRaster} layer giving the minimum similarity value
 across all variables for each location (i.e. the MESS);
 \item \code{exip}: a \code{SpatRaster} layer indicating whether any model would interpolate
@@ -78,7 +80,7 @@ species distribution models" https://doi.org/10.1111/ddi.12209 \emph{Diversity a
 }
 }
 \seealso{
-\link{dismo} R-package
+\code{\link{dismo}} R-package.
 }
 \keyword{environment}
 \keyword{mahalanobis,}

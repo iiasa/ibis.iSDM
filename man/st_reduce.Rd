@@ -4,7 +4,7 @@
 \alias{st_reduce}
 \title{Aggregate stars variables across dimensions}
 \usage{
-st_reduce(obj, vars, newname, fun = "sum")
+st_reduce(obj, vars, newname, weights = NULL, fun = "sum")
 }
 \arguments{
 \item{obj}{A \code{\link{stars}} object or a \code{\link{list}} that can be coerced to one.}
@@ -13,6 +13,8 @@ st_reduce(obj, vars, newname, fun = "sum")
 length two or greater.}
 
 \item{newname}{A \code{\link{character}} with the new name for the variable.}
+
+\item{weights}{An optional variable layer to use for weighting.}
 
 \item{fun}{A function how the respective layers should be combined.}
 }

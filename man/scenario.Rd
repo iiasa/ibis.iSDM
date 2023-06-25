@@ -6,7 +6,7 @@
 \usage{
 scenario(fit, limits = NULL, copy_model = FALSE)
 
-\S4method{scenario}{ANY}(fit)
+\S4method{scenario}{ANY, ANY, logical}(fit, limits, copy_model)
 }
 \arguments{
 \item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}

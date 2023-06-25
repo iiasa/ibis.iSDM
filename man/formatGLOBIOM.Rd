@@ -38,7 +38,7 @@ Likely of little use for anyone outside IIASA.
 \examples{
 \dontrun{
 # Expects a filename pointing to a netCDF file.
-covariates <- formatBIOCLIMA(fname)
+covariates <- formatGLOBIOM(fname)
 }
 }
 \keyword{internal,}

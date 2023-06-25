@@ -428,10 +428,12 @@ engine_inlabru <- function(x,
             model$biodiversity[[j]]$predictors
           )
           # Convert to Spatial points
-          df <- sp::SpatialPointsDataFrame(coords = df[,c('x', 'y')],
-                                              data = df[, names(df) %notin% c('x','y')],
-                                              proj4string = self$get_data('mesh')$crs
-          )
+          df <- sf::st_as_sf(df,
+                             coords = c('x', 'y'),
+                             # data = df[, names(df) %notin% c('x','y')],
+                             crs = sf::st_crs(self$get_data('mesh')$crs)
+          ) |> as("Spatial")
+          assertthat::assert_that(inherits(df, "sf") || inherits(df, "Spatial"))
 
           # Options for specifying link function of likelihood
           o <- inlabru::bru_options_get()
@@ -439,22 +441,22 @@ engine_inlabru <- function(x,
           # FIXME: Code below does not work as intended. Worked in earlier versions. To be debugged later!
           # FIXME: Apparently the code works when an SPDE is added, thus cp seems to rely on the matter covs
           # if(model$biodiversity[[j]]$type == 'poipo'){
-          # ips <- self$calc_integration_points(model, mode = 'cp')
+          #   ips <- self$calc_integration_points(model, mode = 'cp')
           #
-          # # Log gaussian cox process
-          # lh <- inlabru::like(formula = stats::update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-          #                     # include = model$biodiversity[[j]]$predictors_names,
-          #                     family = "cp",
-          #                     data = df,
-          #                     # samplers = methods::as(model$background,"Spatial"),
-          #                     domain = list(coordinates = self$get_data("mesh")),
-          #                     ips = ips,
-          #                     options = o
-          # )
-          # assertthat::assert_that(sum(lh$response_data$BRU_response_cp>0)>2,
-          #                         msg = "Found issues with aligning coordinates within the domain most likely.")
-          # If not poipo but still poisson, prepare data as follows
-          # } else
+          #   # Log gaussian cox process
+          #   lh <- inlabru::like(formula = stats::update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+          #                       # include = model$biodiversity[[j]]$predictors_names,
+          #                       family = "cp",
+          #                       data = df,
+          #                       # samplers = methods::as(model$background,"Spatial"),
+          #                       # domain = list(coordinates = self$get_data("mesh")),
+          #                       ips = ips,
+          #                       options = o
+          #   )
+          #   assertthat::assert_that(sum(lh$response_data$BRU_response_cp>0)>2,
+          #                           msg = "Found issues with aligning coordinates within the domain most likely.")
+          # # If not poipo but still poisson, prepare data as follows
+          # }
           if(model$biodiversity[[j]]$family == "poisson"){
             # Calculate integration points for PPMs and to estimation data.frame
             ips <- self$calc_integration_points(model, mode = 'stack')
@@ -589,7 +591,7 @@ engine_inlabru <- function(x,
               comp <- stats::update.formula(comp,
                              paste0(c("~ . + "),
                                     paste0("spatial.field", i,
-                                           "(main = coordinates,",
+                                           "(main = geometry,",
                                            ifelse( grep('copy', self$get_equation_latent_spatial('spde', vars = i))==1,
                                                      " copy = \'spatial.field1\', fixed = TRUE,",
                                                      ""),
@@ -886,7 +888,7 @@ engine_inlabru <- function(x,
             pred_bru <- inlabru:::predict.bru(
               object = fit_bru,
               num.threads = cores,
-              data = preds,
+              newdata = preds,
               probs = c(0.05, 0.5, 0.95),
               formula = pfo,
               n.samples = 1000 # Pass as parameter?

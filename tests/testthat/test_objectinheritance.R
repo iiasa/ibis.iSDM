@@ -4,7 +4,6 @@ test_that('Check that distribution objects are properly inherited', {
   skip_if_not_installed('igraph')
   skip_if_not_installed('abind')
 
-  # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
   skip_if_not_installed("cmdstanr")
   skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
           message = "No cmdstan path")
@@ -41,7 +40,7 @@ test_that('Check that distribution objects are properly inherited', {
   expect_equal(x$biodiversity$length(),0)
 
   # Offsets
-  suppressWarnings( x |> add_offset_range(virtual_range) )
+  suppressMessages( suppressWarnings( x |> add_offset_range(virtual_range) ) )
   expect_s3_class(x$offset, "Waiver")
 
   # -- #

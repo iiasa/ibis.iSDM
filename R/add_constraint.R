@@ -15,9 +15,9 @@ NULL
 #' give the number of iteration steps (or within year migration steps).
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
 #' should be performed.
-#' @param type A [`character`] indicating the type used in the method. See for instance [`kissmig::kissmig`].
+#' @param type A [`character`] indicating the type used in the method. See for instance \code{`kissmig`}.
 #' @param layer A [`SpatRaster`] object that can be used for boundary constraints (Default: \code{NULL}).
-#' @param pext [`numeric`] indicator for [`kissmig`] of the probability a colonized cell becomes uncolonised,
+#' @param pext [`numeric`] indicator for \code{`kissmig`} of the probability a colonized cell becomes uncolonised,
 #' i.e., the species gets locally extinct (Default: \code{0.1}).
 #' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
 #' @param ... passed on parameters. See also the specific methods for adding constraints.
@@ -30,7 +30,7 @@ NULL
 #' **Dispersal**:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
-#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires [`kissmig`] package. Applied at each modelling time step.
+#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [`MigClim`] package.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models

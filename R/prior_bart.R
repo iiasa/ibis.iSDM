@@ -8,7 +8,7 @@ NULL
 #' Bayesian additive regression tree model added via [engine_bart].
 #'
 #' Priors for [engine_bart] have to be specified as transition probabilities of variables which
-#' are interally used to generate splits in the regression tree. Specifying a prior can thus help
+#' are internally used to generate splits in the regression tree. Specifying a prior can thus help
 #' to 'enforce' a split with a given variable.
 #' These can be numeric and coded as values between \code{0} and \code{1}.
 #'
@@ -54,6 +54,9 @@ methods::setMethod(
       (hyper>=0 && hyper <= 1)
     )
     assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use XGBPriors')
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
     # Create new prior object
     bdproto(

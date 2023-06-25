@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate.R
 \name{validate}
 \alias{validate}
-\title{Validation of distribution object}
+\title{Validation of a fitted distribution object}
 \usage{
 \S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
 
@@ -12,7 +12,9 @@
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors. Alternatively one can also
 provide directly a \code{\link{SpatRaster}}, however in this case the \code{point} layer also needs to be provided.}
 
-\item{method}{Should the validation be conducted on continuous metrics or thresholded? See Details.}
+\item{method}{Should the validation be conducted on the continious prediction or a
+(previously calculated) thresholded layer in binary format? Note that depending
+on the method different metrics can be computed. See Details.}
 
 \item{layer}{In case multiple layers exist, which one to use? (Default: \code{'mean'}).}
 
@@ -27,15 +29,44 @@ provide directly a \code{\link{SpatRaster}}, however in this case the \code{poin
 Return a tidy \code{\link{tibble}} with validation results.
 }
 \description{
-This function conducts a comprehensive model evaluation based on
+This function conducts a model evaluation based on
 either on the fitted point data or any supplied independent.
 \strong{Currently only supporting point datasets. For validation of integrated models more work is needed.}
 }
 \details{
-The \code{validate} function does not work for all datasets equally.
+The \code{'validate'} function calculates different validation metrics
+depending on the output type.
+
+The output metrics for each type are defined as follows:
+\strong{Continuous:}
+\itemize{
+\item \code{'n'} = Number of observations.
+\item \code{'rmse'} = Root Mean Square Error, \deqn{ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} }
+\item \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
+\item \code{'logloss'} = Log loss, TBD
+\item \code{'normgini'} = Normalized Gini index, TBD
+\item \code{'cont.boyce'} = Continuous Boyce index, TBD
+}
+
+\strong{Discrete:}
+\itemize{
+\item \code{'n'} = Number of observations.
+\item \code{'auc'} = Area under the curve, TBD
+\item \code{'overall.accuracy'} = Overall Accuracy, TBD
+\item \code{'true.presence.ratio'} = True presence ratio or Jaccard index, TBD
+\item \code{'precision'} = Precision, TBD
+\item \code{'sensitivity'} = Sensitivity, TBD
+\item \code{'specificity'} = Specifivity, TBD
+\item \code{'tss'} = True Skill Statistics, TBD
+\item \code{'f1'} = F1 Score or Positive predictive value, TBD
+\item \code{'logloss'} = Log loss, TBD
+\item \code{'expected.accuracy'} = Expected Accuracy, TBD
+\item \code{'kappa'} = Kappa value, TBD
+\item \code{'brier.score'} = Brier score, TBD
+}
 }
 \note{
-If you use the Boyce Index, cite the original Hirzel et al. (2006) paper.
+If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 }
 \examples{
 \dontrun{

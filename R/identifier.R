@@ -39,6 +39,8 @@ new_id <- function() {
 }
 
 #' As Id
+#' @param x A [`character`] to be converted as id.
+#' @param ... Other arguements
 #' @rdname as
 #' @keywords misc
 #' @export

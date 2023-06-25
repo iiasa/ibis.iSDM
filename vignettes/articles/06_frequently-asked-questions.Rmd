@@ -333,7 +333,7 @@ By default, presence only biodiversity data is modelled as point-process model (
 <details>
 <summary><b>My model keeps crashing, what can I do?</b>
 </summary>
-Sorry to hear and unless the model or input data are grossely misspecified, this should not happen.
+Sorry to hear and unless the model or input data are grossely misspecified, this should not happen. Consider changing the input covariates. Often scaling the covariates (see `add_predictors()`) can help with model convergence. Similarly if the use of discrete variables (e.g. ``factor` predictors) results in errors, consider setting the parameter "explode_factors" to TRUE in `add_predictors()`. This will create additional covariates for every factor level.
 Please report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the concrete error message, your R session information (call `sessionInfo()`) and preferably some example data and code.
 </details>
 
@@ -361,4 +361,16 @@ pred <- fit$calc_suitabilityindex()
 
 ```
 
+</details>
+
+<details>
+<summary><b>The names of my variables are slightly changing when added to a model?</b>
+</summary>
+This is a feature, not a bug ;) Many covariates often come with unusual characters and symbols that can not be readily used in equations or in queries of tabular data. The `sanitize_names()` function cleans those variable names and removes / resets non conform symbols.
+
+```
+# It can be disabled by setting the following option to false at the start of the script.
+options('ibis.cleannames' = FALSE)
+
+```
 </details>

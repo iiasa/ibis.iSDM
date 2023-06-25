@@ -28,7 +28,6 @@
 #' to the target value during projection. By default the value is set to the minimum value found in the layer (Default: \code{NULL}).
 #' @param add [`logical`] specifying whether a new offset is to be added. Setting
 #' this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).
-#' @param ... Other parameters or arguments (currently not supported).
 #' @references
 #' * Warton, D.I., Renner, I.W. and Ramp, D., 2013. Model-based control of observer bias for the analysis of presence-only data in ecology. PloS one, 8(11), p.e79168.
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
@@ -75,14 +74,17 @@ methods::setMethod(
     }
 
     # Calculate a default bias value if not already set
-    if(is.null(bias_value)) bias_value <- terra::global(layer, stat = "min", na.rm = TRUE)
+    if(is.null(bias_value)) bias_value <- terra::global(layer, stat = "min", na.rm = TRUE)[,1]
 
     # Check for infinite values
     assertthat::assert_that(
       terra::nlyr(layer) == length(bias_value),
-      all( terra::global(layer, "range", na.rm = TRUE) > 0),
-      msg = "Infinite values found in the layer (maybe log of 0?)."
+      all( terra::global(layer, "max", na.rm = TRUE)[,1] > 0),
+      msg = "Infinite values found in the bias layer (maybe log of 0?)."
     )
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
     # Now precede depending on method
     if(method == "partial"){

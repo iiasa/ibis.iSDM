@@ -53,6 +53,9 @@ methods::setMethod(
     # Match supplied constrain in case someone has been lazy
     hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave','positive', 'negative', 'none'), several.ok = FALSE)
 
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+
     # Create new prior object
     bdproto(
       'GDBPrior',

@@ -9,6 +9,11 @@ as.Id(x, ...)
 
 \method{as.Id}{character}(x, ...)
 }
+\arguments{
+\item{x}{A \code{\link{character}} to be converted as id.}
+
+\item{...}{Other arguements}
+}
 \description{
 As Id
 

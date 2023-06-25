@@ -519,8 +519,8 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
     is.character(method),
     is.logical(cl)
   )
-  method <- match.arg(method, c("bilinear", "ngb"), several.ok = FALSE)
-
+  method <- match.arg(method, c("bilinear", "ngb", "near", "cubic", "lanczos", "sum", "max", "average", "mode"), several.ok = FALSE)
+  if(method == "ngb") method <- "near"
   if(sf::st_crs(data) != sf::st_crs(template)){
     # Project Raster layer
     data <- terra::project(data, terra::crs(template), method = method, threads = getOption("ibis.nthread"))
@@ -889,7 +889,7 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
   if(!any(is.factor(ras))) return(ras)
 
   # If input is a SpatRaster
-  if(inherits(ras, 'SpatRaster')){
+  if(terra::nlyr(ras)==1){
     # Get name
     # Create output template
     temp <- emptyraster(ras)
@@ -931,18 +931,18 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
       sub <- ras[[k]]
 
       temp <- emptyraster(sub)
-      if(is.null(name)) new_name <- names(sub)
+      if(is.null(name)) new_name <- names(sub) else new_name <- name
 
       # Extract data
       o <- data.frame(val = values(sub));names(o) <- new_name;o[[new_name]] <- factor(o[[new_name]])
 
       # Check if there is an NaN and remove if present.
-      if( any(is.nan(terra::levels(o[[name]])) | terra::levels(o[[name]]) == "NaN") ){
-        lvl <- terra::levels(o[[name]])
+      if( any(is.nan(terra::levels(o[[new_name]])) | terra::levels(o[[new_name]]) == "NaN") ){
+        lvl <- terra::levels(o[[new_name]])
         if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
         if(any(lvl == "Nan")) lvl <- lvl[-which(lvl == "NaN")]
       } else {
-        lvl <- terra::levels(o[[name]])
+        lvl <- terra::levels(o[[new_name]])
       }
 
       # Make function that converts all factors to split rasters
@@ -1164,7 +1164,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
     # Cluster
     E <- stats::kmeans(x = subset(stk, select = -cid),
-                       centers = ncol(stk)-1, iter.max = 10)
+                       centers = ncol(stk)-1, iter.max = 50)
 
     stk$cluster <- E$cluster
 

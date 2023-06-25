@@ -267,7 +267,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any way
 #' (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
-#' @param deriv A [`vector`] with [`characters`] of specific derivates to create (Default: \code{NULL}).
+#' @param deriv A [`vector`] with [`character`] of specific derivates to create (Default: \code{NULL}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates  (Default: \code{NULL}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @param ... other options (Non specified).
@@ -351,7 +351,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       for(val in names(env)){
         o <- makeHinge(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
         if(is.null(o)) next()
-        new_env <- c(new_env, fill_rasters(o, emptyraster(env) ) )
+        suppressWarnings( new_env <- c(new_env, fill_rasters(o, emptyraster(env) ) ) )
         rm(o)
       }
     } else {
@@ -383,7 +383,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.Raster(env)){
       new_env <- terra::rast()
       for(val in names(env)){
-        o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs)
+        suppressWarnings( o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
         new_env <- c(new_env, fill_rasters(o, emptyraster(env)) )
         rm(o)
@@ -416,7 +416,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.Raster(env)){
       new_env <- terra::rast()
       for(val in names(env)){
-        o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs)
+        suppressWarnings( o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
         new_env <- c(new_env, o)
         rm(o)
@@ -465,7 +465,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         # Multiply first with second entry
         o <- env[[ind[1,i]]] * env[[ind[2,i]]]
         names(o) <- paste0('inter__', ind[1, i],".", ind[2, i])
-        new_env <- c(new_env, o)
+        suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
@@ -496,7 +496,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 #' Homogenize NA values across a set of predictors.
 #'
 #' @description This method allows the homogenization of missing data across a set of environmental predictors.
-#' It is by default called when predictors are added to [´BiodiversityDistribution´] object. Only grid cells with NAs that contain
+#' It is by default called when predictors are added to [`BiodiversityDistribution`] object. Only grid cells with NAs that contain
 #' values at some raster layers are homogenized.
 #' Additional parameters allow instead of homogenization to fill the missing data with neighbouring values
 #' @param env A [`SpatRaster`] object with the predictors.
@@ -700,7 +700,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' This function helps to remove highly correlated variables from a set of predictors. It supports multiple options
 #' some of which require both environmental predictors and observations, others only predictors.
 #'
-#' Some of the options require different packages to be pre-installed, such as [ranger] or [Boruta].
+#' Some of the options require different packages to be pre-installed, such as [`ranger`] or [`Boruta`].
 #'
 #' @details
 #' Available options are:
@@ -708,16 +708,15 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' * \code{"none"} No prior variable removal is performed (Default).
 #' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 #' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [abess] package (see References). Note that this
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [`abess`] package (see References). Note that this
 #' effectively fits a separate generalized linear model to reduce the number of covariates.
-#' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
+#' * \code{"boruta"} Uses the [`Boruta`] package to identify non-informative features.
 #'
 #' @note
 #' Using this function on predictors effectively means that a separate model is fitted on the data
 #' with all the assumptions that come with in (e.g. linearity, appropriateness of response, normality, etc).
 #'
 #' @param env A [`data.frame`] or [`matrix`] with extracted environmental covariates for a given species.
-#' @param obs A [`vector`] with observational records to use for determining variable importance. Can be \code{NULL}.
 #' @param keep A [`vector`] with variables to keep regardless. These are usually variables for which prior
 #' information is known.
 #' @param method Which method to use for constructing the correlation matrix (Options: \code{'pearson'} (Default),
@@ -833,9 +832,10 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
 #' in Zhu et al. (2021) and Zhu et al. (2020).
 #' @inheritParams predictor_filter
 #'
+#' @param observed A [`vector`] with observational records to use for determining variable importance.
 #' @param family A [`character`] indicating the family the observational data originates from.
 #' @param tune.type [`character`] indicating the type used for subset evaluation.
-#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [abess].
+#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [`abess`].
 #' @param lambda A [`numeric`] single lambda value for regularized best subset selection (Default: \code{0}).
 #' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1} for each observation as default.
 #' @references
@@ -909,21 +909,22 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' All relevant feature selection using Boruta
 #'
 #' @description
-#' This function uses the [Boruta] package to identify predictor variables with little information content. It iteratively
+#' This function uses the [`Boruta`] package to identify predictor variables with little information content. It iteratively
 #' compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
 #' Attributes that have significantly worst importance than shadow ones are being consecutively dropped.
 #'
 #' @note
-#' This package depends on the [ranger] package to iteratively fit randomForest models.
+#' This package depends on the [`ranger`] package to iteratively fit randomForest models.
 #'
 #' @inheritParams predictor_filter
+#' @param observed A [`vector`] with observational records to use for determining variable importance.
 #' @param iter [`numeric`] on the number of maximal runs (Default: \code{100}). Increase if too many tentative left.
 #' @param verbose [`logical`] whether to be chatty.
 #' @references
 #' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
 #' @keywords utils, internal
 #' @returns A [`vector`] of variable names to exclude.
-predictors_filter_boruta <- function( env, observed, method, keep = NULL,
+predictors_filter_boruta <- function( env, obs, method, keep = NULL,
                                       iter = 100, verbose = getOption('ibis.setupmessages'), ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env) || is.matrix(env),

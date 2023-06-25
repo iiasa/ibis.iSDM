@@ -8,13 +8,13 @@ NULL
 #' furthermore has some generic options that apply to all engines (regardless of type).
 #' See Details with regards to such options.
 #'
-#' Users are advised to check the help files for individual [engine]s for advice on how
+#' Users are advised to check the help files for individual engines for advice on how
 #' the estimation is being done.
 #' @details
 #' This function acts as a generic training function that - based on the provided [`BiodiversityDistribution-class`]
 #' object creates a new distribution model.
-#' The resulting object contains both a [`fit_best`] object of the estimated model and, if \code{inference_only} is \code{FALSE}
-#' a [SpatRaster] object named [`prediction`] that contains the spatial prediction of the model.
+#' The resulting object contains both a \code{"fit_best"} object of the estimated model and, if \code{inference_only} is \code{FALSE}
+#' a [SpatRaster] object named \code{"prediction"} that contains the spatial prediction of the model.
 #' These objects can be requested via \code{object$get_data("fit_best")}.
 #'
 #' Other parameters in this function:
@@ -50,22 +50,23 @@ NULL
 #' * \code{"none"} No prior variable removal is performed (Default).
 #' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 #' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [abess] package (see References). Note that this
-#' effectively fits a separate generalized linear model to reduce the number of covariates.
-#' * \code{"boruta"} Uses the [Boruta] package to identify non-informative features.
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [`abess`] package (see References).
+#' Note that this effectively fits a separate generalized linear model to
+#' reduce the number of covariates.
+#' * \code{"boruta"} Uses the [`Boruta`] package to identify non-informative features.
 #'
 #' @param optim_hyperparam Parameter to tune the model by iterating over input parameters or selection
 #' of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
 #' needed (Default: \code{FALSE}).
 #'
-#' @param inference_only By default the [engine] is used to create
+#' @param inference_only By default the engine is used to create
 #' a spatial prediction of the suitability surface, which can take time. If only inferences of
 #' the strength of relationship between covariates and observations are required, this parameter
 #' can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE}).
 #' @param only_linear Fit model only on linear baselearners and functions. Depending
-#' on the [engine] setting this option to \code{FALSE} will result in non-linear relationships
+#' on the engine setting this option to \code{FALSE} will result in non-linear relationships
 #' between observations and covariates, often increasing processing time (Default: \code{TRUE}).
-#' How non-linearity is captured depends on the used [engine].
+#' How non-linearity is captured depends on the used engine.
 #' @param method_integration A [`character`] with the type of integration that should be applied if more
 #' than one [`BiodiversityDataset-class`] object is provided in \code{x}. Particular relevant for engines
 #' that do not support the integration of more than one dataset. Integration methods are generally sensitive
@@ -131,7 +132,7 @@ methods::setGeneric(
 
 #' @name train
 #' @rdname train
-#' @usage \S4method{train}{BiodiversityDistribution}(x)
+#' @usage \S4method{train}{BiodiversityDistribution, character, character, logical, logical, logical, character, logical, logical, logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose)
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
@@ -172,6 +173,7 @@ methods::setMethod(
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
+    settings$set('ibis.cleannames', getOption("ibis.cleannames"))
     settings$set('verbose', verbose)
     settings$set('seed', getOption("ibis.seed"))
     # Other settings

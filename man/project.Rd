@@ -12,19 +12,19 @@
 \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
 }
 \arguments{
+\item{x}{A \code{\link{BiodiversityScenario}} object with set predictors.
+Note that some constrains such as \code{\link{MigClim}} can still simulate future change without projections.}
+
 \item{...}{passed on parameters.}
 
 \item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated. Options
 include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
 
-\item{stabilize}{A \code{\link{boolean}} value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).}
+\item{stabilize}{A \code{\link{logical}} value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).}
 
 \item{stabilize_method}{\code{\link{character}} stating the stabilization method to be applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
-
-\item{mod}{A \code{\link{BiodiversityScenario}} object with set predictors.
-Note that some constrains such as \link{MigClim} can still simulate future change without projections.}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.
@@ -39,7 +39,7 @@ Any constrains specified in the scenario object are applied during the projectio
 }
 \details{
 In the background the function \code{x$project()} for the respective model object is called, where
-\code{x} is fitted model object. For specifics on the constrains, see the relevant \link{constrain} functions,
+\code{x} is fitted model object. For specifics on the constrains, see the relevant \code{\link{constrain}} functions,
 respectively:
 \itemize{
 \item \code{\link[=add_constrain]{add_constrain()}} for generic wrapper to add any of the available constrains.

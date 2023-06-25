@@ -6,7 +6,7 @@
 \usage{
 predictors_filter_boruta(
   env,
-  observed,
+  obs,
   method,
   keep = NULL,
   iter = 100,
@@ -28,17 +28,19 @@ information is known.}
 \item{verbose}{\code{\link{logical}} whether to be chatty.}
 
 \item{...}{Other options for a specific method}
+
+\item{observed}{A \code{\link{vector}} with observational records to use for determining variable importance.}
 }
 \value{
 A \code{\link{vector}} of variable names to exclude.
 }
 \description{
-This function uses the \link{Boruta} package to identify predictor variables with little information content. It iteratively
+This function uses the \code{\link{Boruta}} package to identify predictor variables with little information content. It iteratively
 compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
 Attributes that have significantly worst importance than shadow ones are being consecutively dropped.
 }
 \note{
-This package depends on the \link{ranger} package to iteratively fit randomForest models.
+This package depends on the \code{\link{ranger}} package to iteratively fit randomForest models.
 }
 \references{
 \itemize{

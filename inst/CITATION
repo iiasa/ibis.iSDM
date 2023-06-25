@@ -10,6 +10,7 @@ bibentry(
 	volume = {"76"},
 	year = {"2023"},
 	pages = {"102127"},
+	url = "https://doi.org/10.1016/j.ecoinf.2023.102127",
   textVersion  = "Jung, M. (2023). An integrated species distribution modelling framework for heterogeneous biodiversity data. Ecological Informatics, 102127.")
 
 citEntry(
@@ -20,5 +21,5 @@ citEntry(
         as.person("Maximilian H.K. Hesselbarth")
         ),
   year     = "2023",
-  version  = "0.0.4",
-  textVersion = "Jung, M., Hesselbarth, H.K.M. (2023). An integrated species distribution modelling framework for heterogeneous biodiversity data. R package version 0.0.4")
+  version  = "0.0.5",
+  textVersion = "Jung, M., Hesselbarth, H.K.M. (2023). An integrated species distribution modelling framework for heterogeneous biodiversity data. R package version 0.0.5")

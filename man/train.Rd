@@ -20,7 +20,7 @@ train(
   ...
 )
 
-\S4method{train}{BiodiversityDistribution}(x)
+\S4method{train}{BiodiversityDistribution, character, character, logical, logical, logical, character, logical, logical, logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}
@@ -34,24 +34,25 @@ Available options are:
 \item \code{"none"} No prior variable removal is performed (Default).
 \item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \link{abess} package (see References). Note that this
-effectively fits a separate generalized linear model to reduce the number of covariates.
-\item \code{"boruta"} Uses the \link{Boruta} package to identify non-informative features.
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{\link{abess}} package (see References).
+Note that this effectively fits a separate generalized linear model to
+reduce the number of covariates.
+\item \code{"boruta"} Uses the \code{\link{Boruta}} package to identify non-informative features.
 }}
 
 \item{optim_hyperparam}{Parameter to tune the model by iterating over input parameters or selection
 of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
 needed (Default: \code{FALSE}).}
 
-\item{inference_only}{By default the \link{engine} is used to create
+\item{inference_only}{By default the engine is used to create
 a spatial prediction of the suitability surface, which can take time. If only inferences of
 the strength of relationship between covariates and observations are required, this parameter
 can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE}).}
 
 \item{only_linear}{Fit model only on linear baselearners and functions. Depending
-on the \link{engine} setting this option to \code{FALSE} will result in non-linear relationships
+on the engine setting this option to \code{FALSE} will result in non-linear relationships
 between observations and covariates, often increasing processing time (Default: \code{TRUE}).
-How non-linearity is captured depends on the used \link{engine}.}
+How non-linearity is captured depends on the used engine.}
 
 \item{method_integration}{A \code{\link{character}} with the type of integration that should be applied if more
 than one \code{\linkS4class{BiodiversityDataset}} object is provided in \code{x}. Particular relevant for engines
@@ -94,14 +95,14 @@ This function trains a \code{\link[=distribution]{distribution()}} model with th
 furthermore has some generic options that apply to all engines (regardless of type).
 See Details with regards to such options.
 
-Users are advised to check the help files for individual \link{engine}s for advice on how
+Users are advised to check the help files for individual engines for advice on how
 the estimation is being done.
 }
 \details{
 This function acts as a generic training function that - based on the provided \code{\linkS4class{BiodiversityDistribution}}
 object creates a new distribution model.
-The resulting object contains both a \code{\link{fit_best}} object of the estimated model and, if \code{inference_only} is \code{FALSE}
-a \link{SpatRaster} object named \code{\link{prediction}} that contains the spatial prediction of the model.
+The resulting object contains both a \code{"fit_best"} object of the estimated model and, if \code{inference_only} is \code{FALSE}
+a \link{SpatRaster} object named \code{"prediction"} that contains the spatial prediction of the model.
 These objects can be requested via \code{object$get_data("fit_best")}.
 
 Other parameters in this function:

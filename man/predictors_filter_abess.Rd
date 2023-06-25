@@ -19,13 +19,15 @@ predictors_filter_abess(
 \arguments{
 \item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates for a given species.}
 
+\item{observed}{A \code{\link{vector}} with observational records to use for determining variable importance.}
+
 \item{method}{Which method to use for constructing the correlation matrix (Options: \code{'pearson'} (Default),
 \code{'spearman'}| \code{'kendal'}), \code{"abess"}, or \code{"boruta"}.}
 
 \item{family}{A \code{\link{character}} indicating the family the observational data originates from.}
 
 \item{tune.type}{\code{\link{character}} indicating the type used for subset evaluation.
-Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \link{abess}.}
+Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \code{\link{abess}}.}
 
 \item{lambda}{A \code{\link{numeric}} single lambda value for regularized best subset selection (Default: \code{0}).}
 

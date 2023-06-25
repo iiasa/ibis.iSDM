@@ -1,7 +1,6 @@
 # Test scenario creation and constraints
 test_that('Scenarios and constraints', {
 
-  skip_if_not_installed('stars')
   skip_if_not_installed('glmnet')
   skip_if_not_installed('geosphere')
   skip_on_travis()
@@ -36,8 +35,15 @@ test_that('Scenarios and constraints', {
   )
   sf::st_crs(pred_future) <- sf::st_crs(4326)
 
+  expect_true(is.stars(pred_future))
+
   pred_current <- stars_to_raster(pred_future, 1)[[1]]
   names(pred_current) <- names(pred_future)
+
+  # Also test the reverse
+  test <- raster_to_stars(pred_current)
+  expect_length(test, 9)
+  expect_equal(names(test), names(pred_current))
 
   # Basic validity checks
   expect_length(pred_future, 9)

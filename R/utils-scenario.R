@@ -81,6 +81,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
 #' @param vars A [`vector`] describing the variables to be combined. Has to be of
 #' length two or greater.
 #' @param newname A [`character`] with the new name for the variable.
+#' @param weights An optional variable layer to use for weighting.
 #' @param fun A function how the respective layers should be combined.
 #' @examples
 #' \dontrun{
@@ -88,15 +89,16 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
 #'   newname = "forest",fun = "sum")
 #' }
 #' @keywords scenario, internal
-st_reduce <- function(obj, vars, newname, fun = 'sum'){
+st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
   assertthat::assert_that(
     is.list(obj) || inherits(obj, 'stars'),
     is.vector(vars) && is.character(vars),
     length(vars) >=2,
+    is.null(weights) || is.character(weights),
     is.character(fun),
     is.character(newname)
   )
-  fun <- match.arg(fun, c("sum", "multiply", "divide", "subtract", "mean"), several.ok = FALSE)
+  fun <- match.arg(fun, c("sum", "multiply", "divide", "subtract", "mean", "weighted.mean"), several.ok = FALSE)
   check_package('stars')
   # Convert to stars if not already
   if(!inherits(obj, 'stars')) obj <- stars::st_as_stars(obj)
@@ -104,6 +106,11 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
   assertthat::assert_that(
     all(vars %in% names(obj))
   )
+  # If weighted mean is chosen, ensure that weights are set and of equal length to vars.
+  if(fun == "weighted.mean") assertthat::assert_that(is.character(weights),
+                                                     length(vars) == length(weights),
+                                                     all(weights %in% names(obj)))
+
   # Future?
   if(foreach::getDoParRegistered()){
     ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
@@ -113,6 +120,13 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
   # First get all target variables and non-target variables
   target <- stars:::select.stars(obj, vars)
   non_target <- stars:::select.stars(obj, -vars)
+  if(fun == "weighted.mean"){
+    target_weights <- stars:::select.stars(obj, weights)
+    # Normalize the weights
+    no <- stars::st_as_stars( Reduce("+", target_weights) )
+    stars::st_dimensions(no) <- stars::st_dimensions(target_weights)
+    target_weights <- target_weights / no
+  }
 
   # Now apply the function on the target
   # FIXME: Not working as intended and horribly slow
@@ -121,15 +135,19 @@ st_reduce <- function(obj, vars, newname, fun = 'sum'){
   #                           FUTURE = fut,
   #                           ...
   #                           )
+  if(fun == "weighted.mean") target <- target * target_weights
+
   what <- switch (fun,
     "sum" = "+",
     "multiply" = "*",
     "divide" = "/",
     "subtract" = "-",
-    "mean" = "+"
+    "mean" = "+",
+    "weighted.mean" = "+"
   )
   new <- stars::st_as_stars( Reduce(what, target) )
   if(what == "mean") new <- new / length(target)
+  if(what == "weighted.mean") new <- new / ( stars::st_as_stars( Reduce("+", target_weights) ) )
   stars::st_dimensions(new) <- stars::st_dimensions(target)
   # Rename to newname
   names(new) <- newname
@@ -179,6 +197,7 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
     # Slice to a specific time frame for each
     o <- obj |> stars:::slice.stars({{time_band}}, tt) |>
       terra::rast() # Or alternatively rast
+    names(o) <- names(obj)
 
     # Reset times to the correct ones
     terra::time(o) <- as.Date( rep(times[tt], terra::nlyr(o)) )
@@ -238,6 +257,7 @@ raster_to_stars <- function(obj){
 
   # Get time dimension
   times <- terra::time(obj)
+  if(all(is.na( as.character(times) ))) stop("Predictor covariates are missing a time dimension! See terra::time() ")
   if(!all(inherits(times, "Date"))) times <- as.Date(times)
   prj <- sf::st_crs( terra::crs(obj) )
 
@@ -248,7 +268,8 @@ raster_to_stars <- function(obj){
   # Convert to stars step by step
   new_env <- list()
   for(i in 1:terra::nlyr(obj)){
-    suppressWarnings(  o <- stars::st_as_stars(obj[[i]]) )
+    oo <- subset(obj, i)
+    suppressWarnings(  o <- stars::st_as_stars(oo) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
 
@@ -509,13 +530,22 @@ hack_project_stars <- function(obj, template){
     sub <- obj[v]
     stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
 
+    # FIXME: ideally remove proj4 string dependency here
+    # Re project with terra
+    # temp <- terra::rast(x = file.path(td, "ReprojectedStars.tif"))
+    # temp <- terra::project(x = temp,
+    #                        y = template,
+    #                        align = TRUE,
+    #                        gdal = TRUE,
+    #                        threads = FALSE)
+    # terra::writeRaster(temp, file.path(td, "ReprojectedStars_temp.tif"),overwrite = TRUE)
     suppressWarnings(
       gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
                           dstfile = file.path(td, "ReprojectedStars_temp.tif"),
                           s_srs = "EPSG:4296",
                           tr = terra::res(template),
                           te = terra::ext(template) |> st_bbox(),
-                          t_srs = sp::proj4string(template))
+                          t_srs = sf::st_crs(template)$proj4string)
     )
     oo <- stars::read_stars(file.path(td, "ReprojectedStars_temp.tif"),proxy = F)
     names(oo) <- v # Rename
