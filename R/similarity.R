@@ -348,9 +348,9 @@ methods::setMethod(
 
   # --- #
   # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
-  nt_novel <- emptyraster(bg)
+  nt_novel <- terra::init(bg, NA)
   # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
-  if(terra::hasValues(nt1)) o_low <- nt1 < 0 else o_low <- terra::init(nt1, FALSE)
+  if(terra::hasValues(nt1)) o_low <- nt1 < 0 else o_low <- terra::init(nt1, 0)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
   # non-analogous covariate combinations
