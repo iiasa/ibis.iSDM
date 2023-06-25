@@ -360,7 +360,7 @@ methods::setMethod(
   nt_novel[o_mid == 1] <- 2
   nt_novel[o_high == 1] <- 3
   nt_novel <- terra::as.factor(nt_novel)
-  levels(nt_novel) <- data.frame(ID = levels(nt_novel)[[1]][,1],
+  levels(nt_novel) <- data.frame(ID = c(1,2,3),
                             what = c('Outside reference','Within reference','Novel combinations'))
 
   # Create output stack
