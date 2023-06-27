@@ -217,7 +217,7 @@ methods::setMethod(
           ras_uncertainty <- switch (uncertainty,
                                      "sd" = terra::app(ras, sd, na.rm = TRUE),
                                      "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                     "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE),
+                                     "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE),
                                      "pca" = terra::mean(rasp, na.rm = TRUE)
           )
           names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
@@ -300,7 +300,7 @@ methods::setMethod(
         ras_uncertainty <- switch (uncertainty,
                                    "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
                                    "cv" = terra::app(ras, fun = "sd", na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                   "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
+                                   "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
         )
         names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
         # Add attributes on the method of ensembling
