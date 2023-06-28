@@ -296,6 +296,9 @@ methods::setMethod(
       # Add attributes on the method of ensemble
       attr(new, "method") <- method
       if(uncertainty != "none"){
+        if(uncertainty == "pca") {
+          stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+        }
         # Add uncertainty
         ras_uncertainty <- switch (uncertainty,
                                    "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
@@ -385,6 +388,9 @@ methods::setMethod(
 
     # --- #
     if(uncertainty != 'none'){
+      if(uncertainty == "pca") {
+       stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
+      }
       # Add uncertainty
       out_uncertainty <- switch (uncertainty,
                                  "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),

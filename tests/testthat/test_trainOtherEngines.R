@@ -47,6 +47,15 @@ test_that('Train a distribution model with XGboost', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+
+  ex_sd <- ensemble(mod, mod, uncertainty = "sd")
+  ex_range <- ensemble(mod, mod, uncertainty = "range")
+  ex_pca <- ensemble(mod, mod, uncertainty = "pca")
+
+  expect_named(object = ex_sd, expected = c("ensemble_mean", "sd_mean"))
+  expect_named(object = ex_range, expected = c("ensemble_mean", "range_mean"))
+  expect_named(object = ex_pca, expected = c("ensemble_mean", "pca_mean"))
+
 })
 
 # ---- #
