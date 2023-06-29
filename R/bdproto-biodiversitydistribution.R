@@ -81,8 +81,13 @@ BiodiversityDistribution <- bdproto(
     return(o)
   },
   # Set limits
-  set_limits = function(self, x){
-    assertthat::assert_that(is.Raster(x))
+  set_limits = function(self, x, mcp_buffer = 0, limits_clip = FALSE){
+    assertthat::assert_that(is.Raster(x) || inherits(x, "sf"),
+                            msg = "Provide a SpatRaster or sf object!")
+    # Construct limits object assuming zones
+    x <- list(layer = x, limits_method = "zones",
+                   "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
+
     bdproto(NULL, self, limits = x )
   },
   # Get provided limits
@@ -137,7 +142,8 @@ BiodiversityDistribution <- bdproto(
   },
   # Set new priors
   set_priors = function(self, x ){
-    assertthat::assert_that(inherits(x, 'PriorList'), msg = 'An object created through `priors` has to be provided.')
+    assertthat::assert_that(inherits(x, 'PriorList'),
+                            msg = 'An object created through `priors` has to be provided.')
     # Check if a priorlist is set. If yes, then combine the new one with existing priors
     if(is.Waiver(self$priors)){
       bdproto(NULL, self, priors = x )

@@ -131,12 +131,12 @@ methods::setMethod(
       suppressMessages(
         suppressWarnings(
           zones <- st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
-                                   mod$get_limits()
+                                   mod$get_limits()$layer
           )
         )
       )
       # Limit zones
-      zones <- subset(mod$get_limits(), limit %in% unique(zones$limit) )
+      zones <- subset(mod$get_limits()$layer, limit %in% unique(zones$limit) )
       # Now clip all provided new predictors and background to this
       new_preds$crop_data(zones)
     }

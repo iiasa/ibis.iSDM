@@ -135,6 +135,58 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
   return(ov)
 }
 
+#' Help function to create a minimum convex polygon for supplied biodiversity data
+#'
+#' @description
+#' This function create a minimum convex polygon based on supplied spatial data.
+#' @note
+#' This is an internal function that makes use of data prepared within the `train`
+#' call.
+#' @param biod A [`list`] supplied by description
+#' @returns A [`sf`] object.
+#' @keywords internal
+#' @noRd
+create_mcp <- function(biod, limits){
+  assertthat::assert_that(
+    is.list(biod), length(biod)>=1,
+    is.list(limits)
+  )
+  check_package("dplyr")
+
+  # First collate all occurrence points in the supplied object
+  obs <- lapply( biod, function(x) {
+    guess_sf( x$observations ) |> dplyr::select("observed")
+  } )
+  obs <- do.call("rbind", obs)
+  # Get only those observations with presence
+  obs <- obs[which(obs[[1]]>0),]
+
+  # Assing unique id
+  obs$id <- 1:nrow(obs)
+  if(!utils::hasName(obs, "geometry")) obs <- rename_geometry(obs, "geometry")
+
+  suppressMessages(
+    suppressWarnings(
+      out <- obs %>%
+        dplyr::group_by( id ) %>%
+        dplyr::summarise( geometry = sf::st_combine( geometry ) ) |>
+        sf::st_union()
+    )
+  )
+  # Convert to convex polygon
+  out <- sf::st_convex_hull(out) |> sf::st_cast("MULTIPOLYGON") |>
+    sf::st_as_sf()
+
+  # Buffer if specified
+  if(limits$mcp_buffer>0) out <- out |> sf::st_buffer(dist = limits$mcp_buffer)
+  # Add a limit field
+  out$limit <- 1:nrow(out)
+  attr(out, "limits_method") <- "mcp"
+
+  assertthat::assert_that(inherits(out, "sf"))
+  return(out)
+}
+
 #' Create mask based on a zonal layer
 #'
 #' @description

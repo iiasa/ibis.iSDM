@@ -1,3 +1,8 @@
+# ibis.iSDM 0.0.6
+
+* Respecification of limits with implementation of minimum convex polygon limits to `distribution`.
+* Minor bug fixes to `ensemble` uncertainty calculations.
+
 # ibis.iSDM 0.0.5
 
 * Addition of 5 parameter logistic curve offsets with parameter search to `add_offset`.

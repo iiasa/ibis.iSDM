@@ -4,11 +4,17 @@
 \alias{distribution}
 \title{Create distribution modelling procedure}
 \usage{
-distribution(background, limits = NULL)
+distribution(
+  background,
+  limits = NULL,
+  limits_method = "none",
+  mcp_buffer = 0,
+  limits_clip = FALSE
+)
 
-\S4method{distribution}{SpatRaster, ANY}(background, limits)
+\S4method{distribution}{SpatRaster, ANY, character, numeric, logical}(background, limits, limits_method, mcp_buffer,limits_clip)
 
-\S4method{distribution}{sf, ANY}(background, limits)
+\S4method{distribution}{sf, ANY, character, numeric, logical}(background, limits, limits_method, mcp_buffer, limits_clip)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
@@ -16,6 +22,15 @@ distribution(background, limits = NULL)
 
 \item{limits}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the prediction surface when
 intersected with input data (Default: \code{NULL}).}
+
+\item{limits_method}{A \code{\link{character}} of the method used for hard limiting a projection.
+Available options are \code{"none"} (Default), \code{"zones"} or \code{"mcp"}.}
+
+\item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default \code{0}). Only used if
+\code{"mcp"} is used.}
+
+\item{limits_clip}{\code{\link{logical}} Should the limits clip all predictors before fitting
+a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).}
 }
 \value{
 \code{\linkS4class{BiodiversityDistribution}} object containing data for building a biodiversity distribution modelling problem.
@@ -31,8 +46,12 @@ via the \link{train} function and predictions be created.
 
 Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
 the background. This can be for instance a buffered layer by a certain dispersal distance (Cooper and Soberon, 2018)
-or a categorical layer representing biomes or soil conditions. See also the
-frequently asked question (FAQ) section on the homepage for more information.
+or a categorical layer representing biomes or soil conditions.
+Another option is to create a constraint by constructing a minimum convex polygon (MCP) using
+the supplied biodiversity data. This option can be enabled by setting
+\code{"limits_method"} to \code{"mcp"}. It is also possible to provide a small buffer
+to constructed MCP that way.
+See the frequently asked question (FAQ) section on the homepage for more information.
 
 See \strong{Details} for a description of the internal functions available
 to modify or summarize data within the created object.

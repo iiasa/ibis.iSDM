@@ -85,6 +85,16 @@ mod <- distribution(background, limits = zone) |>
   engine_gdb() |>  
   train()
 plot(mod)
+
+# Alternatively one can also create such limits based on a minimum convex polygon
+# of the provided data. Here we create a non-buffered MCP across all points used
+# in species_data to constrain the prediction.
+mod <- distribution(background, limits_method = "mcp", mcp_buffer = 0) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_gdb() |>  
+  train()
+plot(mod)
+
 ```
 
 There is further a dedicated function ([`create_zonaloccurrence_mask()`]) to help set up such zones, either by taking existing categorical raster datasets or by constructing buffers around existing presence records (which could for example reflect assumed maximum dispersal distances).
