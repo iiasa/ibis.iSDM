@@ -22,7 +22,7 @@ NULL
 #' Lower values generally being better but also computationally more costly. (Default: \code{1e-3})
 #' @param iter [`numeric`] value giving the the maximum number of boosting iterations for cross-validation (Default: \code{8e3L}).
 #' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
-#' Also see [reg_lambda] parameter for the L2 regularization on the weights
+#' Also see \code{"reg_lambda"} parameter for the L2 regularization on the weights
 #' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
 #' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
 #' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
@@ -38,7 +38,7 @@ NULL
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add xgboost as an engine

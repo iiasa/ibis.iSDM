@@ -5,7 +5,7 @@ NULL
 #'
 #' @description
 #' Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
-#' Engine has been largely superceded by the [engine_bru] package and users are advised to us this one,
+#' Engine has been largely superceded by the [`engine_inlabru`] package and users are advised to us this one,
 #' unless specific options are required.
 #'
 #' @details
@@ -29,7 +29,7 @@ NULL
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
 #' Default is an educated guess (Default: \code{NULL}).
@@ -58,7 +58,7 @@ NULL
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add INLA as an engine (with a custom mesh)

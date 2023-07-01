@@ -29,7 +29,7 @@ determined deterministically (Default: \code{NULL}).}
 \item{...}{Other parameters passed on to glmnet.}
 }
 \value{
-An \link{engine}.
+An engine.
 }
 \description{
 This engine allows the estimation of linear coefficients using either ridge, lasso or elastic net regressions techniques.

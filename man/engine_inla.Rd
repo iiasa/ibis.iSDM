@@ -28,7 +28,7 @@ engine_inla(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
+\item{optional_mesh}{A directly supplied \code{"INLA"} mesh (Default: \code{NULL})}
 
 \item{optional_projstk}{A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})}
 
@@ -69,11 +69,11 @@ Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: 
 \item{...}{Other options.}
 }
 \value{
-An \link{engine}.
+An engine.
 }
 \description{
 Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
-Engine has been largely superceded by the \link{engine_bru} package and users are advised to us this one,
+Engine has been largely superceded by the \code{\link{engine_inlabru}} package and users are advised to us this one,
 unless specific options are required.
 }
 \details{

@@ -28,7 +28,7 @@ add_biodiversity_polpa(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{polpa}{A \code{\link{sf}} or \code{\link{Spatial}}) polygon object of presence-absence occurrences.}
+\item{polpa}{A \code{\link{sf}} polygon object of presence-absence occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -42,7 +42,7 @@ add_biodiversity_polpa(
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
 Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{polpa}}.}
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{"polpa"}.}
 
 \item{simulate}{Simulate poipa points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipa}} (Default: \code{FALSE}).}
 
@@ -51,10 +51,10 @@ one dataset is added. A \code{\link{vector}} is also supported but must be of th
 \item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
-\code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}
+\code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{"simulate_weights"}
 parameter.}
 
-\item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}

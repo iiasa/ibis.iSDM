@@ -50,10 +50,10 @@ NULL
 #' * \code{"none"} No prior variable removal is performed (Default).
 #' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 #' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [`abess`] package (see References).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
 #' Note that this effectively fits a separate generalized linear model to
 #' reduce the number of covariates.
-#' * \code{"boruta"} Uses the [`Boruta`] package to identify non-informative features.
+#' * \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
 #'
 #' @param optim_hyperparam Parameter to tune the model by iterating over input parameters or selection
 #' of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is

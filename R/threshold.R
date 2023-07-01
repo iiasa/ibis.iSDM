@@ -32,18 +32,18 @@ NULL
 #' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
 #' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 #' * \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
-#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the [`modEvA`] package to be installed.
-#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the [`modEvA`] package to be installed.
-#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the [`modEvA`] package to be installed.
-#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
-#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
-#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
+#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
 #' @name threshold
 #' @references
 #' * Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
 #' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
-#' @seealso [`modEvA`]
+#' @seealso \code{"modEvA"}
 #' @returns A [SpatRaster] if a [SpatRaster] object as input.
 #' Otherwise the threshold is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
 #' @examples

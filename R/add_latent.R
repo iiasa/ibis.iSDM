@@ -20,7 +20,7 @@ NULL
 #'
 #' Available are:
 #'
-#' [*] \code{"spde"} - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
+#' [*] \code{"spde"} - stochastic partial differential equation (SPDE) for [`engine_inla`] and [`engine_inlabru`].
 #' SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
 #' Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
 #' if elevation is positively correlated with the response variable, but is not included in the model,
@@ -35,7 +35,7 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model. See details.
-#' @param priors A [`Prior-List`] object supplied to the latent effect. Relevant only for [`engine_inla`] and \code{NULL} equates the use of default priors.
+#' @param priors A \code{"Prior-List"} object supplied to the latent effect. Relevant only for [`engine_inla`] and \code{NULL} equates the use of default priors.
 #' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
 #' for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down

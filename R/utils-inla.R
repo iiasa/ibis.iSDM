@@ -490,7 +490,7 @@ coords_in_mesh <- function(mesh, coords) {
 #' TODO: Switch to posterior sampling
 #' https://groups.google.com/g/r-inla-discussion-group/c/y-rQlDVtzmM
 #'
-#' @param mesh x A [`distribution`] object used for fitting an [`INLA`] model.
+#' @param mesh x A [`distribution`] object used for fitting an INLA model.
 #' @param mod A trained [`distribution`] model.
 #' @param type The summary statistic to use.
 #' @param backtransf Either NULL or a function.
@@ -713,10 +713,10 @@ post_prediction <- function(mod, nsamples = 100,
   myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
 
   # evaluate_model Function
-  A <- inlabru:::amatrix_eval(model, data = preds)
+  A <- inlabru:::ibm_amatrix(model, data = preds)
   A <- x$engine$data$stk_pred$stk_proj$A
 
-  effects <- inlabru:::evaluate_effect_multi_state(
+  effects <- inlabru::evaluate_effect_multi_state(
     model$effects[included],
     state = vals,
     data = preds,
@@ -728,7 +728,7 @@ post_prediction <- function(mod, nsamples = 100,
     return(effects)
   }
 
-  values <- inlabru::evaluate_predictor(
+  values <- inlabru:::evaluate_predictor(
     model,
     state = state,
     data = data,

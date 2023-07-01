@@ -22,7 +22,7 @@ NULL
 #' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
 #' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine

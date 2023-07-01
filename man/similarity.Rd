@@ -80,7 +80,7 @@ species distribution models" https://doi.org/10.1111/ddi.12209 \emph{Diversity a
 }
 }
 \seealso{
-\code{\link{dismo}} R-package.
+dismo R-package.
 }
 \keyword{environment}
 \keyword{mahalanobis,}

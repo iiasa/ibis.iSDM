@@ -33,7 +33,7 @@ The code here was adapted from the Supporting materials script.
 Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
 from elevation limits. It requires a \code{\link{SpatRaster}} with elevation information.
 A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
-areas, with the \code{\link{rate}} parameter allowing to vary the steepness of decline.
+areas, with the \code{"rate"} parameter allowing to vary the steepness of decline.
 
 Note that all offsets created by this function are by default log-transformed before export. In addition
 this function also mean-centers the output as recommended by Ellis-Soto et al.

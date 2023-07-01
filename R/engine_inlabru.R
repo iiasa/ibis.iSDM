@@ -6,10 +6,10 @@ NULL
 #' @description Model components are specified with general inputs and mapping methods to the
 #' latent variables, and the predictors are specified via general R expressions,
 #' with separate expressions for each observation likelihood model in multi-likelihood models.
-#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for [INLA::inla],
-#' albeit [inlabru] has a number of convenience functions implemented that make in particular predictions
+#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for INLA,
+#' albeit \code{"inlabru"} has a number of convenience functions implemented that make in particular predictions
 #' with new data much more straight forward (e.g. via posterior simulation instead of fitting).
-#' Since more recent versions [inlabru] also supports the addition of multiple likelihoods, therefore
+#' Since more recent versions \code{"inlabru"} also supports the addition of multiple likelihoods, therefore
 #' allowing full integrated inference.
 #' @details
 #' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
@@ -32,7 +32,7 @@ NULL
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
 #' Default is an educated guess (Default: \code{NULL}).
 #' @param offset interpreted as a numeric factor relative to the approximate data diameter.
@@ -53,7 +53,7 @@ NULL
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add inlabru as an engine

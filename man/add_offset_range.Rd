@@ -28,7 +28,7 @@ add_offset_range(
 \item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
 
 \item{distance_max}{A \code{\link{numeric}} threshold on the maximum distance beyond the range that should be considered
-to have a high likelihood of containing species occurrences (Default: \code{Inf} \link{m}). Can be set to \code{NULL} or \code{0}
+to have a high likelihood of containing species occurrences (Default: \code{Inf} \code{"m"}). Can be set to \code{NULL} or \code{0}
 to indicate that no distance should be calculated.}
 
 \item{family}{A \code{\link{character}} denoting the type of model to which this offset is to be added. By default
@@ -64,8 +64,10 @@ Adds a range offset to a \code{\link{distribution}} object.
 This function has additional options compared to the more generic
 \code{\link[=add_offset]{add_offset()}}, allowing customized options specifically for expert-based
 ranges as offsets or spatialized polygon information on species occurrences.
-If even more control is needed, the user is informed of the \pkg{bossMaps}
-package Merow et al. (2017).
+If even more control is needed, the user is informed of the \code{"bossMaps"}
+package Merow et al. (2017). Some functionalities of that package emulated
+through the \code{"distance_function"} set to \code{"log"}. This tries to fit
+a 5-parameter logistic function to estimate the distance from the range (Merow et al. 2017).
 }
 \details{
 The output created by this function creates a \code{\link{SpatRaster}} to be added to
@@ -73,7 +75,7 @@ a provided distribution object. Offsets in regression models are likelihood
 specific as they are added directly to the overall estimate of \code{`y^hat`}.
 
 Note that all offsets created by this function are by default log-transformed before export.
-Background values (e.g. beyond \code{\link{distance_max}}) are set to a very small
+Background values (e.g. beyond \code{"distance_max"}) are set to a very small
 constant (\code{1e-10}).
 }
 \examples{
@@ -89,7 +91,7 @@ constant (\code{1e-10}).
 }
 }
 \seealso{
-\code{\link{bossMaps}}
+\code{"bossMaps"}
 
 Other offset: 
 \code{\link{add_offset_bias}()},

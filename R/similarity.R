@@ -41,7 +41,7 @@ NULL
 #' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool
 #' for quantifying novelty due to covariate range and correlation change when projecting
 #' species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
-#' @seealso [`dismo`] R-package.
+#' @seealso dismo R-package.
 #' @name similarity
 #' @export
 #' @examples
@@ -209,7 +209,7 @@ methods::setMethod(
       # Relabel most important
       out$mod <- terra::as.factor(out$mod)
       levels(out$mod) <- data.frame(ID = levels(out$mod)[[1]][,1],
-                                    variable = names(covs))
+                                    variable = names(obj))
 
     } else {
       stop('Not yet implemented!')

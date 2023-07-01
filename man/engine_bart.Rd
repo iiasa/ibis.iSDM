@@ -20,7 +20,7 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 \item{...}{Other options.}
 }
 \value{
-An \link{engine}.
+An engine.
 }
 \description{
 The Bayesian regression approach to a sum of complementary trees is to shrink
@@ -29,9 +29,9 @@ non-linear highly flexible estimation and have been shown to compare favourable 
 algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
 and shrinkage towards \code{0}.
 
-This package requires the \link{dbarts} R-package to be installed.
-Many of the functionalities of this \link{engine} have been inspired by the \link{embarcadero} R-package. Users
-are therefore advised to cite if they make heavy use of BART.
+This package requires the \code{"dbarts"} R-package to be installed.
+Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
+Users are therefore advised to cite if they make heavy use of BART.
 }
 \details{
 Prior distributions can furthermore be set for:

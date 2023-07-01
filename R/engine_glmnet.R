@@ -38,7 +38,7 @@ NULL
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine

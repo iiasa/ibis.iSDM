@@ -6,9 +6,9 @@ NULL
 #' @description
 #' This function creates an object that contains all the data, parameters and settings
 #' for building an (integrated) species distribution model.
-#' Key functions to add data are [`add_biodiversity_*`], [`add_predictors()`],
-#' [`add_latent_*`], [`engine_*`], [`add_priors`] and [`add_offset`]. It creates a
-#' prototype [`BiodiversityDistribution`] object with its own functions.
+#' Key functions to add data are [`add_biodiversity_poipo`] and the like, [`add_predictors`],
+#' [`add_latent_spatial`], [`engine_glmnet`] or similar, [`add_priors`] and [`add_offset`].
+#' It creates a prototype [`BiodiversityDistribution`] object with its own functions.
 #' After setting input data and parameters, model predictions can then be created
 #' via the [train] function and predictions be created.
 #'
@@ -24,11 +24,11 @@ NULL
 #' See **Details** for a description of the internal functions available
 #' to modify or summarize data within the created object.
 #'
-#' **Note that any model requires at minimum a single added [biodiversity] dataset
-#' as well as a specified [engine].**
+#' **Note that any model requires at minimum a single added biodiversity dataset
+#' as well as a specified engine.**
 #'
 #' @param background Specification of the modelling background. Must be a
-#' [`SpatRaster`], [`sf`] or [`extent`] object.
+#' [`SpatRaster`] or [`sf`] object.
 #' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction surface when
 #' intersected with input data (Default: \code{NULL}).
 #' @param limits_method A [`character`] of the method used for hard limiting a projection.
@@ -41,17 +41,17 @@ NULL
 #' @details
 #' This function creates a [`BiodiversityDistribution-class`] object that in itself contains
 #' other functions and stores parameters and (pre-)processed data.
-#' A full list of functions available can be queried via \code{names(object)}.
+#' A full list of functions available can be queried via \code{"names(object)"}.
 #' Some of the functions are not intended to be manipulated directly,
-#'  but rather through convenience functions (e.g. [`object$set_predictors()`]).
+#'  but rather through convenience functions (e.g. \code{"object$set_predictors()"}).
 #' Similarly other objects are stored in the [`BiodiversityDistribution-class`] object that
-#' have their own functions as well and can be queried (e.g. [`names(object)`]). For a list of
+#' have their own functions as well and can be queried (e.g. \code{"names(object)"}). For a list of
 #' functions see the reference documentation. By default,
-#' if some datasets are not set, then a [`Waiver`] object is returned instead.
+#' if some datasets are not set, then a \code{"Waiver"} object is returned instead.
 #'
 #' The following objects can be stored:
 #' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with the added biodiversity data.
-#' * \code{object$engine} An [`engine`] object (e.g. [engine_inlabru]) with function depended on the added engine.
+#' * \code{object$engine} An \code{"engine"} object (e.g. [`engine_inlabru()`]) with function depended on the added engine.
 #' * \code{object$predictors} A [`PredictorDataset`] object with all set predictions.
 #' * \code{object$priors} A [`PriorList`] object with all specified priors.
 #' * \code{object$log} A [`Log`] object that captures.
@@ -61,8 +61,8 @@ NULL
 #' * \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
 #' * \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
 #' * \code{object$get_extent()} Outputs the [terra::ext] of the modelling region.
-#' * \code{object$show_background_info()} Returns a [`list`] with the [terra::ext] and the [sp::proj4string].
-#' * \code{object$get_extent_dimensions()} Outputs the [terra::ext] dimension by calling the [`extent_dimensions()`] function.
+#' * \code{object$show_background_info()} Returns a [`list`] with the [terra::ext] and the [terra::crs].
+#' * \code{object$get_extent_dimensions()} Outputs the [terra::ext] dimension by calling the \code{"extent_dimensions()"} function.
 #' * \code{object$get_predictor_names()} Returns a [character] vector with the names of all added predictors.
 #' * \code{object$get_prior_variables()} Returns a description of [`priors`] added.
 #'
@@ -70,7 +70,7 @@ NULL
 #'
 #' @returns [`BiodiversityDistribution-class`] object containing data for building a biodiversity distribution modelling problem.
 #'
-#' @seealso [`bdproto`] on the general definition of [`proto`] objects and in particular [`bdproto-biodiversitydistribution`].
+#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and in particular [`bdproto-biodiversitydistribution`].
 #'
 #' @references
 #' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710

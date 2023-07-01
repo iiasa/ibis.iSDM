@@ -9,9 +9,9 @@ NULL
 #' algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
 #' and shrinkage towards \code{0}.
 #'
-#' This package requires the [dbarts] R-package to be installed.
-#' Many of the functionalities of this [engine] have been inspired by the [embarcadero] R-package. Users
-#' are therefore advised to cite if they make heavy use of BART.
+#' This package requires the \code{"dbarts"} R-package to be installed.
+#' Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
+#' Users are therefore advised to cite if they make heavy use of BART.
 #' @details
 #' Prior distributions can furthermore be set for:
 #' * probability that a tree stops at a node of a given depth (Not yet implemented)
@@ -27,7 +27,7 @@ NULL
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
 #' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
-#' @returns An [engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add BART as an engine

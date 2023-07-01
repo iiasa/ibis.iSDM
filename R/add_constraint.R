@@ -10,7 +10,7 @@ NULL
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
 #' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details for more
 #' information.
-#' @param value For many dispersal [`constrain`] this is set as [`numeric`] value specifying a
+#' @param value For many dispersal \code{"constrain"} this is set as [`numeric`] value specifying a
 #' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 #' give the number of iteration steps (or within year migration steps).
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
@@ -31,7 +31,7 @@ NULL
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
-#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [`MigClim`] package.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -64,7 +64,7 @@ NULL
 #' # Assumes that a trained 'model' object exists
 #'  mod <- scenario(model) |>
 #'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
-#'   add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+#'   add_constraint_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
 #'   project()
 #' }
 #' @name add_constraint
@@ -356,7 +356,7 @@ methods::setMethod(
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in
+#' @param resistance A [`SpatRaster`] object describing a resistance surface or barrier for use in
 #' connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario

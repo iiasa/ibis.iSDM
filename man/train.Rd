@@ -34,10 +34,10 @@ Available options are:
 \item \code{"none"} No prior variable removal is performed (Default).
 \item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{\link{abess}} package (see References).
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
 Note that this effectively fits a separate generalized linear model to
 reduce the number of covariates.
-\item \code{"boruta"} Uses the \code{\link{Boruta}} package to identify non-informative features.
+\item \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
 }}
 
 \item{optim_hyperparam}{Parameter to tune the model by iterating over input parameters or selection

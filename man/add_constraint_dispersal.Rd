@@ -12,7 +12,7 @@
 \item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
 information.}
 
-\item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
+\item{value}{For many dispersal \code{"constrain"} this is set as \code{\link{numeric}} value specifying a
 fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations

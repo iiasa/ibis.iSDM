@@ -23,7 +23,7 @@ add_biodiversity_poipa(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipa}{A \code{\link{data.frame}}, \code{\link{sf}} or \code{\link{Spatial}}) object of presence-absence point occurrences.}
+\item{poipa}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-absence point occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -38,9 +38,10 @@ By default set to \code{"Observed"} and an error will be thrown if a \code{\link
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
 Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipa}}.}
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as
+parameter \code{"poipa"}.}
 
-\item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in.
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in.
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
@@ -62,7 +63,7 @@ for more information.
 }
 \details{
 By default, the logit link function is used in a logistic regression setting
-unless the specific \link{engine} does not support generalised linear regressions (e.g. \link{engine_bart}).
+unless the specific engine does not support generalised linear regressions (e.g. \link{engine_bart}).
 }
 \examples{
 \dontrun{

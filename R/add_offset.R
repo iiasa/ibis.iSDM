@@ -273,8 +273,10 @@ methods::setMethod(
 #' This function has additional options compared to the more generic
 #' [`add_offset()`], allowing customized options specifically for expert-based
 #' ranges as offsets or spatialized polygon information on species occurrences.
-#' If even more control is needed, the user is informed of the \pkg{bossMaps}
-#' package Merow et al. (2017).
+#' If even more control is needed, the user is informed of the \code{"bossMaps"}
+#' package Merow et al. (2017). Some functionalities of that package emulated
+#' through the \code{"distance_function"} set to \code{"log"}. This tries to fit
+#' a 5-parameter logistic function to estimate the distance from the range (Merow et al. 2017).
 #'
 #' @details
 #' The output created by this function creates a [`SpatRaster`] to be added to
@@ -282,12 +284,12 @@ methods::setMethod(
 #' specific as they are added directly to the overall estimate of \code{`y^hat`}.
 #'
 #' Note that all offsets created by this function are by default log-transformed before export.
-#' Background values (e.g. beyond [`distance_max`]) are set to a very small
+#' Background values (e.g. beyond \code{"distance_max"}) are set to a very small
 #' constant (\code{1e-10}).
 #'
 #' @inheritParams add_offset
 #' @param distance_max A [`numeric`] threshold on the maximum distance beyond the range that should be considered
-#' to have a high likelihood of containing species occurrences (Default: \code{Inf} [m]). Can be set to \code{NULL} or \code{0}
+#' to have a high likelihood of containing species occurrences (Default: \code{Inf} \code{"m"}). Can be set to \code{NULL} or \code{0}
 #' to indicate that no distance should be calculated.
 #' @param family A [`character`] denoting the type of model to which this offset is to be added. By default
 #' it assumes a \code{'poisson'} distributed model and as a result the output created by this function will be log-transformed.
@@ -305,7 +307,7 @@ methods::setMethod(
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param fraction An optional [`SpatRaster`] object that is multiplied with digitized raster layer.
 #' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
-#' @seealso [`bossMaps`]
+#' @seealso \code{"bossMaps"}
 #' @references
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
@@ -673,7 +675,6 @@ methods::setMethod(
     # suppressMessages( attach(holdEnv) )
     # on.exit(detach("holdEnv"))
     xx <- pp[i,] |> as.list()
-    xx$x <- x
 
     # Fit Model
     if(family == "binomial"){
@@ -687,6 +688,8 @@ methods::setMethod(
         )
       )
     } else {
+      # Add estimate here
+      xx$x <- x
       suppressMessages(
         suppressWarnings(
           logisticParam <- try({
@@ -710,7 +713,6 @@ methods::setMethod(
   # suppressMessages( attach(holdEnv) )
   # on.exit(detach("holdEnv"))
   xx <- pp[which.min(result$aic),] |> as.list()
-  xx$x <- x
   # Fit Model
   if(family == "binomial"){
     suppressMessages(
@@ -723,6 +725,7 @@ methods::setMethod(
       )
     )
   } else {
+    xx$x <- x
     suppressMessages(
       suppressWarnings(
         logisticParam <- try({
@@ -735,11 +738,13 @@ methods::setMethod(
   }
 
   # Get the coefficients of the best model
+  if(inherits(logisticParam, "try-error")) stop("Offset calculating failed...")
   co <- logisticParam$coefficients
   names(co) <- c("upper", "lower", "rate", "shift", "skew")
   return(co)
 }
 
+#### Elevational offset ####
 #' Specify elevational preferences as offset
 #'
 #' @description
@@ -749,7 +754,7 @@ methods::setMethod(
 #' Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
 #' from elevation limits. It requires a [`SpatRaster`] with elevation information.
 #' A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
-#' areas, with the [`rate`] parameter allowing to vary the steepness of decline.
+#' areas, with the \code{"rate"} parameter allowing to vary the steepness of decline.
 #'
 #' Note that all offsets created by this function are by default log-transformed before export. In addition
 #' this function also mean-centers the output as recommended by Ellis-Soto et al.

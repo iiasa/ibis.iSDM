@@ -6,7 +6,7 @@ NULL
 #' @description This function adds a presence-only biodiversity dataset to a
 #' distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param poipo A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-only point occurrences.
+#' @param poipo A [`data.frame`] or [`sf`] object of presence-only point occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
@@ -14,9 +14,9 @@ NULL
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`poipo`].
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"poipo"}.
 #' **Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).**
-#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
+#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
@@ -33,7 +33,7 @@ NULL
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 #' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
 #' @seealso
-#' See other functions for adding biodiversity data, e.g. [add_biodiversity]
+#' See other functions for adding biodiversity data, i.e. [`add_biodiversity_poipa`]
 #' @family add_biodiversity
 #' @returns Adds biodiversity data to [distribution] object.
 #' @keywords biodiversity
@@ -144,10 +144,10 @@ methods::setMethod(
 #'
 #' @details
 #' By default, the logit link function is used in a logistic regression setting
-#' unless the specific [engine] does not support generalised linear regressions (e.g. [engine_bart]).
+#' unless the specific engine does not support generalised linear regressions (e.g. [engine_bart]).
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param poipa A [`data.frame`], [`sf`] or [`Spatial`]) object of presence-absence point occurrences.
+#' @param poipa A [`data.frame`] or [`sf`] object of presence-absence point occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence.
 #' By default set to \code{"Observed"} and an error will be thrown if a [`numeric`] column with that name does not exist.
@@ -156,8 +156,9 @@ methods::setMethod(
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`poipa`].
-#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in.
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as
+#' parameter \code{"poipa"}.
+#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in.
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down.
@@ -264,7 +265,7 @@ methods::setMethod(
 #' some engines particular through the way that points are generated.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param polpo A [`sf`] or [`Spatial`]) polygon object of presence-only occurrences.
+#' @param polpo A [`sf`] polygon object of presence-only occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
@@ -272,14 +273,14 @@ methods::setMethod(
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpo`].
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"polpo"}.
 #' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
 #' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
 #' parameter.
-#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
+#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
@@ -440,7 +441,7 @@ methods::setMethod(
 #' species is absent.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param polpa A [`sf`] or [`Spatial`]) polygon object of presence-absence occurrences.
+#' @param polpa A [`sf`] polygon object of presence-absence occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
@@ -448,14 +449,14 @@ methods::setMethod(
 #' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
 #' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as [`polpa`].
+#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"polpa"}.
 #' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by simulation.
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
-#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
+#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{"simulate_weights"}
 #' parameter.
-#' @param separate_intercept A [`boolean`] value stating whether a separate intercept is to be added in
+#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
 #' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
@@ -638,7 +639,7 @@ methods::setMethod(
 
 #' Format biodiversity dataset to standardized format
 #'
-#' @param x A [`data.frame`], [`sf`] or [`Spatial`]) object of biodiversity information.
+#' @param x A [`data.frame`] or [`sf`] object of biodiversity information.
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
 #' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'}).
 #' @param ... Other parameters passed down.
@@ -680,7 +681,6 @@ format_biodiversity_data <- function(x, field_occurrence, field_space = c("x","y
       tibble::as_tibble()
   } else {
     if(inherits(x, "Spatial")) x <- sf::st_as_sf(x) # First convert to sf
-    #if(inherits(x,'sf')) coords <- sf::st_coordinates(x) |> tibble::as_tibble()
 
     if(unique(sf::st_geometry_type(x)) %in% c("POINT","MULTIPOINT")){
       # Take target column and append coordinates to it

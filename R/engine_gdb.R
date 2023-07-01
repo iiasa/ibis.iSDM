@@ -4,20 +4,20 @@ NULL
 #'
 #' @description
 #' Gradient descent boosting is an efficient way to optimize any loss function
-#' of a generalized linear or additive model (such as the GAMs available through the [mgcv] R-package).
+#' of a generalized linear or additive model (such as the GAMs available through the \code{"mgcv"} R-package).
 #' It furthermore automatically regularizes the fit, thus the resulting model only contains the
 #' covariates whose baselearners have some influence on the response.
 #' Depending on the type of the [add_biodiversity] data, either poisson process models or
-#' logistic regressions are estimated. If the \code{only_linear} term in [train] is set to \code{FALSE},
+#' logistic regressions are estimated. If the \code{"only_linear"} term in [train] is set to \code{FALSE},
 #' splines are added to the estimation, thus providing a non-linear additive inference.
 #'
 #' @details:
-#' This package requires the [mboost] R-package to be installed.
-#' It is in philosophy somewhat related to the [engine_xgboost] and [XGBoost] R-package,
+#' This package requires the \code{"mboost"} R-package to be installed.
+#' It is in philosophy somewhat related to the [engine_xgboost] and \code{"XGBoost"} R-package,
 #' however providing some additional desirable features that make estimation quicker and
 #' particularly useful for spatial projections. Such as for instance the ability to specifically add
-#' spatial baselearners via [add_latent] or the specification of monotonically constrained priors
-#' via [GDBPrior].
+#' spatial baselearners via [add_latent_spatial] or the specification of
+#' monotonically constrained priors via [GDBPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param iter An [`integer`] giving the number of boosting iterations (Default: \code{2e3L}).
 #' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1} defining the shrinkage parameter.
@@ -30,7 +30,7 @@ NULL
 #' * Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
 #' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
 #' @family engine
-#' @returns An[engine].
+#' @returns An engine.
 #' @examples
 #' \dontrun{
 #' # Add GDB as an engine

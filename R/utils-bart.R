@@ -308,13 +308,13 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
         lyrtmp <- envs[[pd$xlbs[[i]]]]
         xmat <- data.frame(from = c(min( terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
                            to = c(xmeds, max( terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
-        lyrtr <- terra::reclassify(lyrtmp, xmat, include.lowest = TRUE)
+        lyrtr <- terra::classify(lyrtmp, xmat, include.lowest = TRUE)
       } else if (inherits(x = envs, what = "list")) {
         lyrtr <- lapply(envs, function(x) {
           lyrtmp <- x[[pd$xlbs[[i]]]]
           xmat <- data.frame(from = c(min(terra::global(lyrtmp, "min", na.rm = TRUE)[,1], min(df$x)), xmeds),
                              to = c(xmeds, max(terra::global(lyrtmp, "max", na.rm = TRUE)[,1], max(df$x))), becomes = df$med)
-          return(terra::reclassify(lyrtmp, xmat, include.lowest = TRUE))
+          return(terra::classify(lyrtmp, xmat, include.lowest = TRUE))
         })
       }
       # Check if stack exists, otherwise create

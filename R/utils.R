@@ -367,7 +367,7 @@ run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packag
 #' of predictor values observed during model training.
 #' This function takes an internal model matrix and restricts the values seen in the predictor matrix
 #' to those observed during training.
-#' @note This function is meant to be used within a certain [`engine`] or within [`project`].
+#' @note This function is meant to be used within a certain \code{"engine"} or within [`project`].
 #' @param model A [`list`] with the input data used for inference. Created during model setup.
 #' @param pred An optional [`data.frame`] of the prediction container.
 #' @returns A [`data.frame`] with the clamped predictors.

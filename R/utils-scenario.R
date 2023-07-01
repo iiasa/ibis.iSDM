@@ -430,7 +430,7 @@ summarise_change <- function(scenario){
   )
   # Check that geosphere is installed and loaded
   check_package("geosphere")
-  if(!("geosphere" %in% loadedNamespaces()) || ('geosphare' %notin% utils::sessionInfo()$otherPkgs) ) {
+  if(!("geosphere" %in% loadedNamespaces()) || ('geosphere' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('geosphere');attachNamespace("geosphere")},silent = TRUE)
   } else {
     if(getOption("ibis.setupmessages")) myLog("[Summary]","red","This summary function requires the geosphere package.")

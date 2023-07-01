@@ -47,7 +47,7 @@ In particular Bayesian engines can produce not only mean estimates of fitted res
 but also pixel-based estimates of uncertainty from the posterior such as the standard deviation (SD)
 or the coefficient of variation of a given prediction.
 
-This function makes use of the \code{\link{biscale}} R-package to create bivariate plots of the fitted distribution object,
+This function makes use of the \code{"biscale"} R-package to create bivariate plots of the fitted distribution object,
 allowing to visualize two variables at once. It is mostly thought of as a convenience function to
 create such bivariate plots for quick visualization.
 

@@ -19,7 +19,7 @@ add_latent_spatial(
 
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model. See details.}
 
-\item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
+\item{priors}{A \code{"Prior-List"} object supplied to the latent effect. Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
 
 \item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
 for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.}
@@ -46,7 +46,7 @@ unsupported method for an engine is chosen this is modified to the next similar 
 
 Available are:
 
-\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}} and \code{\link{INLABRU-engine}}.
+\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for \code{\link{engine_inla}} and \code{\link{engine_inlabru}}.
 SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
 Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
 if elevation is positively correlated with the response variable, but is not included in the model,

@@ -863,7 +863,10 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 
   # Check that abess package is available
   check_package("abess")
-  if(!isNamespaceLoaded("abess")) { attachNamespace("abess");requireNamespace('abess') }
+  if(!("abess" %in% loadedNamespaces()) || ('abess' %notin% utils::sessionInfo()$otherPkgs) ) {
+    try({requireNamespace('abess');attachNamespace("abess")},silent = TRUE)
+    stopifnot(require("abess"))
+  }
 
   # Build model
   abess_fit <- abess::abess(x = env,
@@ -934,6 +937,10 @@ predictors_filter_boruta <- function( env, obs, method, keep = NULL,
                           is.logical(verbose)
   )
   check_package("Boruta")
+  if(!("Boruta" %in% loadedNamespaces()) || ('Boruta' %notin% utils::sessionInfo()$otherPkgs) ) {
+    try({requireNamespace('Boruta');attachNamespace("Boruta")},silent = TRUE)
+    stopifnot(require("Boruta"))
+  }
 
   # Get all variable names to test
   vars <- names(env)

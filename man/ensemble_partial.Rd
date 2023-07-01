@@ -41,7 +41,7 @@ Possible options for creating an ensemble includes:
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}.
+Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs \link{log}.
 By default the response functions of each model are normalized.
 }
 \examples{

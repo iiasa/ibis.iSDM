@@ -64,6 +64,7 @@ Suggests:
     rstantools (>= 2.1.1),
     gnlm,
     testthat,
+    Matrix,
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues

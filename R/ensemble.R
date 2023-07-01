@@ -36,7 +36,7 @@ NULL
 #'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log]. In this case
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs [log]. In this case
 #' the \code{"normalize"} parameter has to be set.
 #' @param ... Provided [`DistributionModel`] objects.
 #' @param method Approach on how the ensemble is to be created. See details for available options (Default: \code{'mean'}).
@@ -445,7 +445,7 @@ methods::setMethod(
 #'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs [log].
 #' By default the response functions of each model are normalized.
 #' @param ... Provided [`DistributionModel`] objects from which partial responses can be called. In the future provided data.frames might be supported as well.
 #' @param x.var A [`character`] of the variable from which an ensemble is to be created.
