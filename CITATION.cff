@@ -721,6 +721,24 @@ references:
     email: hadley@posit.co
   year: '2023'
 - type: software
+  title: Matrix
+  abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
+  notes: Suggests
+  url: https://R-forge.R-project.org/tracker/?atid=294&group_id=61
+  repository: https://CRAN.R-project.org/package=Matrix
+  authors:
+  - family-names: Bates
+    given-names: Douglas
+    orcid: https://orcid.org/0000-0001-8316-9503
+  - family-names: Maechler
+    given-names: Martin
+    email: mmaechler+Matrix@gmail.com
+    orcid: https://orcid.org/0000-0002-8685-9910
+  - family-names: Jagan
+    given-names: Mikael
+    orcid: https://orcid.org/0000-0002-3542-2938
+  year: '2023'
+- type: software
   title: xgboost
   abstract: 'xgboost: Extreme Gradient Boosting'
   notes: Suggests
