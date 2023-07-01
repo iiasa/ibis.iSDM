@@ -29,12 +29,13 @@ The code here was adapted from the Supporting materials script."><meta name="twi
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
+    <a class="dropdown-item" href="../articles/04_mechanistic_estimation.html">4. Simulating mechanisms</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../articles/06_frequently-asked-questions.html">FAQ</a>
+  <a class="nav-link" href="../articles/07_frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/contributing.html">Contributing</a>
@@ -112,7 +113,7 @@ this parameter to <code>FALSE</code> replaces the current offsets with the new o
     <p>Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
 from elevation limits. It requires a <code>SpatRaster</code> with elevation information.
 A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
-areas, with the <code>rate</code> parameter allowing to vary the steepness of decline.</p>
+areas, with the <code>"rate"</code> parameter allowing to vary the steepness of decline.</p>
 <p>Note that all offsets created by this function are by default log-transformed before export. In addition
 this function also mean-centers the output as recommended by Ellis-Soto et al.</p>
     </div>

@@ -33,12 +33,13 @@ Most constrains require pre-calculated thresholds to present in the Biodiversity
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
+    <a class="dropdown-item" href="../articles/04_mechanistic_estimation.html">4. Simulating mechanisms</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../articles/06_frequently-asked-questions.html">FAQ</a>
+  <a class="nav-link" href="../articles/07_frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/contributing.html">Contributing</a>
@@ -96,7 +97,7 @@ information.</p></dd>
 
 
 <dt>value</dt>
-<dd><p>For many dispersal <code>constrain</code> this is set as <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying a
+<dd><p>For many dispersal <code>"constrain"</code> this is set as <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying a
 fixed constrain or constant in units <code>"m"</code> (Default: <code>NULL</code>). For kissmig the value needs to
 give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
@@ -134,7 +135,7 @@ Currently supported are the following options:
 <strong>Dispersal</strong>:</p><ul><li><p><code>sdd_fixed</code> - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
 <li><p><code>sdd_nexpkernel</code> - Applies a dispersal distance using a negative exponential kernel from its origin.</p></li>
 <li><p><code>kissmig</code> - Applies the kissmig stochastic dispersal model. Requires <code>`kissmig`</code> package. Applied at each modelling time step.</p></li>
-<li><p><code>migclim</code> - Applies the dispersal algorithm MigClim to the modelled objects. Requires <code>MigClim</code> package.</p></li>
+<li><p><code>migclim</code> - Applies the dispersal algorithm MigClim to the modelled objects. Requires <code>"MigClim"</code> package.</p></li>
 </ul><p>A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 can be found in Bateman et al. (2013).</p>
 <p><strong>Connectivity</strong>:</p><ul><li><p><code>hardbarrier</code> - Defines a hard barrier to any dispersal events. By definition this sets all values larger
@@ -173,7 +174,7 @@ constrain a projection within a certain area (e.g. a species range or an island)
 <span class="r-in"><span><span class="co"># Assumes that a trained 'model' object exists</span></span></span>
 <span class="r-in"><span> <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="scenario.html">scenario</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">add_constrain_dispersal</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"kissmig"</span>, value <span class="op">=</span> <span class="fl">2</span>, pext <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_constraint_dispersal.html">add_constraint_dispersal</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"kissmig"</span>, value <span class="op">=</span> <span class="fl">2</span>, pext <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="project.html">project</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>

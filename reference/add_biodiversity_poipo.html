@@ -29,12 +29,13 @@ distribution object."><meta name="twitter:card" content="summary"><meta name="tw
     <a class="dropdown-item" href="../articles/01_train_simple_model.html">1. Train a model</a>
     <a class="dropdown-item" href="../articles/02_integrate_data.html">2. Integrate data</a>
     <a class="dropdown-item" href="../articles/03_biodiversity_projections.html">3. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/04_engine_comparison.html">4. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/05_package_comparison.html">5. Other packages</a>
+    <a class="dropdown-item" href="../articles/04_mechanistic_estimation.html">4. Simulating mechanisms</a>
+    <a class="dropdown-item" href="../articles/05_engine_comparison.html">5. Engine comparison</a>
+    <a class="dropdown-item" href="../articles/06_package_comparison.html">6. Other packages</a>
   </div>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../articles/06_frequently-asked-questions.html">FAQ</a>
+  <a class="nav-link" href="../articles/07_frequently-asked-questions.html">FAQ</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/contributing.html">Contributing</a>
@@ -96,7 +97,7 @@ distribution object.</p>
 
 
 <dt>poipo</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>, <code>sf</code> or <code>Spatial</code>) object of presence-only point occurrences.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code>sf</code> object of presence-only point occurrences.</p></dd>
 
 
 <dt>name</dt>
@@ -122,12 +123,12 @@ distribution object.</p>
 <dt>weight</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value acting as a multiplier with regards to any weights used in the modelling.
 Larger weights indicate higher weighting relative to any other datasets. By default set to <code>1</code> if only
-one dataset is added. A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> is also supported but must be of the same length as <code>poipo</code>.
+one dataset is added. A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> is also supported but must be of the same length as <code>"poipo"</code>.
 <strong>Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).</strong></p></dd>
 
 
 <dt>separate_intercept</dt>
-<dd><p>A <code>boolean</code> value stating whether a separate intercept is to be added in
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value stating whether a separate intercept is to be added in
 shared likelihood models for engines <a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a> and <a href="engine_stan.html">engine_stan</a>. Otherwise ignored.</p></dd>
 
 
@@ -166,7 +167,7 @@ regression. See Renner et al. 2015 for an overview.</p>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>See other functions for adding biodiversity data, e.g. add_biodiversity</p>
+    <div class="dont-index"><p>See other functions for adding biodiversity data, i.e. <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a></code></p>
 <p>Other add_biodiversity: 
 <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a>()</code>,
 <code><a href="add_biodiversity_polpa.html">add_biodiversity_polpa</a>()</code>,
