@@ -1186,6 +1186,17 @@ engine_inlabru <- function(x,
               )
             }
           },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Get residuals
+            rd <- obj$residuals$deviance.residuals
+            assertthat::assert_that(length(rd)>0)
+            return(rd)
+          },
+          # Get coefficients
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             cofs <- self$summary()

@@ -931,6 +931,10 @@ engine_inla <- function(x,
 
                 # Plot and return result
               },
+              # Get residuals
+              get_residuals = function(self){
+                new_waiver()
+              },
               # Get coefficients
               get_coefficients = function(self){
                 # Returns a vector of the coefficients with direction/importance

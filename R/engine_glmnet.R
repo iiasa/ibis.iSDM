@@ -637,7 +637,21 @@ engine_glmnet <- function(x,
             if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
             return(prediction)
           },
-          # Get coefficients from breg
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Calculate residuals
+            model <- self$model$predictors
+            # Get fm
+            fitted_values <- predict(obj, model, s = 'lambda.1se')
+            fitted_min <- predict(obj, model, s = 'lambda.min')
+            rd <- fitted_min[,1] - fitted_values[,1]
+            assertthat::assert_that(length(rd)>0)
+            return(rd)
+          },
+          # Get coefficients from glmnet
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data("fit_best")

@@ -816,6 +816,13 @@ engine_stan <- function(x,
             }
             return(prediction)
           },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            message("Not yet implemented.. :-( ")
+            new_waiver()
+          },
+          # Get coefficients
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             cofs <- self$summary()

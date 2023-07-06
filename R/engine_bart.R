@@ -545,6 +545,17 @@ engine_bart <- function(x,
             # Also return spatial
             return(p)
           },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Get residuals
+            rd <- dbarts:::residuals.bart(obj)
+            if(length(rd)==0) rd <- new_waiver()
+            return(rd)
+          },
+          # Coefficient function
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             cofs <- self$summary()

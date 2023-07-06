@@ -99,6 +99,7 @@ Collate:
     'add_priors.R'
     'bdproto-engine.R'
     'bdproto-settings.R'
+    'check.R'
     'utils-spatial.R'
     'data.R'
     'distribution.R'

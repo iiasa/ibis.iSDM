@@ -800,6 +800,22 @@ engine_xgboost <- function(x,
             prediction[] <- pred_xgb
             return(prediction)
           },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            message("Not yet implemented!")
+            return(new_waiver())
+            # Get residuals
+            model <- self$model
+            pred <- model$biodiversity[[length(model$biodiversity)]]
+            predf <- pred$predictors |> subset(select = obj$feature_names)
+            newdata <- xgboost::xgb.DMatrix(as.matrix(predf))
+
+            fn <- predict(obj, newdata,type = "class")
+            return(fn)
+          },
           # Get coefficients
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance

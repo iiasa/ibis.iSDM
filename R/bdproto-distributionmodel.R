@@ -266,6 +266,10 @@ DistributionModel <- bdproto(
       tidy_glmnet_summary(self$get_data(obj))
     }
   },
+  # Dummy residual function
+  get_residuals = function(self){
+    new_waiver()
+  },
   # Dummy partial response calculation. To be overwritten per engine
   partial = function(self){
     new_waiver()

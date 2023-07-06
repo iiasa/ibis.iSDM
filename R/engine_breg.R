@@ -712,6 +712,16 @@ engine_breg <- function(x,
             if(length(int)>0) cofs <- cofs[-int,]
             return(cofs)
           },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Get residuals
+            rd <- obj$deviance.residuals
+            assertthat::assert_that(length(rd)>0)
+            return(rd)
+          },
           # Engine-specific projection function
           project = function(self, newdata, type = NULL, layer = "mean"){
             assertthat::assert_that("model" %in% names(self),

@@ -159,6 +159,7 @@ reference:
     contents:
       - as.Id
       - is.Id
+      - check
       - has_keyword("misc")
       - print
       - myLog
