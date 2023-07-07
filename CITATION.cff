@@ -218,17 +218,6 @@ references:
     email: dpierce@ucsd.edu
   year: '2023'
 - type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Imports
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
-  year: '2023'
-- type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -710,6 +699,28 @@ references:
     email: jlindsey@gen.unimaas.nl
   year: '2023'
 - type: software
+  title: geosphere
+  abstract: 'geosphere: Spherical Trigonometry'
+  notes: Suggests
+  url: https://github.com/rspatial/geosphere/issues/
+  repository: https://CRAN.R-project.org/package=geosphere
+  authors:
+  - family-names: Hijmans
+    given-names: Robert J.
+    email: r.hijmans@gmail.com
+  year: '2023'
+- type: software
+  title: cubelyr
+  abstract: 'cubelyr: A Data Cube ''dplyr'' Backend'
+  notes: Suggests
+  url: https://github.com/hadley/cubelyr
+  repository: https://CRAN.R-project.org/package=cubelyr
+  authors:
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@rstudio.com
+  year: '2023'
+- type: software
   title: testthat
   abstract: 'testthat: Unit Testing for R'
   notes: Suggests
@@ -720,6 +731,7 @@ references:
     given-names: Hadley
     email: hadley@posit.co
   year: '2023'
+  version: '>= 3.0.0'
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
