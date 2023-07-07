@@ -278,7 +278,7 @@ methods::setMethod(
 #' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
-#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the [simulate_weights]
+#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
 #' parameter.
 #' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
@@ -454,7 +454,7 @@ methods::setMethod(
 #' @param simulate_points A [`numeric`] number of points to be created by simulation.
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
-#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{"simulate_weights"}
+#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
 #' parameter.
 #' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
 #' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].

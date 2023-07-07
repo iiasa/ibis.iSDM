@@ -65,7 +65,7 @@ Available options are:
 added to the predictor stack and thus are predictors for subsequent models (Default).
 \item \code{"offset"} The predicted output of the first (or previously fitted) models are
 added as spatial offsets to subsequent models. Offsets are back-transformed depending
-on the model family. This option might not be supported for every \code{\link{engine}}.
+on the model family. This option might not be supported for every \code{\link{Engine}}.
 \item \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 partialed out during prediction. Here the first dataset added determines the reference level

@@ -66,7 +66,7 @@ them through a principal component analysis (\link{prcomp}). In contrast, deriva
 the original provided predictors alone, but instead create new ones, for instance by transforming
 their values through a quadratic or hinge transformation. Note that this effectively
 increases the number of predictors in the object, generally requiring stronger regularization by
-the used \code{\link{engine}}.
+the used \code{\link{Engine}}.
 Both transformations and derivates can also be combined.
 Available options for transformation are:
 \itemize{
@@ -92,13 +92,13 @@ Available options for creating derivates are:
 }
 \note{
 \strong{Important:}
-Not every \code{\link{engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
+Not every \code{\link{Engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
 among extracted covariates. Thus any observation with missing data is generally removed prior
 from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
 values to \code{0} or another out of range constant).
 
 Not every engine does actually need covariates. For instance it is perfectly legit
-to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
+to fit a model with only occurrence data and a spatial latent effect (\link{add_latent_spatial}).
 This correspondents to a spatial kernel density estimate.
 
 Certain names such \code{"offset"} are forbidden as predictor variable names. The function

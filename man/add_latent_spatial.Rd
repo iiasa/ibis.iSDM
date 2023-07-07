@@ -53,7 +53,7 @@ if elevation is positively correlated with the response variable, but is not inc
 we could see a higher posterior mean in areas with higher elevation. Note that calculations of
 SPDE's can be computationally costly.
 \itemize{
-\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}. Not yet implemented in full.
+\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}. Not yet implemented in full.
 \item \code{"kde"} - additional covariate of the kernel density of input point observations.
 \item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 \item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell

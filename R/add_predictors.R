@@ -15,7 +15,7 @@ NULL
 #' the original provided predictors alone, but instead create new ones, for instance by transforming
 #' their values through a quadratic or hinge transformation. Note that this effectively
 #' increases the number of predictors in the object, generally requiring stronger regularization by
-#' the used [`engine`].
+#' the used [`Engine`].
 #' Both transformations and derivates can also be combined.
 #' Available options for transformation are:
 #' * \code{'none'} - Leaves the provided predictors in the original scale.
@@ -49,13 +49,13 @@ NULL
 #' @param ... Other parameters passed down
 #' @note
 #' **Important:**
-#' Not every [`engine`] supported by the \pkg{ibis.iSDM} R-package allows missing data points
+#' Not every [`Engine`] supported by the \pkg{ibis.iSDM} R-package allows missing data points
 #' among extracted covariates. Thus any observation with missing data is generally removed prior
 #' from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
 #' values to \code{0} or another out of range constant).
 #'
 #' Not every engine does actually need covariates. For instance it is perfectly legit
-#' to fit a model with only occurrence data and a spatial latent effect ([add_latent]).
+#' to fit a model with only occurrence data and a spatial latent effect ([add_latent_spatial]).
 #' This correspondents to a spatial kernel density estimate.
 #'
 #' Certain names such \code{"offset"} are forbidden as predictor variable names. The function

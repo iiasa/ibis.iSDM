@@ -70,7 +70,7 @@ NULL
 #'
 #' @returns [`BiodiversityDistribution-class`] object containing data for building a biodiversity distribution modelling problem.
 #'
-#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and in particular [`bdproto-biodiversitydistribution`].
+#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and in particular [`BiodiversityDistribution`].
 #'
 #' @references
 #' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710

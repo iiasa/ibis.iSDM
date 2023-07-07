@@ -112,5 +112,5 @@ There are other functions as well but those are better accessed through their re
 }
 }
 \seealso{
-\code{"bdproto"} on the general definition of \code{\link{proto}} objects and in particular \code{\link{bdproto-biodiversitydistribution}}.
+\code{"bdproto"} on the general definition of \code{\link{proto}} objects and in particular \code{\link{BiodiversityDistribution}}.
 }

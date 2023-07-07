@@ -700,7 +700,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' This function helps to remove highly correlated variables from a set of predictors. It supports multiple options
 #' some of which require both environmental predictors and observations, others only predictors.
 #'
-#' Some of the options require different packages to be pre-installed, such as [`ranger`] or [`Boruta`].
+#' Some of the options require different packages to be pre-installed, such as \code{ranger} or \code{Boruta}.
 #'
 #' @details
 #' Available options are:
@@ -708,9 +708,9 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' * \code{"none"} No prior variable removal is performed (Default).
 #' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 #' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [`abess`] package (see References). Note that this
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{abess} package (see References). Note that this
 #' effectively fits a separate generalized linear model to reduce the number of covariates.
-#' * \code{"boruta"} Uses the [`Boruta`] package to identify non-informative features.
+#' * \code{"boruta"} Uses the \code{Boruta} package to identify non-informative features.
 #'
 #' @note
 #' Using this function on predictors effectively means that a separate model is fitted on the data
@@ -835,7 +835,7 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
 #' @param observed A [`vector`] with observational records to use for determining variable importance.
 #' @param family A [`character`] indicating the family the observational data originates from.
 #' @param tune.type [`character`] indicating the type used for subset evaluation.
-#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in [`abess`].
+#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \code{abess}.
 #' @param lambda A [`numeric`] single lambda value for regularized best subset selection (Default: \code{0}).
 #' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1} for each observation as default.
 #' @references
@@ -912,12 +912,12 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' All relevant feature selection using Boruta
 #'
 #' @description
-#' This function uses the [`Boruta`] package to identify predictor variables with little information content. It iteratively
+#' This function uses the \code{Boruta} package to identify predictor variables with little information content. It iteratively
 #' compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
 #' Attributes that have significantly worst importance than shadow ones are being consecutively dropped.
 #'
 #' @note
-#' This package depends on the [`ranger`] package to iteratively fit randomForest models.
+#' This package depends on the \code{ranger} package to iteratively fit randomForest models.
 #'
 #' @inheritParams predictor_filter
 #' @param observed A [`vector`] with observational records to use for determining variable importance.

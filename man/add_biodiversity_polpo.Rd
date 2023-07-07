@@ -51,7 +51,7 @@ one dataset is added. A \code{\link{vector}} is also supported but must be of th
 \item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
-\code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \link{simulate_weights}
+\code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
 parameter.}
 
 \item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in

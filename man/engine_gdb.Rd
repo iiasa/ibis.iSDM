@@ -35,7 +35,7 @@ Gradient descent boosting is an efficient way to optimize any loss function
 of a generalized linear or additive model (such as the GAMs available through the \code{"mgcv"} R-package).
 It furthermore automatically regularizes the fit, thus the resulting model only contains the
 covariates whose baselearners have some influence on the response.
-Depending on the type of the \link{add_biodiversity} data, either poisson process models or
+Depending on the type of the \code{add_biodiversity} data, either poisson process models or
 logistic regressions are estimated. If the \code{"only_linear"} term in \link{train} is set to \code{FALSE},
 splines are added to the estimation, thus providing a non-linear additive inference.
 }

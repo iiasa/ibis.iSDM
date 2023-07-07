@@ -26,7 +26,7 @@ NULL
 #' if elevation is positively correlated with the response variable, but is not included in the model,
 #' we could see a higher posterior mean in areas with higher elevation. Note that calculations of
 #' SPDE's can be computationally costly.
-#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]. Not yet implemented in full.
+#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`engine_inla`]. Not yet implemented in full.
 #' * \code{"kde"} - additional covariate of the kernel density of input point observations.
 #' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 #' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
