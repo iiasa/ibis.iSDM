@@ -128,14 +128,14 @@ include <code>"none"</code> (Default), <code>"annual"</code>, <code>"monthly"</c
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>In the background the function <code>x$project()</code> for the respective model object is called, where
 <code>x</code> is fitted model object. For specifics on the constrains, see the relevant <code>constrain</code> functions,
-respectively:</p><ul><li><p><code>add_constrain()</code> for generic wrapper to add any of the available constrains.</p></li>
-<li><p><code>add_constrain_dispersal()</code> for specifying dispersal constrain on the temporal projections at each step.</p></li>
-<li><p><code>add_constrain_MigClim()</code> Using the <span class="pkg">MigClim</span> R-package to simulate dispersal in projections.</p></li>
-<li><p><code>add_constrain_connectivity()</code> Apply a connectivity constrain at the projection, for instance by adding
+respectively:</p><ul><li><p><code><a href="add_constraint.html">add_constraint()</a></code> for generic wrapper to add any of the available constrains.</p></li>
+<li><p><code><a href="add_constraint_dispersal.html">add_constraint_dispersal()</a></code> for specifying dispersal constrain on the temporal projections at each step.</p></li>
+<li><p><code><a href="add_constraint_MigClim.html">add_constraint_MigClim()</a></code> Using the <span class="pkg">MigClim</span> R-package to simulate dispersal in projections.</p></li>
+<li><p><code><a href="add_constraint_connectivity.html">add_constraint_connectivity()</a></code> Apply a connectivity constrain at the projection, for instance by adding
 a barrier that prevents migration.</p></li>
-<li><p><code>add_constrain_adaptability()</code> Apply an adaptability constrain to the projection, for instance
+<li><p><code><a href="add_constraint_adaptability.html">add_constraint_adaptability()</a></code> Apply an adaptability constrain to the projection, for instance
 constraining the speed a species is able to adapt to new conditions.</p></li>
-<li><p><code>add_constrain_boundary()</code> To artificially limit the distribution change. Similar as specifying projection limits, but
+<li><p><code><a href="add_constraint_boundary.html">add_constraint_boundary()</a></code> To artificially limit the distribution change. Similar as specifying projection limits, but
 can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).</p></li>
 </ul><p>Many constrains also requires thresholds to be calculated. Adding <code><a href="threshold.html">threshold()</a></code> to a
 <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object enables the computation of thresholds at every step based on the threshold

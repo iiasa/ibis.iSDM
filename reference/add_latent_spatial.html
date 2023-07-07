@@ -140,7 +140,7 @@ SPDE effects aim at capturing the variation of the response variable in space, o
 Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
 if elevation is positively correlated with the response variable, but is not included in the model,
 we could see a higher posterior mean in areas with higher elevation. Note that calculations of
-SPDE's can be computationally costly.</p><ul><li><p><code>"car"</code> - conditional autocorrelative errors (CAR) for <code>INLA-engine</code>. Not yet implemented in full.</p></li>
+SPDE's can be computationally costly.</p><ul><li><p><code>"car"</code> - conditional autocorrelative errors (CAR) for <code><a href="engine_inla.html">engine_inla</a></code>. Not yet implemented in full.</p></li>
 <li><p><code>"kde"</code> - additional covariate of the kernel density of input point observations.</p></li>
 <li><p><code>"poly"</code> - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.</p></li>
 <li><p><code>"nnd"</code> - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
