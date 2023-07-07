@@ -33,7 +33,7 @@ methods::setGeneric(
 
 #' @name partial
 #' @rdname partial
-#' @usage \S4method{partial}{ANY,character}(mod, x.var)
+#' @usage \S4method{partial}{ANY,character, ANY, numeric, ANY, logical, character}(mod, x.var, constant, variable_length, values, plot, type, ...)
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -91,7 +91,7 @@ methods::setGeneric(
 
 #' @name spartial
 #' @rdname spartial
-#' @usage \S4method{spartial}{ANY,character}(mod, x.var)
+#' @usage \S4method{spartial}{ANY,character, ANY, logical}(mod, x.var, constant, plot, ...)
 methods::setMethod(
   "spartial",
   methods::signature(mod = "ANY", x.var = "character"),

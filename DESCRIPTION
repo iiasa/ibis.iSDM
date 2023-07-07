@@ -30,7 +30,6 @@ Imports:
     graphics,
     methods,
     ncdf4,
-    ncmeta,
     parallel,
     posterior,
     proto (>= 1.0.0),
@@ -63,7 +62,9 @@ Suggests:
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
     gnlm,
-    testthat,
+    geosphere,
+    cubelyr,
+    testthat (>= 3.0.0),
     Matrix,
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/

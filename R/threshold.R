@@ -24,8 +24,8 @@ NULL
 #' @param point A [`sf`] object containing observational data used for model training.
 #' @param format [`character`] indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
 #' formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
-#' @param ... other parameters not yet set.
 #' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
+#' @param ... other parameters not yet set.
 #' @details
 #' The following options are currently implemented:
 #' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
@@ -67,11 +67,11 @@ methods::setGeneric(
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{ANY}(obj)
+#' @usage \S4method{threshold}{ANY, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold, ...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, format = "binary", return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
@@ -101,16 +101,20 @@ methods::setMethod(
     if(method == "min.cv") assertthat::assert_that("cv" %in% names(ras), msg = "Method min.cv requires a posterior prediction and coefficient of variation!")
 
     # Get all point data in distribution model
-    point <- do.call(sf:::rbind.sf,
-                     lapply(obj$model$biodiversity, function(y){
-                       o <- guess_sf(y$observations)
-                       o$name <- y$name; o$type <- y$type
-                       subset(o, select = c('observed', "name", "type", "geometry"))
-                     } )
-    ) |> tibble::remove_rownames()
-    suppressWarnings(
-      point <- sf::st_set_crs(point, value = sf::st_crs(obj$get_data('prediction')))
-    )
+    if(is.null(point)){
+      point <- do.call(sf:::rbind.sf,
+                       lapply(obj$model$biodiversity, function(y){
+                         o <- guess_sf(y$observations)
+                         o$name <- y$name; o$type <- y$type
+                         subset(o, select = c('observed', "name", "type", "geometry"))
+                       } )
+      ) |> tibble::remove_rownames()
+      suppressWarnings(
+        point <- sf::st_set_crs(point, value = sf::st_crs(obj$get_data('prediction')))
+      )
+    } else {
+      assertthat::assert_that(sf::st_crs(point) == sf::st_crs(obj$get_data('prediction')))
+    }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
     if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
@@ -202,7 +206,7 @@ methods::setMethod("threshold", methods::signature(obj = "SpatRasterDataset"), .
 
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{SpatRaster}(obj)
+#' @usage \S4method{threshold}{SpatRaster, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
@@ -358,9 +362,9 @@ methods::setMethod(
 #'
 #' @name threshold
 #' @inheritParams threshold
-#' @param tr A [`numeric`] value specifiying the specific threshold for scenarios.
+#' @param tr A [`numeric`] value specifying the specific threshold for scenarios.
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario}(obj)
+#' @usage \S4method{threshold}{BiodiversityScenario, ANY}(obj, tr, ...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),

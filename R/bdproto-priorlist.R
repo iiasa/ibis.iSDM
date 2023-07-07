@@ -91,7 +91,7 @@ PriorList <- bdproto(
       if(!all(variable %in% vn)){
         id <- NULL
       } else {
-        id <- names(vn)[match(variable, vn, nomatch = 0)]
+        id <- names(vn)[base::match(variable, vn, nomatch = 0)]
       }
     }
     return(id)

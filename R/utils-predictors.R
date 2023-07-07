@@ -865,7 +865,6 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
   check_package("abess")
   if(!("abess" %in% loadedNamespaces()) || ('abess' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('abess');attachNamespace("abess")},silent = TRUE)
-    stopifnot(require("abess"))
   }
 
   # Build model
@@ -939,7 +938,6 @@ predictors_filter_boruta <- function( env, obs, method, keep = NULL,
   check_package("Boruta")
   if(!("Boruta" %in% loadedNamespaces()) || ('Boruta' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('Boruta');attachNamespace("Boruta")},silent = TRUE)
-    stopifnot(require("Boruta"))
   }
 
   # Get all variable names to test

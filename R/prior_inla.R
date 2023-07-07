@@ -57,7 +57,7 @@ methods::setGeneric(
 
 #' @name INLAPrior
 #' @rdname INLAPrior
-#' @usage \S4method{INLAPrior}{character, character}(variable, type)
+#' @usage \S4method{INLAPrior}{character, character, ANY}(variable, type, hyper, ...)
 methods::setMethod(
   "INLAPrior",
   methods::signature(variable = "character", type = "character"),
@@ -124,7 +124,7 @@ methods::setGeneric(
 
 #' @name INLAPriors
 #' @rdname INLAPriors
-#' @usage \S4method{INLAPriors}{vector, character}(variables, type)
+#' @usage \S4method{INLAPriors}{vector, character, ANY}(variables, type, hyper, ...)
 methods::setMethod(
   "INLAPriors",
   methods::signature(variables = "vector", type = "character"),

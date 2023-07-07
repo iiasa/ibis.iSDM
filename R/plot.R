@@ -103,7 +103,7 @@ methods::setGeneric(
 
 #' @name bivplot
 #' @rdname bivplot
-#' @usage \S4method{bivplot}{ANY}(mod)
+#' @usage \S4method{bivplot}{ANY, character, character, logical, ANY, ANY, character}(mod, xvar, yvar, plot, fname, title, col, ...)
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),
@@ -147,7 +147,6 @@ methods::setMethod(
     check_package("cowplot")
     if(!("biscale" %in% loadedNamespaces()) || ('biscale' %notin% utils::sessionInfo()$otherPkgs) ) {
       try({requireNamespace('biscale');attachNamespace("biscale")},silent = TRUE)
-      stopifnot(require("biscale"))
     }
 
     # Check provided colours

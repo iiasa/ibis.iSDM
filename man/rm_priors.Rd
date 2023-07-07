@@ -6,7 +6,7 @@
 \usage{
 rm_priors(x, names = NULL, ...)
 
-\S4method{rm_priors}{BiodiversityDistribution}(x)
+\S4method{rm_priors}{BiodiversityDistribution, ANY}(x, names, ...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

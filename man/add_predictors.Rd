@@ -19,7 +19,7 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection, ANY, character, character, numeric, ANY, logical, logical, logical, ANY}(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
 
 \S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
 

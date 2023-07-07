@@ -283,11 +283,11 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
       dfbin$is <- as.numeric(as.character(dfbin$is))
       if (is.Raster(envs) && (terra::nlyr(envs)>1) ) {
         lyrtmp <- envs[[pd$xlbs[[i]]]]
-        lyrtr <- terra::reclassify(lyrtmp, as.matrix(dfbin))
+        lyrtr <- terra::classify(lyrtmp, as.matrix(dfbin))
       } else if (inherits(envs, "list")) {
         lyrtr <- lapply(envs, function(x) {
         lyrtmp <- x[[pd$xlbs[[i]]]]
-          return(terra::reclassify(lyrtmp, as.matrix(dfbin)))
+          return(terra::classify(lyrtmp, as.matrix(dfbin)))
         })
       }
       if (exists("pdstack")) {

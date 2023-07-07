@@ -41,7 +41,7 @@ methods::setGeneric(
 
 #' @name BARTPrior
 #' @rdname BARTPrior
-#' @usage \S4method{BARTPrior}{character, numeric}(variable, hyper)
+#' @usage \S4method{BARTPrior}{character, numeric}(variable, hyper, ...)
 methods::setMethod(
   "BARTPrior",
   methods::signature(variable = "character"),

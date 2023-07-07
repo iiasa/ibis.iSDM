@@ -13,7 +13,7 @@ add_predictor_range(
   priors = NULL
 )
 
-\S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster}(x, layer)
+\S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster, character, ANY, ANY}(x, layer, method, fraction, priors)
 
 \S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
 }

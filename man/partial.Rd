@@ -16,7 +16,7 @@ partial(
   ...
 )
 
-\S4method{partial}{ANY,character}(mod, x.var)
+\S4method{partial}{ANY,character, ANY, numeric, ANY, logical, character}(mod, x.var, constant, variable_length, values, plot, type, ...)
 
 \method{partial}{DistributionModel}(mod, ...)
 }

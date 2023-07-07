@@ -82,7 +82,7 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection, ANY, character, character, numeric, ANY, logical, logical, logical, ANY}(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
@@ -390,7 +390,7 @@ methods::setGeneric(
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster, character, ANY, ANY}(x, layer, method, fraction, priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),

@@ -23,7 +23,7 @@ add_biodiversity_polpo(
   ...
 )
 
-\S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf}(x, polpo)
+\S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf, ANY, character, ANY, character, ANY, numeric, logical, numeric, ANY, character, logical, logical, ANY}(x, polpo,name, field_occurrence, formula, family, link, weight, simulate, simulate_points, simulate_bias, simulate_strategy,separate_intercept, docheck, pseudoabsence_settings, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

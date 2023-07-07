@@ -108,7 +108,7 @@ methods::setGeneric(
 
 #' @name rm_priors
 #' @rdname rm_priors
-#' @usage \S4method{rm_priors}{BiodiversityDistribution}(x)
+#' @usage \S4method{rm_priors}{BiodiversityDistribution, ANY}(x, names, ...)
 methods::setMethod(
   "rm_priors",
   methods::signature(x = "BiodiversityDistribution"),

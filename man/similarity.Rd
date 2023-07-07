@@ -15,9 +15,9 @@ similarity(
   ...
 )
 
-\S4method{similarity}{BiodiversityDistribution, character, character, character, logical, logical}(obj, ref_type, method, predictor_names, full, plot)
+\S4method{similarity}{BiodiversityDistribution, character, character, character, logical, logical}(obj, ref_type, method, predictor_names, full, plot, ...)
 
-\S4method{similarity}{SpatRaster}(obj)
+\S4method{similarity}{SpatRaster, sf, character, logical, logical}(obj, ref, method, full, plot, ...)
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}

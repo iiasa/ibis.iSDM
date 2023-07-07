@@ -63,7 +63,7 @@ methods::setGeneric(
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
-#' @usage \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
+#' @usage \S4method{add_latent_spatial}{BiodiversityDistribution, character, ANY, logical}(x, method, priors, separate_spde, ...)
 methods::setMethod(
   "add_latent_spatial",
   methods::signature(x = "BiodiversityDistribution"),

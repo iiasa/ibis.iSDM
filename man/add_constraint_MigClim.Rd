@@ -4,7 +4,10 @@
 \alias{add_constraint_MigClim}
 \title{Add constrains to the modelled distribution projection using the MigClim approach}
 \usage{
-\S4method{add_constraint_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange, iniMatAge, propaguleProdProb, replicateNb, dtmp)
+\S4method{add_constraint_MigClim}{BiodiversityScenario, character,
+numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}
+(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange,
+iniMatAge, propaguleProdProb, replicateNb, dtmp)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

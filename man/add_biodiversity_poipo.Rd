@@ -19,7 +19,7 @@ add_biodiversity_poipo(
   ...
 )
 
-\S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf}(x, poipo)
+\S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf, ANY, character, ANY, character, ANY, numeric, logical, logical, ANY}(x, poipo,name, field_occurrence, formula, family, link, weight, separate_intercept, docheck, pseudoabsence_settings, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
