@@ -101,9 +101,46 @@ Currently supported are:</p><ul><li><p><code>'ibis.runparallel'</code> : <code><
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span> <span class="fu">ibis_options</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span> <span class="fu">ibis_options</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.cleannames</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.corPred</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.dependencies</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "pdp"           "scales"        "biscale"       "modEvA"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "dplyr"         "geodist"       "geosphere"     "progress"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "glmnet"        "glmnetUtils"   "xgboost"       "BoomSpikeSlab"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "INLA"          "inlabru"       "gnlm"          "cubelyr"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "dbarts"        "mboost"        "rstan"         "cmdstanr"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.engines</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "GDB-Model"     "BART-Model"    "INLABRU-Model" "BREG-Model"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "GLMNET-Model"  "INLA-Model"    "STAN-Model"    "XGBOOST-Model"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.futurestrategy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "multisession"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.nthread</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.priors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "INLAPrior"   "BARTPrior"   "GDBPrior"    "GLMNETPrior" "XGBPrior"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "BREGPrior"   "STANPrior"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.pseudoabsence</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Background Settings: <span style="color: #00BB00;">5</span> parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.runparallel</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 19372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ibis.setupmessages</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
