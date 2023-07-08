@@ -229,17 +229,6 @@ references:
   institution:
     name: R Foundation for Statistical Computing
 - type: software
-  title: stats
-  abstract: 'R: A Language and Environment for Statistical Computing'
-  notes: Imports
-  authors:
-  - name: R Core Team
-  location:
-    name: Vienna, Austria
-  year: '2023'
-  institution:
-    name: R Foundation for Statistical Computing
-- type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
   notes: Imports
@@ -312,6 +301,17 @@ references:
     orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'
   version: '>= 0.5'
+- type: software
+  title: stats
+  abstract: 'R: A Language and Environment for Statistical Computing'
+  notes: Imports
+  authors:
+  - name: R Core Team
+  location:
+    name: Vienna, Austria
+  year: '2023'
+  institution:
+    name: R Foundation for Statistical Computing
 - type: software
   title: tibble
   abstract: 'tibble: Simple Data Frames'
