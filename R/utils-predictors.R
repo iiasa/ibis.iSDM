@@ -798,7 +798,7 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
   x <- x[, !(colnames(x) %in% non.numeric.columns)]
 
   # Get all variables that are singular or unique in value
-  singular_var <- which(round( apply(x, 2, var),4) == 0)
+  singular_var <- which(round( apply(x, 2, stats::var),4) == 0)
   if(length(singular_var)>0) x <- x[,-singular_var]
 
   # Calculate correlation matrix

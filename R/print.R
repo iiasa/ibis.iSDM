@@ -12,7 +12,7 @@ NULL
 #' @seealso [base::print()].
 #'
 #' @name print
-#' @aliases print, Id-method print
+#' @aliases print, Id-method print, tbl_df-method
 #' @keywords misc
 #' @examples
 #' \dontrun{

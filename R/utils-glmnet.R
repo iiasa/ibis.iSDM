@@ -100,7 +100,7 @@ default.regularization <- function(p, m){
                                               0 || sum(mm[, i]) == nrow(mm)), 1, 0)
   })
   pmax(0.001 * (apply(m, 2, max) - apply(m, 2, min)), hmindev,
-       tmindev, apply(as.matrix(mm), 2, sd) * classregularization)
+       tmindev, apply(as.matrix(mm), 2, stats::sd) * classregularization)
 }
 
 #' Determine best lambda

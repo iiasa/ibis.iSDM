@@ -11,7 +11,7 @@ NULL
 #'
 #' @details Identifiers are made using the [uuid::UUIDgenerate()].
 #'
-#' @return [`Id`] object.
+#' @return \code{"Id"} object.
 #'
 #' @seealso [uuid::UUIDgenerate()].
 #'
@@ -28,7 +28,7 @@ NULL
 #' # check if it is an Id object
 #' is.Id(i)
 #'
-#' @aliases Id
+#' @aliases Id, new_id
 #' @name new_id
 #' @keywords misc
 #' @export

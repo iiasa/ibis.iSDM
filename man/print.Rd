@@ -4,6 +4,7 @@
 \alias{print}
 \alias{print,}
 \alias{Id-method}
+\alias{tbl_df-method}
 \alias{print.distribution}
 \alias{print.BiodiversityDistribution}
 \alias{print.BiodiversityDatasetCollection}

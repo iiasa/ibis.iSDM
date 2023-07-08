@@ -215,8 +215,8 @@ methods::setMethod(
           } else rasp <- NULL
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
-                                     "sd" = terra::app(ras, sd, na.rm = TRUE),
-                                     "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
+                                     "sd" = terra::app(ras, stats::sd, na.rm = TRUE),
+                                     "cv" = terra::app(ras, stats::sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
                                      "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE),
                                      "pca" = terra::mean(rasp, na.rm = TRUE)
           )
@@ -393,8 +393,8 @@ methods::setMethod(
       }
       # Add uncertainty
       out_uncertainty <- switch (uncertainty,
-                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
-                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
+                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE)),
+                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
                                  "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
       )
       if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA

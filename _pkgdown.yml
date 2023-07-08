@@ -118,7 +118,6 @@ reference:
       These functions are used by engines or spatial processing in the package. Most
       of them are for internal use, but can be of use if input needs to be reformatted.
     contents:
-      - explode_factorized_raster
       - posterior_predict_stanfit
       - alignRasters
       - emptyraster

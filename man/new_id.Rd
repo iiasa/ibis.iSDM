@@ -8,7 +8,7 @@
 new_id()
 }
 \value{
-\code{\link{Id}} object.
+\code{"Id"} object.
 }
 \description{
 Generate a new unique identifier.
