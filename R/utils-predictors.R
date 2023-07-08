@@ -40,6 +40,7 @@ NULL
 #' new_x <- predictor_transform(x, option = 'scale')
 #' }
 #' @keywords utils
+#' @aliases predictor_transform
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
   assertthat::assert_that(
@@ -272,7 +273,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @param method As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).
 #' @param ... other options (Non specified).
 #' @return Returns the derived adjusted [`SpatRaster`] objects of identical resolution.
-#' @seealso predictor_derivate
+#' @seealso predictor_transform
+#' @aliases predictor_derivate
 #' @examples
 #' \dontrun{
 #' # Create a hinge transformation of one or multiple SpatRaster.
@@ -504,6 +506,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 #' @param fill_method A [`character`] of the method for filling gaps to be used (Default: \code{'ngb'}).
 #' @param return_na_cells A [`logical`] value of whether the ids of grid cells with NA values is to be returned instead (Default: \code{FALSE}).
 #' @returns A [`SpatRaster`] object with the same number of layers as the input.
+#' @aliases predictor_homogenize_na
 #' @examples
 #' \dontrun{
 #'  # Harmonize predictors
@@ -726,6 +729,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' @keywords utils
 #' @return A [`character`] [`vector`] of variable names to be excluded.
 #' If the function fails due to some reason return \code{NULL}.
+#' @aliases predictor_filter
 #' @examples
 #' \dontrun{
 #'  # Remove highly correlated predictors
@@ -842,6 +846,7 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
 #' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
 #' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
 #' @keywords utils, internal
+#' @aliases predictor_filter_abess
 #' @returns A [`vector`] of variable names to exclude
 predictors_filter_abess <- function( env, observed, method, family, tune.type = "cv", lambda = 0,
                                        weight = NULL, keep = NULL, ...){
@@ -925,6 +930,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' @references
 #' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
 #' @keywords utils, internal
+#' @aliases predictor_filter_boruta
 #' @returns A [`vector`] of variable names to exclude.
 predictors_filter_boruta <- function( env, obs, method, keep = NULL,
                                       iter = 100, verbose = getOption('ibis.setupmessages'), ...){

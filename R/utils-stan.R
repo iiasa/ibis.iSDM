@@ -290,7 +290,6 @@ run_stan <- function( model_code, data = list(),
 #' @param family A [`character`] giving the family for simulating linear response values (Default: \code{NULL})
 #' @param offset A [vector] with an optionally specified offset.
 #' @param draws [numeric] indicating whether a specific number of draws should be taken.
-#' @import posterior
 #' @references
 #' * [https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed](https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed).
 #' * The brms R-package.

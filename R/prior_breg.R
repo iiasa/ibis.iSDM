@@ -98,6 +98,7 @@ methods::setMethod(
 #' @rdname BREGPriors
 #' @exportMethod BREGPriors
 #' @inheritParams BREGPrior
+#' @aliases BREGPriors
 #' @family prior
 #' @keywords priors
 #' @export

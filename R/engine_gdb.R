@@ -31,6 +31,7 @@ NULL
 #' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
 #' @family engine
 #' @returns An engine.
+#' @aliases engine_gdb
 #' @examples
 #' \dontrun{
 #' # Add GDB as an engine
@@ -669,6 +670,15 @@ engine_gdb <- function(x,
               graphics::par(par.ori)
             }
             return(temp)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            # Get risks
+            evl <- fit$risk()
+            if(fit$mstop() == length(evl)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

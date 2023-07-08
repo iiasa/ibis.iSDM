@@ -6,6 +6,7 @@
 #' @param x [`SpatRaster-class`] object.
 #' @param y [`SpatRaster-class`] or [`sf`] object.
 #' @keywords internal, utils
+#' @aliases is_comparable_raster
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
 #'   resolution, extent, dimensionality, and coordinate system.
 #' @noRd
@@ -145,6 +146,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' call.
 #' @param biod A [`list`] supplied by description.
 #' @returns A [`sf`] object.
+#' @aliases create_mcp
 #' @keywords internal
 #' @noRd
 create_mcp <- function(biod, limits){
@@ -209,6 +211,7 @@ create_mcp <- function(biod, limits){
 #' type [`sf`] (Default: \code{"limits"}).
 #' @param template An optional [`SpatRaster`] object on which which the zones should be rasterized (Default: \code{NULL}).
 #' @returns A [`sf`] or [`SpatRaster`] object.
+#' @aliases create_zonaloccurrence_mask
 #' @keywords utils, internal
 #' @noRd
 create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
@@ -332,6 +335,7 @@ extent_expand <- function(e,f=0.1){
 #' @param g A [`sf`] object containing some data.
 #' @param name A [`character`] with the new name for the geometry.
 #' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
+#' @aliases rename_geometry
 #' @keywords internal, utils
 #' @noRd
 rename_geometry <- function(g, name){
@@ -353,6 +357,8 @@ rename_geometry <- function(g, name){
 #'
 #' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
 #' @param geom_name A [`character`] indicating the name of the geometry column (Default: \code{'geometry'}).
+#' @returns A [`sf`] object.
+#' @aliases guess_sf
 #' @keywords internal, utils
 #' @noRd
 guess_sf <- function(df, geom_name = 'geometry'){
@@ -407,6 +413,7 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #' @param background A template [`SpatRaster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
 #' @returns A [`SpatRaster`] with the density of point observations.
+#' @aliases st_kde
 #' @keywords utils, internal
 #' @noRd
 st_kde <- function(points, background, bandwidth = 3){
@@ -485,6 +492,7 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`], [`Spatial*`] or [`sf`] object.
 #' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
 #' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: \code{'km'}).
+#' @aliases extent_dimensions
 #' @keywords utils, internal
 #' @noRd
 extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = 'km') {
@@ -558,6 +566,7 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
 #' Nearest Neighbour resampling (near) is recommended for discrete and bilinear
 #' resampling recommended for continuous data. See also help from [terra::resample] for other options.
 #' @return New [`SpatRaster`] object aligned to the supplied template layer.
+#' @aliases alignRasters
 #' @examples
 #' \dontrun{
 #'  # Align one raster to another
@@ -604,8 +613,8 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' @param x A \code{SpatRaster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{terra}}
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
-#' @import terra
-#' @keywords terra, utils
+#' @keywords utils
+#' @aliases emptyraster
 #' @examples
 #' require(terra)
 #' r <- rast(matrix(1:100, 5, 20))
@@ -637,6 +646,7 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist}).
 #' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+#' @aliases get_ngbvalue
 #' @examples
 #' \dontrun{
 #'  # Create matchup table
@@ -744,6 +754,7 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
 #' @return A [`data.frame`] with the extracted covariate data from each provided data point.
 #' @keywords utils
+#' @aliases get_rastervalue
 #' @examples
 #' \dontrun{
 #' # Extract values
@@ -925,16 +936,17 @@ clean_rasterfile <- function(x, verbose = FALSE)
 
 #' Split raster factor levels to stack
 #'
-#'  @description Takes a single raster that is a [`factor`] and creates
-#'  a new [`SpatRaster`] that contains the individual levels.
-#'  @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a [`SpatRaster`] object
-#'  can be supplied in which only factor variables are 'exploded'.
-#'  @param name An optional [`character`] name for the [`SpatRaster`].
-#'  @param ... Other parameters (not used).
-#'  @returns A [`SpatRaster`] object.
-#'  @keywords utils, internal
-#'  @noRd
-explode_factorized_raster <- function(ras, name = NULL, ...){
+#' @description Takes a single raster that is a [`factor`] and creates
+#' a new [`SpatRaster`] that contains the individual levels.
+#'
+#' @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a [`SpatRaster`] object
+#' can be supplied in which only factor variables are 'exploded'.
+#' @param name An optional [`character`] name for the [`SpatRaster`].
+#' @aliases explode_factorized_raster
+#' @returns A [`SpatRaster`] object.
+#' @keywords utils, internal
+#' @noRd
+explode_factorized_raster <- function(ras, name = NULL){
   assertthat::assert_that(is.Raster(ras),
                           is.null(name) || is.character(name))
 
@@ -1058,6 +1070,7 @@ explode_factorized_raster <- function(ras, name = NULL, ...){
 #'  # using a bias layer
 #'  thin_points <- thin_observations(points, background, method = "bias", env = bias)
 #' }
+#' @aliases thin_observations
 #' @references
 #' * Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., & Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
 #' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.

@@ -7,6 +7,7 @@ NULL
 #' @name ibis_colours
 #' @examples
 #' ibis_colours[['viridis_plasma']]
+#' @aliases ibis_colours
 #' @keywords internal
 #' @noRd
 ibis_colours <- list(
@@ -45,10 +46,9 @@ ibis_colours <- list(
 #'  * \code{'ibis.use_future'} : [`logical`] on whether the \pkg{future} package should be used for parallel computing.
 #' @return The output of \code{getOptions} for all ibis related variables.
 #' @keywords misc
+#' @aliases ibis_options
 #' @examples
-#' \dontrun{
 #'  ibis_options()
-#' }
 #' @export
 ibis_options <- function(){
   what <- grep('ibis',names(options()),value = TRUE)
@@ -70,6 +70,7 @@ ibis_options <- function(){
 #' @param deps A [`vector`] with the names of the packages to be installed (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
 #' @param update A [`logical`] flag of whether all (installed) packages should also be checked for updates (Default: \code{TRUE}).
 #' @returns Nothing. Packages will be installed.
+#' @aliases ibis_dependencies
 #' @examples
 #' \dontrun{
 #'   # Install and update all dependencies
@@ -126,6 +127,7 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
 #' (Default: \code{"multisession"}).
 #' @seealso [future]
 #' @return None
+#' @aliases ibis_future
 #' @examples
 #' \dontrun{
 #' # Starts future job

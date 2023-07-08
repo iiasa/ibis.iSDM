@@ -45,6 +45,13 @@ predictor. The difference being that the range is either directly included as pr
 alternatively with a linear distance transform from the range boundary. The parameter
 \code{"distance_max"} can be specified to constrain this distance transform.
 }
+\examples{
+\dontrun{
+distribution(background) |>
+  add_predictor_range(range, method = "distance", distance_max = 2)
+}
+
+}
 \references{
 \itemize{
 \item Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539

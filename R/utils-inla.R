@@ -781,7 +781,7 @@ post_prediction <- function(mod, nsamples = 100,
     }
     else {
       smy <- data.frame(apply(data, MARGIN = 1, mean, na.rm = TRUE),
-                        apply(data, MARGIN = 1, sd, na.rm = TRUE),
+                        apply(data, MARGIN = 1, stats::sd, na.rm = TRUE),
                         t(apply(data,MARGIN = 1, quantile, prob = c(0.025, 0.5, 0.975),na.rm = TRUE)),
                         apply(data, MARGIN = 1, min, na.rm = TRUE),
                         apply(data, MARGIN = 1, max, na.rm = TRUE))

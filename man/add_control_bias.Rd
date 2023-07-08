@@ -6,7 +6,7 @@
 \usage{
 add_control_bias(x, layer, method = "partial", bias_value = NULL, add = TRUE)
 
-\S4method{add_control_bias}{BiodiversityDistribution, SpatRaster}(x, layer)
+\S4method{add_control_bias}{BiodiversityDistribution, SpatRaster, character, ANY, logical}(x, layer, method, bias_value, add)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -40,7 +40,7 @@ across the background.
 offsets to factor out a specified bias variable.
 }
 \note{
-**Covariate transformations applied to other predictors need to **
+\strong{Covariate transformations applied to other predictors need to be applied to bias too.}
 Another option to consider biases particular in Poisson-point process models is to remove them
 through an offset. Functionality to do so is available through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting the
 method to \code{"offset"} will automatically point to this option.

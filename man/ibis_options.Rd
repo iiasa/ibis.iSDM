@@ -21,8 +21,6 @@ Currently supported are:
 }
 }
 \examples{
-\dontrun{
  ibis_options()
-}
 }
 \keyword{misc}

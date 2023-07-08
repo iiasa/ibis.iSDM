@@ -6,11 +6,11 @@
 \usage{
 priors(x, ...)
 
-\S4method{priors}{Prior}(x)
+\S4method{priors}{Prior}(x,...)
 
 priors(x, ...)
 
-\S4method{priors}{Prior}(x)
+\S4method{priors}{Prior}(x, ...)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{Prior}} object added to the list.}

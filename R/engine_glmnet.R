@@ -39,6 +39,7 @@ NULL
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @family engine
 #' @returns An engine.
+#' @aliases engine_glmnet
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine
@@ -636,6 +637,15 @@ engine_glmnet <- function(x,
             # Do plot and return result
             if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
             return(prediction)
+          },
+          # Convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            # Get lambdas
+            lmd <- fit$lambda
+            if(determine_lambda(fit) == min(lmd)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

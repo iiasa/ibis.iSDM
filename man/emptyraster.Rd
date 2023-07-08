@@ -23,5 +23,4 @@ require(terra)
 r <- rast(matrix(1:100, 5, 20))
 emptyraster(r)
 }
-\keyword{terra,}
 \keyword{utils}

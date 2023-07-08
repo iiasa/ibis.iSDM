@@ -30,6 +30,7 @@
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds an offset to a [`distribution`] object.
 #' @family offset
+#' @aliases add_offset
 #' @keywords prior, offset
 #' @examples
 #' \dontrun{
@@ -110,6 +111,7 @@ methods::setMethod(
 #' }
 #' @family offset
 #' @keywords prior, offset, internal
+#' @aliases rm_offset
 #' @name rm_offset
 NULL
 
@@ -179,6 +181,7 @@ methods::setMethod(
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @family offset
 #' @keywords prior, offset
+#' @aliases add_offset_bias
 #' @returns Adds a bias offset to a [`distribution`] object.
 #' @examples
 #' \dontrun{
@@ -312,6 +315,7 @@ methods::setMethod(
 #' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds a range offset to a [`distribution`] object.
+#' @aliases add_offset_range
 #' @examples
 #' \dontrun{
 #'  # Adds the offset to a distribution object
@@ -770,6 +774,7 @@ methods::setMethod(
 #' * Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale 1 km hummingbird diversity derived from fusing point records with lateral and elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds a elevational offset to a [`distribution`] object.
+#' @aliases add_offset_elevation
 #' @examples
 #' \dontrun{
 #'  # Adds the offset to a distribution object

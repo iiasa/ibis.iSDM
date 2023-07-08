@@ -7,6 +7,7 @@
 #' @param date_interpolation [`character`] on how missing dates between events should be interpolated. See [`project()`].
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same.
 #' @keywords scenario
+#' @aliases approximate_gaps
 #' @noRd
 approximate_gaps <- function(env, date_interpolation = "annual"){
   assertthat::assert_that(
@@ -83,6 +84,7 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
 #' @param newname A [`character`] with the new name for the variable.
 #' @param weights An optional variable layer to use for weighting.
 #' @param fun A function how the respective layers should be combined.
+#' @aliases st_reduce
 #' @examples
 #' \dontrun{
 #'  st_reduce(obj, vars = c('forestShare', 'forestShare.2'),
@@ -172,6 +174,7 @@ st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
 #' of numeric time entries corresponding to the time dimension (Default: \code{NULL}).
 #' @param template An optional [`SpatRaster`] template to which the output should be aligned too.
 #' @returns A [`list`] containing [`SpatRaster`] objects.
+#' @aliases stars_to_raster
 #' @keywords scenario, internal
 stars_to_raster <- function(obj, which = NULL, template = NULL){
   assertthat::assert_that(
@@ -244,6 +247,7 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
 #'  stars_to_raster(obj)
 #' }
 #' @seealso `stars_to_raster`
+#' @aliases raster_to_stars
 #' @keywords scenario, internal
 raster_to_stars <- function(obj){
   assertthat::assert_that(
@@ -297,6 +301,7 @@ raster_to_stars <- function(obj){
 #' @param obj A [`stars`] object with a time dimension (\code{"time"}).
 #' @param new A [`SpatRaster`] object with additional covariates to be added.
 #' @returns A [`stars`] object with the names of the [`SpatRaster`] object added.
+#' @aliases st_add_raster
 #' @keywords scenario, internal
 st_add_raster <- function(obj, new){
   assertthat::assert_that(
@@ -339,6 +344,7 @@ st_add_raster <- function(obj, new){
 #' A parameter called \code{"relative"} can be set to calculate relative change instead.
 #' @param scenario A [`stars`] object with a time dimension.
 #' @param relative A [`logical`] check whether to calculate relative changes instead.
+#' @aliases summarise_projection
 #' @keywords internal, scenario
 #' @noRd
 summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
@@ -419,9 +425,12 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
 #' @description
 #' This is a wrapper function to summarize the output of a scenario projection, but specifically
 #' calculates statistics of change for two time steps, a before and after step.
+#' @note
+#' This function currently requires the \code{"geosphere"} package installed.
 #' @param scenario A [`stars`] object with a time dimension.
 #' @references
 #' * Godsoe, W. (2014). Inferring the similarity of species distributions using Species’ Distribution Models. Ecography, 37(2), 130-136.
+#' @aliases summarise_change
 #' @keywords internal, scenario
 #' @noRd
 summarise_change <- function(scenario){
@@ -504,7 +513,7 @@ summarise_change <- function(scenario){
 #'
 #' @description
 #' The reprojection of WGS84 currently fails due to some unforeseen bug.
-#' This function is meant to reproject back the lasyer
+#' This function is meant to reproject back the layer.
 #' @param obj A ['stars'] object to be clipped and cropped.
 #' @param template A ['SpatRaster'] or ['sf'] object to which the object should be projected.
 #' @keywords internal, scenario
@@ -583,6 +592,7 @@ hack_project_stars <- function(obj, template){
 #' @param layer A [`SpatRaster`] or [`sf`] object for which the centre of the range is to be calculated.
 #' If the distribution is continuous, then the centre is calculated as the value centre to all non-NA values.
 #' @param spatial A [`logical`] of whether outputs should be returned as spatial.
+#' @aliases calculate_range_centre
 #' @keywords scenario, internal
 #' @noRd
 calculate_range_centre <- function(layer, spatial = TRUE) {

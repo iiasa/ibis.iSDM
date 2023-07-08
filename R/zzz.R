@@ -14,8 +14,6 @@
   options("rgdal_show_exportToProj4_warnings" = "none")
 
   # Set some default ibis options
-  options('ibis.nthread' = parallel::detectCores() - 1)
-  options('ibis.runparallel' = FALSE)
   options('ibis.setupmessages' = TRUE)
   # Option to have variable names "cleaned" by default
   options('ibis.cleannames' = TRUE)
@@ -28,7 +26,10 @@
   # Names of priors
   options('ibis.priors' = c('INLAPrior', 'BARTPrior', 'GDBPrior','GLMNETPrior',
                             'XGBPrior', 'BREGPrior', 'STANPrior'))
+
   # Use the future package for any options. Default is FALSE
+  options('ibis.nthread' = parallel::detectCores() - 1)
+  options('ibis.runparallel' = FALSE)
   options('ibis.futurestrategy' = "multisession")
   options(doFuture.foreach.export = ".export-and-automatic-with-warning")
 

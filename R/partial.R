@@ -18,6 +18,7 @@ NULL
 #' @details By default the mean is calculated across all parameters that are not \code{x.var}.
 #' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
 #' @return A [data.frame] with the created partial response.
+#' @aliases partial
 #' @examples
 #' \dontrun{
 #'  # Do a partial calculation of a trained model
@@ -76,6 +77,7 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 #' @details By default the [mean] is calculated across all parameters that are not \code{x.var}.
 #' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
 #' @returns A [SpatRaster] containing the mapped partial response of the variable.
+#' @aliases spartial
 #' @examples
 #' \dontrun{
 #'  # Create and visualize the spartial effect

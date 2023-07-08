@@ -16,9 +16,7 @@ threshold(
 
 \S4method{threshold}{ANY, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold, ...)
 
-\S4method{threshold}{SpatRasterDataset}(obj)
-
-\S4method{threshold}{SpatRaster, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold)
+\S4method{threshold}{SpatRaster, character, ANY, ANY, character, logical, logical}(obj, method, value, point, format, return_threshold, plot)
 
 \S4method{threshold}{BiodiversityScenario, ANY}(obj, tr, ...)
 }

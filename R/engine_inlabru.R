@@ -54,6 +54,7 @@ NULL
 #' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
 #' @returns An engine.
+#' @aliases engine_inlabru
 #' @examples
 #' \dontrun{
 #' # Add inlabru as an engine
@@ -1185,6 +1186,12 @@ engine_inlabru <- function(x,
                 )
               )
             }
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

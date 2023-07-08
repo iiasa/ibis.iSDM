@@ -30,6 +30,13 @@ can be defined through the \code{"value"} parameter. For example by setting it t
 are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
 training.
 }
+\examples{
+\dontrun{
+scenario(fit) |>
+ add_constraint_adaptability(value = 1)
+}
+
+}
 \seealso{
 Other constraint: 
 \code{\link{add_constraint_boundary}()},

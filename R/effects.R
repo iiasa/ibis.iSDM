@@ -11,7 +11,7 @@ NULL
 #' this function will attempt to generate [partial] dependency plots instead.
 #' @param object Any fitted [distribution] object.
 #' @param ... Not used.
-#'
+#' @aliases effects
 #' @examples
 #' \dontrun{
 #' # Where mod is an estimated distribution model

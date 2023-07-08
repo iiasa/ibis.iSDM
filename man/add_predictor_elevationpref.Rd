@@ -22,3 +22,10 @@ add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 \description{
 Create lower and upper limits for an elevational range and add them as separate predictors
 }
+\examples{
+\dontrun{
+distribution(background) |>
+  add_predictor_elevationpref(elevation, lower = 200, upper = 1000)
+}
+
+}

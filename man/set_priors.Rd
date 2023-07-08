@@ -6,7 +6,7 @@
 \usage{
 set_priors(x, priors = NULL, ...)
 
-\S4method{set_priors}{BiodiversityDistribution}(x)
+\S4method{set_priors}{BiodiversityDistribution, ANY}(x, priors, ...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -26,7 +26,10 @@ via \link{add_predictors}
 }
 \examples{
 \dontrun{
- x <- distribution(background)
+ pp <-  GLMNETPrior("forest")
+ x <- distribution(background) |>
+  add_priors(pp)
+
 }
 }
 \seealso{

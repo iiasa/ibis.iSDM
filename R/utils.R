@@ -16,6 +16,7 @@
 #' @param ... Any additional outputs or words for display
 #' @examples
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
+#' @aliases myLog
 #' @keywords internal, utils
 #' @export
 myLog <- function(title = "[Processing]", col = 'green', ...) {
@@ -85,6 +86,7 @@ to_camelcase <- function(x){
 #' @param x A [`vector`] object
 #' @return [`character`] object.
 #' @concept function taken from `prioritizr` package
+#' @aliases name_atomic
 #' @keywords internal, utils
 #' @examples
 #' name_atomic(letters)
@@ -234,6 +236,7 @@ thresholdval <- function(x, knot) {
 #' vars <- c("Climate-temperature2015", "Elevation__sealevel", "Landuse.forest..meanshare")
 #' sanitize_names(vars)
 #'
+#' @aliases sanitize_names
 #' @keywords utils
 #' @export
 sanitize_names <- function(names){
@@ -602,7 +605,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 #' Outlier detection via reverse jackknife
 #'
 #' @description
-#' Implemententation of a Reverse Jackknife procedure as described by Chapman (2005).
+#' Implementation of a Reverse Jackknife procedure as described by Chapman (2005).
 #' Can be used to identify outliers in environmental predictors or predictions.
 #' @param vals A [`numeric`] vector from which outliers are to be identified and removed.
 #' @param procedure [`character`] denoting what to do with outliers.
@@ -610,6 +613,7 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 #' @references
 #' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity Information Facility, Copenhagen.
 #' @source [`bioGeo`] package code served as inspiration
+#' @aliases rm_outlier_revjack
 #' @keywords utils
 #' @noRd
 rm_outlier_revjack <- function(vals, procedure = "missing"){
@@ -737,31 +741,59 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 #' **This function is intended to only run within ibis and with the model packages created by it.**
 #' @param model A [`list`] object containing the biodiversity and predictor objects.
 #' @param include_absences A [`logical`] of whether absences should be included (Default: \code{FALSE}).
-#' @returns A [`sf`] object with the newly aggregated points.
+#' @param point_column [`chracter`] on the column with observed values.
+#' @param addName [`logical`] Should the name of the feature be added (Default: \code{FALSE}).
+#' @param tosf [`logical`] of whether the output should be [`sf`] object (Default: \code{FALSE}).
+#' @returns A [`matrix`] or [`sf`] object with the newly aggregated points.
 #' @keywords internal
 #' @noRd
-collect_occurrencepoints <- function(model, include_absences = FALSE){
+collect_occurrencepoints <- function(model, include_absences = FALSE,
+                                     point_column = "observed",
+                                     addName = FALSE,
+                                     tosf = FALSE){
   assertthat::assert_that(
     is.list(model),
     assertthat::has_name(model, "id"),
     assertthat::has_name(model, "biodiversity"),
-    is.logical(include_absences)
+    is.character(point_column),
+    is.logical(addName),
+    is.logical(include_absences),
+    is.logical(tosf)
   )
 
   # Get the locations
-  locs <- do.call("rbind",
-                  lapply(model$biodiversity, function(x){
+  locs <- lapply(model$biodiversity, function(x){
                     z <- x$observations
-                    if(!include_absences) z <- subset(z, observed > 0)
-                    o <- sf::st_coordinates( guess_sf( z )[,1:2])
-                    o <- as.matrix(o)
-                    colnames(o) <- c("x", "y")
+                    if(!include_absences) z <- z[point_column > 0,]
+                    if(tosf){
+                      # o <- subset(
+                        o <- z |> guess_sf() |>
+                                  # select = c(point_column, attr(z, "sf_column"))) |>
+                        rename_geometry("geometry")
+                    } else {
+                      o <- sf::st_coordinates( guess_sf( z )[,1:2])
+                      colnames(o) <- c("x", "y")
+                      o <- as.matrix(o)
+                    }
+                    if(addName) o$name <- x$name
                     return(o)
-                  }
+                    }
                   )
-  )
-  assertthat::assert_that(
-    is.matrix(locs), nrow(locs)>1
-  )
+  # Combine
+  locs <- do.call(rbind, locs)
+
+  if(!tosf){
+    assertthat::assert_that(
+      is.matrix(locs), nrow(locs)>1
+    )
+  } else {
+    assertthat::assert_that(inherits(locs, "sf"))
+    if(is.na(sf::st_crs(locs))){
+      suppressWarnings(
+        locs <- locs |> sf::st_set_crs(value = sf::st_crs(model$background))
+      )
+    }
+    locs <- locs |> tibble::remove_rownames()
+  }
   return(locs)
 }

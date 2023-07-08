@@ -45,6 +45,7 @@ NULL
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
 #' @keywords latent
+#' @aliases add_latent_spatial
 #' @examples
 #' \dontrun{
 #'  distribution(background) |> add_latent_spatial(method = "poly")
@@ -105,6 +106,7 @@ methods::setMethod(
 #'  rm_latent(model) -> model
 #' }
 #' @keywords latent, internal
+#' @aliases rm_latent
 #' @name rm_latent
 NULL
 

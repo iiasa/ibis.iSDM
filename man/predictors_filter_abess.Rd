@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils-predictors.R
 \name{predictors_filter_abess}
 \alias{predictors_filter_abess}
+\alias{predictor_filter_abess}
 \title{Apply the adaptive best subset selection framework on a set of predictors}
 \usage{
 predictors_filter_abess(

@@ -17,7 +17,11 @@ NULL
 #' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' @seealso [`Prior-class`].
-#' s
+#' @examples
+#' \dontrun{
+#'  pp <- STANPrior("forest", "normal", c(0,1))
+#' }
+#'
 #' @family prior
 #' @keywords priors
 #' @aliases STANPrior
@@ -82,6 +86,7 @@ methods::setMethod(
 #' @param ... Variables passed on to prior object
 #' @rdname STANPriors
 #' @family prior
+#' @aliases STANPriors
 #' @keywords priors
 #' @exportMethod STANPriors
 #' @export

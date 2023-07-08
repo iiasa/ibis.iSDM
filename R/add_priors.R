@@ -17,7 +17,10 @@ NULL
 #' @aliases add_priors
 #' @examples
 #' \dontrun{
-#'  x <- distribution(background)
+#'  pp <-  GLMNETPrior("forest")
+#'  x <- distribution(background) |>
+#'   add_priors(pp)
+#'
 #' }
 #' @name add_priors
 NULL
@@ -33,7 +36,7 @@ methods::setGeneric(
 
 #' @name add_priors
 #' @rdname add_priors
-#' @usage \S4method{add_priors}{BiodiversityDistribution, ANY}(x, priors)
+#' @usage \S4method{add_priors}{BiodiversityDistribution, ANY}(x, priors, ...)
 methods::setMethod(
   "add_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -67,7 +70,7 @@ methods::setGeneric(
 #' @inherit add_priors
 #' @inheritParams add_priors
 #' @keywords deprecated
-#' @usage \S4method{set_priors}{BiodiversityDistribution}(x)
+#' @usage \S4method{set_priors}{BiodiversityDistribution, ANY}(x, priors, ...)
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -76,7 +79,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors, "PriorList") || inherits(priors, 'INLAPrior') || inherits(priors, 'GDBPrior')
     )
     message('Deprecated. Use add_priors ')
-    add_priors(x, priors)
+    add_priors(x, priors, ...)
   }
 )
 
@@ -92,7 +95,12 @@ methods::setMethod(
 #' @family prior
 #' @examples
 #' \dontrun{
-#'  TBD
+#'  # Add prior
+#'  pp <-  GLMNETPrior("forest")
+#'  x <- distribution(background) |>
+#'   add_priors(pp)
+#'  # Remove again
+#'  x <- x |> rm_priors("forest")
 #' }
 #' @name rm_priors
 NULL
@@ -162,7 +170,7 @@ methods::setGeneric(
 
 #' @name get_priors
 #' @rdname get_priors
-#' @usage \S4method{get_priors}{ANY, character}(mod, target_engine)
+#' @usage \S4method{get_priors}{ANY, character}(mod, target_engine, ...)
 methods::setMethod(
   "get_priors",
   methods::signature(mod = "ANY", target_engine = "character"),

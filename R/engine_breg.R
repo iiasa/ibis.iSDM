@@ -23,6 +23,7 @@ NULL
 #' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 #' @family engine
 #' @returns An engine.
+#' @aliases engine_breg
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine
@@ -711,6 +712,12 @@ engine_breg <- function(x,
             int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
             if(length(int)>0) cofs <- cofs[-int,]
             return(cofs)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

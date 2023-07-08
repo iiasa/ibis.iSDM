@@ -462,6 +462,12 @@ methods::setMethod(
 #' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
 #' Allows incremental widening of the niche space, thus opening constraints.
 #' @family constraint
+#' @examples
+#' \dontrun{
+#' scenario(fit) |>
+#'  add_constraint_adaptability(value = 1)
+#' }
+#'
 #' @keywords scenario
 #' @exportMethod add_constraint_adaptability
 #' @export
@@ -551,7 +557,7 @@ methods::setMethod(
                 sub$predictors[is_presence, names])
   }
   rr <- sapply(df, function(x) range(x, na.rm = TRUE))   # Calculate ranges
-  rsd <- sapply(df, function(x) sd(x, na.rm = TRUE))   # Calculate standard deviation
+  rsd <- sapply(df, function(x) stats::sd(x, na.rm = TRUE))   # Calculate standard deviation
 
   # Apply value and increment if set
   rsd <- rsd * (value + (increment*increment_step))
@@ -589,6 +595,12 @@ methods::setMethod(
 #' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the model background. Has to be binary and
 #' is used for a posthoc masking of projected grid cells.
 #' @family constraint
+#' @examples
+#' \dontrun{
+#' # Add scenario constraint
+#' scenario(fit) |> add_constraint_boundary(range)
+#' }
+#'
 #' @keywords scenario
 #' @exportMethod add_constraint_boundary
 #' @export

@@ -23,6 +23,12 @@ Monotonic priors enforce directionality in direction of certain variables, howev
 specifying a monotonic constrain does not guarantee that the variable is not regularized out
 during model fitting.
 }
+\examples{
+\dontrun{
+ pp <- XGBPrior("forest", "increasing")
+}
+
+}
 \references{
 \itemize{
 \item Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.

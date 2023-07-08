@@ -40,6 +40,7 @@ NULL
 #' Abacus$subtract(10)
 #'
 #' @return A bdproto object.
+#' @aliases bdproto
 #' @keywords bdproto
 #' @family bdproto
 #' @noRd

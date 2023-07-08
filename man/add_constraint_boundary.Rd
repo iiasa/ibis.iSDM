@@ -29,6 +29,13 @@ as a hard cut on any projection, while the zones would allow any projection (and
 the zone.
 \strong{Note: Setting a boundary constraint for future projections effectively potentially suitable areas!}
 }
+\examples{
+\dontrun{
+# Add scenario constraint
+scenario(fit) |> add_constraint_boundary(range)
+}
+
+}
 \seealso{
 Other constraint: 
 \code{\link{add_constraint_adaptability}()},

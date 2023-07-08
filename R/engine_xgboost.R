@@ -38,6 +38,7 @@ NULL
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @family engine
+#' @aliases engine_xgboost
 #' @returns An engine.
 #' @examples
 #' \dontrun{
@@ -799,6 +800,15 @@ engine_xgboost <- function(x,
             }
             prediction[] <- pred_xgb
             return(prediction)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            # Get evaluation log
+            evl <- fit$evaluation_log
+            if(fit$best_iteration >= (nrow(evl)-(nrow(evl)*.01))) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils-predictors.R
 \name{predictors_filter_boruta}
 \alias{predictors_filter_boruta}
+\alias{predictor_filter_boruta}
 \title{All relevant feature selection using Boruta}
 \usage{
 predictors_filter_boruta(

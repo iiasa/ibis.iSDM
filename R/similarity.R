@@ -18,7 +18,7 @@ NULL
 #' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
 #' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
 #' @param ... other options (Non specified).
-#' @return
+#' @returns
 #'  This function returns a list containing:
 #'  * `similarity`: A `SpatRaster` object with multiple layers giving the environmental
 #'  similarities for each variable in `x` (only included when \code{"full=TRUE"});
@@ -42,6 +42,7 @@ NULL
 #' for quantifying novelty due to covariate range and correlation change when projecting
 #' species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
 #' @seealso dismo R-package.
+#' @aliases similarity
 #' @name similarity
 #' @export
 #' @examples

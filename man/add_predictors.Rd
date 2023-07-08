@@ -25,9 +25,9 @@ add_predictors(
 
 \S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
 
-\S4method{add_predictors}{BiodiversityScenario, SpatRaster}(x, env)
+\S4method{add_predictors}{BiodiversityScenario, SpatRaster, ANY, character, character, numeric, ANY, logical}(x, env, names, transform, derivates, derivate_knots, int_variables, harmonize_na, ...)
 
-\S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
+\S4method{add_predictors}{BiodiversityScenario, stars, ANY, character, character, numeric, ANY, logical}(x, env,names, transform, derivates, derivate_knots, int_variables, harmonize_na, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

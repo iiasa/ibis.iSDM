@@ -76,6 +76,7 @@ methods::setMethod(
 #' @rdname GDBPriors
 #' @exportMethod GDBPriors
 #' @inheritParams GDBPrior
+#' @aliases GDBPriors
 #' @keywords priors
 #' @family prior
 #' @export

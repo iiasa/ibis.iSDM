@@ -83,6 +83,7 @@ methods::setMethod(
       is.character(layer),
       is.character(method)
     )
+    # method = "discrete"; layer = "mean"; point = NULL; point_column = "observed"
     assertthat::assert_that( "prediction" %in% mod$show_rasters(),msg = "No prediction of the fitted model found!" )
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
@@ -159,13 +160,10 @@ methods::setMethod(
       # TODO: Think about how to do validation with non-point data
       if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
-      point <- do.call(sf:::rbind.sf,
-                        lapply(mod$model$biodiversity, function(y){
-                         o <-  guess_sf(y$observations)
-                         o$name <- y$name; o$type <- y$type
-                         subset(o, select = c(point_column, "name", "type", attr(o, "sf_column")))
-                        } )
-                        )  |> tibble::remove_rownames()
+      point <- collect_occurrencepoints(mod$model,
+                                        include_absences = FALSE,
+                                        addName = TRUE,
+                                        tosf = TRUE)
       if(is.factor(point[[point_column]])){
         point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
       }

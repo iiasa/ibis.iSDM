@@ -59,6 +59,7 @@ NULL
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @family engine
 #' @returns An engine.
+#' @aliases engine_inla
 #' @examples
 #' \dontrun{
 #' # Add INLA as an engine (with a custom mesh)
@@ -203,8 +204,7 @@ engine_inla <- function(x,
         locs <- collect_occurrencepoints(model, include_absences = FALSE)
 
         assertthat::assert_that(
-          nrow(locs)>0,
-          ncol(locs)==2
+          nrow(locs)>0, ncol(locs)==2
         )
 
         if(is.null(params$max.edge)){
@@ -255,7 +255,7 @@ engine_inla <- function(x,
         # )
         # 06/01/2023: This should work and is identical to inlabru::ipoints
         ar <- suppressWarnings(
-          diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
+          Matrix::diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
         )
         assertthat::assert_that(length(ar) == mesh$n)
 
@@ -930,6 +930,12 @@ engine_inla <- function(x,
                 control.predictor = list(A = INLA::inla.stack.A(stk_inference))
 
                 # Plot and return result
+              },
+              # Model convergence check
+              has_converged = function(self){
+                fit <- self$get_data("fit_best")
+                if(is.Waiver(fit)) return(FALSE)
+                return(TRUE)
               },
               # Get residuals
               get_residuals = function(self){

@@ -161,6 +161,7 @@ methods::setMethod(
 #' Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions
 #' for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
 #' @keywords train
+#' @aliases add_pseudoabsence
 #' @returns A [`data.frame`] containing the newly created pseudo absence points.
 #' @export
 add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL, settings = getOption("ibis.pseudoabsence")){

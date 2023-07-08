@@ -93,6 +93,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' Although a work around without the package could be developed, it was not deemed necessary at this point.
 #' See also this [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
 #' @return Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
+#' @aliases bivplot
 #' @keywords misc
 #' @export
 #' @name bivplot

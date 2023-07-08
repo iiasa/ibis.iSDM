@@ -266,6 +266,10 @@ DistributionModel <- bdproto(
       tidy_glmnet_summary(self$get_data(obj))
     }
   },
+  # Model convergence check
+  has_converged = function(self){
+    new_waiver()
+  },
   # Dummy residual function
   get_residuals = function(self){
     new_waiver()

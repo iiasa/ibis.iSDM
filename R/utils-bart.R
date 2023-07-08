@@ -53,6 +53,7 @@ built_formula_bart <- function(obj){
 #' @param model A fitted [dbarts] model.
 #' @concept Taken from the \pkg{embarcadero} package.
 #' @return A [`data.frame`] with the variable importance information.
+#' @aliases varimp.bart
 #' @keywords utils, internal
 #' @noRd
 varimp.bart <- function(model){
@@ -104,6 +105,7 @@ varimp.bart <- function(model){
 #'
 #' }
 #' @return A [`SpatRaster`] layer containing the partial effect
+#' @aliases bart_partial_effect
 #' @keywords utils
 #' @noRd
 bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
@@ -220,6 +222,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' @return A [`SpatRaster`] layer containing the partial effect.
+#' @aliases bart_partial_space
 #' @keywords utils
 #' @noRd
 bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){

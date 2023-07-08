@@ -35,6 +35,8 @@ test_that('Train a distribution model with INLA', {
   skip_on_travis()
   skip_on_cran()
 
+  options(ibis.setupmessages = FALSE)
+
   # Load data
   # Background Raster
   background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
@@ -57,8 +59,10 @@ test_that('Train a distribution model with INLA', {
       proj_stepsize = 1
     )
   # Train the model
-  suppressWarnings(
-    mod <- train(x, "test", inference_only = TRUE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+  suppressMessages(
+    suppressWarnings(
+      mod <- train(x, "test", inference_only = TRUE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+    )
   )
 
   # Expect summary

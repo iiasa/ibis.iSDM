@@ -32,6 +32,7 @@ NULL
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @seealso [add_predictors]
+#' @aliases add_predictors_globiom
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
@@ -286,6 +287,7 @@ methods::setMethod(
 #' @param template An optional [`SpatRaster`] object towards which projects should be transformed.
 #' @param verbose [`logical`] on whether to be chatty.
 #' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
+#' @aliases formatGLOBIOM
 #'
 #' @examples \dontrun{
 #' # Expects a filename pointing to a netCDF file.

@@ -34,6 +34,7 @@ NULL
 #' x <- distribution(background) |> engine_bart(iter = 100)
 #' }
 #' @family engine
+#' @aliases engine_bart
 #' @name engine_bart
 NULL
 #' @rdname engine_bart
@@ -544,6 +545,12 @@ engine_bart <- function(x,
             terra::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
             # Also return spatial
             return(p)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

@@ -581,7 +581,8 @@ methods::setMethod(
     # Convert predictions back to terra if data.frame
     model <- mod$model
     if(is.list( model$predictors_object ) ){
-      ras <- terra::rast(model$predictors, type = "xyz", crs = terra::crs(model$background))
+      ras <- terra::rast(model$predictors, type = "xyz",
+                         crs = terra::crs(model$background))
       assertthat::assert_that(all(names(ras) %in% model$predictors_names))
       # Get any previously set attributes
       ats <- model$predictors_object

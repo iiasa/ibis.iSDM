@@ -99,6 +99,7 @@ methods::setMethod(
 #' @rdname GLMNETPriors
 #' @exportMethod GLMNETPriors
 #' @inheritParams GLMNETPrior
+#' @aliases GLMNETPriors
 #' @family prior
 #' @keywords priors
 #' @export

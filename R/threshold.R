@@ -46,6 +46,7 @@ NULL
 #' @seealso \code{"modEvA"}
 #' @returns A [SpatRaster] if a [SpatRaster] object as input.
 #' Otherwise the threshold is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
+#' @aliases threshold
 #' @examples
 #' \dontrun{
 #'  # Where mod is an estimated DistributionModel
@@ -102,16 +103,11 @@ methods::setMethod(
 
     # Get all point data in distribution model
     if(is.null(point)){
-      point <- do.call(sf:::rbind.sf,
-                       lapply(obj$model$biodiversity, function(y){
-                         o <- guess_sf(y$observations)
-                         o$name <- y$name; o$type <- y$type
-                         subset(o, select = c('observed', "name", "type", "geometry"))
-                       } )
-      ) |> tibble::remove_rownames()
-      suppressWarnings(
-        point <- sf::st_set_crs(point, value = sf::st_crs(obj$get_data('prediction')))
-      )
+      point <- collect_occurrencepoints(model = obj$model,
+                                        include_absences = FALSE,
+                                        point_column = "observed",
+                                        addName = TRUE, tosf = TRUE
+                                        )
     } else {
       assertthat::assert_that(sf::st_crs(point) == sf::st_crs(obj$get_data('prediction')))
     }
@@ -200,13 +196,7 @@ methods::setMethod(
 
 #' @name threshold
 #' @rdname threshold
-#' @inheritParams threshold
-#' @usage \S4method{threshold}{SpatRasterDataset}(obj)
-methods::setMethod("threshold", methods::signature(obj = "SpatRasterDataset"), .stackthreshold)
-
-#' @name threshold
-#' @rdname threshold
-#' @usage \S4method{threshold}{SpatRaster, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold)
+#' @usage \S4method{threshold}{SpatRaster, character, ANY, ANY, character, logical, logical}(obj, method, value, point, format, return_threshold, plot)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),

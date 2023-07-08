@@ -21,7 +21,12 @@ In order to remove a set prior, the name of the prior has to be specified.
 }
 \examples{
 \dontrun{
- TBD
+ # Add prior
+ pp <-  GLMNETPrior("forest")
+ x <- distribution(background) |>
+  add_priors(pp)
+ # Remove again
+ x <- x |> rm_priors("forest")
 }
 }
 \seealso{

@@ -114,6 +114,7 @@ methods::setMethod(
 #' @param ... Variables passed on to prior object.
 #' @rdname INLAPriors
 #' @exportMethod INLAPriors
+#' @aliases INLAPriors
 #' @keywords priors
 #' @family prior
 #' @export

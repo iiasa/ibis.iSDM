@@ -35,6 +35,7 @@ NULL
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' * Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
 #' @family engine
+#' @aliases engine_stan
 #' @returns An engine.
 #' @examples
 #' \dontrun{
@@ -815,6 +816,12 @@ engine_stan <- function(x,
               plot(prediction[[c("mean","sd")]], col = ibis_colours$viridis_orig)
             }
             return(prediction)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
           },
           # Residual function
           get_residuals = function(self){

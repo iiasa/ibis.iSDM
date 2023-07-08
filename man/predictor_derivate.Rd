@@ -62,6 +62,6 @@ predictor_derivate(covs, option = "hinge", knots = 4)
 }
 }
 \seealso{
-predictor_derivate
+predictor_transform
 }
 \keyword{utils}

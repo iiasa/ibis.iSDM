@@ -17,6 +17,11 @@ NULL
 #' @references
 #' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
 #' @seealso [`Prior-class`] and [`GDBPrior`].
+#' @examples
+#' \dontrun{
+#'  pp <- XGBPrior("forest", "increasing")
+#' }
+#'
 #' @family prior
 #' @keywords priors
 #' @aliases XGBPrior
@@ -71,6 +76,7 @@ methods::setMethod(
 #' @rdname XGBPriors
 #' @exportMethod XGBPriors
 #' @inheritParams XGBPrior
+#' @aliases XGBPriors
 #' @family prior
 #' @keywords priors
 #' @export

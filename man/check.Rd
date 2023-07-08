@@ -31,13 +31,18 @@ Different checks are implemented depending on the supplied object
 \item \code{\link{BiodiversityDistribution}}
 }
 \itemize{
-\item 
+\item Checks if there are less than 200 observations
+\item TODO: Add rm_insufficient_covs link
 }
 \itemize{
 \item \code{\link{DistributionModel}}
 }
 \itemize{
-\item 
+\item Check model convergence
+\item Check if model is found
+\item Check if coefficients exist
+\item Check if there are unusal outliers in prediction (using 10median absolute deviation)
+\item Check if threshold is larger than layer
 }
 \itemize{
 \item \code{\link{BiodiversityScenario}}

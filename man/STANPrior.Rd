@@ -23,6 +23,12 @@ a Gaussian distribution on the respective coefficient.}
 Function to create a new prior for \link{engine_stan} models. Priors currently
 can be set on specific environmental predictors.
 }
+\examples{
+\dontrun{
+ pp <- STANPrior("forest", "normal", c(0,1))
+}
+
+}
 \references{
 \itemize{
 \item Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
@@ -31,7 +37,6 @@ can be set on specific environmental predictors.
 }
 \seealso{
 \code{\linkS4class{Prior}}.
-s
 
 Other prior: 
 \code{\link{BARTPriors}()},

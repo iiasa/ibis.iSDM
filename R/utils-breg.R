@@ -148,6 +148,7 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 #' @param w A [`numeric`] [`vector`] containing the exposure variables for PPMs. Can
 #' be \code{NULL} if the model is not a PPM.
 #' @returns A [`data.frame`] with the respective prediction.
+#' @aliases predict_boom
 #' @keywords utils, internal
 #' @noRd
 predict_boom <- function(obj, newdata, fam, params, w = NULL) {
