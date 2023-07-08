@@ -204,13 +204,12 @@ methods::setMethod(
                                template = threshold,
                                settings = pseudoabs_settings(background = threshold,nrpoints = nrow(df2)*2)) |>
           subset(subset = observed == 0)
-
-        abs <- list(); abs[[point_column]] <- o[[point_column]]
-        abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
-        abs[["pred"]] <- get_rastervalue(coords = o, env = prediction)[[layer]]
-        abs[["pred_tr"]] <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
-
-        df2 <- rbind(df2, as.data.frame(abs))
+        o$name <- dataset
+        o <- o[,which(names(o) %in% names(df2))]
+        o$pred <- get_rastervalue(coords = o, env = prediction)[[layer]]
+        o$pred_tr <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
+        o <- o |> sf::st_drop_geometry()
+        df2 <- rbind(df2, as.data.frame(o))
       }
       # Validate the threshold
       out <- try({.validatethreshold(df2 = df2, point_column = point_column, mod = mod,

@@ -1137,7 +1137,9 @@ engine_inlabru <- function(x,
                                                 proj4string = self$get_data('mesh')$crs
             )
             df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
-            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
+            suppressWarnings(
+              df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
+            )
 
             # Add all others as constant
             if(is.null(constant)){
