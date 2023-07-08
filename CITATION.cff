@@ -229,24 +229,33 @@ references:
   institution:
     name: R Foundation for Statistical Computing
 - type: software
-  title: posterior
-  abstract: 'posterior: Tools for Working with Posterior Distributions'
+  title: stats
+  abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
-  url: https://mc-stan.org/posterior/
-  repository: https://CRAN.R-project.org/package=posterior
   authors:
-  - family-names: Bürkner
-    given-names: Paul-Christian
-    email: paul.buerkner@gmail.com
-  - family-names: Gabry
-    given-names: Jonah
-    email: jsg2201@columbia.edu
-  - family-names: Kay
-    given-names: Matthew
-    email: mjskay@northwestern.edu
-  - family-names: Vehtari
-    given-names: Aki
-    email: Aki.Vehtari@aalto.fi
+  - name: R Core Team
+  location:
+    name: Vienna, Austria
+  year: '2023'
+  institution:
+    name: R Foundation for Statistical Computing
+- type: software
+  title: Matrix
+  abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
+  notes: Imports
+  url: https://R-forge.R-project.org/tracker/?atid=294&group_id=61
+  repository: https://CRAN.R-project.org/package=Matrix
+  authors:
+  - family-names: Bates
+    given-names: Douglas
+    orcid: https://orcid.org/0000-0001-8316-9503
+  - family-names: Maechler
+    given-names: Martin
+    email: mmaechler+Matrix@gmail.com
+    orcid: https://orcid.org/0000-0002-8685-9910
+  - family-names: Jagan
+    given-names: Mikael
+    orcid: https://orcid.org/0000-0002-3542-2938
   year: '2023'
 - type: software
   title: proto
@@ -304,17 +313,6 @@ references:
   year: '2023'
   version: '>= 0.5'
 - type: software
-  title: stats
-  abstract: 'R: A Language and Environment for Statistical Computing'
-  notes: Imports
-  authors:
-  - name: R Core Team
-  location:
-    name: Vienna, Austria
-  year: '2023'
-  institution:
-    name: R Foundation for Statistical Computing
-- type: software
   title: tibble
   abstract: 'tibble: Simple Data Frames'
   notes: Imports
@@ -343,6 +341,26 @@ references:
   - family-names: Ts'o
     given-names: Theodore
     email: tytso@thunk.org
+  year: '2023'
+- type: software
+  title: posterior
+  abstract: 'posterior: Tools for Working with Posterior Distributions'
+  notes: Imports
+  url: https://mc-stan.org/posterior/
+  repository: https://CRAN.R-project.org/package=posterior
+  authors:
+  - family-names: Bürkner
+    given-names: Paul-Christian
+    email: paul.buerkner@gmail.com
+  - family-names: Gabry
+    given-names: Jonah
+    email: jsg2201@columbia.edu
+  - family-names: Kay
+    given-names: Matthew
+    email: mjskay@northwestern.edu
+  - family-names: Vehtari
+    given-names: Aki
+    email: Aki.Vehtari@aalto.fi
   year: '2023'
 - type: software
   title: utils
@@ -732,24 +750,6 @@ references:
     email: hadley@posit.co
   year: '2023'
   version: '>= 3.0.0'
-- type: software
-  title: Matrix
-  abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
-  notes: Suggests
-  url: https://R-forge.R-project.org/tracker/?atid=294&group_id=61
-  repository: https://CRAN.R-project.org/package=Matrix
-  authors:
-  - family-names: Bates
-    given-names: Douglas
-    orcid: https://orcid.org/0000-0001-8316-9503
-  - family-names: Maechler
-    given-names: Martin
-    email: mmaechler+Matrix@gmail.com
-    orcid: https://orcid.org/0000-0002-8685-9910
-  - family-names: Jagan
-    given-names: Mikael
-    orcid: https://orcid.org/0000-0002-3542-2938
-  year: '2023'
 - type: software
   title: xgboost
   abstract: 'xgboost: Extreme Gradient Boosting'
