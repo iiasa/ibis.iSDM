@@ -607,6 +607,17 @@ references:
     given-names: Real
   year: '2023'
 - type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Suggests
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2023'
+- type: software
   title: progress
   abstract: 'progress: Terminal Progress Bars'
   notes: Suggests
