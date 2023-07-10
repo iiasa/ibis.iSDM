@@ -740,8 +740,8 @@ engine_stan <- function(x,
             if(plot){
               o <- pred_part
               pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
-                                                           ymin = mean-sd,
-                                                           ymax = mean+sd) ) +
+                                                           ymin = mean-stats::sd,
+                                                           ymax = mean+stats::sd) ) +
                 ggplot2::theme_classic() +
                 ggplot2::geom_ribbon(fill = "grey90") +
                 ggplot2::geom_line() +

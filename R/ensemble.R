@@ -546,7 +546,7 @@ methods::setMethod(
     if(method == 'mean'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                                   FUN = function(x = out[[layer]]) {
-                                    return(cbind( mean = stats::mean(x), sd = stats::sd(x)))
+                                    return(cbind( mean = mean(x), sd = stats::sd(x)))
                                     }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "mean", "sd")
     } else if(method == 'median'){

@@ -58,6 +58,7 @@ Suggests:
     knitr,
     mboost,
     modEvA,
+    ncmeta,
     progress,
     rmarkdown,
     rstan (>= 2.21.0),
