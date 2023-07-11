@@ -74,11 +74,11 @@ either on the fitted point data or any supplied independent.
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY, character, sf, character, character</span></span>
-<span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>, <span class="va">method</span>, <span class="va">point</span>, <span class="va">layer</span>, <span class="va">point_column</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY,character,sf,character,character</span></span>
+<span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>,<span class="va">method</span>,<span class="va">point</span>,<span class="va">layer</span>,<span class="va">point_column</span>,<span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for SpatRaster, character, sf, character</span></span>
-<span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>, <span class="va">method</span>, <span class="va">point</span>, <span class="va">point_column</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for SpatRaster,character,sf,character</span></span>
+<span><span class="fu">validate</span><span class="op">(</span><span class="va">mod</span>,<span class="va">method</span>,<span class="va">point</span>,<span class="va">point_column</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -136,11 +136,12 @@ depending on the output type.</p>
 <li><p><code>'sensitivity'</code> = Sensitivity, TBD</p></li>
 <li><p><code>'specificity'</code> = Specifivity, TBD</p></li>
 <li><p><code>'tss'</code> = True Skill Statistics, TBD</p></li>
-<li><p><code>'f1'</code> = F1 Score or Positive predictive value, TBD</p></li>
+<li><p><code>'f1'</code> = F1 Score or Positive predictive value, $$ \frac{2TP}{2TP + FP + FN} $$</p></li>
 <li><p><code>'logloss'</code> = Log loss, TBD</p></li>
-<li><p><code>'expected.accuracy'</code> = Expected Accuracy, TBD</p></li>
-<li><p><code>'kappa'</code> = Kappa value, TBD</p></li>
-<li><p><code>'brier.score'</code> = Brier score, TBD</p></li>
+<li><p><code>'expected.accuracy'</code> = Expected Accuracy, $$ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} $$</p></li>
+<li><p><code>'kappa'</code> = Kappa value, $$ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } $$,</p></li>
+<li><p><code>'brier.score'</code> = Brier score, $$ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} $$, where $y_i$ is predicted presence or absence and $x_i$ an observed.
+where TP is true positive, TN a true negative, FP the false positive and FN the false negative.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
