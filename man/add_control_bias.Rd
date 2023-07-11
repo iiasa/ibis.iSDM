@@ -6,7 +6,7 @@
 \usage{
 add_control_bias(x, layer, method = "partial", bias_value = NULL, add = TRUE)
 
-\S4method{add_control_bias}{BiodiversityDistribution, SpatRaster, character, ANY, logical}(x, layer, method, bias_value, add)
+\S4method{add_control_bias}{BiodiversityDistribution,SpatRaster,character,ANY,logical}(x,layer,method,bias_value,add)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

@@ -42,7 +42,7 @@ NULL
 #' @seealso [`Prior-class`].
 #' @keywords priors
 #' @family prior
-#' @aliases INLAPrior
+#' @aliases INLAPrior, Prior
 #' @name INLAPrior
 NULL
 
@@ -57,7 +57,7 @@ methods::setGeneric(
 
 #' @name INLAPrior
 #' @rdname INLAPrior
-#' @usage \S4method{INLAPrior}{character, character, ANY}(variable, type, hyper, ...)
+#' @usage \S4method{INLAPrior}{character,character,ANY}(variable,type,hyper,...)
 methods::setMethod(
   "INLAPrior",
   methods::signature(variable = "character", type = "character"),
@@ -125,7 +125,7 @@ methods::setGeneric(
 
 #' @name INLAPriors
 #' @rdname INLAPriors
-#' @usage \S4method{INLAPriors}{vector, character, ANY}(variables, type, hyper, ...)
+#' @usage \S4method{INLAPriors}{vector,character,ANY}(variables,type,hyper,...)
 methods::setMethod(
   "INLAPriors",
   methods::signature(variables = "vector", type = "character"),

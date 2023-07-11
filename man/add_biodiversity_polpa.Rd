@@ -23,7 +23,7 @@ add_biodiversity_polpa(
   ...
 )
 
-\S4method{add_biodiversity_polpa}{BiodiversityDistribution, sf}(x, polpa)
+\S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf}(x,polpa)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

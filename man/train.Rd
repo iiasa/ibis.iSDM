@@ -20,7 +20,7 @@ train(
   ...
 )
 
-\S4method{train}{BiodiversityDistribution, character, character, logical, logical, logical, character, logical, logical, logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose)
+\S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}

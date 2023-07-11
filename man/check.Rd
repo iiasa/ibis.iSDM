@@ -6,7 +6,7 @@
 \usage{
 check(obj, stoponwarning = FALSE)
 
-\S4method{check}{ANY, logical}(obj, stoponwarning)
+\S4method{check}{ANY,logical}(obj,stoponwarning)
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}

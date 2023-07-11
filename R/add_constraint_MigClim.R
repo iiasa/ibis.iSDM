@@ -61,7 +61,7 @@ methods::setGeneric("add_constraint_MigClim",
 
 #' @name add_constraint_MigClim
 #' @rdname add_constraint_MigClim
-#' @usage \S4method{add_constraint_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange,iniMatAge, propaguleProdProb, replicateNb, dtmp)
+#' @usage \S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
 methods::setMethod(
   "add_constraint_MigClim",
   methods::signature(mod = "BiodiversityScenario"),

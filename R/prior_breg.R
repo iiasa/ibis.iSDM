@@ -42,7 +42,7 @@ NULL
 #' }
 #' @family prior
 #' @keywords priors
-#' @aliases BREGPrior
+#' @aliases BREGPrior, Prior
 #' @name BREGPrior
 NULL
 
@@ -57,7 +57,7 @@ methods::setGeneric(
 
 #' @name BREGPrior
 #' @rdname BREGPrior
-#' @usage \S4method{BREGPrior}{character, ANY, ANY}(variable, hyper, ip)
+#' @usage \S4method{BREGPrior}{character,ANY,ANY}(variable,hyper,ip)
 methods::setMethod(
   "BREGPrior",
   methods::signature(variable = "character"),
@@ -109,7 +109,7 @@ methods::setGeneric(
 
 #' @name BREGPriors
 #' @rdname BREGPriors
-#' @usage \S4method{BREGPriors}{character, ANY, ANY}(variable, hyper, ip)
+#' @usage \S4method{BREGPriors}{character,ANY,ANY}(variable,hyper,ip)
 methods::setMethod(
   "BREGPriors",
   methods::signature(variable = "character"),

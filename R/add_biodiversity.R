@@ -63,7 +63,7 @@ methods::setGeneric(
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
-#' @usage \S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf, ANY, character, ANY, character, ANY, numeric, logical, logical, ANY}(x, poipo,name, field_occurrence, formula, family, link, weight, separate_intercept, docheck, pseudoabsence_settings, ...)
+#' @usage \S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,logical,ANY}(x,poipo,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
@@ -192,7 +192,7 @@ methods::setGeneric(
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
-#' @usage \S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf, character, character, ANY, character, character,numeric, logical, logical}(x, poipa, name, field_occurrence, formula, family,link, weight, separate_intercept, docheck)
+#' @usage \S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf,character,character,ANY,character,character,numeric,logical,logical}(x,poipa,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck)
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
@@ -322,7 +322,7 @@ methods::setGeneric(
 
 #' @name add_biodiversity_polpo
 #' @rdname add_biodiversity_polpo
-#' @usage \S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf, ANY, character, ANY, character, ANY, numeric, logical, numeric, ANY, character, logical, logical, ANY}(x, polpo,name, field_occurrence, formula, family, link, weight, simulate, simulate_points, simulate_bias, simulate_strategy,separate_intercept, docheck, pseudoabsence_settings, ...)
+#' @usage \S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpo,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
@@ -498,7 +498,7 @@ methods::setGeneric(
 
 #' @name add_biodiversity_polpa
 #' @rdname add_biodiversity_polpa
-#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution, sf}(x, polpa)
+#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf}(x,polpa)
 methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),

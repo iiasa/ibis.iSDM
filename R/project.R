@@ -77,7 +77,7 @@ project.BiodiversityScenario <- function(x,...) project(x,...)
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
+#' @usage \S4method{project}{BiodiversityScenario,character,logical,character,character}(mod,date_interpolation,stabilize,stabilize_method,layer)
 methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),

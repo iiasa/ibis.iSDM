@@ -80,7 +80,7 @@ methods::setGeneric("add_constraint",
 
 #' @name add_constraint
 #' @rdname add_constraint
-#' @usage \S4method{add_constraint}{BiodiversityScenario, character}(mod, method)
+#' @usage \S4method{add_constraint}{BiodiversityScenario,character}(mod,method)
 methods::setMethod(
   "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
@@ -137,7 +137,7 @@ methods::setGeneric("add_constraint_dispersal",
 
 #' @name add_constraint_dispersal
 #' @rdname add_constraint_dispersal
-#' @usage \S4method{add_constraint_dispersal}{BiodiversityScenario, character, numeric}(mod, method, value)
+#' @usage \S4method{add_constraint_dispersal}{BiodiversityScenario,character,numeric}(mod,method,value)
 methods::setMethod(
   "add_constraint_dispersal",
   methods::signature(mod = "BiodiversityScenario"),
@@ -369,7 +369,7 @@ methods::setGeneric("add_constraint_connectivity",
 
 #' @name add_constraint_connectivity
 #' @rdname add_constraint_connectivity
-#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, ANY}(mod, method, value, resistance)
+#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario,character,numeric,ANY}(mod,method,value,resistance)
 methods::setMethod(
   "add_constraint_connectivity",
   methods::signature(mod = "BiodiversityScenario"),
@@ -478,7 +478,7 @@ methods::setGeneric("add_constraint_adaptability",
 
 #' @name add_constraint_adaptability
 #' @rdname add_constraint_adaptability
-#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
+#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
 methods::setMethod(
   "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
@@ -611,7 +611,7 @@ methods::setGeneric("add_constraint_boundary",
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "sf"),
@@ -644,7 +644,7 @@ methods::setMethod(
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "ANY"),

@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_bart.R
 \name{BARTPriors}
 \alias{BARTPriors}
+\alias{BARTPriors,}
+\alias{Prior}
 \title{Helper function when multiple variables are supplied for a BART prior}
 \usage{
 BARTPriors(variable, hyper = 0.75, ...)
 
-\S4method{BARTPriors}{character, numeric}(variable, hyper, ...)
+\S4method{BARTPriors}{character,numeric}(variable,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}

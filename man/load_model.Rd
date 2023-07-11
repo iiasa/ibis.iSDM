@@ -4,7 +4,7 @@
 \alias{load_model}
 \title{Load a pre-computed model}
 \usage{
-\S4method{load_model}{character, logical}(fname, verbose)
+\S4method{load_model}{character,logical}(fname,verbose)
 }
 \arguments{
 \item{fname}{A \code{\link{character}} depicting an output filename.}

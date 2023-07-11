@@ -104,7 +104,7 @@ methods::setGeneric(
 
 #' @name bivplot
 #' @rdname bivplot
-#' @usage \S4method{bivplot}{ANY, character, character, logical, ANY, ANY, character}(mod, xvar, yvar, plot, fname, title, col, ...)
+#' @usage \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),

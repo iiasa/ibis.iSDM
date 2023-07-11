@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPrior}
 \alias{XGBPrior}
+\alias{XGBPrior,}
+\alias{Prior}
 \title{Create a new monotonic prior for boosted regressions}
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)
 
-\S4method{XGBPrior}{character, character}(variable, hyper, ...)
+\S4method{XGBPrior}{character,character}(variable,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}

@@ -15,7 +15,7 @@ bivplot(
   ...
 )
 
-\S4method{bivplot}{ANY, character, character, logical, ANY, ANY, character}(mod, xvar, yvar, plot, fname, title, col, ...)
+\S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 }
 \arguments{
 \item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object with \code{prediction} model within.}

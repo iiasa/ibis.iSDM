@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_glmnet.R
 \name{GLMNETPrior}
 \alias{GLMNETPrior}
+\alias{GLMNETPrior,}
+\alias{Prior}
 \title{Regression penalty priors for GLMNET}
 \usage{
 GLMNETPrior(variable, hyper = 0, lims = c(-Inf, Inf), ...)
 
-\S4method{GLMNETPrior}{character, numeric, ANY}(variable, hyper, lims, ...)
+\S4method{GLMNETPrior}{character,numeric,ANY}(variable,hyper,lims,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} variable passed on to the prior object.}

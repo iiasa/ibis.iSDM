@@ -87,7 +87,7 @@ methods::setGeneric("pseudoabs_settings",
 
 #' @name pseudoabs_settings
 #' @rdname pseudoabs_settings
-#' @usage \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, logical ANY}(background, nrpoints, min_ratio, method, buffer_distance, inside, layer, bias)
+#' @usage \S4method{pseudoabs_settings}{ANY,numeric,numeric,character,numeric,logical,logical,ANY}(background,nrpoints,min_ratio,method,buffer_distance,inside,layer,bias,...)
 methods::setMethod(
   "pseudoabs_settings",
   methods::signature(background = "ANY"),

@@ -68,7 +68,7 @@ methods::setGeneric(
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{ANY, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold, ...)
+#' @usage \S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
@@ -196,7 +196,7 @@ methods::setMethod(
 
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{SpatRaster, character, ANY, ANY, character, logical, logical}(obj, method, value, point, format, return_threshold, plot)
+#' @usage \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical,logical}(obj,method,value,point,format,return_threshold,plot)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
@@ -354,7 +354,7 @@ methods::setMethod(
 #' @inheritParams threshold
 #' @param tr A [`numeric`] value specifying the specific threshold for scenarios.
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario, ANY}(obj, tr, ...)
+#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),

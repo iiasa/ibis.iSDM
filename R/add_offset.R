@@ -52,7 +52,7 @@ methods::setGeneric(
 
 #' @name add_offset
 #' @rdname add_offset
-#' @usage \S4method{add_offset}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_offset}{BiodiversityDistribution,SpatRaster}(x,layer)
 methods::setMethod(
   "add_offset",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -126,7 +126,7 @@ methods::setGeneric(
 
 #' @name rm_offset
 #' @rdname rm_offset
-#' @usage \S4method{rm_offset}{BiodiversityDistribution, character}(x, layer)
+#' @usage \S4method{rm_offset}{BiodiversityDistribution,character}(x,layer)
 methods::setMethod(
   "rm_offset",
   methods::signature(x = "BiodiversityDistribution", layer = "character"),
@@ -203,7 +203,7 @@ methods::setGeneric(
 
 #' @name add_offset_bias
 #' @rdname add_offset_bias
-#' @usage \S4method{add_offset_bias}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster}(x,layer)
 methods::setMethod(
   "add_offset_bias",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -341,7 +341,7 @@ methods::setGeneric(
 #' Function for when raster is directly supplied (precomputed)
 #' @name add_offset_range
 #' @rdname add_offset_range
-#' @usage \S4method{add_offset_range}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_offset_range}{BiodiversityDistribution,SpatRaster}(x,layer)
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -397,7 +397,7 @@ methods::setMethod(
 
 #' @name add_offset_range
 #' @rdname add_offset_range
-#' @usage \S4method{add_offset_range}{BiodiversityDistribution, sf}(x, layer)
+#' @usage \S4method{add_offset_range}{BiodiversityDistribution,sf}(x,layer)
 methods::setMethod(
   "add_offset_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
@@ -797,7 +797,7 @@ methods::setGeneric(
 
 #' @name add_offset_elevation
 #' @rdname add_offset_elevation
-#' @usage \S4method{add_offset_elevation}{BiodiversityDistribution, SpatRaster, numeric}(x, elev, pref)
+#' @usage \S4method{add_offset_elevation}{BiodiversityDistribution,SpatRaster,numeric}(x,elev,pref)
 methods::setMethod(
   "add_offset_elevation",
   methods::signature(x = "BiodiversityDistribution", elev = "SpatRaster", pref = "numeric"),

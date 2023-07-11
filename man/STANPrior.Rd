@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_stan.R
 \name{STANPrior}
 \alias{STANPrior}
+\alias{STANPrior,}
+\alias{Prior}
 \title{Create a new STAN prior}
 \usage{
 STANPrior(variable, type, hyper = c(0, 2), ...)
 
-\S4method{STANPrior}{character, character, ANY}(variable, type, hyper, ...)
+\S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}

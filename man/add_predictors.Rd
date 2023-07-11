@@ -19,15 +19,15 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection, ANY, character, character, numeric, ANY, logical, logical, logical, ANY}(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityScenario, SpatRaster, ANY, character, character, numeric, ANY, logical}(x, env, names, transform, derivates, derivate_knots, int_variables, harmonize_na, ...)
+\S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 
-\S4method{add_predictors}{BiodiversityScenario, stars, ANY, character, character, numeric, ANY, logical}(x, env,names, transform, derivates, derivate_knots, int_variables, harmonize_na, ...)
+\S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

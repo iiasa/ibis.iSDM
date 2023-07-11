@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPrior}
 \alias{GDBPrior}
+\alias{GDBPrior,}
+\alias{Prior}
 \title{Monotonic constrained priors for boosted regressions}
 \usage{
 GDBPrior(variable, hyper = "increasing", ...)
 
-\S4method{GDBPrior}{character, character}(variable, hyper, ...)
+\S4method{GDBPrior}{character,character}(variable,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors variables.}

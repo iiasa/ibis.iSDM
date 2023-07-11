@@ -29,11 +29,13 @@
 #' * \code{'sensitivity'} = Sensitivity, TBD
 #' * \code{'specificity'} = Specifivity, TBD
 #' * \code{'tss'} = True Skill Statistics, TBD
-#' * \code{'f1'} = F1 Score or Positive predictive value, TBD
+#' * \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
 #' * \code{'logloss'} = Log loss, TBD
-#' * \code{'expected.accuracy'} = Expected Accuracy, TBD
-#' * \code{'kappa'} = Kappa value, TBD
-#' * \code{'brier.score'} = Brier score, TBD
+#' * \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
+#' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
+#' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
+#' where TP is true positive, TN a true negative, FP the false positive and FN the false negative.
+
 #'
 #' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
 #' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.
@@ -70,7 +72,7 @@ methods::setGeneric("validate",
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
+#' @usage \S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "ANY"),
@@ -225,7 +227,7 @@ methods::setMethod(
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{SpatRaster, character, sf, character}(mod, method, point, point_column)
+#' @usage \S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "SpatRaster"),

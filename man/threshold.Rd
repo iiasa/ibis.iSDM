@@ -14,11 +14,11 @@ threshold(
   ...
 )
 
-\S4method{threshold}{ANY, character, numeric, ANY, character, logical}(obj, method, value, point, format, return_threshold, ...)
+\S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 
-\S4method{threshold}{SpatRaster, character, ANY, ANY, character, logical, logical}(obj, method, value, point, format, return_threshold, plot)
+\S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical,logical}(obj,method,value,point,format,return_threshold,plot)
 
-\S4method{threshold}{BiodiversityScenario, ANY}(obj, tr, ...)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
 }
 \arguments{
 \item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}

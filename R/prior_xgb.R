@@ -24,7 +24,7 @@ NULL
 #'
 #' @family prior
 #' @keywords priors
-#' @aliases XGBPrior
+#' @aliases XGBPrior, Prior
 #' @name XGBPrior
 NULL
 
@@ -39,7 +39,7 @@ methods::setGeneric(
 
 #' @name XGBPrior
 #' @rdname XGBPrior
-#' @usage \S4method{XGBPrior}{character, character}(variable, hyper, ...)
+#' @usage \S4method{XGBPrior}{character,character}(variable,hyper,...)
 methods::setMethod(
   "XGBPrior",
   methods::signature(variable = "character", hyper = "character"),
@@ -87,7 +87,7 @@ methods::setGeneric(
 
 #' @name XGBPriors
 #' @rdname XGBPriors
-#' @usage \S4method{XGBPriors}{character, character}(variable, hyper, ...)
+#' @usage \S4method{XGBPriors}{character,character}(variable,hyper,...)
 methods::setMethod(
   "XGBPriors",
   methods::signature(variable = "character"),

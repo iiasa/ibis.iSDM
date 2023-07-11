@@ -4,7 +4,7 @@
 \alias{add_constraint_connectivity}
 \title{Adds a connectivity constraint to a scenario object.}
 \usage{
-\S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, ANY}(mod, method, value, resistance)
+\S4method{add_constraint_connectivity}{BiodiversityScenario,character,numeric,ANY}(mod,method,value,resistance)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

@@ -4,7 +4,7 @@
 \alias{ensemble}
 \title{Function to create an ensemble of multiple fitted models}
 \usage{
-\S4method{ensemble}{ANY, character, numeric, numeric, character, logical, character}(..., method, weights, min.value, layer, normalize, uncertainty)
+\S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects.}

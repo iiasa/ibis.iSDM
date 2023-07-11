@@ -4,7 +4,7 @@
 \alias{write_summary}
 \title{Generic function to write summary outputs from created models.}
 \usage{
-\S4method{write_summary}{ANY, character, logical, logical}(mod, fname, partial, verbose)
+\S4method{write_summary}{ANY,character,logical,logical}(mod,fname,partial,verbose,...)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}

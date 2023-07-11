@@ -46,6 +46,7 @@ test_that('Scenarios and constraints', {
   test <- raster_to_stars(pred_current)
   expect_length(test, 9)
   expect_equal(names(test), names(pred_current))
+  expect_length(stars::st_get_dimension_values(test,"time"), 1)
 
   # Basic validity checks
   expect_length(pred_future, 9)

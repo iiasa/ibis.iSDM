@@ -9,7 +9,7 @@
 \usage{
 \method{project}{BiodiversityScenario}(x, ...)
 
-\S4method{project}{BiodiversityScenario, character, logical, character, character}(mod, date_interpolation, stabilize, stabilize_method, layer)
+\S4method{project}{BiodiversityScenario,character,logical,character,character}(mod,date_interpolation,stabilize,stabilize_method,layer)
 }
 \arguments{
 \item{x}{A \code{\link{BiodiversityScenario}} object with set predictors.

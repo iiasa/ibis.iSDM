@@ -4,15 +4,15 @@
 \alias{write_output}
 \title{Generic function to write spatial outputs}
 \usage{
-\S4method{write_output}{ANY, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
 
-\S4method{write_output}{BiodiversityScenario, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
 
-\S4method{write_output}{SpatRaster, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
 
-\S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
 
-\S4method{write_output}{stars, character, character, logical}(mod, fname, dt, verbose)
+\S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{terra}} or \code{\link{stars}} object.}

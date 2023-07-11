@@ -6,7 +6,7 @@
 \usage{
 rm_predictors(x, names)
 
-\S4method{rm_predictors}{BiodiversityDistribution, ANY}(x, names)
+\S4method{rm_predictors}{BiodiversityDistribution,ANY}(x,names)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

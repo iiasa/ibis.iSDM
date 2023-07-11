@@ -2,11 +2,13 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPrior}
 \alias{BREGPrior}
+\alias{BREGPrior,}
+\alias{Prior}
 \title{Create a new spike and slab prior for Bayesian generalized linear models}
 \usage{
 BREGPrior(variable, hyper = NULL, ip = NULL)
 
-\S4method{BREGPrior}{character, ANY, ANY}(variable, hyper, ip)
+\S4method{BREGPrior}{character,ANY,ANY}(variable,hyper,ip)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors.}

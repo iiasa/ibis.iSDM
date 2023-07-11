@@ -55,7 +55,7 @@ methods::setGeneric(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution, character}(x, fname)
+#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution", fname = "character"),
@@ -169,7 +169,7 @@ methods::setMethod(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario, character}(x, fname)
+#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityScenario", fname = "character"),

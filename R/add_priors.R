@@ -36,7 +36,7 @@ methods::setGeneric(
 
 #' @name add_priors
 #' @rdname add_priors
-#' @usage \S4method{add_priors}{BiodiversityDistribution, ANY}(x, priors, ...)
+#' @usage \S4method{add_priors}{BiodiversityDistribution,ANY}(x,priors,...)
 methods::setMethod(
   "add_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -70,7 +70,7 @@ methods::setGeneric(
 #' @inherit add_priors
 #' @inheritParams add_priors
 #' @keywords deprecated
-#' @usage \S4method{set_priors}{BiodiversityDistribution, ANY}(x, priors, ...)
+#' @usage \S4method{set_priors}{BiodiversityDistribution,ANY}(x,priors,...)
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -116,7 +116,7 @@ methods::setGeneric(
 
 #' @name rm_priors
 #' @rdname rm_priors
-#' @usage \S4method{rm_priors}{BiodiversityDistribution, ANY}(x, names, ...)
+#' @usage \S4method{rm_priors}{BiodiversityDistribution,ANY}(x,names,...)
 methods::setMethod(
   "rm_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -170,7 +170,7 @@ methods::setGeneric(
 
 #' @name get_priors
 #' @rdname get_priors
-#' @usage \S4method{get_priors}{ANY, character}(mod, target_engine, ...)
+#' @usage \S4method{get_priors}{ANY,character}(mod,target_engine,...)
 methods::setMethod(
   "get_priors",
   methods::signature(mod = "ANY", target_engine = "character"),

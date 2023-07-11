@@ -273,6 +273,8 @@ raster_to_stars <- function(obj){
   new_env <- list()
   for(i in 1:terra::nlyr(obj)){
     oo <- subset(obj, i)
+    # Check if times are unique
+    if(length(unique(times))==1) terra::time(oo) <- NULL
     suppressWarnings(  o <- stars::st_as_stars(oo) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj

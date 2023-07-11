@@ -96,7 +96,7 @@ methods::setGeneric("distribution",
                     function(background, limits = NULL, limits_method = "none", mcp_buffer = 0,limits_clip = FALSE) standardGeneric("distribution"))
 
 #' @name distribution
-#' @usage \S4method{distribution}{SpatRaster, ANY, character, numeric, logical}(background, limits, limits_method, mcp_buffer,limits_clip)
+#' @usage \S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -121,7 +121,7 @@ methods::setMethod(
   })
 
 #' @name distribution
-#' @usage \S4method{distribution}{sf, ANY, character, numeric, logical}(background, limits, limits_method, mcp_buffer, limits_clip)
+#' @usage \S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
