@@ -645,7 +645,8 @@ engine_xgboost <- function(x,
             if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")
             mod <- self$get_data('fit_best')
-            df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
+            model <- self$model
+            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
 
             # Match x.var to argument
@@ -653,6 +654,14 @@ engine_xgboost <- function(x,
               x.var <- colnames(df)
             } else {
               x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
+            }
+
+            # Calculate range of predictors
+            if(any(model$predictors_types$type=="factor")){
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            } else {
+              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
 
             # if values are set, make sure that they cover the data.frame
@@ -668,7 +677,11 @@ engine_xgboost <- function(x,
               df2 <- df2 |> as.data.frame()
               df2 <- df2[, mod$feature_names]
             } else {
-              df2 <- df
+              df2 <- list()
+              for(i in x.var) {
+                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+              }
+              df2 <- do.call(cbind, df2); names(df2) <- x.var
             }
 
             # Check that variables are in

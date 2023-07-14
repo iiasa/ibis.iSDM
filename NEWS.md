@@ -1,6 +1,7 @@
 # ibis.iSDM 0.0.6 (current dev branch)
 
 #### New features
+* `partial_density` function implemented  #57
 * Re-specification of limits with implementation of minimum convex polygon limits to `distribution`.
 * Added `check` function for assessing assumptions and fits for various objects #45
 

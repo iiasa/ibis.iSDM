@@ -773,18 +773,23 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
                     } else {
                       o <- sf::st_coordinates( guess_sf( z )[,1:2])
                       colnames(o) <- c("x", "y")
-                      o <- as.matrix(o)
+                      o <- as.data.frame(o)
+                      o[[point_column]] <- z[,point_column]
+                      o[["type"]] <- x$type
                     }
-                    if(addName) o$name <- x$name
+                    if(addName) suppressWarnings( o$name <- x$name )
                     return(o)
                     }
                   )
   # Combine
   locs <- do.call(rbind, locs)
+  # Remove rownames
+  locs <- locs |> tibble::remove_rownames()
 
   if(!tosf){
     assertthat::assert_that(
-      is.matrix(locs), nrow(locs)>1
+      is.matrix(locs) || is.data.frame(locs),
+      utils::hasName(locs, point_column)
     )
   } else {
     assertthat::assert_that(inherits(locs, "sf"))
@@ -793,7 +798,6 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
         locs <- locs |> sf::st_set_crs(value = sf::st_crs(model$background))
       )
     }
-    locs <- locs |> tibble::remove_rownames()
   }
   return(locs)
 }

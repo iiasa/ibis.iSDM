@@ -608,12 +608,21 @@ engine_gdb <- function(x,
             }
 
             # Now predict with model
-            pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
-                                         which = x.var,
-                                         type = type, aggregate = 'sum')
-            # Combine with
-            out <- data.frame(partial_effect = dummy[[x.var]],
-                              mean = pp[,grep(x.var, colnames(pp))] )
+            suppressWarnings(
+              pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
+                                           which = x.var,
+                                           type = type, aggregate = 'sum')
+            )
+            # Check duplicates. If bbs is present and non-linear, use bbs estimate
+            if(!self$settings$data$only_linear){
+              # Combine with
+              out <- data.frame(partial_effect = dummy[[x.var]],
+                                mean = pp[,grep("bbs", colnames(pp))] )
+            } else {
+              # Combine with
+              out <- data.frame(partial_effect = dummy[[x.var]],
+                                mean = pp[,grep(x.var, colnames(pp))] )
+            }
 
             # If plot, make plot, otherwise
             if(plot){

@@ -201,7 +201,9 @@ engine_inla <- function(x,
         # Try and infer mesh parameters if not set
 
         # Get all coordinates of observations
-        locs <- collect_occurrencepoints(model, include_absences = FALSE)
+        locs <- collect_occurrencepoints(model, include_absences = FALSE,
+                                         tosf = FALSE)
+        locs <- locs[,c("x","y")]# Get only the coordinates
 
         assertthat::assert_that(
           nrow(locs)>0, ncol(locs)==2

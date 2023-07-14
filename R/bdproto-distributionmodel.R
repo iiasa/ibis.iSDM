@@ -216,7 +216,7 @@ DistributionModel <- bdproto(
       if(format == "normalize"){
         col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(100)
       } else if(format == "percentile") {
-        col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(length(unique(ras)))
+        col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(length(unique(ras)[,1]))
       } else {
         # Binary
         col <- c("grey", "black")

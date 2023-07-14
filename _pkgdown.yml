@@ -108,6 +108,7 @@ reference:
       - effects
       - partial
       - spartial
+      - partial_density
       - threshold
       - ensemble
       - ensemble_partial
