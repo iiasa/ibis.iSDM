@@ -184,6 +184,7 @@ engine_inlabru <- function(x,
 
         # Get all coordinates of observations
         locs <- collect_occurrencepoints(model, include_absences = FALSE)
+        locs <- locs[,c("x","y")] # Take only the coordinates
 
         # Try and infer mesh parameters if not set
         if(is.null(params$max.edge)){
