@@ -95,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-07-11</h4>
+            <h4 data-toc-skip class="date">2023-07-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/07_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/07_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>07_frequently-asked-questions.Rmd</code></div>
@@ -109,7 +109,7 @@ Jung</h4>
 <p>This document contains a series of frequently asked questions when
 using the <code>ibis.iSDM</code> package and is a work in progress.</p>
 <div class="section level3">
-<h3 id="data-preparation">Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
+<h3 id="data-and-model-preparation">Data and model preparation<a class="anchor" aria-label="anchor" href="#data-and-model-preparation"></a>
 </h3>
 <details><summary><b>What are the necessary data preparation steps for
 <code>ibis.iSDM</code> ?</b>
@@ -173,6 +173,14 @@ the first article on this website. For example it is possible to define
 pseudo-absence sampling in specific spatial formats, such as sampling
 within or outside a minimum convex polygon (MCP) of all presence points
 or within a certain buffer.</p>
+</details><details><summary><b> The package seem to have many suggested dependencies. Is there a way
+to install them all?</b>
+</summary><p>Yes, the ibis.iSDM package uses a range of different functionalities
+from other, existing packages and if these functions are required for a
+specific purpose, the packages in question should be installed.</p>
+<p>An easy convenience functions to install all packages is
+<code><a href="../reference/ibis_dependencies.html">ibis_dependencies()</a></code> which installs all the packages listed
+in <code>getOption("ibis.dependencies")</code>.</p>
 </details>
 </div>
 <div class="section level3">
