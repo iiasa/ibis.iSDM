@@ -111,17 +111,17 @@ stores a threshold attribute in the created <a href="scenario.html">scenario</a>
 <span><span class="co"># S4 method for ANY,character,numeric,ANY,character,logical</span></span>
 <span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span>,<span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for SpatRaster,character,ANY,ANY,character,logical,logical</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span>,<span class="va">plot</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for SpatRaster,character,ANY,ANY,character,logical</span></span>
+<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityScenario,ANY</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">tr</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">tr</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>obj</dt>
-<dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object.</p></dd>
+<dd><p>A <a href="BiodiversityScenario-class.html">BiodiversityScenario</a> object to which an existing threshold is to be added.</p></dd>
 
 
 <dt>method</dt>
@@ -150,7 +150,7 @@ formatted thresholds are to be created (Default: <code>"binary"</code>). Also se
 
 
 <dt>tr</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying the specific threshold for scenarios.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying the specific threshold for scenarios (Default: Grab from object).</p></dd>
 
 </dl></div>
     <div class="section level2">

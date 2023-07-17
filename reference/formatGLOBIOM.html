@@ -77,6 +77,8 @@ Likely of little use for anyone outside IIASA.</p>
 <span>  ignore <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  period <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  shares_to_area <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_gdalutils <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"ibis.setupmessages"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -103,6 +105,14 @@ and <code>"all"</code> for all entries (Default: <code>"reference"</code>).</p><
 
 <dt>template</dt>
 <dd><p>An optional <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object towards which projects should be transformed.</p></dd>
+
+
+<dt>shares_to_area</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on whether shares should be corrected to areas (if identified).</p></dd>
+
+
+<dt>use_gdalutils</dt>
+<dd><p>(Deprecated) <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on to use gdalutils hack around.</p></dd>
 
 
 <dt>verbose</dt>
