@@ -16,12 +16,12 @@ threshold(
 
 \S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 
-\S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical,logical}(obj,method,value,point,format,return_threshold,plot)
+\S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 
-\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
 }
 \arguments{
-\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
+\item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is to be added.}
 
 \item{method}{A specifc method for thresholding. See details for available options.}
 
@@ -36,7 +36,7 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 
 \item{...}{other parameters not yet set.}
 
-\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios.}
+\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: Grab from object).}
 }
 \value{
 A \link{SpatRaster} if a \link{SpatRaster} object as input.

@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_inla.R
 \name{INLAPrior}
 \alias{INLAPrior}
-\alias{INLAPrior,}
-\alias{Prior}
 \title{Create a new INLA prior}
 \usage{
 INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)

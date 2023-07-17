@@ -196,11 +196,11 @@ methods::setMethod(
 
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical,logical}(obj,method,value,point,format,return_threshold,plot)
+#' @usage \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
-  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
+  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'SpatRaster'),
                             is.character(method),
@@ -289,7 +289,7 @@ methods::setMethod(
           opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
                                     measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
                                                  "Sensitivity","Specificity"),
-                                    optimize = "each", plot = plot)
+                                    optimize = "each", plot = FALSE)
         )
         if(method %in% opt$optimals.each$measure){
           tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
@@ -351,14 +351,14 @@ methods::setMethod(
 #' Thresholds in scenario estimation
 #'
 #' @name threshold
-#' @inheritParams threshold
-#' @param tr A [`numeric`] value specifying the specific threshold for scenarios.
+#' @param obj A [BiodiversityScenario] object to which an existing threshold is to be added.
+#' @param tr A [`numeric`] value specifying the specific threshold for scenarios (Default: Grab from object).
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
+#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, tr = new_waiver(), ...) {
+  function(obj, tr = new_waiver()) {
 
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )

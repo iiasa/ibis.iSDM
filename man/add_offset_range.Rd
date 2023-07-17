@@ -18,9 +18,9 @@ add_offset_range(
   add = TRUE
 )
 
-\S4method{add_offset_range}{BiodiversityDistribution,SpatRaster}(x,layer)
+\S4method{add_offset_range}{BiodiversityDistribution,SpatRaster,ANY,logical}(x,layer,fraction,add)
 
-\S4method{add_offset_range}{BiodiversityDistribution,sf}(x,layer)
+\S4method{add_offset_range}{BiodiversityDistribution,sf,numeric,character,numeric,logical,character,character,ANY,ANY,logical}(x,layer,distance_max,family,presence_prop,distance_clip,distance_function,field_occurrence,fraction,point,add)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

@@ -498,7 +498,7 @@ methods::setGeneric(
 
 #' @name add_biodiversity_polpa
 #' @rdname add_biodiversity_polpa
-#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf}(x,polpa)
+#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpa,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),

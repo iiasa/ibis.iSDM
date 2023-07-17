@@ -38,7 +38,7 @@ NULL
 #' }
 #' @keywords priors
 #' @family prior
-#' @aliases GLMNETPrior, Prior
+#' @aliases GLMNETPrior
 #' @name GLMNETPrior
 NULL
 

@@ -24,7 +24,7 @@ NULL
 #'
 #' @family prior
 #' @keywords priors
-#' @aliases XGBPrior, Prior
+#' @aliases XGBPrior
 #' @name XGBPrior
 NULL
 

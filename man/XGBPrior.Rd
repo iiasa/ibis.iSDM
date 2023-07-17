@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPrior}
 \alias{XGBPrior}
-\alias{XGBPrior,}
-\alias{Prior}
 \title{Create a new monotonic prior for boosted regressions}
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)

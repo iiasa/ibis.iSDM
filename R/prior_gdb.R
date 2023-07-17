@@ -23,7 +23,7 @@ NULL
 #' @seealso [`Prior-class`], [`XGBPrior`]
 #' @keywords priors
 #' @family prior
-#' @aliases GDBPrior, Prior
+#' @aliases GDBPrior
 #' @name GDBPrior
 NULL
 

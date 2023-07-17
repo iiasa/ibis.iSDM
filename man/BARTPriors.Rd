@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_bart.R
 \name{BARTPriors}
 \alias{BARTPriors}
-\alias{BARTPriors,}
-\alias{Prior}
 \title{Helper function when multiple variables are supplied for a BART prior}
 \usage{
 BARTPriors(variable, hyper = 0.75, ...)

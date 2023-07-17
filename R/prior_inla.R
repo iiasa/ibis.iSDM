@@ -42,7 +42,7 @@ NULL
 #' @seealso [`Prior-class`].
 #' @keywords priors
 #' @family prior
-#' @aliases INLAPrior, Prior
+#' @aliases INLAPrior
 #' @name INLAPrior
 NULL
 

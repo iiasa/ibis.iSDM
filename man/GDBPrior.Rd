@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPrior}
 \alias{GDBPrior}
-\alias{GDBPrior,}
-\alias{Prior}
 \title{Monotonic constrained priors for boosted regressions}
 \usage{
 GDBPrior(variable, hyper = "increasing", ...)

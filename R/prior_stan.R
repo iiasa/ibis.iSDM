@@ -24,7 +24,7 @@ NULL
 #'
 #' @family prior
 #' @keywords priors
-#' @aliases STANPrior, Prior
+#' @aliases STANPrior
 #' @name STANPrior
 NULL
 

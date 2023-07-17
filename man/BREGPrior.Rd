@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPrior}
 \alias{BREGPrior}
-\alias{BREGPrior,}
-\alias{Prior}
 \title{Create a new spike and slab prior for Bayesian generalized linear models}
 \usage{
 BREGPrior(variable, hyper = NULL, ip = NULL)

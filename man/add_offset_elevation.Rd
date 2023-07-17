@@ -6,7 +6,7 @@
 \usage{
 add_offset_elevation(x, elev, pref, rate = 0.0089, add = TRUE)
 
-\S4method{add_offset_elevation}{BiodiversityDistribution,SpatRaster,numeric}(x,elev,pref)
+\S4method{add_offset_elevation}{BiodiversityDistribution,SpatRaster,numeric,numeric,logical}(x,elev,pref,rate,add)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

@@ -2,8 +2,6 @@
 % Please edit documentation in R/prior_stan.R
 \name{STANPrior}
 \alias{STANPrior}
-\alias{STANPrior,}
-\alias{Prior}
 \title{Create a new STAN prior}
 \usage{
 STANPrior(variable, type, hyper = c(0, 2), ...)

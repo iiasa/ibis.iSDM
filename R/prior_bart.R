@@ -77,7 +77,7 @@ methods::setMethod(
 #' @rdname BARTPriors
 #' @exportMethod BARTPriors
 #' @inheritParams BARTPrior
-#' @aliases BARTPriors, Prior
+#' @aliases BARTPriors
 #' @family prior
 #' @keywords priors
 #' @export

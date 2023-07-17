@@ -42,7 +42,7 @@ NULL
 #' }
 #' @family prior
 #' @keywords priors
-#' @aliases BREGPrior, Prior
+#' @aliases BREGPrior
 #' @name BREGPrior
 NULL
 

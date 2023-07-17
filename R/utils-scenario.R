@@ -422,6 +422,49 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   return(out)
 }
 
+#' Duplicate a provided stars raster
+#'
+#' @description
+#' This function duplicates a provded [`stars`] object along a given dimension (usually time).
+#' This can be useful for simply multiplication tasks, e.g. multiplying every attribute by another
+#' stars object that needs to have the same dimensions.
+#' @param obj A [`stars`] object that is to be duplicated.
+#' @param dim A dimensions file return from \code{st_dimensions(...)}.
+#' @param dimname A [`character`] of the dimension name to be used.
+#' @examples
+#' \dontrun{
+#' o <- st_rep(obj, )
+#' }
+#'
+#' @returns A [`stars`] object.
+#' @keywords internal, scenarip
+#' @noRd
+st_rep <- function(obj, dim, dimname = "time"){
+  assertthat::assert_that(
+    inherits(obj, "stars"),
+    inherits(dim, "dimensions"),
+    dimname %in% names(dim)
+  )
+  # Check that coordinate systems and values are identical
+  assertthat::assert_that(
+    dim[[1]]$to == stars::st_dimensions(obj)[[1]]$to,
+    dim[[1]]$refsys == sf::st_crs(obj),
+    msg = "Coordinate system between provided dimension and obj are not identical!"
+  )
+
+  # Make a sequence of the given dimension
+  it <- seq(dim[[dimname]]$from, dim[[dimname]]$to-1)
+
+  # Make a dummy
+  new <- obj
+  for(i in it) new <- c(new, obj,along = 3)
+
+  stars::st_dimensions(new) <- dim # Redimension
+
+  assertthat::assert_that(inherits(new, "stars"))
+  return(new)
+}
+
 #' Summarize change before to after
 #'
 #' @description
@@ -518,12 +561,14 @@ summarise_change <- function(scenario){
 #' This function is meant to reproject back the layer.
 #' @param obj A ['stars'] object to be clipped and cropped.
 #' @param template A ['SpatRaster'] or ['sf'] object to which the object should be projected.
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack around.
 #' @keywords internal, scenario
 #' @noRd
-hack_project_stars <- function(obj, template){
+hack_project_stars <- function(obj, template, use_gdalutils = TRUE){
   assertthat::assert_that(
     inherits(obj, "stars"),
-    is.Raster(template) || inherits(template, "sf")
+    is.Raster(template) || inherits(template, "sf"),
+    is.logical(use_gdalutils)
   )
   # Get tempdir
   td <- terra::terraOptions(print = FALSE)[['tempdir']]
@@ -539,25 +584,31 @@ hack_project_stars <- function(obj, template){
   out <- c()
   for(v in names(obj)){
     sub <- obj[v]
-    stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
 
-    # FIXME: ideally remove proj4 string dependency here
-    # Re project with terra
-    # temp <- terra::rast(x = file.path(td, "ReprojectedStars.tif"))
-    # temp <- terra::project(x = temp,
-    #                        y = template,
-    #                        align = TRUE,
-    #                        gdal = TRUE,
-    #                        threads = FALSE)
-    # terra::writeRaster(temp, file.path(td, "ReprojectedStars_temp.tif"),overwrite = TRUE)
-    suppressWarnings(
-      gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
-                          dstfile = file.path(td, "ReprojectedStars_temp.tif"),
-                          s_srs = "EPSG:4296",
-                          tr = terra::res(template),
-                          te = terra::ext(template) |> st_bbox(),
-                          t_srs = sf::st_crs(template)$proj4string)
-    )
+    if(use_gdalutils){
+      check_package("gdalUtils")
+      # Write output
+      stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
+      suppressWarnings(
+        gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
+                            dstfile = file.path(td, "ReprojectedStars_temp.tif"),
+                            s_srs = "EPSG:4296",
+                            tr = terra::res(template),
+                            te = terra::ext(template) |> sf::st_bbox(),
+                            t_srs = sf::st_crs(template)$proj4string)
+      )
+    } else {
+      # Try and use terra
+      stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
+      # Re project with terra
+      temp <- terra::rast(x = file.path(td, "ReprojectedStars.tif"))
+      temp <- terra::project(x = temp,
+                             y = template,
+                             align = TRUE,
+                             gdal = TRUE,
+                             threads = FALSE)
+      terra::writeRaster(temp, file.path(td, "ReprojectedStars_temp.tif"),overwrite = TRUE)
+    }
     oo <- stars::read_stars(file.path(td, "ReprojectedStars_temp.tif"),proxy = F)
     names(oo) <- v # Rename
 
