@@ -109,6 +109,7 @@ reference:
       - partial
       - spartial
       - partial_density
+      - limiting
       - threshold
       - ensemble
       - ensemble_partial

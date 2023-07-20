@@ -128,7 +128,7 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
@@ -138,7 +138,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks

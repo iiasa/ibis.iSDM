@@ -117,6 +117,7 @@ Collate:
     'engine_xgboost.R'
     'ensemble.R'
     'ibis.iSDM-package.R'
+    'limiting.R'
     'misc.R'
     'partial.R'
     'plot.R'

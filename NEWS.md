@@ -5,6 +5,7 @@
 * Re-specification of limits with implementation of minimum convex polygon limits to `distribution`.
 * Added `check` function for assessing assumptions and fits for various objects #45
 * Added minor internal helper functions to duplicate `stars` objects via `st_rep`.
+* Implemented local limiting factor function (`limiting`) #37
 
 ### Minor improvements and bug fixes
 * Further smaller documentation fixes towards a CRAN submission #38

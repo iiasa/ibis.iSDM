@@ -90,6 +90,7 @@ varimp.bart <- function(model){
 #' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
 #' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response was not binomial.
 #' @param values Either a [`numeric`] vector of supplied value ranges or \code{NULL} (Default).
+#' @param variable_length A [`numeric`] on the number of partial effects to be derived.
 #' @param plot Whether a model should be created (Default: \code{TRUE}).
 #' @concept Function taken and adapted from the [embarcadero] package.
 #' @references
@@ -109,7 +110,8 @@ varimp.bart <- function(model){
 #' @keywords utils
 #' @noRd
 bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
-                                 smooth = 1, transform = TRUE, values = NULL, plot = TRUE) {
+                                 smooth = 1, transform = TRUE, values = NULL,
+                                 variable_length = 100,plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
@@ -145,7 +147,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
     }
     lev <- lapply(c(1:nrow(minmax)), function(i) {
       seq(minmax$mins[i], minmax$maxs[i], (minmax$maxs[i] -
-                                             minmax$mins[i])/(10 * smooth))
+                                             minmax$mins[i])/(variable_length * smooth))
     })
     for (i in 1:length(lev)) {
       if (length(lev) == 1) {
@@ -159,13 +161,12 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
         }
       }
     }
-    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, keepevery = 10, pl = FALSE)
+    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, keepevery = variable_length, pl = FALSE)
 
   } else {
-    levq = c(0.05, seq(0.1, 0.9, 0.1/smooth),
-             0.95)
+    levq = c(0.05, seq(0.1, 0.9, length.out = (variable_length-2)/smooth), 0.95)
     pd <- dbarts::pdbart(model, xind = x.vars, levquants = levq,
-                         keepevery = 10,
+                         keepevery = 10, #levs = list(levq),
                          pl = FALSE)
   }
 
@@ -197,7 +198,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
       ggplot2::theme_light(base_size = 20) +
       ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95),
                            fill = "deepskyblue1", alpha = 0.3) +
-      ggplot2::geom_line(size = 1.25) +
+      ggplot2::geom_line(linewidth = 1.25) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
                      axis.title.y = ggplot2::element_text(vjust = 1.7))
     # If multiple variables, add facets

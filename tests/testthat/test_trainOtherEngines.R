@@ -108,6 +108,9 @@ test_that('Train a distribution model with Breg', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+
 })
 
 # ---- #
@@ -159,6 +162,9 @@ test_that('Train a distribution model with GDB', {
   expect_type(tr$get_thresholdvalue(), "double")
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
 
 })
 
@@ -212,6 +218,12 @@ test_that('Train a distribution model with glmnet', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+  # Added here to tests as it is quick
+  expect_no_error( partial_density(mod = mod, x.var = "elevation_mean_50km", df = FALSE))
+  expect_s3_class( partial_density(mod = mod, x.var = "elevation_mean_50km", df = TRUE), "data.frame")
+
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
 })
 
 # ---- #

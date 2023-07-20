@@ -529,7 +529,7 @@ engine_bart <- function(x,
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
             bart_partial_effect(model, x.vars = x.var,
-                                transform = self$settings$data$binary, values = values, ... )
+                                transform = self$settings$data$binary, values = values )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE, type = NULL){

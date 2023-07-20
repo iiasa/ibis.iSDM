@@ -434,7 +434,7 @@ BiodiversityScenario <- bdproto(
 
     if(plot){
       if( 'threshold' %in% attributes(self$get_data())$names ){
-        if(has_name(out,"band")) out <- dplyr::rename(out, "time" = "band")
+        if(utils::hasName(out,"band")) out <- dplyr::rename(out, "time" = "band")
         ggplot2::ggplot(out,
                         ggplot2::aes(x = time, y = as.numeric(area_km2))) +
           ggplot2::theme_classic(base_size = 18) +
