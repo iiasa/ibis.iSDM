@@ -16,7 +16,7 @@ train(
   method_integration = "predictor",
   aggregate_observations = TRUE,
   clamp = FALSE,
-  verbose = FALSE,
+  verbose = getOption("ibis.setupmessages"),
   ...
 )
 

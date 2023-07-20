@@ -4,20 +4,30 @@
 \alias{limiting}
 \title{Identify local limiting factor}
 \usage{
-limiting(mod)
+limiting(mod, plot = TRUE)
 
-\S4method{limiting}{ANY}(mod)
+\S4method{limiting}{ANY,logical}(mod,plot)
 }
 \arguments{
 \item{mod}{A fitted \code{'DistributionModel'} object from which limited factors are to
 be identified.}
+
+\item{plot}{Should the result be plotted? (Default: \code{TRUE}).}
 }
 \value{
 A \code{terra} object of the most important variable for a given grid cell.
 }
 \description{
-Calculates a \code{\link{SpatRaster}} of locally limiting factors from a given projected model. To
-calculate this first the \code{\link{spartial}} effect of each individual covariate in the model is calculated.
+Calculates a \code{\link{SpatRaster}} of locally limiting factors from a given projected model.
+To calculate this first the \code{\link{spartial}} effect of each individual covariate
+in the model is calculated.
+
+The effect is estimated as that variable most responsible for decreasing suitability
+at that cell. The decrease in suitability is calculated,
+for each predictor in turn, relative to thesuitability
+that would be achieved if that predictor took the value equal to the mean
+The predictor associated with the largest decrease in suitability is
+the most limiting factor.
 }
 \examples{
 \dontrun{

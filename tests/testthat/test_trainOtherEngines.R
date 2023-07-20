@@ -2,10 +2,12 @@
 test_that('Train a distribution model with XGboost', {
 
   skip_if_not_installed('xgboost')
+  skip_if_not_installed('pdp')
   skip_on_travis()
   skip_on_cran()
 
   suppressWarnings( requireNamespace('xgboost', quietly = TRUE) )
+  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Load data
   # Background Raster
@@ -173,10 +175,12 @@ test_that('Train a distribution model with GDB', {
 test_that('Train a distribution model with glmnet', {
 
   skip_if_not_installed('glmnet')
+  skip_if_not_installed('pdp')
   skip_on_travis()
   skip_on_cran()
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
+  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Load data
   # Background Raster
