@@ -247,6 +247,37 @@ references:
     orcid: https://orcid.org/0000-0002-3542-2938
   year: '2023'
 - type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Imports
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2023'
+- type: software
+  title: posterior
+  abstract: 'posterior: Tools for Working with Posterior Distributions'
+  notes: Imports
+  url: https://mc-stan.org/posterior/
+  repository: https://CRAN.R-project.org/package=posterior
+  authors:
+  - family-names: Bürkner
+    given-names: Paul-Christian
+    email: paul.buerkner@gmail.com
+  - family-names: Gabry
+    given-names: Jonah
+    email: jsg2201@columbia.edu
+  - family-names: Kay
+    given-names: Matthew
+    email: mjskay@northwestern.edu
+  - family-names: Vehtari
+    given-names: Aki
+    email: Aki.Vehtari@aalto.fi
+  year: '2023'
+- type: software
   title: proto
   abstract: 'proto: Prototype Object-Based Programming'
   notes: Imports
@@ -341,26 +372,6 @@ references:
   - family-names: Ts'o
     given-names: Theodore
     email: tytso@thunk.org
-  year: '2023'
-- type: software
-  title: posterior
-  abstract: 'posterior: Tools for Working with Posterior Distributions'
-  notes: Imports
-  url: https://mc-stan.org/posterior/
-  repository: https://CRAN.R-project.org/package=posterior
-  authors:
-  - family-names: Bürkner
-    given-names: Paul-Christian
-    email: paul.buerkner@gmail.com
-  - family-names: Gabry
-    given-names: Jonah
-    email: jsg2201@columbia.edu
-  - family-names: Kay
-    given-names: Matthew
-    email: mjskay@northwestern.edu
-  - family-names: Vehtari
-    given-names: Aki
-    email: Aki.Vehtari@aalto.fi
   year: '2023'
 - type: software
   title: utils
@@ -605,17 +616,6 @@ references:
     given-names: Jimenez-Valverde
   - family-names: R.
     given-names: Real
-  year: '2023'
-- type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Suggests
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
   year: '2023'
 - type: software
   title: progress
