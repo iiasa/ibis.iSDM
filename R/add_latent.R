@@ -20,13 +20,13 @@ NULL
 #'
 #' Available are:
 #'
-#' [*] \code{"spde"} - stochastic partial differential equation (SPDE) for [`INLA-engine`] and [`INLABRU-engine`].
+#' [*] \code{"spde"} - stochastic partial differential equation (SPDE) for [`engine_inla`] and [`engine_inlabru`].
 #' SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
 #' Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
 #' if elevation is positively correlated with the response variable, but is not included in the model,
 #' we could see a higher posterior mean in areas with higher elevation. Note that calculations of
 #' SPDE's can be computationally costly.
-#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`INLA-engine`]. Not yet implemented in full.
+#' * \code{"car"} - conditional autocorrelative errors (CAR) for [`engine_inla`]. Not yet implemented in full.
 #' * \code{"kde"} - additional covariate of the kernel density of input point observations.
 #' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 #' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
@@ -35,7 +35,7 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be added to the model. See details.
-#' @param priors A [`Prior-List`] object supplied to the latent effect. Relevant only for [`engine_inla`] and \code{NULL} equates the use of default priors.
+#' @param priors A \code{"Prior-List"} object supplied to the latent effect. Relevant only for [`engine_inla`] and \code{NULL} equates the use of default priors.
 #' @param separate_spde A [`logical`] parameter indicating whether, in the case of SPDE effects, separate effects
 #' for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.
 #' @param ... Other parameters passed down
@@ -45,6 +45,7 @@ NULL
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
 #' @keywords latent
+#' @aliases add_latent_spatial
 #' @examples
 #' \dontrun{
 #'  distribution(background) |> add_latent_spatial(method = "poly")
@@ -63,7 +64,7 @@ methods::setGeneric(
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
-#' @usage \S4method{add_latent_spatial}{BiodiversityDistribution}(x)
+#' @usage \S4method{add_latent_spatial}{BiodiversityDistribution,character,ANY,logical}(x,method,priors,separate_spde,...)
 methods::setMethod(
   "add_latent_spatial",
   methods::signature(x = "BiodiversityDistribution"),
@@ -105,6 +106,7 @@ methods::setMethod(
 #'  rm_latent(model) -> model
 #' }
 #' @keywords latent, internal
+#' @aliases rm_latent
 #' @name rm_latent
 NULL
 

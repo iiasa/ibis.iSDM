@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.0.5
+Version: 0.0.6
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -30,6 +30,8 @@ Imports:
     graphics,
     methods,
     ncdf4,
+    parallel,
+    Matrix,
     ncmeta,
     parallel,
     posterior,
@@ -63,7 +65,9 @@ Suggests:
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
     gnlm,
-    testthat,
+    geosphere,
+    cubelyr,
+    testthat (>= 3.0.0),
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
@@ -98,6 +102,7 @@ Collate:
     'add_priors.R'
     'bdproto-engine.R'
     'bdproto-settings.R'
+    'check.R'
     'utils-spatial.R'
     'data.R'
     'distribution.R'
@@ -113,6 +118,7 @@ Collate:
     'engine_xgboost.R'
     'ensemble.R'
     'ibis.iSDM-package.R'
+    'limiting.R'
     'misc.R'
     'partial.R'
     'plot.R'

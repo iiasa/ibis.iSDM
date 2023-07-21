@@ -25,7 +25,7 @@ engine_inlabru(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{optional_mesh}{A directly supplied \code{\link{INLA}} mesh (Default: \code{NULL})}
+\item{optional_mesh}{A directly supplied \code{"INLA"} mesh (Default: \code{NULL})}
 
 \item{max.edge}{The largest allowed triangle edge length, must be in the same scale units as the coordinates.
 Default is an educated guess (Default: \code{NULL}).}
@@ -52,16 +52,16 @@ Default is an educated guess (Default: \code{NULL}).}
 \item{...}{Other variables}
 }
 \value{
-An \link{engine}.
+An \link{Engine}.
 }
 \description{
 Model components are specified with general inputs and mapping methods to the
 latent variables, and the predictors are specified via general R expressions,
 with separate expressions for each observation likelihood model in multi-likelihood models.
-The inlabru engine - similar as the \code{\link{engine_inla}} function acts a wrapper for \link[INLA:inla]{INLA::inla},
-albeit \link{inlabru} has a number of convenience functions implemented that make in particular predictions
+The inlabru engine - similar as the \code{\link{engine_inla}} function acts a wrapper for INLA,
+albeit \code{"inlabru"} has a number of convenience functions implemented that make in particular predictions
 with new data much more straight forward (e.g. via posterior simulation instead of fitting).
-Since more recent versions \link{inlabru} also supports the addition of multiple likelihoods, therefore
+Since more recent versions \code{"inlabru"} also supports the addition of multiple likelihoods, therefore
 allowing full integrated inference.
 }
 \details{

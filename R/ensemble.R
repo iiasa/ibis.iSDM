@@ -36,7 +36,7 @@ NULL
 #'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log]. In this case
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs [log]. In this case
 #' the \code{"normalize"} parameter has to be set.
 #' @param ... Provided [`DistributionModel`] objects.
 #' @param method Approach on how the ensemble is to be created. See details for available options (Default: \code{'mean'}).
@@ -75,7 +75,7 @@ methods::setGeneric("ensemble",
 
 #' @name ensemble
 #' @rdname ensemble
-#' @usage \S4method{ensemble}{ANY, character, numeric, numeric, character, logical, character}(..., method, weights, min.value, layer, normalize, uncertainty)
+#' @usage \S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
@@ -215,9 +215,9 @@ methods::setMethod(
           } else rasp <- NULL
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
-                                     "sd" = terra::app(ras, sd, na.rm = TRUE),
-                                     "cv" = terra::app(ras, sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                     "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE),
+                                     "sd" = terra::app(ras, stats::sd, na.rm = TRUE),
+                                     "cv" = terra::app(ras, stats::sd, na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
+                                     "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE),
                                      "pca" = terra::mean(rasp, na.rm = TRUE)
           )
           names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
@@ -296,11 +296,14 @@ methods::setMethod(
       # Add attributes on the method of ensemble
       attr(new, "method") <- method
       if(uncertainty != "none"){
+        if(uncertainty == "pca") {
+          stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+        }
         # Add uncertainty
         ras_uncertainty <- switch (uncertainty,
                                    "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
                                    "cv" = terra::app(ras, fun = "sd", na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                   "range" = terra::max(ras, na.rm = TRUE) - terra::min(ras, na.rm = TRUE)
+                                   "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
         )
         names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
         # Add attributes on the method of ensembling
@@ -385,10 +388,13 @@ methods::setMethod(
 
     # --- #
     if(uncertainty != 'none'){
+      if(uncertainty == "pca") {
+       stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
+      }
       # Add uncertainty
       out_uncertainty <- switch (uncertainty,
-                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE)),
-                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
+                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE)),
+                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
                                  "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
       )
       if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
@@ -439,7 +445,7 @@ methods::setMethod(
 #'
 #' @note
 #' If a list is supplied, then it is assumed that each entry in the list is a fitted [`DistributionModel`] object.
-#' Take care not to create an ensemble of models constructed with different link functions, e.g. [logistic] vs [log].
+#' Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs [log].
 #' By default the response functions of each model are normalized.
 #' @param ... Provided [`DistributionModel`] objects from which partial responses can be called. In the future provided data.frames might be supported as well.
 #' @param x.var A [`character`] of the variable from which an ensemble is to be created.
@@ -466,7 +472,7 @@ methods::setGeneric("ensemble_partial",
 
 #' @name ensemble_partial
 #' @rdname ensemble_partial
-#' @usage \S4method{ensemble_partial}{ANY, character, character, character, logical}(..., x.var, method, layer, normalize)
+#' @usage \S4method{ensemble_partial}{ANY,character,character,character,logical}(...,x.var,method,layer,normalize)
 methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),
@@ -540,13 +546,13 @@ methods::setMethod(
     if(method == 'mean'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                                   FUN = function(x = out[[layer]]) {
-                                    return(cbind( mean = mean(x), sd = sd(x)))
+                                    return(cbind( mean = mean(x), sd = stats::sd(x)))
                                     }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "mean", "sd")
     } else if(method == 'median'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                        FUN = function(x = out[[layer]]) {
-                         return(cbind( median = stats::median(x), mad = mad(x)))
+                         return(cbind( median = stats::median(x), mad = stats::mad(x)))
                        }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "median", "mad")
     }

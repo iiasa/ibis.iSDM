@@ -6,7 +6,7 @@
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 
-\S4method{INLAPriors}{vector, character}(variables, type)
+\S4method{INLAPriors}{vector,character,ANY}(variables,type,hyper,...)
 }
 \arguments{
 \item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing predictors or latent effects.}

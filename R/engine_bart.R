@@ -9,9 +9,9 @@ NULL
 #' algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
 #' and shrinkage towards \code{0}.
 #'
-#' This package requires the [dbarts] R-package to be installed.
-#' Many of the functionalities of this [engine] have been inspired by the [embarcadero] R-package. Users
-#' are therefore advised to cite if they make heavy use of BART.
+#' This package requires the \code{"dbarts"} R-package to be installed.
+#' Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
+#' Users are therefore advised to cite if they make heavy use of BART.
 #' @details
 #' Prior distributions can furthermore be set for:
 #' * probability that a tree stops at a node of a given depth (Not yet implemented)
@@ -27,13 +27,14 @@ NULL
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
 #' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
 #' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
-#' @returns An [engine].
+#' @returns An [Engine].
 #' @examples
 #' \dontrun{
 #' # Add BART as an engine
 #' x <- distribution(background) |> engine_bart(iter = 100)
 #' }
 #' @family engine
+#' @aliases engine_bart
 #' @name engine_bart
 NULL
 #' @rdname engine_bart
@@ -528,7 +529,7 @@ engine_bart <- function(x,
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
             bart_partial_effect(model, x.vars = x.var,
-                                transform = self$settings$data$binary, values = values, ... )
+                                transform = self$settings$data$binary, values = values )
           },
           # Spatial partial dependence plot option from embercardo
           spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE, type = NULL){
@@ -545,6 +546,23 @@ engine_bart <- function(x,
             # Also return spatial
             return(p)
           },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
+          },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Get residuals
+            rd <- dbarts:::residuals.bart(obj)
+            if(length(rd)==0) rd <- new_waiver()
+            return(rd)
+          },
+          # Coefficient function
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             cofs <- self$summary()

@@ -14,7 +14,7 @@
 #' offsets to factor out a specified bias variable.
 #'
 #' @note
-#' **Covariate transformations applied to other predictors need to **
+#' **Covariate transformations applied to other predictors need to be applied to bias too.**
 #' Another option to consider biases particular in Poisson-point process models is to remove them
 #' through an offset. Functionality to do so is available through the [`add_offset_bias()`] method. Setting the
 #' method to \code{"offset"} will automatically point to this option.
@@ -34,6 +34,7 @@
 #' * Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly estimating spatial sampling effort and habitat suitability for multiple species from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 #' @returns Adds bias control option to a [`distribution`] object.
 #' @keywords bias, offset
+#' @aliases add_control_bias
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) |>
@@ -54,7 +55,7 @@ methods::setGeneric(
 
 #' @name add_control_bias
 #' @rdname add_control_bias
-#' @usage \S4method{add_control_bias}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_control_bias}{BiodiversityDistribution,SpatRaster,character,ANY,logical}(x,layer,method,bias_value,add)
 methods::setMethod(
   "add_control_bias",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),

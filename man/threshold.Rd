@@ -14,16 +14,14 @@ threshold(
   ...
 )
 
-\S4method{threshold}{ANY}(obj)
+\S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 
-\S4method{threshold}{SpatRasterDataset}(obj)
+\S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 
-\S4method{threshold}{SpatRaster}(obj)
-
-\S4method{threshold}{BiodiversityScenario}(obj)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
 }
 \arguments{
-\item{obj}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
+\item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is to be added.}
 
 \item{method}{A specifc method for thresholding. See details for available options.}
 
@@ -38,7 +36,7 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 
 \item{...}{other parameters not yet set.}
 
-\item{tr}{A \code{\link{numeric}} value specifiying the specific threshold for scenarios.}
+\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: Grab from object).}
 }
 \value{
 A \link{SpatRaster} if a \link{SpatRaster} object as input.
@@ -66,12 +64,12 @@ The following options are currently implemented:
 \item \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
 \item \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 \item \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
-\item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{\link{modEvA}} package to be installed.
-\item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{\link{modEvA}} package to be installed.
-\item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{\link{modEvA}} package to be installed.
-\item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
-\item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
-\item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{\link{modEvA}} package to be installed.
+\item \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{"modEvA"} package to be installed.
+\item \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{"modEvA"} package to be installed.
+\item \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{"modEvA"} package to be installed.
+\item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+\item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+\item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
 }
 }
 \examples{
@@ -89,5 +87,5 @@ The following options are currently implemented:
 }
 }
 \seealso{
-\code{\link{modEvA}}
+\code{"modEvA"}
 }

@@ -13,9 +13,9 @@ add_predictor_range(
   priors = NULL
 )
 
-\S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster}(x, layer)
+\S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
 
-\S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
+\S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -35,7 +35,7 @@ Can be used to for example to remove or reduce the expected value (Default: \cod
 This function allows to add a species range which is usually drawn by experts in a separate process
 as spatial explicit prior. Both \code{\link{sf}} and \code{\link{SpatRaster}}-objects are supported as input.
 
-Users are advised to look at the \code{\link{bossMaps}} R-package presented as part of Merow et al. (2017),
+Users are advised to look at the \code{"bossMaps"} R-package presented as part of Merow et al. (2017),
 which allows flexible calculation of non-linear distance transforms from the boundary of the range.
 Outputs of this package could be added directly to this function.
 \strong{Note that this function adds the range as predictor and not as offset. For this purpose a separate function \code{\link[=add_offset_range]{add_offset_range()}} exists.}
@@ -44,6 +44,13 @@ Additional options allow to include the range either as \code{"binary"} or as \c
 predictor. The difference being that the range is either directly included as presence-only predictor or
 alternatively with a linear distance transform from the range boundary. The parameter
 \code{"distance_max"} can be specified to constrain this distance transform.
+}
+\examples{
+\dontrun{
+distribution(background) |>
+  add_predictor_range(range, method = "distance", distance_max = 2)
+}
+
 }
 \references{
 \itemize{

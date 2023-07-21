@@ -29,22 +29,22 @@ If step-size adaptation is on (Default: \code{TRUE}), this also controls the num
 adaptation is run (and hence these warmup samples should not be used for inference).
 The number of warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.}
 
-\item{init}{Initial values for parameters (Default: \code{'random'}). Can also be specified as \link{list} (see: \code{\link[rstan:stan]{rstan::stan}})}
+\item{init}{Initial values for parameters (Default: \code{'random'}). Can also be specified as \link{list} (see: \code{"rstan::stan"})}
 
 \item{cores}{If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.}
 
 \item{algorithm}{Mode used to sample from the posterior. Available options are \code{"sampling"}, \code{"optimize"},
 or \code{"variational"}.
-See \code{\link{cmdstanr}} package for more details. (Default: \code{"sampling"}).}
+See \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).}
 
-\item{control}{See \code{\link[rstan:stan]{rstan::stan}} for more details on specifying the controls.}
+\item{control}{See \code{"rstan::stan"} for more details on specifying the controls.}
 
 \item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other variables}
 }
 \value{
-An \link{engine}.
+An \link{Engine}.
 }
 \description{
 Stan is probabilistic programming language that can be used to
@@ -53,7 +53,7 @@ Stan provides full Bayesian inference for continuous-variable models through Mar
 such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling.
 Stan code has to be written separately and this function acts as compiler to
 build the stan-model.
-\strong{Requires the \link{cmdstanr} package to be installed!}
+\strong{Requires the \code{"cmdstanr"} package to be installed!}
 }
 \details{
 By default the posterior is obtained through sampling, however stan also supports
@@ -76,7 +76,7 @@ x <- distribution(background) |> engine_stan(iter = 1000)
 }
 }
 \seealso{
-\link{rstan}, \link{cmdstanr}
+rstan, cmdstanr
 
 Other engine: 
 \code{\link{engine_bart}()},

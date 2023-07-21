@@ -17,7 +17,11 @@ NULL
 #' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' @seealso [`Prior-class`].
-#' s
+#' @examples
+#' \dontrun{
+#'  pp <- STANPrior("forest", "normal", c(0,1))
+#' }
+#'
 #' @family prior
 #' @keywords priors
 #' @aliases STANPrior
@@ -35,7 +39,7 @@ methods::setGeneric(
 
 #' @name STANPrior
 #' @rdname STANPrior
-#' @usage \S4method{STANPrior}{character, character}(variable, type)
+#' @usage \S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 methods::setMethod(
   "STANPrior",
   methods::signature(variable = "character", type = "character"),
@@ -82,6 +86,7 @@ methods::setMethod(
 #' @param ... Variables passed on to prior object
 #' @rdname STANPriors
 #' @family prior
+#' @aliases STANPriors
 #' @keywords priors
 #' @exportMethod STANPriors
 #' @export
@@ -92,7 +97,7 @@ methods::setGeneric(
 
 #' @name STANPriors
 #' @rdname STANPriors
-#' @usage \S4method{STANPriors}{vector, character}(variables, type)
+#' @usage \S4method{STANPriors}{vector,character,ANY}(variables,type,hyper,...)
 methods::setMethod(
   "STANPriors",
   methods::signature(variables = "vector", type = "character"),

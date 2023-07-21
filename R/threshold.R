@@ -24,28 +24,29 @@ NULL
 #' @param point A [`sf`] object containing observational data used for model training.
 #' @param format [`character`] indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
 #' formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
-#' @param ... other parameters not yet set.
 #' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
+#' @param ... other parameters not yet set.
 #' @details
 #' The following options are currently implemented:
 #' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
 #' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
 #' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
 #' * \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
-#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the [`modEvA`] package to be installed.
-#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the [`modEvA`] package to be installed.
-#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the [`modEvA`] package to be installed.
-#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
-#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
-#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the [`modEvA`] package to be installed.
+#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
 #' @name threshold
 #' @references
 #' * Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
 #' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
-#' @seealso [`modEvA`]
+#' @seealso \code{"modEvA"}
 #' @returns A [SpatRaster] if a [SpatRaster] object as input.
 #' Otherwise the threshold is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
+#' @aliases threshold
 #' @examples
 #' \dontrun{
 #'  # Where mod is an estimated DistributionModel
@@ -67,11 +68,11 @@ methods::setGeneric(
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
 #' @rdname threshold
-#' @usage \S4method{threshold}{ANY}(obj)
+#' @usage \S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, format = "binary", return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
@@ -101,16 +102,15 @@ methods::setMethod(
     if(method == "min.cv") assertthat::assert_that("cv" %in% names(ras), msg = "Method min.cv requires a posterior prediction and coefficient of variation!")
 
     # Get all point data in distribution model
-    point <- do.call(sf:::rbind.sf,
-                     lapply(obj$model$biodiversity, function(y){
-                       o <- guess_sf(y$observations)
-                       o$name <- y$name; o$type <- y$type
-                       subset(o, select = c('observed', "name", "type", "geometry"))
-                     } )
-    ) |> tibble::remove_rownames()
-    suppressWarnings(
-      point <- sf::st_set_crs(point, value = sf::st_crs(obj$get_data('prediction')))
-    )
+    if(is.null(point)){
+      point <- collect_occurrencepoints(model = obj$model,
+                                        include_absences = FALSE,
+                                        point_column = "observed",
+                                        addName = TRUE, tosf = TRUE
+                                        )
+    } else {
+      assertthat::assert_that(sf::st_crs(point) == sf::st_crs(obj$get_data('prediction')))
+    }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
     if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
@@ -196,17 +196,11 @@ methods::setMethod(
 
 #' @name threshold
 #' @rdname threshold
-#' @inheritParams threshold
-#' @usage \S4method{threshold}{SpatRasterDataset}(obj)
-methods::setMethod("threshold", methods::signature(obj = "SpatRasterDataset"), .stackthreshold)
-
-#' @name threshold
-#' @rdname threshold
-#' @usage \S4method{threshold}{SpatRaster}(obj)
+#' @usage \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
-  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, plot = FALSE) {
+  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'SpatRaster'),
                             is.character(method),
@@ -295,7 +289,7 @@ methods::setMethod(
           opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
                                     measures = c("TSS","kappa","F1score","Misclass","Omission","Commission",
                                                  "Sensitivity","Specificity"),
-                                    optimize = "each", plot = plot)
+                                    optimize = "each", plot = FALSE)
         )
         if(method %in% opt$optimals.each$measure){
           tr <- opt$optimals.each$threshold[which(opt$optimals.each$measure==method)]
@@ -357,14 +351,14 @@ methods::setMethod(
 #' Thresholds in scenario estimation
 #'
 #' @name threshold
-#' @inheritParams threshold
-#' @param tr A [`numeric`] value specifiying the specific threshold for scenarios.
+#' @param obj A [BiodiversityScenario] object to which an existing threshold is to be added.
+#' @param tr A [`numeric`] value specifying the specific threshold for scenarios (Default: Grab from object).
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario}(obj)
+#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, tr = new_waiver(), ...) {
+  function(obj, tr = new_waiver()) {
 
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )

@@ -29,11 +29,12 @@
 #' * \code{'sensitivity'} = Sensitivity, TBD
 #' * \code{'specificity'} = Specifivity, TBD
 #' * \code{'tss'} = True Skill Statistics, TBD
-#' * \code{'f1'} = F1 Score or Positive predictive value, TBD
+#' * \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
 #' * \code{'logloss'} = Log loss, TBD
-#' * \code{'expected.accuracy'} = Expected Accuracy, TBD
-#' * \code{'kappa'} = Kappa value, TBD
-#' * \code{'brier.score'} = Brier score, TBD
+#' * \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
+#' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
+#' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
+#' where TP is true positive, TN a true negative, FP the false positive and FN the false negative.
 #'
 #' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
 #' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.
@@ -70,7 +71,7 @@ methods::setGeneric("validate",
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
+#' @usage \S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "ANY"),
@@ -83,6 +84,7 @@ methods::setMethod(
       is.character(layer),
       is.character(method)
     )
+    # method = "discrete"; layer = "mean"; point = NULL; point_column = "observed"
     assertthat::assert_that( "prediction" %in% mod$show_rasters(),msg = "No prediction of the fitted model found!" )
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
@@ -159,13 +161,10 @@ methods::setMethod(
       # TODO: Think about how to do validation with non-point data
       if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
-      point <- do.call(sf:::rbind.sf,
-                        lapply(mod$model$biodiversity, function(y){
-                         o <-  guess_sf(y$observations)
-                         o$name <- y$name; o$type <- y$type
-                         subset(o, select = c(point_column, "name", "type", attr(o, "sf_column")))
-                        } )
-                        )  |> tibble::remove_rownames()
+      point <- collect_occurrencepoints(mod$model,
+                                        include_absences = FALSE,
+                                        addName = TRUE,
+                                        tosf = TRUE)
       if(is.factor(point[[point_column]])){
         point[[point_column]] <- as.numeric(as.character(point[[point_column]]))
       }
@@ -206,13 +205,12 @@ methods::setMethod(
                                template = threshold,
                                settings = pseudoabs_settings(background = threshold,nrpoints = nrow(df2)*2)) |>
           subset(subset = observed == 0)
-
-        abs <- list(); abs[[point_column]] <- o[[point_column]]
-        abs[["name"]] <- dataset; abs[["type"]] <- "poipo"
-        abs[["pred"]] <- get_rastervalue(coords = o, env = prediction)[[layer]]
-        abs[["pred_tr"]] <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
-
-        df2 <- rbind(df2, as.data.frame(abs))
+        o$name <- dataset
+        o <- o[,which(names(o) %in% names(df2))]
+        o$pred <- get_rastervalue(coords = o, env = prediction)[[layer]]
+        o$pred_tr <- get_rastervalue(coords = o, env = threshold)[[names(threshold)]]
+        o <- o |> sf::st_drop_geometry()
+        df2 <- rbind(df2, as.data.frame(o))
       }
       # Validate the threshold
       out <- try({.validatethreshold(df2 = df2, point_column = point_column, mod = mod,
@@ -228,7 +226,7 @@ methods::setMethod(
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{SpatRaster, character, sf, character}(mod, method, point, point_column)
+#' @usage \S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "SpatRaster"),

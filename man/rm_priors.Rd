@@ -6,7 +6,7 @@
 \usage{
 rm_priors(x, names = NULL, ...)
 
-\S4method{rm_priors}{BiodiversityDistribution}(x)
+\S4method{rm_priors}{BiodiversityDistribution,ANY}(x,names,...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -21,7 +21,12 @@ In order to remove a set prior, the name of the prior has to be specified.
 }
 \examples{
 \dontrun{
- TBD
+ # Add prior
+ pp <-  GLMNETPrior("forest")
+ x <- distribution(background) |>
+  add_priors(pp)
+ # Remove again
+ x <- x |> rm_priors("forest")
 }
 }
 \seealso{

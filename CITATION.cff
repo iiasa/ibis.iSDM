@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.0.5
+version: 0.0.6
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -64,7 +64,7 @@ references:
   - family-names: Hesselbarth
     given-names: Maximilian H.K.
   year: '2023'
-  version: 0.0.4
+  version: 0.0.5
 - type: software
   title: assertthat
   abstract: 'assertthat: Easy Pre and Post Assertions'
@@ -218,17 +218,6 @@ references:
     email: dpierce@ucsd.edu
   year: '2023'
 - type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Imports
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
-  year: '2023'
-- type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -239,6 +228,35 @@ references:
   year: '2023'
   institution:
     name: R Foundation for Statistical Computing
+- type: software
+  title: Matrix
+  abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
+  notes: Imports
+  url: https://R-forge.R-project.org/tracker/?atid=294&group_id=61
+  repository: https://CRAN.R-project.org/package=Matrix
+  authors:
+  - family-names: Bates
+    given-names: Douglas
+    orcid: https://orcid.org/0000-0001-8316-9503
+  - family-names: Maechler
+    given-names: Martin
+    email: mmaechler+Matrix@gmail.com
+    orcid: https://orcid.org/0000-0002-8685-9910
+  - family-names: Jagan
+    given-names: Mikael
+    orcid: https://orcid.org/0000-0002-3542-2938
+  year: '2023'
+- type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Imports
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2023'
 - type: software
   title: posterior
   abstract: 'posterior: Tools for Working with Posterior Distributions'
@@ -427,6 +445,7 @@ references:
     given-names: Fabian E.
     email: bachlfab@gmail.com
   year: '2023'
+  version: '>= 2.6.0'
 - type: software
   title: glmnet
   abstract: 'glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models'
@@ -450,6 +469,7 @@ references:
   - family-names: Yang
     given-names: James
   year: '2023'
+  version: '>= 4.1'
 - type: software
   title: glmnetUtils
   abstract: 'glmnetUtils: Utilities for ''Glmnet'''
@@ -694,6 +714,42 @@ references:
   year: '2023'
   version: '>= 2.1.1'
 - type: software
+  title: gnlm
+  abstract: 'gnlm: Generalized Nonlinear Regression Models'
+  notes: Suggests
+  url: http://www.commanster.eu/rcode.html
+  repository: https://CRAN.R-project.org/package=gnlm
+  authors:
+  - family-names: Swihart
+    given-names: Bruce
+    email: bruce.swihart@gmail.com
+  - family-names: Lindsey
+    given-names: Jim
+    email: jlindsey@gen.unimaas.nl
+  year: '2023'
+- type: software
+  title: geosphere
+  abstract: 'geosphere: Spherical Trigonometry'
+  notes: Suggests
+  url: https://github.com/rspatial/geosphere/issues/
+  repository: https://CRAN.R-project.org/package=geosphere
+  authors:
+  - family-names: Hijmans
+    given-names: Robert J.
+    email: r.hijmans@gmail.com
+  year: '2023'
+- type: software
+  title: cubelyr
+  abstract: 'cubelyr: A Data Cube ''dplyr'' Backend'
+  notes: Suggests
+  url: https://github.com/hadley/cubelyr
+  repository: https://CRAN.R-project.org/package=cubelyr
+  authors:
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@rstudio.com
+  year: '2023'
+- type: software
   title: testthat
   abstract: 'testthat: Unit Testing for R'
   notes: Suggests
@@ -704,6 +760,7 @@ references:
     given-names: Hadley
     email: hadley@posit.co
   year: '2023'
+  version: '>= 3.0.0'
 - type: software
   title: xgboost
   abstract: 'xgboost: Extreme Gradient Boosting'

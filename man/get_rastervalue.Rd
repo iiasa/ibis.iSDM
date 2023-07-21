@@ -7,7 +7,7 @@
 get_rastervalue(coords, env, ngb_fill = TRUE, rm.na = FALSE)
 }
 \arguments{
-\item{coords}{A \code{\link{Spatial}}, \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object.}
+\item{coords}{A \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object.}
 
 \item{env}{A \code{\link{SpatRaster}} object with the provided predictors.}
 

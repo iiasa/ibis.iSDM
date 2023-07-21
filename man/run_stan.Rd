@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-stan.R
 \name{run_stan}
 \alias{run_stan}
-\title{Fit \link{cmdstanr} model and convert to \link{rstan} object}
+\title{Fit cmdstanr model and convert to rstan object}
 \usage{
 run_stan(
   model_code,
@@ -24,7 +24,7 @@ run_stan(
 \arguments{
 \item{model_code}{A \code{\link{character}} pointing to the stan modelling code.}
 
-\item{data}{A \code{\link{list}} with all the parameters required to run the \link{model_code} in stan.}
+\item{data}{A \code{\link{list}} with all the parameters required to run the model_code in stan.}
 
 \item{algorithm}{A \code{\link{character}} giving the algorithm to use. Either \code{'sampling'} (Default), \code{'optimize'} or \code{'variational'} for penalized likelihood estimation.}
 
@@ -51,14 +51,14 @@ run_stan(
 \item{...}{Other non-specified parameters.}
 }
 \value{
-A \link{rstan} object
+A rstan object
 }
 \description{
 This function fits a stan model using the light-weight interface provided
-by \link{cmdstanr}. The code was adapted from McElreath \link{rethinking} package.
+by cmdstanr. The code was adapted from McElreath rethinking package.
 }
 \seealso{
-\link{rethinking} R package
+rethinking R package
 }
 \keyword{misc,}
 \keyword{stan}

@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils-predictors.R
 \name{predictors_filter_abess}
 \alias{predictors_filter_abess}
+\alias{predictor_filter_abess}
 \title{Apply the adaptive best subset selection framework on a set of predictors}
 \usage{
 predictors_filter_abess(
@@ -27,7 +28,7 @@ predictors_filter_abess(
 \item{family}{A \code{\link{character}} indicating the family the observational data originates from.}
 
 \item{tune.type}{\code{\link{character}} indicating the type used for subset evaluation.
-Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \code{\link{abess}}.}
+Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \code{abess}.}
 
 \item{lambda}{A \code{\link{numeric}} single lambda value for regularized best subset selection (Default: \code{0}).}
 

@@ -4,7 +4,7 @@
 \alias{add_constraint_adaptability}
 \title{Adds an adaptability constraint to a scenario object}
 \usage{
-\S4method{add_constraint_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
+\S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -29,6 +29,13 @@ Currently only \code{nichelimit} is implemented, which adds a simple constrain o
 can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
 are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
 training.
+}
+\examples{
+\dontrun{
+scenario(fit) |>
+ add_constraint_adaptability(value = 1)
+}
+
 }
 \seealso{
 Other constraint: 

@@ -2,10 +2,12 @@
 test_that('Train a distribution model with XGboost', {
 
   skip_if_not_installed('xgboost')
+  skip_if_not_installed('pdp')
   skip_on_travis()
   skip_on_cran()
 
   suppressWarnings( requireNamespace('xgboost', quietly = TRUE) )
+  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Load data
   # Background Raster
@@ -46,6 +48,15 @@ test_that('Train a distribution model with XGboost', {
   expect_type(tr$get_thresholdvalue(), "double")
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+
+  ex_sd <- ensemble(mod, mod, uncertainty = "sd")
+  ex_range <- ensemble(mod, mod, uncertainty = "range")
+  ex_pca <- ensemble(mod, mod, uncertainty = "pca")
+
+  expect_named(object = ex_sd, expected = c("ensemble_mean", "sd_mean"))
+  expect_named(object = ex_range, expected = c("ensemble_mean", "range_mean"))
+  expect_named(object = ex_pca, expected = c("ensemble_mean", "pca_mean"))
 
 })
 
@@ -99,6 +110,9 @@ test_that('Train a distribution model with Breg', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+
 })
 
 # ---- #
@@ -151,6 +165,9 @@ test_that('Train a distribution model with GDB', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+
 })
 
 # ---- #
@@ -158,10 +175,12 @@ test_that('Train a distribution model with GDB', {
 test_that('Train a distribution model with glmnet', {
 
   skip_if_not_installed('glmnet')
+  skip_if_not_installed('pdp')
   skip_on_travis()
   skip_on_cran()
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
+  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Load data
   # Background Raster
@@ -203,6 +222,12 @@ test_that('Train a distribution model with glmnet', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
+  # Added here to tests as it is quick
+  expect_no_error( partial_density(mod = mod, x.var = "elevation_mean_50km", df = FALSE))
+  expect_s3_class( partial_density(mod = mod, x.var = "elevation_mean_50km", df = TRUE), "data.frame")
+
+  # Does limiting raster work?
+  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
 })
 
 # ---- #

@@ -125,6 +125,7 @@ built_formula_gdb <- function(model, id, x, settings){
 #' @param nd A new data.frame with all predictiors used in fit.
 #' @param template A [`SpatRaster`] object that can be used as spatial template.
 #' @returns A [`RasterLayer`] containing a presence-absence prediction.
+#' @aliases predict_gdbclass
 #' @keywords utils
 #' @noRd
 predict_gdbclass <- function(fit, nd, template){
@@ -262,6 +263,7 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @return A vector with the weights
+#' @aliases ppm_weights
 #' @keywords utils
 #' @noRd
 ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWPR"){

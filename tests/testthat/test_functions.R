@@ -105,9 +105,20 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   ex <- ensemble(r1, r2, r3, layer = "lyr.1")
   expect_equal(terra::nlyr(ex), 2)
   expect_lte( terra::global(ex, "max", na.rm = TRUE)[1,1], max( terra::global( c(r1, r2, r3), "max", na.rm = TRUE) ))
+  expect_named(object = ex, expected = c("ensemble_lyr.1", "cv_lyr.1"))
 
   ex <- ensemble(r1, r2, r3, layer = "lyr.1", normalize = TRUE)
   expect_lte( terra::global(ex, "max")[1,1], 1)
+
+  ex_sd <- ensemble(r1, r2, r3, layer = "lyr.1", uncertainty = "sd")
+  ex_range <- ensemble(r1, r2, r3, layer = "lyr.1", uncertainty = "range")
+
+  expect_named(object = ex_sd, expected = c("ensemble_lyr.1", "sd_lyr.1"))
+  expect_named(object = ex_range, expected = c("ensemble_lyr.1", "range_lyr.1"))
+
+  expect_error(ensemble(r1, r2, r3, layer = "lyr.1", uncertainty = "pca"),
+               regexp = "Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+
 
 })
 

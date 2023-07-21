@@ -7,7 +7,7 @@
 \usage{
 spartial(mod, x.var, constant = NULL, plot = FALSE, ...)
 
-\S4method{spartial}{ANY,character}(mod, x.var)
+\S4method{spartial}{ANY,character,ANY,logical}(mod,x.var,constant,plot,...)
 
 \method{spartial}{DistributionModel}(mod, ...)
 }

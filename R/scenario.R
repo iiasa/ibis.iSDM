@@ -26,7 +26,7 @@ methods::setGeneric("scenario",
                     function(fit, limits = NULL, copy_model = FALSE) standardGeneric("scenario"))
 
 #' @name scenario
-#' @usage \S4method{scenario}{ANY, ANY, logical}(fit, limits, copy_model)
+#' @usage \S4method{scenario}{ANY,ANY,logical}(fit,limits,copy_model)
 #' @rdname scenario
 methods::setMethod(
   "scenario",

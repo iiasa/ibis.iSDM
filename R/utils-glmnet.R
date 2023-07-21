@@ -92,7 +92,7 @@ default.regularization <- function(p, m){
     if (!ishinge[i])
       return(0)
     avg <- mean(mm[, i])
-    std <- max(sd(mm[, i]), 1/sqrt(np))
+    std <- max(stats::sd(mm[, i]), 1/sqrt(np))
     std * 0.5/sqrt(np)
   })
   tmindev <- sapply(1:ncol(mm), function(i) {
@@ -100,7 +100,7 @@ default.regularization <- function(p, m){
                                               0 || sum(mm[, i]) == nrow(mm)), 1, 0)
   })
   pmax(0.001 * (apply(m, 2, max) - apply(m, 2, min)), hmindev,
-       tmindev, apply(as.matrix(mm), 2, sd) * classregularization)
+       tmindev, apply(as.matrix(mm), 2, stats::sd) * classregularization)
 }
 
 #' Determine best lambda
@@ -111,6 +111,7 @@ default.regularization <- function(p, m){
 #' By default use the one within 1 SE of minimum lambda, unless it falls on the very first value,
 #' likely indicating an overregularized model. In this case take the minimum value of all lambda's.
 #' @param obj A \code{"glmnet"} object.
+#' @aliases determine_lambda
 #' @keywords internal, utils
 #' @noRd
 determine_lambda <- function(obj){

@@ -3,6 +3,7 @@ test_that('Scenarios and constraints', {
 
   skip_if_not_installed('glmnet')
   skip_if_not_installed('geosphere')
+  skip_if_not_installed('cubelyr')
   skip_on_travis()
   skip_on_cran()
 
@@ -10,6 +11,7 @@ test_that('Scenarios and constraints', {
   suppressWarnings( requireNamespace('igraph', quietly = TRUE) )
   suppressWarnings( requireNamespace('stars', quietly = TRUE) )
   suppressWarnings( requireNamespace('geosphere', quietly = TRUE) )
+  suppressWarnings( requireNamespace('cubelyr', quietly = TRUE) )
 
   options("ibis.setupmessages" = FALSE) # Be less chatty
   options("ibis.seed" = 1234)
@@ -44,6 +46,7 @@ test_that('Scenarios and constraints', {
   test <- raster_to_stars(pred_current)
   expect_length(test, 9)
   expect_equal(names(test), names(pred_current))
+  expect_length(stars::st_get_dimension_values(test,"time"), 1)
 
   # Basic validity checks
   expect_length(pred_future, 9)

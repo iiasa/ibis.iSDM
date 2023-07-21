@@ -70,7 +70,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' but also pixel-based estimates of uncertainty from the posterior such as the standard deviation (SD)
 #' or the coefficient of variation of a given prediction.
 #'
-#' This function makes use of the [`biscale`] R-package to create bivariate plots of the fitted distribution object,
+#' This function makes use of the \code{"biscale"} R-package to create bivariate plots of the fitted distribution object,
 #' allowing to visualize two variables at once. It is mostly thought of as a convenience function to
 #' create such bivariate plots for quick visualization.
 #'
@@ -93,6 +93,7 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' Although a work around without the package could be developed, it was not deemed necessary at this point.
 #' See also this [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
 #' @return Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
+#' @aliases bivplot
 #' @keywords misc
 #' @export
 #' @name bivplot
@@ -103,7 +104,7 @@ methods::setGeneric(
 
 #' @name bivplot
 #' @rdname bivplot
-#' @usage \S4method{bivplot}{ANY}(mod)
+#' @usage \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),

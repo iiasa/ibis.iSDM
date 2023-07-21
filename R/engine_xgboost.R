@@ -22,7 +22,7 @@ NULL
 #' Lower values generally being better but also computationally more costly. (Default: \code{1e-3})
 #' @param iter [`numeric`] value giving the the maximum number of boosting iterations for cross-validation (Default: \code{8e3L}).
 #' @param gamma [`numeric`] A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
-#' Also see [reg_lambda] parameter for the L2 regularization on the weights
+#' Also see \code{"reg_lambda"} parameter for the L2 regularization on the weights
 #' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
 #' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
 #' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
@@ -38,7 +38,8 @@ NULL
 #' @references
 #' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
 #' @family engine
-#' @returns An [engine].
+#' @aliases engine_xgboost
+#' @returns An [Engine].
 #' @examples
 #' \dontrun{
 #' # Add xgboost as an engine
@@ -644,7 +645,8 @@ engine_xgboost <- function(x,
             if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")
             mod <- self$get_data('fit_best')
-            df <- self$model$biodiversity[[length( self$model$biodiversity )]]$predictors
+            model <- self$model
+            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
 
             # Match x.var to argument
@@ -652,6 +654,14 @@ engine_xgboost <- function(x,
               x.var <- colnames(df)
             } else {
               x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
+            }
+
+            # Calculate range of predictors
+            if(any(model$predictors_types$type=="factor")){
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+            } else {
+              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
 
             # if values are set, make sure that they cover the data.frame
@@ -667,7 +677,11 @@ engine_xgboost <- function(x,
               df2 <- df2 |> as.data.frame()
               df2 <- df2[, mod$feature_names]
             } else {
-              df2 <- df
+              df2 <- list()
+              for(i in x.var) {
+                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+              }
+              df2 <- do.call(cbind, df2); names(df2) <- x.var
             }
 
             # Check that variables are in
@@ -799,6 +813,31 @@ engine_xgboost <- function(x,
             }
             prediction[] <- pred_xgb
             return(prediction)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            # Get evaluation log
+            evl <- fit$evaluation_log
+            if(fit$best_iteration >= (nrow(evl)-(nrow(evl)*.01))) return(FALSE)
+            return(TRUE)
+          },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            message("Not yet implemented!")
+            return(new_waiver())
+            # Get residuals
+            model <- self$model
+            pred <- model$biodiversity[[length(model$biodiversity)]]
+            predf <- pred$predictors |> subset(select = obj$feature_names)
+            newdata <- xgboost::xgb.DMatrix(as.matrix(predf))
+
+            fn <- predict(obj, newdata,type = "class")
+            return(fn)
           },
           # Get coefficients
           get_coefficients = function(self){

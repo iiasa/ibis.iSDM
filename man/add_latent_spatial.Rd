@@ -12,14 +12,14 @@ add_latent_spatial(
   ...
 )
 
-\S4method{add_latent_spatial}{BiodiversityDistribution}(x)
+\S4method{add_latent_spatial}{BiodiversityDistribution,character,ANY,logical}(x,method,priors,separate_spde,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model. See details.}
 
-\item{priors}{A \code{\link{Prior-List}} object supplied to the latent effect. Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
+\item{priors}{A \code{"Prior-List"} object supplied to the latent effect. Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
 
 \item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
 for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.}
@@ -46,14 +46,14 @@ unsupported method for an engine is chosen this is modified to the next similar 
 
 Available are:
 
-\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for \code{\link{INLA-engine}} and \code{\link{INLABRU-engine}}.
+\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for \code{\link{engine_inla}} and \code{\link{engine_inlabru}}.
 SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
 Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
 if elevation is positively correlated with the response variable, but is not included in the model,
 we could see a higher posterior mean in areas with higher elevation. Note that calculations of
 SPDE's can be computationally costly.
 \itemize{
-\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{INLA-engine}}. Not yet implemented in full.
+\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}. Not yet implemented in full.
 \item \code{"kde"} - additional covariate of the kernel density of input point observations.
 \item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 \item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell

@@ -6,7 +6,7 @@
 \usage{
 STANPrior(variable, type, hyper = c(0, 2), ...)
 
-\S4method{STANPrior}{character, character}(variable, type)
+\S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
@@ -23,6 +23,12 @@ a Gaussian distribution on the respective coefficient.}
 Function to create a new prior for \link{engine_stan} models. Priors currently
 can be set on specific environmental predictors.
 }
+\examples{
+\dontrun{
+ pp <- STANPrior("forest", "normal", c(0,1))
+}
+
+}
 \references{
 \itemize{
 \item Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
@@ -31,7 +37,6 @@ can be set on specific environmental predictors.
 }
 \seealso{
 \code{\linkS4class{Prior}}.
-s
 
 Other prior: 
 \code{\link{BARTPriors}()},

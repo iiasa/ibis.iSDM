@@ -5,7 +5,7 @@ NULL
 #'
 #' @description
 #' Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
-#' Engine has been largely superceded by the [engine_bru] package and users are advised to us this one,
+#' Engine has been largely superceded by the [`engine_inlabru`] package and users are advised to us this one,
 #' unless specific options are required.
 #'
 #' @details
@@ -29,7 +29,7 @@ NULL
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied [`INLA`] mesh (Default: \code{NULL})
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
 #' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
 #' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
 #' Default is an educated guess (Default: \code{NULL}).
@@ -58,7 +58,8 @@ NULL
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @family engine
-#' @returns An [engine].
+#' @returns An engine.
+#' @aliases engine_inla
 #' @examples
 #' \dontrun{
 #' # Add INLA as an engine (with a custom mesh)
@@ -200,11 +201,12 @@ engine_inla <- function(x,
         # Try and infer mesh parameters if not set
 
         # Get all coordinates of observations
-        locs <- collect_occurrencepoints(model, include_absences = FALSE)
+        locs <- collect_occurrencepoints(model, include_absences = FALSE,
+                                         tosf = FALSE)
+        locs <- locs[,c("x","y")]# Get only the coordinates
 
         assertthat::assert_that(
-          nrow(locs)>0,
-          ncol(locs)==2
+          nrow(locs)>0, ncol(locs)==2
         )
 
         if(is.null(params$max.edge)){
@@ -255,7 +257,7 @@ engine_inla <- function(x,
         # )
         # 06/01/2023: This should work and is identical to inlabru::ipoints
         ar <- suppressWarnings(
-          diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
+          Matrix::diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
         )
         assertthat::assert_that(length(ar) == mesh$n)
 
@@ -930,6 +932,16 @@ engine_inla <- function(x,
                 control.predictor = list(A = INLA::inla.stack.A(stk_inference))
 
                 # Plot and return result
+              },
+              # Model convergence check
+              has_converged = function(self){
+                fit <- self$get_data("fit_best")
+                if(is.Waiver(fit)) return(FALSE)
+                return(TRUE)
+              },
+              # Get residuals
+              get_residuals = function(self){
+                new_waiver()
               },
               # Get coefficients
               get_coefficients = function(self){

@@ -38,7 +38,8 @@ NULL
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 #' @family engine
-#' @returns An [engine].
+#' @returns An [Engine].
+#' @aliases engine_glmnet
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine
@@ -637,7 +638,30 @@ engine_glmnet <- function(x,
             if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
             return(prediction)
           },
-          # Get coefficients from breg
+          # Convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            # Get lambdas
+            lmd <- fit$lambda
+            if(determine_lambda(fit) == min(lmd)) return(FALSE)
+            return(TRUE)
+          },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Calculate residuals
+            model <- self$model$predictors
+            # Get fm
+            fitted_values <- predict(obj, model, s = 'lambda.1se')
+            fitted_min <- predict(obj, model, s = 'lambda.min')
+            rd <- fitted_min[,1] - fitted_values[,1]
+            assertthat::assert_that(length(rd)>0)
+            return(rd)
+          },
+          # Get coefficients from glmnet
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data("fit_best")

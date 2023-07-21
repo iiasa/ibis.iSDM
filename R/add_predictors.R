@@ -15,7 +15,7 @@ NULL
 #' the original provided predictors alone, but instead create new ones, for instance by transforming
 #' their values through a quadratic or hinge transformation. Note that this effectively
 #' increases the number of predictors in the object, generally requiring stronger regularization by
-#' the used [`engine`].
+#' the used [`Engine`].
 #' Both transformations and derivates can also be combined.
 #' Available options for transformation are:
 #' * \code{'none'} - Leaves the provided predictors in the original scale.
@@ -49,13 +49,13 @@ NULL
 #' @param ... Other parameters passed down
 #' @note
 #' **Important:**
-#' Not every [`engine`] supported by the \pkg{ibis.iSDM} R-package allows missing data points
+#' Not every [`Engine`] supported by the \pkg{ibis.iSDM} R-package allows missing data points
 #' among extracted covariates. Thus any observation with missing data is generally removed prior
 #' from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
 #' values to \code{0} or another out of range constant).
 #'
 #' Not every engine does actually need covariates. For instance it is perfectly legit
-#' to fit a model with only occurrence data and a spatial latent effect ([add_latent]).
+#' to fit a model with only occurrence data and a spatial latent effect ([add_latent_spatial]).
 #' This correspondents to a spatial kernel density estimate.
 #'
 #' Certain names such \code{"offset"} are forbidden as predictor variable names. The function
@@ -82,7 +82,7 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
@@ -98,7 +98,7 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
@@ -236,7 +236,7 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
@@ -263,6 +263,13 @@ methods::setMethod(
 #' @param lower [`numeric`] value for a lower elevational preference of a species.
 #' @param upper [`numeric`] value for a upper elevational preference of a species.
 #' @param transform [`character`] Any optional transformation to be applied. Usually not needed (Default: \code{"none"}).
+#' @aliases add_predictor_elevationpref
+#' @examples
+#' \dontrun{
+#' distribution(background) |>
+#'   add_predictor_elevationpref(elevation, lower = 200, upper = 1000)
+#' }
+#'
 #' @name add_predictor_elevationpref
 NULL
 
@@ -277,7 +284,7 @@ methods::setGeneric(
 
 #' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @usage \S4method{add_predictor_elevationpref}{BiodiversityDistribution, ANY, numeric, numeric, character}(x, layer, lower, upper, transform)
+#' @usage \S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
 methods::setMethod(
   "add_predictor_elevationpref",
   methods::signature(x = "BiodiversityDistribution", layer = "ANY", lower = "numeric", upper = "numeric"),
@@ -356,7 +363,7 @@ methods::setMethod(
 #' This function allows to add a species range which is usually drawn by experts in a separate process
 #' as spatial explicit prior. Both [`sf`] and [`SpatRaster`]-objects are supported as input.
 #'
-#' Users are advised to look at the [`bossMaps`] R-package presented as part of Merow et al. (2017),
+#' Users are advised to look at the \code{"bossMaps"} R-package presented as part of Merow et al. (2017),
 #' which allows flexible calculation of non-linear distance transforms from the boundary of the range.
 #' Outputs of this package could be added directly to this function.
 #' **Note that this function adds the range as predictor and not as offset. For this purpose a separate function [`add_offset_range()`] exists.**
@@ -373,6 +380,13 @@ methods::setMethod(
 #' @param fraction An optional [`SpatRaster`] object that is multiplied with digitized raster layer.
 #' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions.
+#' @aliases add_predictor_range
+#' @examples
+#' \dontrun{
+#' distribution(background) |>
+#'   add_predictor_range(range, method = "distance", distance_max = 2)
+#' }
+#'
 #' @references
 #' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
 #' @name add_predictor_range
@@ -390,7 +404,7 @@ methods::setGeneric(
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, SpatRaster}(x, layer)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -440,7 +454,7 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution, sf}(x, layer)
+#' @usage \S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
@@ -544,6 +558,7 @@ methods::setMethod(
 #' See Examples.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @aliases rm_predictors
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
@@ -564,12 +579,12 @@ methods::setGeneric(
 
 #' @name rm_predictors
 #' @rdname rm_predictors
-#' @usage \S4method{rm_predictors}{BiodiversityDistribution,vector}(x, names)
+#' @usage \S4method{rm_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "rm_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
   # rm_predictors ----
-  function(x, names ) {
+  function(x, names) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(names) || assertthat::is.scalar(names) || is.vector(names)
                             )
@@ -593,6 +608,7 @@ methods::setMethod(
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @aliases sel_predictors
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
@@ -613,12 +629,12 @@ methods::setGeneric(
 
 #' @name sel_predictors
 #' @rdname sel_predictors
-#' @usage \S4method{sel_predictors}{BiodiversityDistribution,vector}(x, names)
+#' @usage \S4method{sel_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "sel_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
   # sel_predictors ----
-  function(x, names ) {
+  function(x, names) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.character(names) || assertthat::is.scalar(names) || is.vector(names)
     )
@@ -641,7 +657,7 @@ methods::setMethod(
 # Add predictor actions for scenario objects ----
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario, SpatRaster}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
@@ -658,7 +674,7 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
+#' @usage \S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),

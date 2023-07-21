@@ -8,7 +8,7 @@ NULL
 #' such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling.
 #' Stan code has to be written separately and this function acts as compiler to
 #' build the stan-model.
-#' **Requires the [cmdstanr] package to be installed!**
+#' **Requires the \code{"cmdstanr"} package to be installed!**
 #' @details
 #' By default the posterior is obtained through sampling, however stan also supports
 #' approximate inference forms through penalized maximum likelihood estimation (see Carpenter et al. 2017).
@@ -20,14 +20,14 @@ NULL
 #' adaptation is run (and hence these warmup samples should not be used for inference).
 #' The number of warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.
 #' @param cores If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.
-#' @param init Initial values for parameters (Default: \code{'random'}). Can also be specified as [list] (see: [`rstan::stan`])
+#' @param init Initial values for parameters (Default: \code{'random'}). Can also be specified as [list] (see: \code{"rstan::stan"})
 #' @param algorithm Mode used to sample from the posterior. Available options are \code{"sampling"}, \code{"optimize"},
 #' or \code{"variational"}.
-#' See [`cmdstanr`] package for more details. (Default: \code{"sampling"}).
-#' @param control See [`rstan::stan`] for more details on specifying the controls.
+#' See \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).
+#' @param control See \code{"rstan::stan"} for more details on specifying the controls.
 #' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other variables
-#' @seealso [rstan], [cmdstanr]
+#' @seealso rstan, cmdstanr
 #' @note
 #' The function \code{obj$stancode()} can be used to print out the stancode of the model.
 #' @references
@@ -35,7 +35,8 @@ NULL
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
 #' * Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
 #' @family engine
-#' @returns An [engine].
+#' @aliases engine_stan
+#' @returns An [Engine].
 #' @examples
 #' \dontrun{
 #' # Add Stan as an engine
@@ -739,8 +740,8 @@ engine_stan <- function(x,
             if(plot){
               o <- pred_part
               pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = mean,
-                                                           ymin = mean-sd,
-                                                           ymax = mean+sd) ) +
+                                                           ymin = mean-stats::sd,
+                                                           ymax = mean+stats::sd) ) +
                 ggplot2::theme_classic() +
                 ggplot2::geom_ribbon(fill = "grey90") +
                 ggplot2::geom_line() +
@@ -816,6 +817,19 @@ engine_stan <- function(x,
             }
             return(prediction)
           },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
+          },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            message("Not yet implemented.. :-( ")
+            new_waiver()
+          },
+          # Get coefficients
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             cofs <- self$summary()

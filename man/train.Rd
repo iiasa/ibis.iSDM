@@ -16,11 +16,11 @@ train(
   method_integration = "predictor",
   aggregate_observations = TRUE,
   clamp = FALSE,
-  verbose = FALSE,
+  verbose = getOption("ibis.setupmessages"),
   ...
 )
 
-\S4method{train}{BiodiversityDistribution, character, character, logical, logical, logical, character, logical, logical, logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose)
+\S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}
@@ -34,10 +34,10 @@ Available options are:
 \item \code{"none"} No prior variable removal is performed (Default).
 \item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{\link{abess}} package (see References).
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
 Note that this effectively fits a separate generalized linear model to
 reduce the number of covariates.
-\item \code{"boruta"} Uses the \code{\link{Boruta}} package to identify non-informative features.
+\item \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
 }}
 
 \item{optim_hyperparam}{Parameter to tune the model by iterating over input parameters or selection
@@ -65,7 +65,7 @@ Available options are:
 added to the predictor stack and thus are predictors for subsequent models (Default).
 \item \code{"offset"} The predicted output of the first (or previously fitted) models are
 added as spatial offsets to subsequent models. Offsets are back-transformed depending
-on the model family. This option might not be supported for every \code{\link{engine}}.
+on the model family. This option might not be supported for every \code{\link{Engine}}.
 \item \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 partialed out during prediction. Here the first dataset added determines the reference level

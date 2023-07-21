@@ -37,7 +37,7 @@ methods::setGeneric(
 
 #' @name priors
 #' @rdname priors
-#' @usage \S4method{priors}{Prior}(x)
+#' @usage \S4method{priors}{Prior}(x,...)
 methods::setMethod(
   "priors",
   methods::signature(x = "ANY"),
@@ -142,7 +142,7 @@ methods::setGeneric(
 
 #' @name priors
 #' @rdname priors
-#' @usage \S4method{priors}{Prior}(x)
+#' @usage \S4method{priors}{Prior}(x,...)
 methods::setMethod(
   "priors",
   methods::signature(x = "ANY"),

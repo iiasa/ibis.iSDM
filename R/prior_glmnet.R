@@ -53,7 +53,7 @@ methods::setGeneric(
 
 #' @name GLMNETPrior
 #' @rdname GLMNETPrior
-#' @usage \S4method{GLMNETPrior}{character, numeric, numeric}(variable, hyper, lims)
+#' @usage \S4method{GLMNETPrior}{character,numeric,ANY}(variable,hyper,lims,...)
 methods::setMethod(
   "GLMNETPrior",
   methods::signature(variable = "character"),
@@ -99,6 +99,7 @@ methods::setMethod(
 #' @rdname GLMNETPriors
 #' @exportMethod GLMNETPriors
 #' @inheritParams GLMNETPrior
+#' @aliases GLMNETPriors
 #' @family prior
 #' @keywords priors
 #' @export
@@ -109,7 +110,7 @@ methods::setGeneric(
 
 #' @name GLMNETPriors
 #' @rdname GLMNETPriors
-#' @usage \S4method{GLMNETPriors}{character, numeric, numeric}(variable, hyper, lims)
+#' @usage \S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
 methods::setMethod(
   "GLMNETPriors",
   methods::signature(variable = "character"),

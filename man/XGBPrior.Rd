@@ -6,7 +6,7 @@
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)
 
-\S4method{XGBPrior}{character, character}(variable, hyper)
+\S4method{XGBPrior}{character,character}(variable,hyper,...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
@@ -22,6 +22,12 @@ extreme gradient descent boosting model \code{\link{engine_xgboost}}.
 Monotonic priors enforce directionality in direction of certain variables, however
 specifying a monotonic constrain does not guarantee that the variable is not regularized out
 during model fitting.
+}
+\examples{
+\dontrun{
+ pp <- XGBPrior("forest", "increasing")
+}
+
 }
 \references{
 \itemize{

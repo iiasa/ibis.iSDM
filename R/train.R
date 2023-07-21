@@ -50,10 +50,10 @@ NULL
 #' * \code{"none"} No prior variable removal is performed (Default).
 #' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
 #' remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the [`abess`] package (see References).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
 #' Note that this effectively fits a separate generalized linear model to
 #' reduce the number of covariates.
-#' * \code{"boruta"} Uses the [`Boruta`] package to identify non-informative features.
+#' * \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
 #'
 #' @param optim_hyperparam Parameter to tune the model by iterating over input parameters or selection
 #' of predictors included in each iteration. Can be set to \code{TRUE} if extra precision is
@@ -77,7 +77,7 @@ NULL
 #' added to the predictor stack and thus are predictors for subsequent models (Default).
 #' * \code{"offset"} The predicted output of the first (or previously fitted) models are
 #' added as spatial offsets to subsequent models. Offsets are back-transformed depending
-#' on the model family. This option might not be supported for every [`engine`].
+#' on the model family. This option might not be supported for every [`Engine`].
 #' * \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
 #' are combined and incorporated in the prediction as a factor interaction with the "weaker" data source being
 #' partialed out during prediction. Here the first dataset added determines the reference level
@@ -128,17 +128,17 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) standardGeneric("train"))
 
 #' @name train
 #' @rdname train
-#' @usage \S4method{train}{BiodiversityDistribution, character, character, logical, logical, logical, character, logical, logical, logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose)
+#' @usage \S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = FALSE,...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -593,67 +593,89 @@ methods::setMethod(
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
-    # Applying prediction filter based on model input data if specified
-    # TODO: Potentially outsource to a function in the future
+    # -  Applying prediction filter based on model input data if specified
+    # Check if MCP should be calculated
     if(!is.Waiver(x$limits)){
-      # Get biodiversity data
-      coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']][,c('x','y','observed')] ) )
-      coords <- subset(coords, observed > 0) # Remove absences
-      # Get zones from the limiting area, e.g. those intersecting with input
-      suppressMessages(
-        suppressWarnings(
-          zones <- sf::st_intersection(sf::st_as_sf(coords, coords = c('x','y'),
-                                                    crs = sf::st_crs(model$background)),
-                                       x$limits)
-        )
-      )
-      # Limit zones
-      zones <- subset(x$limits, limit %in% unique(zones$limit) )
+      # Build MCP based zones ?
+      if(x$limits$limits_method=="mcp"){
+        # Create a polygon using all available information
+        # Then overwrite limits
+        x <- x$set_limits(x = create_mcp(model$biodiversity, x$limits),
+                          mcp_buffer = x$limits$mcp_buffer,
+                          limits_clip = x$limits$limits_clip)
+      }
 
-      # Only if some points actually fall in the zones
-      if(nrow(zones)>0){
-        # Now clip all predictors and background to this
-        model$background <- suppressMessages(
-          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background), by_feature = TRUE) |>
-                              sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
-                              sf::st_cast("MULTIPOLYGON")
+      # No clip if limits are to TRUE
+      if(x$limits$limits_clip){
+        # TODO: Potentially outsource to a function in the future
+
+        # Get biodiversity data
+        coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']] |>
+                                          guess_sf() |>
+                                          dplyr::select('observed', 'x', 'y') ) )
+        coords <- subset(coords, observed > 0) # Remove absences
+        # Reproject if necessary
+        if(sf::st_crs(coords) != sf::st_crs(model$background)){
+          coords <- sf::st_transform(coords, sf::st_crs(model$background))
+        }
+        # Get zones from the limiting area, e.g. those intersecting with input
+        suppressMessages(
+          suppressWarnings(
+            zones <- sf::st_intersection(sf::st_as_sf(coords, coords = c('x','y'),
+                                                      crs = sf::st_crs(model$background)),
+                                         x$limits$layer)
           )
         )
+        # Limit zones
+        zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
 
-        # Extract predictors and offsets again if set
-        if(!is.Waiver(model$predictors_object)){
-          # Using the raster operations is generally faster than point in polygon tests
-          pred_ov <- model$predictors_object$get_data(df = FALSE)
-          # Make a rasterized mask of the background
-          pred_ov <- terra::mask( pred_ov, model$background )
-          # Convert Predictors to data.frame, including error catching for raster errors
-          # FIXME: This could be outsourced
-          o <- try({ terra::as.data.frame(pred_ov, xy = TRUE, na.rm = FALSE) },silent = TRUE)
-          if(inherits(o, "try-error")){
-            o <- as.data.frame( cbind( terra::crds(pred_ov),
-                                       as.matrix( pred_ov )) )
-            if(any(is.factor(pred_ov))){
-              o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+        # Only if some points actually fall in the zones
+        if(nrow(zones)>0){
+          # Now clip all predictors and background to this
+          model$background <- suppressMessages(
+            suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background),
+                                            by_feature = TRUE) |>
+                                sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
+                                sf::st_cast("MULTIPOLYGON")
+            )
+          )
+
+          # Extract predictors and offsets again if set
+          if(!is.Waiver(model$predictors_object)){
+            # Using the raster operations is generally faster than point in polygon tests
+            pred_ov <- model$predictors_object$get_data(df = FALSE)
+            # Make a rasterized mask of the background
+            pred_ov <- terra::mask( pred_ov, model$background )
+            # Convert Predictors to data.frame, including error catching for raster errors
+            # FIXME: This could be outsourced
+            o <- try({ terra::as.data.frame(pred_ov, xy = TRUE, na.rm = FALSE) },silent = TRUE)
+            if(inherits(o, "try-error")){
+              o <- as.data.frame( cbind( terra::crds(pred_ov),
+                                         as.matrix( pred_ov )) )
+              if(any(is.factor(pred_ov))){
+                o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+              }
             }
+            model[['predictors']] <- o
+            model[['predictors_object']]$data <- fill_rasters(o[,c(1,2)*-1], # Remove x and y coordinates for overwriting raster data
+                                                              model$predictors_object$data)
+            rm(pred_ov, o)
+          } else {
+            model$predictors[which( is.na(
+              point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
+            )),model$predictors_names] <- NA # Fill with NA
           }
-          model[['predictors']] <- o
-          model[['predictors_object']]$data <- fill_rasters(o[,c(1,2)*-1], # Remove x and y coordinates for overwriting raster data
-                                                            model$predictors_object$data)
-          rm(pred_ov, o)
-        } else {
-          model$predictors[which( is.na(
-            point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
-          )),model$predictors_names] <- NA # Fill with NA
+          # The same with offset if specified, Note this operation below is computationally quite costly
+          # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
+          # if(!is.Waiver(x$offset)){
+          #   model$offset[which( is.na(
+          #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
+          #   )), "spatial_offset" ] <- NA # Fill with NA
+          # }
         }
-        # The same with offset if specified, Note this operation below is computationally quite costly
-        # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
-        # if(!is.Waiver(x$offset)){
-        #   model$offset[which( is.na(
-        #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-        #   )), "spatial_offset" ] <- NA # Fill with NA
-        # }
       }
     }
+
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
@@ -1262,7 +1284,7 @@ methods::setMethod(
     # Clip to limits again to be sure
     if(!is.Waiver(x$limits)) {
       if(settings$get('inference_only')==FALSE){
-        out <- out$set_data("prediction", terra::mask(out$get_data("prediction"), model$background))
+        out <- out$set_data("prediction", terra::mask(out$get_data("prediction"), x$limits$layer))
       }
       out$settings$set("has_limits", TRUE)
     } else {

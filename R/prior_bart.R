@@ -41,7 +41,7 @@ methods::setGeneric(
 
 #' @name BARTPrior
 #' @rdname BARTPrior
-#' @usage \S4method{BARTPrior}{character, numeric}(variable, hyper)
+#' @usage \S4method{BARTPrior}{character,numeric}(variable,hyper,...)
 methods::setMethod(
   "BARTPrior",
   methods::signature(variable = "character"),
@@ -77,6 +77,7 @@ methods::setMethod(
 #' @rdname BARTPriors
 #' @exportMethod BARTPriors
 #' @inheritParams BARTPrior
+#' @aliases BARTPriors
 #' @family prior
 #' @keywords priors
 #' @export
@@ -87,7 +88,7 @@ methods::setGeneric(
 
 #' @name BARTPriors
 #' @rdname BARTPriors
-#' @usage \S4method{BARTPriors}{character, numeric}(variable, hyper)
+#' @usage \S4method{BARTPriors}{character,numeric}(variable,hyper,...)
 methods::setMethod(
   "BARTPriors",
   methods::signature(variable = "character"),

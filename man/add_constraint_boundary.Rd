@@ -4,9 +4,9 @@
 \alias{add_constraint_boundary}
 \title{Adds a boundary constraint to a scenario object}
 \usage{
-\S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
+\S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
 
-\S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
+\S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -28,6 +28,13 @@ as was done for model training. The difference to a boundary constraint is that 
 as a hard cut on any projection, while the zones would allow any projection (and other constraints) to be applied within
 the zone.
 \strong{Note: Setting a boundary constraint for future projections effectively potentially suitable areas!}
+}
+\examples{
+\dontrun{
+# Add scenario constraint
+scenario(fit) |> add_constraint_boundary(range)
+}
+
 }
 \seealso{
 Other constraint: 

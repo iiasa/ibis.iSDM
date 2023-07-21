@@ -2,13 +2,13 @@
 % Please edit documentation in R/identifier.R
 \name{new_id}
 \alias{new_id}
-\alias{Id}
+\alias{Id,}
 \title{Identifier}
 \usage{
 new_id()
 }
 \value{
-\code{\link{Id}} object.
+\code{"Id"} object.
 }
 \description{
 Generate a new unique identifier.

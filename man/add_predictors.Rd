@@ -19,15 +19,15 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityDistribution, SpatRaster}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityDistribution, stars}(x, env)
+\S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 
-\S4method{add_predictors}{BiodiversityScenario, SpatRaster}(x, env)
+\S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 
-\S4method{add_predictors}{BiodiversityScenario, stars}(x, env)
+\S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -66,7 +66,7 @@ them through a principal component analysis (\link{prcomp}). In contrast, deriva
 the original provided predictors alone, but instead create new ones, for instance by transforming
 their values through a quadratic or hinge transformation. Note that this effectively
 increases the number of predictors in the object, generally requiring stronger regularization by
-the used \code{\link{engine}}.
+the used \code{\link{Engine}}.
 Both transformations and derivates can also be combined.
 Available options for transformation are:
 \itemize{
@@ -92,13 +92,13 @@ Available options for creating derivates are:
 }
 \note{
 \strong{Important:}
-Not every \code{\link{engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
+Not every \code{\link{Engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
 among extracted covariates. Thus any observation with missing data is generally removed prior
 from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
 values to \code{0} or another out of range constant).
 
 Not every engine does actually need covariates. For instance it is perfectly legit
-to fit a model with only occurrence data and a spatial latent effect (\link{add_latent}).
+to fit a model with only occurrence data and a spatial latent effect (\link{add_latent_spatial}).
 This correspondents to a spatial kernel density estimate.
 
 Certain names such \code{"offset"} are forbidden as predictor variable names. The function

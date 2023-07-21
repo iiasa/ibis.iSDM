@@ -4,7 +4,7 @@
 \alias{add_constraint}
 \title{Add a constraint to an existing \code{scenario}}
 \usage{
-\S4method{add_constraint}{BiodiversityScenario, character}(mod, method)
+\S4method{add_constraint}{BiodiversityScenario,character}(mod,method)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -14,7 +14,7 @@ information.}
 
 \item{...}{passed on parameters. See also the specific methods for adding constraints.}
 
-\item{value}{For many dispersal \code{\link{constrain}} this is set as \code{\link{numeric}} value specifying a
+\item{value}{For many dispersal \code{"constrain"} this is set as \code{\link{numeric}} value specifying a
 fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 give the number of iteration steps (or within year migration steps).
 For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
@@ -47,7 +47,7 @@ Currently supported are the following options:
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 \item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
-\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{\link{MigClim}} package.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 }
 
 A comprehensive overview of the benefits of including dispersal constrains in species distribution models
@@ -82,7 +82,7 @@ constrain a projection within a certain area (e.g. a species range or an island)
 # Assumes that a trained 'model' object exists
  mod <- scenario(model) |>
   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
-  add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+  add_constraint_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
   project()
 }
 }

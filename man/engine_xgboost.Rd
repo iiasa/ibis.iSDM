@@ -31,7 +31,7 @@ engine_xgboost(
 Lower values generally being better but also computationally more costly. (Default: \code{1e-3})}
 
 \item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower values for better estimates (Default: \code{3}).
-Also see \link{reg_lambda} parameter for the L2 regularization on the weights}
+Also see \code{"reg_lambda"} parameter for the L2 regularization on the weights}
 
 \item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: \code{0}).}
 
@@ -51,7 +51,7 @@ tresting dataset (Default: \code{0.75}).}
 \item{...}{Other none specified parameters.}
 }
 \value{
-An \link{engine}.
+An \link{Engine}.
 }
 \description{
 Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.

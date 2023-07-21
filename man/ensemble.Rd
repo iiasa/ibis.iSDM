@@ -4,7 +4,7 @@
 \alias{ensemble}
 \title{Function to create an ensemble of multiple fitted models}
 \usage{
-\S4method{ensemble}{ANY, character, numeric, numeric, character, logical, character}(..., method, weights, min.value, layer, normalize, uncertainty)
+\S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects.}
@@ -63,7 +63,7 @@ other summary statistics from the posterior (e.g. \code{'sd'}) can be specified.
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}. In this case
+Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs \link{log}. In this case
 the \code{"normalize"} parameter has to be set.
 }
 \examples{

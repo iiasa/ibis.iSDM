@@ -13,7 +13,7 @@ wrap_stanmodel(sm_code)
 A \link{character} object.
 }
 \description{
-\link{engine_stan} builds a list with stan model code. This function
+engine_stan builds a list with stan model code. This function
 concatenates them together.
 }
 \keyword{stan,}

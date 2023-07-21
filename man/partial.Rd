@@ -16,7 +16,7 @@ partial(
   ...
 )
 
-\S4method{partial}{ANY,character}(mod, x.var)
+\S4method{partial}{ANY,character,ANY,numeric,ANY,logical,character}(mod,x.var,constant,variable_length,values,plot,type,...)
 
 \method{partial}{DistributionModel}(mod, ...)
 }
@@ -42,7 +42,7 @@ than \code{NULL}, the parameter \code{"variable_length"} is ignored (Default: \c
 A \link{data.frame} with the created partial response.
 }
 \description{
-Create a partial response or effect plot of a trained model
+Create a partial response or effect plot of a trained model.
 }
 \details{
 By default the mean is calculated across all parameters that are not \code{x.var}.

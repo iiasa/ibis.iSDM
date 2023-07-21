@@ -19,12 +19,12 @@ add_biodiversity_poipo(
   ...
 )
 
-\S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf}(x, poipo)
+\S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,logical,ANY}(x,poipo,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck,pseudoabsence_settings,...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipo}{A \code{\link{data.frame}}, \code{\link{sf}} or \code{\link{Spatial}}) object of presence-only point occurrences.}
+\item{poipo}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-only point occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -38,10 +38,10 @@ add_biodiversity_poipo(
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
 Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{\link{poipo}}.
+one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{"poipo"}.
 \strong{Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).}}
 
-\item{separate_intercept}{A \code{\link{boolean}} value stating whether a separate intercept is to be added in
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in
 shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
 
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
@@ -83,7 +83,7 @@ x
 }
 }
 \seealso{
-See other functions for adding biodiversity data, e.g. \link{add_biodiversity}
+See other functions for adding biodiversity data, i.e. \code{\link{add_biodiversity_poipa}}
 
 Other add_biodiversity: 
 \code{\link{add_biodiversity_poipa}()},

@@ -87,7 +87,7 @@ methods::setGeneric("pseudoabs_settings",
 
 #' @name pseudoabs_settings
 #' @rdname pseudoabs_settings
-#' @usage \S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, logical ANY}(background, nrpoints, min_ratio, method, buffer_distance, inside, layer, bias)
+#' @usage \S4method{pseudoabs_settings}{ANY,numeric,numeric,character,numeric,logical,logical,ANY}(background,nrpoints,min_ratio,method,buffer_distance,inside,layer,bias,...)
 methods::setMethod(
   "pseudoabs_settings",
   methods::signature(background = "ANY"),
@@ -161,6 +161,7 @@ methods::setMethod(
 #' Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions
 #' for error and bias in global citizen science datasets. Biological Conservation, 173, pp.144-154.
 #' @keywords train
+#' @aliases add_pseudoabsence
 #' @returns A [`data.frame`] containing the newly created pseudo absence points.
 #' @export
 add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL, settings = getOption("ibis.pseudoabsence")){
@@ -214,6 +215,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
 
   method <- settings$get('method')
   buffer_distance <- settings$get('buffer_distance')
+  inside <- settings$get('inside')
 
   # If the nr of points is 0, set it equal to the number of min_ratio or presented presence points
   nrpoints <- max(nrpoints, round( nrow(df) * min_ratio ))
@@ -256,12 +258,18 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     assertthat::assert_that(is.numeric(buffer_distance),msg = "Buffer distance parameter not numeric!")
     # Get units of projection and print for
     un <- sf:::crs_parameters(sf::st_crs(df))$ud_unit
-    if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance ,units::deparse_unit(un),' buffer'))
+    if(is.null(un)) un <- " map units" else un <- units::deparse_unit(un)
+    if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance , un,' buffer'))
     # Calculate buffer
-    buf <- sf::st_buffer(x = df, dist = buffer_distance)
+    suppressMessages(
+      suppressWarnings( buf <- sf::st_buffer(x = df, dist = buffer_distance) )
+    )
     buf <- terra::rasterize(buf, emptyraster(template), field = 1)
-    bg2 <- terra::mask(template, buf, inverse = FALSE, updatevalue = 1)
-    assertthat::assert_that(terra::global(bg2, "max", na.rm = TRUE) >0,msg = "Considered buffer distance too big!")
+    if(!inside){
+      bg2 <- terra::mask(template, buf, inverse = TRUE)
+    } else {bg2 <- buf}
+    assertthat::assert_that(terra::global(bg2, "max", na.rm = TRUE)[,1]> 0,
+                            msg = "Considered buffer distance too big!")
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted

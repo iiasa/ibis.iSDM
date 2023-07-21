@@ -15,7 +15,7 @@ NULL
 #' Can be set either to a uniform numeric [vector], e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default).
 #' **Depending on the resolution of the raster, this parameter needs to be adapted**
 #' @param barrierType A [character] indicating whether any set barrier should be set as \code{'strong'} or \code{'weak'} barriers.
-#' Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole [dispKernel] length
+#' Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole \code{"dispKernel"} length
 #' is covered by the barrier (Default: \code{'strong'}).
 #' @param lddFreq [`numeric`] parameter indicating the frequency of long-distance dispersal (LDD) events. Default is \code{0}, so no long-distance dispersal.
 #' @param lddRange A [`numeric`] value highlighting the minimum and maximum distance of LDD events.
@@ -26,8 +26,8 @@ NULL
 #' Set as probability vector that defines the probability of a cell producing propagules.
 #' @param replicateNb Number of replicates to be used for the analysis (Default: \code{10}).
 #' @param dtmp A [`character`] to a folder where temporary files are to be created.
-#' @details The barrier parameter is defined through [add_barrier].
-#' @seealso [`MigClim.userGuide()`]
+#' @details The barrier parameter is defined through \code{"add_barrier"}.
+#' @seealso \code{"MigClim::MigClim.userGuide()"}
 #' @references
 #' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of
 #' dispersal constraints into projections of species distribution models. Ecography,
@@ -61,7 +61,7 @@ methods::setGeneric("add_constraint_MigClim",
 
 #' @name add_constraint_MigClim
 #' @rdname add_constraint_MigClim
-#' @usage \S4method{add_constraint_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange, iniMatAge, propaguleProdProb, replicateNb, dtmp)
+#' @usage \S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
 methods::setMethod(
   "add_constraint_MigClim",
   methods::signature(mod = "BiodiversityScenario"),

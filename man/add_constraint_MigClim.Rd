@@ -4,7 +4,7 @@
 \alias{add_constraint_MigClim}
 \title{Add constrains to the modelled distribution projection using the MigClim approach}
 \usage{
-\S4method{add_constraint_MigClim}{BiodiversityScenario, character, numeric, numeric, character, numeric, numeric, numeric, numeric, numeric, character}(mod, rcThresholdMode, dispSteps, dispKernel, barrierType, lddFreq, lddRange, iniMatAge, propaguleProdProb, replicateNb, dtmp)
+\S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -19,7 +19,7 @@ Can be set either to a uniform numeric \link{vector}, e.g. \code{c(1,1,1,1)} or 
 \strong{Depending on the resolution of the raster, this parameter needs to be adapted}}
 
 \item{barrierType}{A \link{character} indicating whether any set barrier should be set as \code{'strong'} or \code{'weak'} barriers.
-Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole \link{dispKernel} length
+Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole \code{"dispKernel"} length
 is covered by the barrier (Default: \code{'strong'}).}
 
 \item{lddFreq}{\code{\link{numeric}} parameter indicating the frequency of long-distance dispersal (LDD) events. Default is \code{0}, so no long-distance dispersal.}
@@ -47,7 +47,7 @@ constrain future projections. For a detailed description of MigClim, please the 
 and the UserGuide. \strong{The default parameters chosen here are suggestions.}
 }
 \details{
-The barrier parameter is defined through \link{add_barrier}.
+The barrier parameter is defined through \code{"add_barrier"}.
 }
 \examples{
 \dontrun{
@@ -69,7 +69,7 @@ into species distribution models. R package version 1.6.
 }
 }
 \seealso{
-\code{\link[=MigClim.userGuide]{MigClim.userGuide()}}
+\code{"MigClim::MigClim.userGuide()"}
 }
 \concept{constrain}
 \keyword{scenario}

@@ -22,7 +22,8 @@ NULL
 #' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
 #' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 #' @family engine
-#' @returns An [engine].
+#' @returns An [Engine].
+#' @aliases engine_breg
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine
@@ -711,6 +712,22 @@ engine_breg <- function(x,
             int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
             if(length(int)>0) cofs <- cofs[-int,]
             return(cofs)
+          },
+          # Model convergence check
+          has_converged = function(self){
+            fit <- self$get_data("fit_best")
+            if(is.Waiver(fit)) return(FALSE)
+            return(TRUE)
+          },
+          # Residual function
+          get_residuals = function(self){
+            # Get best object
+            obj <- self$get_data("fit_best")
+            if(is.Waiver(obj)) return(obj)
+            # Get residuals
+            rd <- obj$deviance.residuals
+            assertthat::assert_that(length(rd)>0)
+            return(rd)
           },
           # Engine-specific projection function
           project = function(self, newdata, type = NULL, layer = "mean"){

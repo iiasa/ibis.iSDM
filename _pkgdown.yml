@@ -39,13 +39,15 @@ navbar:
           href: articles/02_integrate_data.html
         - text: 3. Biodiversity projections
           href: articles/03_biodiversity_projections.html
-        - text: 4. Engine comparison
-          href: articles/04_engine_comparison.html
-        - text: 5. Other packages
-          href: articles/05_package_comparison.html
+        - text: 4. Simulating mechanisms
+          href: articles/04_mechanistic_estimation.html
+        - text: 5. Engine comparison
+          href: articles/05_engine_comparison.html
+        - text: 6. Other packages
+          href: articles/06_package_comparison.html
     faq:
       text: FAQ
-      href: articles/06_frequently-asked-questions.html
+      href: articles/07_frequently-asked-questions.html
     contributing:
       text: Contributing
       href: articles/contributing.html
@@ -106,6 +108,8 @@ reference:
       - effects
       - partial
       - spartial
+      - partial_density
+      - limiting
       - threshold
       - ensemble
       - ensemble_partial
@@ -116,7 +120,6 @@ reference:
       These functions are used by engines or spatial processing in the package. Most
       of them are for internal use, but can be of use if input needs to be reformatted.
     contents:
-      - explode_factorized_raster
       - posterior_predict_stanfit
       - alignRasters
       - emptyraster
@@ -157,6 +160,7 @@ reference:
     contents:
       - as.Id
       - is.Id
+      - check
       - has_keyword("misc")
       - print
       - myLog

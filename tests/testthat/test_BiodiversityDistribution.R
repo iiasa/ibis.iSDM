@@ -113,7 +113,13 @@ test_that('Setting up a distribution model',{
   # Also add a zonal layer for limits
   zones <- terra::as.factor( predictors$koeppen_50km )
   x <- distribution(background, limits = zones)
-  expect_s3_class(x$get_limits(), "sf")
+  expect_type(x$get_limits(), "list")
+  expect_s3_class(x$get_limits()$layer, "sf")
+
+  # Alternatively with MCP
+  x <- distribution(background, limits_method = "mcp", mcp_buffer = 1000)
+  expect_type(x$get_limits(), "list")
+  expect_equal(x$get_limits()$limits_method, "mcp")
 
   y <- x |> engine_bart()
   expect_equal( y$get_engine(), "<BART>")

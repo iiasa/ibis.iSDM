@@ -4,9 +4,9 @@
 \alias{validate}
 \title{Validation of a fitted distribution object}
 \usage{
-\S4method{validate}{ANY, character, sf, character, character}(mod, method, point, layer, point_column)
+\S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
 
-\S4method{validate}{SpatRaster, character, sf, character}(mod, method, point, point_column)
+\S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors. Alternatively one can also
@@ -58,11 +58,12 @@ The output metrics for each type are defined as follows:
 \item \code{'sensitivity'} = Sensitivity, TBD
 \item \code{'specificity'} = Specifivity, TBD
 \item \code{'tss'} = True Skill Statistics, TBD
-\item \code{'f1'} = F1 Score or Positive predictive value, TBD
+\item \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
 \item \code{'logloss'} = Log loss, TBD
-\item \code{'expected.accuracy'} = Expected Accuracy, TBD
-\item \code{'kappa'} = Kappa value, TBD
-\item \code{'brier.score'} = Brier score, TBD
+\item \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
+\item \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
+\item \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
+where TP is true positive, TN a true negative, FP the false positive and FN the false negative.
 }
 }
 \note{

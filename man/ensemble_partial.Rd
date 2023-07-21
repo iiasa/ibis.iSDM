@@ -4,7 +4,7 @@
 \alias{ensemble_partial}
 \title{Function to create an ensemble of partial effects from multiple models}
 \usage{
-\S4method{ensemble_partial}{ANY, character, character, character, logical}(..., x.var, method, layer, normalize)
+\S4method{ensemble_partial}{ANY,character,character,character,logical}(...,x.var,method,layer,normalize)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects from which partial responses can be called. In the future provided data.frames might be supported as well.}
@@ -41,7 +41,7 @@ Possible options for creating an ensemble includes:
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. \link{logistic} vs \link{log}.
+Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs \link{log}.
 By default the response functions of each model are normalized.
 }
 \examples{

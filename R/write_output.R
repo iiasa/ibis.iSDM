@@ -29,15 +29,15 @@
 #' @export
 NULL
 methods::setGeneric("write_output",
-                    signature = methods::signature("mod"),
+                    signature = methods::signature("mod", "fname"),
                     function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) standardGeneric("write_output"))
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{ANY, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
-  methods::signature("ANY"),
+  methods::signature("ANY", fname = "character"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...){
     assertthat::assert_that(
       !missing(mod),
@@ -75,10 +75,10 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{BiodiversityScenario, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
-  methods::signature(mod = "BiodiversityScenario"),
+  methods::signature(mod = "BiodiversityScenario",fname = "character"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
@@ -94,10 +94,10 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{SpatRaster, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
-  methods::signature(mod = "SpatRaster"),
+  methods::signature(mod = "SpatRaster",fname = "character"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
@@ -121,10 +121,10 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{data.frame, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
-  methods::signature(mod = "data.frame"),
+  methods::signature(mod = "data.frame",fname = "character"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
     assertthat::assert_that(
       !missing(mod),
@@ -142,10 +142,10 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{stars, character, character, logical}(mod, fname, dt, verbose)
+#' @usage \S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
-  methods::signature(mod = "stars"),
+  methods::signature(mod = "stars",fname = "character"),
   function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
     assertthat::assert_that(
       !missing(mod),
@@ -296,16 +296,16 @@ writeNetCDF <- function(file, fname,
 #' @export
 NULL
 methods::setGeneric("write_summary",
-                    signature = methods::signature("mod"),
+                    signature = methods::signature("mod","fname"),
                     function(mod, fname, partial = FALSE,
                              verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
 
 #' @name write_summary
 #' @rdname write_summary
-#' @usage \S4method{write_summary}{ANY, character, logical, logical}(mod, fname, partial, verbose)
+#' @usage \S4method{write_summary}{ANY,character,logical,logical}(mod,fname,partial,verbose,...)
 methods::setMethod(
   "write_summary",
-  methods::signature(mod = "ANY"),
+  methods::signature(mod = "ANY", fname = "character"),
   function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages"), ...) {
     assertthat::assert_that(
       !missing(mod),
@@ -484,7 +484,7 @@ methods::setGeneric("write_model",
 
 #' @name write_model
 #' @rdname write_model
-#' @usage \S4method{write_model}{ANY, character, logical, logical}(mod, fname, slim, verbose)
+#' @usage \S4method{write_model}{ANY,character,logical,logical}(mod,fname,slim,verbose)
 methods::setMethod(
   "write_model",
   methods::signature(mod = "ANY"),
@@ -556,7 +556,7 @@ methods::setGeneric("load_model",
 
 #' @name load_model
 #' @rdname load_model
-#' @usage \S4method{load_model}{character, logical}(fname, verbose)
+#' @usage \S4method{load_model}{character,logical}(fname,verbose)
 methods::setMethod(
   "load_model",
   methods::signature(fname = "character"),
@@ -581,7 +581,8 @@ methods::setMethod(
     # Convert predictions back to terra if data.frame
     model <- mod$model
     if(is.list( model$predictors_object ) ){
-      ras <- terra::rast(model$predictors, type = "xyz", crs = terra::crs(model$background))
+      ras <- terra::rast(model$predictors, type = "xyz",
+                         crs = terra::crs(model$background))
       assertthat::assert_that(all(names(ras) %in% model$predictors_names))
       # Get any previously set attributes
       ats <- model$predictors_object

@@ -28,25 +28,25 @@ Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default
 \item{...}{Other variables or control parameters}
 }
 \value{
-An\link{engine}.
+An engine.
 }
 \description{
 Gradient descent boosting is an efficient way to optimize any loss function
-of a generalized linear or additive model (such as the GAMs available through the \link{mgcv} R-package).
+of a generalized linear or additive model (such as the GAMs available through the \code{"mgcv"} R-package).
 It furthermore automatically regularizes the fit, thus the resulting model only contains the
 covariates whose baselearners have some influence on the response.
-Depending on the type of the \link{add_biodiversity} data, either poisson process models or
-logistic regressions are estimated. If the \code{only_linear} term in \link{train} is set to \code{FALSE},
+Depending on the type of the \code{add_biodiversity} data, either poisson process models or
+logistic regressions are estimated. If the \code{"only_linear"} term in \link{train} is set to \code{FALSE},
 splines are added to the estimation, thus providing a non-linear additive inference.
 }
 \details{
 :
-This package requires the \link{mboost} R-package to be installed.
-It is in philosophy somewhat related to the \link{engine_xgboost} and \link{XGBoost} R-package,
+This package requires the \code{"mboost"} R-package to be installed.
+It is in philosophy somewhat related to the \link{engine_xgboost} and \code{"XGBoost"} R-package,
 however providing some additional desirable features that make estimation quicker and
 particularly useful for spatial projections. Such as for instance the ability to specifically add
-spatial baselearners via \link{add_latent} or the specification of monotonically constrained priors
-via \link{GDBPrior}.
+spatial baselearners via \link{add_latent_spatial} or the specification of
+monotonically constrained priors via \link{GDBPrior}.
 }
 \examples{
 \dontrun{

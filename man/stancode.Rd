@@ -18,10 +18,10 @@ None.
 \description{
 This helper function shows the code from a trained \link{DistributionModel}
 using the \code{\link{engine_stan}}.
-This function is emulated after a similar functionality in the \link{brms} R-package.
+This function is emulated after a similar functionality in the brms R-package.
 \strong{It only works with models inferred with stan!}
 }
 \seealso{
-\link{rstan}, \link{cmdstanr}, \link{brms}
+rstan, cmdstanr, brms
 }
 \keyword{engine}

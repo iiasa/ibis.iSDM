@@ -4,7 +4,7 @@
 \alias{pseudoabs_settings}
 \title{Settings for specifying pseudo-absence points within the model background}
 \usage{
-\S4method{pseudoabs_settings}{ANY, numeric, numeric, character, numeric, logical, logical ANY}(background, nrpoints, min_ratio, method, buffer_distance, inside, layer, bias)
+\S4method{pseudoabs_settings}{ANY,numeric,numeric,character,numeric,logical,logical,ANY}(background,nrpoints,min_ratio,method,buffer_distance,inside,layer,bias,...)
 }
 \arguments{
 \item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background points can be sampled. Default is

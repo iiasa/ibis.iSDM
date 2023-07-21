@@ -120,7 +120,7 @@ PredictorDataset <- bdproto(
                             all(x %in% names(self$get_data()))
                             )
     # Match indices
-    ind <- match(x, self$get_names())
+    ind <- base::match(x, self$get_names())
     if(is.Raster(self$get_data() )){
       # Overwrite predictor dataset
       if(base::length(ind) == base::length(self$get_names())){

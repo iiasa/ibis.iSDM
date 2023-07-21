@@ -21,7 +21,7 @@ This function takes an internal model matrix and restricts the values seen in th
 to those observed during training.
 }
 \note{
-This function is meant to be used within a certain \code{\link{engine}} or within \code{\link{project}}.
+This function is meant to be used within a certain \code{"engine"} or within \code{\link{project}}.
 }
 \references{
 Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049

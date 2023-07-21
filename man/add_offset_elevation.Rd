@@ -6,7 +6,7 @@
 \usage{
 add_offset_elevation(x, elev, pref, rate = 0.0089, add = TRUE)
 
-\S4method{add_offset_elevation}{BiodiversityDistribution, SpatRaster, numeric}(x, elev, pref)
+\S4method{add_offset_elevation}{BiodiversityDistribution,SpatRaster,numeric,numeric,logical}(x,elev,pref,rate,add)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -33,7 +33,7 @@ The code here was adapted from the Supporting materials script.
 Specifically this functions calculates a continuous decay and decreasing probability of a species to occur
 from elevation limits. It requires a \code{\link{SpatRaster}} with elevation information.
 A generalized logistic transform (aka Richard's curve) is used to calculate decay from the suitable elevational
-areas, with the \code{\link{rate}} parameter allowing to vary the steepness of decline.
+areas, with the \code{"rate"} parameter allowing to vary the steepness of decline.
 
 Note that all offsets created by this function are by default log-transformed before export. In addition
 this function also mean-centers the output as recommended by Ellis-Soto et al.

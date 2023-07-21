@@ -6,7 +6,7 @@
 \usage{
 add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 
-\S4method{add_predictor_elevationpref}{BiodiversityDistribution, ANY, numeric, numeric, character}(x, layer, lower, upper, transform)
+\S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -21,4 +21,11 @@ add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 }
 \description{
 Create lower and upper limits for an elevational range and add them as separate predictors
+}
+\examples{
+\dontrun{
+distribution(background) |>
+  add_predictor_elevationpref(elevation, lower = 200, upper = 1000)
+}
+
 }

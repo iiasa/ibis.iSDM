@@ -15,9 +15,9 @@ similarity(
   ...
 )
 
-\S4method{similarity}{BiodiversityDistribution, character, character, character, logical, logical}(obj, ref_type, method, predictor_names, full, plot)
+\S4method{similarity}{BiodiversityDistribution,character,character,character,logical,logical}(obj,ref_type,method,predictor_names,full,plot,...)
 
-\S4method{similarity}{SpatRaster}(obj)
+\S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
@@ -80,7 +80,7 @@ species distribution models" https://doi.org/10.1111/ddi.12209 \emph{Diversity a
 }
 }
 \seealso{
-\code{\link{dismo}} R-package.
+dismo R-package.
 }
 \keyword{environment}
 \keyword{mahalanobis,}

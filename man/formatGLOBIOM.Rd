@@ -10,6 +10,8 @@ formatGLOBIOM(
   ignore = NULL,
   period = "all",
   template = NULL,
+  shares_to_area = FALSE,
+  use_gdalutils = FALSE,
   verbose = getOption("ibis.setupmessages")
 )
 }
@@ -25,6 +27,10 @@ Options include \code{"reference"} for the first entry, \code{"projection"} for 
 and \code{"all"} for all entries (Default: \code{"reference"}).}
 
 \item{template}{An optional \code{\link{SpatRaster}} object towards which projects should be transformed.}
+
+\item{shares_to_area}{A \code{\link{logical}} on whether shares should be corrected to areas (if identified).}
+
+\item{use_gdalutils}{(Deprecated) \code{\link{logical}} on to use gdalutils hack around.}
 
 \item{verbose}{\code{\link{logical}} on whether to be chatty.}
 }

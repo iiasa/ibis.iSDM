@@ -10,7 +10,7 @@ NULL
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
 #' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details for more
 #' information.
-#' @param value For many dispersal [`constrain`] this is set as [`numeric`] value specifying a
+#' @param value For many dispersal \code{"constrain"} this is set as [`numeric`] value specifying a
 #' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
 #' give the number of iteration steps (or within year migration steps).
 #' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
@@ -31,7 +31,7 @@ NULL
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
-#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires [`MigClim`] package.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
 #' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
 #' can be found in Bateman et al. (2013).
@@ -64,7 +64,7 @@ NULL
 #' # Assumes that a trained 'model' object exists
 #'  mod <- scenario(model) |>
 #'   add_predictors(env = predictors, transform = 'scale', derivates = "none") |>
-#'   add_constrain_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
+#'   add_constraint_dispersal(method = "kissmig", value = 2, pext = 0.1) |>
 #'   project()
 #' }
 #' @name add_constraint
@@ -80,7 +80,7 @@ methods::setGeneric("add_constraint",
 
 #' @name add_constraint
 #' @rdname add_constraint
-#' @usage \S4method{add_constraint}{BiodiversityScenario, character}(mod, method)
+#' @usage \S4method{add_constraint}{BiodiversityScenario,character}(mod,method)
 methods::setMethod(
   "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
@@ -137,7 +137,7 @@ methods::setGeneric("add_constraint_dispersal",
 
 #' @name add_constraint_dispersal
 #' @rdname add_constraint_dispersal
-#' @usage \S4method{add_constraint_dispersal}{BiodiversityScenario, character, numeric}(mod, method, value)
+#' @usage \S4method{add_constraint_dispersal}{BiodiversityScenario,character,numeric}(mod,method,value)
 methods::setMethod(
   "add_constraint_dispersal",
   methods::signature(mod = "BiodiversityScenario"),
@@ -356,7 +356,7 @@ methods::setMethod(
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
-#' @param resistance A [`RasterLayer`] object describing a resistance surface or barrier for use in
+#' @param resistance A [`SpatRaster`] object describing a resistance surface or barrier for use in
 #' connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario
@@ -369,7 +369,7 @@ methods::setGeneric("add_constraint_connectivity",
 
 #' @name add_constraint_connectivity
 #' @rdname add_constraint_connectivity
-#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario, character, numeric, ANY}(mod, method, value, resistance)
+#' @usage \S4method{add_constraint_connectivity}{BiodiversityScenario,character,numeric,ANY}(mod,method,value,resistance)
 methods::setMethod(
   "add_constraint_connectivity",
   methods::signature(mod = "BiodiversityScenario"),
@@ -462,6 +462,12 @@ methods::setMethod(
 #' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
 #' Allows incremental widening of the niche space, thus opening constraints.
 #' @family constraint
+#' @examples
+#' \dontrun{
+#' scenario(fit) |>
+#'  add_constraint_adaptability(value = 1)
+#' }
+#'
 #' @keywords scenario
 #' @exportMethod add_constraint_adaptability
 #' @export
@@ -472,7 +478,7 @@ methods::setGeneric("add_constraint_adaptability",
 
 #' @name add_constraint_adaptability
 #' @rdname add_constraint_adaptability
-#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario, character, character, numeric, numeric}(mod, method, names, value, increment)
+#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
 methods::setMethod(
   "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
@@ -551,7 +557,7 @@ methods::setMethod(
                 sub$predictors[is_presence, names])
   }
   rr <- sapply(df, function(x) range(x, na.rm = TRUE))   # Calculate ranges
-  rsd <- sapply(df, function(x) sd(x, na.rm = TRUE))   # Calculate standard deviation
+  rsd <- sapply(df, function(x) stats::sd(x, na.rm = TRUE))   # Calculate standard deviation
 
   # Apply value and increment if set
   rsd <- rsd * (value + (increment*increment_step))
@@ -589,6 +595,12 @@ methods::setMethod(
 #' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the model background. Has to be binary and
 #' is used for a posthoc masking of projected grid cells.
 #' @family constraint
+#' @examples
+#' \dontrun{
+#' # Add scenario constraint
+#' scenario(fit) |> add_constraint_boundary(range)
+#' }
+#'
 #' @keywords scenario
 #' @exportMethod add_constraint_boundary
 #' @export
@@ -599,7 +611,7 @@ methods::setGeneric("add_constraint_boundary",
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, sf, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "sf"),
@@ -632,7 +644,7 @@ methods::setMethod(
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario, ANY, character}(mod, layer, method)
+#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "ANY"),

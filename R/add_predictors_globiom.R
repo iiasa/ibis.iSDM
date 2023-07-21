@@ -32,6 +32,7 @@ NULL
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @seealso [add_predictors]
+#' @aliases add_predictors_globiom
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
@@ -54,7 +55,7 @@ methods::setGeneric(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution, character}(x, fname)
+#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution", fname = "character"),
@@ -168,7 +169,7 @@ methods::setMethod(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario, character}(x, fname)
+#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityScenario", fname = "character"),
@@ -284,8 +285,11 @@ methods::setMethod(
 #' Options include \code{"reference"} for the first entry, \code{"projection"} for all entries but the first,
 #' and \code{"all"} for all entries (Default: \code{"reference"}).
 #' @param template An optional [`SpatRaster`] object towards which projects should be transformed.
+#' @param shares_to_area A [`logical`] on whether shares should be corrected to areas (if identified).
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack around.
 #' @param verbose [`logical`] on whether to be chatty.
 #' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
+#' @aliases formatGLOBIOM
 #'
 #' @examples \dontrun{
 #' # Expects a filename pointing to a netCDF file.
@@ -293,7 +297,8 @@ methods::setMethod(
 #' }
 #' @keywords internal, utils
 formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
-                          period = "all", template = NULL,
+                          period = "all", template = NULL, shares_to_area = FALSE,
+                          use_gdalutils = FALSE,
                           verbose = getOption("ibis.setupmessages")){
   assertthat::assert_that(
     file.exists(fname),
@@ -302,6 +307,8 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
     is.null(ignore) || is.character(ignore),
     is.character(period),
     is.character(fname),
+    is.logical(shares_to_area),
+    is.logical(use_gdalutils),
     is.logical(verbose)
   )
   period <- match.arg(period, c("reference", "projection", "all"), several.ok = FALSE)
@@ -351,7 +358,16 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       )
 
       # Sometimes variables don't seem to have a time dimension
-      if(!"time" %in% names(stars::st_dimensions(ff))) next()
+      if(!"time" %in% names(stars::st_dimensions(ff))) {
+        if(shares_to_area && length(grep("area",names(ff)))>0){
+          # Check that the unit is a unit
+          if(fatt$var[[v]]$units %in% c("km2","ha","m2")){
+            sc_area <- ff
+          }
+        } else {
+          next()
+        }
+      }
 
       # Crop to background extent if set
       # if(!is.null(template)){
@@ -407,21 +423,22 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
         # FIXME:
         # MJ 14/11/2022 - The code below is buggy, resulting in odd curvilinear extrapolations for Europe
         # Hacky approach now is to convert to raster, crop, project and then convert back.
-        ff <- hack_project_stars(ff, template)
-        # Make background
-        # bg <- stars::st_as_stars(template)
-        #
-        # # Get resolution
-        # res <- sapply(stars::st_dimensions(bg), "[[", "delta")
-        # res[1:2] = abs(res[1:2]) # Assumes the first too entries are the coordinates
-        # assertthat::assert_that(!anyNA(res))
-        #
-        # # And warp by projecting and resampling
-        # ff <- ff |> st_transform(crs = sf::st_crs(template)) |>
-        #   stars::st_warp(crs = sf::st_crs(bg),
-        #                           cellsize = res,
-        #                           method = "near") |>
-        #   stars:::st_transform.stars(crs = sf::st_crs(template))
+        # Only use if gdalUtils is installed
+        if(("gdalUtils" %in% installed.packages()[,1])&&use_gdalutils){
+          ff <- hack_project_stars(ff, template, use_gdalutils)
+        } else {
+          # Make background
+          bg <- stars::st_as_stars(template)
+
+          # # Get resolution
+          res <- stars::st_res(bg)
+          assertthat::assert_that(!anyNA(res))
+
+          # # And warp by projecting and resampling
+          ff <- ff |> stars::st_warp(bg, crs = st_crs(bg),
+                                     cellsize = res, method = "near") |>
+            st_transform(crs = sf::st_crs(template))
+        }
         # Overwrite full dimensions
         full_dis <- stars::st_dimensions(ff)
       }
@@ -489,6 +506,15 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
       template <- terra::rasterize(template, o, field = 1)
       rm(o)
     }
+  }
+
+  # Correct shares to area if set
+  if(shares_to_area && inherits(sc_area,"stars")){
+    # Transform and warp the shares
+    sc_area <- st_warp(sc_area, stars::st_as_stars(template), crs = sf::st_crs(sc),method = "near")
+    # grep those layers with the name share
+    shares <- grep(pattern = "share|fraction|proportion", names(sc),value = TRUE)
+    sc[shares] <- sc[shares] * sc_area
   }
 
   # Now format outputs depending on type, either returning the raster or the stars object
