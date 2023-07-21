@@ -52,7 +52,7 @@ Default is an educated guess (Default: \code{NULL}).}
 \item{...}{Other variables}
 }
 \value{
-An engine.
+An \link{Engine}.
 }
 \description{
 Model components are specified with general inputs and mapping methods to the

@@ -51,7 +51,7 @@ tresting dataset (Default: \code{0.75}).}
 \item{...}{Other none specified parameters.}
 }
 \value{
-An engine.
+An \link{Engine}.
 }
 \description{
 Allows to estimate eXtreme gradient descent boosting for tree-based or linear boosting regressions.

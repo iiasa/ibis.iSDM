@@ -32,6 +32,9 @@ Imports:
     ncdf4,
     parallel,
     Matrix,
+    ncmeta,
+    parallel,
+    posterior,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
     sf (>= 0.9),
@@ -39,7 +42,6 @@ Imports:
     stats,
     tibble (>= 2.0.0),
     uuid, 
-    posterior,
     utils
 Depends:
     R(>= 4.1.0)
@@ -58,7 +60,6 @@ Suggests:
     knitr,
     mboost,
     modEvA,
-    ncmeta,
     progress,
     rmarkdown,
     rstan (>= 2.21.0),

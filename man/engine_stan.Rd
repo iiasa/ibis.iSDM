@@ -44,7 +44,7 @@ See \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).}
 \item{...}{Other variables}
 }
 \value{
-An engine.
+An \link{Engine}.
 }
 \description{
 Stan is probabilistic programming language that can be used to

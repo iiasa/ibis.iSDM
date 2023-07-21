@@ -35,7 +35,6 @@
 #' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
 #' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
 #' where TP is true positive, TN a true negative, FP the false positive and FN the false negative.
-
 #'
 #' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
 #' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.

@@ -53,7 +53,7 @@ NULL
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
 #' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
-#' @returns An engine.
+#' @returns An [Engine].
 #' @aliases engine_inlabru
 #' @examples
 #' \dontrun{

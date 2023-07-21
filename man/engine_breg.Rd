@@ -24,7 +24,7 @@ engine_breg(
 \item{...}{Other none specified parameters passed on to the model.}
 }
 \value{
-An engine.
+An \link{Engine}.
 }
 \description{
 Efficient MCMC algorithm for linear regression models that makes use of

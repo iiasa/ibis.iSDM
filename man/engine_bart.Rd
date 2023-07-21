@@ -20,7 +20,7 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 \item{...}{Other options.}
 }
 \value{
-An engine.
+An \link{Engine}.
 }
 \description{
 The Bayesian regression approach to a sum of complementary trees is to shrink
