@@ -349,6 +349,12 @@ methods::setMethod(
         ras_of <- x$offset
         names(ras_of) <- "spatial_offset"
       }
+      # Align with predictors object just to be sure
+      temp <- emptyraster(model$predictors_object$get_data())
+      ras_of <- terra::resample(ras_of, temp, method = "bilinear")
+      assertthat::assert_that(terra::ncell(temp) == terra::ncell(ras_of),
+                              msg = "Something went wrong with the offset creation!")
+
       # Save overall offset
       ofs <- terra::as.data.frame(ras_of, xy = TRUE, na.rm = FALSE)
       names(ofs)[which(names(ofs)==names(ras_of))] <- "spatial_offset"
@@ -524,7 +530,7 @@ methods::setMethod(
       model[['biodiversity']][[id]][['predictors']] <- env
       model[['biodiversity']][[id]][['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
       model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
-  }
+    }
 
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){

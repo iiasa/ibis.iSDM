@@ -26,6 +26,11 @@ test_that('Setting up a distribution model',{
   expect_equal(nrow(virtual_points), 208)
   expect_equal(terra::ncell(predictors), 7313)
 
+  # Expect errors if there are non-unique data
+  background2 <- background
+  background2 <- background2 * terra::cellSize(background2)
+  expect_error(x <- distribution(background2))
+
   # Now set them one up step by step
   x <- distribution(background)
   expect_s3_class(x,'BiodiversityDistribution')

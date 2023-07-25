@@ -103,6 +103,7 @@ methods::setMethod(
 
     # Get all point data in distribution model
     if(is.null(point)){
+      if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
       point <- collect_occurrencepoints(model = obj$model,
                                         include_absences = FALSE,
                                         point_column = "observed",
@@ -138,7 +139,8 @@ methods::setMethod(
     if(!inherits(point,"sf")){ point <- guess_sf(point) }
 
     # Now self call threshold
-    out <- threshold(ras, method = method, value = value, point = point, format = format,...)
+    out <- .stackthreshold(obj = ras,method = method, value = value,point = point, format = format,
+                           return_threshold = return_threshold)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj and clean up old thresholds before
     tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
@@ -172,12 +174,11 @@ methods::setMethod(
     names(out) <- names(obj)
   } else {
     # Return the raster instead
-    out <- terra::rast()
     if(method == "min.cv"){
       # If the coefficient of variation is to be minmized, mask first all values with the threshold only
       assertthat::assert_that(terra::nlyr(obj)>2, "sd" %in% names(obj))
       # Get global coefficient of variation
-      errortr <- quantile(obj[["cv"]], .3)
+      errortr <- terra::global(obj[["cv"]], fun = quantile, na.rm = TRUE)[[3]]
       assertthat::assert_that(is.numeric(errortr))
       # Create mask
       mm <- obj[["cv"]]
@@ -187,9 +188,9 @@ methods::setMethod(
       value <- errortr
     }
     # Now loop
-    for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                 value = value, point = point, format = format,
-                                                 return_threshold = return_threshold, ...) )
+    out <- threshold(obj, method = method,
+                     value = value, point = point, format = format,
+                     return_threshold = return_threshold, ...)
   }
   return(out)
 }

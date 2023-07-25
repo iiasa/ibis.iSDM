@@ -92,6 +92,11 @@ methods::setMethod(
       suppressMessages( poipo <- point_in_polygon(poly = x$background, points = poipo) )
     }
 
+    # Convert occurrence field to numeric
+    if(is.factor(poipo[[field_occurrence]])) {
+      poipo[[field_occurrence]] <- as.numeric(as.character(poipo[[field_occurrence]]))
+    }
+
     # Check whether there are any absence point, if so stop with error
     if(any(poipo[[field_occurrence]] == 0)){
       if(getOption("ibis.setupmessages")) myLog("[Setup]","yellow",
@@ -225,7 +230,9 @@ methods::setMethod(
     }
 
     # Record presence absence to 0 and 1
-    poipa[[field_occurrence]] <- as.numeric(poipa[[field_occurrence]]) # Convert to numeric for occasional factor formatting
+    if(is.factor(poipa[[field_occurrence]])) {
+      poipa[[field_occurrence]] <- as.numeric(as.character(poipa[[field_occurrence]]))
+    }
 
     # Convert formula if necessary
     formula = to_formula(formula)
@@ -354,6 +361,11 @@ methods::setMethod(
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(polpo)){
       polpo <- polpo |> sf::st_transform(crs = sf::st_crs(x$background))
+    }
+
+    # Record presence absence to 0 and 1
+    if(is.factor(polpo[[field_occurrence]])) {
+      polpo[[field_occurrence]] <- as.numeric(as.character(polpo[[field_occurrence]]))
     }
 
     # Simulate presence absence points rather than using the range directly
@@ -527,6 +539,11 @@ methods::setMethod(
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(polpa)){
       polpa <- polpa |> sf::st_transform(crs = sf::st_crs(x$background))
+    }
+
+    # Record presence absence to 0 and 1
+    if(is.factor(polpa[[field_occurrence]])) {
+      polpa[[field_occurrence]] <- as.numeric(as.character(polpa[[field_occurrence]]))
     }
 
     # Simulate presence absence points rather than using the range directly

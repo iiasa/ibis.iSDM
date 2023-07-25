@@ -96,6 +96,54 @@ methods::setMethod(
   }
 )
 
+#' @name add_offset
+#' @rdname add_offset
+#' @usage \S4method{add_offset}{BiodiversityDistribution,sf,logical}(x,layer,add)
+methods::setMethod(
+  "add_offset",
+  methods::signature(x = "BiodiversityDistribution", layer = "sf"),
+  function(x, layer, add = TRUE) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            inherits(layer, "sf"),
+                            is.logical(add)
+    )
+
+    # Template raster for rasterization background
+    if(!is.Waiver(x$predictors)){
+      temp <- emptyraster(x$predictors$get_data())
+    } else {
+      # Try and guess an sensible background raster
+      myLog('[Setup]','red',
+            'CAREFUL - This might not work without predictors already in the model.
+      Add offset after predictors')
+      temp <- terra::rast( extent = terra::ext(x$background),
+                           resolution = diff(sf::st_bbox(x$background)[c(1,3)]) / 100,
+                           crs = terra::crs(x$background))
+    }
+
+    # Check to make the entries valid
+    if( any(!sf::st_is_valid(layer)) ){
+      layer <- sf::st_make_valid(layer) # Check whether to make them valid
+      if( any(!sf::st_is_valid(layer)) ){
+        # If still has errors, combine
+        suppressMessages( layer <- layer |> sf::st_combine() |> sf::st_as_sf() )
+      }
+    }
+
+    # If layer has multiple entries join them
+    if(nrow(layer)>1) suppressMessages( layer <- layer |> sf::st_union() |> sf::st_as_sf() )
+
+    # Rasterize the range
+    ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
+    ras_range <- terra::mask(ras_range, x$background)
+    names(ras_range) <-  "spatial_offset"
+
+    # Call with new SpatRaster object
+    x <- add_offset(x, ras_range, add)
+    return(x)
+  }
+)
+
 #' Function to remove an offset
 #'
 #' @description
@@ -121,7 +169,7 @@ NULL
 #' @export
 methods::setGeneric(
   "rm_offset",
-  signature = methods::signature("x", "layer"),
+  signature = methods::signature("x"),
   function(x, layer = NULL) standardGeneric("rm_offset"))
 
 #' @name rm_offset
@@ -129,10 +177,10 @@ methods::setGeneric(
 #' @usage \S4method{rm_offset}{BiodiversityDistribution,character}(x,layer)
 methods::setMethod(
   "rm_offset",
-  methods::signature(x = "BiodiversityDistribution", layer = "character"),
+  methods::signature(x = "BiodiversityDistribution"),
   function(x, layer = NULL) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.character(layer) || is.null(layer)
+                            missing(layer) || is.character(layer) || is.null(layer)
     )
     # If no offset can be found, just return proto object
     if(is.Waiver(x$offset)){ return(x) }
@@ -429,7 +477,6 @@ methods::setMethod(
       if(!("gnlm" %in% loadedNamespaces()) || ('gnlm' %notin% utils::sessionInfo()$otherPkgs) ) {
         try({requireNamespace('gnlm');attachNamespace("gnlm")},silent = TRUE)
       }
-      assertthat::assert_that(isTRUE(point) || inherits(point, "sf"))
     }
 
     # Messenger
@@ -467,7 +514,7 @@ methods::setMethod(
     if(nrow(layer)>1) suppressMessages( layer <- layer |> sf::st_union() |> sf::st_as_sf() )
 
     # Get Point information if set
-    if(isTRUE(point)){
+    if(isTRUE(point) || is.null(point)){
       assertthat::assert_that(length(x$get_biodiversity_types()) > 0)
       #TODO: Collate point from x
       stop("Automatic point collation not yet implemented. Please supply a sf layer to point!")

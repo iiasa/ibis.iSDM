@@ -207,12 +207,13 @@ DistributionModel <- bdproto(
     if(length(grep('threshold',rl))>0){
 
       # Get stack of computed thresholds
-      ras <- self$get_data( grep('threshold', rl, value = TRUE)[[what]] )
+      ras <- self$get_data( grep('threshold', rl, value = TRUE) )[[what]]
       suppressWarnings(
         ras <- terra::droplevels(ras)
       )
       # Get colour palette
       format <- attr(ras[[1]], 'format') # Format attribute
+      if(is.null(format)) format = "binary"
       if(format == "normalize"){
         col <- colorRampPalette(c("grey","#EB072F","#FFE900","#5A94DD","black"))(100)
       } else if(format == "percentile") {
