@@ -111,6 +111,17 @@ methods::setMethod(
     # Check that arguments are valid
     assertthat::assert_that( inherits(background,'SpatRaster')  )
 
+    # Make an error check that units have a single units
+    vals <- unique(background)[[1]]
+    if(length(vals)>1){
+      # Set values of 0 to NA
+      background[background == 0] <- NA
+      vals <- unique(background)[[1]]
+      assertthat::assert_that(length(vals)==1,
+                              msg = "Values in background layer can only be unique!")
+    }
+
+
     # Convert raster to dissolved polygons to get a study boundary
     newbg <- sf::st_as_sf(
       terra::as.polygons(background, dissolve = TRUE)

@@ -177,7 +177,9 @@ methods::setMethod(
           for(i in 1:length(n_tr)){
             o <- mods[[i]]$get_data(n_tr[i])
             # Grep layer name from the stack
-            ras_tr <- c(ras_tr, o[[grep(layer, names(o))]] )
+            suppressWarnings(
+              ras_tr <- c(ras_tr, o[[grep(layer, names(o))]] )
+            )
           }
           # Calculate frequency
           new <- sum(ras_tr, na.rm = TRUE)
