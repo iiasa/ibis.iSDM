@@ -95,7 +95,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-07-25</h4>
+            <h4 data-toc-skip class="date">2023-07-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_integrate_data.Rmd" class="external-link"><code>vignettes/articles/02_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>02_integrate_data.Rmd</code></div>
@@ -174,9 +174,9 @@ below.</p>
 <span><span class="va">basemodel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.350076 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.360064 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.361188 | Transforming predictors...</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:50.747572 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:50.756916 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:50.757814 | Transforming predictors...</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="integration-through-predictors">Integration through predictors<a class="anchor" aria-label="anchor" href="#integration-through-predictors"></a>
@@ -194,7 +194,7 @@ scenarios.</p>
 <span><span class="co"># Here we simply add the range as simple binary predictor</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="va">basemodel</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="../reference/add_predictor_range.html">add_predictor_range</a></span><span class="op">(</span><span class="va">virtual_range</span>, method <span class="op">=</span> <span class="st">"distance"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.538268 | Adding range predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:50.935369 | Adding range predictors...</span></span></span>
 <span></span>
 <span><span class="co"># We can see that the range has been added to the predictors object</span></span>
 <span><span class="co"># 'distance_range'</span></span>
@@ -217,14 +217,14 @@ sea level, this can be added as follows:</p>
 <span><span class="va">basemodel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>  <span class="op">|&gt;</span> </span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.905108 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.906928 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.907526 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:51.304083 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:51.305888 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:51.306468 | Transforming predictors...</span></span></span>
 <span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="va">basemodel</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_predictor_elevationpref.html">add_predictor_elevationpref</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">elevation_mean_50km</span>,</span>
 <span>                              lower <span class="op">=</span> <span class="fl">300</span>, upper <span class="op">=</span> <span class="fl">800</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:03.96504 | Formatting elevational preference predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:51.362667 | Formatting elevational preference predictors...</span></span></span>
 <span></span>
 <span><span class="co"># Plot the threshold for an upper</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span> <span class="va">mod1</span><span class="op">$</span><span class="va">predictors</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"elev_low"</span>, <span class="st">"elev_high"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span></code></pre></div>
@@ -257,15 +257,15 @@ al. (2016)</a>.</p>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">engine_glmnet</span>() <span class="sc">|&gt;</span>  </span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Train</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">runname =</span> <span class="st">"Prediction with range offset"</span>,<span class="at">only_linear =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:04.587715 | Creating distribution object... [39m</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:04.589578 | Adding predictors... [39m</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:04.590156 | Transforming predictors... [39m</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:04.61761 | Adding poipo dataset... [39m</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:04.770792 | Adding range offset... [39m</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:05.007706 | Collecting input parameters. [39m</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:05.138095 | Adding engine-specific parameters. [39m</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:05.140264 | Engine setup. [39m</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:05.60945 | Starting fitting: Species projection [39m</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:39:51.985526 | Creating distribution object... [39m</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:39:51.987377 | Adding predictors... [39m</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:39:51.987947 | Transforming predictors... [39m</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:39:52.014635 | Adding poipo dataset... [39m</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:39:52.17259 | Adding range offset... [39m</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:39:52.406741 | Collecting input parameters. [39m</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:39:52.530951 | Adding engine-specific parameters. [39m</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:39:52.533091 | Engine setup. [39m</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:39:52.991715 | Starting fitting: Species projection [39m</span></span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Training</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
@@ -3390,8 +3390,8 @@ al. (2016)</a>.</p>
 <span id="cb6-3140"><a href="#cb6-3140" aria-hidden="true" tabindex="-1"></a>  <span class="er">|=====================================================================</span> <span class="er">|</span>  <span class="dv">99</span>%</span>
 <span id="cb6-3141"><a href="#cb6-3141" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb6-3142"><a href="#cb6-3142" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb6-3143"><a href="#cb6-3143" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:07.877469 | Starting prediction... [39m</span></span>
-<span id="cb6-3144"><a href="#cb6-3144" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-25 22:12:07.903387 | Completed after 2.89 secs [39m</span></span>
+<span id="cb6-3143"><a href="#cb6-3143" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:39:55.245081 | Starting prediction... [39m</span></span>
+<span id="cb6-3144"><a href="#cb6-3144" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-29 20:39:55.270938 | Completed after 2.86 secs [39m</span></span>
 <span id="cb6-3145"><a href="#cb6-3145" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3146"><a href="#cb6-3146" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod1)</span></code></pre></div>
 <p><img src="02_integrate_data_files/figure-html/Train%20model%20with%20range%20offset-1.png" width="700" style="display: block; margin: auto;"></p>
@@ -3452,24 +3452,24 @@ function.</p>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>      <span class="fu"><a href="../reference/engine_inlabru.html">engine_inlabru</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:08.23757 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:08.239353 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:08.239938 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:12:08.267379 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:55.614094 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:55.61592 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:55.616502 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:39:55.642865 | Adding poipo dataset...</span></span></span>
 <span></span>
 <span><span class="co"># Make a first model</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:08.420892 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:08.496948 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:10.100667 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:10.271998 | Starting fitting.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:39:55.800996 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:39:55.875507 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:39:57.430208 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:39:57.5969 | Starting fitting.</span></span></span>
 <span><span class="co">#&gt; iinla: Iteration 1 [max:10]</span></span>
 <span><span class="co">#&gt; iinla: Iteration 2 [max:10]</span></span>
 <span><span class="co">#&gt; iinla: Max deviation from previous: 3.76e-08% of SD, and line search is inactive [stop if: &lt;10% and line search inactive]</span></span>
 <span><span class="co">#&gt; iinla: Convergence criterion met, running final INLA integration with known theta mode.</span></span>
 <span><span class="co">#&gt; iinla: Iteration 3 [max:10]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:16.691557 | Starting prediction.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-25 22:12:32.42768 | Completed after 24 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:03.782245 | Starting prediction.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-29 20:40:19.283788 | Completed after 23.48 secs</span></span></span>
 <span></span>
 <span><span class="co"># Now assume we now that the species occurs more likely in intensively farmed land. </span></span>
 <span><span class="co"># We can use this information to construct a prior for the linear coefficient.</span></span>
@@ -3481,22 +3481,22 @@ function.</p>
 <span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priors.html">priors</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
 <span><span class="co"># The variables and values in this object can be queried as well</span></span>
 <span><span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; e87fce77-7ca0-4d38-97d2-d1ebe0bb48db </span></span>
+<span><span class="co">#&gt; d08fa75e-9791-4b78-a6d0-1f69448afb55 </span></span>
 <span><span class="co">#&gt;                 "CLC3_211_mean_50km"</span></span>
 <span></span>
 <span><span class="co"># Priors can then be added via </span></span>
 <span><span class="va">mod2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/add_priors.html">add_priors</a></span><span class="op">(</span><span class="va">pp</span><span class="op">)</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:32.44276 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:32.511301 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:32.655221 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:33.170781 | Starting fitting.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:19.298674 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:19.365659 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:19.511924 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:20.028825 | Starting fitting.</span></span></span>
 <span><span class="co">#&gt; iinla: Iteration 1 [max:10]</span></span>
 <span><span class="co">#&gt; iinla: Iteration 2 [max:10]</span></span>
 <span><span class="co">#&gt; iinla: Max deviation from previous: 0.000114% of SD, and line search is inactive [stop if: &lt;10% and line search inactive]</span></span>
 <span><span class="co">#&gt; iinla: Convergence criterion met, running final INLA integration with known theta mode.</span></span>
 <span><span class="co">#&gt; iinla: Iteration 3 [max:10]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:12:38.299189 | Starting prediction.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-25 22:12:49.316941 | Completed after 16.87 secs</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:40:25.07522 | Starting prediction.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-29 20:40:36.255605 | Completed after 16.95 secs</span></span></span>
 <span><span class="co"># Or alternatively directly as parameter via add_predictors,</span></span>
 <span><span class="co"># e.g. add_predictors(env = predictors, priors = pp)</span></span>
 <span></span>
@@ -3530,14 +3530,14 @@ partial responses via <code><a href="../reference/ensemble_partial.html">ensembl
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Add dataset 1 </span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_biodiversity_poipo</span>(<span class="at">poipo =</span> virtual_species, <span class="at">name =</span> <span class="st">"Dataset1"</span>,<span class="at">field_occurrence =</span> <span class="st">"Observed"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">train</span>(<span class="at">runname =</span> <span class="st">"Test1"</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:53.1243 | Creating distribution object... [39m</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:53.126123 | Adding predictors... [39m</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:53.126722 | Transforming predictors... [39m</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:53.169703 | Adding poipo dataset... [39m</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:53.32212 | Collecting input parameters. [39m</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:53.390944 | Adding engine-specific parameters. [39m</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:53.392694 | Engine setup. [39m</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:53.664222 | Starting fitting: Dataset1 [39m</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:40.115618 | Creating distribution object... [39m</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:40.117446 | Adding predictors... [39m</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:40.118046 | Transforming predictors... [39m</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:40.161456 | Adding poipo dataset... [39m</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:40.31805 | Collecting input parameters. [39m</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:40.385686 | Adding engine-specific parameters. [39m</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:40.387392 | Engine setup. [39m</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:40.656553 | Starting fitting: Dataset1 [39m</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Training</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
@@ -6662,8 +6662,8 @@ partial responses via <code><a href="../reference/ensemble_partial.html">ensembl
 <span id="cb9-3137"><a href="#cb9-3137" aria-hidden="true" tabindex="-1"></a>  <span class="er">|=====================================================================</span> <span class="er">|</span>  <span class="dv">99</span>%</span>
 <span id="cb9-3138"><a href="#cb9-3138" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb9-3139"><a href="#cb9-3139" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb9-3140"><a href="#cb9-3140" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:55.12946 | Starting prediction... [39m</span></span>
-<span id="cb9-3141"><a href="#cb9-3141" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-25 22:12:55.149961 | Completed after 1.83 secs [39m</span></span>
+<span id="cb9-3140"><a href="#cb9-3140" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:42.182275 | Starting prediction... [39m</span></span>
+<span id="cb9-3141"><a href="#cb9-3141" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-29 20:40:42.203112 | Completed after 1.88 secs [39m</span></span>
 <span id="cb9-3142"><a href="#cb9-3142" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3143"><a href="#cb9-3143" aria-hidden="true" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">distribution</span>(background) <span class="sc">|&gt;</span>  </span>
 <span id="cb9-3144"><a href="#cb9-3144" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_predictors</span>(<span class="at">env =</span> predictors, <span class="at">transform =</span> <span class="st">"scale"</span>, <span class="at">derivates =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span> </span>
@@ -6672,70 +6672,70 @@ partial responses via <code><a href="../reference/ensemble_partial.html">ensembl
 <span id="cb9-3147"><a href="#cb9-3147" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_biodiversity_polpo</span>(virtual_range, <span class="at">name =</span> <span class="st">"Dataset2"</span>,<span class="at">field_occurrence =</span> <span class="st">"Observed"</span>,</span>
 <span id="cb9-3148"><a href="#cb9-3148" aria-hidden="true" tabindex="-1"></a>                             <span class="at">simulate =</span> <span class="cn">TRUE</span>,<span class="at">simulate_points =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span>  </span>
 <span id="cb9-3149"><a href="#cb9-3149" aria-hidden="true" tabindex="-1"></a>      <span class="fu">train</span>(<span class="at">runname =</span> <span class="st">"Test1"</span>, <span class="at">only_linear =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb9-3150"><a href="#cb9-3150" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:55.21952 | Creating distribution object... [39m</span></span>
-<span id="cb9-3151"><a href="#cb9-3151" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:55.221387 | Adding predictors... [39m</span></span>
-<span id="cb9-3152"><a href="#cb9-3152" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:55.221985 | Transforming predictors... [39m</span></span>
-<span id="cb9-3153"><a href="#cb9-3153" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:55.268101 | Adding polpo dataset... [39m</span></span>
-<span id="cb9-3154"><a href="#cb9-3154" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-25 22:12:55.384875 | Adding poipo dataset... [39m</span></span>
-<span id="cb9-3155"><a href="#cb9-3155" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:55.59935 | Collecting input parameters. [39m</span></span>
-<span id="cb9-3156"><a href="#cb9-3156" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:55.66997 | Adding engine-specific parameters. [39m</span></span>
-<span id="cb9-3157"><a href="#cb9-3157" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:55.671865 | Engine setup. [39m</span></span>
-<span id="cb9-3158"><a href="#cb9-3158" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:12:56.004544 | Starting fitting: Dataset2_simulated [39m</span></span>
-<span id="cb9-3159"><a href="#cb9-3159" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  train-logloss:1.228779 </span></span>
+<span id="cb9-3150"><a href="#cb9-3150" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:42.271639 | Creating distribution object... [39m</span></span>
+<span id="cb9-3151"><a href="#cb9-3151" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:42.273545 | Adding predictors... [39m</span></span>
+<span id="cb9-3152"><a href="#cb9-3152" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:42.274158 | Transforming predictors... [39m</span></span>
+<span id="cb9-3153"><a href="#cb9-3153" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:42.318165 | Adding polpo dataset... [39m</span></span>
+<span id="cb9-3154"><a href="#cb9-3154" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Setup] 2023-07-29 20:40:42.493335 | Adding poipo dataset... [39m</span></span>
+<span id="cb9-3155"><a href="#cb9-3155" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:42.711663 | Collecting input parameters. [39m</span></span>
+<span id="cb9-3156"><a href="#cb9-3156" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:42.791404 | Adding engine-specific parameters. [39m</span></span>
+<span id="cb9-3157"><a href="#cb9-3157" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:42.793286 | Engine setup. [39m</span></span>
+<span id="cb9-3158"><a href="#cb9-3158" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:43.12845 | Starting fitting: Dataset2_simulated [39m</span></span>
+<span id="cb9-3159"><a href="#cb9-3159" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  train-logloss:1.228039 </span></span>
 <span id="cb9-3160"><a href="#cb9-3160" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Will train until train_logloss hasn't improved in 1250 rounds.</span></span>
 <span id="cb9-3161"><a href="#cb9-3161" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-3162"><a href="#cb9-3162" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [101]    train-logloss:1.187845 </span></span>
-<span id="cb9-3163"><a href="#cb9-3163" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [201]    train-logloss:1.150671 </span></span>
-<span id="cb9-3164"><a href="#cb9-3164" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [301]    train-logloss:1.116738 </span></span>
-<span id="cb9-3165"><a href="#cb9-3165" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [401]    train-logloss:1.085669 </span></span>
-<span id="cb9-3166"><a href="#cb9-3166" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [501]    train-logloss:1.057130 </span></span>
-<span id="cb9-3167"><a href="#cb9-3167" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [601]    train-logloss:1.030894 </span></span>
-<span id="cb9-3168"><a href="#cb9-3168" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [701]    train-logloss:1.006695 </span></span>
-<span id="cb9-3169"><a href="#cb9-3169" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [801]    train-logloss:0.984353 </span></span>
-<span id="cb9-3170"><a href="#cb9-3170" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [901]    train-logloss:0.963689 </span></span>
-<span id="cb9-3171"><a href="#cb9-3171" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1001]   train-logloss:0.944515 </span></span>
-<span id="cb9-3172"><a href="#cb9-3172" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1101]   train-logloss:0.926732 </span></span>
-<span id="cb9-3173"><a href="#cb9-3173" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1201]   train-logloss:0.910194 </span></span>
-<span id="cb9-3174"><a href="#cb9-3174" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1301]   train-logloss:0.894808 </span></span>
-<span id="cb9-3175"><a href="#cb9-3175" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1401]   train-logloss:0.880495 </span></span>
-<span id="cb9-3176"><a href="#cb9-3176" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1501]   train-logloss:0.867142 </span></span>
-<span id="cb9-3177"><a href="#cb9-3177" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1601]   train-logloss:0.854699 </span></span>
-<span id="cb9-3178"><a href="#cb9-3178" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1701]   train-logloss:0.843049 </span></span>
-<span id="cb9-3179"><a href="#cb9-3179" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1801]   train-logloss:0.832157 </span></span>
-<span id="cb9-3180"><a href="#cb9-3180" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1901]   train-logloss:0.821959 </span></span>
-<span id="cb9-3181"><a href="#cb9-3181" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2001]   train-logloss:0.812417 </span></span>
-<span id="cb9-3182"><a href="#cb9-3182" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2101]   train-logloss:0.803485 </span></span>
-<span id="cb9-3183"><a href="#cb9-3183" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2201]   train-logloss:0.795099 </span></span>
-<span id="cb9-3184"><a href="#cb9-3184" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2301]   train-logloss:0.787266 </span></span>
-<span id="cb9-3185"><a href="#cb9-3185" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2401]   train-logloss:0.779880 </span></span>
-<span id="cb9-3186"><a href="#cb9-3186" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2501]   train-logloss:0.772950 </span></span>
-<span id="cb9-3187"><a href="#cb9-3187" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2601]   train-logloss:0.766440 </span></span>
-<span id="cb9-3188"><a href="#cb9-3188" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2701]   train-logloss:0.760324 </span></span>
-<span id="cb9-3189"><a href="#cb9-3189" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2801]   train-logloss:0.754544 </span></span>
-<span id="cb9-3190"><a href="#cb9-3190" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2901]   train-logloss:0.749119 </span></span>
-<span id="cb9-3191"><a href="#cb9-3191" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3001]   train-logloss:0.744054 </span></span>
-<span id="cb9-3192"><a href="#cb9-3192" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3101]   train-logloss:0.739233 </span></span>
-<span id="cb9-3193"><a href="#cb9-3193" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3201]   train-logloss:0.734751 </span></span>
-<span id="cb9-3194"><a href="#cb9-3194" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3301]   train-logloss:0.730508 </span></span>
-<span id="cb9-3195"><a href="#cb9-3195" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3401]   train-logloss:0.726493 </span></span>
-<span id="cb9-3196"><a href="#cb9-3196" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3501]   train-logloss:0.722697 </span></span>
-<span id="cb9-3197"><a href="#cb9-3197" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3601]   train-logloss:0.719122 </span></span>
-<span id="cb9-3198"><a href="#cb9-3198" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3701]   train-logloss:0.715718 </span></span>
-<span id="cb9-3199"><a href="#cb9-3199" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3801]   train-logloss:0.712480 </span></span>
-<span id="cb9-3200"><a href="#cb9-3200" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3901]   train-logloss:0.709441 </span></span>
-<span id="cb9-3201"><a href="#cb9-3201" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4001]   train-logloss:0.706553 </span></span>
-<span id="cb9-3202"><a href="#cb9-3202" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4101]   train-logloss:0.703821 </span></span>
-<span id="cb9-3203"><a href="#cb9-3203" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4201]   train-logloss:0.701252 </span></span>
-<span id="cb9-3204"><a href="#cb9-3204" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4301]   train-logloss:0.698760 </span></span>
-<span id="cb9-3205"><a href="#cb9-3205" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4401]   train-logloss:0.696414 </span></span>
-<span id="cb9-3206"><a href="#cb9-3206" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4501]   train-logloss:0.694166 </span></span>
-<span id="cb9-3207"><a href="#cb9-3207" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4601]   train-logloss:0.692037 </span></span>
-<span id="cb9-3208"><a href="#cb9-3208" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4701]   train-logloss:0.690042 </span></span>
-<span id="cb9-3209"><a href="#cb9-3209" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4801]   train-logloss:0.688091 </span></span>
-<span id="cb9-3210"><a href="#cb9-3210" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4901]   train-logloss:0.686252 </span></span>
-<span id="cb9-3211"><a href="#cb9-3211" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5000]   train-logloss:0.684491</span></span>
-<span id="cb9-3212"><a href="#cb9-3212" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-25 22:13:11.744027 | Starting prediction... [39m</span></span>
-<span id="cb9-3213"><a href="#cb9-3213" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-25 22:13:13.921577 | Completed after 18.32 secs [39m</span></span>
+<span id="cb9-3162"><a href="#cb9-3162" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [101]    train-logloss:1.187135 </span></span>
+<span id="cb9-3163"><a href="#cb9-3163" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [201]    train-logloss:1.149970 </span></span>
+<span id="cb9-3164"><a href="#cb9-3164" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [301]    train-logloss:1.116047 </span></span>
+<span id="cb9-3165"><a href="#cb9-3165" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [401]    train-logloss:1.084996 </span></span>
+<span id="cb9-3166"><a href="#cb9-3166" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [501]    train-logloss:1.056491 </span></span>
+<span id="cb9-3167"><a href="#cb9-3167" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [601]    train-logloss:1.030247 </span></span>
+<span id="cb9-3168"><a href="#cb9-3168" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [701]    train-logloss:1.006054 </span></span>
+<span id="cb9-3169"><a href="#cb9-3169" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [801]    train-logloss:0.983715 </span></span>
+<span id="cb9-3170"><a href="#cb9-3170" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [901]    train-logloss:0.963046 </span></span>
+<span id="cb9-3171"><a href="#cb9-3171" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1001]   train-logloss:0.943884 </span></span>
+<span id="cb9-3172"><a href="#cb9-3172" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1101]   train-logloss:0.926106 </span></span>
+<span id="cb9-3173"><a href="#cb9-3173" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1201]   train-logloss:0.909572 </span></span>
+<span id="cb9-3174"><a href="#cb9-3174" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1301]   train-logloss:0.894161 </span></span>
+<span id="cb9-3175"><a href="#cb9-3175" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1401]   train-logloss:0.879827 </span></span>
+<span id="cb9-3176"><a href="#cb9-3176" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1501]   train-logloss:0.866440 </span></span>
+<span id="cb9-3177"><a href="#cb9-3177" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1601]   train-logloss:0.853950 </span></span>
+<span id="cb9-3178"><a href="#cb9-3178" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1701]   train-logloss:0.842297 </span></span>
+<span id="cb9-3179"><a href="#cb9-3179" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1801]   train-logloss:0.831396 </span></span>
+<span id="cb9-3180"><a href="#cb9-3180" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1901]   train-logloss:0.821194 </span></span>
+<span id="cb9-3181"><a href="#cb9-3181" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2001]   train-logloss:0.811649 </span></span>
+<span id="cb9-3182"><a href="#cb9-3182" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2101]   train-logloss:0.802697 </span></span>
+<span id="cb9-3183"><a href="#cb9-3183" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2201]   train-logloss:0.794309 </span></span>
+<span id="cb9-3184"><a href="#cb9-3184" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2301]   train-logloss:0.786454 </span></span>
+<span id="cb9-3185"><a href="#cb9-3185" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2401]   train-logloss:0.779060 </span></span>
+<span id="cb9-3186"><a href="#cb9-3186" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2501]   train-logloss:0.772132 </span></span>
+<span id="cb9-3187"><a href="#cb9-3187" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2601]   train-logloss:0.765605 </span></span>
+<span id="cb9-3188"><a href="#cb9-3188" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2701]   train-logloss:0.759462 </span></span>
+<span id="cb9-3189"><a href="#cb9-3189" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2801]   train-logloss:0.753661 </span></span>
+<span id="cb9-3190"><a href="#cb9-3190" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2901]   train-logloss:0.748225 </span></span>
+<span id="cb9-3191"><a href="#cb9-3191" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3001]   train-logloss:0.743134 </span></span>
+<span id="cb9-3192"><a href="#cb9-3192" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3101]   train-logloss:0.738282 </span></span>
+<span id="cb9-3193"><a href="#cb9-3193" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3201]   train-logloss:0.733766 </span></span>
+<span id="cb9-3194"><a href="#cb9-3194" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3301]   train-logloss:0.729458 </span></span>
+<span id="cb9-3195"><a href="#cb9-3195" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3401]   train-logloss:0.725406 </span></span>
+<span id="cb9-3196"><a href="#cb9-3196" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3501]   train-logloss:0.721585 </span></span>
+<span id="cb9-3197"><a href="#cb9-3197" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3601]   train-logloss:0.717948 </span></span>
+<span id="cb9-3198"><a href="#cb9-3198" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3701]   train-logloss:0.714510 </span></span>
+<span id="cb9-3199"><a href="#cb9-3199" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3801]   train-logloss:0.711246 </span></span>
+<span id="cb9-3200"><a href="#cb9-3200" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3901]   train-logloss:0.708170 </span></span>
+<span id="cb9-3201"><a href="#cb9-3201" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4001]   train-logloss:0.705239 </span></span>
+<span id="cb9-3202"><a href="#cb9-3202" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4101]   train-logloss:0.702468 </span></span>
+<span id="cb9-3203"><a href="#cb9-3203" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4201]   train-logloss:0.699847 </span></span>
+<span id="cb9-3204"><a href="#cb9-3204" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4301]   train-logloss:0.697326 </span></span>
+<span id="cb9-3205"><a href="#cb9-3205" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4401]   train-logloss:0.694947 </span></span>
+<span id="cb9-3206"><a href="#cb9-3206" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4501]   train-logloss:0.692647 </span></span>
+<span id="cb9-3207"><a href="#cb9-3207" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4601]   train-logloss:0.690531 </span></span>
+<span id="cb9-3208"><a href="#cb9-3208" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4701]   train-logloss:0.688472 </span></span>
+<span id="cb9-3209"><a href="#cb9-3209" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4801]   train-logloss:0.686485 </span></span>
+<span id="cb9-3210"><a href="#cb9-3210" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4901]   train-logloss:0.684617 </span></span>
+<span id="cb9-3211"><a href="#cb9-3211" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5000]   train-logloss:0.682832</span></span>
+<span id="cb9-3212"><a href="#cb9-3212" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Estimation] 2023-07-29 20:40:59.365636 | Starting prediction... [39m</span></span>
+<span id="cb9-3213"><a href="#cb9-3213" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [32m[Done] 2023-07-29 20:41:01.664849 | Completed after 18.95 secs [39m</span></span>
 <span id="cb9-3214"><a href="#cb9-3214" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3215"><a href="#cb9-3215" aria-hidden="true" tabindex="-1"></a><span class="co"># Show outputs of each model individually and combined</span></span>
 <span id="cb9-3216"><a href="#cb9-3216" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod1)</span></code></pre></div>
@@ -6822,187 +6822,187 @@ added!</b></p>
 <span>  <span class="co"># Train</span></span>
 <span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Combined prediction"</span>,only_linear <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>        method_integration <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:13:14.809798 | Creating distribution object...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:13:14.811607 | Adding predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:13:14.812195 | Transforming predictors...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:13:14.840031 | Adding poipo dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-25 22:13:14.995787 | Adding poipa dataset...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:15.301772 | Collecting input parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">[Setup] 2023-07-25 22:13:15.403902 | Excluded 1 observations owing to missing values in covariates!</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:15.428299 | Adding engine-specific parameters.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:15.430152 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:15.732985 | Starting fitting: Species projection</span></span></span>
-<span><span class="co">#&gt; [1]  train-logloss:1.065699 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:41:02.572015 | Creating distribution object...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:41:02.573817 | Adding predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:41:02.57441 | Transforming predictors...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:41:02.601717 | Adding poipo dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Setup] 2023-07-29 20:41:02.759538 | Adding poipa dataset...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:03.072929 | Collecting input parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">[Setup] 2023-07-29 20:41:03.192449 | Excluded 2 observations owing to missing values in covariates!</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:03.196221 | Adding engine-specific parameters.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:03.197825 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:03.497941 | Starting fitting: Species projection</span></span></span>
+<span><span class="co">#&gt; [1]  train-logloss:1.065515 </span></span>
 <span><span class="co">#&gt; Will train until train_logloss hasn't improved in 2000 rounds.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [101]    train-logloss:1.022364 </span></span>
-<span><span class="co">#&gt; [201]    train-logloss:0.983158 </span></span>
-<span><span class="co">#&gt; [301]    train-logloss:0.947507 </span></span>
-<span><span class="co">#&gt; [401]    train-logloss:0.914952 </span></span>
-<span><span class="co">#&gt; [501]    train-logloss:0.885120 </span></span>
-<span><span class="co">#&gt; [601]    train-logloss:0.857703 </span></span>
-<span><span class="co">#&gt; [701]    train-logloss:0.832441 </span></span>
-<span><span class="co">#&gt; [801]    train-logloss:0.809114 </span></span>
-<span><span class="co">#&gt; [901]    train-logloss:0.787533 </span></span>
-<span><span class="co">#&gt; [1001]   train-logloss:0.767533 </span></span>
-<span><span class="co">#&gt; [1101]   train-logloss:0.748972 </span></span>
-<span><span class="co">#&gt; [1201]   train-logloss:0.731723 </span></span>
-<span><span class="co">#&gt; [1301]   train-logloss:0.715675 </span></span>
-<span><span class="co">#&gt; [1401]   train-logloss:0.700729 </span></span>
-<span><span class="co">#&gt; [1501]   train-logloss:0.686797 </span></span>
-<span><span class="co">#&gt; [1601]   train-logloss:0.673798 </span></span>
-<span><span class="co">#&gt; [1701]   train-logloss:0.661661 </span></span>
-<span><span class="co">#&gt; [1801]   train-logloss:0.650321 </span></span>
-<span><span class="co">#&gt; [1901]   train-logloss:0.639720 </span></span>
-<span><span class="co">#&gt; [2001]   train-logloss:0.629804 </span></span>
-<span><span class="co">#&gt; [2101]   train-logloss:0.620524 </span></span>
-<span><span class="co">#&gt; [2201]   train-logloss:0.611835 </span></span>
-<span><span class="co">#&gt; [2301]   train-logloss:0.603698 </span></span>
-<span><span class="co">#&gt; [2401]   train-logloss:0.596073 </span></span>
-<span><span class="co">#&gt; [2501]   train-logloss:0.588926 </span></span>
-<span><span class="co">#&gt; [2601]   train-logloss:0.582227 </span></span>
-<span><span class="co">#&gt; [2701]   train-logloss:0.575944 </span></span>
-<span><span class="co">#&gt; [2801]   train-logloss:0.570051 </span></span>
-<span><span class="co">#&gt; [2901]   train-logloss:0.564522 </span></span>
-<span><span class="co">#&gt; [3001]   train-logloss:0.559334 </span></span>
-<span><span class="co">#&gt; [3101]   train-logloss:0.554466 </span></span>
-<span><span class="co">#&gt; [3201]   train-logloss:0.549896 </span></span>
-<span><span class="co">#&gt; [3301]   train-logloss:0.545606 </span></span>
-<span><span class="co">#&gt; [3401]   train-logloss:0.541579 </span></span>
-<span><span class="co">#&gt; [3501]   train-logloss:0.537797 </span></span>
-<span><span class="co">#&gt; [3601]   train-logloss:0.534246 </span></span>
-<span><span class="co">#&gt; [3701]   train-logloss:0.530911 </span></span>
-<span><span class="co">#&gt; [3801]   train-logloss:0.527779 </span></span>
-<span><span class="co">#&gt; [3901]   train-logloss:0.524837 </span></span>
-<span><span class="co">#&gt; [4001]   train-logloss:0.522073 </span></span>
-<span><span class="co">#&gt; [4101]   train-logloss:0.519476 </span></span>
-<span><span class="co">#&gt; [4201]   train-logloss:0.517036 </span></span>
-<span><span class="co">#&gt; [4301]   train-logloss:0.514744 </span></span>
-<span><span class="co">#&gt; [4401]   train-logloss:0.512589 </span></span>
-<span><span class="co">#&gt; [4501]   train-logloss:0.510563 </span></span>
-<span><span class="co">#&gt; [4601]   train-logloss:0.508659 </span></span>
-<span><span class="co">#&gt; [4701]   train-logloss:0.506869 </span></span>
-<span><span class="co">#&gt; [4801]   train-logloss:0.505186 </span></span>
-<span><span class="co">#&gt; [4901]   train-logloss:0.503602 </span></span>
-<span><span class="co">#&gt; [5001]   train-logloss:0.502113 </span></span>
-<span><span class="co">#&gt; [5101]   train-logloss:0.500711 </span></span>
-<span><span class="co">#&gt; [5201]   train-logloss:0.499392 </span></span>
-<span><span class="co">#&gt; [5301]   train-logloss:0.498150 </span></span>
-<span><span class="co">#&gt; [5401]   train-logloss:0.496980 </span></span>
-<span><span class="co">#&gt; [5501]   train-logloss:0.495879 </span></span>
-<span><span class="co">#&gt; [5601]   train-logloss:0.494841 </span></span>
-<span><span class="co">#&gt; [5701]   train-logloss:0.493863 </span></span>
-<span><span class="co">#&gt; [5801]   train-logloss:0.492940 </span></span>
-<span><span class="co">#&gt; [5901]   train-logloss:0.492070 </span></span>
-<span><span class="co">#&gt; [6001]   train-logloss:0.491249 </span></span>
-<span><span class="co">#&gt; [6101]   train-logloss:0.490473 </span></span>
-<span><span class="co">#&gt; [6201]   train-logloss:0.489741 </span></span>
-<span><span class="co">#&gt; [6301]   train-logloss:0.489049 </span></span>
-<span><span class="co">#&gt; [6401]   train-logloss:0.488395 </span></span>
-<span><span class="co">#&gt; [6501]   train-logloss:0.487777 </span></span>
-<span><span class="co">#&gt; [6601]   train-logloss:0.487192 </span></span>
-<span><span class="co">#&gt; [6701]   train-logloss:0.486637 </span></span>
-<span><span class="co">#&gt; [6801]   train-logloss:0.486112 </span></span>
-<span><span class="co">#&gt; [6901]   train-logloss:0.485615 </span></span>
-<span><span class="co">#&gt; [7001]   train-logloss:0.485143 </span></span>
-<span><span class="co">#&gt; [7101]   train-logloss:0.484695 </span></span>
-<span><span class="co">#&gt; [7201]   train-logloss:0.484270 </span></span>
-<span><span class="co">#&gt; [7301]   train-logloss:0.483866 </span></span>
-<span><span class="co">#&gt; [7401]   train-logloss:0.483483 </span></span>
-<span><span class="co">#&gt; [7501]   train-logloss:0.483118 </span></span>
-<span><span class="co">#&gt; [7601]   train-logloss:0.482770 </span></span>
-<span><span class="co">#&gt; [7701]   train-logloss:0.482439 </span></span>
-<span><span class="co">#&gt; [7801]   train-logloss:0.482124 </span></span>
-<span><span class="co">#&gt; [7901]   train-logloss:0.481824 </span></span>
-<span><span class="co">#&gt; [8000]   train-logloss:0.481540</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:30.478125 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:30.737269 | Engine setup.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:30.951597 | Starting fitting: Species projection</span></span></span>
-<span><span class="co">#&gt; [1]  train-logloss:0.692705 </span></span>
+<span><span class="co">#&gt; [101]    train-logloss:1.022161 </span></span>
+<span><span class="co">#&gt; [201]    train-logloss:0.982933 </span></span>
+<span><span class="co">#&gt; [301]    train-logloss:0.947261 </span></span>
+<span><span class="co">#&gt; [401]    train-logloss:0.914688 </span></span>
+<span><span class="co">#&gt; [501]    train-logloss:0.884843 </span></span>
+<span><span class="co">#&gt; [601]    train-logloss:0.857416 </span></span>
+<span><span class="co">#&gt; [701]    train-logloss:0.832148 </span></span>
+<span><span class="co">#&gt; [801]    train-logloss:0.808818 </span></span>
+<span><span class="co">#&gt; [901]    train-logloss:0.787236 </span></span>
+<span><span class="co">#&gt; [1001]   train-logloss:0.767237 </span></span>
+<span><span class="co">#&gt; [1101]   train-logloss:0.748678 </span></span>
+<span><span class="co">#&gt; [1201]   train-logloss:0.731433 </span></span>
+<span><span class="co">#&gt; [1301]   train-logloss:0.715389 </span></span>
+<span><span class="co">#&gt; [1401]   train-logloss:0.700448 </span></span>
+<span><span class="co">#&gt; [1501]   train-logloss:0.686520 </span></span>
+<span><span class="co">#&gt; [1601]   train-logloss:0.673526 </span></span>
+<span><span class="co">#&gt; [1701]   train-logloss:0.661394 </span></span>
+<span><span class="co">#&gt; [1801]   train-logloss:0.650059 </span></span>
+<span><span class="co">#&gt; [1901]   train-logloss:0.639462 </span></span>
+<span><span class="co">#&gt; [2001]   train-logloss:0.629550 </span></span>
+<span><span class="co">#&gt; [2101]   train-logloss:0.620275 </span></span>
+<span><span class="co">#&gt; [2201]   train-logloss:0.611590 </span></span>
+<span><span class="co">#&gt; [2301]   train-logloss:0.603456 </span></span>
+<span><span class="co">#&gt; [2401]   train-logloss:0.595835 </span></span>
+<span><span class="co">#&gt; [2501]   train-logloss:0.588692 </span></span>
+<span><span class="co">#&gt; [2601]   train-logloss:0.581996 </span></span>
+<span><span class="co">#&gt; [2701]   train-logloss:0.575716 </span></span>
+<span><span class="co">#&gt; [2801]   train-logloss:0.569826 </span></span>
+<span><span class="co">#&gt; [2901]   train-logloss:0.564301 </span></span>
+<span><span class="co">#&gt; [3001]   train-logloss:0.559116 </span></span>
+<span><span class="co">#&gt; [3101]   train-logloss:0.554250 </span></span>
+<span><span class="co">#&gt; [3201]   train-logloss:0.549683 </span></span>
+<span><span class="co">#&gt; [3301]   train-logloss:0.545395 </span></span>
+<span><span class="co">#&gt; [3401]   train-logloss:0.541370 </span></span>
+<span><span class="co">#&gt; [3501]   train-logloss:0.537591 </span></span>
+<span><span class="co">#&gt; [3601]   train-logloss:0.534042 </span></span>
+<span><span class="co">#&gt; [3701]   train-logloss:0.530710 </span></span>
+<span><span class="co">#&gt; [3801]   train-logloss:0.527579 </span></span>
+<span><span class="co">#&gt; [3901]   train-logloss:0.524639 </span></span>
+<span><span class="co">#&gt; [4001]   train-logloss:0.521877 </span></span>
+<span><span class="co">#&gt; [4101]   train-logloss:0.519282 </span></span>
+<span><span class="co">#&gt; [4201]   train-logloss:0.516844 </span></span>
+<span><span class="co">#&gt; [4301]   train-logloss:0.514553 </span></span>
+<span><span class="co">#&gt; [4401]   train-logloss:0.512401 </span></span>
+<span><span class="co">#&gt; [4501]   train-logloss:0.510377 </span></span>
+<span><span class="co">#&gt; [4601]   train-logloss:0.508475 </span></span>
+<span><span class="co">#&gt; [4701]   train-logloss:0.506686 </span></span>
+<span><span class="co">#&gt; [4801]   train-logloss:0.505005 </span></span>
+<span><span class="co">#&gt; [4901]   train-logloss:0.503423 </span></span>
+<span><span class="co">#&gt; [5001]   train-logloss:0.501935 </span></span>
+<span><span class="co">#&gt; [5101]   train-logloss:0.500535 </span></span>
+<span><span class="co">#&gt; [5201]   train-logloss:0.499218 </span></span>
+<span><span class="co">#&gt; [5301]   train-logloss:0.497978 </span></span>
+<span><span class="co">#&gt; [5401]   train-logloss:0.496810 </span></span>
+<span><span class="co">#&gt; [5501]   train-logloss:0.495710 </span></span>
+<span><span class="co">#&gt; [5601]   train-logloss:0.494674 </span></span>
+<span><span class="co">#&gt; [5701]   train-logloss:0.493697 </span></span>
+<span><span class="co">#&gt; [5801]   train-logloss:0.492776 </span></span>
+<span><span class="co">#&gt; [5901]   train-logloss:0.491908 </span></span>
+<span><span class="co">#&gt; [6001]   train-logloss:0.491088 </span></span>
+<span><span class="co">#&gt; [6101]   train-logloss:0.490315 </span></span>
+<span><span class="co">#&gt; [6201]   train-logloss:0.489584 </span></span>
+<span><span class="co">#&gt; [6301]   train-logloss:0.488894 </span></span>
+<span><span class="co">#&gt; [6401]   train-logloss:0.488241 </span></span>
+<span><span class="co">#&gt; [6501]   train-logloss:0.487625 </span></span>
+<span><span class="co">#&gt; [6601]   train-logloss:0.487041 </span></span>
+<span><span class="co">#&gt; [6701]   train-logloss:0.486488 </span></span>
+<span><span class="co">#&gt; [6801]   train-logloss:0.485965 </span></span>
+<span><span class="co">#&gt; [6901]   train-logloss:0.485469 </span></span>
+<span><span class="co">#&gt; [7001]   train-logloss:0.484999 </span></span>
+<span><span class="co">#&gt; [7101]   train-logloss:0.484553 </span></span>
+<span><span class="co">#&gt; [7201]   train-logloss:0.484130 </span></span>
+<span><span class="co">#&gt; [7301]   train-logloss:0.483727 </span></span>
+<span><span class="co">#&gt; [7401]   train-logloss:0.483345 </span></span>
+<span><span class="co">#&gt; [7501]   train-logloss:0.482982 </span></span>
+<span><span class="co">#&gt; [7601]   train-logloss:0.482636 </span></span>
+<span><span class="co">#&gt; [7701]   train-logloss:0.482307 </span></span>
+<span><span class="co">#&gt; [7801]   train-logloss:0.481993 </span></span>
+<span><span class="co">#&gt; [7901]   train-logloss:0.481694 </span></span>
+<span><span class="co">#&gt; [8000]   train-logloss:0.481412</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:18.613962 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:18.873934 | Engine setup.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:19.089881 | Starting fitting: Species projection</span></span></span>
+<span><span class="co">#&gt; [1]  train-logloss:0.692701 </span></span>
 <span><span class="co">#&gt; Will train until train_logloss hasn't improved in 2000 rounds.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [101]    train-logloss:0.657775 </span></span>
-<span><span class="co">#&gt; [201]    train-logloss:0.635038 </span></span>
-<span><span class="co">#&gt; [301]    train-logloss:0.618961 </span></span>
-<span><span class="co">#&gt; [401]    train-logloss:0.606756 </span></span>
-<span><span class="co">#&gt; [501]    train-logloss:0.596954 </span></span>
-<span><span class="co">#&gt; [601]    train-logloss:0.588751 </span></span>
-<span><span class="co">#&gt; [701]    train-logloss:0.581681 </span></span>
-<span><span class="co">#&gt; [801]    train-logloss:0.575468 </span></span>
-<span><span class="co">#&gt; [901]    train-logloss:0.569930 </span></span>
-<span><span class="co">#&gt; [1001]   train-logloss:0.564948 </span></span>
-<span><span class="co">#&gt; [1101]   train-logloss:0.560432 </span></span>
-<span><span class="co">#&gt; [1201]   train-logloss:0.556317 </span></span>
-<span><span class="co">#&gt; [1301]   train-logloss:0.552552 </span></span>
-<span><span class="co">#&gt; [1401]   train-logloss:0.549093 </span></span>
-<span><span class="co">#&gt; [1501]   train-logloss:0.545907 </span></span>
-<span><span class="co">#&gt; [1601]   train-logloss:0.542964 </span></span>
-<span><span class="co">#&gt; [1701]   train-logloss:0.540240 </span></span>
-<span><span class="co">#&gt; [1801]   train-logloss:0.537712 </span></span>
-<span><span class="co">#&gt; [1901]   train-logloss:0.535362 </span></span>
-<span><span class="co">#&gt; [2001]   train-logloss:0.533175 </span></span>
-<span><span class="co">#&gt; [2101]   train-logloss:0.531136 </span></span>
-<span><span class="co">#&gt; [2201]   train-logloss:0.529231 </span></span>
-<span><span class="co">#&gt; [2301]   train-logloss:0.527451 </span></span>
-<span><span class="co">#&gt; [2401]   train-logloss:0.525785 </span></span>
-<span><span class="co">#&gt; [2501]   train-logloss:0.524223 </span></span>
-<span><span class="co">#&gt; [2601]   train-logloss:0.522759 </span></span>
-<span><span class="co">#&gt; [2701]   train-logloss:0.521383 </span></span>
-<span><span class="co">#&gt; [2801]   train-logloss:0.520091 </span></span>
-<span><span class="co">#&gt; [2901]   train-logloss:0.518876 </span></span>
-<span><span class="co">#&gt; [3001]   train-logloss:0.517732 </span></span>
-<span><span class="co">#&gt; [3101]   train-logloss:0.516654 </span></span>
-<span><span class="co">#&gt; [3201]   train-logloss:0.515638 </span></span>
-<span><span class="co">#&gt; [3301]   train-logloss:0.514680 </span></span>
-<span><span class="co">#&gt; [3401]   train-logloss:0.513775 </span></span>
-<span><span class="co">#&gt; [3501]   train-logloss:0.512920 </span></span>
-<span><span class="co">#&gt; [3601]   train-logloss:0.512112 </span></span>
-<span><span class="co">#&gt; [3701]   train-logloss:0.511348 </span></span>
-<span><span class="co">#&gt; [3801]   train-logloss:0.510626 </span></span>
-<span><span class="co">#&gt; [3901]   train-logloss:0.509941 </span></span>
-<span><span class="co">#&gt; [4001]   train-logloss:0.509293 </span></span>
-<span><span class="co">#&gt; [4101]   train-logloss:0.508678 </span></span>
-<span><span class="co">#&gt; [4201]   train-logloss:0.508096 </span></span>
-<span><span class="co">#&gt; [4301]   train-logloss:0.507543 </span></span>
-<span><span class="co">#&gt; [4401]   train-logloss:0.507018 </span></span>
-<span><span class="co">#&gt; [4501]   train-logloss:0.506520 </span></span>
-<span><span class="co">#&gt; [4601]   train-logloss:0.506047 </span></span>
-<span><span class="co">#&gt; [4701]   train-logloss:0.505597 </span></span>
-<span><span class="co">#&gt; [4801]   train-logloss:0.505170 </span></span>
-<span><span class="co">#&gt; [4901]   train-logloss:0.504763 </span></span>
-<span><span class="co">#&gt; [5001]   train-logloss:0.504376 </span></span>
-<span><span class="co">#&gt; [5101]   train-logloss:0.504008 </span></span>
-<span><span class="co">#&gt; [5201]   train-logloss:0.503657 </span></span>
-<span><span class="co">#&gt; [5301]   train-logloss:0.503323 </span></span>
-<span><span class="co">#&gt; [5401]   train-logloss:0.503005 </span></span>
-<span><span class="co">#&gt; [5501]   train-logloss:0.502701 </span></span>
-<span><span class="co">#&gt; [5601]   train-logloss:0.502412 </span></span>
-<span><span class="co">#&gt; [5701]   train-logloss:0.502136 </span></span>
-<span><span class="co">#&gt; [5801]   train-logloss:0.501873 </span></span>
-<span><span class="co">#&gt; [5901]   train-logloss:0.501622 </span></span>
-<span><span class="co">#&gt; [6001]   train-logloss:0.501382 </span></span>
-<span><span class="co">#&gt; [6101]   train-logloss:0.501153 </span></span>
-<span><span class="co">#&gt; [6201]   train-logloss:0.500934 </span></span>
-<span><span class="co">#&gt; [6301]   train-logloss:0.500725 </span></span>
-<span><span class="co">#&gt; [6401]   train-logloss:0.500526 </span></span>
-<span><span class="co">#&gt; [6501]   train-logloss:0.500335 </span></span>
-<span><span class="co">#&gt; [6601]   train-logloss:0.500152 </span></span>
-<span><span class="co">#&gt; [6701]   train-logloss:0.499978 </span></span>
-<span><span class="co">#&gt; [6801]   train-logloss:0.499811 </span></span>
-<span><span class="co">#&gt; [6901]   train-logloss:0.499651 </span></span>
-<span><span class="co">#&gt; [7001]   train-logloss:0.499499 </span></span>
-<span><span class="co">#&gt; [7101]   train-logloss:0.499352 </span></span>
-<span><span class="co">#&gt; [7201]   train-logloss:0.499212 </span></span>
-<span><span class="co">#&gt; [7301]   train-logloss:0.499078 </span></span>
-<span><span class="co">#&gt; [7401]   train-logloss:0.498950 </span></span>
-<span><span class="co">#&gt; [7501]   train-logloss:0.498827 </span></span>
-<span><span class="co">#&gt; [7601]   train-logloss:0.498710 </span></span>
-<span><span class="co">#&gt; [7701]   train-logloss:0.498597 </span></span>
-<span><span class="co">#&gt; [7801]   train-logloss:0.498489 </span></span>
-<span><span class="co">#&gt; [7901]   train-logloss:0.498385 </span></span>
-<span><span class="co">#&gt; [8000]   train-logloss:0.498287</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-25 22:13:36.041136 | Starting prediction...</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-25 22:13:36.053657 | Completed after 20.75 secs</span></span></span>
+<span><span class="co">#&gt; [101]    train-logloss:0.657820 </span></span>
+<span><span class="co">#&gt; [201]    train-logloss:0.635704 </span></span>
+<span><span class="co">#&gt; [301]    train-logloss:0.620503 </span></span>
+<span><span class="co">#&gt; [401]    train-logloss:0.609245 </span></span>
+<span><span class="co">#&gt; [501]    train-logloss:0.600358 </span></span>
+<span><span class="co">#&gt; [601]    train-logloss:0.592988 </span></span>
+<span><span class="co">#&gt; [701]    train-logloss:0.586654 </span></span>
+<span><span class="co">#&gt; [801]    train-logloss:0.581078 </span></span>
+<span><span class="co">#&gt; [901]    train-logloss:0.576093 </span></span>
+<span><span class="co">#&gt; [1001]   train-logloss:0.571591 </span></span>
+<span><span class="co">#&gt; [1101]   train-logloss:0.567495 </span></span>
+<span><span class="co">#&gt; [1201]   train-logloss:0.563753 </span></span>
+<span><span class="co">#&gt; [1301]   train-logloss:0.560322 </span></span>
+<span><span class="co">#&gt; [1401]   train-logloss:0.557168 </span></span>
+<span><span class="co">#&gt; [1501]   train-logloss:0.554262 </span></span>
+<span><span class="co">#&gt; [1601]   train-logloss:0.551580 </span></span>
+<span><span class="co">#&gt; [1701]   train-logloss:0.549101 </span></span>
+<span><span class="co">#&gt; [1801]   train-logloss:0.546805 </span></span>
+<span><span class="co">#&gt; [1901]   train-logloss:0.544676 </span></span>
+<span><span class="co">#&gt; [2001]   train-logloss:0.542700 </span></span>
+<span><span class="co">#&gt; [2101]   train-logloss:0.540864 </span></span>
+<span><span class="co">#&gt; [2201]   train-logloss:0.539155 </span></span>
+<span><span class="co">#&gt; [2301]   train-logloss:0.537563 </span></span>
+<span><span class="co">#&gt; [2401]   train-logloss:0.536079 </span></span>
+<span><span class="co">#&gt; [2501]   train-logloss:0.534694 </span></span>
+<span><span class="co">#&gt; [2601]   train-logloss:0.533400 </span></span>
+<span><span class="co">#&gt; [2701]   train-logloss:0.532190 </span></span>
+<span><span class="co">#&gt; [2801]   train-logloss:0.531058 </span></span>
+<span><span class="co">#&gt; [2901]   train-logloss:0.529998 </span></span>
+<span><span class="co">#&gt; [3001]   train-logloss:0.529005 </span></span>
+<span><span class="co">#&gt; [3101]   train-logloss:0.528074 </span></span>
+<span><span class="co">#&gt; [3201]   train-logloss:0.527200 </span></span>
+<span><span class="co">#&gt; [3301]   train-logloss:0.526379 </span></span>
+<span><span class="co">#&gt; [3401]   train-logloss:0.525607 </span></span>
+<span><span class="co">#&gt; [3501]   train-logloss:0.524882 </span></span>
+<span><span class="co">#&gt; [3601]   train-logloss:0.524200 </span></span>
+<span><span class="co">#&gt; [3701]   train-logloss:0.523557 </span></span>
+<span><span class="co">#&gt; [3801]   train-logloss:0.522952 </span></span>
+<span><span class="co">#&gt; [3901]   train-logloss:0.522382 </span></span>
+<span><span class="co">#&gt; [4001]   train-logloss:0.521845 </span></span>
+<span><span class="co">#&gt; [4101]   train-logloss:0.521338 </span></span>
+<span><span class="co">#&gt; [4201]   train-logloss:0.520859 </span></span>
+<span><span class="co">#&gt; [4301]   train-logloss:0.520407 </span></span>
+<span><span class="co">#&gt; [4401]   train-logloss:0.519980 </span></span>
+<span><span class="co">#&gt; [4501]   train-logloss:0.519576 </span></span>
+<span><span class="co">#&gt; [4601]   train-logloss:0.519194 </span></span>
+<span><span class="co">#&gt; [4701]   train-logloss:0.518833 </span></span>
+<span><span class="co">#&gt; [4801]   train-logloss:0.518492 </span></span>
+<span><span class="co">#&gt; [4901]   train-logloss:0.518168 </span></span>
+<span><span class="co">#&gt; [5001]   train-logloss:0.517861 </span></span>
+<span><span class="co">#&gt; [5101]   train-logloss:0.517571 </span></span>
+<span><span class="co">#&gt; [5201]   train-logloss:0.517296 </span></span>
+<span><span class="co">#&gt; [5301]   train-logloss:0.517035 </span></span>
+<span><span class="co">#&gt; [5401]   train-logloss:0.516787 </span></span>
+<span><span class="co">#&gt; [5501]   train-logloss:0.516552 </span></span>
+<span><span class="co">#&gt; [5601]   train-logloss:0.516329 </span></span>
+<span><span class="co">#&gt; [5701]   train-logloss:0.516117 </span></span>
+<span><span class="co">#&gt; [5801]   train-logloss:0.515916 </span></span>
+<span><span class="co">#&gt; [5901]   train-logloss:0.515724 </span></span>
+<span><span class="co">#&gt; [6001]   train-logloss:0.515542 </span></span>
+<span><span class="co">#&gt; [6101]   train-logloss:0.515369 </span></span>
+<span><span class="co">#&gt; [6201]   train-logloss:0.515205 </span></span>
+<span><span class="co">#&gt; [6301]   train-logloss:0.515049 </span></span>
+<span><span class="co">#&gt; [6401]   train-logloss:0.514900 </span></span>
+<span><span class="co">#&gt; [6501]   train-logloss:0.514758 </span></span>
+<span><span class="co">#&gt; [6601]   train-logloss:0.514623 </span></span>
+<span><span class="co">#&gt; [6701]   train-logloss:0.514494 </span></span>
+<span><span class="co">#&gt; [6801]   train-logloss:0.514372 </span></span>
+<span><span class="co">#&gt; [6901]   train-logloss:0.514255 </span></span>
+<span><span class="co">#&gt; [7001]   train-logloss:0.514143 </span></span>
+<span><span class="co">#&gt; [7101]   train-logloss:0.514037 </span></span>
+<span><span class="co">#&gt; [7201]   train-logloss:0.513936 </span></span>
+<span><span class="co">#&gt; [7301]   train-logloss:0.513839 </span></span>
+<span><span class="co">#&gt; [7401]   train-logloss:0.513747 </span></span>
+<span><span class="co">#&gt; [7501]   train-logloss:0.513659 </span></span>
+<span><span class="co">#&gt; [7601]   train-logloss:0.513575 </span></span>
+<span><span class="co">#&gt; [7701]   train-logloss:0.513495 </span></span>
+<span><span class="co">#&gt; [7801]   train-logloss:0.513418 </span></span>
+<span><span class="co">#&gt; [7901]   train-logloss:0.513345 </span></span>
+<span><span class="co">#&gt; [8000]   train-logloss:0.513276</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Estimation] 2023-07-29 20:41:24.255128 | Starting prediction...</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">[Done] 2023-07-29 20:41:24.267611 | Completed after 21.19 secs</span></span></span>
 <span></span>
 <span><span class="co"># The resulting object contains only the final prediction, e.g. that of the presence-absence model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
@@ -7078,17 +7078,17 @@ an overview on which engines support which level of integration.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 11 × 8</span></span></span>
 <span><span class="co">#&gt;    variable                  mean      sd      q05     q50     q95    mode   kld</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept              -<span style="color: #BB0000;">0.327</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.327</span>  42.1    -<span style="color: #BB0000;">0.327</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species.pro… -<span style="color: #BB0000;">0.327</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.327</span>  42.1    -<span style="color: #BB0000;">0.327</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species.pro… -<span style="color: #BB0000;">0.327</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.327</span>  42.1    -<span style="color: #BB0000;">0.327</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km        -<span style="color: #BB0000;">0.117</span>   0.134   -<span style="color: #BB0000;">0.338</span>  -<span style="color: #BB0000;">0.117</span>   0.104  -<span style="color: #BB0000;">0.117</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km        -<span style="color: #BB0000;">0.397</span>   0.121   -<span style="color: #BB0000;">0.596</span>  -<span style="color: #BB0000;">0.397</span>  -<span style="color: #BB0000;">0.198</span>  -<span style="color: #BB0000;">0.397</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km         0.518   0.087<span style="text-decoration: underline;">0</span>   0.375   0.518   0.661   0.518      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km      0.449   0.053<span style="text-decoration: underline;">9</span>   0.361   0.449   0.538   0.449      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km      0.017<span style="text-decoration: underline;">7</span>  0.038<span style="text-decoration: underline;">4</span>  -<span style="color: #BB0000;">0.045</span><span style="color: #BB0000; text-decoration: underline;">5</span>  0.017<span style="text-decoration: underline;">7</span>  0.080<span style="text-decoration: underline;">9</span>  0.017<span style="text-decoration: underline;">7</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km      0.945   0.082<span style="text-decoration: underline;">4</span>   0.810   0.945   1.08    0.945      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km      1.02    0.067<span style="text-decoration: underline;">7</span>   0.909   1.02    1.13    1.02       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km     0.041<span style="text-decoration: underline;">1</span>  0.083<span style="text-decoration: underline;">1</span>  -<span style="color: #BB0000;">0.095</span><span style="color: #BB0000; text-decoration: underline;">5</span>  0.041<span style="text-decoration: underline;">1</span>  0.178   0.041<span style="text-decoration: underline;">1</span>     0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept              -<span style="color: #BB0000;">0.326</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.326</span>  42.1    -<span style="color: #BB0000;">0.326</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species.pro… -<span style="color: #BB0000;">0.326</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.326</span>  42.1    -<span style="color: #BB0000;">0.326</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species.pro… -<span style="color: #BB0000;">0.326</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.326</span>  42.1    -<span style="color: #BB0000;">0.326</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km        -<span style="color: #BB0000;">0.127</span>   0.133   -<span style="color: #BB0000;">0.345</span>  -<span style="color: #BB0000;">0.127</span>   0.091<span style="text-decoration: underline;">6</span> -<span style="color: #BB0000;">0.127</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km        -<span style="color: #BB0000;">0.419</span>   0.120   -<span style="color: #BB0000;">0.617</span>  -<span style="color: #BB0000;">0.419</span>  -<span style="color: #BB0000;">0.222</span>  -<span style="color: #BB0000;">0.419</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km         0.455   0.086<span style="text-decoration: underline;">5</span>   0.312   0.455   0.597   0.455      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km      0.402   0.049<span style="text-decoration: underline;">0</span>   0.321   0.402   0.483   0.402      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km      0.068<span style="text-decoration: underline;">3</span>  0.049<span style="text-decoration: underline;">9</span>  -<span style="color: #BB0000;">0.013</span><span style="color: #BB0000; text-decoration: underline;">6</span>  0.068<span style="text-decoration: underline;">3</span>  0.150   0.068<span style="text-decoration: underline;">3</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km      0.865   0.078<span style="text-decoration: underline;">7</span>   0.735   0.865   0.994   0.865      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km      0.982   0.066<span style="text-decoration: underline;">1</span>   0.873   0.982   1.09    0.982      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km     0.024<span style="text-decoration: underline;">9</span>  0.085<span style="text-decoration: underline;">2</span>  -<span style="color: #BB0000;">0.115</span>   0.024<span style="text-decoration: underline;">9</span>  0.165   0.024<span style="text-decoration: underline;">9</span>     0</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
