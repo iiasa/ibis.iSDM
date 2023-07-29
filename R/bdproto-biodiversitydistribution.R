@@ -92,7 +92,7 @@ BiodiversityDistribution <- bdproto(
   },
   # Get provided limits
   get_limits = function(self){
-    if(is.Waiver(self$limits)) return(NULL)
+    if(is.Waiver(self$limits)) return(new_waiver())
     return(self$limits)
   },
   # Remove limits

@@ -107,7 +107,7 @@ test_that('Setting up a distribution model',{
   expect_error(x$engine$calc_stack_poipo()) # Nothing to train on
 
   expect_s3_class(x$get_priors(),'Waiver')
-  expect_null(x$get_limits())
+  expect_s3_class(x$get_limits(), 'Waiver')
 
   # Add latent effect and see whether the attributes is changed
   y <- x |> add_latent_spatial(method = "spde")

@@ -44,7 +44,9 @@ test_that('Add further tests for model fits', {
   expect_s4_class(mod$get_data(), "SpatRaster")
 
   # Threshold with independent data
-  mod <- threshold(mod, method = "perc", format = "bin")
+  suppressMessages(
+    mod <- threshold(mod, method = "perc", format = "bin")
+  )
   expect_gt(mod$get_thresholdvalue(),0)
   expect_length(mod$show_rasters(), 2)
 
@@ -82,4 +84,5 @@ test_that('Add further tests for model fits', {
   tf <- base::tempfile()
   expect_no_error(write_summary(mod, paste0(tf, ".rds")))
   expect_no_error(write_model(mod, paste0(tf, ".rds")))
+
 })

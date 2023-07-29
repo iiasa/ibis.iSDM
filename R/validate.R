@@ -162,7 +162,7 @@ methods::setMethod(
       if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
       point <- collect_occurrencepoints(mod$model,
-                                        include_absences = FALSE,
+                                        include_absences = TRUE,
                                         addName = TRUE,
                                         tosf = TRUE)
       if(is.factor(point[[point_column]])){

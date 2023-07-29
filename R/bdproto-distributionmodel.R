@@ -425,10 +425,15 @@ DistributionModel <- bdproto(
       dt %in% c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S')
     )
     type <- tolower(type)
+    if(type %in% c("gtif", "gtiff", "tif")){
+      fname <- paste0(tools::file_path_sans_ext(fname), ".tif")
+    }
 
     # Get raster file in fitted object
     cl <- sapply(self$fits, class)
-    ras <- self$fits[[grep('raster', cl,ignore.case = T)]]
+    ras <- self$fits[[grep('SpatRaster', cl,ignore.case = T)]]
+    assertthat::assert_that(length(ras)>0,
+                            msg = "No prediction to save found.")
 
     # Check that no-data value is not present in ras
     assertthat::assert_that(any(!terra::global(ras, "min", na.rm = TRUE)[,1] <= -9999),
@@ -440,8 +445,8 @@ DistributionModel <- bdproto(
       writeGeoTiff(ras, fname = fname, dt = dt)
     } else if(type %in% c('nc','ncdf')) {
       # Save as netcdf
-      # TODO: Potentially change the unit descriptions
-      writeNetCDF(ras, fname = fname, varName = 'iSDM prediction', varUnit = "",varLong = "")
+      writeNetCDF(ras, fname = fname, varName = 'ibis.iSDM prediction',
+                  varUnit = "Suitability",varLong = "Relative suitable habitat")
     }
     invisible()
   }

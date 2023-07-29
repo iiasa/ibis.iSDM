@@ -154,15 +154,12 @@ create_mcp <- function(biod, limits){
     is.list(biod), length(biod)>=1,
     is.list(limits)
   )
-  check_package("dplyr")
 
-  # First collate all occurrence points in the supplied object
-  obs <- lapply( biod, function(x) {
-    guess_sf( x$observations ) |> dplyr::select("observed")
-  } )
-  obs <- do.call("rbind", obs)
-  # Get only those observations with presence
-  obs <- obs[which(obs[[1]]>0),]
+  # Get biodiversity data
+  obs <- collect_occurrencepoints(model = biod,
+                                     include_absences = FALSE,
+                                     tosf = TRUE) |>
+    dplyr::select("observed")
 
   # Assing unique id
   obs$id <- 1:nrow(obs)
