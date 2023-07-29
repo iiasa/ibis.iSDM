@@ -44,6 +44,7 @@ NULL
 #' @param stabilize A [`logical`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
 #' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
 #' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).
 #' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
 #' @examples
@@ -77,12 +78,12 @@ project.BiodiversityScenario <- function(x,...) project(x,...)
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario,character,logical,character,character}(x,date_interpolation,stabilize,stabilize_method,layer)
+#' @usage \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
 methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),
   function(x, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
-           layer = "mean", ...){
+           layer = "mean", verbose = getOption('ibis.setupmessages'), ...){
     mod <- x # MJ: Workaround to ensure project generic does not conflict with terra::project
     # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     assertthat::assert_that(
@@ -204,8 +205,10 @@ methods::setMethod(
     proj <- terra::rast()
     proj_thresh <- terra::rast()
 
-    pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
-                                     total = length(unique(df$time)))
+    if(getOption('ibis.setupmessages')){
+      pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
+                                       total = length(unique(df$time)))
+    }
     # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
     for(step in times){ # step = times[1]
@@ -304,9 +307,9 @@ methods::setMethod(
       }
       # Add to result stack
       suppressWarnings( proj <- c(proj, out) )
-      pb$tick()
+      if(getOption('ibis.setupmessages')) pb$tick()
     }
-    rm(pb)
+    if(getOption('ibis.setupmessages')) rm(pb)
     terra::time(proj) <- times
     if(terra::nlyr(proj_thresh)>1) terra::time(proj_thresh) <- times
 
@@ -320,9 +323,9 @@ methods::setMethod(
           # Get Parameters
           params <- scenario_constraints$dispersal$params
 
-          pb <- progress::progress_bar$new(total = terra::nlyr(proj))
+          if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = terra::nlyr(proj))
           for(lyr in 1:terra::nlyr(proj)){
-            pb$tick()
+            if(getOption('ibis.setupmessages')) pb$tick()
             # Normalize the projected suitability rasters to be in range 0-1000 and save
             hsMap <- predictor_transform(env = proj[[lyr]], option = "norm") * 1000
             # Write as filename in the destined folder
@@ -331,7 +334,8 @@ methods::setMethod(
                                   datatype = "INT2S", NAflag = -9999, overwrite = TRUE)
               )
             rm(hsMap)
-          };rm(pb)
+          }
+          if(getOption('ibis.setupmessages')) rm(pb)
           # For threshold, define based on type
           tr <- ifelse(params[["rcThreshold"]] == "continuous", 0, 750) # Set to 75% as suitability threshold
 

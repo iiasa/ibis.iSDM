@@ -93,7 +93,7 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
-  myLog('[Deprecation]','yellow','Consider using engine_inlabru as engine with better prediction support.')
+  if(getOption('ibis.setupmessages')) myLog('[Deprecation]','yellow','Consider using engine_inlabru as engine with better prediction support.')
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),

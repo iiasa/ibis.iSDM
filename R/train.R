@@ -593,7 +593,7 @@ methods::setMethod(
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         spec_priors$rm( spec_priors$exists(vv) )
       }
     } else { spec_priors <- new_waiver() }
@@ -601,29 +601,27 @@ methods::setMethod(
 
     # -  Applying prediction filter based on model input data if specified
     # Check if MCP should be calculated
-    if(!is.Waiver(x$limits)){
+    if(!is.Waiver(x$get_limits())){
       # Build MCP based zones ?
       if(x$limits$limits_method=="mcp"){
         # Create a polygon using all available information
         # Then overwrite limits
-        x <- x$set_limits(x = create_mcp(model$biodiversity, x$limits),
+        x <- x$set_limits(x = create_mcp(model, x$limits),
                           mcp_buffer = x$limits$mcp_buffer,
                           limits_clip = x$limits$limits_clip)
-      }
-
-      # No clip if limits are to TRUE
-      if(x$limits$limits_clip){
-        # TODO: Potentially outsource to a function in the future
-
+        zones <- x$limits$layer
+        assertthat::assert_that(!is.null(zones),
+                                utils::hasName(zones, "limit"))
+      } else {
+        # Zones
         # Get biodiversity data
-        coords <- do.call(rbind, lapply(model$biodiversity, function(z) z[['observations']] |>
-                                          guess_sf() |>
-                                          dplyr::select('observed', 'x', 'y') ) )
-        coords <- subset(coords, observed > 0) # Remove absences
+        coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
+                                           tosf = TRUE)
         # Reproject if necessary
         if(sf::st_crs(coords) != sf::st_crs(model$background)){
           coords <- sf::st_transform(coords, sf::st_crs(model$background))
         }
+
         # Get zones from the limiting area, e.g. those intersecting with input
         suppressMessages(
           suppressWarnings(
@@ -634,52 +632,63 @@ methods::setMethod(
         )
         # Limit zones
         zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
-
-        # Only if some points actually fall in the zones
-        if(nrow(zones)>0){
-          # Now clip all predictors and background to this
-          model$background <- suppressMessages(
-            suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background),
-                                            by_feature = TRUE) |>
-                                sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
-                                sf::st_cast("MULTIPOLYGON")
-            )
-          )
-
-          # Extract predictors and offsets again if set
-          if(!is.Waiver(model$predictors_object)){
-            # Using the raster operations is generally faster than point in polygon tests
-            pred_ov <- model$predictors_object$get_data(df = FALSE)
-            # Make a rasterized mask of the background
-            pred_ov <- terra::mask( pred_ov, model$background )
-            # Convert Predictors to data.frame, including error catching for raster errors
-            # FIXME: This could be outsourced
-            o <- try({ terra::as.data.frame(pred_ov, xy = TRUE, na.rm = FALSE) },silent = TRUE)
-            if(inherits(o, "try-error")){
-              o <- as.data.frame( cbind( terra::crds(pred_ov),
-                                         as.matrix( pred_ov )) )
-              if(any(is.factor(pred_ov))){
-                o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
-              }
-            }
-            model[['predictors']] <- o
-            model[['predictors_object']]$data <- fill_rasters(o[,c(1,2)*-1], # Remove x and y coordinates for overwriting raster data
-                                                              model$predictors_object$data)
-            rm(pred_ov, o)
-          } else {
-            model$predictors[which( is.na(
-              point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
-            )),model$predictors_names] <- NA # Fill with NA
-          }
-          # The same with offset if specified, Note this operation below is computationally quite costly
-          # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
-          # if(!is.Waiver(x$offset)){
-          #   model$offset[which( is.na(
-          #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-          #   )), "spatial_offset" ] <- NA # Fill with NA
-          # }
-        }
       }
+
+      if(nrow(zones)==0){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+                                                  'Occurrence points do not fall into any zones!')
+        zones <- x$limits$layer  # Reset
+      }
+
+      # Also clip the predictors if set
+      if(x$limits$limits_clip && nrow(zones)>0){
+        # Now clip all predictors and background to this
+        model$background <- suppressMessages(
+          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background),
+                                          by_feature = TRUE) |>
+                              sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
+                              sf::st_cast("MULTIPOLYGON")
+          )
+        )
+
+        # Extract predictors and offsets again if set
+        if(!is.Waiver(model$predictors_object)){
+          # Using the raster operations is generally faster than point in polygon tests
+          pred_ov <- model$predictors_object$get_data(df = FALSE)
+          # Make a rasterized mask of the background
+          pred_ov <- terra::mask( pred_ov, model$background )
+          # Convert Predictors to data.frame, including error catching for raster errors
+          # FIXME: This could be outsourced
+          o <- try({ terra::as.data.frame(pred_ov, xy = TRUE, na.rm = FALSE) },silent = TRUE)
+          if(inherits(o, "try-error")){
+            o <- as.data.frame( cbind( terra::crds(pred_ov),
+                                       as.matrix( pred_ov )) )
+            if(any(is.factor(pred_ov))){
+              o[names(pred_ov)[which(is.factor(pred_ov))]] <- factor(o[names(pred_ov)[which(is.factor(pred_ov))]] )
+            }
+          }
+          model[['predictors']] <- o
+          model[['predictors_object']]$data <- fill_rasters(o[,c(1,2)*-1], # Remove x and y coordinates for overwriting raster data
+                                                            model$predictors_object$data)
+          rm(pred_ov, o)
+        } else {
+          model$predictors[which( is.na(
+            point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
+          )),model$predictors_names] <- NA # Fill with NA
+        }
+        # The same with offset if specified, Note this operation below is computationally quite costly
+        # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
+        # if(!is.Waiver(x$offset)){
+        #   model$offset[which( is.na(
+        #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
+        #   )), "spatial_offset" ] <- NA # Fill with NA
+        # }
+      }
+
+      x <- x$set_limits(x = zones,
+                        mcp_buffer = x$limits$mcp_buffer,
+                        limits_clip = x$limits$limits_clip)
+      rm(zones)
     }
 
     # Messenger

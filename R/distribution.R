@@ -166,6 +166,7 @@ methods::setMethod(
         assertthat::assert_that(terra::is.factor(limits),
                                 msg = 'Provided limit raster needs to be ratified (categorical)!')
         limits <- sf::st_as_sf( terra::as.polygons(limits, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
+
       }
       assertthat::assert_that(inherits(limits, "sf"))
 

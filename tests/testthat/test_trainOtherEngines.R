@@ -49,7 +49,6 @@ test_that('Train a distribution model with XGboost', {
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
-
   ex_sd <- ensemble(mod, mod, uncertainty = "sd")
   ex_range <- ensemble(mod, mod, uncertainty = "range")
   ex_pca <- ensemble(mod, mod, uncertainty = "pca")
@@ -228,6 +227,19 @@ test_that('Train a distribution model with glmnet', {
 
   # Does limiting raster work?
   suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+
+  # ------- #
+  # Create some mcps and collect data using some of the internal functions
+  suppressMessages(
+    suppressWarnings(
+      m <- create_mcp(biod = mod$model,limits = list(mcp_buffer = 10))
+    )
+  )
+  expect_true(inherits(m, "sf"))
+  expect_equal(nrow(m), 1)
+
+  p <- collect_occurrencepoints(mod$model,tosf = TRUE)
+  expect_true(nrow(p)>0)
 })
 
 # ---- #

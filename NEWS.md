@@ -5,6 +5,8 @@
 * Added warning message to the threshold creation to use independent data where possible.
 * Fixed min.cv bug in `threshold` introduced by #17
 * Fixed `add_offset` function now also allowing sf objects as input.
+* Fixed bug with writing outputs in `write_output`
+* Fixed a bug with prediction limits that now work correctly again (`distribution(...,lim = x)`)
 
 # ibis.iSDM 0.0.6
 

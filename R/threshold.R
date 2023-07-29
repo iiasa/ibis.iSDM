@@ -104,7 +104,7 @@ methods::setMethod(
     # Get all point data in distribution model
     if(is.null(point)){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
-      point <- collect_occurrencepoints(model = obj$model,
+      point <- collect_occurrencepoints(model = model,
                                         include_absences = FALSE,
                                         point_column = "observed",
                                         addName = TRUE, tosf = TRUE

@@ -764,7 +764,12 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
   # Get the locations
   locs <- lapply(model$biodiversity, function(x){
                     z <- x$observations
-                    if(!include_absences) z <- z[point_column > 0,]
+                    # Convert to numeric just to be sure
+                    if(is.factor(z[[point_column]])){
+                      z[[point_column]] <- as.numeric(as.character(z[[point_column]]))
+                    }
+
+                    if(!include_absences) z <- z[z[[point_column]] > 0,]
                     if(tosf){
                       # o <- subset(
                         o <- z |> guess_sf() |>
@@ -779,8 +784,7 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
                     }
                     if(addName) suppressWarnings( o$name <- x$name )
                     return(o)
-                    }
-                  )
+                    } )
   # Combine
   locs <- do.call(rbind, locs)
   # Remove rownames

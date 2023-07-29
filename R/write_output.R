@@ -48,29 +48,29 @@ methods::setMethod(
 
     if(verbose && getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
 
-  # This function will only capture the distribution model object and will save them separately
-  if(any(class(mod) %in% getOption("ibis.engines")) ){
-    # FIXME: If errors occur, check harmonization of saving among engines.
-    mod$save(fname = fname)
-  } else if(is.Raster(mod)){
-      if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
-        writeGeoTiff(file = mod, fname = fname, dt = dt)
-      } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
-        writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
-      } else {
-        stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
-      }
-  } else if(is.data.frame(mod)){
-    utils::write.csv(x = mod,file = fname,...)
-  } else {
-    # Check that a save function exists for object
-    assertthat::assert_that("save" %in%names(mod),
-                            msg = "No method to save the output could be found!")
-    # Try a generic save
-    mod$save(fname = fname)
-  }
-  invisible()
-  }
+    # This function will only capture the distribution model object and will save them separately
+    if(any(class(mod) %in% getOption("ibis.engines")) ){
+      # FIXME: If errors occur, check harmonization of saving among engines.
+      mod$save(fname = fname)
+    } else if(is.Raster(mod)){
+        if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
+          writeGeoTiff(file = mod, fname = fname, dt = dt)
+        } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
+          writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
+        } else {
+          stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
+        }
+    } else if(is.data.frame(mod)){
+      utils::write.csv(x = mod,file = fname,...)
+    } else {
+      # Check that a save function exists for object
+      assertthat::assert_that("save" %in%names(mod),
+                              msg = "No method to save the output could be found!")
+      # Try a generic save
+      mod$save(fname = fname)
+    }
+    invisible()
+    }
 )
 
 #' @name write_output
