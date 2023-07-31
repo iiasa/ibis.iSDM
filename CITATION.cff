@@ -218,17 +218,6 @@ references:
     email: dpierce@ucsd.edu
   year: '2023'
 - type: software
-  title: parallel
-  abstract: 'R: A Language and Environment for Statistical Computing'
-  notes: Imports
-  authors:
-  - name: R Core Team
-  location:
-    name: Vienna, Austria
-  year: '2023'
-  institution:
-    name: R Foundation for Statistical Computing
-- type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
   notes: Imports
@@ -257,6 +246,17 @@ references:
     given-names: Michael
     email: mdsumner@gmail.com
   year: '2023'
+- type: software
+  title: parallel
+  abstract: 'R: A Language and Environment for Statistical Computing'
+  notes: Imports
+  authors:
+  - name: R Core Team
+  location:
+    name: Vienna, Austria
+  year: '2023'
+  institution:
+    name: R Foundation for Statistical Computing
 - type: software
   title: posterior
   abstract: 'posterior: Tools for Working with Posterior Distributions'
@@ -713,6 +713,18 @@ references:
     given-names: Andrew
   year: '2023'
   version: '>= 2.1.1'
+- type: software
+  title: pdp
+  abstract: 'pdp: Partial Dependence Plots'
+  notes: Suggests
+  url: http://bgreenwell.github.io/pdp/
+  repository: https://CRAN.R-project.org/package=pdp
+  authors:
+  - family-names: Greenwell
+    given-names: Brandon M.
+    email: greenwell.brandon@gmail.com
+    orcid: https://orcid.org/0000-0002-8120-0084
+  year: '2023'
 - type: software
   title: gnlm
   abstract: 'gnlm: Generalized Nonlinear Regression Models'
