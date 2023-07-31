@@ -424,7 +424,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
         # MJ 14/11/2022 - The code below is buggy, resulting in odd curvilinear extrapolations for Europe
         # Hacky approach now is to convert to raster, crop, project and then convert back.
         # Only use if gdalUtils is installed
-        if(("gdalUtils" %in% installed.packages()[,1])&&use_gdalutils){
+        if(("gdalUtils" %in% utils::installed.packages()[,1])&&use_gdalutils){
           ff <- hack_project_stars(ff, template, use_gdalutils)
         } else {
           # Make background
@@ -435,7 +435,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
           assertthat::assert_that(!anyNA(res))
 
           # # And warp by projecting and resampling
-          ff <- ff |> stars::st_warp(bg, crs = st_crs(bg),
+          ff <- ff |> stars::st_warp(bg, crs = sf::st_crs(bg),
                                      cellsize = res, method = "near") |>
             st_transform(crs = sf::st_crs(template))
         }
@@ -511,7 +511,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
   # Correct shares to area if set
   if(shares_to_area && inherits(sc_area,"stars")){
     # Transform and warp the shares
-    sc_area <- st_warp(sc_area, stars::st_as_stars(template), crs = sf::st_crs(sc),method = "near")
+    sc_area <- stars::st_warp(sc_area, stars::st_as_stars(template), crs = sf::st_crs(sc),method = "near")
     # grep those layers with the name share
     shares <- grep(pattern = "share|fraction|proportion", names(sc),value = TRUE)
     sc[shares] <- sc[shares] * sc_area

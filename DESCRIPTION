@@ -30,7 +30,6 @@ Imports:
     graphics,
     methods,
     ncdf4,
-    parallel,
     Matrix,
     ncmeta,
     parallel,
@@ -64,6 +63,7 @@ Suggests:
     rmarkdown,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
+    pdp,
     gnlm,
     geosphere,
     cubelyr,
@@ -117,6 +117,7 @@ Collate:
     'engine_stan.R'
     'engine_xgboost.R'
     'ensemble.R'
+    'get_data.R'
     'ibis.iSDM-package.R'
     'limiting.R'
     'misc.R'

@@ -1,4 +1,6 @@
 # ibis.iSDM 0.0.7 (current dev branch)
+#### New features
+* Added helper functions `get_data()` and the option to apply `threshold` directly on BiodiversityScenarios.
 
 #### Minor improvements and bug fixes
 * Add Error message for background data of different units easier to understand.

@@ -353,18 +353,29 @@ methods::setMethod(
 #'
 #' @name threshold
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is to be added.
-#' @param tr A [`numeric`] value specifying the specific threshold for scenarios (Default: Grab from object).
+#' @param tr A [`numeric`] value specifying the specific threshold for scenarios (Default: \code{NULL} Grab from object).
+#' @param ... Any other parameter. Used to fetch value if set somehow.
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
+#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, tr = new_waiver()) {
+  function(obj, tr = NULL,...) {
+
+    # Get Dots
+    dots <- list(...)
+    # Check for value parameter in dots if tr is null
+    if(is.null(tr) && ("value" %in% names(dots))){
+      tr <- dots[["value"]]
+      assertthat::assert_that(is.numeric(tr),
+                              msg = "Parameter tr not found and other numeric values not found?")
+    }
 
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
+
     # Unless set, check
-    if(is.Waiver(tr)){
+    if(is.null(tr)){
       # Check that a threshold layer is available and get the methods and data from it
       assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
                                msg = 'Call \' threshold \' for prediction first!')
@@ -376,6 +387,18 @@ methods::setMethod(
       names(tr) <- attr(ras_tr[[1]], 'method')
     } else {
       assertthat::assert_that(is.numeric(tr))
+      # Check if scenario is already fitted
+      proj <- obj$get_data()
+      if(!is.Waiver(proj)){
+        # Existing projection ?
+        if(getOption('ibis.setupmessages')) myLog('[Threshold]',
+                                                  'green',
+                                                  'Projection found. Applying threshold!')
+        new <- proj |> dplyr::select(suitability)
+        obj <- obj$apply_threshold(tr = tr)
+        return( obj )
+        invisible()
+      }
     }
     bdproto(NULL, obj, threshold = tr)
   }

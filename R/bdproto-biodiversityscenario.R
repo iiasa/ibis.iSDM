@@ -148,6 +148,11 @@ BiodiversityScenario <- bdproto(
     if('threshold' %notin% names(self)) return( new_waiver() )
     return( self$threshold )
   },
+  # Duplicate function for internal consistency
+  get_thresholdvalue = function(self){
+    if('threshold' %notin% names(self)) return( new_waiver() )
+    return( self$threshold )
+  },
   # Apply specific threshold
   apply_threshold = function(self, tr = new_waiver()){
     # Assertions
@@ -155,11 +160,23 @@ BiodiversityScenario <- bdproto(
     assertthat::assert_that( !is.Waiver(self$scenarios), msg = 'No scenarios found.')
     # Get prediction and threshold
     sc <- self$get_data()
-    if(!is.Waiver(tr)) tr <- self$threshold
+    if(is.Waiver(tr)){
+      tr <- self$threshold
+    } else {
+      # Reassign name as method
+      names(tr) <- "fixed"
+    }
+    if(!is.Waiver(tr))
+    # Select only suitability layer
+    if("threshold" %in% names(sc)) sc <- sc |> dplyr::select(suitability)
     # reclassify to binary
-    sc[sc < tr] <- 0; sc[sc >= tr] <- 1
-    names(sc) <- 'presence'
-    return(sc)
+    new <- sc
+    new[new < tr[[1]]] <- 0; new[new >= tr[[1]]] <- 1
+    names(new) <- 'threshold'
+    # Add to scenario object
+    sc <- c(sc, new)
+    # Format new threshold object
+    bdproto(NULL, self, scenarios = sc, threshold = tr)
   },
   # Set Predictors
   set_predictors = function(self, x){
