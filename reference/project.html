@@ -86,8 +86,8 @@ Any constrains specified in the scenario object are applied during the projectio
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for BiodiversityScenario</span></span>
 <span><span class="fu">project</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,character,logical,character,character</span></span>
-<span><span class="fu">project</span><span class="op">(</span><span class="va">x</span>,<span class="va">date_interpolation</span>,<span class="va">stabilize</span>,<span class="va">stabilize_method</span>,<span class="va">layer</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityScenario,character,logical,character,character,logical</span></span>
+<span><span class="fu">project</span><span class="op">(</span><span class="va">x</span>,<span class="va">date_interpolation</span>,<span class="va">stabilize</span>,<span class="va">stabilize_method</span>,<span class="va">layer</span>,<span class="va">verbose</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -116,6 +116,10 @@ include <code>"none"</code> (Default), <code>"annual"</code>, <code>"monthly"</c
 
 <dt>layer</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> specifying the layer to be projected (Default: <code>"mean"</code>).</p></dd>
+
+
+<dt>verbose</dt>
+<dd><p>Setting this <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value to <code>TRUE</code> prints out further information during the model fitting (Default: <code>FALSE</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
