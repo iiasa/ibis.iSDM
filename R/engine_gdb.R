@@ -642,11 +642,11 @@ engine_gdb <- function(x,
 
             # If plot, make plot, otherwise
             if(plot){
-              par.ori <- par(no.readonly = TRUE)
+              par.ori <- graphics::par(no.readonly = TRUE)
               par(mfrow = c(1,2))
               mboost::plot.mboost(self$get_data('fit_best'), which = x.var, newdata = dummy)
               if(utils::hasName(par.ori, "pin")) par.ori$pin <- NULL
-              par(par.ori)
+              graphics::par(par.ori)
             }
             return(out)
           },

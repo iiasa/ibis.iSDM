@@ -9,7 +9,7 @@
 \usage{
 \method{project}{BiodiversityScenario}(x, ...)
 
-\S4method{project}{BiodiversityScenario,character,logical,character,character}(x,date_interpolation,stabilize,stabilize_method,layer)
+\S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
 }
 \arguments{
 \item{x}{A \code{\link{BiodiversityScenario}} object with set predictors.
@@ -25,6 +25,8 @@ include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily
 \item{stabilize_method}{\code{\link{character}} stating the stabilization method to be applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
+
+\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.

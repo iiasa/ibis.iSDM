@@ -36,7 +36,7 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 
 \item{...}{other parameters not yet set.}
 
-\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: Grab from object).}
+\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: \code{NULL} Grab from object).}
 }
 \value{
 A \link{SpatRaster} if a \link{SpatRaster} object as input.

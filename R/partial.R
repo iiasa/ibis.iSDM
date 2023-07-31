@@ -314,7 +314,7 @@ methods::setMethod(
         ggplot2::theme_bw() +
         # Add the raster
         ggplot2::geom_raster(ggplot2::aes(fill = pred)) +
-        ggplot2::scale_fill_viridis_c(option = "B", guide = guide_colourbar(title = "Suitability")) +
+        ggplot2::scale_fill_viridis_c(option = "B", guide = ggplot2::guide_colourbar(title = "Suitability")) +
         ggplot2::labs(x = x.var[1], y = x.var[2], title = "Predicted suitability in environment space") +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +

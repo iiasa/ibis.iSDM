@@ -57,6 +57,9 @@ test_that('Train a distribution model with XGboost', {
   expect_named(object = ex_range, expected = c("ensemble_mean", "range_mean"))
   expect_named(object = ex_pca, expected = c("ensemble_mean", "pca_mean"))
 
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
+
 })
 
 # ---- #
@@ -112,6 +115,9 @@ test_that('Train a distribution model with Breg', {
   # Does limiting raster work?
   suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
 
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
+
 })
 
 # ---- #
@@ -166,6 +172,9 @@ test_that('Train a distribution model with GDB', {
 
   # Does limiting raster work?
   suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
 
 })
 
@@ -226,7 +235,10 @@ test_that('Train a distribution model with glmnet', {
   expect_s3_class( partial_density(mod = mod, x.var = "elevation_mean_50km", df = TRUE), "data.frame")
 
   # Does limiting raster work?
-  suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
+  expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster")
+
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
 
   # ------- #
   # Create some mcps and collect data using some of the internal functions
@@ -240,6 +252,10 @@ test_that('Train a distribution model with glmnet', {
 
   p <- collect_occurrencepoints(mod$model,tosf = TRUE)
   expect_true(nrow(p)>0)
+
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
+
 })
 
 # ---- #
@@ -295,6 +311,9 @@ test_that('Train a distribution model with bart', {
   expect_type(tr$get_thresholdvalue(), "double")
   ex <- ensemble(mod, tr)
   expect_s4_class(ex, "SpatRaster")
+
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
 
 })
 

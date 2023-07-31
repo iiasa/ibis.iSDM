@@ -131,6 +131,7 @@ reference:
       - run_stan
       - wrap_stanmodel
       - sanitize_names
+      - get_data
       - starts_with("stancode")
       - starts_with("write_")
       - starts_with("load_")

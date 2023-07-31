@@ -120,6 +120,10 @@ test_that('Scenarios and constraints', {
   mod <- x |> project()
   expect_s3_class(mod$get_data(), "stars")
 
+  # Apply a manual threshold and check that works
+  mod <- threshold(mod, tr = .5)
+  expect_true("threshold" %in% names(get_data(mod)))
+
   # Also check that it works with single SpatRaster layers
   x <- sc |> add_predictors(obj[[5]], transform = "none")
   expect_length(x$get_predictor_names(), 1)
@@ -132,7 +136,9 @@ test_that('Scenarios and constraints', {
 
   # Predict
   mod <- x |> project()
+  # Get layer
   expect_s3_class(mod$get_data(), "stars")
+  expect_s3_class(mod |> get_data(), "stars")
 
   # Make a first projection
   mod <- sc |> add_predictors(pred_future) |> project()
@@ -153,6 +159,10 @@ test_that('Scenarios and constraints', {
   # identical
   expect_equal(as.numeric(mod$get_threshold()), fit$get_thresholdvalue())
   expect_invisible(mod$verify())
+
+  # Reapply a different threshold and check that works
+  mod <- threshold(mod, tr = .25)
+  expect_equal(as.numeric(mod$get_threshold()), .25)
 
   # --- #
   # Finally add the various constraints
