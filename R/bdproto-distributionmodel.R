@@ -416,6 +416,42 @@ DistributionModel <- bdproto(
     }
     return(out)
   },
+  # Get centroids of layers
+  get_centroid = function(self, patch = FALSE, layer = "mean"){
+    assertthat::assert_that(
+      is.logical(patch),
+      is.character(layer),
+      is.Raster(self$get_data()),
+      msg = "This function only works if predictions have been calculated!"
+    )
+
+    # Check if threshold is present
+    rl <- self$show_rasters()
+    if(length( grep('threshold',rl,value = TRUE) )>0){
+      # Threshold present
+      obj <- self$get_data( grep('threshold',rl,value = TRUE) )
+      assertthat::assert_that(length(grep(layer, names(obj),value = TRUE))>0)
+      obj <- obj[[grep(layer, names(obj),value = TRUE)]]
+      # Get format
+      if(attr(obj, "format") == "binary"){
+        # Calculate centroid
+        cent <- raster_centroid(obj, patch)
+      } else {
+        # In this case we assume all values larger than 0 to be genuine patches
+        # TODO: This could be implemented if there is need.
+        obj[obj>0] <- 1
+        cent <- raster_centroid(obj, patch)
+      }
+    } else {
+      # Get non-thresholded layer
+      obj <- self$get_data( grep('prediction',rl,value = TRUE) )
+      assertthat::assert_that(layer %in% names(obj))
+      obj <- obj[[layer]]
+      # Calculate centroid, patch to FALSE as this is non-sensical here
+      cent <- raster_centroid(obj, patch = FALSE)
+    }
+    return(cent)
+  },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){
     assertthat::assert_that(

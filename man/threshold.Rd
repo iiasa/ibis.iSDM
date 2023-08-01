@@ -18,7 +18,7 @@ threshold(
 
 \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 
-\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
 }
 \arguments{
 \item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is to be added.}
@@ -34,7 +34,7 @@ formatted thresholds are to be created (Default: \code{"binary"}). Also see Musc
 
 \item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
 
-\item{...}{other parameters not yet set.}
+\item{...}{Any other parameter. Used to fetch value if set somehow.}
 
 \item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: \code{NULL} Grab from object).}
 }

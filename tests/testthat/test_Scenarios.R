@@ -120,9 +120,16 @@ test_that('Scenarios and constraints', {
   mod <- x |> project()
   expect_s3_class(mod$get_data(), "stars")
 
+  # Calculate centroids
+  expect_s3_class(mod$get_centroid(), "sf")
+
   # Apply a manual threshold and check that works
   mod <- threshold(mod, tr = .5)
   expect_true("threshold" %in% names(get_data(mod)))
+
+  # Calculate centroid on threshold
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_true(nrow(mod$get_centroid(patch=TRUE))>1)
 
   # Also check that it works with single SpatRaster layers
   x <- sc |> add_predictors(obj[[5]], transform = "none")

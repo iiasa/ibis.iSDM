@@ -44,10 +44,14 @@ test_that('Train a distribution model with XGboost', {
   expect_true("summary" %in% names(mod))
 
   # Test some basic non-sense calculations
-  tr <- threshold(mod)
+  suppressMessages(tr <- threshold(mod))
   expect_type(tr$get_thresholdvalue(), "double")
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
 
   ex_sd <- ensemble(mod, mod, uncertainty = "sd")
   ex_range <- ensemble(mod, mod, uncertainty = "range")
@@ -109,6 +113,11 @@ test_that('Train a distribution model with Breg', {
   # Test some basic non-sense calculations
   tr <- threshold(mod)
   expect_type(tr$get_thresholdvalue(), "double")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
+
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
@@ -167,6 +176,11 @@ test_that('Train a distribution model with GDB', {
   # Test some basic non-sense calculations
   tr <- threshold(mod)
   expect_type(tr$get_thresholdvalue(), "double")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
+
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
@@ -227,6 +241,11 @@ test_that('Train a distribution model with glmnet', {
   # Test some basic non-sense calculations
   tr <- threshold(mod)
   expect_type(tr$get_thresholdvalue(), "double")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
+
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
@@ -309,6 +328,11 @@ test_that('Train a distribution model with bart', {
   # Test some basic non-sense calculations
   tr <- threshold(mod)
   expect_type(tr$get_thresholdvalue(), "double")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
+
   ex <- ensemble(mod, tr)
   expect_s4_class(ex, "SpatRaster")
 
