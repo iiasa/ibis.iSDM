@@ -105,7 +105,7 @@ methods::setMethod(
     if(is.null(point)){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
       point <- collect_occurrencepoints(model = model,
-                                        include_absences = FALSE,
+                                        include_absences = TRUE,
                                         point_column = "observed",
                                         addName = TRUE, tosf = TRUE
                                         )
@@ -117,22 +117,26 @@ methods::setMethod(
     if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
-      abs <- add_pseudoabsence(df = point,
-                                   field_occurrence = 'observed',
-                                   template = bg,
-                                   # Assuming that settings are comparable among objects
-                                   settings = model$biodiversity[[1]]$pseudoabsence_settings
-                                   )
-
+      ass <- model$biodiversity[[1]]$pseudoabsence_settings
+      if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
+      suppressMessages(
+        abs <- add_pseudoabsence(df = point,
+                                 field_occurrence = 'observed',
+                                 template = bg,
+                                 # Assuming that settings are comparable among objects
+                                 settings = ass
+        )
+      )
       abs <- subset(abs, select = c('x','y'));abs$observed <- 0
       abs <- guess_sf(abs)
       abs$name <- 'Background point'; abs$type <- "generated"
       suppressWarnings(
         abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
       )
-      point <- subset(point, select = c("observed", "name", "type","geometry"))
-      abs <- subset(abs, select = c("observed", "name", "type","geometry"))
-      point <- rbind(point, abs);rm(abs)
+      point <- point |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
+      abs <- abs |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
+      point <- dplyr::bind_rows(point,abs)
+      rm(abs)
     }
 
     # Convert to sf

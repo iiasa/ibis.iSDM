@@ -1,38 +1,39 @@
 # ibis.iSDM 0.0.7 (current dev branch)
 #### New features
-* Added helper functions `get_data()` and the option to apply `threshold` directly on BiodiversityScenarios.
+* Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.
+* Added centroid function to BiodiversityScenarios and DistributionModels #29
 
 #### Minor improvements and bug fixes
 * Add Error message for background data of different units easier to understand.
 * Added warning message to the threshold creation to use independent data where possible.
-* Fixed min.cv bug in `threshold` introduced by #17
-* Fixed `add_offset` function now also allowing sf objects as input.
-* Fixed bug with writing outputs in `write_output`
-* Fixed a bug with prediction limits that now work correctly again (`distribution(...,lim = x)`)
+* Fixed min.cv bug in `threshold()` introduced by #17
+* Fixed `add_offset()` function now also allowing sf objects as input.
+* Fixed bug with writing outputs in `write_output()`
+* Fixed a bug so that prediction limits work correctly again (`distribution(...,lim = x)`)
 
 # ibis.iSDM 0.0.6
 
 #### New features
-* `partial_density` function implemented  #57
-* Re-specification of limits with implementation of minimum convex polygon limits to `distribution`.
-* Added `check` function for assessing assumptions and fits for various objects #45
+* `partial_density()` function implemented  #57
+* Re-specification of limits with implementation of minimum convex polygon limits to `distribution()`.
+* Added `check()` function for assessing assumptions and fits for various objects #45
 * Added minor internal helper functions to duplicate `stars` objects via `st_rep`.
-* Implemented local limiting factor function (`limiting`) #37
+* Implemented local limiting factor function (`limiting()`) #37
 
 #### Minor improvements and bug fixes
 * Further smaller documentation fixes towards a CRAN submission #38
 * Bug fix to method `buffer` in pseudo-absence settings.
-* Minor bug fixes to `ensemble` uncertainty calculations.
+* Minor bug fixes to `ensemble()` uncertainty calculations.
 
 # ibis.iSDM 0.0.5
 
 #### New features
-* Addition of 5 parameter logistic curve offsets with parameter search to `add_offset`.
+* Addition of 5 parameter logistic curve offsets with parameter search to `add_offset()`.
 
 #### Minor improvements and bug fixes
 * Further smaller documentation fixes towards a CRAN submission #38
-* Bug with with `write_model`, now converting `terra` objects to `data.frames` between import/export.
-* Smaller bug fixes, for example in `similarity`, addition of variable name sanitization to predictors by default.
+* Bug with with `write_model()`, now converting `terra` objects to `data.frames` between import/export.
+* Smaller bug fixes, for example in `similarity()`, addition of variable name sanitization to predictors by default.
 
 # ibis.iSDM 0.0.4
 
@@ -57,7 +58,7 @@
 #### Minor improvements and bug fixes
 * Smaller documentation fixes, including to make sure examples and returns are in all exported function documentations.
 * Preparation for cran release #38, including fixing some common issues and checks.
-* Some smaller bug fixes to `validate` to make Boyce more robust.
+* Some smaller bug fixes to `validate()` to make Boyce more robust.
 * Change of the logo. Thanks to @elliwoto 
 * Added warning to validate call for users to be aware of non-independent validation.
 * Further fixes on github actions and tests by @mhesselbarth

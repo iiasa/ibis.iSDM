@@ -185,6 +185,13 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   # Take name of third band, assuming it to be time
   time_band <- names(dim(obj))[3]
 
+  # if timeband is na and dimensions equal to 2, return SpatRaster
+  if(is.na(time_band) && length(stars::st_dimensions(obj))<=2){
+    out <- list()
+    out[["SingleTimeStep"]] <- terra::rast(obj)
+    return(out)
+  }
+
   assertthat::assert_that(
     length(which) <= dim(obj)[time_band]
   )

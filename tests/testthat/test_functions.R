@@ -119,8 +119,17 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_error(ensemble(r1, r2, r3, layer = "lyr.1", uncertainty = "pca"),
                regexp = "Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
 
+  # Check centroid calculation
+  expect_s3_class(raster_centroid(r1), "sf")
+  expect_s3_class(raster_centroid(r1,patch = TRUE), "sf")
+  # Make binary
+  b <- r1; b[b<.5] <- 0; b[b>0] <- 1
+  expect_s3_class(raster_centroid(b,patch = FALSE), "sf")
+  expect_true(nrow( raster_centroid(b,patch = TRUE) )>1)
 
 })
+
+
 
 # ---- #
 # Other generic functions in the package

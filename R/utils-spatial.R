@@ -280,6 +280,81 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
   return(zones)
 }
 
+#' Calculate centroids from a provided SpatRaster
+#'
+#' @description
+#' This helpfer function calculates centroids of a provided SpatRaster.
+#' Different calculations are performed depending on whether the provided object
+#' is binary or continuous format. A [`logical`] patch parameter can be supplied
+#' to support decomposition into individual patches.
+#'
+#' @details
+#' If a \code{patch==TRUE}, then `terra::patches()` is used to generate ids for
+#' individuals patches.
+#' Furthermore, if a supplied \code{obj} is a continious SpatRaster, e.g. has
+#' more than 2 unique values and is not categorical, then a weighted average of the
+#' coordinates is returned by default.
+#'
+#' @param obj A [`SpatRaster`] object.
+#' @param path A [`logical`] flag whether centroids should be calculated per patch (Default: \code{FALSE}).
+#' @returns A [`sf`] POINT object.
+#' @keywords internal, utils
+#' @noRd
+raster_centroid <- function(obj, patch = FALSE){
+  assertthat::assert_that(is.Raster(obj),
+                          is.logical(patch))
+
+  # Check if binary
+  if(length(terra::unique(obj)[,1]) <=2 || terra::is.factor(obj)){
+    # Set patches
+    if(patch){
+      obj[obj == 0] <- NA
+      obj <- terra::patches(obj)
+    }
+
+    # Convert to vect format
+    pol <- terra::as.polygons(obj,
+                              na.rm = TRUE,
+                              dissolve = TRUE)
+    names(pol) <- "values" # Rename
+
+    # Convert to sf
+    pol <- pol |> sf::st_as_sf() |>
+      # Remove 0 values
+      dplyr::filter(values > 0)
+
+    # Calculate centroids
+    suppressWarnings(
+      poi <- sf::st_centroid(pol, of_largest_polygon = FALSE)
+    )
+  } else {
+    # Convert to data.frame with coordinates
+    df <- as.data.frame(obj, xy = TRUE)
+    names(df) <- c("x", "y", "values")
+
+    # Remove zero and NA values
+    df <- subset(df, complete.cases(df))
+    df <- subset(df, values > 0 )
+    assertthat::assert_that(nrow(df)>1)
+
+    # Now calculate weighted centroid
+    cent <- c(stats::weighted.mean(df$x,
+                                   w = df$values),
+              stats::weighted.mean(df$y,
+                                   w = df$values)
+              )
+
+    cent <- data.frame(x = cent[1], y = cent[2], weight =  base::mean(df$values))
+    # Convert to sf coordinate
+    poi <- sf::st_as_sf(cent, coords = c("x", "y"))
+    poi <- sf::st_set_crs(poi, value = sf::st_crs(obj))
+  }
+
+  assertthat::assert_that(inherits(poi, "sf"),
+                          nrow(poi)>=1)
+  return(poi)
+}
+
 #' Converts a bounding box to a Well Known Text (WKT) polygon
 #'
 #' @param minx Minimum x value, or the most western longitude

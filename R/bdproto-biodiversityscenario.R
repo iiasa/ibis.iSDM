@@ -519,6 +519,49 @@ BiodiversityScenario <- bdproto(
     }
     return(out)
   },
+  # Get centroids
+  get_centroid = function(self, patch = FALSE){
+    assertthat::assert_that(
+      is.logical(patch),
+      inherits(self$get_data(), "stars"),
+      msg = "This function only works if projections have been calculated!"
+    )
+
+    # Check if threshold is present
+    rl <- names(self$get_data())
+    if(length( grep('threshold',rl,value = TRUE) )>0){
+      # Threshold present
+      obj <- self$get_data( )[grep('threshold',rl,value = TRUE)]
+
+      # Convert to list of SpatRasters
+      ll <- stars_to_raster(obj)
+      # Loop through each time step
+      cent <- data.frame()
+      for(step in names(ll)){
+        ras <- ll[[step]]
+        # Calculate centroid per time step
+        poi <- raster_centroid(ras, patch)
+        poi$time <- step
+        cent <- rbind(cent, poi)
+      }
+    } else {
+      # Get non-thresholded layer
+      obj <- self$get_data( )[ grep('suitability',rl,value = TRUE) ]
+      # Convert to list of SpatRasters
+      ll <- stars_to_raster(obj)
+      # Loop through each time step
+      cent <- data.frame()
+      for(step in names(ll)){
+        ras <- ll[[step]]
+        # Calculate centroid per time step,
+        # patch to FALSE as this is non-sensical here
+        poi <- raster_centroid(ras, patch = FALSE)
+        poi$time <- step
+        cent <- rbind(cent, poi)
+      }
+    }
+    return(cent)
+  },
   # Save object
   save = function(self, fname, type = 'tif', dt = 'FLT4S'){
     assertthat::assert_that(
