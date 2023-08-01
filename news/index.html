@@ -65,17 +65,18 @@
 <h2 class="pkg-version" data-toc-text="0.0.7" id="ibisisdm-007-current-dev-branch">ibis.iSDM 0.0.7 (current dev branch)<a class="anchor" aria-label="anchor" href="#ibisisdm-007-current-dev-branch"></a></h2>
 <div class="section level5">
 <h5 id="new-features-0-0-7">New features<a class="anchor" aria-label="anchor" href="#new-features-0-0-7"></a></h5>
-<ul><li>Added helper functions <code><a href="../reference/get_data.html">get_data()</a></code> and the option to apply <code>threshold</code> directly on BiodiversityScenarios.</li>
+<ul><li>Added helper functions <code><a href="../reference/get_data.html">get_data()</a></code> and the option to apply <code><a href="../reference/threshold.html">threshold()</a></code> directly on BiodiversityScenarios.</li>
+<li>Added centroid function to BiodiversityScenarios and DistributionModels <a href="https://github.com/iiasa/ibis.iSDM/issues/29" class="external-link">#29</a></li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-0-7">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-0-7"></a></h5>
 <ul><li>Add Error message for background data of different units easier to understand.</li>
 <li>Added warning message to the threshold creation to use independent data where possible.</li>
-<li>Fixed min.cv bug in <code>threshold</code> introduced by <a href="https://github.com/iiasa/ibis.iSDM/issues/17" class="external-link">#17</a></li>
-<li>Fixed <code>add_offset</code> function now also allowing sf objects as input.</li>
-<li>Fixed bug with writing outputs in <code>write_output</code>
+<li>Fixed min.cv bug in <code><a href="../reference/threshold.html">threshold()</a></code> introduced by <a href="https://github.com/iiasa/ibis.iSDM/issues/17" class="external-link">#17</a></li>
+<li>Fixed <code><a href="../reference/add_offset.html">add_offset()</a></code> function now also allowing sf objects as input.</li>
+<li>Fixed bug with writing outputs in <code><a href="../reference/write_output.html">write_output()</a></code>
 </li>
-<li>Fixed a bug with prediction limits that now work correctly again (<code>distribution(...,lim = x)</code>)</li>
+<li>Fixed a bug so that prediction limits work correctly again (<code>distribution(...,lim = x)</code>)</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -83,30 +84,30 @@
 <div class="section level5">
 <h5 id="new-features-0-0-6">New features<a class="anchor" aria-label="anchor" href="#new-features-0-0-6"></a></h5>
 <ul><li>
-<code>partial_density</code> function implemented <a href="https://github.com/iiasa/ibis.iSDM/issues/57" class="external-link">#57</a></li>
-<li>Re-specification of limits with implementation of minimum convex polygon limits to <code>distribution</code>.</li>
-<li>Added <code>check</code> function for assessing assumptions and fits for various objects <a href="https://github.com/iiasa/ibis.iSDM/issues/45" class="external-link">#45</a></li>
+<code><a href="../reference/partial_density.html">partial_density()</a></code> function implemented <a href="https://github.com/iiasa/ibis.iSDM/issues/57" class="external-link">#57</a></li>
+<li>Re-specification of limits with implementation of minimum convex polygon limits to <code><a href="../reference/distribution.html">distribution()</a></code>.</li>
+<li>Added <code><a href="../reference/check.html">check()</a></code> function for assessing assumptions and fits for various objects <a href="https://github.com/iiasa/ibis.iSDM/issues/45" class="external-link">#45</a></li>
 <li>Added minor internal helper functions to duplicate <code>stars</code> objects via <code>st_rep</code>.</li>
-<li>Implemented local limiting factor function (<code>limiting</code>) <a href="https://github.com/iiasa/ibis.iSDM/issues/37" class="external-link">#37</a></li>
+<li>Implemented local limiting factor function (<code><a href="../reference/limiting.html">limiting()</a></code>) <a href="https://github.com/iiasa/ibis.iSDM/issues/37" class="external-link">#37</a></li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-0-6">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-0-6"></a></h5>
 <ul><li>Further smaller documentation fixes towards a CRAN submission <a href="https://github.com/iiasa/ibis.iSDM/issues/38" class="external-link">#38</a></li>
 <li>Bug fix to method <code>buffer</code> in pseudo-absence settings.</li>
-<li>Minor bug fixes to <code>ensemble</code> uncertainty calculations.</li>
+<li>Minor bug fixes to <code><a href="../reference/ensemble.html">ensemble()</a></code> uncertainty calculations.</li>
 </ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.5" id="ibisisdm-005">ibis.iSDM 0.0.5<a class="anchor" aria-label="anchor" href="#ibisisdm-005"></a></h2>
 <div class="section level5">
 <h5 id="new-features-0-0-5">New features<a class="anchor" aria-label="anchor" href="#new-features-0-0-5"></a></h5>
-<ul><li>Addition of 5 parameter logistic curve offsets with parameter search to <code>add_offset</code>.</li>
+<ul><li>Addition of 5 parameter logistic curve offsets with parameter search to <code><a href="../reference/add_offset.html">add_offset()</a></code>.</li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-0-5">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-0-5"></a></h5>
 <ul><li>Further smaller documentation fixes towards a CRAN submission <a href="https://github.com/iiasa/ibis.iSDM/issues/38" class="external-link">#38</a></li>
-<li>Bug with with <code>write_model</code>, now converting <code>terra</code> objects to <code>data.frames</code> between import/export.</li>
-<li>Smaller bug fixes, for example in <code>similarity</code>, addition of variable name sanitization to predictors by default.</li>
+<li>Bug with with <code><a href="../reference/write_model.html">write_model()</a></code>, now converting <code>terra</code> objects to <code>data.frames</code> between import/export.</li>
+<li>Smaller bug fixes, for example in <code><a href="../reference/similarity.html">similarity()</a></code>, addition of variable name sanitization to predictors by default.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -138,7 +139,7 @@
 <h5 id="minor-improvements-and-bug-fixes-0-0-2">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-0-2"></a></h5>
 <ul><li>Smaller documentation fixes, including to make sure examples and returns are in all exported function documentations.</li>
 <li>Preparation for cran release <a href="https://github.com/iiasa/ibis.iSDM/issues/38" class="external-link">#38</a>, including fixing some common issues and checks.</li>
-<li>Some smaller bug fixes to <code>validate</code> to make Boyce more robust.</li>
+<li>Some smaller bug fixes to <code><a href="../reference/validate.html">validate()</a></code> to make Boyce more robust.</li>
 <li>Change of the logo. Thanks to <a href="https://github.com/elliwoto" class="external-link">@elliwoto</a></li>
 <li>Added warning to validate call for users to be aware of non-independent validation.</li>
 <li>Further fixes on github actions and tests by <a href="https://github.com/mhesselbarth" class="external-link">@mhesselbarth</a></li>
