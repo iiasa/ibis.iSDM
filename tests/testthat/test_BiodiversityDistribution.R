@@ -3,11 +3,6 @@ test_that('Setting up a distribution model',{
   testthat::skip_on_cran()
   skip_if_not_installed('igraph')
 
-  # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
-  skip_if_not_installed("cmdstanr")
-  skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
-          message = "No cmdstan path")
-
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   suppressWarnings( requireNamespace("sf", quietly = TRUE) )
   suppressWarnings( requireNamespace("igraph", quietly = TRUE) )
@@ -57,6 +52,14 @@ test_that('Setting up a distribution model',{
   # remove again
   x <- y$rm_offset()
   expect_true(is.Waiver( x$get_offset() ) )
+
+  # Try also different bias controls
+  expect_no_error(x |> add_control_bias(predictors$hmi_mean_50km,method = "partial"))
+  expect_no_error(x |> add_control_bias(predictors$hmi_mean_50km,method = "partial",bias_value = 0))
+  expect_no_error(y <- x |> add_control_bias(predictors$hmi_mean_50km,method = "offset",bias_value = 0))
+  expect_equal(y$get_offset(),"hmi_mean_50km")
+  expect_no_error(y <- x |> add_control_bias(method = "proximity",bias_value = 0))
+  expect_length(y$bias$bias_value, 2)
 
   # Add Predictors
   x <- x |> add_predictors(predictors)
@@ -136,12 +139,18 @@ test_that('Setting up a distribution model',{
   expect_equal( y$get_engine(), "<INLA>")
   y <- x |> engine_inlabru()
   expect_equal( y$get_engine(), "<INLABRU>")
-  y <- x |> engine_stan()
-  expect_equal( y$get_engine(), "<STAN>")
   y <- x |> engine_xgboost()
   expect_equal( y$get_engine(), "<XGBOOST>")
 
   # Normal x should still be none
   expect_null( x$get_engine() )
+
+  # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
+  skip_if_not_installed("cmdstanr")
+  skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
+          message = "No cmdstan path")
+
+  y <- x |> engine_stan()
+  expect_equal( y$get_engine(), "<STAN>")
 
 })

@@ -1,4 +1,64 @@
 # Test scenario creation and constraints
+test_that('Testing functions for spatial-temporal data in stars', {
+
+  skip_if_not_installed('geosphere')
+  skip_if_not_installed('cubelyr')
+
+  suppressWarnings( requireNamespace('stars', quietly = TRUE) )
+  suppressWarnings( requireNamespace('cubelyr', quietly = TRUE) )
+
+  options("ibis.setupmessages" = FALSE) # Be less chatty
+
+  # Load some stars rasters
+  ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+
+  # Load the same files future ones
+  suppressWarnings(
+    pred_future <- stars::read_stars(ll) |> dplyr::slice('Time', seq(1, 86, by = 10))
+  )
+  sf::st_crs(pred_future) <- sf::st_crs(4326)
+
+  expect_true(is.stars(pred_future))
+
+  # Do some aggregations
+  new <- st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "sum")
+  expect_true("combined" %in% names(new))
+  expect_false("primn" %in% names(new))
+
+  # Other aggregation methods
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "mean") )
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "multiply") )
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "divide") )
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "subtract") )
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",
+                            fun = "weighted.mean", weights = c("bio01","bio01")) ) # Weight by different layer
+
+  # Stars to raster check
+  expect_type(stars_to_raster(pred_future,which = 1), "list")
+  # Also try the inverse
+  o <- stars_to_raster(pred_future,which = 1)[[1]] |>
+    raster_to_stars()
+  expect_s3_class(o, "stars")
+  expect_length(o, 9)
+
+  # Add a new raster to stars object
+  o <- stars_to_raster(pred_future,which = 1)[[1]]['bio01']
+  suppressMessages(
+    expect_length(st_add_raster(pred_future, o),10)
+  )
+
+  # Summarize a single variable
+  expect_s3_class(
+    summarise_projection(pred_future[1],fun = "mean"),
+    "data.frame"
+  )
+
+  # Replicate
+  # st_rep(pred_future[1], stars::st_dimensions(pred_future[1]), "Time")
+
+})
+
+# Test scenario creation and constraints
 test_that('Scenarios and constraints', {
 
   skip_if_not_installed('glmnet')

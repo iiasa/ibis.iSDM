@@ -65,6 +65,9 @@ library(xgboost)
 library(terra)
 library(uuid)
 library(assertthat)
+
+# Don't print out as many messages
+options("ibis.setupmessages" = FALSE)
 ```
 
 

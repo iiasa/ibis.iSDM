@@ -55,6 +55,10 @@ library(igraph)
 library(ggplot2)
 library(ncdf4)
 library(assertthat)
+
+# Don't print out as many messages
+options("ibis.setupmessages" = FALSE)
+
 ```
 
 For the purpose of this example we are loading some testing data on species distributions as well as contemporary and future predictors. Note the names of predictors used for building a distribution model have to be consistent with those for creating projections!

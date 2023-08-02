@@ -60,6 +60,10 @@ library(xgboost)
 library(terra)
 library(igraph)
 library(assertthat)
+
+# Don't print out as many messages
+options("ibis.setupmessages" = FALSE)
+
 ```
 
 Lets load some of the prepared test data for this exercise. This time we are going to make use of 

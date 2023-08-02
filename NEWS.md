@@ -1,5 +1,6 @@
 # ibis.iSDM 0.0.7 (current dev branch)
 #### New features
+* Added method proximity to `add_control_bias` to place lower weights on points closer to another.
 * Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.
 * Added centroid function to BiodiversityScenarios and DistributionModels #29
 
