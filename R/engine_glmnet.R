@@ -532,7 +532,7 @@ engine_glmnet <- function(x,
             } else {
               df2 <- list()
               for(i in x.var) {
-                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+                df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
               }
               df2 <- do.call(cbind, df2); names(df2) <- x.var
             }
