@@ -363,11 +363,11 @@ methods::setMethod(
       model[['offset_object']] <- ras_of
     } else { model[['offset']] <- new_waiver() }
 
-    # Setting up variable bias control if set
+    # Setting up variable bias control if method == partial
     if(!is.Waiver( x$get_biascontrol())){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable for bias control.')
       bias <- x$bias
       if(bias$method == "partial"){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
         settings$set("bias_variable", names(bias$layer) )
         settings$set("bias_value", bias$bias_value )
         # Check that variable is already in the predictors object
@@ -564,6 +564,28 @@ methods::setMethod(
       model[['biodiversity']] <- list()
       model[['biodiversity']][[as.character(new_id())]] <- new
       rm(new, obs, w, preds, predn, predt)
+    }
+
+    # Add proximity weights if relevant option is found
+    if(!is.Waiver( x$get_biascontrol())){
+      bias <- x$bias
+      if(bias$method == "proximity"){
+        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
+        assertthat::assert_that(length(model$biodiversity)==1,
+                                msg = "This method is not yet implemented for multiple datasets.")
+
+        # For each biodiversity dataset collect the points and reassign weights
+        poi <- collect_occurrencepoints(model = model,
+                                        include_absences = TRUE,
+                                        addName = TRUE,
+                                        tosf = TRUE)
+        neww <- sf_proximity_weight(poi = poi,
+                                    maxdist = bias$bias_value[1],
+                                    alpha = bias$bias_value[2])
+        # Now set the expectation respectively
+        model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect * exp(neww)
+        rm(neww)
+      }
     }
 
     # Warning if Np is larger than Nb

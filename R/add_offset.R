@@ -716,9 +716,9 @@ methods::setMethod(
   result$aic <- NA
 
   # Progress
-  pb <- progress::progress_bar$new(total = nrow(pp))
+  if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = nrow(pp))
   for(i in 1:nrow(pp)){
-    pb$tick()
+    if(getOption('ibis.setupmessages')) pb$tick()
     # Default starting
     # holdEnv <- list(y = y,
     #                 x = x,

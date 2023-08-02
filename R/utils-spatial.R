@@ -524,6 +524,76 @@ st_kde <- function(points, background, bandwidth = 3){
   return( out )
 }
 
+#' Add proximity weights to points
+#'
+#' @description
+#' Function to define proximity weights for a given dataset.
+#'
+#' @param poi	[`sf`] object with points.
+#' @param maxdist [`numeric`] of Maximum distance beyond which a two neighbouring points are
+#' assumed to have no effect on one another for calculation of weights. If not set, use quarter
+#' distance to centroid from a minimum convex polygon.
+#' @param alpha Scaling parameter (Default: \code{1}).
+#'
+#' @concept Inspired from https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
+#' @keywords utils, internal
+#' @return A numeric vector of weights.
+#' @noRd
+sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
+  assertthat::assert_that(
+    inherits(poi, "sf"),
+    is.null(maxdist) || is.numeric(maxdist),
+    is.numeric(alpha)
+  )
+
+  # Get new maxdist
+  if(is.null(maxdist) || maxdist == 0){
+    # Build mcp
+    poi$id <- 1:nrow(poi)
+    suppressMessages(
+      suppressWarnings(
+        out <- poi %>%
+          dplyr::group_by( id ) %>%
+          dplyr::summarise( geometry = sf::st_combine( geometry ) ) |>
+          sf::st_union()
+      )
+    )
+    # Convert to convex polygon
+    out <- sf::st_convex_hull(out) |> sf::st_cast("MULTIPOLYGON") |>
+      sf::st_as_sf()
+    # Now calculate distance to centroid
+    corners <- sf::st_coordinates(out) |> as.data.frame() |>
+      sf::st_as_sf(coords = c("X","Y"), crs = sf::st_crs(out))
+    # Now calculate average distance as quarter to centroid
+    suppressWarnings(
+      maxdist <- mean(
+        sf::st_distance(corners, sf::st_centroid(out))[,1],
+        na.rm = TRUE
+      )
+    ) |> as.numeric()
+    maxdist <- maxdist / 4
+  }
+
+  # Now calculate overall distances
+  dists <- sf::st_distance(poi)
+  diag(dists) <- NA
+  dists <- methods::as(dists, 'matrix')
+
+  # For each row and weight
+  w <- rep(1, nrow(poi))
+  for (i in 1:nrow(poi)) {
+    neighs <- which(dists[i, ] < maxdist)
+    if (length(neighs) > 0) {
+      theseDists <- dists[i, neighs]
+      epsilon <- sum((1 - (theseDists / maxdist))^alpha)
+      w[i] <- 1 / (1 + epsilon)
+    }
+  }
+  assertthat::assert_that(is.numeric(w),
+                          nrow(poi) == length(w))
+  return(w)
+}
+
 #' Polygon to points
 #'
 #' @description

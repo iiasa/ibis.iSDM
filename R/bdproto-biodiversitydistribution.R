@@ -235,7 +235,13 @@ BiodiversityDistribution <- bdproto(
   },
   # set_biascontrol
   set_biascontrol = function(self, x, method, value){
-    assertthat::assert_that(is.Raster(x), is.numeric(value))
+    assertthat::assert_that(missing(x) || is.Raster(x),
+                            all(is.numeric(value)))
+    if(missing(x)) {
+      assertthat::assert_that(method == "proximity",
+                              msg = paste0("Supply a layer for method ", method))
+      x <- NULL
+    }
     bdproto(NULL, self, bias = list(layer = x, method = method, bias_value = value) )
   },
   # Get bias control (print name)

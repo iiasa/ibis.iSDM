@@ -120,10 +120,10 @@ st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
   } else { fut <- FALSE }
   # --- #
   # First get all target variables and non-target variables
-  target <- stars:::select.stars(obj, vars)
-  non_target <- stars:::select.stars(obj, -vars)
+  target <- obj |> dplyr::select( dplyr::all_of(vars))
+  non_target <- obj |> dplyr::select(-dplyr::all_of(vars))
   if(fun == "weighted.mean"){
-    target_weights <- stars:::select.stars(obj, weights)
+    target_weights <- obj |> dplyr::select( dplyr::all_of(weights))
     # Normalize the weights
     no <- stars::st_as_stars( Reduce("+", target_weights) )
     stars::st_dimensions(no) <- stars::st_dimensions(target_weights)
@@ -440,11 +440,11 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
 #' @param dimname A [`character`] of the dimension name to be used.
 #' @examples
 #' \dontrun{
-#' o <- st_rep(obj, )
+#' o <- st_rep(obj, dim)
 #' }
 #'
 #' @returns A [`stars`] object.
-#' @keywords internal, scenarip
+#' @keywords internal, scenario
 #' @noRd
 st_rep <- function(obj, dim, dimname = "time"){
   assertthat::assert_that(
