@@ -7,30 +7,38 @@
 \S4method{ensemble_partial}{ANY,character,character,character,logical}(...,x.var,method,layer,normalize)
 }
 \arguments{
-\item{...}{Provided \code{\link{DistributionModel}} objects from which partial responses can be called. In the future provided data.frames might be supported as well.}
+\item{...}{Provided \code{\link{DistributionModel}} objects from which partial
+responses can be called. In the future provided data.frames might be
+supported as well.}
 
-\item{x.var}{A \code{\link{character}} of the variable from which an ensemble is to be created.}
+\item{x.var}{A \code{\link{character}} of the variable from which an ensemble is to be
+created.}
 
-\item{method}{Approach on how the ensemble is to be created. See details for options (Default: \code{'mean'}).}
+\item{method}{Approach on how the ensemble is to be created. See details for
+options (Default: \code{'mean'}).}
 
-\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
-ignore any of the layer names in ensembles of \code{SpatRaster} objects.}
+\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
+(Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
+names in ensembles of \code{SpatRaster} objects.}
 
-\item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{TRUE}).}
+\item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be
+normalized to a scale of 0-1 (Default: \code{TRUE}).}
 }
 \value{
-A \link{data.frame} with the combined partial effects of the supplied models.
+A \link{data.frame} with the combined partial effects of the supplied
+models.
 }
 \description{
-Similar to the \code{ensemble()} function, this function creates an ensemble of
-partial responses of provided distribution models fitted with the \code{\link{ibis.iSDM-package}}.
-Through the \code{layer} parameter it can be specified which part of the partial prediction
-should be averaged in an ensemble (if given). This can be for instance the \emph{mean} prediction and/or
-the standard deviation \emph{sd}. Ensemble partial is also being called if more than one input
-\code{\link{DistributionModel}} object is provided to \code{partial}.
+Similar to the \code{ensemble()} function, this function creates an
+ensemble of partial responses of provided distribution models fitted with
+the \code{\link{ibis.iSDM-package}}. Through the \code{layer} parameter it can be
+specified which part of the partial prediction should be averaged in an
+ensemble (if given). This can be for instance the \emph{mean} prediction and/or
+the standard deviation \emph{sd}. Ensemble partial is also being called if more
+than one input \code{\link{DistributionModel}} object is provided to \code{partial}.
 
-By default the ensemble of partial responses is created as average across all models with the
-uncertainty being the standard deviation of responses.
+By default the ensemble of partial responses is created as average across
+all models with the uncertainty being the standard deviation of responses.
 }
 \details{
 Possible options for creating an ensemble includes:
@@ -40,8 +48,9 @@ Possible options for creating an ensemble includes:
 }
 }
 \note{
-If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs \link{log}.
+If a list is supplied, then it is assumed that each entry in the list
+is a fitted \code{\link{DistributionModel}} object. Take care not to create an ensemble
+of models constructed with different link functions, e.g. logistic vs \link{log}.
 By default the response functions of each model are normalized.
 }
 \examples{

@@ -3,15 +3,16 @@ NULL
 
 #' Create a new STAN prior
 #'
-#' @description
-#' Function to create a new prior for [engine_stan] models. Priors currently
-#' can be set on specific environmental predictors.
+#' @description Function to create a new prior for [engine_stan] models. Priors
+#' currently can be set on specific environmental predictors.
 #'
-#' @param variable A [`character`] matched against existing predictors or latent effects.
+#' @param variable A [`character`] matched against existing predictors or latent
+#'   effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper parameters.
-#' First entry is treated as mean (Default: \code{0}), the second as the standard variation (Default: \code{2}) of
-#' a Gaussian distribution on the respective coefficient.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper
+#'   parameters. First entry is treated as mean (Default: \code{0}), the second
+#'   as the standard variation (Default: \code{2}) of a Gaussian distribution on
+#'   the respective coefficient.
 #' @param ... Variables passed on to prior object.
 #' @references
 #' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
@@ -77,12 +78,13 @@ methods::setMethod(
 #' Helper function when multiple variables and types are supplied for STAN
 #'
 #' @name STANPriors
-#' @description
-#' This is a helper function to specify several [STANPrior] with the same
-#' hyper-parameters, but different variables.
-#' @param variables A [`vector`] of [`character`] matched against existing predictors or latent effects.
+#' @description This is a helper function to specify several [STANPrior] with
+#' the same hyper-parameters, but different variables.
+#' @param variables A [`vector`] of [`character`] matched against existing
+#'   predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as
+#'   hyper-parameters.
 #' @param ... Variables passed on to prior object
 #' @rdname STANPriors
 #' @family prior

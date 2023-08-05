@@ -15,7 +15,8 @@ rm_latent(x)
 Removes a latent spatial effect from a \code{\link{distribution}} object.
 }
 \description{
-This is just a wrapper function for removing specified offsets from a \code{\linkS4class{BiodiversityDistribution}}) object.
+This is just a wrapper function for removing specified offsets
+from a \code{\linkS4class{BiodiversityDistribution}}) object.
 }
 \examples{
 \dontrun{

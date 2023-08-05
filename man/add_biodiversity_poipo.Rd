@@ -24,31 +24,42 @@ add_biodiversity_poipo(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipo}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-only point occurrences.}
+\item{poipo}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-only point
+occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
+biodiversity point records.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is
+to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'Poisson'}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default:
+\code{'Poisson'}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
+\code{NULL}).}
 
-\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
-Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{"poipo"}.
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
+weights used in the modelling. Larger weights indicate higher weighting
+relative to any other datasets. By default set to \code{1} if only one
+dataset is added. A \code{\link{vector}} is also supported but must be of the same
+length as \code{"poipo"}.
 \strong{Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).}}
 
-\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in
-shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
+intercept is to be added in shared likelihood models for engines
+\link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}. Otherwise ignored.}
 
-\item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
+\item{docheck}{\code{\link{logical}} on whether additional checks should be performed
+(e.g. intersection tests) (Default: \code{TRUE}).}
 
-\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
+\item{pseudoabsence_settings}{Either \code{NULL} or a
+\code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
 
-\item{...}{Other parameters passed down to the object. Normally not used unless described in details.}
+\item{...}{Other parameters passed down to the object. Normally not used
+unless described in details.}
 }
 \value{
 Adds biodiversity data to \link{distribution} object.
@@ -58,11 +69,13 @@ This function adds a presence-only biodiversity dataset to a
 distribution object.
 }
 \details{
-This function allows to add presence-only biodiversity records to a \link{distribution} \pkg{ibis.iSDM}
-Presence-only data are usually modelled through an inferential model (see Guisan and Zimmerman, 2000) that
-relate their occurrence in relation to environmental covariates to a selected sample of
-'background' points. The most common approach for estimation and the one supported by this type of dataset
-are poisson-process models (PPM) in which presence-only points are fitted through a down-weighted Poisson
+This function allows to add presence-only biodiversity records to a
+\link{distribution} \pkg{ibis.iSDM} Presence-only data are usually modelled
+through an inferential model (see Guisan and Zimmerman, 2000) that relate
+their occurrence in relation to environmental covariates to a selected
+sample of 'background' points. The most common approach for estimation and
+the one supported by this type of dataset are poisson-process models (PPM)
+in which presence-only points are fitted through a down-weighted Poisson
 regression. See Renner et al. 2015 for an overview.
 }
 \examples{
@@ -83,7 +96,8 @@ x
 }
 }
 \seealso{
-See other functions for adding biodiversity data, i.e. \code{\link{add_biodiversity_poipa}}
+See other functions for adding biodiversity data, i.e.
+\code{\link{add_biodiversity_poipa}}
 
 Other add_biodiversity: 
 \code{\link{add_biodiversity_poipa}()},

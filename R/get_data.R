@@ -1,17 +1,17 @@
 #' Small helper function to obtain predictions from an object
 #'
-#' @description
-#' This function is a short helper function to return the fitted data from a `DistributionModel` or
-#' `BiodiversityScenario` object. It can be used to easily obtain for example the estimated prediction
-#' from a model or the projected scenario from a `scenario()` object.
+#' @description This function is a short helper function to return the fitted
+#' data from a `DistributionModel` or `BiodiversityScenario` object. It can be
+#' used to easily obtain for example the estimated prediction from a model or
+#' the projected scenario from a `scenario()` object.
 #'
-#' @note
-#' This function is essentially identical to querying the internal function
-#' \code{x$get_data()} from the object. However it does attempt some lazy
-#' character matching if what is supplied.
+#' @note This function is essentially identical to querying the internal
+#' function \code{x$get_data()} from the object. However it does attempt some
+#' lazy character matching if what is supplied.
 #'
 #' @param obj Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
-#' @param what A [`character`] of specific layer to be returned if existing (Default: \code{NULL}).
+#' @param what A [`character`] of specific layer to be returned if existing
+#'   (Default: \code{NULL}).
 #' @keywords utils
 #' @examples
 #' \dontrun{

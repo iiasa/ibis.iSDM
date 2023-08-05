@@ -11,30 +11,32 @@ GLMNETPrior(variable, hyper = 0, lims = c(-Inf, Inf), ...)
 \arguments{
 \item{variable}{A \code{\link{character}} variable passed on to the prior object.}
 
-\item{hyper}{A \code{\link{numeric}} value between \code{0} and \code{1} that state the penalization factor.
-By default this is set to \code{0}, implying the \code{"variable"} provided is not regularized at all.}
+\item{hyper}{A \code{\link{numeric}} value between \code{0} and \code{1} that state the
+penalization factor. By default this is set to \code{0}, implying the
+\code{"variable"} provided is not regularized at all.}
 
-\item{lims}{A \code{\link{numeric}} \code{\link{vector}} of the lower and upper limits for each coefficient (Default: \code{c(-Inf, Inf)}).}
+\item{lims}{A \code{\link{numeric}} \code{\link{vector}} of the lower and upper limits for each
+coefficient (Default: \code{c(-Inf, Inf)}).}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-The \code{\link{engine_glmnet}} engine does not support priors in a typical sense, however it is
-possible to specify so called penalty factors as well as lower and upper limits
-on all variables in the model.
+The \code{\link{engine_glmnet}} engine does not support priors in a
+typical sense, however it is possible to specify so called penalty factors as
+well as lower and upper limits on all variables in the model.
 
 The default penalty multiplier is \code{1} for each coefficient X covariate,
 i.e. coefficients are penalized equally and then informed by an intersection
-of any absence information with the covariates.
-In contrast a variable with penalty.factor equal to \code{0} is not penalized at all.
+of any absence information with the covariates. In contrast a variable with
+penalty.factor equal to \code{0} is not penalized at all.
 
-In addition, it is possible to specifiy a lower and upper limit for specific coefficients,
-which constrain them to a certain range.
-By default those ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset to a
-specific value range by altering \code{"lims"} (see examples).
+In addition, it is possible to specifiy a lower and upper limit for specific
+coefficients, which constrain them to a certain range. By default those
+ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset
+to a specific value range by altering \code{"lims"} (see examples).
 
-For a regularized regression that supports a few more options on the priors, check out the
-Bayesian \code{\link{engine_breg}}.
+For a regularized regression that supports a few more options on the priors,
+check out the Bayesian \code{\link{engine_breg}}.
 }
 \examples{
 \dontrun{

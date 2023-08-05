@@ -9,13 +9,17 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the sum-of-trees formulation (Default: \code{1000}).}
+\item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the
+sum-of-trees formulation (Default: \code{1000}).}
 
-\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples (Default: \code{250}).}
+\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples (Default:
+\code{250}).}
 
-\item{chains}{A number of the number of chains to be used (Default: \code{4}).}
+\item{chains}{A number of the number of chains to be used (Default:
+\code{4}).}
 
-\item{type}{The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either
+\code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other options.}
 }
@@ -23,15 +27,17 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 An \link{Engine}.
 }
 \description{
-The Bayesian regression approach to a sum of complementary trees is to shrink
-the said fit of each tree through a regularization prior. BART models provide
-non-linear highly flexible estimation and have been shown to compare favourable among machine learning
-algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
-and shrinkage towards \code{0}.
+The Bayesian regression approach to a sum of complementary trees
+is to shrink the said fit of each tree through a regularization prior. BART
+models provide non-linear highly flexible estimation and have been shown to
+compare favourable among machine learning algorithms (Dorie et al. 2019).
+Default prior preference is for trees to be small (few terminal nodes) and
+shrinkage towards \code{0}.
 
-This package requires the \code{"dbarts"} R-package to be installed.
-Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
-Users are therefore advised to cite if they make heavy use of BART.
+This package requires the \code{"dbarts"} R-package to be installed. Many
+of the functionalities of this engine have been inspired by the
+\code{"embarcadero"} R-package. Users are therefore advised to cite if they
+make heavy use of BART.
 }
 \details{
 Prior distributions can furthermore be set for:

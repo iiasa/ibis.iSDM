@@ -18,20 +18,27 @@ bivplot(
 \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 }
 \arguments{
-\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object with \code{prediction} model within.}
+\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}}
+object with \code{prediction} model within.}
 
-\item{xvar}{A \code{\link{character}} denoting the value on the x-axis (Default: \code{'mean'}).}
+\item{xvar}{A \code{\link{character}} denoting the value on the x-axis (Default:
+\code{'mean'}).}
 
-\item{yvar}{A \code{\link{character}} denoting the value on the y-axis (Default: \code{'sd'}).}
+\item{yvar}{A \code{\link{character}} denoting the value on the y-axis (Default:
+\code{'sd'}).}
 
-\item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted (Default: \code{TRUE})?}
+\item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted
+(Default: \code{TRUE})?}
 
-\item{fname}{A \code{\link{character}} specifying the output filename a created figure should be written to.}
+\item{fname}{A \code{\link{character}} specifying the output filename a created figure
+should be written to.}
 
-\item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
+\item{title}{Allows to respecify the title through a \code{\link{character}} (Default:
+\code{NULL}).}
 
-\item{col}{A \code{\link{character}} stating the colour palette to use. Has to be either a predefined value or a
-vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
+\item{col}{A \code{\link{character}} stating the colour palette to use. Has to be
+either a predefined value or a vector of colours. See
+\code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
 
 \item{...}{Other engine specific parameters.}
 }
@@ -39,26 +46,31 @@ vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold
 Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
 }
 \description{
-Often there is an intention to display not only the predictions made with a SDM, but
-also the uncertainty of the prediction. Uncertainty be estimated either directly by the model
-or by calculating the variation in prediction values among a set of models.
+Often there is an intention to display not only the predictions
+made with a SDM, but also the uncertainty of the prediction. Uncertainty be
+estimated either directly by the model or by calculating the variation in
+prediction values among a set of models.
 
-In particular Bayesian engines can produce not only mean estimates of fitted responses,
-but also pixel-based estimates of uncertainty from the posterior such as the standard deviation (SD)
-or the coefficient of variation of a given prediction.
+In particular Bayesian engines can produce not only mean estimates of fitted
+responses, but also pixel-based estimates of uncertainty from the posterior
+such as the standard deviation (SD) or the coefficient of variation of a
+given prediction.
 
-This function makes use of the \code{"biscale"} R-package to create bivariate plots of the fitted distribution object,
-allowing to visualize two variables at once. It is mostly thought of as a convenience function to
-create such bivariate plots for quick visualization.
+This function makes use of the \code{"biscale"} R-package to create bivariate
+plots of the fitted distribution object, allowing to visualize two variables
+at once. It is mostly thought of as a convenience function to create such
+bivariate plots for quick visualization.
 
-Supported Inputs are either single trained Bayesian \code{\link{DistributionModel}} with uncertainty or
-the output of an \code{\link[=ensemble]{ensemble()}} call. In both cases, users have to make sure that \code{"xvar"} and
-\code{"yvar"} are set accordingly.
+Supported Inputs are either single trained Bayesian \code{\link{DistributionModel}}
+with uncertainty or the output of an \code{\link[=ensemble]{ensemble()}} call. In both cases,
+users have to make sure that \code{"xvar"} and \code{"yvar"} are set
+accordingly.
 }
 \note{
 \strong{This function requires the biscale package to be installed.}
-Although a work around without the package could be developed, it was not deemed necessary at this point.
-See also this \href{https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188}{gist}.
+Although a work around without the package could be developed, it was not
+deemed necessary at this point. See also this
+\href{https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188}{gist}.
 }
 \seealso{
 \link{partial}, \link{plot.DistributionModel}

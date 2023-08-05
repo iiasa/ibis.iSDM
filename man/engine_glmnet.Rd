@@ -16,15 +16,19 @@ engine_glmnet(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{alpha}{A \code{\link{numeric}} giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-\code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).}
+\item{alpha}{A \code{\link{numeric}} giving the elasticnet mixing parameter, which has
+to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
+and \code{alpha=0} the ridge penalty (Default: \code{0}).}
 
-\item{nlambda}{A \code{\link{numeric}} giving the number of lambda values to be used (Default: \code{100}).}
+\item{nlambda}{A \code{\link{numeric}} giving the number of lambda values to be used
+(Default: \code{100}).}
 
-\item{lambda}{A \code{\link{numeric}} with a user supplied estimate of lambda. Usually best to let this parameter be
-determined deterministically (Default: \code{NULL}).}
+\item{lambda}{A \code{\link{numeric}} with a user supplied estimate of lambda. Usually
+best to let this parameter be determined deterministically (Default:
+\code{NULL}).}
 
-\item{type}{The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either making
+\code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other parameters passed on to glmnet.}
 }
@@ -32,28 +36,34 @@ determined deterministically (Default: \code{NULL}).}
 An \link{Engine}.
 }
 \description{
-This engine allows the estimation of linear coefficients using either ridge, lasso or elastic net regressions techniques.
-Backbone of this engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
-including the popular \code{'maxnet'} (e.g. Maxent) package.
-Ultimately this engine is an equivalent of \link{engine_breg}, but in a "frequentist" setting.
-If user aim to emulate a model that most closely resembles maxent within the ibis.iSDM modelling framework,
-then this package is the best way of doing so. Compared to the \code{'maxnet'} R-package,
-a number of efficiency settings are implemented in particular for cross-validation of alpha and lambda values.
+This engine allows the estimation of linear coefficients using
+either ridge, lasso or elastic net regressions techniques. Backbone of this
+engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
+including the popular \code{'maxnet'} (e.g. Maxent) package. Ultimately this
+engine is an equivalent of \link{engine_breg}, but in a "frequentist" setting. If
+user aim to emulate a model that most closely resembles maxent within the
+ibis.iSDM modelling framework, then this package is the best way of doing so.
+Compared to the \code{'maxnet'} R-package, a number of efficiency settings
+are implemented in particular for cross-validation of alpha and lambda
+values.
 
-Limited amount of prior information can be specified for this engine, specifically via offsets or as
-\code{\link{GLMNETPrior}}, which allow to specify priors as regularization constants.
+Limited amount of prior information can be specified for this engine,
+specifically via offsets or as \code{\link{GLMNETPrior}}, which allow to specify priors
+as regularization constants.
 }
 \details{
-Regularized regressions are effectively GLMs that are fitted with ridge, lasso or elastic-net regularization.
-Which of them is chosen is critical dependent on the alpha value:
-\link{*} For \code{alpha} equal to \code{0} a ridge regularization is used. Ridge regularization has the property that
-it doesn't remove variables entirely, but instead sets their coefficients to \code{0}.
-\link{*} For \code{alpha} equal to \code{1} a lasso regularization is used. Lassos tend to remove those coefficients
-fully from the final model that do not improve the loss function.
-\link{*} For \code{alpha} values between \code{0} and \code{1} a elastic-net regularization is used, which is essentially a combination
-of the two.
-The optimal lambda parameter can be determined via cross-validation. For this option set \code{"varsel"} in \code{train()}
-to \code{"reg"}.
+Regularized regressions are effectively GLMs that are fitted with
+ridge, lasso or elastic-net regularization. Which of them is chosen is
+critical dependent on the alpha value: \link{*} For \code{alpha} equal to \code{0}
+a ridge regularization is used. Ridge regularization has the property that it
+doesn't remove variables entirely, but instead sets their coefficients to
+\code{0}. \link{*} For \code{alpha} equal to \code{1} a lasso regularization is
+used. Lassos tend to remove those coefficients fully from the final model
+that do not improve the loss function. \link{*} For \code{alpha} values between
+\code{0} and \code{1} a elastic-net regularization is used, which is
+essentially a combination of the two. The optimal lambda parameter can be
+determined via cross-validation. For this option set \code{"varsel"} in
+\code{train()} to \code{"reg"}.
 }
 \examples{
 \dontrun{

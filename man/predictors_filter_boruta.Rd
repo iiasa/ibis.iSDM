@@ -16,32 +16,39 @@ predictors_filter_boruta(
 )
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates for a given species.}
+\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental
+covariates for a given species.}
 
-\item{method}{Which method to use for constructing the correlation matrix (Options: \code{'pearson'} (Default),
-\code{'spearman'}| \code{'kendal'}), \code{"abess"}, or \code{"boruta"}.}
+\item{method}{Which method to use for constructing the correlation matrix
+(Options: \code{'pearson'} (Default), \code{'spearman'}| \code{'kendal'}),
+\code{"abess"}, or \code{"boruta"}.}
 
-\item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually variables for which prior
-information is known.}
+\item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually
+variables for which prior information is known.}
 
-\item{iter}{\code{\link{numeric}} on the number of maximal runs (Default: \code{100}). Increase if too many tentative left.}
+\item{iter}{\code{\link{numeric}} on the number of maximal runs (Default: \code{100}).
+Increase if too many tentative left.}
 
 \item{verbose}{\code{\link{logical}} whether to be chatty.}
 
 \item{...}{Other options for a specific method}
 
-\item{observed}{A \code{\link{vector}} with observational records to use for determining variable importance.}
+\item{observed}{A \code{\link{vector}} with observational records to use for
+determining variable importance.}
 }
 \value{
 A \code{\link{vector}} of variable names to exclude.
 }
 \description{
-This function uses the \code{Boruta} package to identify predictor variables with little information content. It iteratively
-compares importances of attributes with importances of shadow attributes, created by shuffling original ones.
-Attributes that have significantly worst importance than shadow ones are being consecutively dropped.
+This function uses the \code{Boruta} package to identify
+predictor variables with little information content. It iteratively compares
+importances of attributes with importances of shadow attributes, created by
+shuffling original ones. Attributes that have significantly worst importance
+than shadow ones are being consecutively dropped.
 }
 \note{
-This package depends on the \code{ranger} package to iteratively fit randomForest models.
+This package depends on the \code{ranger} package to iteratively fit
+randomForest models.
 }
 \references{
 \itemize{

@@ -9,8 +9,8 @@ st_reduce(obj, vars, newname, weights = NULL, fun = "sum")
 \arguments{
 \item{obj}{A \code{\link{stars}} object or a \code{\link{list}} that can be coerced to one.}
 
-\item{vars}{A \code{\link{vector}} describing the variables to be combined. Has to be of
-length two or greater.}
+\item{vars}{A \code{\link{vector}} describing the variables to be combined. Has to be
+of length two or greater.}
 
 \item{newname}{A \code{\link{character}} with the new name for the variable.}
 
@@ -19,8 +19,8 @@ length two or greater.}
 \item{fun}{A function how the respective layers should be combined.}
 }
 \description{
-Small helper function that acts a wrapper to combine
-2 or more variables in a \code{stars} object together.
+Small helper function that acts a wrapper to combine 2 or more
+variables in a \code{stars} object together.
 }
 \note{
 Currently only works via matrix manipulation

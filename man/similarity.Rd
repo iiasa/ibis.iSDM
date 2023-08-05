@@ -20,20 +20,27 @@ similarity(
 \S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
 }
 \arguments{
-\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}} object.}
+\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or
+alternatively a \code{\link{SpatRaster}} object.}
 
-\item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively
-a \code{\link{data.frame}} with extracted values (corresponding to those given in \code{obj}).}
+\item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or
+alternatively a \code{\link{data.frame}} with extracted values (corresponding to
+those given in \code{obj}).}
 
-\item{ref_type}{A \code{\link{character}} specifying the type of biodiversity to use when obj is a \code{\link{BiodiversityDistribution}}.}
+\item{ref_type}{A \code{\link{character}} specifying the type of biodiversity to use
+when obj is a \code{\link{BiodiversityDistribution}}.}
 
-\item{method}{A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.}
+\item{method}{A specifc method for similarity calculation. Currently
+supported: \code{'mess'}, \code{'nt'}.}
 
-\item{predictor_names}{An optional \code{\link{character}} specifying the covariates to be used (Default: \code{NULL}).}
+\item{predictor_names}{An optional \code{\link{character}} specifying the covariates to
+be used (Default: \code{NULL}).}
 
-\item{full}{should similarity values be returned for all variables (Default: \code{FALSE})?}
+\item{full}{should similarity values be returned for all variables (Default:
+\code{FALSE})?}
 
-\item{plot}{Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).}
+\item{plot}{Should the result be plotted? Otherwise return the output list
+(Default: \code{TRUE}).}
 
 \item{...}{other options (Non specified).}
 }
@@ -41,27 +48,28 @@ a \code{\link{data.frame}} with extracted values (corresponding to those given i
 This function returns a list containing:
 \itemize{
 \item \code{similarity}: A \code{SpatRaster} object with multiple layers giving the environmental
-similarities for each variable in \code{x} (only included when \code{"full=TRUE"});
+similarities for each variable in \code{x} (only included when
+\code{"full=TRUE"});
 \item \code{mis}: a \code{SpatRaster} layer giving the minimum similarity value
 across all variables for each location (i.e. the MESS);
 \item \code{exip}: a \code{SpatRaster} layer indicating whether any model would interpolate
 or extrapolate to this location based on environmental surface;
 \item \code{mod}: a factor \code{SpatRaster} layer indicating which variable was most
-dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
-and
+dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010); and
 \item \code{mos}: a factor \code{SpatRaster} layer indicating which variable was most
 similar to its reference range.
 }
 }
 \description{
-Calculate the environmental similarity of the provided covariates
-with respect to a reference dataset.
-Currently supported is Multivariate Environmental Similarity index
-and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
+Calculate the environmental similarity of the provided
+covariates with respect to a reference dataset. Currently supported is
+Multivariate Environmental Similarity index and the multivariate combination
+novelty index (NT2) based on the Mahalanobis divergence (see references).
 }
 \details{
-\code{\link{similarity}} implements the MESS algorithm described in Appendix S3
-of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014).
+\code{\link{similarity}} implements the MESS algorithm described in Appendix
+S3 of Elith et al. (2010) as well as the Mahalanobis dissimilarity
+described in Mesgaran et al. (2014).
 }
 \examples{
  \dontrun{
@@ -73,10 +81,12 @@ plot(
 \references{
 \itemize{
 \item Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting
-species" https://doi.org/10.1111/j.2041-210X.2010.00036.x \emph{Methods in Ecology and Evolution}, 1: 330-342
+species" https://doi.org/10.1111/j.2041-210X.2010.00036.x \emph{Methods in Ecology
+and Evolution}, 1: 330-342
 \item Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool
-for quantifying novelty due to covariate range and correlation change when projecting
-species distribution models" https://doi.org/10.1111/ddi.12209 \emph{Diversity and Distributions}, 20: 1147-1159.
+for quantifying novelty due to covariate range and correlation change when
+projecting species distribution models" https://doi.org/10.1111/ddi.12209
+\emph{Diversity and Distributions}, 20: 1147-1159.
 }
 }
 \seealso{

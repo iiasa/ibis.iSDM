@@ -9,7 +9,8 @@ write_stanmodel(mod, dir = tempdir())
 \arguments{
 \item{mod}{A supplied cmdstanr model}
 
-\item{dir}{The model directory where the model chould be written. Should be a character / existing dir.}
+\item{dir}{The model directory where the model chould be written. Should be a
+character / existing dir.}
 }
 \description{
 Write a cmdstanr model output to a specific destination

@@ -16,8 +16,9 @@ rm_priors(x, names = NULL, ...)
 \item{...}{Other parameters passed down}
 }
 \description{
-This function allows to remove priors from an existing \link{distribution} object.
-In order to remove a set prior, the name of the prior has to be specified.
+This function allows to remove priors from an existing
+\link{distribution} object. In order to remove a set prior, the name of the
+prior has to be specified.
 }
 \examples{
 \dontrun{

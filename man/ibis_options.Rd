@@ -10,8 +10,8 @@ ibis_options()
 The output of \code{getOptions} for all ibis related variables.
 }
 \description{
-There are a number of hidden options that can be specified for ibis.iSDM.
-Currently supported are:
+There are a number of hidden options that can be specified for
+ibis.iSDM. Currently supported are:
 \itemize{
 \item \code{'ibis.runparallel'} : \code{\link{logical}} value on whether processing should be run in parallel.
 \item \code{'ibis.nthread'} : \code{\link{numeric}} value on how many cores should be used by default.

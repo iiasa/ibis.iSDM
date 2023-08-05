@@ -1,15 +1,13 @@
 #' Validation of a fitted distribution object
 #'
-#' @description
-#' This function conducts a model evaluation based on
-#' either on the fitted point data or any supplied independent.
+#' @description This function conducts a model evaluation based on either on the
+#'   fitted point data or any supplied independent.
 #' **Currently only supporting point datasets. For validation of integrated models more work is needed.**
 #'
-#' @details
-#' The \code{'validate'} function calculates different validation metrics
-#' depending on the output type.
+#' @details The \code{'validate'} function calculates different validation
+#'   metrics depending on the output type.
 #'
-#' The output metrics for each type are defined as follows:
+#'   The output metrics for each type are defined as follows:
 #' **Continuous:**
 #'
 #' * \code{'n'} = Number of observations.
@@ -34,20 +32,24 @@
 #' * \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
 #' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
 #' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
-#' where TP is true positive, TN a true negative, FP the false positive and FN the false negative.
+#'   where TP is true positive, TN a true negative, FP the false positive and FN
+#'   the false negative.
 #'
-#' @param mod A fitted [`BiodiversityDistribution`] object with set predictors. Alternatively one can also
-#' provide directly a [`SpatRaster`], however in this case the `point` layer also needs to be provided.
-#' @param method Should the validation be conducted on the continious prediction or a
-#' (previously calculated) thresholded layer in binary format? Note that depending
-#' on the method different metrics can be computed. See Details.
-#' @param layer In case multiple layers exist, which one to use? (Default: \code{'mean'}).
+#' @param mod A fitted [`BiodiversityDistribution`] object with set predictors.
+#'   Alternatively one can also provide directly a [`SpatRaster`], however in
+#'   this case the `point` layer also needs to be provided.
+#' @param method Should the validation be conducted on the continious prediction
+#'   or a (previously calculated) thresholded layer in binary format? Note that
+#'   depending on the method different metrics can be computed. See Details.
+#' @param layer In case multiple layers exist, which one to use? (Default:
+#'   \code{'mean'}).
 #' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
-#' @param point_column A [`character`] vector with the name of the column containing the independent observations.
-#' (Default: \code{'observed'}).
+#' @param point_column A [`character`] vector with the name of the column
+#'   containing the independent observations. (Default: \code{'observed'}).
 #' @param ... Other parameters that are passed on. Currently unused.
 #' @returns Return a tidy [`tibble`] with validation results.
-#' @note If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
+#' @note If you use the Boyce Index, please cite the original Hirzel et al.
+#'   (2006) paper.
 #'
 #' @references
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
@@ -226,7 +228,8 @@ methods::setMethod(
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
+#' @usage
+#'   \S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "SpatRaster"),
@@ -297,8 +300,10 @@ methods::setMethod(
     )
     #### Calculating Boyce index as in Hirzel et al. 2006
     # fit: A vector or SpatRaster containing the predicted suitability values
-    # obs: A vector containing the predicted suitability values or xy-coordinates (if fit is a SpatRaster) of the validation points (presence records)
-    # nclass : number of classes or vector with classes threshold. If nclass=0, Boyce index is calculated with a moving window (see next parameters)
+    # obs: A vector containing the predicted suitability values or xy-coordinates
+    # (if fit is a SpatRaster) of the validation points (presence records)
+    # nclass : number of classes or vector with classes threshold. If nclass=0,
+    # Boyce index is calculated with a moving window (see next parameters)
     # windows.w : width of the moving window (by default 1/10 of the suitability range)
     # res : resolution of the moving window (by default 101 focals)
     # PEplot : if True, plot the predicted to expected ratio along the suitability class

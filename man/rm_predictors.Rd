@@ -11,12 +11,12 @@ rm_predictors(x, names)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack.}
+\item{names}{\code{\link{vector}} A Vector of character names describing the
+environmental stack.}
 }
 \description{
-Remove a particular variable from an \link{distribution} object with a
-\code{\linkS4class{PredictorDataset}}.
-See Examples.
+Remove a particular variable from an \link{distribution} object with
+a \code{\linkS4class{PredictorDataset}}. See Examples.
 }
 \examples{
 \dontrun{

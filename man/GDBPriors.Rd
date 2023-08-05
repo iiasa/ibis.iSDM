@@ -9,16 +9,19 @@ GDBPriors(variable, hyper = "increasing", ...)
 \S4method{GDBPriors}{character,character}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
+\item{variable}{A \code{\link{character}} matched against existing predictors
+variables.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
-\code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain.
+Available options are \code{'increasing'}, \code{'decreasing'},
+\code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
+\code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-This is a helper function to specify several \link{GLMNETPrior} with the same
-hyper-parameters, but different variables.
+This is a helper function to specify several \link{GLMNETPrior} with
+the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 

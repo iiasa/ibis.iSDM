@@ -3,11 +3,10 @@ NULL
 
 #' Summarises a trained model or predictor object
 #'
-#' @description
-#' This helper function summarizes a given object, including
-#' [DistributionModel], [PredictorDataset] or [PriorList] objects and others. This can be
-#' a helpful way to summarize what is contained within and the values of specified
-#' models or objects.
+#' @description This helper function summarizes a given object, including
+#' [DistributionModel], [PredictorDataset] or [PriorList] objects and others.
+#' This can be a helpful way to summarize what is contained within and the
+#' values of specified models or objects.
 #'
 #' When unsure, it is usually a good strategy to run [summary] on any object.
 #'
@@ -77,13 +76,12 @@ summary.Settings <- function(object, ...) object$summary()
 
 #' Obtains the coefficients of a trained model
 #'
-#' @description
-#' Similar as [`summary`], this helper function obtains the coefficients from
-#' a given [DistributionModel] object.
+#' @description Similar as [`summary`], this helper function obtains the
+#' coefficients from a given [DistributionModel] object.
 #' **Note:**
-#' For models trained with machine-learning approaches (e.g. [`engine_bart`] etc) this function
-#' will return variable importance estimates rather than linear coefficients.
-#' Similar can be said for trained non-linear models.
+#' For models trained with machine-learning approaches (e.g. [`engine_bart`]
+#' etc) this function will return variable importance estimates rather than
+#' linear coefficients. Similar can be said for trained non-linear models.
 #' @param object Any prepared object.
 #' @param ... not used.
 #' @seealso [stats::coef()].

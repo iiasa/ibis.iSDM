@@ -37,8 +37,8 @@ ibis_colours <- list(
 
 #' Print ibis options
 #'
-#' @description There are a number of hidden options that can be specified for ibis.iSDM.
-#' Currently supported are:
+#' @description There are a number of hidden options that can be specified for
+#'   ibis.iSDM. Currently supported are:
 #'  * \code{'ibis.runparallel'} : [`logical`] value on whether processing should be run in parallel.
 #'  * \code{'ibis.nthread'} : [`numeric`] value on how many cores should be used by default.
 #'  * \code{'ibis.setupmessages'} : [`logical`] value indicating whether message during object creation should be shown.
@@ -58,17 +58,19 @@ ibis_options <- function(){
 
 #' Install ibis dependencies
 #'
-#' @description
-#' Some of the dependencies (R-Packages) that ibis.iSDM relies on are by intention
-#' not added to the Description of the file to keep the number of mandatory dependencies small
-#' and enable the package to run even on systems that might not have all libraries pre-installed.
+#' @description Some of the dependencies (R-Packages) that ibis.iSDM relies on
+#' are by intention not added to the Description of the file to keep the number
+#' of mandatory dependencies small and enable the package to run even on systems
+#' that might not have all libraries pre-installed.
 #'
-#' This function provides a convenience wrapper to install those missing dependencies as needed. It
-#' furthermore checks which packages require updating and updates them as needed.
-#' @note
-#' INLA is handled in a special way as it is not available via cran.
-#' @param deps A [`vector`] with the names of the packages to be installed (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
-#' @param update A [`logical`] flag of whether all (installed) packages should also be checked for updates (Default: \code{TRUE}).
+#' This function provides a convenience wrapper to install those missing
+#' dependencies as needed. It furthermore checks which packages require updating
+#' and updates them as needed.
+#' @note INLA is handled in a special way as it is not available via cran.
+#' @param deps A [`vector`] with the names of the packages to be installed
+#'   (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
+#' @param update A [`logical`] flag of whether all (installed) packages should
+#'   also be checked for updates (Default: \code{TRUE}).
 #' @returns Nothing. Packages will be installed.
 #' @aliases ibis_dependencies
 #' @examples
@@ -123,8 +125,8 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
 #' Options to set up ibis for parallel processing with future
 #'
 #' @param cores A [`numeric`] number stating the number of cores to use.
-#' @param strategy A [`character`] denoting the strategy to be used for future. See help of [`future`] for options.
-#' (Default: \code{"multisession"}).
+#' @param strategy A [`character`] denoting the strategy to be used for future.
+#'   See help of [`future`] for options. (Default: \code{"multisession"}).
 #' @seealso [future]
 #' @return None
 #' @aliases ibis_future

@@ -9,21 +9,24 @@ get_priors(mod, target_engine, ...)
 \S4method{get_priors}{ANY,character}(mod,target_engine,...)
 }
 \arguments{
-\item{mod}{A fitted \code{\linkS4class{DistributionModel}} object. If instead a \code{\linkS4class{BiodiversityDistribution}} object
-is passed to this function, it simply returns the contained priors used for estimation (if any).}
+\item{mod}{A fitted \code{\linkS4class{DistributionModel}} object. If instead a
+\code{\linkS4class{BiodiversityDistribution}} object is passed to this function, it
+simply returns the contained priors used for estimation (if any).}
 
 \item{target_engine}{A \code{\link{character}} for which the priors should be created.}
 
 \item{...}{Other parameters passed down.}
 }
 \description{
-Often it can make sense to fit an additional model to get a grasp on the range of
-values that "beta" parameters can take. This function takes an existing \code{\linkS4class{BiodiversityDistribution}} object
-and creates \code{\linkS4class{PriorList}} object from them. The resulting object can be used to add for instance \link{priors}
-to a new model.
+Often it can make sense to fit an additional model to get a
+grasp on the range of values that "beta" parameters can take. This function
+takes an existing \code{\linkS4class{BiodiversityDistribution}} object and creates
+\code{\linkS4class{PriorList}} object from them. The resulting object can be used to add
+for instance \link{priors} to a new model.
 }
 \note{
-Not all engines support priors in similar ways. See the vignettes and help pages on that topic!
+Not all engines support priors in similar ways. See the vignettes and
+help pages on that topic!
 }
 \examples{
 \dontrun{

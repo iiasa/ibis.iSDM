@@ -2,13 +2,13 @@
 # CITATION file created with {cffr} R package, v0.5.0
 # See also: https://docs.ropensci.org/cffr/
 # -----------------------------------------------------------
- 
+
 cff-version: 1.2.0
 message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.0.7
+version: 0.0.8
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only

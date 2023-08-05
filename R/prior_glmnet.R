@@ -3,28 +3,29 @@ NULL
 
 #' Regression penalty priors for GLMNET
 #'
-#' @description
-#' The [`engine_glmnet`] engine does not support priors in a typical sense, however it is
-#' possible to specify so called penalty factors as well as lower and upper limits
-#' on all variables in the model.
+#' @description The [`engine_glmnet`] engine does not support priors in a
+#' typical sense, however it is possible to specify so called penalty factors as
+#' well as lower and upper limits on all variables in the model.
 #'
 #' The default penalty multiplier is \code{1} for each coefficient X covariate,
 #' i.e. coefficients are penalized equally and then informed by an intersection
-#' of any absence information with the covariates.
-#' In contrast a variable with penalty.factor equal to \code{0} is not penalized at all.
+#' of any absence information with the covariates. In contrast a variable with
+#' penalty.factor equal to \code{0} is not penalized at all.
 #'
-#' In addition, it is possible to specifiy a lower and upper limit for specific coefficients,
-#' which constrain them to a certain range.
-#' By default those ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset to a
-#' specific value range by altering \code{"lims"} (see examples).
+#' In addition, it is possible to specifiy a lower and upper limit for specific
+#' coefficients, which constrain them to a certain range. By default those
+#' ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset
+#' to a specific value range by altering \code{"lims"} (see examples).
 #'
-#' For a regularized regression that supports a few more options on the priors, check out the
-#' Bayesian [`engine_breg`].
+#' For a regularized regression that supports a few more options on the priors,
+#' check out the Bayesian [`engine_breg`].
 #'
 #' @param variable A [`character`] variable passed on to the prior object.
-#' @param hyper A [`numeric`] value between \code{0} and \code{1} that state the penalization factor.
-#' By default this is set to \code{0}, implying the \code{"variable"} provided is not regularized at all.
-#' @param lims A [`numeric`] [`vector`] of the lower and upper limits for each coefficient (Default: \code{c(-Inf, Inf)}).
+#' @param hyper A [`numeric`] value between \code{0} and \code{1} that state the
+#'   penalization factor. By default this is set to \code{0}, implying the
+#'   \code{"variable"} provided is not regularized at all.
+#' @param lims A [`numeric`] [`vector`] of the lower and upper limits for each
+#'   coefficient (Default: \code{c(-Inf, Inf)}).
 #' @param ... Variables passed on to prior object.
 #' @seealso [`Prior-class`]
 #' @examples
@@ -93,9 +94,8 @@ methods::setMethod(
 
 #' Helper function when multiple variables are supplied for a GLMNET prior
 #' @name GLMNETPriors
-#' @description
-#' This is a helper function to specify several [GLMNETPrior] with the same
-#' hyper-parameters, but different variables.
+#' @description This is a helper function to specify several [GLMNETPrior] with
+#' the same hyper-parameters, but different variables.
 #' @rdname GLMNETPriors
 #' @exportMethod GLMNETPriors
 #' @inheritParams GLMNETPrior
@@ -110,7 +110,8 @@ methods::setGeneric(
 
 #' @name GLMNETPriors
 #' @rdname GLMNETPriors
-#' @usage \S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
+#' @usage
+#'   \S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
 methods::setMethod(
   "GLMNETPriors",
   methods::signature(variable = "character"),

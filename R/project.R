@@ -3,18 +3,17 @@ NULL
 
 #' Project a fitted model to a new environment and covariates
 #'
-#' @description
-#' Equivalent to [train], this function acts as a
-#' wrapper to project the model stored in a [`BiodiversityScenario-class`] object to
-#' newly supplied (future) covariates. Supplied predictors are usually spatial-temporal predictors
-#' which should be prepared via [`add_predictors()`] (e.g. transformations and derivates) in the same way as they have been during
-#' the initial modelling with [`distribution()`].
-#' Any constrains specified in the scenario object are applied during the projection.
+#' @description Equivalent to [train], this function acts as a wrapper to
+#' project the model stored in a [`BiodiversityScenario-class`] object to newly
+#' supplied (future) covariates. Supplied predictors are usually
+#' spatial-temporal predictors which should be prepared via [`add_predictors()`]
+#' (e.g. transformations and derivates) in the same way as they have been during
+#' the initial modelling with [`distribution()`]. Any constrains specified in
+#' the scenario object are applied during the projection.
 #'
-#' @details
-#' In the background the function \code{x$project()} for the respective model object is called, where
-#' \code{x} is fitted model object. For specifics on the constrains, see the relevant \code{constrain} functions,
-#' respectively:
+#' @details In the background the function \code{x$project()} for the respective
+#' model object is called, where \code{x} is fitted model object. For specifics
+#' on the constrains, see the relevant \code{constrain} functions, respectively:
 #' * [`add_constraint()`] for generic wrapper to add any of the available constrains.
 #' * [`add_constraint_dispersal()`] for specifying dispersal constrain on the temporal projections at each step.
 #' * [`add_constraint_MigClim()`] Using the \pkg{MigClim} R-package to simulate dispersal in projections.
@@ -23,28 +22,39 @@ NULL
 #' * [`add_constraint_adaptability()`] Apply an adaptability constrain to the projection, for instance
 #' constraining the speed a species is able to adapt to new conditions.
 #' * [`add_constraint_boundary()`] To artificially limit the distribution change. Similar as specifying projection limits, but
-#' can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).
+#' can be used to specifically constrain a projection within a certain area
+#' (e.g. a species range or an island).
 #'
-#' Many constrains also requires thresholds to be calculated. Adding [`threshold()`] to a
-#' [`BiodiversityScenario-class`] object enables the computation of thresholds at every step based on the threshold
-#' used for the main model (threshold values are taken from there).
+#' Many constrains also requires thresholds to be calculated. Adding
+#' [`threshold()`] to a [`BiodiversityScenario-class`] object enables the
+#' computation of thresholds at every step based on the threshold used for the
+#' main model (threshold values are taken from there).
 #'
-#' Finally this function also allows temporal stabilization across prediction steps via enabling
-#' the parameter \code{stabilize} and checking the \code{stablize_method} argument. Stabilization can for instance
-#' be helpful in situations where environmental variables are quite dynamic, but changes in projected suitability
-#' are not expected to abruptly increase or decrease. It is thus a way to smoothen out outliers from the projection.
-#' Options are so far for instance \code{'loess'} which fits a [`loess()`] model per pixel and time step. This is conducted at
-#' the very of the processing steps and any thresholds will be recalculated afterwards.
+#' Finally this function also allows temporal stabilization across prediction
+#' steps via enabling the parameter \code{stabilize} and checking the
+#' \code{stablize_method} argument. Stabilization can for instance be helpful in
+#' situations where environmental variables are quite dynamic, but changes in
+#' projected suitability are not expected to abruptly increase or decrease. It
+#' is thus a way to smoothen out outliers from the projection. Options are so
+#' far for instance \code{'loess'} which fits a [`loess()`] model per pixel and
+#' time step. This is conducted at the very of the processing steps and any
+#' thresholds will be recalculated afterwards.
 #'
 #' @seealso [`scenario()`]
-#' @param x A [`BiodiversityScenario`] object with set predictors.
-#' Note that some constrains such as \code{MigClim} can still simulate future change without projections.
-#' @param date_interpolation A [`character`] on whether dates should be interpolated. Options
-#' include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
-#' @param stabilize A [`logical`] value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).
-#' @param stabilize_method [`character`] stating the stabilization method to be applied. Currently supported is \code{`loess`}.
-#' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
-#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).
+#' @param x A [`BiodiversityScenario`] object with set predictors. Note that
+#'   some constrains such as \code{MigClim} can still simulate future change
+#'   without projections.
+#' @param date_interpolation A [`character`] on whether dates should be
+#'   interpolated. Options include \code{"none"} (Default), \code{"annual"},
+#'   \code{"monthly"}, \code{"daily"}.
+#' @param stabilize A [`logical`] value indicating whether the suitability
+#'   projection should be stabilized (Default: \code{FALSE}).
+#' @param stabilize_method [`character`] stating the stabilization method to be
+#'   applied. Currently supported is \code{`loess`}.
+#' @param layer A [`character`] specifying the layer to be projected (Default:
+#'   \code{"mean"}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out
+#'   further information during the model fitting (Default: \code{FALSE}).
 #' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
 #' @examples
@@ -78,13 +88,15 @@ project.BiodiversityScenario <- function(x,...) project(x,...)
 
 #' @name project
 #' @rdname project
-#' @usage \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
+#' @usage
+#'   \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
 methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),
   function(x, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
            layer = "mean", verbose = getOption('ibis.setupmessages'), ...){
-    mod <- x # MJ: Workaround to ensure project generic does not conflict with terra::project
+    # MJ: Workaround to ensure project generic does not conflict with terra::project
+    mod <- x
     # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),

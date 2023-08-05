@@ -3,15 +3,17 @@ NULL
 
 #' Plot wrappers
 #'
-#' @description
-#' Plots information from a given object where a plotting object is available.
+#' @description Plots information from a given object where a plotting object is
+#' available.
 #'
-#' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection], [PredictorDataset] or [BiodiversityScenario].
+#' @param x Any object belonging to [DistributionModel],
+#'   [BiodiversityDatasetCollection], [PredictorDataset] or
+#'   [BiodiversityScenario].
 #' @param ... Further arguments passed on to \code{x$plot}.
 #'
-#' @details
-#' The plotted outputs vary depending on what object is being plotted.
-#' For example for a fitted [DistributionModel] the output is usually the fitted spatial prediction (Default: \code{'mean'}).
+#' @details The plotted outputs vary depending on what object is being plotted.
+#' For example for a fitted [DistributionModel] the output is usually the fitted
+#' spatial prediction (Default: \code{'mean'}).
 #' @examples
 #' \dontrun{
 #' # Build and train a model
@@ -61,37 +63,48 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
 #' Bivariate plot wrapper for distribution objects
 #'
-#' @description
-#' Often there is an intention to display not only the predictions made with a SDM, but
-#' also the uncertainty of the prediction. Uncertainty be estimated either directly by the model
-#' or by calculating the variation in prediction values among a set of models.
+#' @description Often there is an intention to display not only the predictions
+#' made with a SDM, but also the uncertainty of the prediction. Uncertainty be
+#' estimated either directly by the model or by calculating the variation in
+#' prediction values among a set of models.
 #'
-#' In particular Bayesian engines can produce not only mean estimates of fitted responses,
-#' but also pixel-based estimates of uncertainty from the posterior such as the standard deviation (SD)
-#' or the coefficient of variation of a given prediction.
+#' In particular Bayesian engines can produce not only mean estimates of fitted
+#' responses, but also pixel-based estimates of uncertainty from the posterior
+#' such as the standard deviation (SD) or the coefficient of variation of a
+#' given prediction.
 #'
-#' This function makes use of the \code{"biscale"} R-package to create bivariate plots of the fitted distribution object,
-#' allowing to visualize two variables at once. It is mostly thought of as a convenience function to
-#' create such bivariate plots for quick visualization.
+#' This function makes use of the \code{"biscale"} R-package to create bivariate
+#' plots of the fitted distribution object, allowing to visualize two variables
+#' at once. It is mostly thought of as a convenience function to create such
+#' bivariate plots for quick visualization.
 #'
-#' Supported Inputs are either single trained Bayesian [`DistributionModel`] with uncertainty or
-#' the output of an [`ensemble()`] call. In both cases, users have to make sure that \code{"xvar"} and
-#' \code{"yvar"} are set accordingly.
+#' Supported Inputs are either single trained Bayesian [`DistributionModel`]
+#' with uncertainty or the output of an [`ensemble()`] call. In both cases,
+#' users have to make sure that \code{"xvar"} and \code{"yvar"} are set
+#' accordingly.
 #'
-#' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`] object with \code{prediction} model within.
-#' @param xvar A [`character`] denoting the value on the x-axis (Default: \code{'mean'}).
-#' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
-#' @param plot A [`logical`] indication of whether the result is to be plotted (Default: \code{TRUE})?
-#' @param fname A [`character`] specifying the output filename a created figure should be written to.
-#' @param title Allows to respecify the title through a [`character`] (Default: \code{NULL}).
-#' @param col A [`character`] stating the colour palette to use. Has to be either a predefined value or a
-#' vector of colours. See \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
+#' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`]
+#'   object with \code{prediction} model within.
+#' @param xvar A [`character`] denoting the value on the x-axis (Default:
+#'   \code{'mean'}).
+#' @param yvar A [`character`] denoting the value on the y-axis (Default:
+#'   \code{'sd'}).
+#' @param plot A [`logical`] indication of whether the result is to be plotted
+#'   (Default: \code{TRUE})?
+#' @param fname A [`character`] specifying the output filename a created figure
+#'   should be written to.
+#' @param title Allows to respecify the title through a [`character`] (Default:
+#'   \code{NULL}).
+#' @param col A [`character`] stating the colour palette to use. Has to be
+#'   either a predefined value or a vector of colours. See
+#'   \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
 #' @param ... Other engine specific parameters.
 #' @seealso [partial], [plot.DistributionModel]
 #' @note
 #' **This function requires the biscale package to be installed.**
-#' Although a work around without the package could be developed, it was not deemed necessary at this point.
-#' See also this [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
+#' Although a work around without the package could be developed, it was not
+#' deemed necessary at this point. See also this
+#' [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
 #' @return Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
 #' @aliases bivplot
 #' @keywords misc
@@ -104,7 +117,8 @@ methods::setGeneric(
 
 #' @name bivplot
 #' @rdname bivplot
-#' @usage \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
+#' @usage
+#'   \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),

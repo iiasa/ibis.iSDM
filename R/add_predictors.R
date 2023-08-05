@@ -3,29 +3,28 @@ NULL
 
 #' Add predictors to a Biodiversity distribution object
 #'
-#' @description
-#' This function allows to add predictors to [distribution] or [BiodiversityScenario]
-#' objects. Predictors are covariates that in spatial projection have to match
-#' the geographic projection of the background layer in the [distribution] object.
-#' This function furthermore allows to transform or create derivates of provided
-#' predictors.
+#' @description This function allows to add predictors to [distribution] or
+#' [BiodiversityScenario] objects. Predictors are covariates that in spatial
+#' projection have to match the geographic projection of the background layer in
+#' the [distribution] object. This function furthermore allows to transform or
+#' create derivates of provided predictors.
 #'
-#' A transformation takes the provided rasters and for instance rescales them or transforms
-#' them through a principal component analysis ([prcomp]). In contrast, derivates leave
-#' the original provided predictors alone, but instead create new ones, for instance by transforming
-#' their values through a quadratic or hinge transformation. Note that this effectively
-#' increases the number of predictors in the object, generally requiring stronger regularization by
-#' the used [`Engine`].
-#' Both transformations and derivates can also be combined.
-#' Available options for transformation are:
+#' A transformation takes the provided rasters and for instance rescales them or
+#' transforms them through a principal component analysis ([prcomp]). In
+#' contrast, derivates leave the original provided predictors alone, but instead
+#' create new ones, for instance by transforming their values through a
+#' quadratic or hinge transformation. Note that this effectively increases the
+#' number of predictors in the object, generally requiring stronger
+#' regularization by the used [`Engine`]. Both transformations and derivates can
+#' also be combined. Available options for transformation are:
 #' * \code{'none'} - Leaves the provided predictors in the original scale.
 #' * \code{'pca'} - Converts the predictors to principal components. Note that this
 #' results in a renaming of the variables to principal component axes!
 #' * \code{'scale'} - Transforms all predictors by applying [scale] on them.
 #' * \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
 #' * \code{'windsor'} - Applies a windsorization to the target predictors. By default
-#' this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove
-#' extreme outliers.
+#' this effectively cuts the predictors to the 0.05 and 0.95, thus helping to
+#' remove extreme outliers.
 #'
 #' Available options for creating derivates are:
 #' * \code{'none'} - No additional predictor derivates are created.
@@ -37,29 +36,42 @@ NULL
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param env A [`SpatRaster`] or [`stars`] object.
-#' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed.
-#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
-#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of knots for derivate creation if relevant (Default: \code{4}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE}).
-#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE}).
-#' @param explode_factors [`logical`] of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
+#' @param names A [`vector`] of character names describing the environmental
+#'   stack in case they should be renamed.
+#' @param transform A [`vector`] stating whether predictors should be
+#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
+#'   \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be
+#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
+#'   \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
+#'   knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#'   specifying the covariates (Default: \code{NULL}).
+#' @param bgmask Check whether the environmental data should be masked with the
+#'   background layer (Default: \code{TRUE}).
+#' @param harmonize_na A [`logical`] value indicating of whether NA values
+#'   should be harmonized among predictors (Default: \code{FALSE}).
+#' @param explode_factors [`logical`] of whether any factor variables should be
+#'   split up into binary variables (one per class). (Default: \code{FALSE}).
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
+#'   which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @note
 #' **Important:**
-#' Not every [`Engine`] supported by the \pkg{ibis.iSDM} R-package allows missing data points
-#' among extracted covariates. Thus any observation with missing data is generally removed prior
-#' from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
+#' Not every [`Engine`] supported by the \pkg{ibis.iSDM} R-package allows
+#' missing data points among extracted covariates. Thus any observation with
+#' missing data is generally removed prior from model fitting. Thus ensure that
+#' covariates have appropriate no-data settings (for instance setting \code{NA}
 #' values to \code{0} or another out of range constant).
 #'
-#' Not every engine does actually need covariates. For instance it is perfectly legit
-#' to fit a model with only occurrence data and a spatial latent effect ([add_latent_spatial]).
-#' This correspondents to a spatial kernel density estimate.
+#' Not every engine does actually need covariates. For instance it is perfectly
+#' legit to fit a model with only occurrence data and a spatial latent effect
+#' ([add_latent_spatial]). This correspondents to a spatial kernel density
+#' estimate.
 #'
-#' Certain names such \code{"offset"} are forbidden as predictor variable names. The function
-#' will return an error message if these are used.
+#' Certain names such \code{"offset"} are forbidden as predictor variable names.
+#' The function will return an error message if these are used.
 #' @aliases add_predictors
 #' @examples
 #' \dontrun{
@@ -82,7 +94,8 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+#' @usage
+#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
@@ -98,7 +111,8 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+#' @usage
+#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
@@ -236,7 +250,8 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+#' @usage
+#'   \S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
@@ -256,13 +271,18 @@ methods::setMethod(
 
 # Add elevational delineation as predictor ----
 
-#' Create lower and upper limits for an elevational range and add them as separate predictors
+#' Create lower and upper limits for an elevational range and add them as
+#' separate predictors
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`character`] stating the elevational layer in the Distribution object or [`SpatRaster`] object.
-#' @param lower [`numeric`] value for a lower elevational preference of a species.
-#' @param upper [`numeric`] value for a upper elevational preference of a species.
-#' @param transform [`character`] Any optional transformation to be applied. Usually not needed (Default: \code{"none"}).
+#' @param layer A [`character`] stating the elevational layer in the
+#'   Distribution object or [`SpatRaster`] object.
+#' @param lower [`numeric`] value for a lower elevational preference of a
+#'   species.
+#' @param upper [`numeric`] value for a upper elevational preference of a
+#'   species.
+#' @param transform [`character`] Any optional transformation to be applied.
+#'   Usually not needed (Default: \code{"none"}).
 #' @aliases add_predictor_elevationpref
 #' @examples
 #' \dontrun{
@@ -284,7 +304,8 @@ methods::setGeneric(
 
 #' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @usage \S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
+#' @usage
+#'   \S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
 methods::setMethod(
   "add_predictor_elevationpref",
   methods::signature(x = "BiodiversityDistribution", layer = "ANY", lower = "numeric", upper = "numeric"),
@@ -319,7 +340,8 @@ methods::setMethod(
 
     # Now create thresholded derivatives of lower and upper elevation
     ras1 <- layer
-    # ras2[ras2 < lower] <- 0; ras2[ras2 > upper] <- 0; ras2[ras2 > 0] <- 1 # Both ways
+    # ras2[ras2 < lower] <- 0; ras2[ras2 > upper] <- 0; ras2[ras2 > 0] <- 1 #
+    # Both ways
     ras1[layer < lower] <- 0; ras1[ras1 > lower] <- 1
     ras2 <- layer
     ras2[ras2 < upper] <- 0; ras2[ras2 > 0] <- 1
@@ -356,30 +378,38 @@ methods::setMethod(
   }
 )
 
-# Add species ranges as predictor ----
+#### Add species ranges as predictor ----
+
 #' Add a range of a species as predictor to a distribution object
 #'
-#' @description
-#' This function allows to add a species range which is usually drawn by experts in a separate process
-#' as spatial explicit prior. Both [`sf`] and [`SpatRaster`]-objects are supported as input.
+#' @description This function allows to add a species range which is usually
+#' drawn by experts in a separate process as spatial explicit prior. Both [`sf`]
+#' and [`SpatRaster`]-objects are supported as input.
 #'
-#' Users are advised to look at the \code{"bossMaps"} R-package presented as part of Merow et al. (2017),
-#' which allows flexible calculation of non-linear distance transforms from the boundary of the range.
-#' Outputs of this package could be added directly to this function.
+#' Users are advised to look at the \code{"bossMaps"} R-package presented as
+#' part of Merow et al. (2017), which allows flexible calculation of non-linear
+#' distance transforms from the boundary of the range. Outputs of this package
+#' could be added directly to this function.
 #' **Note that this function adds the range as predictor and not as offset. For this purpose a separate function [`add_offset_range()`] exists.**
 #'
-#' Additional options allow to include the range either as \code{"binary"} or as \code{"distance"} transformed
-#' predictor. The difference being that the range is either directly included as presence-only predictor or
-#' alternatively with a linear distance transform from the range boundary. The parameter
+#' Additional options allow to include the range either as \code{"binary"} or as
+#' \code{"distance"} transformed predictor. The difference being that the range
+#' is either directly included as presence-only predictor or alternatively with
+#' a linear distance transform from the range boundary. The parameter
 #' \code{"distance_max"} can be specified to constrain this distance transform.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target feature.
-#' @param method [`character`] describing how the range should be included (\code{"binary"} | \code{"distance"}).
-#' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
-#' @param fraction An optional [`SpatRaster`] object that is multiplied with digitized raster layer.
-#' Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).
-#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses default prior assumptions.
+#' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target
+#'   feature.
+#' @param method [`character`] describing how the range should be included
+#'   (\code{"binary"} | \code{"distance"}).
+#' @param distance_max Numeric threshold on the maximum distance (Default:
+#'   \code{NULL}).
+#' @param fraction An optional [`SpatRaster`] object that is multiplied with
+#'   digitized raster layer. Can be used to for example to remove or reduce the
+#'   expected value (Default: \code{NULL}).
+#' @param priors A [`PriorList-class`] object. Default is set to NULL which uses
+#'   default prior assumptions.
 #' @aliases add_predictor_range
 #' @examples
 #' \dontrun{
@@ -404,7 +434,8 @@ methods::setGeneric(
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
+#' @usage
+#'   \S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -454,7 +485,8 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage \S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
+#' @usage
+#'   \S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
@@ -552,12 +584,11 @@ methods::setMethod(
 
 #' Remove specific predictors from a [distribution] object
 #'
-#' @description
-#' Remove a particular variable from an [distribution] object with a
-#' [`PredictorDataset-class`].
-#' See Examples.
+#' @description Remove a particular variable from an [distribution] object with
+#' a [`PredictorDataset-class`]. See Examples.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @param names [`vector`] A Vector of character names describing the
+#'   environmental stack.
 #' @aliases rm_predictors
 #' @examples
 #' \dontrun{
@@ -601,13 +632,13 @@ methods::setMethod(
 
 #' Select specific predictors from a [distribution] object
 #'
-#' @description
-#' This function allows - out of a [`character`] vector with the names
-#' of an already added [`PredictorDataset-class`] object - to select a particular set of predictors.
-#' See Examples.
+#' @description This function allows - out of a [`character`] vector with the
+#' names of an already added [`PredictorDataset-class`] object - to select a
+#' particular set of predictors. See Examples.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param names [`vector`] A Vector of character names describing the environmental stack.
+#' @param names [`vector`] A Vector of character names describing the
+#'   environmental stack.
 #' @aliases sel_predictors
 #' @examples
 #' \dontrun{
@@ -653,11 +684,12 @@ methods::setMethod(
   }
 )
 
-# ---------------- #
-# Add predictor actions for scenario objects ----
+#### Predictors for scenarios -----
+
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+#' @usage
+#'   \S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
@@ -674,7 +706,8 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage \S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+#' @usage
+#'   \S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),
@@ -745,7 +778,7 @@ methods::setMethod(
                                                  )
 
     # Check whether predictors already exist, if so overwrite
-    # TODO: In the future one could think of supplying predictors of varying grain
+    # TODO: In the future could think of supplying predictors of varying grain
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified

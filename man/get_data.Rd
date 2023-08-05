@@ -11,20 +11,22 @@ get_data(obj, what = NULL)
 \arguments{
 \item{obj}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
 
-\item{what}{A \code{\link{character}} of specific layer to be returned if existing (Default: \code{NULL}).}
+\item{what}{A \code{\link{character}} of specific layer to be returned if existing
+(Default: \code{NULL}).}
 }
 \value{
 A \code{SpatRaster} or "stars" object depending on the input.
 }
 \description{
-This function is a short helper function to return the fitted data from a \code{DistributionModel} or
-\code{BiodiversityScenario} object. It can be used to easily obtain for example the estimated prediction
-from a model or the projected scenario from a \code{scenario()} object.
+This function is a short helper function to return the fitted
+data from a \code{DistributionModel} or \code{BiodiversityScenario} object. It can be
+used to easily obtain for example the estimated prediction from a model or
+the projected scenario from a \code{scenario()} object.
 }
 \note{
-This function is essentially identical to querying the internal function
-\code{x$get_data()} from the object. However it does attempt some lazy
-character matching if what is supplied.
+This function is essentially identical to querying the internal
+function \code{x$get_data()} from the object. However it does attempt some
+lazy character matching if what is supplied.
 }
 \examples{
 \dontrun{

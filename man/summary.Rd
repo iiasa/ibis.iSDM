@@ -29,9 +29,9 @@
 }
 \description{
 This helper function summarizes a given object, including
-\link{DistributionModel}, \link{PredictorDataset} or \link{PriorList} objects and others. This can be
-a helpful way to summarize what is contained within and the values of specified
-models or objects.
+\link{DistributionModel}, \link{PredictorDataset} or \link{PriorList} objects and others.
+This can be a helpful way to summarize what is contained within and the
+values of specified models or objects.
 
 When unsure, it is usually a good strategy to run \link{summary} on any object.
 }

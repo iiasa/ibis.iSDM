@@ -23,28 +23,37 @@ add_biodiversity_poipa(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipa}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-absence point occurrences.}
+\item{poipa}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-absence point
+occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records indicating presence/absence.
-By default set to \code{"Observed"} and an error will be thrown if a \code{\link{numeric}} column with that name does not exist.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
+biodiversity point records indicating presence/absence. By default set to
+\code{"Observed"} and an error will be thrown if a \code{\link{numeric}} column with
+that name does not exist.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default (\code{NULL}) is to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default
+(\code{NULL}) is to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'binomial'}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default:
+\code{'binomial'}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
+\code{NULL}).}
 
-\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
-Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as
-parameter \code{"poipa"}.}
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
+weights used in the modelling. Larger weights indicate higher weighting
+relative to any other datasets. By default set to \code{1} if only one
+dataset is added. A \code{\link{vector}} is also supported but must be of the same
+length as parameter \code{"poipa"}.}
 
-\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in.
-shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
+intercept is to be added in. shared likelihood models for engines
+\link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
-\item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
+\item{docheck}{\code{\link{logical}} on whether additional checks should be performed
+(e.g. intersection tests) (Default: \code{TRUE}).}
 
 \item{...}{Other parameters passed down.}
 }
@@ -52,18 +61,19 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 Adds biodiversity data to \link{distribution} object.
 }
 \description{
-This function adds a presence-absence biodiversity dataset to a distribution object.
-Opposed to presence-only data, presence-absence biodiversity records usually originate from
-structured biodiversity surveys where the absence of a species in a given region was specifically
-assessed.
+This function adds a presence-absence biodiversity dataset to a
+distribution object. Opposed to presence-only data, presence-absence
+biodiversity records usually originate from structured biodiversity surveys
+where the absence of a species in a given region was specifically assessed.
 
-If it is the analysts choice it is also possible to format presence-only biodiversity data
-into a presence-absence form, by adding pseudo-absence through \code{\link{add_pseudoabsence}}. See the help file
-for more information.
+If it is the analysts choice it is also possible to format presence-only
+biodiversity data into a presence-absence form, by adding pseudo-absence
+through \code{\link{add_pseudoabsence}}. See the help file for more information.
 }
 \details{
-By default, the logit link function is used in a logistic regression setting
-unless the specific engine does not support generalised linear regressions (e.g. \link{engine_bart}).
+By default, the logit link function is used in a logistic regression
+setting unless the specific engine does not support generalised linear
+regressions (e.g. \link{engine_bart}).
 }
 \examples{
 \dontrun{

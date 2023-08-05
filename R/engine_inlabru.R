@@ -3,55 +3,68 @@ NULL
 
 #' Use inlabru as engine
 #'
-#' @description Model components are specified with general inputs and mapping methods to the
-#' latent variables, and the predictors are specified via general R expressions,
-#' with separate expressions for each observation likelihood model in multi-likelihood models.
-#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for INLA,
-#' albeit \code{"inlabru"} has a number of convenience functions implemented that make in particular predictions
-#' with new data much more straight forward (e.g. via posterior simulation instead of fitting).
-#' Since more recent versions \code{"inlabru"} also supports the addition of multiple likelihoods, therefore
-#' allowing full integrated inference.
-#' @details
-#' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
-#' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
-#' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+#' @description Model components are specified with general inputs and mapping
+#'   methods to the latent variables, and the predictors are specified via
+#'   general R expressions, with separate expressions for each observation
+#'   likelihood model in multi-likelihood models. The inlabru engine - similar
+#'   as the [`engine_inla`] function acts a wrapper for INLA, albeit
+#'   \code{"inlabru"} has a number of convenience functions implemented that
+#'   make in particular predictions with new data much more straight forward
+#'   (e.g. via posterior simulation instead of fitting). Since more recent
+#'   versions \code{"inlabru"} also supports the addition of multiple
+#'   likelihoods, therefore allowing full integrated inference.
+#' @details All \code{INLA} engines require the specification of a mesh that
+#' needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
+#' mesh will be created based on best guesses of the data spread. A good mesh
+#' needs to have triangles as regular as possible in size and shape:
+#' equilateral.
 #'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
-#' Lower bounds affect the density of triangles
-#' [*] \code{"offset"}: The automatic extension distance of the mesh
-#' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
-#' i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
-#' [*] \code{"cutoff"}: The minimum allowed distance between points,
-#' it means that points at a closer distance than the supplied value are replaced by a single vertex.
-#' it is critical when there are some points very close to each other, either for point locations or in the
-#' domain boundary.
-#' [*] \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
-#' created.
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates Lower bounds affect the density of
+#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative
+#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' distance between points, it means that points at a closer distance than the
+#' supplied value are replaced by a single vertex. it is critical when there are
+#' some points very close to each other, either for point locations or in the
+#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' predictions, which affects the spatial grain of any outputs created.
 #'
 #' Priors can be set via [INLAPrior].
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
-#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param offset interpreted as a numeric factor relative to the approximate data diameter.
-#' Default is an educated guess (Default: \code{NULL}).
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default:
+#'   \code{NULL})
+#' @param max.edge The largest allowed triangle edge length, must be in the same
+#'   scale units as the coordinates. Default is an educated guess (Default:
+#'   \code{NULL}).
+#' @param offset interpreted as a numeric factor relative to the approximate
+#'   data diameter. Default is an educated guess (Default: \code{NULL}).
 #' @param cutoff The minimum allowed distance between points on the mesh.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
-#' @param strategy Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
-#'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
-#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
-#' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
-#' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
-#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#'   Default is an educated guess (Default: \code{NULL}).
+#' @param proj_stepsize The stepsize in coordinate units between cells of the
+#'   projection grid (Default: \code{NULL})
+#' @param strategy Which approximation to use for the joint posterior. Options
+#'   are \code{"auto"} ("default"), \code{"adaptative"}, \code{"gaussian"},
+#'   \code{"simplified.laplace"} & \code{"laplace"}.
+#' @param int.strategy Integration strategy. Options are
+#'   \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
+#' @param area Accepts a [`character`] denoting the type of area calculation to
+#'   be done on the mesh (Default: \code{'gpc2'}).
+#' @param timeout Specify a timeout for INLA models in sec. Afterwards it
+#'   passed.
+#' @param type The mode used for creating posterior predictions. Either
+#'   summarizing the linear \code{"predictor"} or \code{"response"} (Default:
+#'   \code{"response"}).
 #' @param ... Other variables
 #' @references
 #' * Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
-#' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
+#' @source
+#'   [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
 #' @returns An [Engine].
 #' @aliases engine_inlabru

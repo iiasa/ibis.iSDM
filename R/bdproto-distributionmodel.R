@@ -186,7 +186,8 @@ DistributionModel <- bdproto(
 
       # Match argument
       what <- match.arg(what, names(pred), several.ok = FALSE)
-      assertthat::assert_that( what %in% names(pred),msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
+      assertthat::assert_that( what %in% names(pred),
+                               msg = paste0('Prediction type not found. Available: ', paste0(names(pred),collapse = '|')))
       terra::plot(pred[[what]],
            main = paste0(self$model$runname, ' prediction (',what,')'),
            box = FALSE,

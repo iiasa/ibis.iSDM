@@ -17,12 +17,16 @@ add_latent_spatial(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{method}{A \code{\link{character}} describing what kind of spatial effect is to be added to the model. See details.}
+\item{method}{A \code{\link{character}} describing what kind of spatial effect is to be
+added to the model. See details.}
 
-\item{priors}{A \code{"Prior-List"} object supplied to the latent effect. Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
+\item{priors}{A \code{"Prior-List"} object supplied to the latent effect.
+Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of
+default priors.}
 
-\item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case of SPDE effects, separate effects
-for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the first added likelihood.}
+\item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case
+of SPDE effects, separate effects for each likelihood are being fitted.
+Default (\code{FALSE}) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 }
@@ -30,35 +34,41 @@ for each likelihood are being fitted. Default (\code{FALSE}) uses a copy of the 
 Adds latent spatial effect to a \code{\link{distribution}} object.
 }
 \description{
-In general we understand under latent spatial effects the occurrence of spatial dependency in the observations, which
-might either be caused by spatial biases, similarities in the underlying sampling processes or unmeasured latent
-covariates, e.g. those that have not been quantified.
+In general we understand under latent spatial effects the
+occurrence of spatial dependency in the observations, which might either be
+caused by spatial biases, similarities in the underlying sampling processes
+or unmeasured latent covariates, e.g. those that have not been quantified.
 
-This package supports a range of different spatial effects, however they differ from another by their impact on
-the estimated prediction. Some effects simply add the spatial dependence as covariate, others make use
-of spatial random effects to account for spatial dependence in the predictions. By default these effects are
-added to each dataset as covariate or shared spatial field (e.g. SPDE). See details for an
-explanation of the available options.
+This package supports a range of different spatial effects, however they
+differ from another by their impact on the estimated prediction. Some effects
+simply add the spatial dependence as covariate, others make use of spatial
+random effects to account for spatial dependence in the predictions. By
+default these effects are added to each dataset as covariate or shared
+spatial field (e.g. SPDE). See details for an explanation of the available
+options.
 }
 \details{
-There are several different options some of which depend on the engine used. In case a
-unsupported method for an engine is chosen this is modified to the next similar method
+There are several different options some of which depend on the
+engine used. In case a unsupported method for an engine is chosen this is
+modified to the next similar method
 
 Available are:
 
-\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for \code{\link{engine_inla}} and \code{\link{engine_inlabru}}.
-SPDE effects aim at capturing the variation of the response variable in space, once all of the covariates are accounted for.
-Examining the spatial distribution of the spatial error can reveal which covariates might be missing. For example,
-if elevation is positively correlated with the response variable, but is not included in the model,
-we could see a higher posterior mean in areas with higher elevation. Note that calculations of
-SPDE's can be computationally costly.
+\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for
+\code{\link{engine_inla}} and \code{\link{engine_inlabru}}. SPDE effects aim at capturing the
+variation of the response variable in space, once all of the covariates are
+accounted for. Examining the spatial distribution of the spatial error can
+reveal which covariates might be missing. For example, if elevation is
+positively correlated with the response variable, but is not included in
+the model, we could see a higher posterior mean in areas with higher
+elevation. Note that calculations of SPDE's can be computationally costly.
 \itemize{
 \item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}. Not yet implemented in full.
 \item \code{"kde"} - additional covariate of the kernel density of input point observations.
 \item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
 \item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
-to the nearest other grid cell with values. Applied across all datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.
-Available for all Engines.
+to the nearest other grid cell with values. Applied across all datasets in
+the \code{\linkS4class{BiodiversityDistribution}}) object. Available for all Engines.
 }
 }
 \examples{

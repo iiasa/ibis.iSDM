@@ -3,21 +3,27 @@ NULL
 
 #' Obtain partial effects of trained model
 #'
-#' @description
-#' Create a partial response or effect plot of a trained model.
+#' @description Create a partial response or effect plot of a trained model.
 #'
-#' @param mod A trained `DistributionModel` object with \code{fit_best} model within.
-#' @param x.var A [character] indicating the variable for which a partial effect is to be calculated.
-#' @param constant A [numeric] constant to be inserted for all other variables. Default calculates a mean per variable.
-#' @param variable_length [numeric] The interpolation depth (nr. of points) to be used (Default: \code{100}).
-#' @param values [numeric] Directly specified values to compute partial effects for. If this parameter is set to anything other
-#' than \code{NULL}, the parameter \code{"variable_length"} is ignored (Default: \code{NULL}).
+#' @param mod A trained `DistributionModel` object with \code{fit_best} model
+#'   within.
+#' @param x.var A [character] indicating the variable for which a partial effect
+#'   is to be calculated.
+#' @param constant A [numeric] constant to be inserted for all other variables.
+#'   Default calculates a mean per variable.
+#' @param variable_length [numeric] The interpolation depth (nr. of points) to
+#'   be used (Default: \code{100}).
+#' @param values [numeric] Directly specified values to compute partial effects
+#'   for. If this parameter is set to anything other than \code{NULL}, the
+#'   parameter \code{"variable_length"} is ignored (Default: \code{NULL}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
-#' @param type A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.
+#' @param type A specified type, either \code{'response'} or \code{'predictor'}.
+#'   Can be missing.
 #' @param ... Other engine specific parameters.
 #' @seealso [partial]
-#' @details By default the mean is calculated across all parameters that are not \code{x.var}.
-#' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
+#' @details By default the mean is calculated across all parameters that are not
+#'   \code{x.var}. Instead a *constant* can be set (for instance \code{0}) to be
+#'   applied to the output.
 #' @return A [data.frame] with the created partial response.
 #' @aliases partial
 #' @examples
@@ -35,7 +41,8 @@ methods::setGeneric(
 
 #' @name partial
 #' @rdname partial
-#' @usage \S4method{partial}{ANY,character,ANY,numeric,ANY,logical,character}(mod,x.var,constant,variable_length,values,plot,type,...)
+#' @usage
+#'   \S4method{partial}{ANY,character,ANY,numeric,ANY,logical,character}(mod,x.var,constant,variable_length,values,plot,type,...)
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -65,19 +72,23 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 
 #' Obtain spatial partial effects of trained model
 #'
-#' @description
-#' Similar as [partial] this function calculates a partial response of a trained model for a given variable.
-#' Differently from [partial] in space. However the result is a [`SpatRaster`] showing the spatial magnitude
-#' of the partial response.
+#' @description Similar as [partial] this function calculates a partial response
+#' of a trained model for a given variable. Differently from [partial] in space.
+#' However the result is a [`SpatRaster`] showing the spatial magnitude of the
+#' partial response.
 #' @param mod A [`DistributionModel-class`] object with trained model.
-#' @param x.var A [character] indicating the variable for which a partial effect is to be calculated.
-#' @param constant A [numeric] constant to be inserted for all other variables. Default calculates the [mean] per variable.
+#' @param x.var A [character] indicating the variable for which a partial effect
+#'   is to be calculated.
+#' @param constant A [numeric] constant to be inserted for all other variables.
+#'   Default calculates the [mean] per variable.
 #' @param plot A [logical] indication of whether the result is to be plotted?
 #' @param ... Other engine specific parameters.
 #' @seealso [partial]
-#' @details By default the [mean] is calculated across all parameters that are not \code{x.var}.
-#' Instead a *constant* can be set (for instance \code{0}) to be applied to the output.
-#' @returns A [SpatRaster] containing the mapped partial response of the variable.
+#' @details By default the [mean] is calculated across all parameters that are
+#'   not \code{x.var}. Instead a *constant* can be set (for instance \code{0})
+#'   to be applied to the output.
+#' @returns A [SpatRaster] containing the mapped partial response of the
+#'   variable.
 #' @aliases spartial
 #' @examples
 #' \dontrun{
@@ -94,7 +105,8 @@ methods::setGeneric(
 
 #' @name spartial
 #' @rdname spartial
-#' @usage \S4method{spartial}{ANY,character,ANY,logical}(mod,x.var,constant,plot,...)
+#' @usage
+#'   \S4method{spartial}{ANY,character,ANY,logical}(mod,x.var,constant,plot,...)
 methods::setMethod(
   "spartial",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -120,30 +132,34 @@ methods::setMethod(
 #' @export
 spartial.DistributionModel <- function(mod, ...) mod$spartial(...)
 
-#--------------------------#
 #' Visualize the density of the data over the environmental data
 #'
-#' @description
-#' Based on a fitted model, plot the density of observations over the estimated variable and environmental space.
-#' Opposed to the [partial] and [spartial] functions, which are rather low-level interfaces, this function provides more
-#' detail in the light of the data. It is also able to contrast different variables against each other and show the used data.
+#' @description Based on a fitted model, plot the density of observations over
+#' the estimated variable and environmental space. Opposed to the [partial] and
+#' [spartial] functions, which are rather low-level interfaces, this function
+#' provides more detail in the light of the data. It is also able to contrast
+#' different variables against each other and show the used data.
 #'
-#' @details
-#' This functions calculates the observed density of presence and absence points over the whole surface of a specific
-#' variable. It can be used to visually inspect the fit of the model to data.
+#' @details This functions calculates the observed density of presence and
+#' absence points over the whole surface of a specific variable. It can be used
+#' to visually inspect the fit of the model to data.
 #'
-#' @note
-#' By default all variables that are not \code{x.var} are hold constant at the mean.
-#' @param mod A trained `DistributionModel` object. Requires a fitted model and inferred prediction.
-#' @param x.var A [character] indicating the variable to be investigated. Can be a [`vector`] of length \code{1} or \code{2}.
-#' @param df [`logical`] if plotting data should be returned instead (Default: \code{FALSE}).
+#' @note By default all variables that are not \code{x.var} are hold constant at
+#' the mean.
+#' @param mod A trained `DistributionModel` object. Requires a fitted model and
+#'   inferred prediction.
+#' @param x.var A [character] indicating the variable to be investigated. Can be
+#'   a [`vector`] of length \code{1} or \code{2}.
+#' @param df [`logical`] if plotting data should be returned instead (Default:
+#'   \code{FALSE}).
 #' @param ... Other engine specific parameters.
 #'
 #' @seealso [partial]
 #' @concept Visual style emulated from ENMTools package.
 #' @references
 #' * Warren, D.L., Matzke, N.J., Cardillo, M., Baumgartner, J.B., Beaumont, L.J., Turelli, M., Glor, R.E., Huron, N.A., Simões, M., Iglesias, T.L. Piquet, J.C., and Dinnage, R. 2021. ENMTools 1.0: an R package for comparative ecological biogeography. Ecography, 44(4), pp.504-511.
-#' @returns A [`ggplot2`] object showing the marginal response in light of the data.
+#' @returns A [`ggplot2`] object showing the marginal response in light of the
+#'   data.
 #' @aliases partial_density
 #' @examples
 #' \dontrun{

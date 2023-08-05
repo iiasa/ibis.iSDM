@@ -3,15 +3,16 @@ NULL
 
 #' Create a new scenario based on trained model parameters
 #'
-#' @description
-#' This function creates a new [BiodiversityScenario-class] object
+#' @description This function creates a new [BiodiversityScenario-class] object
 #' that contains the projections of a model.
 #' @param fit A [`BiodiversityDistribution`] object containing a trained model.
-#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection surface when
-#' intersected with the prediction data (Default: \code{NULL}). This can for instance be set
-#' as an expert-delineated constrain to limit spatial projections.
-#' @param copy_model A [`logical`] of whether the model object is to be copied to the scenario object. Note
-#' that setting this option to \code{TRUE} can increase the required amount of memory (Default: \code{FALSE}).
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
+#'   surface when intersected with the prediction data (Default: \code{NULL}).
+#'   This can for instance be set as an expert-delineated constrain to limit
+#'   spatial projections.
+#' @param copy_model A [`logical`] of whether the model object is to be copied
+#'   to the scenario object. Note that setting this option to \code{TRUE} can
+#'   increase the required amount of memory (Default: \code{FALSE}).
 #' @aliases scenario
 #' @exportMethod scenario
 #' @name scenario

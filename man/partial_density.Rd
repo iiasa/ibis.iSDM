@@ -9,28 +9,36 @@ partial_density(mod, x.var, df = FALSE, ...)
 \S4method{partial_density}{ANY,character,logical}(mod,x.var,df,...)
 }
 \arguments{
-\item{mod}{A trained \code{DistributionModel} object. Requires a fitted model and inferred prediction.}
+\item{mod}{A trained \code{DistributionModel} object. Requires a fitted model and
+inferred prediction.}
 
-\item{x.var}{A \link{character} indicating the variable to be investigated. Can be a \code{\link{vector}} of length \code{1} or \code{2}.}
+\item{x.var}{A \link{character} indicating the variable to be investigated. Can be
+a \code{\link{vector}} of length \code{1} or \code{2}.}
 
-\item{df}{\code{\link{logical}} if plotting data should be returned instead (Default: \code{FALSE}).}
+\item{df}{\code{\link{logical}} if plotting data should be returned instead (Default:
+\code{FALSE}).}
 
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \code{\link{ggplot2}} object showing the marginal response in light of the data.
+A \code{\link{ggplot2}} object showing the marginal response in light of the
+data.
 }
 \description{
-Based on a fitted model, plot the density of observations over the estimated variable and environmental space.
-Opposed to the \link{partial} and \link{spartial} functions, which are rather low-level interfaces, this function provides more
-detail in the light of the data. It is also able to contrast different variables against each other and show the used data.
+Based on a fitted model, plot the density of observations over
+the estimated variable and environmental space. Opposed to the \link{partial} and
+\link{spartial} functions, which are rather low-level interfaces, this function
+provides more detail in the light of the data. It is also able to contrast
+different variables against each other and show the used data.
 }
 \details{
-This functions calculates the observed density of presence and absence points over the whole surface of a specific
-variable. It can be used to visually inspect the fit of the model to data.
+This functions calculates the observed density of presence and
+absence points over the whole surface of a specific variable. It can be used
+to visually inspect the fit of the model to data.
 }
 \note{
-By default all variables that are not \code{x.var} are hold constant at the mean.
+By default all variables that are not \code{x.var} are hold constant at
+the mean.
 }
 \examples{
 \dontrun{

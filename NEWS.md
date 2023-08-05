@@ -1,4 +1,11 @@
-# ibis.iSDM 0.0.7 (current dev branch)
+# ibis.iSDM 0.0.8 (current dev branch)
+#### New features
+
+#### Minor improvements and bug fixes
+* Small fix to `threshold()` now returning threshold values correctly. 
+* Further documentation fixes towards CRAN submission #38
+
+# ibis.iSDM 0.0.7
 #### New features
 * Added method proximity to `add_control_bias` to place lower weights on points closer to another.
 * Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.

@@ -7,7 +7,8 @@ NULL
 
 #' Prototype for model settings object
 #'
-#' Basic proto object for Settings object, a List that stores settings used related to model training
+#' Basic proto object for Settings object, a List that stores settings used
+#' related to model training
 #'
 #' @name Settings-class
 #' @aliases Settings

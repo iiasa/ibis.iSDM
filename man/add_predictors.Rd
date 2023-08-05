@@ -34,41 +34,52 @@ add_predictors(
 
 \item{env}{A \code{\link{SpatRaster}} or \code{\link{stars}} object.}
 
-\item{names}{A \code{\link{vector}} of character names describing the environmental stack in case they should be renamed.}
+\item{names}{A \code{\link{vector}} of character names describing the environmental
+stack in case they should be renamed.}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be
+preprocessed in any way (Options: \code{'none'},\code{'pca'},
+\code{'scale'}, \code{'norm'})}
 
-\item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
+\item{derivates}{A Boolean check whether derivate features should be
+considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
+\code{'quad'}) )}
 
-\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of knots for derivate creation if relevant (Default: \code{4}).}
+\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of
+knots for derivate creation if relevant (Default: \code{4}).}
 
-\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).}
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2}
+specifying the covariates (Default: \code{NULL}).}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE}).}
+\item{bgmask}{Check whether the environmental data should be masked with the
+background layer (Default: \code{TRUE}).}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE}).}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values
+should be harmonized among predictors (Default: \code{FALSE}).}
 
-\item{explode_factors}{\code{\link{logical}} of whether any factor variables should be split up into binary variables (one per class). (Default: \code{FALSE}).}
+\item{explode_factors}{\code{\link{logical}} of whether any factor variables should be
+split up into binary variables (one per class). (Default: \code{FALSE}).}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
+which uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
 \description{
-This function allows to add predictors to \link{distribution} or \link{BiodiversityScenario}
-objects. Predictors are covariates that in spatial projection have to match
-the geographic projection of the background layer in the \link{distribution} object.
-This function furthermore allows to transform or create derivates of provided
-predictors.
+This function allows to add predictors to \link{distribution} or
+\link{BiodiversityScenario} objects. Predictors are covariates that in spatial
+projection have to match the geographic projection of the background layer in
+the \link{distribution} object. This function furthermore allows to transform or
+create derivates of provided predictors.
 
-A transformation takes the provided rasters and for instance rescales them or transforms
-them through a principal component analysis (\link{prcomp}). In contrast, derivates leave
-the original provided predictors alone, but instead create new ones, for instance by transforming
-their values through a quadratic or hinge transformation. Note that this effectively
-increases the number of predictors in the object, generally requiring stronger regularization by
-the used \code{\link{Engine}}.
-Both transformations and derivates can also be combined.
-Available options for transformation are:
+A transformation takes the provided rasters and for instance rescales them or
+transforms them through a principal component analysis (\link{prcomp}). In
+contrast, derivates leave the original provided predictors alone, but instead
+create new ones, for instance by transforming their values through a
+quadratic or hinge transformation. Note that this effectively increases the
+number of predictors in the object, generally requiring stronger
+regularization by the used \code{\link{Engine}}. Both transformations and derivates can
+also be combined. Available options for transformation are:
 \itemize{
 \item \code{'none'} - Leaves the provided predictors in the original scale.
 \item \code{'pca'} - Converts the predictors to principal components. Note that this
@@ -76,8 +87,8 @@ results in a renaming of the variables to principal component axes!
 \item \code{'scale'} - Transforms all predictors by applying \link{scale} on them.
 \item \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
 \item \code{'windsor'} - Applies a windsorization to the target predictors. By default
-this effectively cuts the predictors to the 0.05 and 0.95, thus helping to remove
-extreme outliers.
+this effectively cuts the predictors to the 0.05 and 0.95, thus helping to
+remove extreme outliers.
 }
 
 Available options for creating derivates are:
@@ -92,17 +103,19 @@ Available options for creating derivates are:
 }
 \note{
 \strong{Important:}
-Not every \code{\link{Engine}} supported by the \pkg{ibis.iSDM} R-package allows missing data points
-among extracted covariates. Thus any observation with missing data is generally removed prior
-from model fitting. Thus ensure that covariates have appropriate no-data settings (for instance setting \code{NA}
+Not every \code{\link{Engine}} supported by the \pkg{ibis.iSDM} R-package allows
+missing data points among extracted covariates. Thus any observation with
+missing data is generally removed prior from model fitting. Thus ensure that
+covariates have appropriate no-data settings (for instance setting \code{NA}
 values to \code{0} or another out of range constant).
 
-Not every engine does actually need covariates. For instance it is perfectly legit
-to fit a model with only occurrence data and a spatial latent effect (\link{add_latent_spatial}).
-This correspondents to a spatial kernel density estimate.
+Not every engine does actually need covariates. For instance it is perfectly
+legit to fit a model with only occurrence data and a spatial latent effect
+(\link{add_latent_spatial}). This correspondents to a spatial kernel density
+estimate.
 
-Certain names such \code{"offset"} are forbidden as predictor variable names. The function
-will return an error message if these are used.
+Certain names such \code{"offset"} are forbidden as predictor variable names.
+The function will return an error message if these are used.
 }
 \examples{
 \dontrun{

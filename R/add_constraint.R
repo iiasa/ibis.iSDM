@@ -3,56 +3,69 @@ NULL
 
 #' Add a constraint to an existing \code{scenario}
 #'
-#' @description This function adds a constrain to a [`BiodiversityScenario-class`] object to
-#' constrain (future) projections. These constrains can for instance be constraints on a possible
-#' dispersal distance, connectivity between identified patches or limitations on species adaptability.
+#' @description This function adds a constrain to a
+#'   [`BiodiversityScenario-class`] object to constrain (future) projections.
+#'   These constrains can for instance be constraints on a possible dispersal
+#'   distance, connectivity between identified patches or limitations on species
+#'   adaptability.
 #' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
-#' @param method A [`character`] indicating the type of constraints to be added to the scenario. See details for more
-#' information.
-#' @param value For many dispersal \code{"constrain"} this is set as [`numeric`] value specifying a
-#' fixed constrain or constant in units \code{"m"} (Default: \code{NULL}). For kissmig the value needs to
-#' give the number of iteration steps (or within year migration steps).
-#' For adaptability constraints this parameter specifies the extent (in units of standard deviation) to which extrapolations
-#' should be performed.
-#' @param type A [`character`] indicating the type used in the method. See for instance \code{`kissmig`}.
-#' @param layer A [`SpatRaster`] object that can be used for boundary constraints (Default: \code{NULL}).
-#' @param pext [`numeric`] indicator for \code{`kissmig`} of the probability a colonized cell becomes uncolonised,
-#' i.e., the species gets locally extinct (Default: \code{0.1}).
-#' @param pcor [`numeric`] probability that corner cells are considered in the 3x3 neighbourhood (Default: \code{0.2}).
-#' @param ... passed on parameters. See also the specific methods for adding constraints.
+#' @param method A [`character`] indicating the type of constraints to be added
+#'   to the scenario. See details for more information.
+#' @param value For many dispersal \code{"constrain"} this is set as [`numeric`]
+#'   value specifying a fixed constrain or constant in units \code{"m"}
+#'   (Default: \code{NULL}). For kissmig the value needs to give the number of
+#'   iteration steps (or within year migration steps). For adaptability
+#'   constraints this parameter specifies the extent (in units of standard
+#'   deviation) to which extrapolations should be performed.
+#' @param type A [`character`] indicating the type used in the method. See for
+#'   instance \code{`kissmig`}.
+#' @param layer A [`SpatRaster`] object that can be used for boundary
+#'   constraints (Default: \code{NULL}).
+#' @param pext [`numeric`] indicator for \code{`kissmig`} of the probability a
+#'   colonized cell becomes uncolonised, i.e., the species gets locally extinct
+#'   (Default: \code{0.1}).
+#' @param pcor [`numeric`] probability that corner cells are considered in the
+#'   3x3 neighbourhood (Default: \code{0.2}).
+#' @param ... passed on parameters. See also the specific methods for adding
+#'   constraints.
 #'
-#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`], [`add_constraint_adaptability`], [`add_constraint_boundary`]
-#' @details
-#' Constraints can be added to scenario objects to increase or decrease the suitability of a given area for the
-#' target feature. This function acts as a wrapper to add these constraints.
-#' Currently supported are the following options:
+#' @seealso [`add_constraint_dispersal`], [`add_constraint_connectivity`],
+#'   [`add_constraint_adaptability`], [`add_constraint_boundary`]
+#' @details Constraints can be added to scenario objects to increase or decrease
+#'   the suitability of a given area for the target feature. This function acts
+#'   as a wrapper to add these constraints. Currently supported are the
+#'   following options:
 #' **Dispersal**:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
-#' A comprehensive overview of the benefits of including dispersal constrains in species distribution models
-#' can be found in Bateman et al. (2013).
+#'   A comprehensive overview of the benefits of including dispersal constrains
+#'   in species distribution models can be found in Bateman et al. (2013).
 #'
 #' **Connectivity**:
 #' * \code{hardbarrier} - Defines a hard barrier to any dispersal events. By definition this sets all values larger
-#' than \code{0} in the barrier layer to \code{0} in the projection. Barrier has to be provided through the \code{"resistance"}
-#' parameter.
+#'   than \code{0} in the barrier layer to \code{0} in the projection. Barrier
+#'   has to be provided through the \code{"resistance"} parameter.
 #' * \code{resistance} - Allows the provision of a static or dynamic layer that is multiplied with the projection at each
-#' time step. Can for example be used to reduce the suitability of any given area (using pressures not included in the model).
-#' The respective layer(s) have to be provided through the \code{"resistance"} parameter. Provided layers are incorporated as
-#' \code{abs(resistance - 1)} and multiplied with the prediction.
+#'   time step. Can for example be used to reduce the suitability of any given
+#'   area (using pressures not included in the model). The respective layer(s)
+#'   have to be provided through the \code{"resistance"} parameter. Provided
+#'   layers are incorporated as \code{abs(resistance - 1)} and multiplied with
+#'   the prediction.
 #'
 #' **Adaptability**:
 #' * \code{nichelimit} - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
-#' can be particular useful to limit the influence of increasing marginal responses and avoid biologically unrealistic projections.
+#'   can be particular useful to limit the influence of increasing marginal
+#'   responses and avoid biologically unrealistic projections.
 #'
 #' **Boundary**:
 #' * \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
-#' the provide layer. Similar as specifying projection limits (see [`distribution`]), but can be used to specifically
-#' constrain a projection within a certain area (e.g. a species range or an island).
+#'   the provide layer. Similar as specifying projection limits (see
+#'   [`distribution`]), but can be used to specifically constrain a projection
+#'   within a certain area (e.g. a species range or an island).
 #'
 #' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #' @references
@@ -224,10 +237,13 @@ methods::setMethod(
 )
 
 #' Short-distance fixed dispersal function
-#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence
+#'   information from a previous year.
 #' @param new_suit A new [`SpatRaster`] object.
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
-#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit
+#'   \code{'meters'}.
+#' @param resistance A resistance [`SpatRaster`] object with values to be
+#'   omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
@@ -261,11 +277,15 @@ methods::setMethod(
 }
 
 #' Short-distance negative exponential kernel dispersal function
-#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence
+#'   information from a previous year.
 #' @param new_suit A new [`SpatRaster`] object.
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
-#' @param normalize Should a normalising constant be used for the exponential dispersal parameter (Default: \code{FALSE}).
-#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit
+#'   \code{'meters'}.
+#' @param normalize Should a normalising constant be used for the exponential
+#'   dispersal parameter (Default: \code{FALSE}).
+#' @param resistance A resistance [`SpatRaster`] object with values to be
+#'   omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
@@ -298,17 +318,19 @@ methods::setMethod(
     ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
   }
 
-  # Now multiply the net suitability projection with this mask
-  # Thus removing any non-suitable grid cells (0) and changing the value of those within reach
+  # Now multiply the net suitability projection with this mask Thus removing any
+  # non-suitable grid cells (0) and changing the value of those within reach
   out <- new_suit * ras_dis
   return(out)
 }
 
 #' Keep it simple migration calculation.
-#' @param baseline_threshold The [`SpatRaster`] with presence/absence information from a previous year.
+#' @param baseline_threshold The [`SpatRaster`] with presence/absence
+#'   information from a previous year.
 #' @param new_suit A new [`SpatRaster`] object.
 #' @param params A [vector] or [list] with passed on parameter values.
-#' @param resistance A resistance [`SpatRaster`] object with values to be omitted during distance calculation (Default: \code{NULL}).
+#' @param resistance A resistance [`SpatRaster`] object with values to be
+#'   omitted during distance calculation (Default: \code{NULL}).
 #' @noRd
 #' @keywords internal
 .kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
@@ -340,8 +362,8 @@ methods::setMethod(
                         )
   if(is.factor(km)) km <- terra::as.int(km)
 
-  # Now multiply the net suitability projection with this mask
-  # Thus removing any non-suitable grid cells (0) and changing the value of those within reach
+  # Now multiply the net suitability projection with this mask Thus removing any
+  # non-suitable grid cells (0) and changing the value of those within reach
   ns <- new_suit * km
 
   return(
@@ -356,8 +378,8 @@ methods::setMethod(
 #' @name add_constraint_connectivity
 #' @aliases add_constraint_connectivity
 #' @inheritParams add_constraint
-#' @param resistance A [`SpatRaster`] object describing a resistance surface or barrier for use in
-#' connectivity constrains (Default: \code{NULL}).
+#' @param resistance A [`SpatRaster`] object describing a resistance surface or
+#'   barrier for use in connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario
 #' @exportMethod add_constraint_connectivity
@@ -446,21 +468,25 @@ methods::setMethod(
 #### Adaptability constraints ####
 
 #' @title Adds an adaptability constraint to a scenario object
-#' @description
-#' Adaptability constraints assume that suitable habitat for species in (future) projections might be unsuitable if
-#' it is outside the range of conditions currently observed for the species.
+#' @description Adaptability constraints assume that suitable habitat for
+#' species in (future) projections might be unsuitable if it is outside the
+#' range of conditions currently observed for the species.
 #'
-#' Currently only `nichelimit` is implemented, which adds a simple constrain on the predictor parameter space, which
-#' can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
-#' are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
-#' training.
+#' Currently only `nichelimit` is implemented, which adds a simple constrain on
+#' the predictor parameter space, which can be defined through the
+#' \code{"value"} parameter. For example by setting it to \code{1} (Default),
+#' any projections are constrained to be within the range of at maximum 1
+#' standard deviation from the range of covariates used for model training.
 #' @name add_constraint_adaptability
 #' @aliases add_constraint_adaptability
 #' @inheritParams add_constraint
-#' @param names A [`character`] vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).
-#' @param value A [`numeric`] value in units of standard deviation (Default: \code{1}).
-#' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
-#' Allows incremental widening of the niche space, thus opening constraints.
+#' @param names A [`character`] vector with names of the predictors for which an
+#'   adaptability threshold should be set (Default: \code{NULL} for all).
+#' @param value A [`numeric`] value in units of standard deviation (Default:
+#'   \code{1}).
+#' @param increment A [`numeric`] constant that is added to value at every time
+#'   step (Default: \code{0}). Allows incremental widening of the niche space,
+#'   thus opening constraints.
 #' @family constraint
 #' @examples
 #' \dontrun{
@@ -478,7 +504,8 @@ methods::setGeneric("add_constraint_adaptability",
 
 #' @name add_constraint_adaptability
 #' @rdname add_constraint_adaptability
-#' @usage \S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
+#' @usage
+#'   \S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
 methods::setMethod(
   "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
@@ -522,12 +549,16 @@ methods::setMethod(
 #' Adaptability constrain by applying a limit on extrapolation beyond the niche
 #'
 #' @param newdata A [`data.frame`] with the information about new data layers.
-#' @param model A [`list`] created by the modelling object containing the full predictors and biodiversity predictors.
+#' @param model A [`list`] created by the modelling object containing the full
+#'   predictors and biodiversity predictors.
 #' @param names A [`character`] or \code{NULL} of the names of predictors.
-#' @param value A [`numeric`] value in units of standard deviation (Default: \code{1}).
-#' @param increment A [`numeric`] constant that is added to value at every time step (Default: \code{0}).
-#' Allows incremental widening of the niche space, thus opening constraints.
-#' @param increment_step A [`numeric`] indicating the number of time increment should be applied.
+#' @param value A [`numeric`] value in units of standard deviation (Default:
+#'   \code{1}).
+#' @param increment A [`numeric`] constant that is added to value at every time
+#'   step (Default: \code{0}). Allows incremental widening of the niche space,
+#'   thus opening constraints.
+#' @param increment_step A [`numeric`] indicating the number of time increment
+#'   should be applied.
 #' @keywords internal
 #' @noRd
 .nichelimit <- function(newdata, model, names = NULL, value = 1, increment = 0, increment_step = 1){
@@ -580,20 +611,23 @@ methods::setMethod(
 #### Boundary constraints ####
 
 #' @title Adds a boundary constraint to a scenario object
-#' @description
-#' The purpose of boundary constraints is to limit a future projection within a specified area
-#' (such as for example a range or ecoregion). This can help to limit unreasonable projections into geographic space.
+#' @description The purpose of boundary constraints is to limit a future
+#' projection within a specified area (such as for example a range or
+#' ecoregion). This can help to limit unreasonable projections into geographic
+#' space.
 #'
-#' Similar to boundary constraints it is also possible to define a \code{"zone"} for the scenario projections, similar
-#' as was done for model training. The difference to a boundary constraint is that the boundary constraint is applied posthoc
-#' as a hard cut on any projection, while the zones would allow any projection (and other constraints) to be applied within
-#' the zone.
+#' Similar to boundary constraints it is also possible to define a \code{"zone"}
+#' for the scenario projections, similar as was done for model training. The
+#' difference to a boundary constraint is that the boundary constraint is
+#' applied posthoc as a hard cut on any projection, while the zones would allow
+#' any projection (and other constraints) to be applied within the zone.
 #' **Note: Setting a boundary constraint for future projections effectively potentially suitable areas!**
 #' @name add_constraint_boundary
 #' @aliases add_constraint_boundary
 #' @inheritParams add_constraint
-#' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the model background. Has to be binary and
-#' is used for a posthoc masking of projected grid cells.
+#' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the
+#'   model background. Has to be binary and is used for a posthoc masking of
+#'   projected grid cells.
 #' @family constraint
 #' @examples
 #' \dontrun{
@@ -611,7 +645,8 @@ methods::setGeneric("add_constraint_boundary",
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
+#' @usage
+#'   \S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "sf"),
@@ -644,7 +679,8 @@ methods::setMethod(
 
 #' @name add_constraint_boundary
 #' @rdname add_constraint_boundary
-#' @usage \S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
+#' @usage
+#'   \S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
 methods::setMethod(
   "add_constraint_boundary",
   methods::signature(mod = "BiodiversityScenario", layer = "ANY"),
@@ -665,11 +701,13 @@ methods::setMethod(
     # --- #
     co <- list()
     if(method == "boundary"){
-      # Add a constrain on parameter space, e.g. max 1 SD from training data covariates
+      # Add a constrain on parameter space, e.g. max 1 SD from training data
+      # covariates
       assertthat::assert_that(
         length( unique( layer )) <=2
       )
-      # If length of values is greater than 1, remove everything else by setting it to NA
+      # If length of values is greater than 1, remove everything else by setting
+      # it to NA
       if( length( unique( layer )) >1 ){
         layer[layer<1] <- NA
     }

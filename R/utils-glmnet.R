@@ -1,8 +1,8 @@
 #' Built formula for glmnet model
 #'
-#' @description
-#' This function builds a formula for a `engine_glmnet()` model.
-#' @param obj A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @description This function builds a formula for a `engine_glmnet()` model.
+#' @param obj A [`list()`] object containing the prepared model data for a given
+#'   biodiversity dataset.
 #' @note Function is not meant to be run outside the train() call.
 #' @author Martin Jung
 #' @keywords internal
@@ -45,11 +45,11 @@ built_formula_glmnet <- function(obj){
 
 #' Default regularization constant
 #'
-#' @description
-#' This function was taken from the [`maxnet`] R-package to get some more informed
-#' default lambda values for the regularization.
+#' @description This function was taken from the [`maxnet`] R-package to get
+#' some more informed default lambda values for the regularization.
 #'
-#' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for background).
+#' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for
+#'   background).
 #' @param m A [`model.matrix`] object.
 #' @references
 #' * Phillips S (2021). _maxnet: Fitting 'Maxent' Species Distribution Models with 'glmnet'_. R package version 0.1.4, <https://CRAN.R-project.org/package=maxnet>.
@@ -105,11 +105,11 @@ default.regularization <- function(p, m){
 
 #' Determine best lambda
 #'
-#' @description
-#' For glmnet fits the variables are often overregularized. This helper function picks
-#' the best lambda estimate from the model.
-#' By default use the one within 1 SE of minimum lambda, unless it falls on the very first value,
-#' likely indicating an overregularized model. In this case take the minimum value of all lambda's.
+#' @description For glmnet fits the variables are often overregularized. This
+#' helper function picks the best lambda estimate from the model. By default use
+#' the one within 1 SE of minimum lambda, unless it falls on the very first
+#' value, likely indicating an overregularized model. In this case take the
+#' minimum value of all lambda's.
 #' @param obj A \code{"glmnet"} object.
 #' @aliases determine_lambda
 #' @keywords internal, utils
@@ -133,9 +133,9 @@ determine_lambda <- function(obj){
 
 #' Summarize cross-validated glmnet model
 #'
-#' @description
-#' This helper function summarizes the coefficients from a glmnet model.
-#' The optimal lambda is determined through the [`determine_lambda`] function.
+#' @description This helper function summarizes the coefficients from a glmnet
+#' model. The optimal lambda is determined through the [`determine_lambda`]
+#' function.
 #' @param obj An object created with \code{'cv.glmnet'}.
 #' @keywords internal, utils
 #' @noRd

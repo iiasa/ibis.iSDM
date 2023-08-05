@@ -4,36 +4,49 @@ NULL
 #' Add biodiversity point dataset to a distribution object (presence-only)
 #'
 #' @description This function adds a presence-only biodiversity dataset to a
-#' distribution object.
+#'   distribution object.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param poipo A [`data.frame`] or [`sf`] object of presence-only point occurrences.
+#' @param poipo A [`data.frame`] or [`sf`] object of presence-only point
+#'   occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
-#' @param family A [`character`] stating the family to be used (Default: \code{'Poisson'}).
-#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
-#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
-#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"poipo"}.
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#'   biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is
+#'   to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default:
+#'   \code{'Poisson'}).
+#' @param link A [`character`] to overwrite the default link function (Default:
+#'   \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any
+#'   weights used in the modelling. Larger weights indicate higher weighting
+#'   relative to any other datasets. By default set to \code{1} if only one
+#'   dataset is added. A [`vector`] is also supported but must be of the same
+#'   length as \code{"poipo"}.
 #' **Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).**
-#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
-#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
-#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
-#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
-#' @param ... Other parameters passed down to the object. Normally not used unless described in details.
+#' @param separate_intercept A [`logical`] value stating whether a separate
+#'   intercept is to be added in shared likelihood models for engines
+#'   [engine_inla], [engine_inlabru] and [engine_stan]. Otherwise ignored.
+#' @param docheck [`logical`] on whether additional checks should be performed
+#'   (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a
+#'   [`pseudoabs_settings()`] created settings object.
+#' @param ... Other parameters passed down to the object. Normally not used
+#'   unless described in details.
 #'
-#' @details This function allows to add presence-only biodiversity records to a [distribution] \pkg{ibis.iSDM}
-#' Presence-only data are usually modelled through an inferential model (see Guisan and Zimmerman, 2000) that
-#' relate their occurrence in relation to environmental covariates to a selected sample of
-#' 'background' points. The most common approach for estimation and the one supported by this type of dataset
-#' are poisson-process models (PPM) in which presence-only points are fitted through a down-weighted Poisson
-#' regression. See Renner et al. 2015 for an overview.
+#' @details This function allows to add presence-only biodiversity records to a
+#'   [distribution] \pkg{ibis.iSDM} Presence-only data are usually modelled
+#'   through an inferential model (see Guisan and Zimmerman, 2000) that relate
+#'   their occurrence in relation to environmental covariates to a selected
+#'   sample of 'background' points. The most common approach for estimation and
+#'   the one supported by this type of dataset are poisson-process models (PPM)
+#'   in which presence-only points are fitted through a down-weighted Poisson
+#'   regression. See Renner et al. 2015 for an overview.
 #'
 #' @references
 #' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
 #' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
-#' @seealso
-#' See other functions for adding biodiversity data, i.e. [`add_biodiversity_poipa`]
+#' @seealso See other functions for adding biodiversity data, i.e.
+#' [`add_biodiversity_poipa`]
 #' @family add_biodiversity
 #' @returns Adds biodiversity data to [distribution] object.
 #' @keywords biodiversity
@@ -63,7 +76,8 @@ methods::setGeneric(
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
-#' @usage \S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,logical,ANY}(x,poipo,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck,pseudoabsence_settings,...)
+#' @usage
+#'   \S4method{add_biodiversity_poipo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,logical,ANY}(x,poipo,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
@@ -138,35 +152,43 @@ methods::setMethod(
 
 #' Add biodiversity point dataset to a distribution object (presence-absence).
 #'
-#' @description
-#' This function adds a presence-absence biodiversity dataset to a distribution object.
-#' Opposed to presence-only data, presence-absence biodiversity records usually originate from
-#' structured biodiversity surveys where the absence of a species in a given region was specifically
-#' assessed.
+#' @description This function adds a presence-absence biodiversity dataset to a
+#' distribution object. Opposed to presence-only data, presence-absence
+#' biodiversity records usually originate from structured biodiversity surveys
+#' where the absence of a species in a given region was specifically assessed.
 #'
-#' If it is the analysts choice it is also possible to format presence-only biodiversity data
-#' into a presence-absence form, by adding pseudo-absence through [`add_pseudoabsence`]. See the help file
-#' for more information.
+#' If it is the analysts choice it is also possible to format presence-only
+#' biodiversity data into a presence-absence form, by adding pseudo-absence
+#' through [`add_pseudoabsence`]. See the help file for more information.
 #'
-#' @details
-#' By default, the logit link function is used in a logistic regression setting
-#' unless the specific engine does not support generalised linear regressions (e.g. [engine_bart]).
+#' @details By default, the logit link function is used in a logistic regression
+#' setting unless the specific engine does not support generalised linear
+#' regressions (e.g. [engine_bart]).
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param poipa A [`data.frame`] or [`sf`] object of presence-absence point occurrences.
+#' @param poipa A [`data.frame`] or [`sf`] object of presence-absence point
+#'   occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records indicating presence/absence.
-#' By default set to \code{"Observed"} and an error will be thrown if a [`numeric`] column with that name does not exist.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default (\code{NULL}) is to use all covariates (if specified).
-#' @param family A [`character`] stating the family to be used (Default: \code{'binomial'}).
-#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
-#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
-#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as
-#' parameter \code{"poipa"}.
-#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in.
-#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
-#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#'   biodiversity point records indicating presence/absence. By default set to
+#'   \code{"Observed"} and an error will be thrown if a [`numeric`] column with
+#'   that name does not exist.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default
+#'   (\code{NULL}) is to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default:
+#'   \code{'binomial'}).
+#' @param link A [`character`] to overwrite the default link function (Default:
+#'   \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any
+#'   weights used in the modelling. Larger weights indicate higher weighting
+#'   relative to any other datasets. By default set to \code{1} if only one
+#'   dataset is added. A [`vector`] is also supported but must be of the same
+#'   length as parameter \code{"poipa"}.
+#' @param separate_intercept A [`logical`] value stating whether a separate
+#'   intercept is to be added in. shared likelihood models for engines
+#'   [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed
+#'   (e.g. intersection tests) (Default: \code{TRUE}).
 #' @param ... Other parameters passed down.
 #'
 #' @family add_biodiversity
@@ -197,7 +219,8 @@ methods::setGeneric(
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
-#' @usage \S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf,character,character,ANY,character,character,numeric,logical,logical}(x,poipa,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck)
+#' @usage
+#'   \S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf,character,character,ANY,character,character,numeric,logical,logical}(x,poipa,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck)
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
@@ -268,41 +291,57 @@ methods::setMethod(
 
 #' Add biodiversity polygon dataset to a distribution object (presence-only)
 #'
-#' @description
-#' This function can be used to add a [`sf`] polygon dataset to an existing
-#' distribution object. Presence-only polygon data is treated differential than point data in
-#' some engines particular through the way that points are generated.
+#' @description This function can be used to add a [`sf`] polygon dataset to an
+#' existing distribution object. Presence-only polygon data is treated
+#' differential than point data in some engines particular through the way that
+#' points are generated.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param polpo A [`sf`] polygon object of presence-only occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
-#' @param family A [`character`] stating the family to be used (Default: \code{poisson}).
-#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
-#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
-#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"polpo"}.
-#' @param simulate Simulate poipo points within its boundaries. Result are passed to [`add_biodiversity_poipo`] (Default: \code{FALSE}).
-#' @param simulate_points A [`numeric`] number of points to be created by simulation (Default: \code{100}).
-#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
-#' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
-#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
-#' parameter.
-#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
-#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
-#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
-#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#'   biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is
+#'   to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default:
+#'   \code{poisson}).
+#' @param link A [`character`] to overwrite the default link function (Default:
+#'   \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any
+#'   weights used in the modelling. Larger weights indicate higher weighting
+#'   relative to any other datasets. By default set to \code{1} if only one
+#'   dataset is added. A [`vector`] is also supported but must be of the same
+#'   length as \code{"polpo"}.
+#' @param simulate Simulate poipo points within its boundaries. Result are
+#'   passed to [`add_biodiversity_poipo`] (Default: \code{FALSE}).
+#' @param simulate_points A [`numeric`] number of points to be created by
+#'   simulation (Default: \code{100}).
+#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference
+#'   for simulation (Default: \code{NULL}).
+#' @param simulate_strategy A [`character`] stating the strategy for sampling.
+#'   Can be set to either. \code{'random'} or \code{'regular'}, the latter
+#'   requiring a raster supplied in the \code{'simulate_weights'} parameter.
+#' @param separate_intercept A [`logical`] value stating whether a separate
+#'   intercept is to be added in shared likelihood models for engines
+#'   [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed
+#'   (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a
+#'   [`pseudoabs_settings()`] created settings object.
 #' @param ... Other parameters passed down.
 #'
-#' @details The default approach for polygon data is to sample presence-only points across
-#' the region of the polygons. This function thus adds as a wrapper to [`add_biodiversity_poipo()`] as presence-only
-#' points are created by the model. If no points are simulated directly (Default) then the polygon is processed
-#' by [`train()`] by creating regular point data over the supplied predictors.
+#' @details The default approach for polygon data is to sample presence-only
+#'   points across the region of the polygons. This function thus adds as a
+#'   wrapper to [`add_biodiversity_poipo()`] as presence-only points are created
+#'   by the model. If no points are simulated directly (Default) then the
+#'   polygon is processed by [`train()`] by creating regular point data over the
+#'   supplied predictors.
 #'
-#' Use [`add_biodiversity_polpa()`] to create binomial distributed inside-outside points for the given polygon!
+#'   Use [`add_biodiversity_polpa()`] to create binomial distributed
+#'   inside-outside points for the given polygon!
 #'
-#' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
+#'   For an integration of range data as predictor or offset, see
+#'   [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
 #' @keywords biodiversity
 #' @aliases add_biodiversity_polpo
@@ -329,7 +368,8 @@ methods::setGeneric(
 
 #' @name add_biodiversity_polpo
 #' @rdname add_biodiversity_polpo
-#' @usage \S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpo,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
+#' @usage
+#'   \S4method{add_biodiversity_polpo}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpo,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
@@ -379,7 +419,8 @@ methods::setMethod(
         # Normalize the weight layer if is not a factorized, else set everything to 1
         if(is.null(levels(simulate_bias))) simulate_bias <- predictor_transform(simulate_bias, "norm") else simulate_bias[simulate_bias>0] <- 1
 
-        # Weighted sampling on background raster, the greater the value, the more likely sampled points
+        # Weighted sampling on background raster, the greater the value, the
+        # more likely sampled points
         ptscell <- sample(which(!is.na(simulate_bias[])),
                           size = simulate_points,
                           prob = simulate_bias[which(!is.na(simulate_bias[]))],
@@ -449,41 +490,55 @@ methods::setMethod(
 
 #' Add biodiversity polygon dataset to a distribution object (presence-absence)
 #'
-#' @description
-#' This function can be used to add a [`sf`] polygon dataset to an existing
-#' distribution object. Presence-absence polygon data assumes that each area within the polygon
-#' can be treated as 'presence' for the species, while each area outside the polygon is where the
-#' species is absent.
+#' @description This function can be used to add a [`sf`] polygon dataset to an
+#' existing distribution object. Presence-absence polygon data assumes that each
+#' area within the polygon can be treated as 'presence' for the species, while
+#' each area outside the polygon is where the species is absent.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param polpa A [`sf`] polygon object of presence-absence occurrences.
 #' @param name The name of the biodiversity dataset used as internal identifier.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity point records.
-#' @param formula A [`character`] or [`formula`] object to be passed. Default is to use all covariates (if specified).
-#' @param family A [`character`] stating the family to be used (Default: \code{binomial}).
-#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
-#' @param weight A [`numeric`] value acting as a multiplier with regards to any weights used in the modelling.
-#' Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-#' one dataset is added. A [`vector`] is also supported but must be of the same length as \code{"polpa"}.
-#' @param simulate Simulate poipa points within its boundaries. Result are passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
-#' @param simulate_points A [`numeric`] number of points to be created by simulation.
-#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference for simulation (Default: \code{NULL}).
-#' @param simulate_strategy A [`character`] stating the strategy for sampling. Can be set to either.
-#' \code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
-#' parameter.
-#' @param separate_intercept A [`logical`] value stating whether a separate intercept is to be added in
-#' shared likelihood models for engines [engine_inla], [engine_inlabru] and [engine_stan].
-#' @param docheck [`logical`] on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).
-#' @param pseudoabsence_settings Either \code{NULL} or a [`pseudoabs_settings()`] created settings object.
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#'   biodiversity point records.
+#' @param formula A [`character`] or [`formula`] object to be passed. Default is
+#'   to use all covariates (if specified).
+#' @param family A [`character`] stating the family to be used (Default:
+#'   \code{binomial}).
+#' @param link A [`character`] to overwrite the default link function (Default:
+#'   \code{NULL}).
+#' @param weight A [`numeric`] value acting as a multiplier with regards to any
+#'   weights used in the modelling. Larger weights indicate higher weighting
+#'   relative to any other datasets. By default set to \code{1} if only one
+#'   dataset is added. A [`vector`] is also supported but must be of the same
+#'   length as \code{"polpa"}.
+#' @param simulate Simulate poipa points within its boundaries. Result are
+#'   passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
+#' @param simulate_points A [`numeric`] number of points to be created by
+#'   simulation.
+#' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference
+#'   for simulation (Default: \code{NULL}).
+#' @param simulate_strategy A [`character`] stating the strategy for sampling.
+#'   Can be set to either. \code{'random'} or \code{'regular'}, the latter
+#'   requiring a raster supplied in the \code{'simulate_weights'} parameter.
+#' @param separate_intercept A [`logical`] value stating whether a separate
+#'   intercept is to be added in shared likelihood models for engines
+#'   [engine_inla], [engine_inlabru] and [engine_stan].
+#' @param docheck [`logical`] on whether additional checks should be performed
+#'   (e.g. intersection tests) (Default: \code{TRUE}).
+#' @param pseudoabsence_settings Either \code{NULL} or a
+#'   [`pseudoabs_settings()`] created settings object.
 #' @param ... Other parameters passed down.
 #'
-#' @details The default approach for polygon data is to sample presence-absence points across
-#' the region of the polygons. This function thus adds as a wrapper to [`add_biodiversity_poipa()`] as presence-only
-#' points are created by the model.
-#' Note if the polygon is used directly in the modelling the link between covariates and polygonal data is established by
-#' regular sampling of points within the polygon and is thus equivalent to simulating the points directly.
+#' @details The default approach for polygon data is to sample presence-absence
+#'   points across the region of the polygons. This function thus adds as a
+#'   wrapper to [`add_biodiversity_poipa()`] as presence-only points are created
+#'   by the model. Note if the polygon is used directly in the modelling the
+#'   link between covariates and polygonal data is established by regular
+#'   sampling of points within the polygon and is thus equivalent to simulating
+#'   the points directly.
 #'
-#' For an integration of range data as predictor or offset, see [`add_predictor_range()`] and [`add_offset_range()`] instead.
+#'   For an integration of range data as predictor or offset, see
+#'   [`add_predictor_range()`] and [`add_offset_range()`] instead.
 #' @family add_biodiversity
 #' @keywords biodiversity
 #' @aliases add_biodiversity_polpa
@@ -510,7 +565,8 @@ methods::setGeneric(
 
 #' @name add_biodiversity_polpa
 #' @rdname add_biodiversity_polpa
-#' @usage \S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpa,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
+#' @usage
+#'   \S4method{add_biodiversity_polpa}{BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY}(x,polpa,name,field_occurrence,formula,family,link,weight,simulate,simulate_points,simulate_bias,simulate_strategy,separate_intercept,docheck,pseudoabsence_settings,...)
 methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
@@ -620,7 +676,8 @@ methods::setMethod(
       # Messenger
       if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpa dataset...")
 
-      # If no points are simulated, ensure that the polygon has objects with at least 2 factor levels
+      # If no points are simulated, ensure that the polygon has objects with at
+      # least 2 factor levels
       assertthat::assert_that(
         length(unique(polpa[[field_occurrence]]))==2
       )
@@ -661,8 +718,10 @@ methods::setMethod(
 #' Format biodiversity dataset to standardized format
 #'
 #' @param x A [`data.frame`] or [`sf`] object of biodiversity information.
-#' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
-#' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'}).
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#'   biodiversity records.
+#' @param field_space A [`vector`] on the column names (Default: \code{'x'},
+#'   \code{'y'}).
 #' @param ... Other parameters passed down.
 #'
 #' @import sf

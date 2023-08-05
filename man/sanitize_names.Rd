@@ -13,9 +13,10 @@ sanitize_names(names)
 A \code{\link{vector}} of sanitized \code{\link{character}}.
 }
 \description{
-Prepared covariates often have special characters in their variable names
-which can or can not be used in formulas or cause errors for certain engines.
-This function converts special characters of variable names into a format
+Prepared covariates often have special characters in their
+variable names which can or can not be used in formulas or cause errors for
+certain engines. This function converts special characters of variable names
+into a format
 }
 \examples{
 # Correct variable names

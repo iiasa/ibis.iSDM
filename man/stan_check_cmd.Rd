@@ -7,9 +7,11 @@
 stan_check_cmd(install = TRUE, ask = FALSE)
 }
 \arguments{
-\item{install}{A \code{\link{logical}} factor to indicate whether cmdstanr should be directly installed (Default: \code{TRUE}).}
+\item{install}{A \code{\link{logical}} factor to indicate whether cmdstanr should be
+directly installed (Default: \code{TRUE}).}
 
-\item{ask}{\code{\link{logical}} whether the cmdstanr package is to be installed (Default: \code{FALSE}).}
+\item{ask}{\code{\link{logical}} whether the cmdstanr package is to be installed
+(Default: \code{FALSE}).}
 }
 \description{
 Checks whether cmdstanr is available and otherwise tries to install it

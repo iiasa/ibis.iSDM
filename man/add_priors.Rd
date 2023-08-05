@@ -16,13 +16,13 @@ add_priors(x, priors = NULL, ...)
 \item{...}{Other parameters passed down.}
 }
 \description{
-This function simply allows to add priors to an existing \link{distribution} object.
-The supplied priors must be a \code{\linkS4class{PriorList}} object created through
-calling \link{priors}.
+This function simply allows to add priors to an existing
+\link{distribution} object. The supplied priors must be a \code{\linkS4class{PriorList}}
+object created through calling \link{priors}.
 }
 \note{
-Alternatively priors to environmental predictors can also directly added as parameter
-via \link{add_predictors}
+Alternatively priors to environmental predictors can also directly
+added as parameter via \link{add_predictors}
 }
 \examples{
 \dontrun{

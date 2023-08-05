@@ -20,29 +20,37 @@ add_predictor_range(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+feature.}
 
-\item{method}{\code{\link{character}} describing how the range should be included (\code{"binary"} | \code{"distance"}).}
+\item{method}{\code{\link{character}} describing how the range should be included
+(\code{"binary"} | \code{"distance"}).}
 
-\item{distance_max}{Numeric threshold on the maximum distance (Default: \code{NULL}).}
+\item{distance_max}{Numeric threshold on the maximum distance (Default:
+\code{NULL}).}
 
-\item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with digitized raster layer.
-Can be used to for example to remove or reduce the expected value (Default: \code{NULL}).}
+\item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with
+digitized raster layer. Can be used to for example to remove or reduce the
+expected value (Default: \code{NULL}).}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses default prior assumptions.}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to NULL which uses
+default prior assumptions.}
 }
 \description{
-This function allows to add a species range which is usually drawn by experts in a separate process
-as spatial explicit prior. Both \code{\link{sf}} and \code{\link{SpatRaster}}-objects are supported as input.
+This function allows to add a species range which is usually
+drawn by experts in a separate process as spatial explicit prior. Both \code{\link{sf}}
+and \code{\link{SpatRaster}}-objects are supported as input.
 
-Users are advised to look at the \code{"bossMaps"} R-package presented as part of Merow et al. (2017),
-which allows flexible calculation of non-linear distance transforms from the boundary of the range.
-Outputs of this package could be added directly to this function.
+Users are advised to look at the \code{"bossMaps"} R-package presented as
+part of Merow et al. (2017), which allows flexible calculation of non-linear
+distance transforms from the boundary of the range. Outputs of this package
+could be added directly to this function.
 \strong{Note that this function adds the range as predictor and not as offset. For this purpose a separate function \code{\link[=add_offset_range]{add_offset_range()}} exists.}
 
-Additional options allow to include the range either as \code{"binary"} or as \code{"distance"} transformed
-predictor. The difference being that the range is either directly included as presence-only predictor or
-alternatively with a linear distance transform from the range boundary. The parameter
+Additional options allow to include the range either as \code{"binary"} or as
+\code{"distance"} transformed predictor. The difference being that the range
+is either directly included as presence-only predictor or alternatively with
+a linear distance transform from the range boundary. The parameter
 \code{"distance_max"} can be specified to constrain this distance transform.
 }
 \examples{

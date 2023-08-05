@@ -1,29 +1,36 @@
 #' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
 NULL
+
 #' Use of Gradient Descent Boosting for model estimation
 #'
-#' @description
-#' Gradient descent boosting is an efficient way to optimize any loss function
-#' of a generalized linear or additive model (such as the GAMs available through the \code{"mgcv"} R-package).
-#' It furthermore automatically regularizes the fit, thus the resulting model only contains the
-#' covariates whose baselearners have some influence on the response.
-#' Depending on the type of the \code{add_biodiversity} data, either poisson process models or
-#' logistic regressions are estimated. If the \code{"only_linear"} term in [train] is set to \code{FALSE},
-#' splines are added to the estimation, thus providing a non-linear additive inference.
+#' @description Gradient descent boosting is an efficient way to optimize any
+#' loss function of a generalized linear or additive model (such as the GAMs
+#' available through the \code{"mgcv"} R-package). It furthermore automatically
+#' regularizes the fit, thus the resulting model only contains the covariates
+#' whose baselearners have some influence on the response. Depending on the type
+#' of the \code{add_biodiversity} data, either poisson process models or
+#' logistic regressions are estimated. If the \code{"only_linear"} term in
+#' [train] is set to \code{FALSE}, splines are added to the estimation, thus
+#' providing a non-linear additive inference.
 #'
-#' @details:
-#' This package requires the \code{"mboost"} R-package to be installed.
-#' It is in philosophy somewhat related to the [engine_xgboost] and \code{"XGBoost"} R-package,
-#' however providing some additional desirable features that make estimation quicker and
-#' particularly useful for spatial projections. Such as for instance the ability to specifically add
-#' spatial baselearners via [add_latent_spatial] or the specification of
-#' monotonically constrained priors via [GDBPrior].
+#' @details: This package requires the \code{"mboost"} R-package to be
+#' installed. It is in philosophy somewhat related to the [engine_xgboost] and
+#' \code{"XGBoost"} R-package, however providing some additional desirable
+#' features that make estimation quicker and particularly useful for spatial
+#' projections. Such as for instance the ability to specifically add spatial
+#' baselearners via [add_latent_spatial] or the specification of monotonically
+#' constrained priors via [GDBPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter An [`integer`] giving the number of boosting iterations (Default: \code{2e3L}).
-#' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1} defining the shrinkage parameter.
-#' @param empirical_risk method for empirical risk calculation.
-#' Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).
-#' @param type The mode used for creating posterior predictions. Either making \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).
+#' @param iter An [`integer`] giving the number of boosting iterations (Default:
+#'   \code{2e3L}).
+#' @param learning_rate A bounded [`numeric`] value between \code{0} and
+#'   \code{1} defining the shrinkage parameter.
+#' @param empirical_risk method for empirical risk calculation. Available
+#'   options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default:
+#'   \code{'inbag'}).
+#' @param type The mode used for creating posterior predictions. Either making
+#'   \code{"link"}, \code{"response"} or \code{"class"} (Default:
+#'   \code{"response"}).
 #' @param ... Other variables or control parameters
 #' @references
 #' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
@@ -643,7 +650,7 @@ engine_gdb <- function(x,
             # If plot, make plot, otherwise
             if(plot){
               par.ori <- graphics::par(no.readonly = TRUE)
-              par(mfrow = c(1,2))
+              graphics::par(mfrow = c(1,2))
               mboost::plot.mboost(self$get_data('fit_best'), which = x.var, newdata = dummy)
               if(utils::hasName(par.ori, "pin")) par.ori$pin <- NULL
               graphics::par(par.ori)

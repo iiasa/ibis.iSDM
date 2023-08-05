@@ -11,36 +11,41 @@ add_offset_bias(x, layer, add = TRUE, points = NULL)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
-this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
+this parameter to \code{FALSE} replaces the current offsets with the new
+one (Default: \code{TRUE}).}
 
-\item{points}{An optional \code{\link{sf}} object with key points. The location of the points are then used to
-calculate the probability that a cell has been sampled while accounting for area differences.
-(Default: \code{NULL}).}
+\item{points}{An optional \code{\link{sf}} object with key points. The location of the
+points are then used to calculate the probability that a cell has been
+sampled while accounting for area differences. (Default: \code{NULL}).}
 }
 \value{
 Adds a bias offset to a \code{\link{distribution}} object.
 }
 \description{
-Including offsets is another option to integrate spatial prior information
-in linear and additive regression models. Offsets shift the intercept of
-the regression fit by a certain amount. Although only one offset can be added
-to a regression model, it is possible to combine several spatial-explicit estimates into
-one offset by calculating the sum of all spatial-explicit layers.
+Including offsets is another option to integrate spatial prior
+information in linear and additive regression models. Offsets shift the
+intercept of the regression fit by a certain amount. Although only one offset
+can be added to a regression model, it is possible to combine several
+spatial-explicit estimates into one offset by calculating the sum of all
+spatial-explicit layers.
 }
 \details{
-This functions emulates the use of the \code{\link[=add_offset]{add_offset()}} function, however applies an inverse
-transformation to remove the provided layer from the overall offset.
-So if for instance a offset is already specified (such as area), this function
-removes the provided \code{bias.layer} from it via \code{"offset(log(off.area)-log(bias.layer))"}
+This functions emulates the use of the \code{\link[=add_offset]{add_offset()}} function,
+however applies an inverse transformation to remove the provided layer from
+the overall offset. So if for instance a offset is already specified (such as
+area), this function removes the provided \code{bias.layer} from it via
+\code{"offset(log(off.area)-log(bias.layer))"}
 
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 
-If a generic offset is added, consider using the \code{\link[=add_offset]{add_offset()}} function. If the layer is a expert-based range and
-requires additional parametrization, consider using the
-function \code{\link[=add_offset_range]{add_offset_range()}} or the \code{bossMaps} R-package.
+If a generic offset is added, consider using the \code{\link[=add_offset]{add_offset()}} function.
+If the layer is a expert-based range and requires additional parametrization,
+consider using the function \code{\link[=add_offset_range]{add_offset_range()}} or the \code{bossMaps}
+R-package.
 }
 \examples{
 \dontrun{

@@ -16,49 +16,64 @@ thin_observations(
 )
 }
 \arguments{
-\item{df}{A \code{\link{sf}} or \code{\link{data.frame}} object with observed occurrence points. All methods threat presence-only
-and presence-absence occurrence points equally.}
+\item{df}{A \code{\link{sf}} or \code{\link{data.frame}} object with observed occurrence points.
+All methods threat presence-only and presence-absence occurrence points
+equally.}
 
-\item{background}{A \code{\link{SpatRaster}} object with the background of the study region. Use for assessing point density.}
+\item{background}{A \code{\link{SpatRaster}} object with the background of the study
+region. Use for assessing point density.}
 
-\item{env}{A \code{\link{SpatRaster}} object with environmental covariates. Needed when method is set to \code{"environmental"}
-or \code{"bias"} (Default: \code{NULL}).}
+\item{env}{A \code{\link{SpatRaster}} object with environmental covariates. Needed when
+method is set to \code{"environmental"} or \code{"bias"} (Default:
+\code{NULL}).}
 
-\item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
+\item{method}{A \code{\link{character}} of the method to be applied (Default:
+\code{"random"}).}
 
-\item{minpoints}{A \code{\link{numeric}} giving the number of data points at minimum to take (Default: \code{10}).}
+\item{minpoints}{A \code{\link{numeric}} giving the number of data points at minimum to
+take (Default: \code{10}).}
 
-\item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring observations (Default: \code{NULL}).}
+\item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring
+observations (Default: \code{NULL}).}
 
-\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).}
+\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"method"} is
+chosen (Default: \code{NULL}).}
 
-\item{verbose}{\code{\link{logical}} of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} of whether to print some statistics about the
+thinning outcome (Default: \code{TRUE}).}
 }
 \description{
-For most species distribution modelling approaches it is assumed that occurrence records are unbiased, which
-is rarely the case. While model-based control can alleviate some of the effects of sampling bias, it can often be
-desirable to account for some sampling biases through spatial thinning (Aiello‐Lammens et al. 2015). This
-is an approach based on the assumption that oversampled grid cells contribute little more than bias, rather than
-strengthing any environmental responses.
-This function provides some methods to apply spatial thinning approaches. Note that this effectively removes
-data prior to any estimation and its use should be considered with care (see also Steen et al. 2021).
+For most species distribution modelling approaches it is assumed
+that occurrence records are unbiased, which is rarely the case. While
+model-based control can alleviate some of the effects of sampling bias, it
+can often be desirable to account for some sampling biases through spatial
+thinning (Aiello‐Lammens et al. 2015). This is an approach based on the
+assumption that oversampled grid cells contribute little more than bias,
+rather than strengthing any environmental responses. This function provides
+some methods to apply spatial thinning approaches. Note that this
+effectively removes data prior to any estimation and its use should be
+considered with care (see also Steen et al. 2021).
 }
 \details{
 Currently implemented thinning methods:
 \itemize{
 \item \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
-Does not account for any spatial or environmental distance between observations.
+Does not account for any spatial or environmental distance between
+observations.
 \item \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
-Points are preferentially thinned from grid cells which are in the 25\% most biased (larger values assumed greater bias)
-and have high point density. Thins the observations up to \code{"minpoints"}.
+Points are preferentially thinned from grid cells which are in the 25\% most
+biased (larger values assumed greater bias) and have high point density.
+Thins the observations up to \code{"minpoints"}.
 \item \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
-each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
+each occupied zone. Careful: If the zones are relatively wide this can
+remove quite a few observations.
 \item \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
-that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
-We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
+that the full environmental niche has been comprehensively sampled and is
+covered by the provided covariates \code{env}. We then obtain an number
+equal to (\code{"minpoints"}) of observations for each cluster.
 \item \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
-iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
-be set for this function to work.
+iteratively until the minimum distance between points is crossed.  The
+\code{"mindistance"} parameter has to be set for this function to work.
 }
 }
 \examples{

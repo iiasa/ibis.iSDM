@@ -3,54 +3,68 @@ NULL
 
 #' Use INLA as engine
 #'
-#' @description
-#' Allows a full Bayesian analysis of linear and additive models using Integrated Nested Laplace approximation.
-#' Engine has been largely superceded by the [`engine_inlabru`] package and users are advised to us this one,
-#' unless specific options are required.
+#' @description Allows a full Bayesian analysis of linear and additive models
+#' using Integrated Nested Laplace approximation. Engine has been largely
+#' superceded by the [`engine_inlabru`] package and users are advised to us this
+#' one, unless specific options are required.
 #'
-#' @details
-#' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
-#' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
-#' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+#' @details All \code{INLA} engines require the specification of a mesh that
+#' needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
+#' mesh will be created based on best guesses of the data spread. A good mesh
+#' needs to have triangles as regular as possible in size and shape:
+#' equilateral.
 #'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
-#' Lower bounds affect the density of triangles
-#' [*] \code{"offset"}: The automatic extension distance of the mesh
-#' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
-#' i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
-#' [*] \code{"cutoff"}: The minimum allowed distance between points,
-#' it means that points at a closer distance than the supplied value are replaced by a single vertex.
-#' it is critical when there are some points very close to each other, either for point locations or in the
-#' domain boundary.
-#' [*] \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
-#' created.
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates Lower bounds affect the density of
+#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative
+#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' distance between points, it means that points at a closer distance than the
+#' supplied value are replaced by a single vertex. it is critical when there are
+#' some points very close to each other, either for point locations or in the
+#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' predictions, which affects the spatial grain of any outputs created.
 #'
 #' Priors can be set via [INLAPrior].
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
-#' @param optional_projstk A directly supplied projection stack. Useful if projection stack is identical for multiple species (Default: \code{NULL})
-#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param offset interpreted as a numeric factor relative to the approximate data diameter.
-#' Default is an educated guess (Default: \code{NULL}).
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default:
+#'   \code{NULL})
+#' @param optional_projstk A directly supplied projection stack. Useful if
+#'   projection stack is identical for multiple species (Default: \code{NULL})
+#' @param max.edge The largest allowed triangle edge length, must be in the same
+#'   scale units as the coordinates. Default is an educated guess (Default:
+#'   \code{NULL}).
+#' @param offset interpreted as a numeric factor relative to the approximate
+#'   data diameter. Default is an educated guess (Default: \code{NULL}).
 #' @param cutoff The minimum allowed distance between points on the mesh.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL}).
-#' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
-#' @param strategy Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
-#'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
-#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
-#' See also https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
+#'   Default is an educated guess (Default: \code{NULL}).
+#' @param proj_stepsize The stepsize in coordinate units between cells of the
+#'   projection grid (Default: \code{NULL}).
+#' @param timeout Specify a timeout for INLA models in sec. Afterwards it
+#'   passed.
+#' @param strategy Which approximation to use for the joint posterior. Options
+#'   are \code{"auto"} ("default"), \code{"adaptative"}, \code{"gaussian"},
+#'   \code{"simplified.laplace"} & \code{"laplace"}.
+#' @param int.strategy Integration strategy. Options are
+#'   \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}. See
+#'   also https://groups.google.com/g/r-inla-discussion-group/c/hDboQsJ1Mls
 #' @param barrier Should a barrier model be added to the model?
-#' @param type The mode used for creating posterior predictions.
-#' Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
-#' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
-#' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default: \code{FALSE}) **Not yet implemented**
-#' @param nonconvex.convex Non-convex minimal extension radius for convex curvature **Not yet implemented**
-#' @param nonconvex.concave Non-convex minimal extension radius for concave curvature **Not yet implemented**
-#' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet implemented**
+#' @param type The mode used for creating posterior predictions. Either
+#'   summarizing the linear \code{"predictor"} or \code{"response"} (Default:
+#'   \code{"response"}).
+#' @param area Accepts a [`character`] denoting the type of area calculation to
+#'   be done on the mesh (Default: \code{'gpc2'}).
+#' @param nonconvex.bdry Create a non-convex boundary hulls instead (Default:
+#'   \code{FALSE}) **Not yet implemented**
+#' @param nonconvex.convex Non-convex minimal extension radius for convex
+#'   curvature **Not yet implemented**
+#' @param nonconvex.concave Non-convex minimal extension radius for concave
+#'   curvature **Not yet implemented**
+#' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet
+#'   implemented**
 #' @param ... Other options.
 #' @references
 #' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.

@@ -3,35 +3,43 @@ NULL
 
 #' Engine for regularized regression models
 #'
-#' @description
-#' This engine allows the estimation of linear coefficients using either ridge, lasso or elastic net regressions techniques.
-#' Backbone of this engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
-#' including the popular \code{'maxnet'} (e.g. Maxent) package.
-#' Ultimately this engine is an equivalent of [engine_breg], but in a "frequentist" setting.
-#' If user aim to emulate a model that most closely resembles maxent within the ibis.iSDM modelling framework,
-#' then this package is the best way of doing so. Compared to the \code{'maxnet'} R-package,
-#' a number of efficiency settings are implemented in particular for cross-validation of alpha and lambda values.
+#' @description This engine allows the estimation of linear coefficients using
+#' either ridge, lasso or elastic net regressions techniques. Backbone of this
+#' engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
+#' including the popular \code{'maxnet'} (e.g. Maxent) package. Ultimately this
+#' engine is an equivalent of [engine_breg], but in a "frequentist" setting. If
+#' user aim to emulate a model that most closely resembles maxent within the
+#' ibis.iSDM modelling framework, then this package is the best way of doing so.
+#' Compared to the \code{'maxnet'} R-package, a number of efficiency settings
+#' are implemented in particular for cross-validation of alpha and lambda
+#' values.
 #'
-#' Limited amount of prior information can be specified for this engine, specifically via offsets or as
-#' [`GLMNETPrior`], which allow to specify priors as regularization constants.
-#' @details
-#' Regularized regressions are effectively GLMs that are fitted with ridge, lasso or elastic-net regularization.
-#' Which of them is chosen is critical dependent on the alpha value:
-#' [*] For \code{alpha} equal to \code{0} a ridge regularization is used. Ridge regularization has the property that
-#' it doesn't remove variables entirely, but instead sets their coefficients to \code{0}.
-#' [*] For \code{alpha} equal to \code{1} a lasso regularization is used. Lassos tend to remove those coefficients
-#' fully from the final model that do not improve the loss function.
-#' [*] For \code{alpha} values between \code{0} and \code{1} a elastic-net regularization is used, which is essentially a combination
-#' of the two.
-#' The optimal lambda parameter can be determined via cross-validation. For this option set \code{"varsel"} in `train()`
-#' to \code{"reg"}.
+#' Limited amount of prior information can be specified for this engine,
+#' specifically via offsets or as [`GLMNETPrior`], which allow to specify priors
+#' as regularization constants.
+#' @details Regularized regressions are effectively GLMs that are fitted with
+#' ridge, lasso or elastic-net regularization. Which of them is chosen is
+#' critical dependent on the alpha value: [*] For \code{alpha} equal to \code{0}
+#' a ridge regularization is used. Ridge regularization has the property that it
+#' doesn't remove variables entirely, but instead sets their coefficients to
+#' \code{0}. [*] For \code{alpha} equal to \code{1} a lasso regularization is
+#' used. Lassos tend to remove those coefficients fully from the final model
+#' that do not improve the loss function. [*] For \code{alpha} values between
+#' \code{0} and \code{1} a elastic-net regularization is used, which is
+#' essentially a combination of the two. The optimal lambda parameter can be
+#' determined via cross-validation. For this option set \code{"varsel"} in
+#' `train()` to \code{"reg"}.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).
-#' @param nlambda A [`numeric`] giving the number of lambda values to be used (Default: \code{100}).
-#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually best to let this parameter be
-#' determined deterministically (Default: \code{NULL}).
-#' @param type The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has
+#'   to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
+#'   and \code{alpha=0} the ridge penalty (Default: \code{0}).
+#' @param nlambda A [`numeric`] giving the number of lambda values to be used
+#'   (Default: \code{100}).
+#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually
+#'   best to let this parameter be determined deterministically (Default:
+#'   \code{NULL}).
+#' @param type The mode used for creating posterior predictions. Either making
+#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other parameters passed on to glmnet.
 #' @references
 #' * Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.

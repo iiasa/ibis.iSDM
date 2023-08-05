@@ -3,25 +3,30 @@ NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
-#' @description The Bayesian regression approach to a sum of complementary trees is to shrink
-#' the said fit of each tree through a regularization prior. BART models provide
-#' non-linear highly flexible estimation and have been shown to compare favourable among machine learning
-#' algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
-#' and shrinkage towards \code{0}.
+#' @description The Bayesian regression approach to a sum of complementary trees
+#'   is to shrink the said fit of each tree through a regularization prior. BART
+#'   models provide non-linear highly flexible estimation and have been shown to
+#'   compare favourable among machine learning algorithms (Dorie et al. 2019).
+#'   Default prior preference is for trees to be small (few terminal nodes) and
+#'   shrinkage towards \code{0}.
 #'
-#' This package requires the \code{"dbarts"} R-package to be installed.
-#' Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
-#' Users are therefore advised to cite if they make heavy use of BART.
-#' @details
-#' Prior distributions can furthermore be set for:
+#'   This package requires the \code{"dbarts"} R-package to be installed. Many
+#'   of the functionalities of this engine have been inspired by the
+#'   \code{"embarcadero"} R-package. Users are therefore advised to cite if they
+#'   make heavy use of BART.
+#' @details Prior distributions can furthermore be set for:
 #' * probability that a tree stops at a node of a given depth (Not yet implemented)
 #' * probability that a given variable is chosen for a splitting rule
 #' * probability of splitting that variable at a particular value (Not yet implemented)
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation (Default: \code{1000}).
-#' @param nburn A [`numeric`] estimate of the burn in samples (Default: \code{250}).
-#' @param chains A number of the number of chains to be used (Default: \code{4}).
-#' @param type The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param iter A [`numeric`] estimate of the number of trees to be used in the
+#'   sum-of-trees formulation (Default: \code{1000}).
+#' @param nburn A [`numeric`] estimate of the burn in samples (Default:
+#'   \code{250}).
+#' @param chains A number of the number of chains to be used (Default:
+#'   \code{4}).
+#' @param type The mode used for creating posterior predictions. Either
+#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other options.
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389

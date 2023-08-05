@@ -7,20 +7,24 @@
 ibis_dependencies(deps = getOption("ibis.dependencies"), update = TRUE)
 }
 \arguments{
-\item{deps}{A \code{\link{vector}} with the names of the packages to be installed (Default: \code{"ibis.dependencies"} in \code{\link{ibis_options}}).}
+\item{deps}{A \code{\link{vector}} with the names of the packages to be installed
+(Default: \code{"ibis.dependencies"} in \code{\link{ibis_options}}).}
 
-\item{update}{A \code{\link{logical}} flag of whether all (installed) packages should also be checked for updates (Default: \code{TRUE}).}
+\item{update}{A \code{\link{logical}} flag of whether all (installed) packages should
+also be checked for updates (Default: \code{TRUE}).}
 }
 \value{
 Nothing. Packages will be installed.
 }
 \description{
-Some of the dependencies (R-Packages) that ibis.iSDM relies on are by intention
-not added to the Description of the file to keep the number of mandatory dependencies small
-and enable the package to run even on systems that might not have all libraries pre-installed.
+Some of the dependencies (R-Packages) that ibis.iSDM relies on
+are by intention not added to the Description of the file to keep the number
+of mandatory dependencies small and enable the package to run even on systems
+that might not have all libraries pre-installed.
 
-This function provides a convenience wrapper to install those missing dependencies as needed. It
-furthermore checks which packages require updating and updates them as needed.
+This function provides a convenience wrapper to install those missing
+dependencies as needed. It furthermore checks which packages require updating
+and updates them as needed.
 }
 \note{
 INLA is handled in a special way as it is not available via cran.

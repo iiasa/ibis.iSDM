@@ -21,20 +21,26 @@ partial(
 \method{partial}{DistributionModel}(mod, ...)
 }
 \arguments{
-\item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model within.}
+\item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model
+within.}
 
-\item{x.var}{A \link{character} indicating the variable for which a partial effect is to be calculated.}
+\item{x.var}{A \link{character} indicating the variable for which a partial effect
+is to be calculated.}
 
-\item{constant}{A \link{numeric} constant to be inserted for all other variables. Default calculates a mean per variable.}
+\item{constant}{A \link{numeric} constant to be inserted for all other variables.
+Default calculates a mean per variable.}
 
-\item{variable_length}{\link{numeric} The interpolation depth (nr. of points) to be used (Default: \code{100}).}
+\item{variable_length}{\link{numeric} The interpolation depth (nr. of points) to
+be used (Default: \code{100}).}
 
-\item{values}{\link{numeric} Directly specified values to compute partial effects for. If this parameter is set to anything other
-than \code{NULL}, the parameter \code{"variable_length"} is ignored (Default: \code{NULL}).}
+\item{values}{\link{numeric} Directly specified values to compute partial effects
+for. If this parameter is set to anything other than \code{NULL}, the
+parameter \code{"variable_length"} is ignored (Default: \code{NULL}).}
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
-\item{type}{A specified type, either \code{'response'} or \code{'predictor'}. Can be missing.}
+\item{type}{A specified type, either \code{'response'} or \code{'predictor'}.
+Can be missing.}
 
 \item{...}{Other engine specific parameters.}
 }
@@ -45,8 +51,9 @@ A \link{data.frame} with the created partial response.
 Create a partial response or effect plot of a trained model.
 }
 \details{
-By default the mean is calculated across all parameters that are not \code{x.var}.
-Instead a \emph{constant} can be set (for instance \code{0}) to be applied to the output.
+By default the mean is calculated across all parameters that are not
+\code{x.var}. Instead a \emph{constant} can be set (for instance \code{0}) to be
+applied to the output.
 }
 \examples{
 \dontrun{

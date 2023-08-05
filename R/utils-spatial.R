@@ -1,14 +1,13 @@
 #' Are SpatRasters comparable?
 #'
-#' This function checks if two `SpatRaster-class` objects
-#' are comparable.
+#' This function checks if two `SpatRaster-class` objects are comparable.
 #'
 #' @param x [`SpatRaster-class`] object.
 #' @param y [`SpatRaster-class`] or [`sf`] object.
 #' @keywords internal, utils
 #' @aliases is_comparable_raster
-#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
-#'   resolution, extent, dimensionality, and coordinate system.
+#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have
+#'   the same resolution, extent, dimensionality, and coordinate system.
 #' @noRd
 is_comparable_raster <- function(x, y) {
   if(inherits(y, "sf")){
@@ -27,10 +26,9 @@ is_comparable_raster <- function(x, y) {
 
 #' Easy conversion function
 #'
-#' @description
-#' As a consequence of switching to [terra] from [raster], there might be situations
-#' where it is necessary to convert between them.
-#' This function does the job.
+#' @description As a consequence of switching to [terra] from [raster], there
+#' might be situations where it is necessary to convert between them. This
+#' function does the job.
 #'
 #' @param input A [`SpatRaster`] object to convert to raster.
 #' @keywords internal, utils
@@ -71,7 +69,8 @@ intersecting_extents <- function(x, y) {
 #' Extract polygon data from intersecting point data
 #' @param poly A [sf] object.
 #' @param points A [`Spatial`] or [sf] object.
-#' @param coords A [vector] pointing to the coordinate columns. (Default: \code{c("x", "y")})
+#' @param coords A [vector] pointing to the coordinate columns. (Default:
+#'   \code{c("x", "y")})
 #' @keywords utils, internal
 #' @return An object with the spatial intersection
 #' @noRd
@@ -137,13 +136,13 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
   return(ov)
 }
 
-#' Help function to create a minimum convex polygon for supplied biodiversity data
+#' Help function to create a minimum convex polygon for supplied biodiversity
+#' data
 #'
-#' @description
-#' This function create a minimum convex polygon based on supplied spatial data.
-#' @note
-#' This is an internal function that makes use of data prepared within the `train`
-#' call.
+#' @description This function create a minimum convex polygon based on supplied
+#' spatial data.
+#' @note This is an internal function that makes use of data prepared within the
+#' `train` call.
 #' @param biod A [`list`] supplied by description.
 #' @returns A [`sf`] object.
 #' @aliases create_mcp
@@ -189,24 +188,30 @@ create_mcp <- function(biod, limits){
 
 #' Create mask based on a zonal layer
 #'
-#' @description
-#' This function has options to create a mask based on provided point data. It is identical in functionality to
-#' the parameter \code{'limit'} in `train()`. Currently it has two available options:
+#' @description This function has options to create a mask based on provided
+#' point data. It is identical in functionality to the parameter \code{'limit'}
+#' in `train()`. Currently it has two available options:
 #'
-#' [*] It is either possible to provide a categorical zonal [`SpatRaster`] layer takes available point data and intersects it with a
-#' zonal layer. The output is a [`SpatRaster`] object with only those classes in which a point occurrence fell.
-#' Typical example for instance is layer of the distribution of Biomes, Ecoregions or Climatic Zones.
+#' [*] It is either possible to provide a categorical zonal [`SpatRaster`] layer
+#' takes available point data and intersects it with a zonal layer. The output
+#' is a [`SpatRaster`] object with only those classes in which a point
+#' occurrence fell. Typical example for instance is layer of the distribution of
+#' Biomes, Ecoregions or Climatic Zones.
 #'
-#' [*] Buffer, in which case a buffer in the units of the geographic projection are created. Buffer width have to
-#' be supplied as non-NULL parameter to \code{'buffer_width'}. The output mask thus allows to limit the prediction
-#' to a spatial buffer of provided extent within any geovalid occurrence record.
+#' [*] Buffer, in which case a buffer in the units of the geographic projection
+#' are created. Buffer width have to be supplied as non-NULL parameter to
+#' \code{'buffer_width'}. The output mask thus allows to limit the prediction to
+#' a spatial buffer of provided extent within any geovalid occurrence record.
 #'
 #' @param df A [`sf`] object with point information.
-#' @param zones A [`sf`] or [`SpatRaster`] object with polygons of the zones to be used for occurrence masking.
-#' @param buffer_width A [`numeric`] value specifying the buffer width. Ignored if a Zones layer is provided.
-#' @param column A [`character`] giving the column in which zonal ids are found. Only used when zones is of
-#' type [`sf`] (Default: \code{"limits"}).
-#' @param template An optional [`SpatRaster`] object on which which the zones should be rasterized (Default: \code{NULL}).
+#' @param zones A [`sf`] or [`SpatRaster`] object with polygons of the zones to
+#'   be used for occurrence masking.
+#' @param buffer_width A [`numeric`] value specifying the buffer width. Ignored
+#'   if a Zones layer is provided.
+#' @param column A [`character`] giving the column in which zonal ids are found.
+#'   Only used when zones is of type [`sf`] (Default: \code{"limits"}).
+#' @param template An optional [`SpatRaster`] object on which which the zones
+#'   should be rasterized (Default: \code{NULL}).
 #' @returns A [`sf`] or [`SpatRaster`] object.
 #' @aliases create_zonaloccurrence_mask
 #' @keywords utils, internal
@@ -282,21 +287,20 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
 
 #' Calculate centroids from a provided SpatRaster
 #'
-#' @description
-#' This helpfer function calculates centroids of a provided SpatRaster.
-#' Different calculations are performed depending on whether the provided object
-#' is binary or continuous format. A [`logical`] patch parameter can be supplied
-#' to support decomposition into individual patches.
+#' @description This helpfer function calculates centroids of a provided
+#' SpatRaster. Different calculations are performed depending on whether the
+#' provided object is binary or continuous format. A [`logical`] patch parameter
+#' can be supplied to support decomposition into individual patches.
 #'
-#' @details
-#' If a \code{patch==TRUE}, then `terra::patches()` is used to generate ids for
-#' individuals patches.
-#' Furthermore, if a supplied \code{obj} is a continious SpatRaster, e.g. has
-#' more than 2 unique values and is not categorical, then a weighted average of the
-#' coordinates is returned by default.
+#' @details If a \code{patch==TRUE}, then `terra::patches()` is used to generate
+#' ids for individuals patches. Furthermore, if a supplied \code{obj} is a
+#' continious SpatRaster, e.g. has more than 2 unique values and is not
+#' categorical, then a weighted average of the coordinates is returned by
+#' default.
 #'
 #' @param obj A [`SpatRaster`] object.
-#' @param path A [`logical`] flag whether centroids should be calculated per patch (Default: \code{FALSE}).
+#' @param path A [`logical`] flag whether centroids should be calculated per
+#'   patch (Default: \code{FALSE}).
 #' @returns A [`sf`] POINT object.
 #' @keywords internal, utils
 #' @noRd
@@ -333,7 +337,7 @@ raster_centroid <- function(obj, patch = FALSE){
     names(df) <- c("x", "y", "values")
 
     # Remove zero and NA values
-    df <- subset(df, complete.cases(df))
+    df <- subset(df, stats::complete.cases(df))
     df <- subset(df, values > 0 )
     assertthat::assert_that(nrow(df)>1)
 
@@ -361,9 +365,10 @@ raster_centroid <- function(obj, patch = FALSE){
 #' @param miny Minimum y value, or the most southern latitude
 #' @param maxx Maximum x value, or the most eastern longitude
 #' @param maxy Maximum y value, or the most northern latitude
-#' @param all A [`vector`] of length 4, with the elements: minx, miny, maxx, maxy
-#' @return An object of class [`character`], a Well Known Text (WKT) string of the form
-#' 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
+#' @param all A [`vector`] of length 4, with the elements: minx, miny, maxx,
+#'   maxy
+#' @return An object of class [`character`], a Well Known Text (WKT) string of
+#'   the form 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
 #' @keywords internal, utils
 #' @noRd
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
@@ -406,7 +411,8 @@ extent_expand <- function(e,f=0.1){
 #'
 #' @param g A [`sf`] object containing some data.
 #' @param name A [`character`] with the new name for the geometry.
-#' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
+#' @source
+#'   https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
 #' @aliases rename_geometry
 #' @keywords internal, utils
 #' @noRd
@@ -424,11 +430,12 @@ rename_geometry <- function(g, name){
 
 #' Convert a data.frame or tibble to simple features
 #'
-#' @description This function tries to guess the coordinate field and converts a data.frame
-#' to a simple feature.
+#' @description This function tries to guess the coordinate field and converts a
+#'   data.frame to a simple feature.
 #'
 #' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
-#' @param geom_name A [`character`] indicating the name of the geometry column (Default: \code{'geometry'}).
+#' @param geom_name A [`character`] indicating the name of the geometry column
+#'   (Default: \code{'geometry'}).
 #' @returns A [`sf`] object.
 #' @aliases guess_sf
 #' @keywords internal, utils
@@ -476,11 +483,10 @@ guess_sf <- function(df, geom_name = 'geometry'){
 
 #' Kernel density estimation of coordinates
 #'
-#' @description
-#' Takes input point coordinates as [`sf`] layer and estimates the Gaussian Kernel density over
-#' a specified bandwidth for constructing a bivariate Gaussian kernel (see also [`MASS::kde2d()`]).
-#' @details
-#' Requires the `MASS` R-package to be installed!
+#' @description Takes input point coordinates as [`sf`] layer and estimates the
+#' Gaussian Kernel density over a specified bandwidth for constructing a
+#' bivariate Gaussian kernel (see also [`MASS::kde2d()`]).
+#' @details Requires the `MASS` R-package to be installed!
 #' @param points A \code{POINTS} [`sf`] object.
 #' @param background A template [`SpatRaster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
@@ -526,16 +532,17 @@ st_kde <- function(points, background, bandwidth = 3){
 
 #' Add proximity weights to points
 #'
-#' @description
-#' Function to define proximity weights for a given dataset.
+#' @description Function to define proximity weights for a given dataset.
 #'
 #' @param poi	[`sf`] object with points.
-#' @param maxdist [`numeric`] of Maximum distance beyond which a two neighbouring points are
-#' assumed to have no effect on one another for calculation of weights. If not set, use quarter
-#' distance to centroid from a minimum convex polygon.
+#' @param maxdist [`numeric`] of Maximum distance beyond which a two
+#'   neighbouring points are assumed to have no effect on one another for
+#'   calculation of weights. If not set, use quarter distance to centroid from a
+#'   minimum convex polygon.
 #' @param alpha Scaling parameter (Default: \code{1}).
 #'
-#' @concept Inspired from https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
+#' @concept Inspired from
+#'   https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
 #' @keywords utils, internal
 #' @return A numeric vector of weights.
 #' @noRd
@@ -596,12 +603,12 @@ sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
 
 #' Polygon to points
 #'
-#' @description
-#' Converts a polygon [`sf`] layer to a point layer by rasterizing it
-#' over a provided [SpatRaster].
+#' @description Converts a polygon [`sf`] layer to a point layer by rasterizing
+#' it over a provided [SpatRaster].
 #' @param poly A \code{POLYGON} or \code{MULTIPOLYGON} [`sf`] object.
 #' @param template A template [`SpatRaster`] object.
-#' @param field_occurrence A [`character`] specifying the occurrence field. Should contain information on the type.
+#' @param field_occurrence A [`character`] specifying the occurrence field.
+#'   Should contain information on the type.
 #' @keywords utils, internal
 #' @noRd
 polygon_to_points <- function(poly, template, field_occurrence ) {
@@ -629,11 +636,15 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 
 #' Calculate the dimensions from a provided extent object
 #'
-#' @description Calculate the dimensions of an extent
-#' (either an extent object or four-element vector in the right order), either in projected or spherical space.
-#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`], [`Spatial*`] or [`sf`] object.
-#' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
-#' @param output_unit [`character`] determining the units. Allowed is 'm' and 'km' (Default: \code{'km'}).
+#' @description Calculate the dimensions of an extent (either an extent object
+#'   or four-element vector in the right order), either in projected or
+#'   spherical space.
+#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a
+#'   [`SpatRaster`], [`Spatial*`] or [`sf`] object.
+#' @param lonlat A [`logical`] indication whether the extent is WGS 84
+#'   projection (Default: \code{TRUE}).
+#' @param output_unit [`character`] determining the units. Allowed is 'm' and
+#'   'km' (Default: \code{'km'}).
 #' @aliases extent_dimensions
 #' @keywords utils, internal
 #' @noRd
@@ -664,8 +675,8 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
     scaling <- (6371 ^ 2 * pi) / 180
     surface_area <- width * height * scaling
 
-    # Ratio between GCD height and width
-    # Get ratio between height and width in great circle distance, given an extent vector in lat/long
+    # Ratio between GCD height and width Get ratio between height and width in
+    # great circle distance, given an extent vector in lat/long
     lonLatRatio <- function(extent) {
       # lower left point
       p1 <- matrix(extent[c(1, 3)], nrow = 1)
@@ -691,22 +702,26 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
   return(dim)
 }
 
-#' Align a [`SpatRaster-class`] object to another by harmonizing geometry and extend.
+#' Align a [`SpatRaster-class`] object to another by harmonizing geometry and
+#' extend.
 #'
-#' If the data is not in the same projection as the template, the alignment
-#' will be computed by reprojection only. If the data has already the same
+#' If the data is not in the same projection as the template, the alignment will
+#' be computed by reprojection only. If the data has already the same
 #' projection, the data set will be cropped and aggregated prior to resampling
 #' in order to reduce computation time.
 #'
 #' @param data [`SpatRaster-class`] object to be resampled.
-#' @param template [`SpatRaster-class`] or [`sf`] object from which geometry can be extracted.
-#' @param method method for resampling (Options: \code{"near"} or \code{"bilinear"}).
+#' @param template [`SpatRaster-class`] or [`sf`] object from which geometry can
+#'   be extracted.
+#' @param method method for resampling (Options: \code{"near"} or
+#'   \code{"bilinear"}).
 #' @param func function for resampling (Default: [mean]).
-#' @param cl [`logical`] value if multicore computation should be used (Default: \code{TRUE}).
+#' @param cl [`logical`] value if multicore computation should be used (Default:
+#'   \code{TRUE}).
 #' @keywords utils
-#' @details
-#' Nearest Neighbour resampling (near) is recommended for discrete and bilinear
-#' resampling recommended for continuous data. See also help from [terra::resample] for other options.
+#' @details Nearest Neighbour resampling (near) is recommended for discrete and
+#' bilinear resampling recommended for continuous data. See also help from
+#' [terra::resample] for other options.
 #' @return New [`SpatRaster`] object aligned to the supplied template layer.
 #' @aliases alignRasters
 #' @examples
@@ -723,11 +738,14 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
     is.character(method),
     is.logical(cl)
   )
-  method <- match.arg(method, c("bilinear", "ngb", "near", "cubic", "lanczos", "sum", "max", "average", "mode"), several.ok = FALSE)
+  method <- match.arg(method, c("bilinear", "ngb", "near", "cubic",
+                                "lanczos", "sum", "max",
+                                "average", "mode"), several.ok = FALSE)
   if(method == "ngb") method <- "near"
   if(sf::st_crs(data) != sf::st_crs(template)){
     # Project Raster layer
-    data <- terra::project(data, terra::crs(template), method = method, threads = getOption("ibis.nthread"))
+    data <- terra::project(data, terra::crs(template),
+                           method = method, threads = getOption("ibis.nthread"))
   }
 
   # Crop raster to template
@@ -737,7 +755,9 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
   if(is.Raster(template)){
     if(terra::ncol(data) / terra::ncol(template) >= 2){
       factor <- floor(data@ncols/template@ncols)
-      data <- terra::aggregate(data, fact = factor, fun = func, cores = ifelse(cl, getOption("ibis.nthread"), 1))
+      data <- terra::aggregate(data, fact = factor,
+                               fun = func,
+                               cores = ifelse(cl, getOption("ibis.nthread"), 1))
     }
   } else {
     # Resample with target method
@@ -749,9 +769,9 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 
 #' @title Create an empty \code{SpatRaster} based on a template
 #'
-#' @description
-#' This function creates an empty copy of a provided \code{SpatRaster} object. It
-#' is primarily used in the package to create the outputs for the predictions.
+#' @description This function creates an empty copy of a provided
+#' \code{SpatRaster} object. It is primarily used in the package to create the
+#' outputs for the predictions.
 #' @param x A \code{SpatRaster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{terra}}
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
@@ -775,19 +795,25 @@ emptyraster <- function(x, ...) { # add name, filename,
 
 #' Function to extract nearest neighbour predictor values of provided points
 #'
-#' @description
-#' This function performs nearest neighbour matching between biodiversity observations and independent
-#' predictors, and operates directly on provided data.frames.
+#' @description This function performs nearest neighbour matching between
+#' biodiversity observations and independent predictors, and operates directly
+#' on provided data.frames.
 #' **Note that despite being parallized this function can be rather slow for large data volumes of data!**
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors.
-#' @param longlat A [`logical`] variable indicating whether the projection is long-lat.
-#' @param field_space A [`vector`] highlight the columns from which coordinates are to be extracted (Default: \code{c('x','y')}).
-#' @param cheap A [`logical`] variable whether the dataset is considered to be large and faster computation could help.
+#' @param longlat A [`logical`] variable indicating whether the projection is
+#'   long-lat.
+#' @param field_space A [`vector`] highlight the columns from which coordinates
+#'   are to be extracted (Default: \code{c('x','y')}).
+#' @param cheap A [`logical`] variable whether the dataset is considered to be
+#'   large and faster computation could help.
 #' @param ... other options.
-#' @return A [`data.frame`] with the extracted covariate data from each provided data point.
-#' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist}).
-#' @note If multiple values are of equal distance during the nearest neighbour check, then the results is by default averaged.
+#' @return A [`data.frame`] with the extracted covariate data from each provided
+#'   data point.
+#' @details Nearest neighbour matching is done via the [geodist] R-package
+#'   (\code{geodist::geodist}).
+#' @note If multiple values are of equal distance during the nearest neighbour
+#'   check, then the results is by default averaged.
 #' @aliases get_ngbvalue
 #' @examples
 #' \dontrun{
@@ -884,17 +910,19 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 
 #' Function to extract directly the raster value of provided points
 #'
-#' @description
-#' This function simply extracts the values from a provided [`SpatRaster`], [`SpatRasterDataset`] or
-#' [`SpatRasterCollection`] object. For points where or NA values were extracted
-#' a small buffer is applied to try and obtain the remaining values.
-#' @details
-#' It is essentially a wrapper for [`terra::extract`].
+#' @description This function simply extracts the values from a provided
+#' [`SpatRaster`], [`SpatRasterDataset`] or [`SpatRasterCollection`] object. For
+#' points where or NA values were extracted a small buffer is applied to try and
+#' obtain the remaining values.
+#' @details It is essentially a wrapper for [`terra::extract`].
 #' @param coords A [`data.frame`], [`matrix`] or [`sf`] object.
 #' @param env A [`SpatRaster`] object with the provided predictors.
-#' @param ngb_fill [`logical`] on whether cells should be interpolated from neighbouring values.
-#' @param rm.na [`logical`] parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.
-#' @return A [`data.frame`] with the extracted covariate data from each provided data point.
+#' @param ngb_fill [`logical`] on whether cells should be interpolated from
+#'   neighbouring values.
+#' @param rm.na [`logical`] parameter which - if set - removes all rows with a
+#'   missing data point (\code{NA}) from the result.
+#' @return A [`data.frame`] with the extracted covariate data from each provided
+#'   data point.
 #' @keywords utils
 #' @aliases get_rastervalue
 #' @examples
@@ -958,7 +986,8 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
 #' @param post A data.frame
 #' @param background A [`SpatRaster-class`] object for the background raster.
 #' @keywords internal, utils
-#' @return A [`SpatRaster-class`] object with number of columns equal to \code{ncol(post)}.
+#' @return A [`SpatRaster-class`] object with number of columns equal to
+#'   \code{ncol(post)}.
 #' @noRd
 fill_rasters <- function(post, background){
   assertthat::assert_that(
@@ -1004,10 +1033,13 @@ fill_rasters <- function(post, background){
 
 #' Create a polynomial transformation from coordinates
 #'
-#' @description This function transforms the coordinates of a supplied file through a polynomial transform.
-#' By default it applies weights and a QR decomposition for numerical stability.
-#' @param coords A [`data.frame`], [`matrix`] or [`sf`] object with coordinates (2 columns named x-y).
-#' @param degree The number of degrees used for polynominal transformation (Default: \code{2}).
+#' @description This function transforms the coordinates of a supplied file
+#'   through a polynomial transform. By default it applies weights and a QR
+#'   decomposition for numerical stability.
+#' @param coords A [`data.frame`], [`matrix`] or [`sf`] object with coordinates
+#'   (2 columns named x-y).
+#' @param degree The number of degrees used for polynominal transformation
+#'   (Default: \code{2}).
 #' @param weights Set by default to the inverse of the number of coordinates.
 #' @returns A data.frame with transformed coordinates.
 #' @keywords utils
@@ -1078,11 +1110,12 @@ clean_rasterfile <- function(x, verbose = FALSE)
 
 #' Split raster factor levels to stack
 #'
-#' @description Takes a single raster that is a [`factor`] and creates
-#' a new [`SpatRaster`] that contains the individual levels.
+#' @description Takes a single raster that is a [`factor`] and creates a new
+#'   [`SpatRaster`] that contains the individual levels.
 #'
-#' @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a [`SpatRaster`] object
-#' can be supplied in which only factor variables are 'exploded'.
+#' @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a
+#'   [`SpatRaster`] object can be supplied in which only factor variables are
+#'   'exploded'.
 #' @param name An optional [`character`] name for the [`SpatRaster`].
 #' @aliases explode_factorized_raster
 #' @returns A [`SpatRaster`] object.
@@ -1168,42 +1201,55 @@ explode_factorized_raster <- function(ras, name = NULL){
 
 #' Functionality for geographic and environmental thinning
 #'
-#' @description
-#' For most species distribution modelling approaches it is assumed that occurrence records are unbiased, which
-#' is rarely the case. While model-based control can alleviate some of the effects of sampling bias, it can often be
-#' desirable to account for some sampling biases through spatial thinning (Aiello‐Lammens et al. 2015). This
-#' is an approach based on the assumption that oversampled grid cells contribute little more than bias, rather than
-#' strengthing any environmental responses.
-#' This function provides some methods to apply spatial thinning approaches. Note that this effectively removes
-#' data prior to any estimation and its use should be considered with care (see also Steen et al. 2021).
+#' @description For most species distribution modelling approaches it is assumed
+#'   that occurrence records are unbiased, which is rarely the case. While
+#'   model-based control can alleviate some of the effects of sampling bias, it
+#'   can often be desirable to account for some sampling biases through spatial
+#'   thinning (Aiello‐Lammens et al. 2015). This is an approach based on the
+#'   assumption that oversampled grid cells contribute little more than bias,
+#'   rather than strengthing any environmental responses. This function provides
+#'   some methods to apply spatial thinning approaches. Note that this
+#'   effectively removes data prior to any estimation and its use should be
+#'   considered with care (see also Steen et al. 2021).
 #'
-#' @details
-#' Currently implemented thinning methods:
+#' @details Currently implemented thinning methods:
 #'
 #'  * \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
-#'  Does not account for any spatial or environmental distance between observations.
+#'   Does not account for any spatial or environmental distance between
+#'   observations.
 #'  * \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
-#'  Points are preferentially thinned from grid cells which are in the 25% most biased (larger values assumed greater bias)
-#'  and have high point density. Thins the observations up to \code{"minpoints"}.
+#'   Points are preferentially thinned from grid cells which are in the 25% most
+#'   biased (larger values assumed greater bias) and have high point density.
+#'   Thins the observations up to \code{"minpoints"}.
 #'  * \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
-#'  each occupied zone. Careful: If the zones are relatively wide this can remove quite a few observations.
+#'   each occupied zone. Careful: If the zones are relatively wide this can
+#'   remove quite a few observations.
 #'  * \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
-#'  that the full environmental niche has been comprehensively sampled and is covered by the provided covariates \code{env}.
-#'  We then obtain an number equal to (\code{"minpoints"}) of observations for each cluster.
+#'   that the full environmental niche has been comprehensively sampled and is
+#'   covered by the provided covariates \code{env}. We then obtain an number
+#'   equal to (\code{"minpoints"}) of observations for each cluster.
 #'  * \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
-#'  iteratively until the minimum distance between points is crossed.  The \code{"mindistance"} parameter has to
-#'  be set for this function to work.
+#'   iteratively until the minimum distance between points is crossed.  The
+#'   \code{"mindistance"} parameter has to be set for this function to work.
 #'
-#' @param df A [`sf`] or [`data.frame`] object with observed occurrence points. All methods threat presence-only
-#' and presence-absence occurrence points equally.
-#' @param background A [`SpatRaster`] object with the background of the study region. Use for assessing point density.
-#' @param env A [`SpatRaster`] object with environmental covariates. Needed when method is set to \code{"environmental"}
-#' or \code{"bias"} (Default: \code{NULL}).
-#' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
-#' @param minpoints A [`numeric`] giving the number of data points at minimum to take (Default: \code{10}).
-#' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations (Default: \code{NULL}).
-#' @param zones A [`SpatRaster`] to be supplied when option \code{"method"} is chosen (Default: \code{NULL}).
-#' @param verbose [`logical`] of whether to print some statistics about the thinning outcome (Default: \code{TRUE}).
+#' @param df A [`sf`] or [`data.frame`] object with observed occurrence points.
+#'   All methods threat presence-only and presence-absence occurrence points
+#'   equally.
+#' @param background A [`SpatRaster`] object with the background of the study
+#'   region. Use for assessing point density.
+#' @param env A [`SpatRaster`] object with environmental covariates. Needed when
+#'   method is set to \code{"environmental"} or \code{"bias"} (Default:
+#'   \code{NULL}).
+#' @param method A [`character`] of the method to be applied (Default:
+#'   \code{"random"}).
+#' @param minpoints A [`numeric`] giving the number of data points at minimum to
+#'   take (Default: \code{10}).
+#' @param mindistance A [`numeric`] for the minimum distance of neighbouring
+#'   observations (Default: \code{NULL}).
+#' @param zones A [`SpatRaster`] to be supplied when option \code{"method"} is
+#'   chosen (Default: \code{NULL}).
+#' @param verbose [`logical`] of whether to print some statistics about the
+#'   thinning outcome (Default: \code{TRUE}).
 #' @examples
 #' \dontrun{
 #'  # Thin a certain number of observations
@@ -1258,8 +1304,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
 
   # -- #
   if(method == "random"){
-    # For each unique grid cell id, get the minimum value up to a maximum of the points
-    # by sampling at random from the occupied grid cells
+    # For each unique grid cell id, get the minimum value up to a maximum of the
+    # points by sampling at random from the occupied grid cells
 
     # Output vector
     sel <- vector()
@@ -1276,11 +1322,12 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     # Points to take
     sel <- append(sel, ex$id[which(ex$N <= min(totake))] )
 
-    # For those where we have more than the minimum, take at random the upper limits of observations
+    # For those where we have more than the minimum, take at random the upper
+    # limits of observations
     ex$oversampled <- ifelse(ex$N >= totake["upper"], 1, 0)
     if(dplyr::n_distinct(ex$oversampled) > 1){
       # If there any oversampled
-      # Now sample at random up to the maximum amount. Got tired of doing this outside tidyverse
+      # Now sample at random up to the maximum amount.
       o <- ex  |> dplyr::filter(oversampled == 1) |>
         dplyr::group_by(cid) |>
         dplyr::slice_sample(n = min(totake))

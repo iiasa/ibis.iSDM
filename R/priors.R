@@ -3,16 +3,16 @@ NULL
 
 #' Creates a new PriorList object
 #'
-#' @description
-#' A [`PriorList`] object is essentially a list that contains individual
-#' [`Prior-class`] objects. In order to use priors for any of the engines,
-#' the respective [`Prior-class`] has to be identified (e.g. [`INLAPrior`]) and embedded
-#' in a [`PriorList`] object.
-#' Afterwards these objects can then be added to a [distribution] object with the
-#' [add_priors] function.
+#' @description A [`PriorList`] object is essentially a list that contains
+#' individual [`Prior-class`] objects. In order to use priors for any of the
+#' engines, the respective [`Prior-class`] has to be identified (e.g.
+#' [`INLAPrior`]) and embedded in a [`PriorList`] object. Afterwards these
+#' objects can then be added to a [distribution] object with the [add_priors]
+#' function.
 #'
 #' @param x A [`Prior-class`] object added to the list.
-#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the
+#'   list.
 #' @returns A [`PriorList`] object.
 #' @examples
 #' \dontrun{
@@ -109,15 +109,15 @@ methods::setMethod(
 
 #' Creates a new PriorList object
 #'
-#' @description
-#' A [`PriorList`] object is essentially a list that contains individual
-#' [`Prior-class`] objects. In order to use priors for any of the engines,
-#' the respective [`Prior-class`] has to be identified (e.g. [`INLAPrior`]) and embedded
-#' in a [`PriorList`] object.
-#' Afterwards these objects can then be added to a [distribution] object with the
-#' [add_priors] function.
+#' @description A [`PriorList`] object is essentially a list that contains
+#' individual [`Prior-class`] objects. In order to use priors for any of the
+#' engines, the respective [`Prior-class`] has to be identified (e.g.
+#' [`INLAPrior`]) and embedded in a [`PriorList`] object. Afterwards these
+#' objects can then be added to a [distribution] object with the [add_priors]
+#' function.
 #'
-#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the
+#'   list.
 #' @returns A [`PriorList`] object.
 #' @examples
 #' \dontrun{

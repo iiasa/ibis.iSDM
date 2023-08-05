@@ -3,12 +3,11 @@ NULL
 
 #' Adds a log file to distribution object
 #'
-#' @description
-#' This function allows to specify a file as [Log-class] file, which is used to save all
-#' console outputs, prints and messages.
+#' @description This function allows to specify a file as [Log-class] file,
+#' which is used to save all console outputs, prints and messages.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param filename A [`character`] object.
-#' The destination must be writeable and filename ends with \code{'txt'}.
+#' @param filename A [`character`] object. The destination must be writeable and
+#'   filename ends with \code{'txt'}.
 #' @aliases add_log
 #' @returns Adds a log file to a [`distribution`] object.
 #' @examples

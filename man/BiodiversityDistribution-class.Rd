@@ -6,11 +6,12 @@
 \title{Biodiversity Distribution master class}
 \description{
 Base \code{\link{proto}} class for any biodiversity distribution objects.
-Serves as container that supplies data and functions to
-other \code{\link{proto}} classes.
+Serves as container that supplies data and functions to other \code{\link{proto}}
+classes.
 }
 \details{
-Run \code{\link[=names]{names()}} on a \code{\link{distribution}} object to show all available functions.
+Run \code{\link[=names]{names()}} on a \code{\link{distribution}} object to show all available
+functions.
 }
 \seealso{
 Other bdproto: 

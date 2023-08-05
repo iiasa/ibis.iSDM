@@ -13,35 +13,39 @@ add_offset(x, layer, add = TRUE)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
-this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
+this parameter to \code{FALSE} replaces the current offsets with the new
+one (Default: \code{TRUE}).}
 }
 \value{
 Adds an offset to a \code{\link{distribution}} object.
 }
 \description{
-Including offsets is another option to integrate spatial prior information
-in linear and additive regression models. Offsets shift the intercept of
-the regression fit by a certain amount. Although only one offset can be added
-to a regression model, it is possible to combine several spatial-explicit estimates into
-one offset by calculating the sum of all spatial-explicit layers.
+Including offsets is another option to integrate spatial prior
+information in linear and additive regression models. Offsets shift the
+intercept of the regression fit by a certain amount. Although only one offset
+can be added to a regression model, it is possible to combine several
+spatial-explicit estimates into one offset by calculating the sum of all
+spatial-explicit layers.
 }
 \details{
-This function allows to set any specific offset to a regression model. The offset
-has to be provided as spatial \code{\link{SpatRaster}} object. This function simply adds the layer to
-a \code{\link[=distribution]{distribution()}} object.
+This function allows to set any specific offset to a regression
+model. The offset has to be provided as spatial \code{\link{SpatRaster}} object. This
+function simply adds the layer to a \code{\link[=distribution]{distribution()}} object.
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 
 If the layer is range and requires additional formatting, consider using the
-function \code{\link[=add_offset_range]{add_offset_range()}} which has additional functionalities such such distance
-transformations.
+function \code{\link[=add_offset_range]{add_offset_range()}} which has additional functionalities such
+such distance transformations.
 }
 \note{
-Since offsets only make sense for linear regressions (and not for instance
-regression tree based methods such as \link{engine_bart}), they do not work for all engines.
-Offsets specified for non-supported engines are ignored during the estimation
+Since offsets only make sense for linear regressions (and not for
+instance regression tree based methods such as \link{engine_bart}), they do not
+work for all engines. Offsets specified for non-supported engines are ignored
+during the estimation
 }
 \examples{
 \dontrun{

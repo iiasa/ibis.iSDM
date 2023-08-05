@@ -9,25 +9,30 @@ BARTPrior(variable, hyper = 0.75, ...)
 \S4method{BARTPrior}{character,numeric}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
-\item{hyper}{A \code{\link{numeric}} object with a number being \code{>0} and equal to \code{1}. Defaults to \code{0.75}.}
+\item{hyper}{A \code{\link{numeric}} object with a number being \code{>0} and equal to
+\code{1}. Defaults to \code{0.75}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Function to include prior information as split probability for the
-Bayesian additive regression tree model added via \link{engine_bart}.
+Function to include prior information as split probability for
+the Bayesian additive regression tree model added via \link{engine_bart}.
 
-Priors for \link{engine_bart} have to be specified as transition probabilities of variables which
-are internally used to generate splits in the regression tree. Specifying a prior can thus help
-to 'enforce' a split with a given variable.
-These can be numeric and coded as values between \code{0} and \code{1}.
+Priors for \link{engine_bart} have to be specified as transition probabilities of
+variables which are internally used to generate splits in the regression
+tree. Specifying a prior can thus help to 'enforce' a split with a given
+variable. These can be numeric and coded as values between \code{0} and
+\code{1}.
 }
 \note{
-Even if a given variable is included as split in the regression or classification tree, this does
-not necessarily mean that the prediction changes if the value is non-informative (as the split can occur
-early on). It does however affect any variable importance estimates calculated from the model.
+Even if a given variable is included as split in the regression or
+classification tree, this does not necessarily mean that the prediction
+changes if the value is non-informative (as the split can occur early on). It
+does however affect any variable importance estimates calculated from the
+model.
 }
 \references{
 \itemize{

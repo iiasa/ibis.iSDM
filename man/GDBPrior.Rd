@@ -9,24 +9,30 @@ GDBPrior(variable, hyper = "increasing", ...)
 \S4method{GDBPrior}{character,character}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
+\item{variable}{A \code{\link{character}} matched against existing predictors
+variables.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available options are \code{'increasing'},
-\code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain.
+Available options are \code{'increasing'}, \code{'decreasing'},
+\code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
+\code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Monotonic constrains for gradient descent boosting models do not work in the same way as other priors
-where a specific coefficient or magnitude of importance is specified.
-Rather monotonic constraints \strong{enforce} a specific directionality of regression coefficients so that
-for instance a coefficient has to be positive or negative.
+Monotonic constrains for gradient descent boosting models do not
+work in the same way as other priors where a specific coefficient or
+magnitude of importance is specified. Rather monotonic constraints
+\strong{enforce} a specific directionality of regression coefficients so that for
+instance a coefficient has to be positive or negative.
 
-\strong{Important:} Specifying a monotonic constrain for the \link{engine_gdb} does not guarantee that the variable is retained in the
-model as it can still be regularized out.
+\strong{Important:} Specifying a monotonic constrain for the \link{engine_gdb} does not
+guarantee that the variable is retained in the model as it can still be
+regularized out.
 }
 \note{
-Similar priors can also be defined for the \code{\link{engine_xgboost}} via \code{\link[=XGBPrior]{XGBPrior()}}.
+Similar priors can also be defined for the \code{\link{engine_xgboost}} via
+\code{\link[=XGBPrior]{XGBPrior()}}.
 }
 \references{
 \itemize{

@@ -8,13 +8,16 @@
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
 
-![CRAN Status](https://www.r-pkg.org/badges/version/ibis.iSDM)
 [![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![r-cmd-check](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iiasa/ibis.iSDM/actions/workflows/R-CMD-check.yaml)
 [![License: CC BY
 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Codecov
 Status](https://codecov.io/gh/iiasa/ibis.iSDM/branch/master/graph/badge.svg)](https://app.codecov.io/gh/iiasa/ibis.iSDM?branch=master)
+![Published
+in](https://img.shields.io/badge/Ecological_Informatics-green?style=plastic&label=Published%20in&link=https%3A%2F%2Fdoi.org%2F10.1016%2Fj.ecoinf.2023.102127)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/ibis.iSDM)](https://CRAN.R-project.org/package=ibis.iSDM)
 <!-- badges: end -->
 
 The **ibis.iSDM** package provides a series of convenience functions to

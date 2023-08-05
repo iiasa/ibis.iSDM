@@ -11,17 +11,21 @@ get_rastervalue(coords, env, ngb_fill = TRUE, rm.na = FALSE)
 
 \item{env}{A \code{\link{SpatRaster}} object with the provided predictors.}
 
-\item{ngb_fill}{\code{\link{logical}} on whether cells should be interpolated from neighbouring values.}
+\item{ngb_fill}{\code{\link{logical}} on whether cells should be interpolated from
+neighbouring values.}
 
-\item{rm.na}{\code{\link{logical}} parameter which - if set - removes all rows with a missing data point (\code{NA}) from the result.}
+\item{rm.na}{\code{\link{logical}} parameter which - if set - removes all rows with a
+missing data point (\code{NA}) from the result.}
 }
 \value{
-A \code{\link{data.frame}} with the extracted covariate data from each provided data point.
+A \code{\link{data.frame}} with the extracted covariate data from each provided
+data point.
 }
 \description{
-This function simply extracts the values from a provided \code{\link{SpatRaster}}, \code{\link{SpatRasterDataset}} or
-\code{\link{SpatRasterCollection}} object. For points where or NA values were extracted
-a small buffer is applied to try and obtain the remaining values.
+This function simply extracts the values from a provided
+\code{\link{SpatRaster}}, \code{\link{SpatRasterDataset}} or \code{\link{SpatRasterCollection}} object. For
+points where or NA values were extracted a small buffer is applied to try and
+obtain the remaining values.
 }
 \details{
 It is essentially a wrapper for \code{\link[terra:extract]{terra::extract}}.
