@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,24 +89,29 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mod</dt>
-<dd><p>A trained <code>DistributionModel</code> object with <code>fit_best</code> model within.</p></dd>
+<dd><p>A trained <code>DistributionModel</code> object with <code>fit_best</code> model
+within.</p></dd>
 
 
 <dt>x.var</dt>
-<dd><p>A <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> indicating the variable for which a partial effect is to be calculated.</p></dd>
+<dd><p>A <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> indicating the variable for which a partial effect
+is to be calculated.</p></dd>
 
 
 <dt>constant</dt>
-<dd><p>A <a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> constant to be inserted for all other variables. Default calculates a mean per variable.</p></dd>
+<dd><p>A <a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> constant to be inserted for all other variables.
+Default calculates a mean per variable.</p></dd>
 
 
 <dt>variable_length</dt>
-<dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> The interpolation depth (nr. of points) to be used (Default: <code>100</code>).</p></dd>
+<dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> The interpolation depth (nr. of points) to
+be used (Default: <code>100</code>).</p></dd>
 
 
 <dt>values</dt>
-<dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> Directly specified values to compute partial effects for. If this parameter is set to anything other
-than <code>NULL</code>, the parameter <code>"variable_length"</code> is ignored (Default: <code>NULL</code>).</p></dd>
+<dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> Directly specified values to compute partial effects
+for. If this parameter is set to anything other than <code>NULL</code>, the
+parameter <code>"variable_length"</code> is ignored (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>plot</dt>
@@ -114,7 +119,8 @@ than <code>NULL</code>, the parameter <code>"variable_length"</code> is ignored 
 
 
 <dt>type</dt>
-<dd><p>A specified type, either <code>'response'</code> or <code>'predictor'</code>. Can be missing.</p></dd>
+<dd><p>A specified type, either <code>'response'</code> or <code>'predictor'</code>.
+Can be missing.</p></dd>
 
 
 <dt>...</dt>
@@ -129,8 +135,9 @@ than <code>NULL</code>, the parameter <code>"variable_length"</code> is ignored 
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default the mean is calculated across all parameters that are not <code>x.var</code>.
-Instead a <em>constant</em> can be set (for instance <code>0</code>) to be applied to the output.</p>
+    <p>By default the mean is calculated across all parameters that are not
+<code>x.var</code>. Instead a <em>constant</em> can be set (for instance <code>0</code>) to be
+applied to the output.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

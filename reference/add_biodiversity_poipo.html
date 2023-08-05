@@ -12,7 +12,7 @@ distribution object."><meta name="twitter:card" content="summary"><meta name="tw
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,7 +97,8 @@ distribution object.</p>
 
 
 <dt>poipo</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code>sf</code> object of presence-only point occurrences.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code>sf</code> object of presence-only point
+occurrences.</p></dd>
 
 
 <dt>name</dt>
@@ -105,43 +106,53 @@ distribution object.</p>
 
 
 <dt>field_occurrence</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of biodiversity point records.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of
+biodiversity point records.</p></dd>
 
 
 <dt>formula</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default is to use all covariates (if specified).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default is
+to use all covariates (if specified).</p></dd>
 
 
 <dt>family</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default: <code>'Poisson'</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default:
+<code>'Poisson'</code>).</p></dd>
 
 
 <dt>link</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default:
+<code>NULL</code>).</p></dd>
 
 
 <dt>weight</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value acting as a multiplier with regards to any weights used in the modelling.
-Larger weights indicate higher weighting relative to any other datasets. By default set to <code>1</code> if only
-one dataset is added. A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> is also supported but must be of the same length as <code>"poipo"</code>.
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value acting as a multiplier with regards to any
+weights used in the modelling. Larger weights indicate higher weighting
+relative to any other datasets. By default set to <code>1</code> if only one
+dataset is added. A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> is also supported but must be of the same
+length as <code>"poipo"</code>.
 <strong>Note: Weights are reformated to the inverse for models with area offsets (e.g. 5 is converted to 1/5).</strong></p></dd>
 
 
 <dt>separate_intercept</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value stating whether a separate intercept is to be added in
-shared likelihood models for engines <a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a> and <a href="engine_stan.html">engine_stan</a>. Otherwise ignored.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value stating whether a separate
+intercept is to be added in shared likelihood models for engines
+<a href="engine_inla.html">engine_inla</a>, <a href="engine_inlabru.html">engine_inlabru</a> and <a href="engine_stan.html">engine_stan</a>. Otherwise ignored.</p></dd>
 
 
 <dt>docheck</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on whether additional checks should be performed (e.g. intersection tests) (Default: <code>TRUE</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on whether additional checks should be performed
+(e.g. intersection tests) (Default: <code>TRUE</code>).</p></dd>
 
 
 <dt>pseudoabsence_settings</dt>
-<dd><p>Either <code>NULL</code> or a <code><a href="pseudoabs_settings.html">pseudoabs_settings()</a></code> created settings object.</p></dd>
+<dd><p>Either <code>NULL</code> or a
+<code><a href="pseudoabs_settings.html">pseudoabs_settings()</a></code> created settings object.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Other parameters passed down to the object. Normally not used unless described in details.</p></dd>
+<dd><p>Other parameters passed down to the object. Normally not used
+unless described in details.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -152,11 +163,13 @@ shared likelihood models for engines <a href="engine_inla.html">engine_inla</a>,
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function allows to add presence-only biodiversity records to a <a href="distribution.html">distribution</a> <span class="pkg">ibis.iSDM</span>
-Presence-only data are usually modelled through an inferential model (see Guisan and Zimmerman, 2000) that
-relate their occurrence in relation to environmental covariates to a selected sample of
-'background' points. The most common approach for estimation and the one supported by this type of dataset
-are poisson-process models (PPM) in which presence-only points are fitted through a down-weighted Poisson
+    <p>This function allows to add presence-only biodiversity records to a
+<a href="distribution.html">distribution</a> <span class="pkg">ibis.iSDM</span> Presence-only data are usually modelled
+through an inferential model (see Guisan and Zimmerman, 2000) that relate
+their occurrence in relation to environmental covariates to a selected
+sample of 'background' points. The most common approach for estimation and
+the one supported by this type of dataset are poisson-process models (PPM)
+in which presence-only points are fitted through a down-weighted Poisson
 regression. See Renner et al. 2015 for an overview.</p>
     </div>
     <div class="section level2">
@@ -167,7 +180,8 @@ regression. See Renner et al. 2015 for an overview.</p>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>See other functions for adding biodiversity data, i.e. <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a></code></p>
+    <div class="dont-index"><p>See other functions for adding biodiversity data, i.e.
+<code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a></code></p>
 <p>Other add_biodiversity: 
 <code><a href="add_biodiversity_poipa.html">add_biodiversity_poipa</a>()</code>,
 <code><a href="add_biodiversity_polpa.html">add_biodiversity_polpa</a>()</code>,
