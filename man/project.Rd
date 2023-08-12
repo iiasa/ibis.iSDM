@@ -49,14 +49,17 @@ the scenario object are applied during the projection.
 \details{
 In the background the function \code{x$project()} for the respective
 model object is called, where \code{x} is fitted model object. For specifics
-on the constrains, see the relevant \code{constrain} functions, respectively:
+on the constraints, see the relevant \code{constrain} functions, respectively:
 \itemize{
 \item \code{\link[=add_constraint]{add_constraint()}} for generic wrapper to add any of the available constrains.
-\item \code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}} for specifying dispersal constrain on the temporal projections at each step.
+\item \code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}} for specifying dispersal constraint on the temporal projections at each step.
 \item \code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}} Using the \pkg{MigClim} R-package to simulate dispersal in projections.
-\item \code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}} Apply a connectivity constrain at the projection, for instance by adding
+\item \code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}} Apply a connectivity constraint at the projection, for instance by adding
 a barrier that prevents migration.
-\item \code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}} Apply an adaptability constrain to the projection, for instance
+\item \code{\link[=add_constraint_minsize]{add_constraint_minsize()}} Adds a constraint on the minimum area a given
+thresholded patch should have, assuming that smaller areas are in fact not
+suitable.
+\item \code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}} Apply an adaptability constraint to the projection, for instance
 constraining the speed a species is able to adapt to new conditions.
 \item \code{\link[=add_constraint_boundary]{add_constraint_boundary()}} To artificially limit the distribution change. Similar as specifying projection limits, but
 can be used to specifically constrain a projection within a certain area

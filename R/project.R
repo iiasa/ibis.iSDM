@@ -13,13 +13,16 @@ NULL
 #'
 #' @details In the background the function \code{x$project()} for the respective
 #' model object is called, where \code{x} is fitted model object. For specifics
-#' on the constrains, see the relevant \code{constrain} functions, respectively:
+#' on the constraints, see the relevant \code{constrain} functions, respectively:
 #' * [`add_constraint()`] for generic wrapper to add any of the available constrains.
-#' * [`add_constraint_dispersal()`] for specifying dispersal constrain on the temporal projections at each step.
+#' * [`add_constraint_dispersal()`] for specifying dispersal constraint on the temporal projections at each step.
 #' * [`add_constraint_MigClim()`] Using the \pkg{MigClim} R-package to simulate dispersal in projections.
-#' * [`add_constraint_connectivity()`] Apply a connectivity constrain at the projection, for instance by adding
+#' * [`add_constraint_connectivity()`] Apply a connectivity constraint at the projection, for instance by adding
 #' a barrier that prevents migration.
-#' * [`add_constraint_adaptability()`] Apply an adaptability constrain to the projection, for instance
+#' * [`add_constraint_minsize()`] Adds a constraint on the minimum area a given
+#' thresholded patch should have, assuming that smaller areas are in fact not
+#' suitable.
+#' * [`add_constraint_adaptability()`] Apply an adaptability constraint to the projection, for instance
 #' constraining the speed a species is able to adapt to new conditions.
 #' * [`add_constraint_boundary()`] To artificially limit the distribution change. Similar as specifying projection limits, but
 #' can be used to specifically constrain a projection within a certain area
@@ -308,8 +311,23 @@ methods::setMethod(
         scenario_threshold <- scenario_threshold[[1]]
         out_thresh <- out
         out_thresh[out_thresh < scenario_threshold] <- 0; out_thresh[out_thresh >= scenario_threshold] <- 1
+        names(out_thresh) <- "threshold"
+
+        # Apply minimum size constraint if set
+        if("min_size" %in% names(scenario_constraints)){
+          if(scenario_constraints$min_size$method=="min_size"){
+            out_thresh <- st_minsize(obj = out_thresh,
+                                     value = scenario_constraints$min_size$params["value"] |>
+                                       as.numeric(),
+                                     unit = scenario_constraints$min_size$params["unit"] |>
+                                       as.character(),
+                                     establishment_step = scenario_constraints$min_size$params["establishment_step"] |>
+                                       as.logical()
+            )
+          }
+        }
+        # If threshold is found, check if it has values or is extinct?
         names(out_thresh) <-  paste0('threshold_', step)
-        # If threshold is
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold

@@ -10,7 +10,9 @@ test_that('Testing functions for spatial-temporal data in stars', {
   options("ibis.setupmessages" = FALSE) # Be less chatty
 
   # Load some stars rasters
-  ll <- list.files(system.file('extdata/predictors_presfuture/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+  ll <- list.files(system.file('extdata/predictors_presfuture/',
+                               package = 'ibis.iSDM',
+                               mustWork = TRUE),full.names = T)
 
   # Load the same files future ones
   suppressWarnings(
@@ -52,6 +54,18 @@ test_that('Testing functions for spatial-temporal data in stars', {
     summarise_projection(pred_future[1],fun = "mean"),
     "data.frame"
   )
+
+  # --- #
+  # Create threshold
+  expect_no_error(
+    tr <- stars_to_raster(pred_future,1)[[1]] |>
+      terra::subset("crops") |>
+      threshold(method = "fixed",value = 100)
+  )
+  names(tr) <- "threshold"
+  # Apply minimum size filter
+  expect_no_error( st_minsize(tr, 2, unit = "pixel") )
+  expect_no_error( st_minsize(tr, 2000, unit = "km2") )
 
   # Replicate
   # st_rep(pred_future[1], stars::st_dimensions(pred_future[1]), "Time")
@@ -231,7 +245,7 @@ test_that('Scenarios and constraints', {
   mod <- threshold(mod, tr = .25)
   expect_equal(as.numeric(mod$get_threshold()), .25)
 
-  # --- #
+  # ----------- #
   # Finally add the various constraints
   mod <- sc |> add_predictors(pred_future) |> threshold()
   expect_invisible(mod$verify())
@@ -240,7 +254,7 @@ test_that('Scenarios and constraints', {
   mod0 <- mod |> project()
   expect_s3_class(mod0$summary_beforeafter(), 'data.frame')
 
-  # Boundary
+  # Boundary constraint
   mod1 <- mod |> add_constraint_boundary(virtual_range) |> project()
   expect_type(mod1$get_constraints(), "list")
   mod1b <- mod |> add_constraint(method = "boundary", layer = virtual_range)   # Generic constraint
@@ -262,6 +276,12 @@ test_that('Scenarios and constraints', {
   mod2 <- mod |> add_constraint_connectivity(method = "resistance", resistance = res)
   expect_equal(names(mod2$get_constraints()), "connectivity")
   expect_true(is.Raster(mod2$get_constraints()$connectivity$params$resistance))
+
+  # Minimum size constraint
+  mod3 <- mod |> threshold(value = .2) |>
+    add_constraint_minsize(value = 4, unit = "pixel") |> project()
+  expect_equal(names(mod3$get_constraints()), "min_size")
+  expect_s3_class( mod3$get_data()['threshold'], "stars")
 
   # --- #
   # Check that stabilization works

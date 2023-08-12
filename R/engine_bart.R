@@ -475,7 +475,7 @@ engine_bart <- function(x,
                                  .packages = c("dbarts", "matrixStats")) %do% {
                                    i <- which(splits == s)
 
-                                   pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                   pred_bart <- predict(object = fit_bart,
                                                                       newdata = full[i, model$biodiversity[[1]]$predictors_names],
                                                                       type = params$type,
                                                                       offset = of[i]
@@ -563,7 +563,7 @@ engine_bart <- function(x,
             obj <- self$get_data("fit_best")
             if(is.Waiver(obj)) return(obj)
             # Get residuals
-            rd <- dbarts:::residuals.bart(obj)
+            rd <- residuals(obj)
             if(length(rd)==0) rd <- new_waiver()
             return(rd)
           },
@@ -606,7 +606,7 @@ engine_bart <- function(x,
 
             # Make a prediction
             suppressWarnings(
-              pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
+              pred_bart <- predict(object = self$get_data('fit_best'),
                                                  newdata = newdata,
                                                  type = type) |> t()
               )

@@ -570,6 +570,116 @@ summarise_change <- function(scenario){
   return(change)
 }
 
+#' Label patches and apply a minimum size constraint
+#'
+#' @description This is a
+#' @param obj A ['stars'] object to be clipped and cropped.
+#' @keywords internal, scenario
+#' @noRd
+st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
+  assertthat::assert_that(
+    inherits(obj, "stars") || is.Raster(obj),
+    is.numeric(value),
+    is.character(unit),
+    is.logical(establishment_step)
+  )
+
+  # Match unit
+  unit <- match.arg(arg = unit,
+                    choices = c("km2", "ha", "pixel"), several.ok = FALSE)
+
+  # If ha convert to km2
+  if(unit == "ha"){
+    value <- value / 100
+    unit <- "km2"
+  }
+
+  # Original
+  ori.obj <- obj
+
+  # Procedure for raster object
+  if(is.Raster(obj)){
+    assertthat::assert_that(utils::hasName(obj, "threshold"))
+    obj <- obj["threshold"]
+
+    # Check unique values
+    assertthat::assert_that(length(unique(obj)[,1]) <=2)
+
+    if(unit == "pixel"){
+      # Sieve by pixel size
+      assertthat::assert_that(value>1,
+                              msg = "Pixel units need to be larger than 1")
+      obj[obj == 0] <- NA
+      new <- terra::sieve(obj,
+                          value,
+                          directions = 8)
+      new <- terra::mask(new, ori.obj)
+    } else {
+      # Now first label
+      labs <- terra::patches(obj)
+
+      # Then calculate area in km2
+      ar <- terra::mask(terra::cellSize(labs, unit = "km"), labs)
+
+      # Now summarize per label the area
+      zt <- terra::zonal(ar, labs)
+
+      # Identify all grid cells smaller than value and
+      not_big_enough <- zt$patches[which(zt$area < value)]
+      if(length(not_big_enough)>0){
+        new <- labs
+        new[new %in% not_big_enough] <- 0
+        new[new>0] <- 1 # Set remaining cells back to threshold
+        names(new) <- names(obj)
+      } else {
+        new <- ori.obj
+      }
+    }
+
+    if(terra::global(new, "max", na.rm = TRUE)[,1] == 0){
+      if(getOption('ibis.setupmessages')) myLog('[Done]','yellow',
+                                                paste0('Min size constraint removed all areas!'))
+    }
+  } else {
+    # Check that threshold is present
+    assertthat::assert_that(utils::hasName(obj, "threshold"))
+    obj <- obj["threshold"]
+
+    # Also check that time dimension is present
+    assertthat::assert_that(
+      names(stars::st_dimensions(obj)[3]) %in% c("time", "band")
+    )
+
+    # Save dimensions
+    ori.dims <- stars::st_dimensions(obj)
+
+    # Now for each time element, convert to raster and label
+    times <- stars::st_get_dimension_values(obj, 3)
+    new <- terra::rast()
+    for(step in 1:length(times)){
+      ras <- stars_to_raster(obj, which = step)[[1]]
+
+      # For stars objects, convert to raster and self-call
+      suppressWarnings(
+        new <- c(new, st_minsize(obj = ras,
+                 value = value,
+                 unit = unit)
+        )
+      )
+    }
+    assertthat::assert_that(is.Raster(new))
+    # Convert back to stars
+    new <- stars::st_as_stars(new,crs = sf::st_crs(obj))
+    names(new) <- 'threshold'
+    # Correct band if different
+    if(all(!stars::st_get_dimension_values(obj, 3) != stars::st_get_dimension_values(new, 3 ))){
+      new <- stars::st_set_dimensions(new, 3, values = stars::st_get_dimension_values(obj, 3))
+    }
+  }
+  # Return the result
+  return(new)
+}
+
 #' Crop and project a stars raster `HACK`
 #'
 #' @description The reprojection of WGS84 currently fails due to some unforeseen

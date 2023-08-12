@@ -1,13 +1,15 @@
 # ibis.iSDM 0.0.8 (current dev branch)
 #### New features
+* Implemented min size constraint (`add_constraint_minsize()`) #56
 
 #### Minor improvements and bug fixes
 * Small fix to `threshold()` now returning threshold values correctly. 
+* Smaller bug fixes to `threshold()` in `scenario()` projections.
 * Further documentation fixes towards CRAN submission #38
 
 # ibis.iSDM 0.0.7
 #### New features
-* Added method proximity to `add_control_bias` to place lower weights on points closer to another.
+* Added method proximity to `add_control_bias()` to place lower weights on points closer to another.
 * Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.
 * Added centroid function to BiodiversityScenarios and DistributionModels #29
 
@@ -40,7 +42,7 @@
 
 #### Minor improvements and bug fixes
 * Further smaller documentation fixes towards a CRAN submission #38
-* Bug with with `write_model()`, now converting `terra` objects to `data.frames` between import/export.
+* Bug with with `write_model()`, now converting `terra` objects to `data.frame` between import/export.
 * Smaller bug fixes, for example in `similarity()`, addition of variable name sanitization to predictors by default.
 
 # ibis.iSDM 0.0.4
@@ -59,7 +61,7 @@
 #### Minor improvements and bug fixes
 * Removed Magittr dependency #41
 * Smaller improvements to documentation and removing of CRAN preventing function calls.
-* Made the separation from hyperparameter search functions clearer and added new option to filter highly correlated covariates via `train`.
+* Made the separation from hyperparameter search functions clearer and added new option to filter highly correlated covariates via `train()`.
 
 # ibis.iSDM 0.0.2
 

@@ -400,7 +400,7 @@ engine_glmnet <- function(x,
           cv_gn <- try({
             glmnetUtils::cva.glmnet(formula = form,
                       data = df,
-                      alpha = params$alpha, # Elastic net mixing parameter
+                      alpha = seq(0,1,.1), # Elastic net parameters to test
                       lambda = params$lambda, # Overwrite lambda
                       weights = w, # Case weights
                       offset = ofs,
@@ -461,13 +461,30 @@ engine_glmnet <- function(x,
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
           # Attempt prediction
-          out <- predict(object = cv_gn,
-                         newdata = full_sub,
-                         weights = w_full_sub,
-                         newoffset = ofs_pred[full_sub$rowid],
-                         s = determine_lambda(cv_gn), # Determine the best lambda value
-                         type = params$type
-                         )
+          if(inherits(cv_gn, "cv.glmnet")){
+            out <- predict(object = cv_gn,
+                           newdata = full_sub,
+                           weights = w_full_sub,
+                           newoffset = ofs_pred[full_sub$rowid],
+                           s = determine_lambda(cv_gn), # Determine the best lambda value
+                           type = params$type
+            )
+          } else {
+            # Assume cva.glmnet
+            out <- predict(
+              object = cv_gn,
+              newdata = full_sub,
+              alpha = cv_gn$alpha,
+              weights = w_full_sub,
+              newoffset = ofs_pred[full_sub$rowid],
+              s = determine_lambda(cv_gn), # Determine the best lambda value
+              type = params$type
+            )
+            # Determine best model based on cross-validated loss
+            # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
+            # cv_gn <- cv_gn$modlist[[ind]]
+          }
+
 
           # Fill output with summaries of the posterior
           prediction[full_sub$rowid] <- out[,1]
@@ -663,8 +680,18 @@ engine_glmnet <- function(x,
             # Calculate residuals
             model <- self$model$predictors
             # Get fm
-            fitted_values <- predict(obj, model, s = 'lambda.1se')
-            fitted_min <- predict(obj, model, s = 'lambda.min')
+            if(inherits(obj, "cv.glmnet")){
+              fitted_values <- predict(obj, model, s = 'lambda.1se')
+              fitted_min <- predict(obj, model, s = 'lambda.min')
+            } else {
+              alpha <- sapply(obj$modlist, function(z) min(z$cvup))
+              fitted_values <- predict(obj, model,
+                                       which = which.min(alpha),
+                                       s = 'lambda.1se')
+              fitted_min <- predict(obj, model,
+                                    which = which.min(alpha),
+                                    s = 'lambda.min')
+            }
             rd <- fitted_min[,1] - fitted_values[,1]
             assertthat::assert_that(length(rd)>0)
             return(rd)
@@ -722,16 +749,30 @@ engine_glmnet <- function(x,
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
-            pred_gn <- glmnetUtils:::predict.cv.glmnet.formula(
-              object = mod,
-              newdata = df_sub,
-              weights = df_sub$w, # The second entry of unique contains the non-observed variables
-              newoffset = ofs,
-              na.action = "na.pass",
-              s = determine_lambda(mod), # Determine best available lambda
-              fam = fam,
-              type = type
-            ) |> as.data.frame()
+            if(inherits(mod, "cv.glmnet")){
+              pred_gn <- predict(
+                object = mod,
+                newdata = df_sub,
+                weights = df_sub$w, # The second entry of unique contains the non-observed variables
+                newoffset = ofs,
+                na.action = "na.pass",
+                s = determine_lambda(mod), # Determine best available lambda
+                fam = fam,
+                type = type
+              ) |> as.data.frame()
+            } else {
+              pred_gn <- predict(
+                object = mod,
+                newdata = df_sub,
+                alpha = mod$alpha,
+                weights = df_sub$w, # The second entry of unique contains the non-observed variables
+                newoffset = ofs,
+                na.action = "na.pass",
+                s = determine_lambda(mod), # Determine the best lambda value
+                fam = fam,
+                type = type
+              )
+            }
             names(pred_gn) <- layer
             assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 

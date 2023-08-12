@@ -915,44 +915,49 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
     try({requireNamespace('abess');attachNamespace("abess")},silent = TRUE)
   }
 
-  # Build model
-  abess_fit <- abess::abess(x = env,
-                            y = observed,
-                            family = family,
-                            tune.type = tune.type,
-                            weight = weight,
-                            lambda = lambda,
-                            always.include = keep,
-                            nfolds = 100, # Increase from default 5
-                            num.threads = 0
-  )
+  if((requireNamespace("abess", quietly = TRUE))){
 
-  if(anyNA(stats::coef(abess_fit)[,1]) ) {
-    # Refit with minimum support size
-    abess_fit <- abess::abess(x = env,
+    # Build model
+    abess_fit <- abess(x = env,
                               y = observed,
                               family = family,
-                              lambda = lambda,
                               tune.type = tune.type,
                               weight = weight,
+                              lambda = lambda,
                               always.include = keep,
                               nfolds = 100, # Increase from default 5
-                              # Minimum support site of 10% of number of covariates
-                              support.size = ceiling(ncol(env) * 0.1),
                               num.threads = 0
     )
 
-  }
-  # Get best vars
-  co <- stats::coef(abess_fit, support.size = abess_fit[["best.size"]])
-  co <- names( which(co[,1] != 0))
-  co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
-  # Make some checks on the list of reduced variables
-  if(length(co) <= 2) {
-    warning("Abess was likely to rigours. Likely to low signal-to-noise ratio.")
-    return(NULL)
+    if(anyNA(stats::coef(abess_fit)[,1]) ) {
+      # Refit with minimum support size
+      abess_fit <- abess(x = env,
+                                y = observed,
+                                family = family,
+                                lambda = lambda,
+                                tune.type = tune.type,
+                                weight = weight,
+                                always.include = keep,
+                                nfolds = 100, # Increase from default 5
+                                # Minimum support site of 10% of number of covariates
+                                support.size = ceiling(ncol(env) * 0.1),
+                                num.threads = 0
+      )
+
+    }
+    # Get best vars
+    co <- stats::coef(abess_fit, support.size = abess_fit[["best.size"]])
+    co <- names( which(co[,1] != 0))
+    co <- co[grep("Intercept", co, ignore.case = TRUE, invert = TRUE)]
+    # Make some checks on the list of reduced variables
+    if(length(co) <= 2) {
+      warning("Abess was likely to rigours. Likely to low signal-to-noise ratio.")
+      return(NULL)
+    } else {
+      co
+    }
   } else {
-    co
+    return(NULL)
   }
 }
 
@@ -1010,14 +1015,18 @@ predictors_filter_boruta <- function( env, obs, method, keep = NULL,
   if("ID" %in% vars) vars <- vars[-which(vars == "ID")]
 
   # Apply boruta
-  bo_test <- Boruta::Boruta(env, y = observed,
-                            maxRuns = iter,
-                            # Verbosity
-                            doTrace = ifelse(verbose, 1, 0))
+  if((requireNamespace("Boruta", quietly = TRUE))){
+    bo_test <- Boruta(env, y = observed,
+                      maxRuns = iter,
+                      # Verbosity
+                      doTrace = ifelse(verbose, 1, 0))
 
-  # Get from the bo_test object all variables that are clearly rejected
-  res <- bo_test$finalDecision
-  co <- names(res)[which(res == "Rejected")]
-  if(length(co)==0) co <- NULL
-  return(co)
+    # Get from the bo_test object all variables that are clearly rejected
+    res <- bo_test$finalDecision
+    co <- names(res)[which(res == "Rejected")]
+    if(length(co)==0) co <- NULL
+    return(co)
+  } else {
+    return(NULL)
+  }
 }

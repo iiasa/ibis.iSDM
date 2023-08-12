@@ -116,11 +116,20 @@ default.regularization <- function(p, m){
 #' @noRd
 determine_lambda <- function(obj){
   assertthat::assert_that(
-    inherits(obj, "cv.glmnet"),
-    is.numeric(obj$lambda.1se),
-    is.numeric(obj$lambda.min),
-    is.numeric(obj$lambda)
+    inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
   )
+  if(inherits(obj, "cva.glmnet")){
+    # Get the lowest cross-validated loss per alpha
+    ind <- which.min( sapply(obj$modlist, function(z) min(z$cvup)) )
+    obj <- obj$modlist[[ind]]
+
+    assertthat::assert_that(
+      is.numeric(obj$lambda.1se),
+      is.numeric(obj$lambda.min),
+      is.numeric(obj$lambda)
+    )
+  }
+
   if(obj$lambda.1se != obj$lambda[1])	{
     la <- obj$lambda.1se
   } else if (obj$lambda.min != obj$lambda[1]){
@@ -141,14 +150,21 @@ determine_lambda <- function(obj){
 #' @noRd
 tidy_glmnet_summary <- function(obj){
   assertthat::assert_that(
-    inherits(obj, "cv.glmnet")
+    inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
   )
   # Determine best lambda
   lambda <- determine_lambda(obj)
 
-  # Summarise coefficients within 1 standard deviation
-  ms <- stats::coef(obj, s = lambda) |>
-    as.matrix() |> as.data.frame()
+  if(inherits(obj, "cva.glmnet")){
+    # Get best alpha
+    alpha <- sapply(obj$modlist, function(z) min(z$cvup))
+    ms <- stats::coef(obj, which = which.min(alpha)) |>
+      as.matrix() |> as.data.frame()
+  } else {
+    # Summarise coefficients within 1 standard deviation
+    ms <- stats::coef(obj, s = lambda) |>
+      as.matrix() |> as.data.frame()
+  }
   names(ms) <- "mean"
   ms$variable <- rownames(ms)
   ms <- ms[,c("variable", "mean")]

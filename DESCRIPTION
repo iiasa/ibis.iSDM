@@ -61,6 +61,8 @@ Suggests:
     modEvA,
     progress,
     rmarkdown,
+    Boruta,
+    matrixStats,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
     pdp,

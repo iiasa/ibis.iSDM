@@ -46,6 +46,7 @@ Other constraint:
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
+\code{\link{add_constraint_minsize}()},
 \code{\link{add_constraint}()}
 }
 \concept{constraint}

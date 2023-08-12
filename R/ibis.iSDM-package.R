@@ -5,6 +5,7 @@
 #' @importFrom foreach %do% %dopar%
 #' @importFrom methods as
 #' @importFrom stats effects
+#' @importFrom stats residuals
 #' @importFrom stats complete.cases
 #' @importFrom graphics par
 ## usethis namespace: end

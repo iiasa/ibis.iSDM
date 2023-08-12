@@ -256,6 +256,10 @@ methods::setMethod(
     length(unique(baseline_threshold))==2
   )
 
+  # Get original baseline threshold
+  ori.tr <- baseline_threshold
+  ori.tr[ori.tr>0] <- 0
+
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
     baseline_threshold[resistance == 1] <- 2
@@ -273,6 +277,8 @@ methods::setMethod(
   # Now multiply the net suitability projection with this mask
   # Thus removing any grid cells outside
   out <- new_suit * ras_dis
+  # Mask with original so as to retain non-zero values
+  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -298,6 +304,10 @@ methods::setMethod(
     length(unique(baseline_threshold)[,1])==2
   )
 
+  # Get original baseline threshold
+  ori.tr <- baseline_threshold
+  ori.tr[ori.tr>0] <- 0
+
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
     baseline_threshold[resistance == 1] <- 2
@@ -321,6 +331,8 @@ methods::setMethod(
   # Now multiply the net suitability projection with this mask Thus removing any
   # non-suitable grid cells (0) and changing the value of those within reach
   out <- new_suit * ras_dis
+  # Mask with original so as to retain non-zero values
+  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -606,6 +618,93 @@ methods::setMethod(
   }
   return(nd)
 }
+
+# ------------------------ #
+#### Size constraints ####
+
+#' Adds a size constraint on a scenario
+#'
+#' @description
+#' This function applies a minimum size constraint on a `scenario()` created
+#' object. The rationale here is that for a given species isolated habitat patches
+#' smaller than a given size might not be viable / unrealistic for a species
+#' to establish a (long-term) presence.
+#'
+#' The idea thus is to apply a constraint in that only patches bigger than a
+#' certain size are retained between timesteps.
+#' It has thus the potential to reduce subsequent colonizations of neighbouring
+#' patches.
+#'
+#' @details
+#' Area values in a specific unit need to be supplied.
+#'
+#' @note
+#' *This function requires that a scenario has a set `threshold()`!*
+#' @param value A [`numeric`] value describing the minimum amount of area of a
+#' given patch
+#' @param unit A [`character`] of the unit of area. Options available are
+#' \code{km2} (Default) and \code{ha}.
+#' @param establishment_step A [`logical`] flag indicating whether a given patch
+#' is only to be removed if wasn't small in a previous time step (not yet
+#' implemented!)
+#'
+#' @family constraint
+#' @examples
+#' \dontrun{
+#' scenario(fit) |>
+#'  add_predictors(future_covariates) |>
+#'  threshold() |>
+#'  add_constraint_minsize(value = 1000, unit = "km2") |>
+#'  project()
+#' }
+#'
+#' @name add_constraint_minsize
+#' @keywords scenario
+#' @exportMethod add_constraint_minsize
+#' @export
+NULL
+methods::setGeneric("add_constraint_minsize",
+                    signature = methods::signature("mod", "value"),
+                    function(mod, value, unit = "km2", establishment_step = FALSE, ...) standardGeneric("add_constraint_minsize"))
+
+#' @name add_constraint_minsize
+#' @rdname add_constraint_minsize
+#' @usage
+#'   \S4method{add_constraint_minsize}{BiodiversityScenario,numeric,character,logical}(mod,value,unit,establishment_step)
+methods::setMethod(
+  "add_constraint_minsize",
+  methods::signature(mod = "BiodiversityScenario", value = "numeric"),
+  function(mod, value, unit = "km2", establishment_step = FALSE, ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      !is.Waiver(mod$get_predictors()),
+      is.null(value) || is.numeric(value),
+      is.character(unit),
+      is.logical(establishment_step)
+    )
+    # Match unit
+    unit <- match.arg(arg = unit,
+                        choices = c("km2", "ha", "pixel"), several.ok = FALSE)
+
+    if(unit=="pixel"){
+      assertthat::assert_that(value>1,
+                              msg = "For unit pixel supply values > 1.")
+    }
+    # Add processing method #
+    # --- #
+    co <- list()
+    co[['min_size']] <- list(method = "min_size",
+                             params = c("value" = value,
+                                        "unit" = unit,
+                                        "establishment_step" = establishment_step))
+    # --- #
+    new <- mod$set_constraints(co)
+    return(
+      bdproto(NULL, new)
+    )
+  }
+)
+
 
 # ------------------------ #
 #### Boundary constraints ####

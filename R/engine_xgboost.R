@@ -618,7 +618,7 @@ engine_xgboost <- function(x,
 
           # Make a prediction
           suppressWarnings(
-            pred_xgb <- xgboost:::predict.xgb.Booster(
+            pred_xgb <- predict(
               object = fit_xgb,
               newdata = df_pred
               )

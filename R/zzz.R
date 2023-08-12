@@ -38,7 +38,7 @@
   options('ibis.dependencies' = c(
     "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
-    "gnlm", "cubelyr",
+    "gnlm", "cubelyr", "matrixStats", "Boruta", "abess",
     "dbarts", "mboost", "rstan", "cmdstanr"
   ))
 

@@ -116,7 +116,11 @@ methods::setMethod(
 
     # Get all point data in distribution model
     if(is.null(point)){
-      if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
+      if(method %in% c('TSS','kappa','F1score','Sensitivity','Specificity',
+                       'Misclass','Omission','Commission','Precision',
+                       'PPI','PAI','OddsRatio')){
+        if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
+      }
       point <- collect_occurrencepoints(model = model,
                                         include_absences = TRUE,
                                         point_column = "observed",
@@ -378,30 +382,30 @@ methods::setMethod(
 #' @name threshold
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is
 #'   to be added.
-#' @param tr A [`numeric`] value specifying the specific threshold for scenarios
+#' @param value A [`numeric`] value specifying the specific threshold for scenarios
 #'   (Default: \code{NULL} Grab from object).
 #' @param ... Any other parameter. Used to fetch value if set somehow.
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
+#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, tr = NULL,...) {
+  function(obj, value = NULL,...) {
 
     # Get Dots
     dots <- list(...)
     # Check for value parameter in dots if tr is null
-    if(is.null(tr) && ("value" %in% names(dots))){
-      tr <- dots[["value"]]
-      assertthat::assert_that(is.numeric(tr),
-                              msg = "Parameter tr not found and other numeric values not found?")
+    if(is.null(value) && ("tr" %in% names(dots))){
+      value <- dots[["tr"]]
+      assertthat::assert_that(is.numeric(value),
+                              msg = "Parameter value not found and other numeric values not found?")
     }
 
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
 
     # Unless set, check
-    if(is.null(tr)){
+    if(is.null(value)){
       # Check that a threshold layer is available and get the methods and data from it
       assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
                                msg = 'Call \' threshold \' for prediction first!')
@@ -409,10 +413,11 @@ methods::setMethod(
       tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
       if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
       ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
-      tr <- attr(ras_tr[[1]], 'threshold')
-      names(tr) <- attr(ras_tr[[1]], 'method')
+      value <- attr(ras_tr[[1]], 'threshold')
+      names(value) <- attr(ras_tr[[1]], 'method')
     } else {
-      assertthat::assert_that(is.numeric(tr))
+      assertthat::assert_that(is.numeric(value))
+      names(value) <- "fixed"
       # Check if scenario is already fitted
       proj <- obj$get_data()
       if(!is.Waiver(proj)){
@@ -421,11 +426,11 @@ methods::setMethod(
                                                   'green',
                                                   'Projection found. Applying threshold!')
         new <- proj |> dplyr::select(suitability)
-        obj <- obj$apply_threshold(tr = tr)
+        obj <- obj$apply_threshold(tr = value)
         return( obj )
         invisible()
       }
     }
-    bdproto(NULL, obj, threshold = tr)
+    bdproto(NULL, obj, threshold = value)
   }
 )

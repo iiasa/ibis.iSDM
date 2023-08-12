@@ -18,7 +18,7 @@ threshold(
 
 \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 
-\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
 }
 \arguments{
 \item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is
@@ -27,8 +27,8 @@ to be added.}
 \item{method}{A specifc method for thresholding. See details for available
 options.}
 
-\item{value}{A \code{\link{numeric}} value for thresholding if method is fixed
-(Default: \code{NULL}).}
+\item{value}{A \code{\link{numeric}} value specifying the specific threshold for scenarios
+(Default: \code{NULL} Grab from object).}
 
 \item{point}{A \code{\link{sf}} object containing observational data used for model
 training.}
@@ -41,9 +41,6 @@ created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}
 \code{FALSE})}
 
 \item{...}{Any other parameter. Used to fetch value if set somehow.}
-
-\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios
-(Default: \code{NULL} Grab from object).}
 }
 \value{
 A \link{SpatRaster} if a \link{SpatRaster} object as input. Otherwise the

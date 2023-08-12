@@ -440,7 +440,7 @@ engine_gdb <- function(x,
             cvf <- mboost::cv(stats::model.weights(fit_gdb),B = 5, type = "kfold")
             try({cvm <- mboost::cvrisk(fit_gdb,
                                        folds = cvf, grid = grs,
-                                       papply = pbapply::pblapply )
+                                       papply = parallel::parLapply )
             }, silent = TRUE)
             rm(cvf, grs)
           }
