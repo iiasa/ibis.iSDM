@@ -121,7 +121,7 @@ pipeline stores a threshold attribute in the created <a href="scenario.html">sce
 <span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for BiodiversityScenario,ANY</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">tr</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">value</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -137,8 +137,8 @@ options.</p></dd>
 
 
 <dt>value</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value for thresholding if method is fixed
-(Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying the specific threshold for scenarios
+(Default: <code>NULL</code> Grab from object).</p></dd>
 
 
 <dt>point</dt>
@@ -159,11 +159,6 @@ created (Default: <code>"binary"</code>). Also see Muscatello et al. (2021).</p>
 
 <dt>...</dt>
 <dd><p>Any other parameter. Used to fetch value if set somehow.</p></dd>
-
-
-<dt>tr</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value specifying the specific threshold for scenarios
-(Default: <code>NULL</code> Grab from object).</p></dd>
 
 </dl></div>
     <div class="section level2">
