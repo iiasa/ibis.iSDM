@@ -673,6 +673,32 @@ references:
     orcid: https://orcid.org/0000-0003-3925-190X
   year: '2023'
 - type: software
+  title: Boruta
+  abstract: 'Boruta: Wrapper Algorithm for All Relevant Feature Selection'
+  notes: Suggests
+  url: https://gitlab.com/mbq/Boruta/
+  repository: https://CRAN.R-project.org/package=Boruta
+  authors:
+  - family-names: Kursa
+    given-names: Miron Bartosz
+    email: M.Kursa@icm.edu.pl
+    orcid: https://orcid.org/0000-0001-7672-648X
+  - family-names: Rudnicki
+    given-names: Witold Remigiusz
+  year: '2023'
+- type: software
+  title: matrixStats
+  abstract: 'matrixStats: Functions that Apply to Rows and Columns of Matrices (and
+    to Vectors)'
+  notes: Suggests
+  url: https://github.com/HenrikBengtsson/matrixStats
+  repository: https://CRAN.R-project.org/package=matrixStats
+  authors:
+  - family-names: Bengtsson
+    given-names: Henrik
+    email: henrikb@braju.com
+  year: '2023'
+- type: software
   title: rstan
   abstract: 'rstan: R Interface to Stan'
   notes: Suggests
