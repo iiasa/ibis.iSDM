@@ -1,6 +1,7 @@
 # ibis.iSDM 0.0.8 (current dev branch)
 #### New features
 * Implemented min size constraint (`add_constraint_minsize()`) #56
+* Added a function for estimating partial effects of ensembles `ensemble_spartial()`.
 
 #### Minor improvements and bug fixes
 * Small fix to `threshold()` now returning threshold values correctly. 

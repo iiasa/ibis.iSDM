@@ -755,7 +755,7 @@ engine_xgboost <- function(x,
 
             # Spartial prediction
             suppressWarnings(
-              pp <- xgboost:::predict.xgb.Booster(
+              pp <- predict(
                 object = mod,
                 newdata = df
               )
@@ -810,7 +810,7 @@ engine_xgboost <- function(x,
 
             # Make a prediction
             suppressWarnings(
-              pred_xgb <- xgboost:::predict.xgb.Booster(
+              pred_xgb <- predict(
                 object = mod,
                 newdata = newdata
               )
@@ -819,10 +819,11 @@ engine_xgboost <- function(x,
             # Fill output with summaries of the posterior
             prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
             if(inherits(prediction, "try-error")){
-              prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+              prediction <- terra::rast(model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
                 emptyraster()
             }
             prediction[] <- pred_xgb
+            prediction <- terra::mask(prediction, model$background)
             return(prediction)
           },
           # Model convergence check

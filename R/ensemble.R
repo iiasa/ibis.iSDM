@@ -445,6 +445,8 @@ methods::setMethod(
   }
 )
 
+#### Ensemble partial ----
+
 #' Function to create an ensemble of partial effects from multiple models
 #'
 #' @description Similar to the `ensemble()` function, this function creates an
@@ -463,9 +465,9 @@ methods::setMethod(
 #' * \code{'median'} - Calculates the median of several predictions.
 #'
 #' @note If a list is supplied, then it is assumed that each entry in the list
-#' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
-#' of models constructed with different link functions, e.g. logistic vs [log].
-#' By default the response functions of each model are normalized.
+#'   is a fitted [`DistributionModel`] object. Take care not to create an
+#'   ensemble of models constructed with different link functions, e.g. logistic
+#'   vs [log]. By default the response functions of each model are normalized.
 #' @param ... Provided [`DistributionModel`] objects from which partial
 #'   responses can be called. In the future provided data.frames might be
 #'   supported as well.
@@ -476,6 +478,9 @@ methods::setMethod(
 #' @param layer A [`character`] of the layer to be taken from each prediction
 #'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
 #'   names in ensembles of `SpatRaster` objects.
+#' @param newdata A optional [`data.frame`] or [`SpatRaster`] object supplied to
+#'   the model (DefaultL \code{NULL}). *Note: This object needs to have
+#'   identical names as the original predictors.*
 #' @param normalize [`logical`] on whether the inputs of the ensemble should be
 #'   normalized to a scale of 0-1 (Default: \code{TRUE}).
 #' @returns A [data.frame] with the combined partial effects of the supplied
@@ -488,22 +493,22 @@ methods::setMethod(
 
 #' @name ensemble_partial
 #' @aliases ensemble_partial
-#' @keywords train
+#' @keywords train, partial
 #' @exportMethod ensemble_partial
 #' @export
 NULL
 methods::setGeneric("ensemble_partial",
                     signature = methods::signature("..."),
-                    function(..., x.var, method = "mean", layer = "mean", normalize = TRUE) standardGeneric("ensemble_partial"))
+                    function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE) standardGeneric("ensemble_partial"))
 
 #' @name ensemble_partial
 #' @rdname ensemble_partial
 #' @usage
-#'   \S4method{ensemble_partial}{ANY,character,character,character,logical}(...,x.var,method,layer,normalize)
+#'   \S4method{ensemble_partial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdata,normalize)
 methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),
-  function(..., x.var, method = "mean", layer = "mean", normalize = TRUE){
+  function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE){
     assertthat::assert_that(
       is.character(x.var),
       msg = "Partial ensemble requires explicit specification of the parameter x.var."
@@ -516,6 +521,10 @@ methods::setMethod(
         mc <- list(...)
       } else mc <- c(...)
     }
+    assertthat::assert_that(is.null(newdata) || is.data.frame(newdata),
+                            msg = "Provide new data as data.frame.")
+    # TODO: Implement for non-spartials!
+    if(is.data.frame(newdata)) stop("Not yet implemented!")
 
     # Get all those that are DistributionModels
     mods <- mc[ sapply(mc, function(x) inherits(x, "DistributionModel") ) ]
@@ -583,6 +592,132 @@ methods::setMethod(
                        }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "median", "mad")
     }
+    return(new)
+  }
+)
+
+#### Ensemble spartial ----
+
+#' Function to create an ensemble of spartial effects from multiple models
+#'
+#' @inherit ensemble_partial description
+#' @inherit ensemble_partial details
+#' @inherit ensemble_partial note
+#' @inheritParams ensemble_partial
+#' @returns A [SpatRaster] object with the combined partial effects of the
+#'   supplied models.
+#' @examples
+#' \dontrun{
+#'  # Assumes previously computed models
+#'  ex <- ensemble_spartial(mod1, mod2, mod3, method = "mean")
+#' }
+
+#' @name ensemble_spartial
+#' @aliases ensemble_spartial
+#' @keywords train, partial
+#' @exportMethod ensemble_spartial
+#' @export
+NULL
+methods::setGeneric("ensemble_spartial",
+                    signature = methods::signature("..."),
+                    function(..., x.var, method = "mean", layer = "mean",newdata = NULL, normalize = TRUE) standardGeneric("ensemble_spartial"))
+
+#' @name ensemble_spartial
+#' @rdname ensemble_spartial
+#' @usage
+#'   \S4method{ensemble_spartial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdatanormalize)
+methods::setMethod(
+  "ensemble_spartial",
+  methods::signature("ANY"),
+  function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE){
+    assertthat::assert_that(
+      is.character(x.var),
+      msg = "Spartial ensemble requires explicit specification of the parameter x.var."
+    )
+    if(length(list(...))>1) {
+      mc <- list(...)
+    } else {
+      # Collate provided models
+      if(!is.list(...)){
+        mc <- list(...)
+      } else mc <- c(...)
+    }
+    assertthat::assert_that(is.null(newdata) || is.Raster(newdata),
+                            msg = "Provide new data as SpatRaster.")
+
+    # Get all those that are DistributionModels
+    mods <- mc[ sapply(mc, function(x) inherits(x, "DistributionModel") ) ]
+
+    # Further checks
+    assertthat::assert_that(length(mods)>0,
+                            msg = "No DistributionModel found among provided objects.")
+    assertthat::assert_that(
+      is.character(method),
+      is.null(layer) || is.character(layer),
+      is.logical(normalize)
+    )
+
+    # Check the method
+    method <- match.arg(method, c('mean', 'median'), several.ok = FALSE)
+
+    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a spartial ensemble...")
+
+    # If new data is provided
+    if(!is.null(newdata)){
+      # Set all variables other than the target variables to their mean
+      # First check that variables are aligned to used predictor objects
+      assertthat::assert_that(all(x.var %in% names(newdata)))
+      template <- terra::rast(mods[[1]]$model$predictors[,c("x", "y")],
+                                crs = terra::crs(mods[[1]]$model$background),type = "xyz") |>
+        emptyraster()
+      newdata <- alignRasters(newdata, template,cl = FALSE)
+      assertthat::assert_that(is.Raster(template),
+                              terra::compareGeom(newdata,template))
+
+      # Calculate global means
+      means <- terra::global(newdata, "mean", na.rm = TRUE)
+      assertthat::assert_that(x.var %in% rownames(means))
+      # Set all variables except x.var to the means
+      nd <- newdata
+      for(val in names(nd)){
+        if(val %in% x.var) next()
+        nd[[val]] <- terra::setValues(nd[[val]], means[rownames(means)==val,1],
+                            keeptime = TRUE, keepnames = TRUE)
+        nd[[val]] <- terra::mask(nd[[val]], newdata[[val]])
+      }
+      assertthat::assert_that(is.Raster(nd))
+      nd <- terra::as.data.frame(nd, xy = TRUE, na.rm = FALSE)
+    }
+
+    # Now for each object get the partial values for the target variable
+    out <- list()
+    for(obj in mods){
+      if(length(grep(x.var, summary(obj)[[1]]))==0){
+        message(paste("Layer", text_red(layer), "not found in model. Skipping!"))
+        next()
+      }
+      # Get spartial
+      if(is.null(newdata)){
+        o <- spartial(mod = obj, x.var = x.var, plot = FALSE)
+      } else {
+        o <- obj$project(newdata = nd, layer = layer)
+      }
+      assertthat::assert_that(is.Raster(o))
+      if(terra::nlyr(o)>1) o <- o[layer]
+      # Rename
+      names(o) <- layer
+      # Append to output object
+      out[[as.character(obj$id)]] <- o
+    }
+    # Now construct an ensemble by calling ensemble directly
+    new <- ensemble(out, method = method,
+                    normalize = normalize,
+                    layer = layer,
+                    uncertainty = "none")
+    assertthat::assert_that(
+      is.Raster(new),msg = "Something went wrong with the ensemble calculation!"
+    )
+    names(new) <- paste0("ensemble_spartial__",x.var)
     return(new)
   }
 )
