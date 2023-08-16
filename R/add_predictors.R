@@ -142,6 +142,13 @@ methods::setMethod(
       names(env) <- names
     }
 
+    # Check that env has a valid crs, if not raise critical warning and set to
+    # background crs.
+    if(is.na(terra::crs(env,describe=TRUE)[['code']])){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided predictors miss projection. Attempting to set it to that of the provided background...')
+      terra::crs(env) <- terra::crs(x$background)
+    }
+
     # Check that all names allowed
     problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
@@ -319,6 +326,13 @@ methods::setMethod(
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting elevational preference predictors...')
 
+    # Check that env has a valid crs, if not raise critical warning and set to
+    # background crs.
+    if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided elevation raster misses projection. Attempting to set it to that of the provided background...')
+      terra::crs(layer) <- terra::crs(x$background)
+    }
+
     # If layer is a character, check that it is in the provided object
     if(is.character(layer)){
       assertthat::assert_that(layer %in% x$get_predictor_names())
@@ -447,6 +461,13 @@ methods::setMethod(
     )
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]', 'green', 'Adding range predictors...')
+
+    # Check that env has a valid crs, if not raise critical warning and set to
+    # background crs.
+    if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided range layer misses projection. Attempting to set it to that of the provided background...')
+      terra::crs(layer) <- terra::crs(x$background)
+    }
 
     # Check that background and range align, otherwise raise error
     if(is.Raster(layer)){

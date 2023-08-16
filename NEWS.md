@@ -4,6 +4,7 @@
 * Added a function for estimating partial effects of ensembles `ensemble_spartial()`.
 
 #### Minor improvements and bug fixes
+* Added warnings and checks for missing crs in supplied layers #65
 * Small fix to `threshold()` now returning threshold values correctly. 
 * Smaller bug fixes to `threshold()` in `scenario()` projections.
 * Further documentation fixes towards CRAN submission #38

@@ -118,6 +118,10 @@ methods::setMethod(
     # Check that arguments are valid
     assertthat::assert_that( inherits(background,'SpatRaster')  )
 
+    # Check that provided background has a valid crs
+    assertthat::assert_that(!is.na(terra::crs(background,describe=TRUE)[['code']]),
+                            msg = "Please provide a background with valid projection!")
+
     # Make an error check that units have a single units
     vals <- unique(background)[[1]]
     if(length(vals)>1){
@@ -133,6 +137,11 @@ methods::setMethod(
     newbg <- sf::st_as_sf(
       terra::as.polygons(background, dissolve = TRUE)
     )
+
+    # Check crs is set to be sure
+    if(is.na(sf::st_crs(newbg))){
+      newbg <- sf::st_set_crs(newbg, sf::st_crs(background))
+    }
 
     # Rerun the distribution call with the object
     distribution(newbg, limits, limits_method, mcp_buffer, limits_clip)
@@ -157,6 +166,10 @@ methods::setMethod(
       inherits(background,'sf'),
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
+
+    # Check that provided background has a valid crs
+    assertthat::assert_that(!is.na(sf::st_crs(background)),
+                            msg = "Please provide a background with valid projection!")
 
     # Small checks on alternative limit functionalities
     limits_method <- match.arg(limits_method, c("none","zones", "mcp"), several.ok = FALSE)

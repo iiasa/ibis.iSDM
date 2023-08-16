@@ -4,7 +4,7 @@
 \alias{ensemble_partial}
 \title{Function to create an ensemble of partial effects from multiple models}
 \usage{
-\S4method{ensemble_partial}{ANY,character,character,character,logical}(...,x.var,method,layer,normalize)
+\S4method{ensemble_partial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdata,normalize)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects from which partial
@@ -20,6 +20,10 @@ options (Default: \code{'mean'}).}
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
 (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
 names in ensembles of \code{SpatRaster} objects.}
+
+\item{newdata}{A optional \code{\link{data.frame}} or \code{\link{SpatRaster}} object supplied to
+the model (DefaultL \code{NULL}). \emph{Note: This object needs to have
+identical names as the original predictors.}}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be
 normalized to a scale of 0-1 (Default: \code{TRUE}).}
@@ -49,9 +53,9 @@ Possible options for creating an ensemble includes:
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list
-is a fitted \code{\link{DistributionModel}} object. Take care not to create an ensemble
-of models constructed with different link functions, e.g. logistic vs \link{log}.
-By default the response functions of each model are normalized.
+is a fitted \code{\link{DistributionModel}} object. Take care not to create an
+ensemble of models constructed with different link functions, e.g. logistic
+vs \link{log}. By default the response functions of each model are normalized.
 }
 \examples{
 \dontrun{

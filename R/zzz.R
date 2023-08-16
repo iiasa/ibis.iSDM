@@ -18,7 +18,7 @@
   # Option to have variable names "cleaned" by default
   options('ibis.cleannames' = TRUE)
   # Known seed
-  options('ibis.seed' = 19372)
+  options('ibis.seed' = (rpois(1, 1000) + Sys.getpid()))
   # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
