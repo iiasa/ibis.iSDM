@@ -318,7 +318,7 @@ references:
     email: edzer.pebesma@uni-muenster.de
     orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'
-  version: '>= 0.9'
+  version: '>= 1.0'
 - type: software
   title: stars
   abstract: 'stars: Spatiotemporal Arrays, Raster and Vector Data Cubes'
