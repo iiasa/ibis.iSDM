@@ -92,8 +92,8 @@ all models with the uncertainty being the standard deviation of responses.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY,character,character,character,ANY,logical</span></span>
-<span><span class="fu">ensemble_spartial</span><span class="op">(</span><span class="va">...</span>,<span class="va">x.var</span>,<span class="va">method</span>,<span class="va">layer</span>,<span class="va">newdatanormalize</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY,character,character,character,ANY,numeric,logical</span></span>
+<span><span class="fu">ensemble_spartial</span><span class="op">(</span><span class="va">...</span>,<span class="va">x.var</span>,<span class="va">method</span>,<span class="va">layer</span>,<span class="va">newdata</span>,<span class="va">min.value</span>,<span class="va">normalize</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -124,6 +124,12 @@ names in ensembles of <code>SpatRaster</code> objects.</p></dd>
 <dd><p>A optional <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object supplied to
 the model (DefaultL <code>NULL</code>). <em>Note: This object needs to have
 identical names as the original predictors.</em></p></dd>
+
+
+<dt>min.value</dt>
+<dd><p>A optional <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> stating a minimum value that needs
+to be surpassed in each layer before calculating and ensemble
+(Default: <code>NULL</code>).</p></dd>
 
 
 <dt>normalize</dt>

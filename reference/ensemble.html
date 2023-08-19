@@ -131,8 +131,9 @@ weighted means are to be constructed (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>min.value</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> stating a minimum threshold value that needs
-to be surpassed in each layer (Default: <code>NULL</code>).</p></dd>
+<dd><p>A optional <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> stating a minimum value that needs
+to be surpassed in each layer before calculating and ensemble
+(Default: <code>NULL</code>).</p></dd>
 
 
 <dt>layer</dt>
@@ -166,6 +167,8 @@ across all models.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Possible options for creating an ensemble includes:</p><ul><li><p><code>'mean'</code> - Calculates the mean of several predictions.</p></li>
 <li><p><code>'median'</code> - Calculates the median of several predictions.</p></li>
+<li><p><code>'max'</code> - The maximum value across predictions.</p></li>
+<li><p><code>'min'</code> - The minimum value across predictions.</p></li>
 <li><p><code>'weighted.mean'</code> - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).</p></li>
 <li><p><code>'min.sd'</code> - Ensemble created by minimizing the uncertainty among predictions.</p></li>
 <li><p><code>'threshold.frequency'</code> - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.</p></li>
