@@ -587,9 +587,10 @@ methods::setMethod(
     )
 
     # Get file size
-    fz <- (file.size(fname) * 0.000001) |> round(digits = 3)
+    fz <- file.size(fname) |> structure(class="object_size") |>
+      format(units = "auto")
 
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,' MB)'))
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,')'))
     # Load file
     mod <- readRDS(fname)
 
@@ -617,9 +618,15 @@ methods::setMethod(
 
     # Reload prediction if data.frame found
     if(is.data.frame(mod$fits$prediction)){
-      ras <- terra::rast(mod$fits$prediction, type = "xyz", crs = terra::crs(model$background))
-      mod$fits$prediction <- ras
-      rm(ras)
+      if(nrow(mod$fits$prediction)>0){
+        ras <- terra::rast(mod$fits$prediction,
+                           type = "xyz",
+                           crs = terra::crs(model$background))
+        mod$fits$prediction <- ras
+        rm(ras)
+      } else {
+        mod$fits$prediction <- NULL
+      }
     }
 
     # --- #

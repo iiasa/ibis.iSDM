@@ -54,6 +54,7 @@ methods::setMethod(
         }
       }
       results <- obj$get_data(x = what)
+      if(is.Waiver(results)) stop("No fitted prediction in object.")
     } else if(inherits(obj, "BiodiversityScenario")){
       results <-obj$get_data()
       if(!is.null(what)){

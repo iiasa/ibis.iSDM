@@ -651,7 +651,8 @@ engine_xgboost <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = TRUE, type = "response"){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
+                             newdata = NULL, plot = TRUE, type = "response"){
             assertthat::assert_that(is.character(x.var) || is.null(x.var))
             if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")
@@ -659,6 +660,11 @@ engine_xgboost <- function(x,
             model <- self$model
             df <- model$biodiversity[[length( model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
+            if(!is.null(newdata)){
+              newdata <- subset(newdata, select = names(df))
+              assertthat::assert_that(nrow(newdata)>1,ncol(newdata)>1,
+                                      all( names(df) %in% names(df) ))
+            }
 
             # Match x.var to argument
             if(is.null(x.var)){
@@ -675,25 +681,35 @@ engine_xgboost <- function(x,
               rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
 
-            # if values are set, make sure that they cover the data.frame
-            if(!is.null(values)){
-              assertthat::assert_that(length(x.var) == 1)
-              df2 <- list()
-              df2[[x.var]] <- values
-              # Then add the others
-              for(var in colnames(df)){
-                if(var == x.var) next()
-                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+            if(is.null(newdata)){
+              # if values are set, make sure that they cover the data.frame
+              if(!is.null(values)){
+                assertthat::assert_that(length(x.var) == 1)
+                df2 <- list()
+                df2[[x.var]] <- values
+                # Then add the others
+                for(var in colnames(df)){
+                  if(var == x.var) next()
+                  df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+                }
+                df2 <- df2 |> as.data.frame()
+                df2 <- df2[, mod$feature_names]
+              } else {
+                df2 <- list()
+                for(i in x.var) {
+                  df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+                }
+                df2 <- do.call(cbind, df2); names(df2) <- x.var
               }
-              df2 <- df2 |> as.data.frame()
-              df2 <- df2[, mod$feature_names]
             } else {
-              df2 <- list()
-              for(i in x.var) {
-                df2[[i]] <- base::as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
-              }
-              df2 <- do.call(cbind, df2); names(df2) <- x.var
+              # Assume that newdata container has all the variables for the grid
+              df2 <- newdata
             }
+
+            # Get offset if set
+            if(!is.Waiver(model$offset)){
+              of <- model$offset$spatial_offset
+            } else of <- new_waiver()
 
             # Check that variables are in
             assertthat::assert_that(all( x.var %in% colnames(df) ),
@@ -703,8 +719,14 @@ engine_xgboost <- function(x,
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
-              p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                 plot = FALSE, rug = TRUE, train = df)
+              if(!is.Waiver(of)){
+                # Predict with offset
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   plot = FALSE, rug = TRUE, newoffset = of, train = df)
+              } else {
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                                   plot = FALSE, rug = TRUE, train = df)
+              }
               p1 <- p1[,c(x.var, "yhat")]
               names(p1) <- c("partial_effect", "mean")
               p1$variable <- v
@@ -732,44 +754,64 @@ engine_xgboost <- function(x,
             # Get data
             mod <- self$get_data('fit_best')
             model <- self$model
+            params <- self$settings
             x.var <- match.arg(x.var, model$predictors_names, several.ok = FALSE)
 
             # Get predictor
             df <- subset(model$predictors, select = mod$feature_names)
             # Convert all non x.vars to the mean
             # Make template of target variable(s)
-            template <- emptyraster( model$predictors_object$get_data() )
+            template <- try({emptyraster( model$predictors_object$get_data() )},silent = TRUE)
+            if(inherits(template, "try-error")){
+              template <- terra::rast(model$predictors[,c("x", "y")],
+                                        crs = terra::crs(model$background),
+                                        type = "xyz") |>
+                emptyraster()
+            }
+
             # Set all variables other the target variable to constant
-            if(is.null(constant)){
-              # Calculate mean
-              # FIXME: for factor use mode!
-              constant <- apply(df, 2, function(x) mean(x, na.rm=T))
-              for(v in mod$feature_names[ mod$feature_names %notin% x.var]){
-                if(v %notin% names(df) ) next()
-                df[!is.na(df[v]),v] <- as.numeric( constant[v] )
-              }
-            } else {
+            if(!is.null(constant)){
+            #   # Calculate mean
+            #   # FIXME: for factor use mode!
+            #   constant <- apply(df, 2, function(x) mean(x, na.rm=T))
+            #   for(v in mod$feature_names){
+            #     if(v %notin% names(df) ) next()
+            #     if(v %in% x.var) next()
+            #     df[!is.na(df[v]),v] <- as.numeric( constant[v] )
+            #   }
+            # } else {
               df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
             }
             df <- xgboost::xgb.DMatrix(data = as.matrix(df))
 
-            # Spartial prediction
-            suppressWarnings(
-              pp <- predict(
-                object = mod,
-                newdata = df
-              )
-            )
-            assertthat::assert_that(terra::ncell(pp) == length(pp))
+            # Spartial prediction contributions Setting predcontrib = TRUE
+            # allows to calculate contributions of each feature to individual
+            # predictions. For "gblinear" booster, feature contributions are
+            # simply linear terms (feature_beta * feature_value). For "gbtree"
+            # booster, feature contributions are SHAP values
+            pp <- predict(object = mod,
+                          newdata = df,
+                          predcontrib = TRUE) |>
+              as.data.frame()
+            # Get only target variable
+            pp <- subset(pp, select = x.var)
+            # suppressWarnings(
+            #   pp <- predict(
+            #     object = mod,
+            #     newdata = df
+            #   )
+            # )
+            # if(params$get('objective')[[1]]=="binary:logitraw") pp <- ilink(pp, "cloglog")
+            assertthat::assert_that(terra::ncell(template) == nrow(pp))
 
             # Fill output with summaries of the posterior
-            terra::values(template) <- pp
+            template <- fill_rasters(as.data.frame(pp), template)
             names(template) <- 'mean'
             template <- terra::mask(template, model$background)
 
             if(plot){
               # Quick plot
-              terra::plot(template, col = ibis_colours$viridis_plasma,
+              terra::plot(template, col = ibis_colours$ohsu_palette,
                           main = paste0(x.var, collapse ='|'))
             }
             # Also return spatial

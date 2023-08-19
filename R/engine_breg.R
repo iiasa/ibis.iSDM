@@ -529,10 +529,12 @@ engine_breg <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.numeric(variable_length)
             )
             # Settings
@@ -555,34 +557,38 @@ engine_breg <- function(x,
               x.var <- match.arg(x.var, names(df), several.ok = FALSE)
             }
 
-            # Calculate range of predictors
-            if(any(model$predictors_types$type=="factor")){
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            } else {
-              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            }
+            if(is.null(newdata)){
+              # Calculate range of predictors
+              if(any(model$predictors_types$type=="factor")){
+                rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                             function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              } else {
+                rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              }
 
-            df_partial <- list()
-            if(!is.null(values)){ assertthat::assert_that(length(values) >= 1) }
+              df_partial <- list()
+              if(!is.null(values)){ assertthat::assert_that(length(values) >= 1) }
 
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
-            } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
-            }
-            if(!is.null(values)){
-              df_partial[[x.var]] <- values
-            } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-            }
+              # Add all others as constant
+              if(is.null(constant)){
+                for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
+              } else {
+                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              }
+              if(!is.null(values)){
+                df_partial[[x.var]] <- values
+              } else {
+                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+              }
 
-            df_partial <- df_partial |> as.data.frame()
-            if(any(model$predictors_types$type=="factor")){
-              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
-                factor(lvl[1], levels = lvl)
+              df_partial <- df_partial |> as.data.frame()
+              if(any(model$predictors_types$type=="factor")){
+                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+                df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+                  factor(lvl[1], levels = lvl)
+              }
+            } else {
+              df_partial <- newdata |> dplyr::select(any_of(names(df)))
             }
 
             # For Integrated model, take the last one
@@ -610,7 +616,8 @@ engine_breg <- function(x,
 
             if(plot){
               # Make a plot
-              g <- ggplot2::ggplot(data = pred_part, ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
+              g <- ggplot2::ggplot(data = pred_part,
+                                   ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
                 ggplot2::theme_classic(base_size = 18) +
                 ggplot2::geom_ribbon(fill = 'grey90') +
                 ggplot2::geom_line() +
@@ -693,12 +700,19 @@ engine_breg <- function(x,
             pred_part$cv <- pred_part$sd / pred_part$mean
 
             # Now create spatial prediction
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(model$predictors[,c("x", "y")],
+                                        crs = terra::crs(model$background),
+                                        type = "xyz") |>
+                emptyraster()
+            }
             prediction <- fill_rasters(pred_part, prediction)
 
             # Do plot and return result
             if(plot){
-              plot(prediction, col = ibis_colours$viridis_orig)
+              terra::plot(prediction, col = ibis_colours$ohsu_palette,
+                   main = paste0("Spartial effect of ", x.var,collapse = ","))
             }
             return(prediction)
           },

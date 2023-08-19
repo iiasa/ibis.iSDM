@@ -24,6 +24,8 @@ NULL
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
 #' * \code{'median'} - Calculates the median of several predictions.
+#' * \code{'max'} - The maximum value across predictions.
+#' * \code{'min'} - The minimum value across predictions.
 #' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 #' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 #' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
@@ -46,8 +48,9 @@ NULL
 #'   available options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if
 #'   weighted means are to be constructed (Default: \code{NULL}).
-#' @param min.value A [`numeric`] stating a minimum threshold value that needs
-#'   to be surpassed in each layer (Default: \code{NULL}).
+#' @param min.value A optional [`numeric`] stating a minimum value that needs
+#'   to be surpassed in each layer before calculating and ensemble
+#'   (Default: \code{NULL}).
 #' @param layer A [`character`] of the layer to be taken from each prediction
 #'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
 #'   names in ensembles of `SpatRaster` objects.
@@ -128,7 +131,8 @@ methods::setMethod(
     )
 
     # Check the method
-    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
+    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'max', 'min',
+                                  'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
     uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
 
@@ -150,7 +154,7 @@ methods::setMethod(
       # Check that layer is present in supplied mods
       assertthat::assert_that(
         all( sapply(mods, function(x) layer %in% names(x$get_data('prediction')) ) ),
-        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+        msg = paste("Layer", text_red(layer), "not found in supplied objects! Prediction missing?")
       )
 
       # Get prediction stacks from all mods
@@ -164,18 +168,22 @@ methods::setMethod(
       out <- terra::rast()
       for(lyr in layer){
         ras <- terra::rast(sapply(ll_ras, function(x) x[[lyr]]))
-        # If normalize before running an ensemble if parameter set
-        if(normalize) ras <- predictor_transform(ras, option = "norm")
-
         # Apply threshold if set. Set to 0 thus reducing the value of the
         # ensembled layer.
         if(!is.null(min.value)) ras[ras < min.value] <- 0
+
+        # If normalize before running an ensemble if parameter set
+        if(normalize) ras <- predictor_transform(ras, option = "norm")
 
         # Now create the ensemble depending on the option
         if(method == 'mean'){
           new <- terra::mean( ras, na.rm = TRUE)
         } else if(method == 'median'){
           new <- terra::median(ras, na.rm = TRUE)
+        } else if(method == 'max'){
+          new <- max(ras, na.rm = TRUE)
+        } else if(method == 'min'){
+          new <- min(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
@@ -269,12 +277,12 @@ methods::setMethod(
       ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
     }
     ras <- terra::rast(ll_ras)
-    # If normalize before running an ensemble if parameter set
-    if(normalize) ras <- predictor_transform(ras, option = "norm")
-
     # Apply threshold if set. Set to 0 thus reducing the value of the ensembled
     # layer.
     if(!is.null(min.value)) ras[ras < min.value] <- 0
+
+    # If normalize before running an ensemble if parameter set
+    if(normalize) ras <- predictor_transform(ras, option = "norm")
 
     # Now ensemble per layer entry
     out <- terra::rast()
@@ -285,6 +293,10 @@ methods::setMethod(
         new <- terra::mean( ras, na.rm = TRUE)
       } else if(method == 'median'){
         new <- terra::median( ras, na.rm = TRUE)
+      } else if(method == 'max'){
+        new <- max(ras, na.rm = TRUE)
+      } else if(method == 'min'){
+        new <- min(ras, na.rm = TRUE)
       } else if(method == 'weighted.mean'){
         new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
       } else if(method == 'threshold.frequency'){
@@ -381,6 +393,12 @@ methods::setMethod(
     } else if(method == 'median'){
       out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                    1, function(x) stats::median(x, na.rm = TRUE))
+    } else if(method == 'max'){
+      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                   1, function(x) max(x, na.rm = TRUE))
+    } else if(method == 'min'){
+      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                   1, function(x) min(x, na.rm = TRUE))
     } else if(method == 'weighted.mean'){
       out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                    1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
@@ -523,8 +541,6 @@ methods::setMethod(
     }
     assertthat::assert_that(is.null(newdata) || is.data.frame(newdata),
                             msg = "Provide new data as data.frame.")
-    # TODO: Implement for non-spartials!
-    if(is.data.frame(newdata)) stop("Not yet implemented!")
 
     # Get all those that are DistributionModels
     mods <- mc[ sapply(mc, function(x) inherits(x, "DistributionModel") ) ]
@@ -547,7 +563,7 @@ methods::setMethod(
 
     if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a partial ensemble...")
 
-    # Get variable range from the first object
+    # Get variable range from the first object assuming they have similar variables
     # FIXME: Ideally make a consensus, otherwise assumes that same predictor been used
     rr <- range(mods[[1]]$model$predictors[,x.var], na.rm = TRUE)
     assertthat::assert_that(length(rr)==2, !anyNA(rr))
@@ -557,12 +573,16 @@ methods::setMethod(
     out <- data.frame()
     for(obj in mods){
       if(length(grep(x.var, summary(obj)[[1]]))==0){
-        message(paste("Layer", text_red(layer), "not found in model. Skipping!"))
+        message(paste("Variable", text_red(x.var), "not found in",class(obj)[1]," Skipping!"))
         next()
       }
       # Get partial with identical variable length
-      o <- partial(mod = obj, x.var = x.var, variable_length = 100, values = rr, plot = FALSE)
-      assertthat::assert_that(all( o$partial_effect == rr ))
+      if(is.null(newdata)){
+        o <- try({partial(mod = obj, x.var = x.var, variable_length = 100, values = rr, plot = FALSE)},silent = TRUE)
+      } else {
+        o <- try({partial(mod = obj, x.var = x.var, newdata = newdata, plot = FALSE)},silent = TRUE)
+      }
+      if(inherits(o,"try-error")) next() # Skip, variable likely regularized out.
       # Subset to target variable
       o <- o[, c("partial_effect", layer)]
       # Normalize if set
@@ -582,15 +602,39 @@ methods::setMethod(
     if(method == 'mean'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                                   FUN = function(x = out[[layer]]) {
-                                    return(cbind( mean = mean(x), sd = stats::sd(x)))
+                                    return(cbind( mean = mean(x,na.rm = TRUE),
+                                                  sd = stats::sd(x,na.rm = TRUE)))
                                     }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "mean", "sd")
     } else if(method == 'median'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
                        FUN = function(x = out[[layer]]) {
-                         return(cbind( median = stats::median(x), mad = stats::mad(x)))
+                         return(cbind( median = stats::median(x,na.rm = TRUE),
+                                       mad = stats::mad(x,na.rm = TRUE)))
                        }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "median", "mad")
+    }
+
+    # FIXME:
+    # A workaround fix specifically if a BART model is found
+    # Reason is that BART partial effect calculation currently uses
+    # its own step function, thus altering found relationships
+    if(any(is.na(new[,3]))){
+      # Rematch based on distance and aggregate
+      new[,1] <- sapply(new[,1], function(z) rr[which.min(abs(z - rr))] )
+      if(method=="mean"){
+        new <- new |> dplyr::group_by(partial_effect) |>
+          dplyr::summarise(sd = sd(mean,na.rm=TRUE),
+                           mean = mean(mean,na.rm=TRUE)
+                           ) |>
+        dplyr::relocate(mean,.before = sd)
+      } else {
+        new <- new |> dplyr::group_by(partial_effect) |>
+          dplyr::summarise(mad = mad(median,na.rm=TRUE),
+                           median = median(median,na.rm=TRUE)
+          ) |>
+          dplyr::relocate(median,.before = mad)
+      }
     }
     return(new)
   }
@@ -604,6 +648,9 @@ methods::setMethod(
 #' @inherit ensemble_partial details
 #' @inherit ensemble_partial note
 #' @inheritParams ensemble_partial
+#' @param min.value A optional [`numeric`] stating a minimum value that needs
+#'   to be surpassed in each layer before calculating and ensemble
+#'   (Default: \code{NULL}).
 #' @returns A [SpatRaster] object with the combined partial effects of the
 #'   supplied models.
 #' @examples
@@ -620,16 +667,18 @@ methods::setMethod(
 NULL
 methods::setGeneric("ensemble_spartial",
                     signature = methods::signature("..."),
-                    function(..., x.var, method = "mean", layer = "mean",newdata = NULL, normalize = TRUE) standardGeneric("ensemble_spartial"))
+                    function(..., x.var, method = "mean", layer = "mean",
+                             newdata = NULL, min.value = NULL, normalize = TRUE) standardGeneric("ensemble_spartial"))
 
 #' @name ensemble_spartial
 #' @rdname ensemble_spartial
 #' @usage
-#'   \S4method{ensemble_spartial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdatanormalize)
+#'   \S4method{ensemble_spartial}{ANY,character,character,character,ANY,numeric,logical}(...,x.var,method,layer,newdata,min.value,normalize)
 methods::setMethod(
   "ensemble_spartial",
   methods::signature("ANY"),
-  function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE){
+  function(..., x.var, method = "mean", layer = "mean", newdata = NULL,
+           min.value = NULL, normalize = TRUE){
     assertthat::assert_that(
       is.character(x.var),
       msg = "Spartial ensemble requires explicit specification of the parameter x.var."
@@ -654,11 +703,12 @@ methods::setMethod(
     assertthat::assert_that(
       is.character(method),
       is.null(layer) || is.character(layer),
+      is.null(min.value) || is.numeric(min.value),
       is.logical(normalize)
     )
 
     # Check the method
-    method <- match.arg(method, c('mean', 'median'), several.ok = FALSE)
+    method <- match.arg(method, c('mean', 'median', 'max', 'min'), several.ok = FALSE)
 
     if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a spartial ensemble...")
 
@@ -666,7 +716,8 @@ methods::setMethod(
     if(!is.null(newdata)){
       # Set all variables other than the target variables to their mean
       # First check that variables are aligned to used predictor objects
-      assertthat::assert_that(all(x.var %in% names(newdata)))
+      assertthat::assert_that(all(x.var %in% names(newdata)),
+                              msg = "Variable not found in newdata!")
       template <- terra::rast(mods[[1]]$model$predictors[,c("x", "y")],
                                 crs = terra::crs(mods[[1]]$model$background),type = "xyz") |>
         emptyraster()
@@ -693,14 +744,18 @@ methods::setMethod(
     out <- list()
     for(obj in mods){
       if(length(grep(x.var, summary(obj)[[1]]))==0){
-        message(paste("Layer", text_red(layer), "not found in model. Skipping!"))
+        message(paste("Variable", text_red(x.var), "not found in",class(obj)[1]," Skipping!"))
         next()
       }
       # Get spartial
       if(is.null(newdata)){
-        o <- spartial(mod = obj, x.var = x.var, plot = FALSE)
+        o <- try({spartial(mod = obj, x.var = x.var, plot = FALSE)},silent = TRUE)
       } else {
-        o <- obj$project(newdata = nd, layer = layer)
+        o <- try({obj$project(newdata = nd, layer = layer)},silent = TRUE)
+      }
+      if(inherits(o, "try-error")){
+        if(getOption('ibis.setupmessages')) myLog('[Inference]','red',paste0('Spartial calculation failed for ',class(obj)[1]))
+        next()
       }
       assertthat::assert_that(is.Raster(o))
       if(terra::nlyr(o)>1) o <- o[layer]
@@ -713,6 +768,7 @@ methods::setMethod(
     new <- ensemble(out, method = method,
                     normalize = normalize,
                     layer = layer,
+                    min.value = min.value,
                     uncertainty = "none")
     assertthat::assert_that(
       is.Raster(new),msg = "Something went wrong with the ensemble calculation!"

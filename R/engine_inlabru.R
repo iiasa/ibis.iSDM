@@ -1045,7 +1045,8 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = TRUE, type = "response"){
+          partial = function(self, x.var, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = TRUE, type = "response"){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
@@ -1057,6 +1058,7 @@ engine_inlabru <- function(x,
                                     is.character(x.var),
                                     is.numeric(variable_length), variable_length >=1,
                                     is.null(constant) || is.numeric(constant),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.null(values) || is.numeric(values)
             )
 
@@ -1064,42 +1066,46 @@ engine_inlabru <- function(x,
             if(!is.null(mod$summary.random)) vn <- names(mod$summary.random) else vn <- ""
             x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = FALSE)
 
-            # Make a prediction via inlabru
-            if(any(model$predictors_types$type=="factor")){
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            } else {
-              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            }
-            assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
+            if(is.null(newdata)){
+              # Make a prediction via inlabru
+              if(any(model$predictors_types$type=="factor")){
+                rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                             function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              } else {
+                rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              }
+              assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
-            df_partial <- list()
-            # Set length out to value length to have equal coverage
-            if(!is.null(values)){  variable_length <- length(values) }
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
-            } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
-            }
-            if(!is.null(values)){
-              df_partial[[x.var]] <- values
-            } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-            }
-            df_partial <- df_partial |> as.data.frame()
+              df_partial <- list()
+              # Set length out to value length to have equal coverage
+              if(!is.null(values)){  variable_length <- length(values) }
+              # Add all others as constant
+              if(is.null(constant)){
+                for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
+              } else {
+                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              }
+              if(!is.null(values)){
+                df_partial[[x.var]] <- values
+              } else {
+                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+              }
+              df_partial <- df_partial |> as.data.frame()
 
-            if(any(model$predictors_types$type=="factor")){
-              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
-                factor(lvl[1], levels = lvl)
+              if(any(model$predictors_types$type=="factor")){
+                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+                df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+                  factor(lvl[1], levels = lvl)
+              }
+            } else {
+              df_partial <- newdata |> dplyr::select(any_of(names(df)))
             }
 
             ## plot the unique effect of the covariate
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-            pred_cov <- inlabru:::predict.bru(mod,
-                                df_partial,
-                                stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+            pred_cov <- predict(object = mod,
+                                newdata = df_partial,
+                                formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
                                 n.samples = 100,
                                 probs = c(0.05,0.5,0.95)
                                 )
@@ -1183,7 +1189,7 @@ engine_inlabru <- function(x,
               ggplot2::ggplot() +
                 ggplot2::theme_classic(base_size = 18) +
                 inlabru::gg(o, ggplot2::aes(fill = mean)) +
-                ggplot2::scale_fill_gradientn(colours = ibis_colours$divg_bluegreen) +
+                ggplot2::scale_fill_gradientn(colours = ibis_colours$ohsu_palette) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
             }
 

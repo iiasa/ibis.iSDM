@@ -5,8 +5,10 @@
 
 #### Minor improvements and bug fixes
 * Added warnings and checks for missing crs in supplied layers #65
+* Smaller bug and code hamornizations to `ensemble_partial()`, `partial()` and `spartial()`. 
 * Small fix to `threshold()` now returning threshold values correctly. 
 * Smaller bug fixes to `threshold()` in `scenario()` projections.
+* Improved error messages in several functions.
 * Further documentation fixes towards CRAN submission #38
 
 # ibis.iSDM 0.0.7

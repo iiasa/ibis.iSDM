@@ -11,12 +11,13 @@ partial(
   constant = NULL,
   variable_length = 100,
   values = NULL,
+  newdata = NULL,
   plot = FALSE,
   type = "response",
   ...
 )
 
-\S4method{partial}{ANY,character,ANY,numeric,ANY,logical,character}(mod,x.var,constant,variable_length,values,plot,type,...)
+\S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
 
 \method{partial}{DistributionModel}(mod, ...)
 }
@@ -36,6 +37,9 @@ be used (Default: \code{100}).}
 \item{values}{\link{numeric} Directly specified values to compute partial effects
 for. If this parameter is set to anything other than \code{NULL}, the
 parameter \code{"variable_length"} is ignored (Default: \code{NULL}).}
+
+\item{newdata}{An optional \link{data.frame} with provided data for partial
+estimation (Default: \code{NULL}).}
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 

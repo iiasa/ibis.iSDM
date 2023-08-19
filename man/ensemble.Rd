@@ -15,8 +15,9 @@ available options (Default: \code{'mean'}).}
 \item{weights}{(\emph{Optional}) weights provided to the ensemble function if
 weighted means are to be constructed (Default: \code{NULL}).}
 
-\item{min.value}{A \code{\link{numeric}} stating a minimum threshold value that needs
-to be surpassed in each layer (Default: \code{NULL}).}
+\item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
+to be surpassed in each layer before calculating and ensemble
+(Default: \code{NULL}).}
 
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
 (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
@@ -60,6 +61,8 @@ Possible options for creating an ensemble includes:
 \itemize{
 \item \code{'mean'} - Calculates the mean of several predictions.
 \item \code{'median'} - Calculates the median of several predictions.
+\item \code{'max'} - The maximum value across predictions.
+\item \code{'min'} - The minimum value across predictions.
 \item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.

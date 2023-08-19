@@ -512,10 +512,12 @@ engine_glmnet <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.numeric(variable_length)
             )
             check_package("pdp")
@@ -543,23 +545,30 @@ engine_glmnet <- function(x,
             } else {
               rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
-            # if values are set, make sure that they cover the data.frame
-            if(!is.null(values)){
-              assertthat::assert_that(length(x.var) == 1)
-              df2 <- list()
-              df2[[x.var]] <- values
-              # Then add the others
-              for(var in colnames(df)){
-                if(var == x.var) next()
-                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+
+            if(is.null(newdata)){
+              # if values are set, make sure that they cover the data.frame
+              if(!is.null(values)){
+                assertthat::assert_that(length(x.var) == 1)
+                df2 <- list()
+                df2[[x.var]] <- values
+                # Then add the others
+                for(var in colnames(df)){
+                  if(var == x.var) next()
+                  df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+                }
+                df2 <- df2 |> as.data.frame()
+              } else {
+                df2 <- list()
+                for(i in x.var) {
+                  df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+                }
+                df2 <- do.call(cbind, df2); names(df2) <- x.var
               }
-              df2 <- df2 |> as.data.frame()
             } else {
-              df2 <- list()
-              for(i in x.var) {
-                df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
-              }
-              df2 <- do.call(cbind, df2); names(df2) <- x.var
+              # Assume all variables are present
+              df2 <- newdata |> dplyr::select(any_of(names(df)))
+              assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
             }
 
             # Get offset if set
@@ -655,12 +664,20 @@ engine_glmnet <- function(x,
             ) |> as.data.frame()
 
             # Now create spatial prediction
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- try({
+              emptyraster( model$predictors_object$get_data()[[1]] )},
+              silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(model$predictors[,c("x", "y")],
+                                      crs = terra::crs(model$background),
+                                      type = "xyz") |>
+                emptyraster()
+            }
             prediction[df_sub$rowid] <- pred_gn[,1]
             names(prediction) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
+            if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
             return(prediction)
           },
           # Convergence check

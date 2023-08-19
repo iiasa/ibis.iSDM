@@ -947,6 +947,11 @@ engine_inla <- function(x,
 
                 # Plot and return result
               },
+              # Spartial dummy function
+              spartial = function(self){
+                message("Spartial function not developed for INLA-engine.")
+                return(NULL)
+              },
               # Model convergence check
               has_converged = function(self){
                 fit <- self$get_data("fit_best")

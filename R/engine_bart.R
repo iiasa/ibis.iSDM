@@ -529,25 +529,42 @@ engine_bart <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
-            bart_partial_effect(model, x.vars = x.var,
-                                transform = self$settings$data$binary, values = values )
+            if(is.null(newdata)){
+              bart_partial_effect(model, x.vars = x.var,
+                                  transform = self$settings$data$binary,
+                                  variable_length = variable_length,
+                                  values = values,
+                                  equal = TRUE,
+                                  plot = plot )
+            } else {
+              # Set the values to newdata
+              bart_partial_effect(model, x.vars = x.var,
+                                  transform = self$settings$data$binary,
+                                  values = newdata[[x.var]],
+                                  plot = plot)
+            }
           },
           # Spatial partial dependence plot option from embercardo
-          spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE, type = NULL){
-            model <- self$get_data('fit_best')
-            assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels'),
+          spartial = function(self, x.var = NULL, equal = FALSE,
+                              smooth = 1, transform = TRUE, type = NULL){
+            fit <- self$get_data('fit_best')
+            model <- self$model
+            predictors <- model$predictors_object$get_data()
+            assertthat::assert_that(x.var %in% attr(fit$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 
-            if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+            if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
 
             # Calculate
-            p <- bart_partial_space(model, predictors, x.var, equal, smooth, transform)
+            p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)
 
-            terra::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+            terra::plot(p, col = ibis_colours$ohsu_palette,
+                        main = paste0(x.var, collapse ='|'))
             # Also return spatial
             return(p)
           },

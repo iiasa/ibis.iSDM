@@ -16,6 +16,8 @@ NULL
 #' @param values [numeric] Directly specified values to compute partial effects
 #'   for. If this parameter is set to anything other than \code{NULL}, the
 #'   parameter \code{"variable_length"} is ignored (Default: \code{NULL}).
+#' @param newdata An optional [data.frame] with provided data for partial
+#'   estimation (Default: \code{NULL}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param type A specified type, either \code{'response'} or \code{'predictor'}.
 #'   Can be missing.
@@ -37,27 +39,29 @@ NULL
 methods::setGeneric(
   "partial",
   signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
+  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, newdata = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
 
 #' @name partial
 #' @rdname partial
 #' @usage
-#'   \S4method{partial}{ANY,character,ANY,numeric,ANY,logical,character}(mod,x.var,constant,variable_length,values,plot,type,...)
+#'   \S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "response",...) {
+  function(mod, x.var, constant = NULL, variable_length = 100,
+           values = NULL, newdata = NULL, plot = FALSE, type = "response",...) {
     assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             is.character(x.var),
                             is.null(constant) || is.numeric(constant),
                             is.numeric(variable_length),
+                            is.null(newdata) || is.data.frame(newdata),
                             is.numeric(values) || is.null(values),
                             is.logical(plot)
     )
     # Work around to call partial response directly
     if(inherits(mod,'DistributionModel')){
-      partial.DistributionModel(mod, x.var, constant, variable_length, values, plot, type, ...)
+      partial.DistributionModel(mod, x.var, constant, variable_length, values, newdata, plot, type, ...)
     } else {
       stop('Partial response calculation not supported!')
     }
@@ -203,7 +207,8 @@ methods::setMethod(
     pred <- mod$get_data() # Get prediction
     # Get target variables from the model object
     vars <- model$predictors_object$get_data()[[x.var]]
-    assertthat::assert_that(is.Raster(pred), is.Raster(vars))
+    assertthat::assert_that(is.Raster(pred), is.Raster(vars),
+                            msg = "Either no prediction or predictor object found.")
 
     # Collect observations from model object
     obs <- collect_occurrencepoints(model = model,

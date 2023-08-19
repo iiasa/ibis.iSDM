@@ -166,7 +166,8 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
         }
       }
     }
-    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev, keepevery = variable_length, pl = FALSE)
+    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev,
+                         keepevery = variable_length, pl = FALSE)
 
   } else {
     levq = c(0.05, seq(0.1, 0.9, length.out = (variable_length-2)/smooth), 0.95)

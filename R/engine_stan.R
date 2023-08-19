@@ -687,7 +687,8 @@ engine_stan <- function(x,
 
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "predictor"){
+          partial = function(self, x.var, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = "predictor"){
             # Get model and intercept if present
             mod <- self$get_data('fit_best')
             model <- self$model
@@ -696,27 +697,33 @@ engine_stan <- function(x,
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
                                     is.numeric(variable_length) && variable_length > 1,
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.null(constant) || is.numeric(constant)
             )
             # Check that given variable is in x.var
             assertthat::assert_that(x.var %in% model$predictors_names)
-            # Calculate
-            rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            df_partial <- list()
-            if(!is.null(values)){ variable_length <- length(values) }
 
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), variable_length )
+            if(is.null(newdata)){
+              # Calculate
+              rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              df_partial <- list()
+              if(!is.null(values)){ variable_length <- length(values) }
+
+              # Add all others as constant
+              if(is.null(constant)){
+                for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), variable_length )
+              } else {
+                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              }
+              if(!is.null(values)){
+                df_partial[[x.var]] <- values
+              } else {
+                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+              }
+              df_partial <- df_partial |> as.data.frame()
             } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              df_partial <- newdata |> dplyr::select(any_of(model$predictors_names))
             }
-            if(!is.null(values)){
-              df_partial[[x.var]] <- values
-            } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-            }
-            df_partial <- df_partial |> as.data.frame()
 
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
@@ -818,12 +825,20 @@ engine_stan <- function(x,
                                                    mode = type # Linear predictor
             )
 
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- try({
+              emptyraster( self$get_data('prediction') )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(model$predictors[,c("x", "y")],
+                                      crs = terra::crs(model$background),
+                                      type = "xyz") |>
+                emptyraster()
+            }
             prediction <- fill_rasters(pred_part, prediction)
 
             # Do plot and return result
             if(plot){
-              plot(prediction[[c("mean","sd")]], col = ibis_colours$viridis_orig)
+              terra::plot(prediction[[c("mean","sd")]],
+                          col = ibis_colours$ohsu_palette)
             }
             return(prediction)
           },

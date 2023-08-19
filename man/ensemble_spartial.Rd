@@ -4,7 +4,7 @@
 \alias{ensemble_spartial}
 \title{Function to create an ensemble of spartial effects from multiple models}
 \usage{
-\S4method{ensemble_spartial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdatanormalize)
+\S4method{ensemble_spartial}{ANY,character,character,character,ANY,numeric,logical}(...,x.var,method,layer,newdata,min.value,normalize)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects from which partial
@@ -24,6 +24,10 @@ names in ensembles of \code{SpatRaster} objects.}
 \item{newdata}{A optional \code{\link{data.frame}} or \code{\link{SpatRaster}} object supplied to
 the model (DefaultL \code{NULL}). \emph{Note: This object needs to have
 identical names as the original predictors.}}
+
+\item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
+to be surpassed in each layer before calculating and ensemble
+(Default: \code{NULL}).}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be
 normalized to a scale of 0-1 (Default: \code{TRUE}).}
