@@ -9,17 +9,19 @@
 \arguments{
 \item{fname}{A \code{\link{character}} depicting an output filename.}
 
-\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
+Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 }
 \value{
 A \code{\link{DistributionModel}} object.
 }
 \description{
-The \code{load_model} function (opposed to the \code{write_model}) loads previous saved
-\code{\link{DistributionModel}}. It is essentially a wrapper to \code{\link{readRDS}}.
+The \code{load_model} function (opposed to the \code{write_model}) loads
+previous saved \code{\link{DistributionModel}}. It is essentially a wrapper to
+\code{\link{readRDS}}.
 
-When models are loaded, they are briefly checked for their validity and presence of
-necessary components.
+When models are loaded, they are briefly checked for their validity and
+presence of necessary components.
 }
 \examples{
 \dontrun{

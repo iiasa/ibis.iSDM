@@ -7,7 +7,8 @@
 clamp_predictions(model, pred)
 }
 \arguments{
-\item{model}{A \code{\link{list}} with the input data used for inference. Created during model setup.}
+\item{model}{A \code{\link{list}} with the input data used for inference. Created
+during model setup.}
 
 \item{pred}{An optional \code{\link{data.frame}} of the prediction container.}
 }
@@ -15,16 +16,19 @@ clamp_predictions(model, pred)
 A \code{\link{data.frame}} with the clamped predictors.
 }
 \description{
-To limit extreme extrapolation it is possible to \code{'clamp'} an existing projection to the range
-of predictor values observed during model training.
-This function takes an internal model matrix and restricts the values seen in the predictor matrix
-to those observed during training.
+To limit extreme extrapolation it is possible to \code{'clamp'}
+an existing projection to the range of predictor values observed during model
+training. This function takes an internal model matrix and restricts the
+values seen in the predictor matrix to those observed during training.
 }
 \note{
-This function is meant to be used within a certain \code{"engine"} or within \code{\link{project}}.
+This function is meant to be used within a certain \code{"engine"} or
+within \code{\link{project}}.
 }
 \references{
-Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
+Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., &
+Blair, M. E. (2017). Opening the black box: An open-source release of
+Maxent. Ecography. https://doi.org/10.1111/ecog.03049
 }
 \keyword{internal}
 \keyword{utils,}

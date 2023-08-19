@@ -13,32 +13,37 @@ BREGPrior(variable, hyper = NULL, ip = NULL)
 
 \item{hyper}{A \code{\link{numeric}} estimate of the mean regression coefficients.}
 
-\item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability of the target variable (Default: \code{NULL}).}
+\item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability
+of the target variable (Default: \code{NULL}).}
 }
 \description{
-Function to include prior information via Zellner-style spike and slab prior for
-generalized linear models used in \link{engine_breg}. These priors are similar to
-the horseshoe priors used in regularized \link{engine_stan} models and penalize regressions
-by assuming most predictors having an effect of \code{0}.
+Function to include prior information via Zellner-style spike
+and slab prior for generalized linear models used in \link{engine_breg}. These
+priors are similar to the horseshoe priors used in regularized \link{engine_stan}
+models and penalize regressions by assuming most predictors having an effect
+of \code{0}.
 }
 \details{
-The Zellner-style spike and slab prior for generalized linear models are specified as described
-in the \pkg{Boom} R-package. Currently supported are two options which work for models with
-\code{Poisson} and \code{binomial} (\code{Bernoulli}) distributed errors.
-Two types of priors can be provided on a variable:
+The Zellner-style spike and slab prior for generalized linear models
+are specified as described in the \pkg{Boom} R-package. Currently supported
+are two options which work for models with \code{Poisson} and \code{binomial}
+(\code{Bernoulli}) distributed errors. Two types of priors can be provided on
+a variable:
 \itemize{
 \item \code{"coefficient"} Allows to specify Gaussian priors on the mean coefficients of the model.
-Priors on the coefficients can be provided via the \code{"hyper"} parameter. Note that variables
-with such a prior can still be regularized out from the model.
+Priors on the coefficients can be provided via the \code{"hyper"} parameter.
+Note that variables with such a prior can still be regularized out from the
+model.
 \item \code{"inclusion.probability"} A \code{\link{vector}} giving the prior probability of inclusion for the
-specified variable. This can be useful when prior information on preference is known but not the
-strength of it.
+specified variable. This can be useful when prior information on preference
+is known but not the strength of it.
 }
 
-If coefficients are set, then the inclusion probability is also modified by default. However
-even when not knowing a particular estimate of a beta coefficients and their direction, one can still
-provide an estimate of the inclusion probability.
-In other words: \strong{The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.}
+If coefficients are set, then the inclusion probability is also modified by
+default. However even when not knowing a particular estimate of a beta
+coefficients and their direction, one can still provide an estimate of the
+inclusion probability. In other words:
+\strong{The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.}
 }
 \examples{
 \dontrun{

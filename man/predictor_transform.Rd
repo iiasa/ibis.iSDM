@@ -16,14 +16,19 @@ predictor_transform(
 \arguments{
 \item{env}{A \code{\link{SpatRaster}} object.}
 
-\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},
-\code{'scale'}, \code{'norm'}, \code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.}
+\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed
+in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'},
+\code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'}
+\code{'pca'}, \code{'revjack'}). See Details.}
 
-\item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be clipped for windsorization (Default: \code{c(.05,.95)}).}
+\item{windsor_props}{A \code{\link{numeric}} vector specifying the proportions to be
+clipped for windsorization (Default: \code{c(.05,.95)}).}
 
-\item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the minimum amount of variance to be covered (Default: \code{0.8}).}
+\item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the
+minimum amount of variance to be covered (Default: \code{0.8}).}
 
-\item{method}{As \code{'option'} for more intuitive method setting. Can be left empty (in this case option has to be set).}
+\item{method}{As \code{'option'} for more intuitive method setting. Can be
+left empty (in this case option has to be set).}
 
 \item{...}{other options (Non specified).}
 }
@@ -31,9 +36,11 @@ predictor_transform(
 Returns a adjusted \code{\link{SpatRaster}} object of identical resolution.
 }
 \description{
-This function allows the transformation of provided environmental predictors (in \code{\link{SpatRaster}} format).
-A common use case is for instance the standardization (or scaling) of all predictors prior to model fitting.
-This function works both with \code{\link{SpatRaster}} as well as with \code{\link{stars}} objects.
+This function allows the transformation of provided
+environmental predictors (in \code{\link{SpatRaster}} format). A common use case is
+for instance the standardization (or scaling) of all predictors prior to
+model fitting. This function works both with \code{\link{SpatRaster}} as well as with
+\code{\link{stars}} objects.
 }
 \details{
 Available options are:
@@ -43,14 +50,17 @@ Available options are:
 A sensible default to for most model fitting.
 \item \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
 \item \code{'windsor'} This applies a 'windsorization' to an existing raster layer by setting the lowest, respectively
-largest values to the value at a certain percentage level (e.g. 95\%). Those can be set via the parameter \code{"windsor_props"}.
+largest values to the value at a certain percentage level (e.g. 95\%). Those
+can be set via the parameter \code{"windsor_props"}.
 \item \code{'windsor_thresh'} Same as option 'windsor', however in this case values are clamped to a thresholds
 rather than certain percentages calculated on the data.
 \item \code{'percentile'} This converts and bins all values into percentiles, e.g. the top 10\% or lowest 10\% of values and so on.
 \item \code{'pca'} This option runs a principal component decomposition of all predictors (via \code{\link[=prcomp]{prcomp()}}).
-It returns new predictors resembling all components in order of the most important ones. Can be useful to
-reduce collinearity, however note that this changes all predictor names to 'PCX', where X is the number of the component.
-The parameter \code{'pca.var'} can be modified to specify the minimum variance to be covered by the axes.
+It returns new predictors resembling all components in order of the most
+important ones. Can be useful to reduce collinearity, however note that
+this changes all predictor names to 'PCX', where X is the number of the
+component. The parameter \code{'pca.var'} can be modified to specify the
+minimum variance to be covered by the axes.
 \item \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
 Identified outliers are by default set to \code{NA}.
 }

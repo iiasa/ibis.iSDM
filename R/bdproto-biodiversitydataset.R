@@ -134,7 +134,8 @@ BiodiversityDatasetCollection <- bdproto(
   get_id_byType = function(self, type){
     assertthat::assert_that(is.character(type), !missing(type))
     # Check whether type is correctly set
-    if(type %notin% c("Point - Presence only","Point - Presence absence",'Polygon - Presence only','Polygon - Presence absence')){
+    if(type %notin% c("Point - Presence only","Point - Presence absence",
+                      'Polygon - Presence only','Polygon - Presence absence')){
       type <- switch(type,
                       'poipo' = "Point - Presence only",
                       'poipa' = "Point - Presence absence",

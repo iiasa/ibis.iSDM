@@ -1,8 +1,8 @@
 #' Built formula for XGBOOST model
 #'
-#' @description
-#' This function built a formula for a `engine_xgboost()` model.
-#' @param obj A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @description This function built a formula for a `engine_xgboost()` model.
+#' @param obj A [`list()`] object containing the prepared model data for a given
+#'   biodiversity dataset.
 #' @author Martin Jung
 #' @note Function is not meant to be run outside the train() call.
 #' @keywords internal
@@ -19,12 +19,14 @@ built_formula_xgboost <- function(obj){
 
   # Default equation found
   if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
-    # XGboost does not explicitly work with formulas, thus all supplied objects are assumed to be part
-    # a covariate
+    # XGboost does not explicitly work with formulas, thus all supplied objects
+    # are assumed to be part a covariate
     form <- new_waiver()
-    # Note: Priors are added in the fitted distribution object through the model object
+    # Note: Priors are added in the fitted distribution object through the model
+    # object
   } else{
-    # If custom supplied formula, check that variable names match the supplied predictors
+    # If custom supplied formula, check that variable names match the supplied
+    # predictors
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
 

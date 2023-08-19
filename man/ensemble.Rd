@@ -9,62 +9,79 @@
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects.}
 
-\item{method}{Approach on how the ensemble is to be created. See details for available options (Default: \code{'mean'}).}
+\item{method}{Approach on how the ensemble is to be created. See details for
+available options (Default: \code{'mean'}).}
 
-\item{weights}{(\emph{Optional}) weights provided to the ensemble function if weighted means are to be constructed (Default: \code{NULL}).}
+\item{weights}{(\emph{Optional}) weights provided to the ensemble function if
+weighted means are to be constructed (Default: \code{NULL}).}
 
-\item{min.value}{A \code{\link{numeric}} stating a minimum threshold value that needs to be surpassed in each layer (Default: \code{NULL}).}
+\item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
+to be surpassed in each layer before calculating and ensemble
+(Default: \code{NULL}).}
 
-\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction (Default: \code{'mean'}). If set to \code{NULL}
-ignore any of the layer names in ensembles of \code{SpatRaster} objects.}
+\item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
+(Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
+names in ensembles of \code{SpatRaster} objects.}
 
-\item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be normalized to a scale of 0-1 (Default: \code{FALSE}).}
+\item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be
+normalized to a scale of 0-1 (Default: \code{FALSE}).}
 
-\item{uncertainty}{A \code{\link{character}} indicating how the uncertainty among models should be calculated. Available options include
-\code{"none"}, the standard deviation (\code{"sd"}), the average of all PCA axes except the first \code{"pca"},
-the coefficient of variation (\code{"cv"}, Default) or the range between the lowest and highest value (\code{"range"}).}
+\item{uncertainty}{A \code{\link{character}} indicating how the uncertainty among
+models should be calculated. Available options include \code{"none"}, the
+standard deviation (\code{"sd"}), the average of all PCA axes except the
+first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
+the range between the lowest and highest value (\code{"range"}).}
 }
 \value{
-A \code{\link{SpatRaster}} object containing the ensemble of the provided predictions specified by \code{method} and a
-coefficient of variation across all models.
+A \code{\link{SpatRaster}} object containing the ensemble of the provided
+predictions specified by \code{method} and a coefficient of variation
+across all models.
 }
 \description{
-Ensemble models calculated on multiple models have often been shown to
-outcompete any single model in comparative assessments (Valavi et al. 2022).
+Ensemble models calculated on multiple models have often been
+shown to outcompete any single model in comparative assessments (Valavi et
+al. 2022).
 
 This function creates an ensemble of multiple provided distribution models
-fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have estimated predictions with a given method and
-optional uncertainty in form of the standard deviation or similar.
-Through the \code{layer} parameter it can be specified which part of the prediction
-should be averaged in an ensemble. This can be for instance the \emph{mean} prediction and/or
-the standard deviation \emph{sd}. See Details below for an overview of the different methods.
+fitted with the \code{\link{ibis.iSDM-package}}. Each model has to have estimated
+predictions with a given method and optional uncertainty in form of the
+standard deviation or similar. Through the \code{layer} parameter it can be
+specified which part of the prediction should be averaged in an ensemble.
+This can be for instance the \emph{mean} prediction and/or the standard deviation
+\emph{sd}. See Details below for an overview of the different methods.
 
-Also returns a coefficient of variation (cv) as output of the ensemble, but note
-this should not be interpreted as measure of model uncertainty as it cannot
-capture parameter uncertainty of individual models; rather it reflects variation among predictions which
-can be due to many factors including simply differences in model complexity.
+Also returns a coefficient of variation (cv) as output of the ensemble, but
+note this should not be interpreted as measure of model uncertainty as it
+cannot capture parameter uncertainty of individual models; rather it reflects
+variation among predictions which can be due to many factors including simply
+differences in model complexity.
 }
 \details{
 Possible options for creating an ensemble includes:
 \itemize{
 \item \code{'mean'} - Calculates the mean of several predictions.
 \item \code{'median'} - Calculates the median of several predictions.
+\item \code{'max'} - The maximum value across predictions.
+\item \code{'min'} - The minimum value across predictions.
 \item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 \item \code{'pca'} - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).
 }
 
-In addition to the different ensemble methods, a minimal threshold (\code{min.value}) can be set that needs to be surpassed for averaging.
-By default this option is not used (Default: \code{NULL}).
+In addition to the different ensemble methods, a minimal threshold
+(\code{min.value}) can be set that needs to be surpassed for averaging. By
+default this option is not used (Default: \code{NULL}).
 
-Note by default only the band in the \code{layer} parameter is composited. If supported by the model
-other summary statistics from the posterior (e.g. \code{'sd'}) can be specified.
+Note by default only the band in the \code{layer} parameter is composited. If
+supported by the model other summary statistics from the posterior (e.g.
+\code{'sd'}) can be specified.
 }
 \note{
-If a list is supplied, then it is assumed that each entry in the list is a fitted \code{\link{DistributionModel}} object.
-Take care not to create an ensemble of models constructed with different link functions, e.g. logistic vs \link{log}. In this case
-the \code{"normalize"} parameter has to be set.
+If a list is supplied, then it is assumed that each entry in the list
+is a fitted \code{\link{DistributionModel}} object. Take care not to create an ensemble
+of models constructed with different link functions, e.g. logistic vs \link{log}.
+In this case the \code{"normalize"} parameter has to be set.
 }
 \examples{
 \dontrun{

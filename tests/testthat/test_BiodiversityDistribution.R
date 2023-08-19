@@ -37,6 +37,11 @@ test_that('Setting up a distribution model',{
   expect_null(x$get_engine())
   expect_vector(names(x))
 
+  # Add small error check by setting crs to NULL
+  background2 <- background
+  terra::crs(background2) <- NULL
+  expect_error(x <- distribution(background2))
+
   # Now add one variable
   x <- x |> add_biodiversity_poipo(virtual_points,field_occurrence = 'Observed',name = 'Virtual points')
   expect_message(x$biodiversity,NA)

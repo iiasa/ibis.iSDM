@@ -9,13 +9,16 @@
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
 
-\item{fname}{A \code{\link{character}} depicting an output filename.
-The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).}
+\item{fname}{A \code{\link{character}} depicting an output filename. The suffix
+determines the file type of the output (Options: \code{'rds'},
+\code{'rdata'}).}
 
-\item{partial}{A \code{\link{logical}} value determining whether partial variable contributions should be calculated and added
-to the model summary. \strong{Note that this can be rather slow} (Default: \code{FALSE}).}
+\item{partial}{A \code{\link{logical}} value determining whether partial variable
+contributions should be calculated and added to the model summary. \strong{Note
+that this can be rather slow} (Default: \code{FALSE}).}
 
-\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
+Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 
 \item{...}{Any other arguments passed on the individual functions.}
 }
@@ -23,14 +26,16 @@ to the model summary. \strong{Note that this can be rather slow} (Default: \code
 No R-output is created. A file is written to the target direction.
 }
 \description{
-The \code{\link{write_summary}} function is a wrapper function to create summaries from fitted \code{\link{DistributionModel}} or
-\code{\link{BiodiversityScenario}} objects. This function will extract parameters and statistics about the used data
-from the input object and writes the output as either \code{'rds'} or \code{'rdata'} file. Alternative, more open file formats
-are under consideration.
+The \code{\link{write_summary}} function is a wrapper function to create
+summaries from fitted \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}}
+objects. This function will extract parameters and statistics about the used
+data from the input object and writes the output as either \code{'rds'} or
+\code{'rdata'} file. Alternative, more open file formats are under
+consideration.
 }
 \note{
-No predictions or tabular data is saved through this function.
-Use \code{\link[=write_output]{write_output()}} to save those.
+No predictions or tabular data is saved through this function. Use
+\code{\link[=write_output]{write_output()}} to save those.
 }
 \examples{
 \dontrun{

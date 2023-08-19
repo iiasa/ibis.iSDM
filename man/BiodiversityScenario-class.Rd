@@ -5,9 +5,8 @@
 \alias{BiodiversityScenario}
 \title{Prototype for a biodiversity scenario from a trained model}
 \description{
-Base \code{\link{proto}} class for any biodiversity scenario objects.
-Serves as container that supplies data and functions to
-other \code{\link{proto}} classes.
+Base \code{\link{proto}} class for any biodiversity scenario objects. Serves as
+container that supplies data and functions to other \code{\link{proto}} classes.
 }
 \seealso{
 Other bdproto: 

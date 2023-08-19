@@ -9,42 +9,50 @@ INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)
 \S4method{INLAPrior}{character,character,ANY}(variable,type,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters. See description.
-The default values are set to a mean of \code{0} and a precision of \code{0.001}.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
+hyper-parameters. See description. The default values are set to a mean of
+\code{0} and a precision of \code{0.001}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-For any fixed and random effect INLA supports a range of different priors of exponential distributions.
+For any fixed and random effect INLA supports a range of
+different priors of exponential distributions.
 
-Currently supported for INLA in ibis.iSDM are the following priors that can be specified via \code{"type"}:
+Currently supported for INLA in ibis.iSDM are the following priors that can
+be specified via \code{"type"}:
 \itemize{
 \item \code{"normal"} or \code{"gaussian"}: Priors on normal distributed and set to specified variable. Required parameters
-are a mean and a precision estimate provided to \code{"hyper"}. Note that precision is not equivalent
-(rather the inverse) to typical standard deviation specified in Gaussian priors. Defaults are set to a mean of \code{0}
-and a precision of \code{0.001}.
+are a mean and a precision estimate provided to \code{"hyper"}. Note that
+precision is not equivalent (rather the inverse) to typical standard
+deviation specified in Gaussian priors. Defaults are set to a mean of
+\code{0} and a precision of \code{0.001}.
 \item \code{"clinear"}: Prior that places a constraint on the linear coefficients of a model
-so as that the coefficient is in a specified interval \code{"c(lower,upper)"}. Specified through hyper these values can be
+so as that the coefficient is in a specified interval
+\code{"c(lower,upper)"}. Specified through hyper these values can be
 negative, positive or infinite.
 \item \code{"spde"}, specifically \code{'prior.range'} and \code{'prior.sigma'}: Specification of
-penalized complexity priors which can be added to a SPDE spatial random effect added via \code{\link[=add_latent_spatial]{add_latent_spatial()}}.
-Here the range of the penalized complexity prior can be specified through \code{'prior.range'} and
-the uncertainty via \code{'prior.sigma'} both supplied to the options 'type' and 'hyper'.
+penalized complexity priors which can be added to a SPDE spatial random
+effect added via \code{\link[=add_latent_spatial]{add_latent_spatial()}}. Here the range of the penalized
+complexity prior can be specified through \code{'prior.range'} and the
+uncertainty via \code{'prior.sigma'} both supplied to the options 'type' and
+'hyper'.
 }
 
-Other priors available in INLA \code{ names(INLA::inla.models()$prior) ) } might also work, but have not
-been tested!
+Other priors available in INLA \code{ names(INLA::inla.models()$prior) ) }
+might also work, but have not been tested!
 }
 \note{
-Compared to other engines, INLA does unfortunately does not support priors related to
-more stringent parameter regularization such as Laplace or Horseshoe priors,
-which limits the capability of \code{\link{engine_inla}} for regularization. That
-being said many of the default uninformative priors act already
-regularize the coefficients to some degree.
+Compared to other engines, INLA does unfortunately does not support
+priors related to more stringent parameter regularization such as Laplace or
+Horseshoe priors, which limits the capability of \code{\link{engine_inla}} for
+regularization. That being said many of the default uninformative priors act
+already regularize the coefficients to some degree.
 }
 \references{
 \itemize{

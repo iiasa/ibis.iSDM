@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.0.7
+Version: 0.0.8
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -36,7 +36,7 @@ Imports:
     posterior,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
-    sf (>= 0.9),
+    sf (>= 1.0),
     stars (>= 0.5),
     stats,
     tibble (>= 2.0.0),
@@ -61,6 +61,8 @@ Suggests:
     modEvA,
     progress,
     rmarkdown,
+    Boruta,
+    matrixStats,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
     pdp,

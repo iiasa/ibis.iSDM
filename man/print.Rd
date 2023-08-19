@@ -59,7 +59,8 @@
 Object specific.
 }
 \description{
-Display information about any object created through the \pkg{ibis.iSDM} R-package.
+Display information about any object created through the \pkg{ibis.iSDM}
+R-package.
 }
 \examples{
 \dontrun{

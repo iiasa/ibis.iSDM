@@ -1,29 +1,36 @@
 #' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
 NULL
+
 #' Use of Gradient Descent Boosting for model estimation
 #'
-#' @description
-#' Gradient descent boosting is an efficient way to optimize any loss function
-#' of a generalized linear or additive model (such as the GAMs available through the \code{"mgcv"} R-package).
-#' It furthermore automatically regularizes the fit, thus the resulting model only contains the
-#' covariates whose baselearners have some influence on the response.
-#' Depending on the type of the \code{add_biodiversity} data, either poisson process models or
-#' logistic regressions are estimated. If the \code{"only_linear"} term in [train] is set to \code{FALSE},
-#' splines are added to the estimation, thus providing a non-linear additive inference.
+#' @description Gradient descent boosting is an efficient way to optimize any
+#' loss function of a generalized linear or additive model (such as the GAMs
+#' available through the \code{"mgcv"} R-package). It furthermore automatically
+#' regularizes the fit, thus the resulting model only contains the covariates
+#' whose baselearners have some influence on the response. Depending on the type
+#' of the \code{add_biodiversity} data, either poisson process models or
+#' logistic regressions are estimated. If the \code{"only_linear"} term in
+#' [train] is set to \code{FALSE}, splines are added to the estimation, thus
+#' providing a non-linear additive inference.
 #'
-#' @details:
-#' This package requires the \code{"mboost"} R-package to be installed.
-#' It is in philosophy somewhat related to the [engine_xgboost] and \code{"XGBoost"} R-package,
-#' however providing some additional desirable features that make estimation quicker and
-#' particularly useful for spatial projections. Such as for instance the ability to specifically add
-#' spatial baselearners via [add_latent_spatial] or the specification of
-#' monotonically constrained priors via [GDBPrior].
+#' @details: This package requires the \code{"mboost"} R-package to be
+#' installed. It is in philosophy somewhat related to the [engine_xgboost] and
+#' \code{"XGBoost"} R-package, however providing some additional desirable
+#' features that make estimation quicker and particularly useful for spatial
+#' projections. Such as for instance the ability to specifically add spatial
+#' baselearners via [add_latent_spatial] or the specification of monotonically
+#' constrained priors via [GDBPrior].
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter An [`integer`] giving the number of boosting iterations (Default: \code{2e3L}).
-#' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1} defining the shrinkage parameter.
-#' @param empirical_risk method for empirical risk calculation.
-#' Available options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).
-#' @param type The mode used for creating posterior predictions. Either making \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).
+#' @param iter An [`integer`] giving the number of boosting iterations (Default:
+#'   \code{2e3L}).
+#' @param learning_rate A bounded [`numeric`] value between \code{0} and
+#'   \code{1} defining the shrinkage parameter.
+#' @param empirical_risk method for empirical risk calculation. Available
+#'   options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default:
+#'   \code{'inbag'}).
+#' @param type The mode used for creating posterior predictions. Either making
+#'   \code{"link"}, \code{"response"} or \code{"class"} (Default:
+#'   \code{"response"}).
 #' @param ... Other variables or control parameters
 #' @references
 #' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
@@ -433,7 +440,7 @@ engine_gdb <- function(x,
             cvf <- mboost::cv(stats::model.weights(fit_gdb),B = 5, type = "kfold")
             try({cvm <- mboost::cvrisk(fit_gdb,
                                        folds = cvf, grid = grs,
-                                       papply = pbapply::pblapply )
+                                       papply = parallel::parLapply )
             }, silent = TRUE)
             rm(cvf, grs)
           }
@@ -547,10 +554,12 @@ engine_gdb <- function(x,
             return(temp)
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL){
+          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL,
+                             newdata = NULL, plot = FALSE, type = NULL){
             # Assert that variable(s) are in fitted model
             assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost'),
                                      is.numeric(variable_length),
+                                     is.null(newdata) || is.data.frame(newdata),
                                      all(is.character(x.var)))
             # Unlike the effects function, build specific predictor for target variable(s) only
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
@@ -560,60 +569,64 @@ engine_gdb <- function(x,
             model <- self$model
 
             # Special treatment for factors
-            variable_range <- list()
-            dummy <- as.data.frame(matrix(nrow = variable_length))
-            # Loop through the provided variables
-            for(v in x.var){
-              if(any(model$predictors_types$type=="factor")){
-                if(any(x.var %in% model$predictors_types$predictors[model$predictors_types$type=="factor"])){
-                  for(v in x.var){
-                    variable_range[[v]] <- levels(model$predictors[,v])
+            if(is.null(newdata)){
+              variable_range <- list()
+              dummy <- as.data.frame(matrix(nrow = variable_length))
+              # Loop through the provided variables
+              for(v in x.var){
+                if(any(model$predictors_types$type=="factor")){
+                  if(any(x.var %in% model$predictors_types$predictors[model$predictors_types$type=="factor"])){
+                    for(v in x.var){
+                      variable_range[[v]] <- levels(model$predictors[,v])
+                    }
+                  } else {
+                    variable_range[[v]] <- range(model$predictors[[v]],na.rm = TRUE)
                   }
                 } else {
                   variable_range[[v]] <- range(model$predictors[[v]],na.rm = TRUE)
                 }
-              } else {
-                variable_range[[v]] <- range(model$predictors[[v]],na.rm = TRUE)
-              }
 
-              # Create dummy data.frame
-              if(is.character(variable_range[[v]])){
-                # For factors, just add them
-                dummy[, v] <- factor(variable_range[[v]])
-              } else {
-                # If custom input values are specified
-                if(!is.null(values)){
-                  variable_length <- length(values)
-                  assertthat::assert_that(length(values) >=1)
-                  dummy[, v] <- values
+                # Create dummy data.frame
+                if(is.character(variable_range[[v]])){
+                  # For factors, just add them
+                  dummy[, v] <- factor(variable_range[[v]])
                 } else {
-                  dummy[, v] <- seq(variable_range[[v]][1],variable_range[[v]][2],
-                                    length.out = variable_length)
+                  # If custom input values are specified
+                  if(!is.null(values)){
+                    variable_length <- length(values)
+                    assertthat::assert_that(length(values) >=1)
+                    dummy[, v] <- values
+                  } else {
+                    dummy[, v] <- seq(variable_range[[v]][1],variable_range[[v]][2],
+                                      length.out = variable_length)
+                  }
                 }
               }
-            }
-
-            # For the others
-            if(is.null(constant)){
-              if(any(model$predictors_types$type=='factor')){
-                # Numeric names
-                nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
-                constant <- apply(model$predictors[,nn], 2, function(x) mean(x, na.rm=T))
-                dummy <- cbind(dummy,t(constant))
-                # For each factor duplicate the entire matrix and add factor levels
-                # nf <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='factor')]
-                # for(n in nf){
-                #   var <- data.frame( factor( rep(levels(self$model$predictors[,nf]), nrow(dummy)) ) )
-                #   names(var) <- n
-                #   dummy <- cbind(dummy,var);rm(var)
-                # }
+              # For the others
+              if(is.null(constant)){
+                if(any(model$predictors_types$type=='factor')){
+                  # Numeric names
+                  nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
+                  constant <- apply(model$predictors[,nn], 2, function(x) mean(x, na.rm=T))
+                  dummy <- cbind(dummy,t(constant))
+                  # For each factor duplicate the entire matrix and add factor levels
+                  # nf <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='factor')]
+                  # for(n in nf){
+                  #   var <- data.frame( factor( rep(levels(self$model$predictors[,nf]), nrow(dummy)) ) )
+                  #   names(var) <- n
+                  #   dummy <- cbind(dummy,var);rm(var)
+                  # }
+                } else {
+                  # Calculate mean
+                  constant <- apply(model$predictors, 2, function(x) mean(x, na.rm=T))
+                  dummy <- cbind(dummy, t(constant))
+                }
               } else {
-                # Calculate mean
-                constant <- apply(model$predictors, 2, function(x) mean(x, na.rm=T))
-                dummy <- cbind(dummy, t(constant))
+                dummy[,variables] <- constant
               }
             } else {
-              dummy[,variables] <- constant
+              # Assume all present
+              dummy <- newdata |> dplyr::select(any_of(as.character(variables)))
             }
 
             # Now predict with model
@@ -643,7 +656,7 @@ engine_gdb <- function(x,
             # If plot, make plot, otherwise
             if(plot){
               par.ori <- graphics::par(no.readonly = TRUE)
-              par(mfrow = c(1,2))
+              graphics::par(mfrow = c(1,2))
               mboost::plot.mboost(self$get_data('fit_best'), which = x.var, newdata = dummy)
               if(utils::hasName(par.ori, "pin")) par.ori$pin <- NULL
               graphics::par(par.ori)
@@ -663,13 +676,22 @@ engine_gdb <- function(x,
                                     msg = "Variable not found in model!" )
 
             # Make template of target variable(s)
-            temp <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            template <- try({
+              emptyraster( self$model$predictors_object$get_data()[[1]] )},
+              silent = TRUE) # Background
+            if(inherits(template, "try-error")){
+              template <- terra::rast(model$predictors[,c("x", "y")],
+                                      crs = terra::crs(model$background),
+                                      type = "xyz") |>
+                emptyraster()
+            }
+
             # Get target variables and predict
             target <- model$predictors
             # Set all variables other the target variable to constant
             if(is.null(constant)){
               # Calculate mean
-              nn <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='numeric')]
+              nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
               constant <- apply(target[,nn], 2, function(x) mean(x, na.rm=T))
               for(v in variables[ variables %notin% x.var]){
                 if(v %notin% names(target) ) next()
@@ -679,7 +701,7 @@ engine_gdb <- function(x,
               target[!is.na(target[,x.var]), variables] <- constant
             }
             target$rowid <- as.numeric( rownames(target) )
-            assertthat::assert_that(nrow(target)==ncell(temp))
+            assertthat::assert_that(nrow(target)==ncell(template))
 
             pp <- suppressWarnings(
               mboost::predict.mboost(mod, newdata = target, which = x.var,
@@ -687,19 +709,20 @@ engine_gdb <- function(x,
             )
             # If both linear and smooth effects are in model
             if(length(target$rowid[which(!is.na(target[[x.var]]))] ) == length(pp[,ncol(pp)])){
-              temp[ target$rowid[which(!is.na(target[[x.var]]))] ] <- pp[,ncol(pp)]
-            } else { temp[] <- pp[, ncol(pp) ]}
-            names(temp) <- paste0('partial__',x.var)
+              template[ target$rowid[which(!is.na(target[[x.var]]))] ] <- pp[,ncol(pp)]
+            } else { template[] <- pp[, ncol(pp) ]}
+            names(template) <- paste0('partial__',x.var)
 
             if(plot){
               # Plot both partial spatial partial
               par.ori <- graphics::par(no.readonly = TRUE)
               graphics::par(mfrow = c(1,3))
-              terra::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen)
+              terra::plot(template, main = expression(f[partial]),
+                          col = ibis_colours$ohsu_palette)
               mboost::plot.mboost(mod,which = x.var)
               graphics::par(par.ori)
             }
-            return(temp)
+            return(template)
           },
           # Model convergence check
           has_converged = function(self){

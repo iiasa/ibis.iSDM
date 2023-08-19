@@ -15,8 +15,9 @@ emptyraster(x, ...)
 an empty \code{\link{SpatRaster}}, i.e. all cells are \code{NA}.
 }
 \description{
-This function creates an empty copy of a provided \code{SpatRaster} object. It
-is primarily used in the package to create the outputs for the predictions.
+This function creates an empty copy of a provided
+\code{SpatRaster} object. It is primarily used in the package to create the
+outputs for the predictions.
 }
 \examples{
 require(terra)

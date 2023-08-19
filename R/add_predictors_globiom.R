@@ -1,35 +1,48 @@
 #' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
 NULL
 
-#' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution object
+#' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution
+#' object
 #'
-#' @description
-#' This is a customized function to format and add downscaled land-use shares from
-#' the [Global Biosphere Management Model (GLOBIOM)](https://iiasa.github.io/GLOBIOM/) to a
-#' [distribution] or [BiodiversityScenario] in ibis.iSDM. GLOBIOM is a partial-equilibrium model
-#' developed at IIASA and represents land-use sectors with a rich set of environmental and
-#' socio-economic parameters, where for instance the agricultural and forestry sector are estimated through
-#' dedicated process-based models. GLOBIOM outputs are spatial explicit and usually at a half-degree resolution globally.
-#' For finer grain analyses GLOBIOM outputs can be produced in a downscaled format with a
-#' customized statistical [downscaling module](https://github.com/iiasa/DownScale).
+#' @description This is a customized function to format and add downscaled
+#' land-use shares from the [Global Biosphere Management Model
+#' (GLOBIOM)](https://iiasa.github.io/GLOBIOM/) to a [distribution] or
+#' [BiodiversityScenario] in ibis.iSDM. GLOBIOM is a partial-equilibrium model
+#' developed at IIASA and represents land-use sectors with a rich set of
+#' environmental and socio-economic parameters, where for instance the
+#' agricultural and forestry sector are estimated through dedicated
+#' process-based models. GLOBIOM outputs are spatial explicit and usually at a
+#' half-degree resolution globally. For finer grain analyses GLOBIOM outputs can
+#' be produced in a downscaled format with a customized statistical [downscaling
+#' module](https://github.com/iiasa/DownScale).
 #'
-#' The purpose of this script is to format the GLOBIOM outputs of *DownScale* for the use in the
-#' ibis.iSDM package.
-#' @details
-#' See [`add_predictors()`] for additional parameters and customizations.
-#' For more (manual) control the function for formatting the GLOBIOM data can also be
-#' called directly via `formatGLOBIOM()`.
+#' The purpose of this script is to format the GLOBIOM outputs of *DownScale*
+#' for the use in the ibis.iSDM package.
+#' @details See [`add_predictors()`] for additional parameters and
+#' customizations. For more (manual) control the function for formatting the
+#' GLOBIOM data can also be called directly via `formatGLOBIOM()`.
 #'
-#' @param x A [`BiodiversityDistribution-class`] or [`BiodiversityScenario-class`] object.
+#' @param x A [`BiodiversityDistribution-class`] or
+#'   [`BiodiversityScenario-class`] object.
 #' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
-#' @param names A [`vector`] of character names describing the environmental stack in case they should be renamed (Default: \code{NULL}).
-#' @param transform A [`vector`] stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
-#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of knots for derivate creation if relevant (Default: \code{4}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})
-#' @param harmonize_na A [`logical`] value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which uses default prior assumptions.
+#' @param names A [`vector`] of character names describing the environmental
+#'   stack in case they should be renamed (Default: \code{NULL}).
+#' @param transform A [`vector`] stating whether predictors should be
+#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
+#'   \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be
+#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
+#'   \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
+#'   knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#'   specifying the covariates (Default: \code{NULL}).
+#' @param bgmask Check whether the environmental data should be masked with the
+#'   background layer (Default: \code{TRUE})
+#' @param harmonize_na A [`logical`] value indicating of whether NA values
+#'   should be harmonized among predictors (Default: \code{FALSE})
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
+#'   which uses default prior assumptions.
 #' @param ... Other parameters passed down
 #' @seealso [add_predictors]
 #' @aliases add_predictors_globiom
@@ -55,7 +68,8 @@ methods::setGeneric(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
+#' @usage
+#'   \S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution", fname = "character"),
@@ -169,7 +183,8 @@ methods::setMethod(
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+#' @usage
+#'   \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityScenario", fname = "character"),
@@ -274,19 +289,24 @@ methods::setMethod(
 
 #' Function to format a prepared GLOBIOM netCDF file for use in Ibis.iSDM
 #'
-#' @description
-#' This function expects a downscaled GLOBIOM output as created in the BIOCLIMA project.
-#' Likely of little use for anyone outside IIASA.
+#' @description This function expects a downscaled GLOBIOM output as created in
+#' the BIOCLIMA project. Likely of little use for anyone outside IIASA.
 #'
-#' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
-#' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
+#' @param fname A filename in [`character`] pointing to a GLOBIOM output in
+#'   netCDF format.
+#' @param oftype A [`character`] denoting the output type (Default:
+#'   \code{'raster'}).
 #' @param ignore A [`vector`] of variables to be ignored (Default: \code{NULL}).
-#' @param period A [`character`] limiting the period to be returned from the formatted data.
-#' Options include \code{"reference"} for the first entry, \code{"projection"} for all entries but the first,
-#' and \code{"all"} for all entries (Default: \code{"reference"}).
-#' @param template An optional [`SpatRaster`] object towards which projects should be transformed.
-#' @param shares_to_area A [`logical`] on whether shares should be corrected to areas (if identified).
-#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack around.
+#' @param period A [`character`] limiting the period to be returned from the
+#'   formatted data. Options include \code{"reference"} for the first entry,
+#'   \code{"projection"} for all entries but the first, and \code{"all"} for all
+#'   entries (Default: \code{"reference"}).
+#' @param template An optional [`SpatRaster`] object towards which projects
+#'   should be transformed.
+#' @param shares_to_area A [`logical`] on whether shares should be corrected to
+#'   areas (if identified).
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack
+#'   around.
 #' @param verbose [`logical`] on whether to be chatty.
 #' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
 #' @aliases formatGLOBIOM
@@ -420,10 +440,10 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
 
       # Finally aggregate
       if(!is.null(template) && is.Raster(template)){
-        # FIXME:
-        # MJ 14/11/2022 - The code below is buggy, resulting in odd curvilinear extrapolations for Europe
-        # Hacky approach now is to convert to raster, crop, project and then convert back.
-        # Only use if gdalUtils is installed
+        # FIXME: MJ 14/11/2022 - The code below is buggy, resulting in odd
+        # curvilinear extrapolations for Europe Hacky approach now is to convert
+        # to raster, crop, project and then convert back. Only use if gdalUtils
+        # is installed
         if(("gdalUtils" %in% utils::installed.packages()[,1])&&use_gdalutils){
           ff <- hack_project_stars(ff, template, use_gdalutils)
         } else {

@@ -1,8 +1,8 @@
 #' Built formula for STAN model
 #'
-#' @description
-#' This function built a formula for a `engine_stan()` model.
-#' @param model A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @description This function built a formula for a `engine_stan()` model.
+#' @param model A [`list()`] object containing the prepared model data for a
+#'   given biodiversity dataset.
 #' @param x A [`BiodiversityDistribution`] object.
 #' @param id The id for the species formula.
 #' @param settings A [`Settings`] object.
@@ -67,8 +67,10 @@ built_formula_stan <- function(model, id, x, settings){
 
 #' Checks whether cmdstanr is available and otherwise tries to install it
 #'
-#' @param install A [`logical`] factor to indicate whether cmdstanr should be directly installed (Default: \code{TRUE}).
-#' @param ask [`logical`] whether the cmdstanr package is to be installed (Default: \code{FALSE}).
+#' @param install A [`logical`] factor to indicate whether cmdstanr should be
+#'   directly installed (Default: \code{TRUE}).
+#' @param ask [`logical`] whether the cmdstanr package is to be installed
+#'   (Default: \code{FALSE}).
 #' @keywords stan, utils, internal
 stan_check_cmd <- function(install = TRUE, ask = FALSE){
   assertthat::assert_that(
@@ -94,7 +96,7 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
 #' Wrap a list with stan model code
 #'
 #' @description engine_stan builds a list with stan model code. This function
-#' concatenates them together.
+#'   concatenates them together.
 #' @param sm_code A [list] object with exactly 7 entries.
 #' @returns A [character] object.
 #' @keywords stan, utils
@@ -140,7 +142,8 @@ wrap_stanmodel <- function(sm_code){
 #'
 #' @description Write a cmdstanr model output to a specific destination
 #' @param mod A supplied cmdstanr model
-#' @param dir The model directory where the model chould be written. Should be a character / existing dir.
+#' @param dir The model directory where the model chould be written. Should be a
+#'   character / existing dir.
 #' @keywords stan, utils
 write_stanmodel <- function( mod, dir = tempdir() ) {
   assertthat::assert_that(
@@ -156,20 +159,31 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
 
 #' Fit cmdstanr model and convert to rstan object
 #'
-#' @description This function fits a stan model using the light-weight interface provided
-#' by cmdstanr. The code was adapted from McElreath rethinking package.
+#' @description This function fits a stan model using the light-weight interface
+#'   provided by cmdstanr. The code was adapted from McElreath rethinking
+#'   package.
 #' @param model_code A [`character`] pointing to the stan modelling code.
-#' @param data A [`list`] with all the parameters required to run the model_code in stan.
-#' @param algorithm A [`character`] giving the algorithm to use. Either \code{'sampling'} (Default), \code{'optimize'} or \code{'variational'} for penalized likelihood estimation.
-#' @param chains A [`numeric`] indicating the number of chains to use for estimation.
-#' @param cores Number of threads for sampling. Default set to \code{'getOption("ibis.nthread")'}. See [ibis_options()].
-#' @param threads [`numeric`] giving the number of threads to be run per chain. Has to be specified in accordance with cores.
-#' @param iter A [`numeric`] value giving the number of MCMC samples to generate.
-#' @param warmup [`numeric`] for the number of warm-up samples for MCMC. Default set to 1/2 of iter.
+#' @param data A [`list`] with all the parameters required to run the model_code
+#'   in stan.
+#' @param algorithm A [`character`] giving the algorithm to use. Either
+#'   \code{'sampling'} (Default), \code{'optimize'} or \code{'variational'} for
+#'   penalized likelihood estimation.
+#' @param chains A [`numeric`] indicating the number of chains to use for
+#'   estimation.
+#' @param cores Number of threads for sampling. Default set to
+#'   \code{'getOption("ibis.nthread")'}. See [ibis_options()].
+#' @param threads [`numeric`] giving the number of threads to be run per chain.
+#'   Has to be specified in accordance with cores.
+#' @param iter A [`numeric`] value giving the number of MCMC samples to
+#'   generate.
+#' @param warmup [`numeric`] for the number of warm-up samples for MCMC. Default
+#'   set to 1/2 of iter.
 #' @param control A [`list`] with further control options for stan.
 #' @param cpp_options A [`list`] with options for the Cpp compiling.
-#' @param force [`logical`] indication whether to force recompile the model (Default: \code{FALSE}).
-#' @param path [`character`] indicating a path to be made available to the stan compiler.
+#' @param force [`logical`] indication whether to force recompile the model
+#'   (Default: \code{FALSE}).
+#' @param path [`character`] indicating a path to be made available to the stan
+#'   compiler.
 #' @param save_warmup A [`logical`] flag whether to save the warmup samples.
 #' @param ... Other non-specified parameters.
 #' @seealso rethinking R package
@@ -279,17 +293,21 @@ run_stan <- function( model_code, data = list(),
 
 #' Create a posterior prediction from a rstanfit object
 #'
-#' @description This function does simulates from the posterior
-#' of a created stan model, therefore providing a fast and efficient way
-#' to project coefficients obtained from Bayesian models to new/novel contexts.
+#' @description This function does simulates from the posterior of a created
+#'   stan model, therefore providing a fast and efficient way to project
+#'   coefficients obtained from Bayesian models to new/novel contexts.
 #'
 #' @param obj A \code{"stanfit"} object (as used by rstan).
-#' @param form A [`formula`] object created for the [ibis.iSDM::DistributionModel].
+#' @param form A [`formula`] object created for the
+#'   [ibis.iSDM::DistributionModel].
 #' @param newdata A [data.frame] with new data to be used for prediction.
-#' @param mode A [`character`] of whether the linear `predictor` or the `response` is to be summarized.
-#' @param family A [`character`] giving the family for simulating linear response values (Default: \code{NULL})
+#' @param mode A [`character`] of whether the linear `predictor` or the
+#'   `response` is to be summarized.
+#' @param family A [`character`] giving the family for simulating linear
+#'   response values (Default: \code{NULL})
 #' @param offset A [vector] with an optionally specified offset.
-#' @param draws [numeric] indicating whether a specific number of draws should be taken.
+#' @param draws [numeric] indicating whether a specific number of draws should
+#'   be taken.
 #' @references
 #' * [https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed](https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed).
 #' * The brms R-package.
@@ -437,10 +455,9 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
 
 #' Show the stan code from a trained model
 #'
-#' @description
-#' This helper function shows the code from a trained [DistributionModel]
-#' using the [`engine_stan`].
-#' This function is emulated after a similar functionality in the brms R-package.
+#' @description This helper function shows the code from a trained
+#' [DistributionModel] using the [`engine_stan`]. This function is emulated
+#' after a similar functionality in the brms R-package.
 #' **It only works with models inferred with stan!**
 #' @param obj Any prepared object.
 #' @param ... not used.

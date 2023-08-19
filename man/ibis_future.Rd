@@ -12,8 +12,8 @@ ibis_future(
 \arguments{
 \item{cores}{A \code{\link{numeric}} number stating the number of cores to use.}
 
-\item{strategy}{A \code{\link{character}} denoting the strategy to be used for future. See help of \code{\link{future}} for options.
-(Default: \code{"multisession"}).}
+\item{strategy}{A \code{\link{character}} denoting the strategy to be used for future.
+See help of \code{\link{future}} for options. (Default: \code{"multisession"}).}
 }
 \value{
 None

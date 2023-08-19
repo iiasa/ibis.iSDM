@@ -3,44 +3,52 @@ NULL
 
 #' Calculate environmental similarity of reference datasets to predictors.
 #'
-#' @description
-#' Calculate the environmental similarity of the provided covariates
-#' with respect to a reference dataset.
-#' Currently supported is Multivariate Environmental Similarity index
-#' and the multivariate combination novelty index (NT2) based on the Mahalanobis divergence (see references).
+#' @description Calculate the environmental similarity of the provided
+#' covariates with respect to a reference dataset. Currently supported is
+#' Multivariate Environmental Similarity index and the multivariate combination
+#' novelty index (NT2) based on the Mahalanobis divergence (see references).
 #'
-#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively a [`SpatRaster`] object.
-#' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or alternatively
-#' a [`data.frame`] with extracted values (corresponding to those given in `obj`).
-#' @param ref_type A [`character`] specifying the type of biodiversity to use when obj is a [`BiodiversityDistribution`].
-#' @param method A specifc method for similarity calculation. Currently supported: \code{'mess'}, \code{'nt'}.
-#' @param predictor_names An optional [`character`] specifying the covariates to be used (Default: \code{NULL}).
-#' @param full should similarity values be returned for all variables (Default: \code{FALSE})?
-#' @param plot Should the result be plotted? Otherwise return the output list (Default: \code{TRUE}).
+#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or
+#'   alternatively a [`SpatRaster`] object.
+#' @param ref A [`BiodiversityDistribution`], [`DistributionModel`] or
+#'   alternatively a [`data.frame`] with extracted values (corresponding to
+#'   those given in `obj`).
+#' @param ref_type A [`character`] specifying the type of biodiversity to use
+#'   when obj is a [`BiodiversityDistribution`].
+#' @param method A specifc method for similarity calculation. Currently
+#'   supported: \code{'mess'}, \code{'nt'}.
+#' @param predictor_names An optional [`character`] specifying the covariates to
+#'   be used (Default: \code{NULL}).
+#' @param full should similarity values be returned for all variables (Default:
+#'   \code{FALSE})?
+#' @param plot Should the result be plotted? Otherwise return the output list
+#'   (Default: \code{TRUE}).
 #' @param ... other options (Non specified).
-#' @returns
-#'  This function returns a list containing:
+#' @returns This function returns a list containing:
 #'  * `similarity`: A `SpatRaster` object with multiple layers giving the environmental
-#'  similarities for each variable in `x` (only included when \code{"full=TRUE"});
+#' similarities for each variable in `x` (only included when
+#' \code{"full=TRUE"});
 #'  * `mis`: a `SpatRaster` layer giving the minimum similarity value
-#'   across all variables for each location (i.e. the MESS);
+#' across all variables for each location (i.e. the MESS);
 #'  * `exip`: a `SpatRaster` layer indicating whether any model would interpolate
-#'   or extrapolate to this location based on environmental surface;
+#' or extrapolate to this location based on environmental surface;
 #'  * `mod`: a factor `SpatRaster` layer indicating which variable was most
-#'   dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010);
-#'   and
+#' dissimilar to its reference range (i.e. the MoD map, Elith et al. 2010); and
 #'  * `mos`: a factor `SpatRaster` layer indicating which variable was most
-#'   similar to its reference range.
+#' similar to its reference range.
 #'
-#' @details [`similarity`] implements the MESS algorithm described in Appendix S3
-#'   of Elith et al. (2010) as well as the Mahalanobis dissimilarity described in Mesgaran et al. (2014).
+#' @details [`similarity`] implements the MESS algorithm described in Appendix
+#'   S3 of Elith et al. (2010) as well as the Mahalanobis dissimilarity
+#'   described in Mesgaran et al. (2014).
 #' @keywords mess, mahalanobis, similarity, environment
 #' @references
 #' * Elith, J., Kearney, M., and Phillips, S. (2010) "The art of modelling range-shifting
-#' species" https://doi.org/10.1111/j.2041-210X.2010.00036.x _Methods in Ecology and Evolution_, 1: 330-342
+#' species" https://doi.org/10.1111/j.2041-210X.2010.00036.x _Methods in Ecology
+#' and Evolution_, 1: 330-342
 #' * Mesgaran, M.B., Cousens, R.D. and Webber, B.L. (2014) "Here be dragons: a tool
-#' for quantifying novelty due to covariate range and correlation change when projecting
-#' species distribution models" https://doi.org/10.1111/ddi.12209 _Diversity and Distributions_, 20: 1147-1159.
+#' for quantifying novelty due to covariate range and correlation change when
+#' projecting species distribution models" https://doi.org/10.1111/ddi.12209
+#' _Diversity and Distributions_, 20: 1147-1159.
 #' @seealso dismo R-package.
 #' @aliases similarity
 #' @name similarity
@@ -66,7 +74,8 @@ methods::setGeneric(
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity
 #' @rdname similarity
-#' @usage \S4method{similarity}{BiodiversityDistribution,character,character,character,logical,logical}(obj,ref_type,method,predictor_names,full,plot,...)
+#' @usage
+#'   \S4method{similarity}{BiodiversityDistribution,character,character,character,logical,logical}(obj,ref_type,method,predictor_names,full,plot,...)
 methods::setMethod(
   "similarity",
   methods::signature(obj = "BiodiversityDistribution"),
@@ -166,7 +175,8 @@ methods::setMethod(
 #' Similarity of used predictors by providing a SpatRaster directly
 #' @name similarity
 #' @rdname similarity
-#' @usage \S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
+#' @usage
+#'   \S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
 methods::setMethod(
   "similarity",
   methods::signature(obj = "SpatRaster"),
@@ -251,29 +261,28 @@ methods::setMethod(
 
 #' Function to calculate the multivariate combination novelty index (NT2)
 #'
-#' @description
-#' NT1 ranges from infinite negative values to zero where zero indicates no
-#' extrapolation beyond the univariate coverage of reference data"
+#' @description NT1 ranges from infinite negative values to zero where zero
+#' indicates no extrapolation beyond the univariate coverage of reference data"
 #' (Mesgaran et al. 2014).
 #'
-#' "NT2 can range from zero up to unbounded positive values. NT2 values
-#' ranging from zero to one indicate similarity (in terms of both univariate
-#' range and multivariate combination), with values closer to zero being more
-#' similar. Values larger than one are indicative of novel combinations"
-#' (Mesgaran et al. 2014).
+#' "NT2 can range from zero up to unbounded positive values. NT2 values ranging
+#' from zero to one indicate similarity (in terms of both univariate range and
+#' multivariate combination), with values closer to zero being more similar.
+#' Values larger than one are indicative of novel combinations" (Mesgaran et al.
+#' 2014).
 #'
 #' @param prodat A [`SpatRaster`]. The projected values. The layer names must
 #'   match the column names of \code{refdat}.
-#' @param refdat A numerical [`matrix`] or [`data.frame`]. The reference values of variables organized
-#'   in columns.
+#' @param refdat A numerical [`matrix`] or [`data.frame`]. The reference values
+#'   of variables organized in columns.
 #'
 #' @references
 #'  * Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin.
-#'   2014. Here be dragons: a tool for quantifying novelty due to covariate
-#'   range and correlation change when projecting species distribution models.
-#'   Diversity and Distributions 20:1147-1159.
-#' @section Notes: The code is adapted from Bell & Schlaepfer 2015 (available
-#'   at \url{https://github.com/bellland/SDM.Virtual.Species_Bell.Schlaepfer})
+#' 2014. Here be dragons: a tool for quantifying novelty due to covariate range
+#' and correlation change when projecting species distribution models. Diversity
+#' and Distributions 20:1147-1159.
+#' @section Notes: The code is adapted from Bell & Schlaepfer 2015 (available at
+#'   \url{https://github.com/bellland/SDM.Virtual.Species_Bell.Schlaepfer})
 #'   which was based on a comment by Matthew Bayly made at
 #'   \url{https://pvanb.wordpress.com/2014/05/13/a-new-method-and-tool-exdet-to-evaluate-novelty-environmental-conditions/}.
 #' @noRd
@@ -348,9 +357,11 @@ methods::setMethod(
   # matrixStats::rowMaxs(icp)
 
   # --- #
-  # Calculate areas outside the univariate range of combinations and non-analogous novel combinations
+  # Calculate areas outside the univariate range of combinations and
+  # non-analogous novel combinations
   nt_novel <- terra::init(bg, NA)
-  # First areas areas in the projection space with at least one covariate outside the univariate range of reference data
+  # First areas areas in the projection space with at least one covariate
+  # outside the univariate range of reference data
   if(terra::hasValues(nt1)) o_low <- nt1 < 0 else o_low <- terra::init(nt1, 0)
   # Next areas with NT2 ranging from 0 to 1 that are similar to the reference data
   o_mid <- nt2 %in% c(0,1)
@@ -371,8 +382,7 @@ methods::setMethod(
 }
 
 #' Function to calculate Multivariate Environmental Similarity index
-#' @description
-#' Internal function to calculate the MESS
+#' @description Internal function to calculate the MESS
 #' @param covs A [`SpatRaster`] with the covariates.
 #' @param ref A [`data.frame`] with the covariates for the reference values.
 #' @param full A [`logical`] indication whether the full extent be calculated.

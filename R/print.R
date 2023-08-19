@@ -3,7 +3,8 @@ NULL
 
 #' Print
 #'
-#' Display information about any object created through the \pkg{ibis.iSDM} R-package.
+#' Display information about any object created through the \pkg{ibis.iSDM}
+#' R-package.
 #'
 #' @param x Any object created through the package.
 #' @param ... not used.

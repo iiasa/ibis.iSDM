@@ -1,8 +1,8 @@
 #' Built formula for GDB model
 #'
-#' @description
-#' This function built a formula for a `engine_gdb()` model.
-#' @param model A [`list()`] object containing the prepared model data for a given biodiversity dataset.
+#' @description This function built a formula for a `engine_gdb()` model.
+#' @param model A [`list()`] object containing the prepared model data for a
+#'   given biodiversity dataset.
 #' @param x A [`BiodiversityDistribution`] object.
 #' @param id The id for the species formula.
 #' @param settings A [`Settings`] object.
@@ -35,7 +35,8 @@ built_formula_gdb <- function(model, id, x, settings){
     form <- "observed ~ "
 
     # Use only variables that have sufficient covariate range for training
-    # Finally check that a minimum of unique numbers are present in the predictor range and if not, remove them
+    # Finally check that a minimum of unique numbers are present in the
+    # predictor range and if not, remove them
     covariates <- rm_insufficient_covs(model = obj, tr = 4)
     if(is.null(covariates)) stop("Not enough variance in training data to fit a SDM!")
 
@@ -72,7 +73,8 @@ built_formula_gdb <- function(model, id, x, settings){
                                           collapse = ' + '
         ))
       }
-      # Add also random effect if there are any factors? THIS currently crashes when there are too few factors
+      # Add also random effect if there are any factors? THIS currently crashes
+      # when there are too few factors
       # if(any(model$predictors_types$type=="factor")){
       #   form <- paste(form, ' + ' ,paste0('brandom(',
       #                              model$biodiversity[[id]]$predictors_types$predictors[which(model$biodiversity[[id]]$predictors_types$type == 'factor')],
@@ -198,14 +200,16 @@ clean_mboost_summary <- function(obj){
 
 #' Check training predictor complexity
 #'
-#' @description
-#' This internal function tests an existing set of covariates (usually the training data)
-#' on the number of unique values within.
-#' If fewer values than a given threshold (\code{'tr'}) is detected, then the predictor is removed, thus
-#' reducing complexity.
-#' @note Maybe in the future a more cleverer solution could be thought of, for instance using a singular value decomposition?
-#' @param model A [`list`] of a model object containing the various predictors and biodiversity occurrence information.
-#' @param tr A [`numeric`] value describing a threshold of minimum unique values to be retained.
+#' @description This internal function tests an existing set of covariates
+#' (usually the training data) on the number of unique values within. If fewer
+#' values than a given threshold (\code{'tr'}) is detected, then the predictor
+#' is removed, thus reducing complexity.
+#' @note Maybe in the future a more cleverer solution could be thought of, for
+#'   instance using a singular value decomposition?
+#' @param model A [`list`] of a model object containing the various predictors
+#'   and biodiversity occurrence information.
+#' @param tr A [`numeric`] value describing a threshold of minimum unique values
+#'   to be retained.
 #' @returns A [`vector`] with the variables that full fill the threshold.
 #' @keywords internal
 #' @noRd
@@ -228,7 +232,8 @@ rm_insufficient_covs <- function(model, tr = 5){
 
   vars_uniques <- apply(model$predictors[,vars_num], 2, function(x) length(unique(x,na.rm = TRUE)) )
 
-  # Get all variables smaller than the threshold and return the original data.frame without them
+  # Get all variables smaller than the threshold and return the original
+  # data.frame without them
   sufficient <- which(vars_uniques >= tr)
 
   # Get the factor variables in it as well
@@ -253,12 +258,15 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' Calculate weights for Point Process models
 #'
 #' @param df The [`data.frame`] for which weights are to be calculated.
-#' @param presence A [`vector`] with the observed species. Has to be in range \code{0} to \code{Inf}.
+#' @param presence A [`vector`] with the observed species. Has to be in range
+#'   \code{0} to \code{Inf}.
 #' @param bg A background [`raster`] layer.
-#' @param use_area A [`logical`] on whether area is to be used instead of grid counts.
+#' @param use_area A [`logical`] on whether area is to be used instead of grid
+#'   counts.
 #' @param weight A [`numeric`] weight to be used in down-weighted regressions.
-#' @param type Accepting either “Infinitely weighted logistic regression” \code{'IWLR'} for use with binomial
-#' logistic regressions or “Down-weighted Poisson regression” \code{'DWPR'} (Default).
+#' @param type Accepting either “Infinitely weighted logistic regression”
+#'   \code{'IWLR'} for use with binomial logistic regressions or “Down-weighted
+#'   Poisson regression” \code{'DWPR'} (Default).
 #' @references
 #' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
 #' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939

@@ -3,13 +3,11 @@ NULL
 
 #' Add priors to an existing distribution object
 #'
-#' @description
-#' This function simply allows to add priors to an existing [distribution] object.
-#' The supplied priors must be a [`PriorList-class`] object created through
-#' calling [priors].
-#' @note
-#' Alternatively priors to environmental predictors can also directly added as parameter
-#' via [add_predictors]
+#' @description This function simply allows to add priors to an existing
+#' [distribution] object. The supplied priors must be a [`PriorList-class`]
+#' object created through calling [priors].
+#' @note Alternatively priors to environmental predictors can also directly
+#' added as parameter via [add_predictors]
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param priors A [`PriorList-class`] object containing multiple priors.
 #' @param ... Other parameters passed down.
@@ -85,9 +83,9 @@ methods::setMethod(
 
 #' Remove existing priors from an existing distribution object
 #'
-#' @description
-#' This function allows to remove priors from an existing [distribution] object.
-#' In order to remove a set prior, the name of the prior has to be specified.
+#' @description This function allows to remove priors from an existing
+#'   [distribution] object. In order to remove a set prior, the name of the
+#'   prior has to be specified.
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names A [`vector`] or [`character`] object for priors to be removed.
 #' @param ... Other parameters passed down
@@ -130,19 +128,20 @@ methods::setMethod(
   }
 )
 
-#### Get priors from model - ####
+#### Get priors from model ####
 
 #' Create priors from an existing distribution model
 #'
-#' @description
-#' Often it can make sense to fit an additional model to get a grasp on the range of
-#' values that "beta" parameters can take. This function takes an existing [`BiodiversityDistribution-class`] object
-#' and creates [`PriorList-class`] object from them. The resulting object can be used to add for instance [priors]
-#' to a new model.
-#' @note
-#' Not all engines support priors in similar ways. See the vignettes and help pages on that topic!
-#' @param mod A fitted [`DistributionModel-class`] object. If instead a [`BiodiversityDistribution-class`] object
-#' is passed to this function, it simply returns the contained priors used for estimation (if any).
+#' @description Often it can make sense to fit an additional model to get a
+#' grasp on the range of values that "beta" parameters can take. This function
+#' takes an existing [`BiodiversityDistribution-class`] object and creates
+#' [`PriorList-class`] object from them. The resulting object can be used to add
+#' for instance [priors] to a new model.
+#' @note Not all engines support priors in similar ways. See the vignettes and
+#' help pages on that topic!
+#' @param mod A fitted [`DistributionModel-class`] object. If instead a
+#'   [`BiodiversityDistribution-class`] object is passed to this function, it
+#'   simply returns the contained priors used for estimation (if any).
 #' @param target_engine A [`character`] for which the priors should be created.
 #' @param ... Other parameters passed down.
 #' @family prior

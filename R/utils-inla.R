@@ -1,7 +1,6 @@
 #' Built formula for INLA model
 #'
-#' @description
-#' This function built a formula for a `engine_inla()` model.
+#' @description This function built a formula for a `engine_inla()` model.
 #' @param model A [`list()`] object containing the prepared model data.
 #' @param id The id for the species formula.
 #' @param x A [`BiodiversityDistribution`] object.
@@ -191,8 +190,8 @@ built_formula_inla <- function(model, id, x, settings){
                                collapse = " ")
       )
 
-      # Add offset if specified
-      # TODO: Not quite sure if this formulation works for inlabru predictor expressions
+      # Add offset if specified TODO: Not quite sure if this formulation works
+      # for inlabru predictor expressions
       if(!is.Waiver(x$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
       if( length( grep('Spatial', x$get_latent() ) ) > 0 ){
         if(attr(x$get_latent(), "method") != "poly"){
@@ -205,7 +204,8 @@ built_formula_inla <- function(model, id, x, settings){
         }
       }
     } else {
-      # If custom likelihood formula is provided, check that variable names match supplied predictors
+      # If custom likelihood formula is provided, check that variable names
+      # match supplied predictors
       form <- obj$equation
       assertthat::assert_that(
         all( all.vars(form) %in% c('observed', obj$predictors_names) )
@@ -248,8 +248,10 @@ built_formula_inla <- function(model, id, x, settings){
 #'
 #' @param mesh [`inla.mesh`] mesh object.
 #' @param region.poly A supplied [`region.poly`] object.
-#' @param variant A character to which type of area calculation (Default: \code{'gpc'}).
-#' @param relative Should the total amount of area converted to relatives (Default: \code{FALSE}).
+#' @param variant A character to which type of area calculation (Default:
+#'   \code{'gpc'}).
+#' @param relative Should the total amount of area converted to relatives
+#'   (Default: \code{FALSE}).
 #' @returns A [`vector`] with the area of each polygon.
 #' @keywords utils
 #' @noRd
@@ -451,9 +453,12 @@ mesh_barrier <- function(mesh, region.poly){
 #' Query if a point is inside the mesh boundary
 #'
 #' @param mesh A [`inla.mesh`] object.
-#' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates. Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
+#' @param coords Either a two-column [`data.frame`] or [`matrix`] of
+#'   coordinates. Alternatively a [`Spatial`] or [`sf`] object from which
+#'   coordinates can be extracted.
 #' @keywords utils
-#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
+#' @return A [`vector`] of Boolean values indicating if a point is inside the
+#'   mesh.
 #' @noRd
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
@@ -483,9 +488,9 @@ coords_in_mesh <- function(mesh, coords) {
 
 #' Manual prediction by matrix multiplication
 #'
-#' Spatial predictions with INLA can be quite computationally costly.
-#' Assuming that model coefficients are fixed and linear, it is possible
-#' to obtain comparable predictions simply by matrix multiplication.
+#' Spatial predictions with INLA can be quite computationally costly. Assuming
+#' that model coefficients are fixed and linear, it is possible to obtain
+#' comparable predictions simply by matrix multiplication.
 #'
 #' TODO: Switch to posterior sampling
 #' https://groups.google.com/g/r-inla-discussion-group/c/y-rQlDVtzmM
@@ -494,7 +499,8 @@ coords_in_mesh <- function(mesh, coords) {
 #' @param mod A trained [`distribution`] model.
 #' @param type The summary statistic to use.
 #' @param backtransf Either NULL or a function.
-#' @param coords A [matrix] with coordinates or \code{NULL}. If \code{NULL} coordinates are recreated from predictors.
+#' @param coords A [matrix] with coordinates or \code{NULL}. If \code{NULL}
+#'   coordinates are recreated from predictors.
 #' @keywords utils
 #' @noRd
 coef_prediction <- function(mesh, mod, type = 'mean',
@@ -595,7 +601,8 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 #' Direct prediction by posterior simulation
 #'
 #' @param mod A trained distribution model.
-#' @param nsamples [`numeric`] on the number of samples to be taken from the posterior.
+#' @param nsamples [`numeric`] on the number of samples to be taken from the
+#'   posterior.
 #' @param backtransf Either \code{NULL} or a function.
 #' @param seed A random seed that can be specified.
 #' @keywords utils
@@ -922,10 +929,12 @@ post_prediction <- function(mod, nsamples = 100,
 
 #' Make Integration stack
 #' @param mesh The background projection mesh.
-#' @param mesh.area The area of the mesh, has to match the number of integration points.
+#' @param mesh.area The area of the mesh, has to match the number of integration
+#'   points.
 #' @param model A prepared model object.
 #' @param id A id supplied to name this object.
-#' @param joint Whether a model with multiple likelihood functions is to be specified.
+#' @param joint Whether a model with multiple likelihood functions is to be
+#'   specified.
 #' @keywords utils, internal
 #' @noRd
 inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALSE){
@@ -993,7 +1002,8 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 #' @param type Name to use.
 #' @param background A [`sf`] formatted background layer.
 #' @param spde An spde field if specified.
-#' @param res Approximate resolution to the projection grid (default: \code{NULL}).
+#' @param res Approximate resolution to the projection grid (default:
+#'   \code{NULL}).
 #' @param settings A settings object.
 #' @param joint Whether more than 2 likelihoods are estimated.
 #' @keywords utils, internal
@@ -1179,8 +1189,10 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
 #' @param mesh A [INLA::inla.mesh] object.
 #' @param background A [sf] object containing the background region.
 #' @param cov A [data.frame] or [matrix] with the covariates for the modelling.
-#' @param proj_stepsize A numeric indication on the prediction stepsize to be used.
-#' @param spatial A [logical] flag whether a spatialpoints [data.frame] should be returned.
+#' @param proj_stepsize A numeric indication on the prediction stepsize to be
+#'   used.
+#' @param spatial A [logical] flag whether a spatialpoints [data.frame] should
+#'   be returned.
 #' @keywords utils
 #' @noRd
 inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatial = TRUE){
@@ -1366,17 +1378,19 @@ manual_inla_priors <- function(prior){
 
 #' Backward variable selection using INLA
 #'
-#' @description
-#' Best model is assessed through their within-sample predictive accuracy via conditional predictive ordinate (CPO)
-#' Ideally this procedure is replaced by a proper regularizing prior at some point...
+#' @description Best model is assessed through their within-sample predictive
+#' accuracy via conditional predictive ordinate (CPO) Ideally this procedure is
+#' replaced by a proper regularizing prior at some point...
 #' @param form A supplied [`formula`] object.
 #' @param stack_data_resp A list containing inla stack data.
 #' @param stk_inference An inla.data.stack object.
 #' @param fam A [`character`] indicating the distribution to be fitted.
 #' @param cf List of link functions to be used.
 #' @param li Internal indication for the link function (Default: \code{1}).
-#' @param response The response variable. If not specified, extract from formula (default: \code{NULL}).
-#' @param keep A [`vector`] of variables that are to be removed from model iterations (default: \code{NULL}).
+#' @param response The response variable. If not specified, extract from formula
+#'   (default: \code{NULL}).
+#' @param keep A [`vector`] of variables that are to be removed from model
+#'   iterations (default: \code{NULL}).
 #' @keywords utils
 #' @noRd
 inla.backstep <- function(master_form,
@@ -1479,9 +1493,10 @@ inla.backstep <- function(master_form,
       rm(fit)
     } # End of loop
 
-    # Best model among competing models has the largest CPO. Ratio of CPO (LPML really, e.g. the transformation above)
-    # is a surrogate for a Bayes Factor
-    # In the code below we take the minimum since the CPO has been multiplied with -2 to emulate comparison with AIC-like statistics
+    # Best model among competing models has the largest CPO. Ratio of CPO (LPML
+    # really, e.g. the transformation above) is a surrogate for a Bayes Factor
+    # In the code below we take the minimum since the CPO has been multiplied
+    # with -2 to emulate comparison with AIC-like statistics
 
     if(!is.na(o$cpo) || nrow(oo) > 0) {
       # Now check whether any of the new models are 'better' than the full model

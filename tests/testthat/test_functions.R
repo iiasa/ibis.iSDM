@@ -127,6 +127,25 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_s3_class(raster_centroid(b,patch = FALSE), "sf")
   expect_true(nrow( raster_centroid(b,patch = TRUE) )>1)
 
+  # --- #
+  # Calculate threshold on new rasters
+  o <- ex[[1]]
+  pp <- terra::spatSample(o,20,as.points = TRUE) |> sf::st_as_sf()
+  pp[[1]] <- sample(c(0,1),size = nrow(pp),replace = TRUE)
+  names(pp)[1] <- "observed"
+  # Dummy points
+
+  expect_error(tr <- threshold(o))
+  expect_no_error(tr <- threshold(o,value = .2))
+  expect_s4_class(tr, "SpatRaster")
+  # Return only threshold
+  expect_no_error(tr <- threshold(o,value = .2,return_threshold = TRUE))
+  expect_type(tr, "double")
+
+  expect_no_error(tr <- threshold(o,method = "perc",point = pp,return_threshold = TRUE))
+  expect_type(tr, "double")
+
+  # --- #
 })
 
 

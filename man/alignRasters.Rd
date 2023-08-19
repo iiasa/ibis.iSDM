@@ -2,33 +2,38 @@
 % Please edit documentation in R/utils-spatial.R
 \name{alignRasters}
 \alias{alignRasters}
-\title{Align a \code{\linkS4class{SpatRaster}} object to another by harmonizing geometry and extend.}
+\title{Align a \code{\linkS4class{SpatRaster}} object to another by harmonizing geometry and
+extend.}
 \usage{
 alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 }
 \arguments{
 \item{data}{\code{\linkS4class{SpatRaster}} object to be resampled.}
 
-\item{template}{\code{\linkS4class{SpatRaster}} or \code{\link{sf}} object from which geometry can be extracted.}
+\item{template}{\code{\linkS4class{SpatRaster}} or \code{\link{sf}} object from which geometry can
+be extracted.}
 
-\item{method}{method for resampling (Options: \code{"near"} or \code{"bilinear"}).}
+\item{method}{method for resampling (Options: \code{"near"} or
+\code{"bilinear"}).}
 
 \item{func}{function for resampling (Default: \link{mean}).}
 
-\item{cl}{\code{\link{logical}} value if multicore computation should be used (Default: \code{TRUE}).}
+\item{cl}{\code{\link{logical}} value if multicore computation should be used (Default:
+\code{TRUE}).}
 }
 \value{
 New \code{\link{SpatRaster}} object aligned to the supplied template layer.
 }
 \description{
-If the data is not in the same projection as the template, the alignment
-will be computed by reprojection only. If the data has already the same
+If the data is not in the same projection as the template, the alignment will
+be computed by reprojection only. If the data has already the same
 projection, the data set will be cropped and aggregated prior to resampling
 in order to reduce computation time.
 }
 \details{
-Nearest Neighbour resampling (near) is recommended for discrete and bilinear
-resampling recommended for continuous data. See also help from \link[terra:resample]{terra::resample} for other options.
+Nearest Neighbour resampling (near) is recommended for discrete and
+bilinear resampling recommended for continuous data. See also help from
+\link[terra:resample]{terra::resample} for other options.
 }
 \examples{
 \dontrun{

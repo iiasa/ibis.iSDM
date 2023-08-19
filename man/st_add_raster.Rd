@@ -12,12 +12,14 @@ st_add_raster(obj, new)
 \item{new}{A \code{\link{SpatRaster}} object with additional covariates to be added.}
 }
 \value{
-A \code{\link{stars}} object with the names of the \code{\link{SpatRaster}} object added.
+A \code{\link{stars}} object with the names of the \code{\link{SpatRaster}} object
+added.
 }
 \description{
-Often it is necessary to add static variables to existing stars objects.
-These will be replicated across the time dimension. This function is a small helper function
-that allows the addition of said raster stacks to a stars object.
+Often it is necessary to add static variables to existing stars
+objects. These will be replicated across the time dimension. This function is
+a small helper function that allows the addition of said raster stacks to a
+stars object.
 }
 \keyword{internal}
 \keyword{scenario,}

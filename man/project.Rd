@@ -12,59 +12,74 @@
 \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
 }
 \arguments{
-\item{x}{A \code{\link{BiodiversityScenario}} object with set predictors.
-Note that some constrains such as \code{MigClim} can still simulate future change without projections.}
+\item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that
+some constrains such as \code{MigClim} can still simulate future change
+without projections.}
 
 \item{...}{passed on parameters.}
 
-\item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated. Options
-include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
+\item{date_interpolation}{A \code{\link{character}} on whether dates should be
+interpolated. Options include \code{"none"} (Default), \code{"annual"},
+\code{"monthly"}, \code{"daily"}.}
 
-\item{stabilize}{A \code{\link{logical}} value indicating whether the suitability projection should be stabilized (Default: \code{FALSE}).}
+\item{stabilize}{A \code{\link{logical}} value indicating whether the suitability
+projection should be stabilized (Default: \code{FALSE}).}
 
-\item{stabilize_method}{\code{\link{character}} stating the stabilization method to be applied. Currently supported is \code{`loess`}.}
+\item{stabilize_method}{\code{\link{character}} stating the stabilization method to be
+applied. Currently supported is \code{`loess`}.}
 
-\item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
+\item{layer}{A \code{\link{character}} specifying the layer to be projected (Default:
+\code{"mean"}).}
 
-\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further information during the model fitting (Default: \code{FALSE}).}
+\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out
+further information during the model fitting (Default: \code{FALSE}).}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.
 }
 \description{
-Equivalent to \link{train}, this function acts as a
-wrapper to project the model stored in a \code{\linkS4class{BiodiversityScenario}} object to
-newly supplied (future) covariates. Supplied predictors are usually spatial-temporal predictors
-which should be prepared via \code{\link[=add_predictors]{add_predictors()}} (e.g. transformations and derivates) in the same way as they have been during
-the initial modelling with \code{\link[=distribution]{distribution()}}.
-Any constrains specified in the scenario object are applied during the projection.
+Equivalent to \link{train}, this function acts as a wrapper to
+project the model stored in a \code{\linkS4class{BiodiversityScenario}} object to newly
+supplied (future) covariates. Supplied predictors are usually
+spatial-temporal predictors which should be prepared via \code{\link[=add_predictors]{add_predictors()}}
+(e.g. transformations and derivates) in the same way as they have been during
+the initial modelling with \code{\link[=distribution]{distribution()}}. Any constrains specified in
+the scenario object are applied during the projection.
 }
 \details{
-In the background the function \code{x$project()} for the respective model object is called, where
-\code{x} is fitted model object. For specifics on the constrains, see the relevant \code{constrain} functions,
-respectively:
+In the background the function \code{x$project()} for the respective
+model object is called, where \code{x} is fitted model object. For specifics
+on the constraints, see the relevant \code{constrain} functions, respectively:
 \itemize{
 \item \code{\link[=add_constraint]{add_constraint()}} for generic wrapper to add any of the available constrains.
-\item \code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}} for specifying dispersal constrain on the temporal projections at each step.
+\item \code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}} for specifying dispersal constraint on the temporal projections at each step.
 \item \code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}} Using the \pkg{MigClim} R-package to simulate dispersal in projections.
-\item \code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}} Apply a connectivity constrain at the projection, for instance by adding
+\item \code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}} Apply a connectivity constraint at the projection, for instance by adding
 a barrier that prevents migration.
-\item \code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}} Apply an adaptability constrain to the projection, for instance
+\item \code{\link[=add_constraint_minsize]{add_constraint_minsize()}} Adds a constraint on the minimum area a given
+thresholded patch should have, assuming that smaller areas are in fact not
+suitable.
+\item \code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}} Apply an adaptability constraint to the projection, for instance
 constraining the speed a species is able to adapt to new conditions.
 \item \code{\link[=add_constraint_boundary]{add_constraint_boundary()}} To artificially limit the distribution change. Similar as specifying projection limits, but
-can be used to specifically constrain a projection within a certain area (e.g. a species range or an island).
+can be used to specifically constrain a projection within a certain area
+(e.g. a species range or an island).
 }
 
-Many constrains also requires thresholds to be calculated. Adding \code{\link[=threshold]{threshold()}} to a
-\code{\linkS4class{BiodiversityScenario}} object enables the computation of thresholds at every step based on the threshold
-used for the main model (threshold values are taken from there).
+Many constrains also requires thresholds to be calculated. Adding
+\code{\link[=threshold]{threshold()}} to a \code{\linkS4class{BiodiversityScenario}} object enables the
+computation of thresholds at every step based on the threshold used for the
+main model (threshold values are taken from there).
 
-Finally this function also allows temporal stabilization across prediction steps via enabling
-the parameter \code{stabilize} and checking the \code{stablize_method} argument. Stabilization can for instance
-be helpful in situations where environmental variables are quite dynamic, but changes in projected suitability
-are not expected to abruptly increase or decrease. It is thus a way to smoothen out outliers from the projection.
-Options are so far for instance \code{'loess'} which fits a \code{\link[=loess]{loess()}} model per pixel and time step. This is conducted at
-the very of the processing steps and any thresholds will be recalculated afterwards.
+Finally this function also allows temporal stabilization across prediction
+steps via enabling the parameter \code{stabilize} and checking the
+\code{stablize_method} argument. Stabilization can for instance be helpful in
+situations where environmental variables are quite dynamic, but changes in
+projected suitability are not expected to abruptly increase or decrease. It
+is thus a way to smoothen out outliers from the projection. Options are so
+far for instance \code{'loess'} which fits a \code{\link[=loess]{loess()}} model per pixel and
+time step. This is conducted at the very of the processing steps and any
+thresholds will be recalculated afterwards.
 }
 \examples{
 \dontrun{

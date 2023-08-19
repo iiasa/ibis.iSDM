@@ -19,64 +19,77 @@ add_control_bias(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target feature. Specify a variable that is not
-already added to \code{"x"} to avoid issues with duplications.}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+feature. Specify a variable that is not already added to \code{"x"} to
+avoid issues with duplications.}
 
-\item{method}{A \code{\link{character}} vector describing the method used for bias control. Available
-options are \code{"partial"} (Default), \code{"offset"} or \code{"proximity"}.}
+\item{method}{A \code{\link{character}} vector describing the method used for bias
+control. Available options are \code{"partial"} (Default), \code{"offset"}
+or \code{"proximity"}.}
 
-\item{bias_value}{A \code{\link{numeric}} with a value for \code{"layer"}. Specifying a \code{\link{numeric}} value here sets \code{layer}
-to the target value during projection. By default the value is set to the minimum value found in the layer (Default: \code{NULL}).}
+\item{bias_value}{A \code{\link{numeric}} with a value for \code{"layer"}. Specifying a
+\code{\link{numeric}} value here sets \code{layer} to the target value during
+projection. By default the value is set to the minimum value found in the
+layer (Default: \code{NULL}).}
 
-\item{maxdist}{A \code{\link{numeric}} giving the maximum distance if method \code{"proximity"} is used. If unset
-it uses by default the distance to the centroid of a minimum convex polygon encircling all points.}
+\item{maxdist}{A \code{\link{numeric}} giving the maximum distance if method
+\code{"proximity"} is used. If unset it uses by default the distance to the
+centroid of a minimum convex polygon encircling all points.}
 
-\item{alpha}{A \code{\link{numeric}} given the initial weight to points if method \code{"proximity"} is used (Default: \code{1}).
-For example, if set to values smaller than \code{1} neighbouring points will be weighted less.}
+\item{alpha}{A \code{\link{numeric}} given the initial weight to points if method
+\code{"proximity"} is used (Default: \code{1}). For example, if set to
+values smaller than \code{1} neighbouring points will be weighted less.}
 
-\item{add}{\code{\link{logical}} specifying whether a new offset is to be added. Setting
-this parameter to \code{FALSE} replaces the current offsets with the new one (Default: \code{TRUE}).}
+\item{add}{\code{\link{logical}} specifying whether a new offset is to be added.
+Setting this parameter to \code{FALSE} replaces the current offsets with
+the new one (Default: \code{TRUE}).}
 }
 \value{
 Adds bias control option to a \code{\link{distribution}} object.
 }
 \description{
-Sampling and other biases are pervasive drivers of the spatial location of
-biodiversity datasets. While the integration of other, presumably less biased
-data can be one way of controlling for sampling biases, another way is to control
-directly for the bias in the model. Currently supported methods are:
+Sampling and other biases are pervasive drivers of the spatial
+location of biodiversity datasets. While the integration of other, presumably
+less biased data can be one way of controlling for sampling biases, another
+way is to control directly for the bias in the model. Currently supported
+methods are:
 
-\link{*} \code{"partial"} - An approach described by Warton et al. (2013) to control the biases in a model, by
-including a specified variable ("layer") in the model, but "partialling" it out during the projection phase.
-Specifically the variable is set to a specified value ("bias_value"), which is by default the minimum value observed
-across the background.
-\link{*} \code{"offset"} - Dummy method that points to the \code{\link[=add_offset_bias]{add_offset_bias()}} functionality (see note). Makes use of
-offsets to factor out a specified bias variable.
-\link{*} \code{"proximity"} - Use the proximity or distance between points as a weight in the model. This option effectively places
-greater weight on points farther away. \emph{Note:} In the best case this can control for spatial bias and aggregation, in
-the worst case it can place a lot of emphasis on points that likely outliers or misidentification (in terms of species).
+\link{*} \code{"partial"} - An approach described by Warton et al. (2013) to
+control the biases in a model, by including a specified variable ("layer") in
+the model, but "partialling" it out during the projection phase. Specifically
+the variable is set to a specified value ("bias_value"), which is by default
+the minimum value observed across the background. \link{*} \code{"offset"} - Dummy
+method that points to the \code{\link[=add_offset_bias]{add_offset_bias()}} functionality (see note).
+Makes use of offsets to factor out a specified bias variable. \link{*}
+\code{"proximity"} - Use the proximity or distance between points as a weight
+in the model. This option effectively places greater weight on points farther
+away. \emph{Note:} In the best case this can control for spatial bias and
+aggregation, in the worst case it can place a lot of emphasis on points that
+likely outliers or misidentification (in terms of species).
 
 See also details for some explanations.
 }
 \details{
-In the case of \code{"proximity"} weights are assigned to each point, placing higher weight on points
-further away and with less overlap. Weights are are assigned up to a maximum of distance
-which can be provided by the user (parameter \code{"maxdist"}). This distance is ideally
-informed by some knowledge of the species to be modelled (e.g., maximum dispersal distance).
-If not provided, it is set to the distance of the centroid of a minimum convex polygon
-encircling all observations. The parameter \code{"alpha"} is a weighting factor which can be used to
-diminish the effect of neighboring points.
-\cr
-For a given observation \eqn{i}, the weight \eqn{w} is defined as \deqn{w_i = 1 / (1 + \epsilon)}
-where \deqn{\epsilon = \sum_{n=1}^{N}((1 - d_n)/d_sac)^\alpha} in which \eqn{N} is
-the total number of points closer than the maximum distance (\eqn{d_sac}) of point \eqn{i},
-and \eqn{d_n} the distance between focal point \eqn{i} and point \eqn{n}.
+In the case of \code{"proximity"} weights are assigned to each point, placing
+higher weight on points further away and with less overlap. Weights are are
+assigned up to a maximum of distance which can be provided by the user
+(parameter \code{"maxdist"}). This distance is ideally informed by some
+knowledge of the species to be modelled (e.g., maximum dispersal distance).
+If not provided, it is set to the distance of the centroid of a minimum
+convex polygon encircling all observations. The parameter \code{"alpha"} is a
+weighting factor which can be used to diminish the effect of neighboring
+points. \cr For a given observation \eqn{i}, the weight \eqn{w} is defined as
+\deqn{w_i = 1 / (1 + \epsilon)} where \deqn{\epsilon = \sum_{n=1}^{N}((1 -
+d_n)/d_sac)^\alpha} in which \eqn{N} is the total number of points closer
+than the maximum distance (\eqn{d_sac}) of point \eqn{i}, and \eqn{d_n} the
+distance between focal point \eqn{i} and point \eqn{n}.
 }
 \note{
 \strong{Covariate transformations applied to other predictors need to be applied to bias too.}
-Another option to consider biases particular in Poisson-point process models is to remove them
-through an offset. Functionality to do so is available through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting the
-method to \code{"offset"} will automatically point to this option.
+Another option to consider biases particular in Poisson-point process models
+is to remove them through an offset. Functionality to do so is available
+through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting the method to
+\code{"offset"} will automatically point to this option.
 }
 \examples{
 \dontrun{
@@ -92,6 +105,7 @@ method to \code{"offset"} will automatically point to this option.
 \item Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly estimating spatial sampling effort and habitat suitability for multiple species from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 }
 }
-\concept{The spatial bias weighting was inspired by code in the \code{enmSdmX} package.}
+\concept{The spatial bias weighting was inspired by code in the
+  \code{enmSdmX} package.}
 \keyword{bias,}
 \keyword{offset}

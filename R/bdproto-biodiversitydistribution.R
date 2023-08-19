@@ -7,13 +7,12 @@ NULL
 
 #' Biodiversity Distribution master class
 #'
-#' @description
-#' Base [`proto`] class for any biodiversity distribution objects.
-#' Serves as container that supplies data and functions to
-#' other [`proto`] classes.
+#' @description Base [`proto`] class for any biodiversity distribution objects.
+#' Serves as container that supplies data and functions to other [`proto`]
+#' classes.
 #'
-#' @details
-#' Run [names()] on a [`distribution`] object to show all available functions.
+#' @details Run [names()] on a [`distribution`] object to show all available
+#' functions.
 #'
 #' @name BiodiversityDistribution-class
 #' @aliases BiodiversityDistribution
@@ -39,11 +38,16 @@ BiodiversityDistribution <- bdproto(
   print = function(self) {
     # Query information from the distribution object
     ex <- self$show_background_info()
-    pn <- ifelse(is.Waiver(self$get_predictor_names()),'None',name_atomic(self$get_predictor_names(), "predictors"))
-    of <- ifelse(is.Waiver(self$offset), '', paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
-    pio <- ifelse(is.Waiver(self$priors), '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
-    bv <- ifelse(is.Waiver(self$bias), '', paste0( "\n  bias control:   <", self$bias$method, ">" ) )
-    en <- ifelse(is.null(self$get_engine()), text_red("<NONE>"), self$get_engine() )
+    pn <- ifelse(is.Waiver(self$get_predictor_names()),'None',
+                 name_atomic(self$get_predictor_names(), "predictors"))
+    of <- ifelse(is.Waiver(self$offset), '',
+                 paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
+    pio <- ifelse(is.Waiver(self$priors),
+                  '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
+    bv <- ifelse(is.Waiver(self$bias), '',
+                 paste0( "\n  bias control:   <", self$bias$method, ">" ) )
+    en <- ifelse(is.null(self$get_engine()),
+                 text_red("<NONE>"), self$get_engine() )
 
     message(paste0('\033[1m','\033[36m','<', self$name(),'>','\033[39m','\033[22m',
                    ifelse(is.Waiver(self$limits), "\nBackground extent: ", "\nBackground extent (limited): "),
@@ -256,7 +260,8 @@ BiodiversityDistribution <- bdproto(
   # Plot bias variable
   plot_bias = function(self){
     if(is.Waiver(self$bias)) return( self$bias )
-    terra::plot(self$bias$layer, col = ibis_colours$viridis_plasma, main = "Bias variable")
+    terra::plot(self$bias$layer,
+                col = ibis_colours$viridis_plasma, main = "Bias variable")
   },
   # Get log
   get_log = function(self){

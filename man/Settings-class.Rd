@@ -5,7 +5,8 @@
 \alias{Settings}
 \title{Prototype for model settings object}
 \description{
-Basic proto object for Settings object, a List that stores settings used related to model training
+Basic proto object for Settings object, a List that stores settings used
+related to model training
 }
 \seealso{
 Other bdproto: 

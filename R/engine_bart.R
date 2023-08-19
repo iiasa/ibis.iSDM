@@ -3,25 +3,30 @@ NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
-#' @description The Bayesian regression approach to a sum of complementary trees is to shrink
-#' the said fit of each tree through a regularization prior. BART models provide
-#' non-linear highly flexible estimation and have been shown to compare favourable among machine learning
-#' algorithms (Dorie et al. 2019). Default prior preference is for trees to be small (few terminal nodes)
-#' and shrinkage towards \code{0}.
+#' @description The Bayesian regression approach to a sum of complementary trees
+#'   is to shrink the said fit of each tree through a regularization prior. BART
+#'   models provide non-linear highly flexible estimation and have been shown to
+#'   compare favourable among machine learning algorithms (Dorie et al. 2019).
+#'   Default prior preference is for trees to be small (few terminal nodes) and
+#'   shrinkage towards \code{0}.
 #'
-#' This package requires the \code{"dbarts"} R-package to be installed.
-#' Many of the functionalities of this engine have been inspired by the \code{"embarcadero"} R-package.
-#' Users are therefore advised to cite if they make heavy use of BART.
-#' @details
-#' Prior distributions can furthermore be set for:
+#'   This package requires the \code{"dbarts"} R-package to be installed. Many
+#'   of the functionalities of this engine have been inspired by the
+#'   \code{"embarcadero"} R-package. Users are therefore advised to cite if they
+#'   make heavy use of BART.
+#' @details Prior distributions can furthermore be set for:
 #' * probability that a tree stops at a node of a given depth (Not yet implemented)
 #' * probability that a given variable is chosen for a splitting rule
 #' * probability of splitting that variable at a particular value (Not yet implemented)
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter A [`numeric`] estimate of the number of trees to be used in the sum-of-trees formulation (Default: \code{1000}).
-#' @param nburn A [`numeric`] estimate of the burn in samples (Default: \code{250}).
-#' @param chains A number of the number of chains to be used (Default: \code{4}).
-#' @param type The mode used for creating posterior predictions. Either \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param iter A [`numeric`] estimate of the number of trees to be used in the
+#'   sum-of-trees formulation (Default: \code{1000}).
+#' @param nburn A [`numeric`] estimate of the burn in samples (Default:
+#'   \code{250}).
+#' @param chains A number of the number of chains to be used (Default:
+#'   \code{4}).
+#' @param type The mode used for creating posterior predictions. Either
+#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other options.
 #' @references
 #' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
@@ -470,7 +475,7 @@ engine_bart <- function(x,
                                  .packages = c("dbarts", "matrixStats")) %do% {
                                    i <- which(splits == s)
 
-                                   pred_bart <- dbarts:::predict.bart(object = fit_bart,
+                                   pred_bart <- predict(object = fit_bart,
                                                                       newdata = full[i, model$biodiversity[[1]]$predictors_names],
                                                                       type = params$type,
                                                                       offset = of[i]
@@ -524,25 +529,42 @@ engine_bart <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             model <- self$get_data('fit_best')
             assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
-            bart_partial_effect(model, x.vars = x.var,
-                                transform = self$settings$data$binary, values = values )
+            if(is.null(newdata)){
+              bart_partial_effect(model, x.vars = x.var,
+                                  transform = self$settings$data$binary,
+                                  variable_length = variable_length,
+                                  values = values,
+                                  equal = TRUE,
+                                  plot = plot )
+            } else {
+              # Set the values to newdata
+              bart_partial_effect(model, x.vars = x.var,
+                                  transform = self$settings$data$binary,
+                                  values = newdata[[x.var]],
+                                  plot = plot)
+            }
           },
           # Spatial partial dependence plot option from embercardo
-          spartial = function(self, predictors, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE, type = NULL){
-            model <- self$get_data('fit_best')
-            assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels'),
+          spartial = function(self, x.var = NULL, equal = FALSE,
+                              smooth = 1, transform = TRUE, type = NULL){
+            fit <- self$get_data('fit_best')
+            model <- self$model
+            predictors <- model$predictors_object$get_data()
+            assertthat::assert_that(x.var %in% attr(fit$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 
-            if( self$model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+            if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
 
             # Calculate
-            p <- bart_partial_space(model, predictors, x.var, equal, smooth, transform)
+            p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)
 
-            terra::plot(p, col = ibis_colours$viridis_plasma, main = paste0(x.var, collapse ='|'))
+            terra::plot(p, col = ibis_colours$ohsu_palette,
+                        main = paste0(x.var, collapse ='|'))
             # Also return spatial
             return(p)
           },
@@ -558,7 +580,7 @@ engine_bart <- function(x,
             obj <- self$get_data("fit_best")
             if(is.Waiver(obj)) return(obj)
             # Get residuals
-            rd <- dbarts:::residuals.bart(obj)
+            rd <- residuals(obj)
             if(length(rd)==0) rd <- new_waiver()
             return(rd)
           },
@@ -601,7 +623,7 @@ engine_bart <- function(x,
 
             # Make a prediction
             suppressWarnings(
-              pred_bart <- dbarts:::predict.bart(object = self$get_data('fit_best'),
+              pred_bart <- predict(object = self$get_data('fit_best'),
                                                  newdata = newdata,
                                                  type = type) |> t()
               )

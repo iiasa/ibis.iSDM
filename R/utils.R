@@ -1,4 +1,6 @@
 #' Inverse of in call for convenience
+#'
+#' @description
 #' Calculates the set of entries not present in the second vector
 #'
 #' @param a First [`vector`] object.
@@ -9,10 +11,10 @@
 
 #' Custom messaging function for scripts
 #'
-#' @description
-#' This functions prints a message with a custom header and colour.
+#' @description This functions prints a message with a custom header and colour.
 #' @param title The title in the log output
-#' @param col A [`character`] indicating the text colour to be used. Supported are \code{'green'} / \code{'yellow'} / \code{'red'}
+#' @param col A [`character`] indicating the text colour to be used. Supported
+#'   are \code{'green'} / \code{'yellow'} / \code{'red'}
 #' @param ... Any additional outputs or words for display
 #' @examples
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
@@ -170,8 +172,8 @@ to_formula <- function(formula){
 
 #' Guess time to Posix
 #'
-#' @description
-#' This little wrapper converts and ensures that a vector of time objects are in POSIXct format.
+#' @description This little wrapper converts and ensures that a vector of time
+#' objects are in POSIXct format.
 #' @param vec A [`vector`] with [`numeric`] or [`Posixct`] data
 #' @keywords utils
 #' @noRd
@@ -223,10 +225,10 @@ thresholdval <- function(x, knot) {
 
 #' Sanitize variable names
 #'
-#' @description
-#' Prepared covariates often have special characters in their variable names
-#' which can or can not be used in formulas or cause errors for certain engines.
-#' This function converts special characters of variable names into a format
+#' @description Prepared covariates often have special characters in their
+#' variable names which can or can not be used in formulas or cause errors for
+#' certain engines. This function converts special characters of variable names
+#' into a format
 #'
 #' @param names A [`vector`] of [`character`] vectors to be sanitized.
 #' @returns A [`vector`] of sanitized [`character`].
@@ -263,18 +265,19 @@ sanitize_names <- function(names){
 
 #' Parallel computation of function
 #'
-#' @description
-#' Some computations take considerable amount of time to execute. This
-#' function provides a helper wrapper for running functions of the [`apply`]
-#' family to specified outputs.
-#' @details
-#' By default, the [parallel] package is used for parallel computation,
+#' @description Some computations take considerable amount of time to execute.
+#' This function provides a helper wrapper for running functions of the
+#' [`apply`] family to specified outputs.
+#' @details By default, the [parallel] package is used for parallel computation,
 #' however an option exists to use the [future] package instead.
-#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a single core or parallel [apply] call.
+#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a
+#'   single core or parallel [apply] call.
 #' @param FUN A [`function`] passed on for computation.
 #' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
-#' @param approach [`character`] for the parallelization approach taken (Options: \code{"parallel"} or \code{"future"}).
-#' @param export_package A [`vector`] with packages to export for use on parallel nodes (Default: \code{NULL}).
+#' @param approach [`character`] for the parallelization approach taken
+#'   (Options: \code{"parallel"} or \code{"future"}).
+#' @param export_package A [`vector`] with packages to export for use on
+#'   parallel nodes (Default: \code{NULL}).
 #' @examples
 #' \dontrun{
 #'  run_par(list, mean, cores = 4)
@@ -365,17 +368,20 @@ run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packag
 
 #' Clamp a predictor matrix by given values
 #'
-#' @description
-#' To limit extreme extrapolation it is possible to \code{'clamp'} an existing projection to the range
-#' of predictor values observed during model training.
-#' This function takes an internal model matrix and restricts the values seen in the predictor matrix
-#' to those observed during training.
-#' @note This function is meant to be used within a certain \code{"engine"} or within [`project`].
-#' @param model A [`list`] with the input data used for inference. Created during model setup.
+#' @description To limit extreme extrapolation it is possible to \code{'clamp'}
+#' an existing projection to the range of predictor values observed during model
+#' training. This function takes an internal model matrix and restricts the
+#' values seen in the predictor matrix to those observed during training.
+#' @note This function is meant to be used within a certain \code{"engine"} or
+#'   within [`project`].
+#' @param model A [`list`] with the input data used for inference. Created
+#'   during model setup.
 #' @param pred An optional [`data.frame`] of the prediction container.
 #' @returns A [`data.frame`] with the clamped predictors.
 #' @keywords utils, internal
-#' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017). Opening the black box: An open-source release of Maxent. Ecography. https://doi.org/10.1111/ecog.03049
+#' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., &
+#'   Blair, M. E. (2017). Opening the black box: An open-source release of
+#'   Maxent. Ecography. https://doi.org/10.1111/ecog.03049
 clamp_predictions <- function(model, pred){
   assertthat::assert_that(
     is.list(model),
@@ -419,11 +425,13 @@ clamp_predictions <- function(model, pred){
 
 #' Create formula matrix
 #'
-#' Function to create list of formulas with all possible combinations of variables
+#' Function to create list of formulas with all possible combinations of
+#' variables
 #' @param form An input [`formula`] object.
-#' @param response A [`character`] object giving the response. (Default: \code{NULL})
+#' @param response A [`character`] object giving the response. (Default:
+#'   \code{NULL})
 #' @param type Currently implemented are \code{'inla'} (variable groups),
-#'  \code{'All'} (All possible combinations) or \code{'forward'}.
+#'   \code{'All'} (All possible combinations) or \code{'forward'}.
 #' @returns A [`vector`] object with [`formula`] objects.
 #' @examples \dontrun{
 #' formula_combinations(form)
@@ -604,12 +612,14 @@ formula_combinations <- function(form, response = NULL, type= 'forward'){
 
 #' Outlier detection via reverse jackknife
 #'
-#' @description
-#' Implementation of a Reverse Jackknife procedure as described by Chapman (2005).
-#' Can be used to identify outliers in environmental predictors or predictions.
-#' @param vals A [`numeric`] vector from which outliers are to be identified and removed.
-#' @param procedure [`character`] denoting what to do with outliers.
-#' Options include: \code{'missing'} (Default) and \code{'remove'}, with the former replacing the outliers with \code{NA} and the latter removing them.
+#' @description Implementation of a Reverse Jackknife procedure as described by
+#' Chapman (2005). Can be used to identify outliers in environmental predictors
+#' or predictions.
+#' @param vals A [`numeric`] vector from which outliers are to be identified and
+#'   removed.
+#' @param procedure [`character`] denoting what to do with outliers. Options
+#'   include: \code{'missing'} (Default) and \code{'remove'}, with the former
+#'   replacing the outliers with \code{NA} and the latter removing them.
 #' @references
 #' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity Information Facility, Copenhagen.
 #' @source [`bioGeo`] package code served as inspiration
@@ -665,13 +675,14 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 
 #' Aggregate count observations to a grid
 #'
-#' @description
-#' This function aggregates provided point data to a reference grid, by,
-#' depending on the type, either counting the number of observations per grid cell
-#' or aggregating them via a sum.
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
+#' @description This function aggregates provided point data to a reference
+#' grid, by, depending on the type, either counting the number of observations
+#' per grid cell or aggregating them via a sum.
+#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point
+#'   data.
 #' @param template A [`SpatRaster`] object that is aligned with the predictors.
-#' @param field_occurrence A [`character`] name of the column containing the presence information (Default: \code{observed}).
+#' @param field_occurrence A [`character`] name of the column containing the
+#'   presence information (Default: \code{observed}).
 #' @returns A [`sf`] object with the newly aggregated points.
 #' @keywords internal
 #' @noRd
@@ -735,15 +746,18 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 
 #' Get all occurrence point locations
 #'
-#' @description
-#' This is a small helper function that simply goes over all biodiversity sets in
-#' the model object.
+#' @description This is a small helper function that simply goes over all
+#' biodiversity sets in the model object.
 #' **This function is intended to only run within ibis and with the model packages created by it.**
-#' @param model A [`list`] object containing the biodiversity and predictor objects.
-#' @param include_absences A [`logical`] of whether absences should be included (Default: \code{FALSE}).
+#' @param model A [`list`] object containing the biodiversity and predictor
+#'   objects.
+#' @param include_absences A [`logical`] of whether absences should be included
+#'   (Default: \code{FALSE}).
 #' @param point_column [`chracter`] on the column with observed values.
-#' @param addName [`logical`] Should the name of the feature be added (Default: \code{FALSE}).
-#' @param tosf [`logical`] of whether the output should be [`sf`] object (Default: \code{FALSE}).
+#' @param addName [`logical`] Should the name of the feature be added (Default:
+#'   \code{FALSE}).
+#' @param tosf [`logical`] of whether the output should be [`sf`] object
+#'   (Default: \code{FALSE}).
 #' @returns A [`matrix`] or [`sf`] object with the newly aggregated points.
 #' @keywords internal
 #' @noRd

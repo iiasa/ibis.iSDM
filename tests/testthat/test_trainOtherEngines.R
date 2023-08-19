@@ -61,6 +61,15 @@ test_that('Train a distribution model with XGboost', {
   expect_named(object = ex_range, expected = c("ensemble_mean", "range_mean"))
   expect_named(object = ex_pca, expected = c("ensemble_mean", "pca_mean"))
 
+  # Do ensemble partials work?
+  expect_no_error(ex <- ensemble_partial(mod,mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do ensemble spartials work
+  mod2 <- x |> train(only_linear = TRUE)
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_true(is.Raster(ex))
+
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
@@ -120,6 +129,15 @@ test_that('Train a distribution model with Breg', {
 
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+  # Do ensemble partials work?
+  expect_no_error(ex <- ensemble_partial(mod,mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do ensemble spartials work
+  mod2 <- x |> train(only_linear = TRUE)
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_true(is.Raster(ex))
 
   # Does limiting raster work?
   suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
@@ -183,6 +201,15 @@ test_that('Train a distribution model with GDB', {
 
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+  # Do ensemble partials work?
+  expect_no_error(ex <- ensemble_partial(mod,mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do ensemble spartials work
+  mod2 <- x |> train(only_linear = TRUE)
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_true(is.Raster(ex))
 
   # Does limiting raster work?
   suppressMessages( expect_s4_class(limiting(mod, plot = FALSE), "SpatRaster") )
@@ -248,6 +275,15 @@ test_that('Train a distribution model with glmnet', {
 
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
+
+  # Do ensemble partials work?
+  expect_no_error(ex <- ensemble_partial(mod,mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do ensemble spartials work
+  mod2 <- x |> train(only_linear = TRUE)
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_true(is.Raster(ex))
 
   # Added here to tests as it is quick
   expect_no_error( partial_density(mod = mod, x.var = "elevation_mean_50km", df = FALSE))

@@ -3,55 +3,68 @@ NULL
 
 #' Use inlabru as engine
 #'
-#' @description Model components are specified with general inputs and mapping methods to the
-#' latent variables, and the predictors are specified via general R expressions,
-#' with separate expressions for each observation likelihood model in multi-likelihood models.
-#' The inlabru engine - similar as the [`engine_inla`] function acts a wrapper for INLA,
-#' albeit \code{"inlabru"} has a number of convenience functions implemented that make in particular predictions
-#' with new data much more straight forward (e.g. via posterior simulation instead of fitting).
-#' Since more recent versions \code{"inlabru"} also supports the addition of multiple likelihoods, therefore
-#' allowing full integrated inference.
-#' @details
-#' All \code{INLA} engines require the specification of a mesh that needs to be provided to the
-#' \code{"optional_mesh"} parameter. Otherwise the mesh will be created based on best guesses of the
-#' data spread. A good mesh needs to have triangles as regular as possible in size and shape: equilateral.
+#' @description Model components are specified with general inputs and mapping
+#'   methods to the latent variables, and the predictors are specified via
+#'   general R expressions, with separate expressions for each observation
+#'   likelihood model in multi-likelihood models. The inlabru engine - similar
+#'   as the [`engine_inla`] function acts a wrapper for INLA, albeit
+#'   \code{"inlabru"} has a number of convenience functions implemented that
+#'   make in particular predictions with new data much more straight forward
+#'   (e.g. via posterior simulation instead of fitting). Since more recent
+#'   versions \code{"inlabru"} also supports the addition of multiple
+#'   likelihoods, therefore allowing full integrated inference.
+#' @details All \code{INLA} engines require the specification of a mesh that
+#' needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
+#' mesh will be created based on best guesses of the data spread. A good mesh
+#' needs to have triangles as regular as possible in size and shape:
+#' equilateral.
 #'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in the same scale units as the coordinates
-#' Lower bounds affect the density of triangles
-#' [*] \code{"offset"}: The automatic extension distance of the mesh
-#' If positive: same scale units. If negative, interpreted as a factor relative to the approximate data diameter
-#' i.e., a value of -0.10 will add a 10% of the data diameter as outer extension.
-#' [*] \code{"cutoff"}: The minimum allowed distance between points,
-#' it means that points at a closer distance than the supplied value are replaced by a single vertex.
-#' it is critical when there are some points very close to each other, either for point locations or in the
-#' domain boundary.
-#' [*] \code{"proj_stepsize"}: The stepsize for spatial predictions, which affects the spatial grain of any outputs
-#' created.
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates Lower bounds affect the density of
+#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative
+#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' distance between points, it means that points at a closer distance than the
+#' supplied value are replaced by a single vertex. it is critical when there are
+#' some points very close to each other, either for point locations or in the
+#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' predictions, which affects the spatial grain of any outputs created.
 #'
 #' Priors can be set via [INLAPrior].
 #' @note
 #' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default: \code{NULL})
-#' @param max.edge The largest allowed triangle edge length, must be in the same scale units as the coordinates.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param offset interpreted as a numeric factor relative to the approximate data diameter.
-#' Default is an educated guess (Default: \code{NULL}).
+#' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default:
+#'   \code{NULL})
+#' @param max.edge The largest allowed triangle edge length, must be in the same
+#'   scale units as the coordinates. Default is an educated guess (Default:
+#'   \code{NULL}).
+#' @param offset interpreted as a numeric factor relative to the approximate
+#'   data diameter. Default is an educated guess (Default: \code{NULL}).
 #' @param cutoff The minimum allowed distance between points on the mesh.
-#' Default is an educated guess (Default: \code{NULL}).
-#' @param proj_stepsize The stepsize in coordinate units between cells of the projection grid (Default: \code{NULL})
-#' @param strategy Which approximation to use for the joint posterior. Options are \code{"auto"} ("default"), \code{"adaptative"},
-#'  \code{"gaussian"}, \code{"simplified.laplace"} & \code{"laplace"}.
-#' @param int.strategy Integration strategy. Options are \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
-#' @param area Accepts a [`character`] denoting the type of area calculation to be done on the mesh (Default: \code{'gpc2'}).
-#' @param timeout Specify a timeout for INLA models in sec. Afterwards it passed.
-#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#'   Default is an educated guess (Default: \code{NULL}).
+#' @param proj_stepsize The stepsize in coordinate units between cells of the
+#'   projection grid (Default: \code{NULL})
+#' @param strategy Which approximation to use for the joint posterior. Options
+#'   are \code{"auto"} ("default"), \code{"adaptative"}, \code{"gaussian"},
+#'   \code{"simplified.laplace"} & \code{"laplace"}.
+#' @param int.strategy Integration strategy. Options are
+#'   \code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.
+#' @param area Accepts a [`character`] denoting the type of area calculation to
+#'   be done on the mesh (Default: \code{'gpc2'}).
+#' @param timeout Specify a timeout for INLA models in sec. Afterwards it
+#'   passed.
+#' @param type The mode used for creating posterior predictions. Either
+#'   summarizing the linear \code{"predictor"} or \code{"response"} (Default:
+#'   \code{"response"}).
 #' @param ... Other variables
 #' @references
 #' * Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
 #' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
 #' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
-#' @source [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
+#' @source
+#'   [https://inlabru-org.github.io/inlabru/articles/](https://inlabru-org.github.io/inlabru/articles/)
 #' @family engine
 #' @returns An [Engine].
 #' @aliases engine_inlabru
@@ -1032,7 +1045,8 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = TRUE, type = "response"){
+          partial = function(self, x.var, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = TRUE, type = "response"){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
@@ -1044,6 +1058,7 @@ engine_inlabru <- function(x,
                                     is.character(x.var),
                                     is.numeric(variable_length), variable_length >=1,
                                     is.null(constant) || is.numeric(constant),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.null(values) || is.numeric(values)
             )
 
@@ -1051,42 +1066,46 @@ engine_inlabru <- function(x,
             if(!is.null(mod$summary.random)) vn <- names(mod$summary.random) else vn <- ""
             x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = FALSE)
 
-            # Make a prediction via inlabru
-            if(any(model$predictors_types$type=="factor")){
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            } else {
-              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            }
-            assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
+            if(is.null(newdata)){
+              # Make a prediction via inlabru
+              if(any(model$predictors_types$type=="factor")){
+                rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                             function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              } else {
+                rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              }
+              assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
-            df_partial <- list()
-            # Set length out to value length to have equal coverage
-            if(!is.null(values)){  variable_length <- length(values) }
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
-            } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
-            }
-            if(!is.null(values)){
-              df_partial[[x.var]] <- values
-            } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-            }
-            df_partial <- df_partial |> as.data.frame()
+              df_partial <- list()
+              # Set length out to value length to have equal coverage
+              if(!is.null(values)){  variable_length <- length(values) }
+              # Add all others as constant
+              if(is.null(constant)){
+                for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
+              } else {
+                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              }
+              if(!is.null(values)){
+                df_partial[[x.var]] <- values
+              } else {
+                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+              }
+              df_partial <- df_partial |> as.data.frame()
 
-            if(any(model$predictors_types$type=="factor")){
-              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
-                factor(lvl[1], levels = lvl)
+              if(any(model$predictors_types$type=="factor")){
+                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+                df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+                  factor(lvl[1], levels = lvl)
+              }
+            } else {
+              df_partial <- newdata |> dplyr::select(any_of(names(df)))
             }
 
             ## plot the unique effect of the covariate
             fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-            pred_cov <- inlabru:::predict.bru(mod,
-                                df_partial,
-                                stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+            pred_cov <- predict(object = mod,
+                                newdata = df_partial,
+                                formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
                                 n.samples = 100,
                                 probs = c(0.05,0.5,0.95)
                                 )
@@ -1170,7 +1189,7 @@ engine_inlabru <- function(x,
               ggplot2::ggplot() +
                 ggplot2::theme_classic(base_size = 18) +
                 inlabru::gg(o, ggplot2::aes(fill = mean)) +
-                ggplot2::scale_fill_gradientn(colours = ibis_colours$divg_bluegreen) +
+                ggplot2::scale_fill_gradientn(colours = ibis_colours$ohsu_palette) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
             }
 

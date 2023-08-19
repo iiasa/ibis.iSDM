@@ -11,18 +11,21 @@
 
 \item{fname}{A \code{\link{character}} depicting an output filename.}
 
-\item{slim}{A \code{\link{logical}} option to whether unnecessary entries in the model object should be deleted.
-This deletes for example predictions or any other non-model content from the object (Default: \code{FALSE}).}
+\item{slim}{A \code{\link{logical}} option to whether unnecessary entries in the model
+object should be deleted. This deletes for example predictions or any other
+non-model content from the object (Default: \code{FALSE}).}
 
-\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
+Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 }
 \value{
 No R-output is created. A file is written to the target direction.
 }
 \description{
-The \code{write_model} function (opposed to the \code{write_output}) is a generic wrapper to writing a
-\code{\link{DistributionModel}} to disk. It is essentially a wrapper to \code{\link{saveRDS}}.
-Models can be loaded again via the \code{load_model} function.
+The \code{write_model} function (opposed to the \code{write_output}) is a
+generic wrapper to writing a \code{\link{DistributionModel}} to disk. It is essentially
+a wrapper to \code{\link{saveRDS}}. Models can be loaded again via the \code{load_model}
+function.
 }
 \note{
 By default output files will be overwritten if already existing!

@@ -2,49 +2,65 @@
 % Please edit documentation in R/add_constraint_MigClim.R
 \name{add_constraint_MigClim}
 \alias{add_constraint_MigClim}
-\title{Add constrains to the modelled distribution projection using the MigClim approach}
+\title{Add constrains to the modelled distribution projection using the MigClim
+approach}
 \usage{
 \S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{rcThresholdMode}{A \code{\link{character}} of either \strong{binary} or \strong{continuous} value (Default: \strong{continuous}).}
+\item{rcThresholdMode}{A \code{\link{character}} of either \strong{binary} or \strong{continuous}
+value (Default: \strong{continuous}).}
 
-\item{dispSteps}{\code{\link{numeric}} parameters on the number of dispersal steps. Dispersal steps are executed for each timestep (prediction layer).
-and ideally should be aligned with the number of steps for projection. Minimum is \code{1} (Default) and maximum is \code{99}.}
+\item{dispSteps}{\code{\link{numeric}} parameters on the number of dispersal steps.
+Dispersal steps are executed for each timestep (prediction layer). and
+ideally should be aligned with the number of steps for projection. Minimum
+is \code{1} (Default) and maximum is \code{99}.}
 
-\item{dispKernel}{A \code{\link{vector}} with the number of the dispersal Kernel to be applied.
-Can be set either to a uniform numeric \link{vector}, e.g. \code{c(1,1,1,1)} or to a proportional decline \code{(1,0.4,0.16,0.06,0.03)} (Default).
+\item{dispKernel}{A \code{\link{vector}} with the number of the dispersal Kernel to be
+applied. Can be set either to a uniform numeric \link{vector}, e.g.
+\code{c(1,1,1,1)} or to a proportional decline
+\code{(1,0.4,0.16,0.06,0.03)} (Default).
 \strong{Depending on the resolution of the raster, this parameter needs to be adapted}}
 
-\item{barrierType}{A \link{character} indicating whether any set barrier should be set as \code{'strong'} or \code{'weak'} barriers.
-Strong barriers prevent any dispersal across the barrier and weak barriers only do so if the whole \code{"dispKernel"} length
-is covered by the barrier (Default: \code{'strong'}).}
+\item{barrierType}{A \link{character} indicating whether any set barrier should be
+set as \code{'strong'} or \code{'weak'} barriers. Strong barriers prevent
+any dispersal across the barrier and weak barriers only do so if the whole
+\code{"dispKernel"} length is covered by the barrier (Default:
+\code{'strong'}).}
 
-\item{lddFreq}{\code{\link{numeric}} parameter indicating the frequency of long-distance dispersal (LDD) events. Default is \code{0}, so no long-distance dispersal.}
+\item{lddFreq}{\code{\link{numeric}} parameter indicating the frequency of
+long-distance dispersal (LDD) events. Default is \code{0}, so no
+long-distance dispersal.}
 
-\item{lddRange}{A \code{\link{numeric}} value highlighting the minimum and maximum distance of LDD events.
+\item{lddRange}{A \code{\link{numeric}} value highlighting the minimum and maximum
+distance of LDD events.
 \strong{Note: The units for those distance are in cells, thus the projection units in the raster.}}
 
-\item{iniMatAge}{Initial maturity age. Used together with \code{propaguleProd} as a proxy of population growth.
-Must be set to the cell age in time units which are dispersal steps (Default: \code{1}).}
+\item{iniMatAge}{Initial maturity age. Used together with \code{propaguleProd} as
+a proxy of population growth. Must be set to the cell age in time units
+which are dispersal steps (Default: \code{1}).}
 
-\item{replicateNb}{Number of replicates to be used for the analysis (Default: \code{10}).}
+\item{replicateNb}{Number of replicates to be used for the analysis (Default:
+\code{10}).}
 
-\item{dtmp}{A \code{\link{character}} to a folder where temporary files are to be created.}
+\item{dtmp}{A \code{\link{character}} to a folder where temporary files are to be
+created.}
 
-\item{propaguleProd}{Probability of a source cell to produce propagules as a function of time since colonization.
-Set as probability vector that defines the probability of a cell producing propagules.}
+\item{propaguleProd}{Probability of a source cell to produce propagules as a
+function of time since colonization. Set as probability vector that defines
+the probability of a cell producing propagules.}
 }
 \value{
 Adds a MigClim onstrain to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
-This function adds constrain as defined by the MigClim approach (Engler et al. 2013)
-to a \code{\linkS4class{BiodiversityScenario}} object to
-constrain future projections. For a detailed description of MigClim, please the respective reference
-and the UserGuide. \strong{The default parameters chosen here are suggestions.}
+This function adds constrain as defined by the MigClim approach
+(Engler et al. 2013) to a \code{\linkS4class{BiodiversityScenario}} object to
+constrain future projections. For a detailed description of MigClim, please
+the respective reference and the UserGuide. \strong{The default parameters chosen
+here are suggestions.}
 }
 \details{
 The barrier parameter is defined through \code{"add_barrier"}.
@@ -63,7 +79,8 @@ The barrier parameter is defined through \code{"add_barrier"}.
 \references{
 \itemize{
 \item Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of
-dispersal constraints into projections of species distribution models. Ecography,
+dispersal constraints into projections of species distribution models.
+Ecography,
 \item Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal
 into species distribution models. R package version 1.6.
 }

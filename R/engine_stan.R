@@ -3,33 +3,43 @@ NULL
 #' Use Stan as engine
 #'
 #' @description Stan is probabilistic programming language that can be used to
-#' specify most types of statistical linear and non-linear regression models.
-#' Stan provides full Bayesian inference for continuous-variable models through Markov chain Monte Carlo methods
-#' such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling.
-#' Stan code has to be written separately and this function acts as compiler to
-#' build the stan-model.
+#'   specify most types of statistical linear and non-linear regression models.
+#'   Stan provides full Bayesian inference for continuous-variable models
+#'   through Markov chain Monte Carlo methods such as the No-U-Turn sampler, an
+#'   adaptive form of Hamiltonian Monte Carlo sampling. Stan code has to be
+#'   written separately and this function acts as compiler to build the
+#'   stan-model.
 #' **Requires the \code{"cmdstanr"} package to be installed!**
-#' @details
-#' By default the posterior is obtained through sampling, however stan also supports
-#' approximate inference forms through penalized maximum likelihood estimation (see Carpenter et al. 2017).
+#' @details By default the posterior is obtained through sampling, however stan
+#' also supports approximate inference forms through penalized maximum
+#' likelihood estimation (see Carpenter et al. 2017).
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param chains A positive [`integer`] specifying the number of Markov chains (Default: \code{4} chains).
-#' @param iter A positive [`integer`] specifying the number of iterations for each chain (including warmup). (Default: \code{2000}).
-#' @param warmup A positive [`integer`] specifying the number of warmup (aka burnin) iterations per chain.
-#' If step-size adaptation is on (Default: \code{TRUE}), this also controls the number of iterations for which
-#' adaptation is run (and hence these warmup samples should not be used for inference).
-#' The number of warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.
-#' @param cores If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.
-#' @param init Initial values for parameters (Default: \code{'random'}). Can also be specified as [list] (see: \code{"rstan::stan"})
-#' @param algorithm Mode used to sample from the posterior. Available options are \code{"sampling"}, \code{"optimize"},
-#' or \code{"variational"}.
-#' See \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).
-#' @param control See \code{"rstan::stan"} for more details on specifying the controls.
-#' @param type The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#' @param chains A positive [`integer`] specifying the number of Markov chains
+#'   (Default: \code{4} chains).
+#' @param iter A positive [`integer`] specifying the number of iterations for
+#'   each chain (including warmup). (Default: \code{2000}).
+#' @param warmup A positive [`integer`] specifying the number of warmup (aka
+#'   burnin) iterations per chain. If step-size adaptation is on (Default:
+#'   \code{TRUE}), this also controls the number of iterations for which
+#'   adaptation is run (and hence these warmup samples should not be used for
+#'   inference). The number of warmup iterations should be smaller than
+#'   \code{iter} and the default is \code{iter/2}.
+#' @param cores If set to NULL take values from specified ibis option
+#'   \code{getOption('ibis.nthread')}.
+#' @param init Initial values for parameters (Default: \code{'random'}). Can
+#'   also be specified as [list] (see: \code{"rstan::stan"})
+#' @param algorithm Mode used to sample from the posterior. Available options
+#'   are \code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See
+#'   \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).
+#' @param control See \code{"rstan::stan"} for more details on specifying the
+#'   controls.
+#' @param type The mode used for creating posterior predictions. Either
+#'   summarizing the linear \code{"predictor"} or \code{"response"} (Default:
+#'   \code{"response"}).
 #' @param ... Other variables
 #' @seealso rstan, cmdstanr
-#' @note
-#' The function \code{obj$stancode()} can be used to print out the stancode of the model.
+#' @note The function \code{obj$stancode()} can be used to print out the
+#' stancode of the model.
 #' @references
 #' * Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'. https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
 #' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
@@ -677,7 +687,8 @@ engine_stan <- function(x,
 
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = "predictor"){
+          partial = function(self, x.var, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = "predictor"){
             # Get model and intercept if present
             mod <- self$get_data('fit_best')
             model <- self$model
@@ -686,27 +697,33 @@ engine_stan <- function(x,
             assertthat::assert_that(inherits(mod,'stanfit'),
                                     is.character(x.var),
                                     is.numeric(variable_length) && variable_length > 1,
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.null(constant) || is.numeric(constant)
             )
             # Check that given variable is in x.var
             assertthat::assert_that(x.var %in% model$predictors_names)
-            # Calculate
-            rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            df_partial <- list()
-            if(!is.null(values)){ variable_length <- length(values) }
 
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), variable_length )
+            if(is.null(newdata)){
+              # Calculate
+              rr <- sapply(model$predictors, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              df_partial <- list()
+              if(!is.null(values)){ variable_length <- length(values) }
+
+              # Add all others as constant
+              if(is.null(constant)){
+                for(n in names(rr)) df_partial[[n]] <- rep( mean(model$predictors[[n]], na.rm = TRUE), variable_length )
+              } else {
+                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              }
+              if(!is.null(values)){
+                df_partial[[x.var]] <- values
+              } else {
+                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
+              }
+              df_partial <- df_partial |> as.data.frame()
             } else {
-              for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+              df_partial <- newdata |> dplyr::select(any_of(model$predictors_names))
             }
-            if(!is.null(values)){
-              df_partial[[x.var]] <- values
-            } else {
-              df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-            }
-            df_partial <- df_partial |> as.data.frame()
 
             # For Integrated model, follow poisson
             fam <- ifelse(length(model$biodiversity)>1, "poisson", model$biodiversity[[1]]$family)
@@ -808,12 +825,20 @@ engine_stan <- function(x,
                                                    mode = type # Linear predictor
             )
 
-            prediction <- emptyraster( self$get_data('prediction') ) # Background
+            prediction <- try({
+              emptyraster( self$get_data('prediction') )},silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(model$predictors[,c("x", "y")],
+                                      crs = terra::crs(model$background),
+                                      type = "xyz") |>
+                emptyraster()
+            }
             prediction <- fill_rasters(pred_part, prediction)
 
             # Do plot and return result
             if(plot){
-              plot(prediction[[c("mean","sd")]], col = ibis_colours$viridis_orig)
+              terra::plot(prediction[[c("mean","sd")]],
+                          col = ibis_colours$ohsu_palette)
             }
             return(prediction)
           },

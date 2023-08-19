@@ -9,15 +9,17 @@ BARTPriors(variable, hyper = 0.75, ...)
 \S4method{BARTPriors}{character,numeric}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
-\item{hyper}{A \code{\link{numeric}} object with a number being \code{>0} and equal to \code{1}. Defaults to \code{0.75}.}
+\item{hyper}{A \code{\link{numeric}} object with a number being \code{>0} and equal to
+\code{1}. Defaults to \code{0.75}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-This is a helper function to specify several \link{BARTPrior} objects with the same
-hyper-parameters, but different variables.
+This is a helper function to specify several \link{BARTPrior} objects
+with the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 

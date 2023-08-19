@@ -7,8 +7,8 @@ NULL
 
 #' List of Priors supplied to an class
 #'
-#' This class represents a collection of [`Prior-class`] objects.
-#' It provides methods for accessing, adding and removing priors from the list
+#' This class represents a collection of [`Prior-class`] objects. It provides
+#' methods for accessing, adding and removing priors from the list
 #'
 #' @name PriorList-class
 #' @examples

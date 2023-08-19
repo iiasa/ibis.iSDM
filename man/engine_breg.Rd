@@ -15,11 +15,14 @@ engine_breg(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{iter}{\code{\link{numeric}} on the number of MCMC iterations to run (Default: \code{10000}).}
+\item{iter}{\code{\link{numeric}} on the number of MCMC iterations to run (Default:
+\code{10000}).}
 
-\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use for data augmentation.}
+\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use for data
+augmentation.}
 
-\item{type}{The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either making
+\code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other none specified parameters passed on to the model.}
 }
@@ -27,16 +30,16 @@ engine_breg(
 An \link{Engine}.
 }
 \description{
-Efficient MCMC algorithm for linear regression models that makes use of
-'spike-and-slab' priors for some modest regularization on the amount of posterior
-probability for a subset of the coefficients.
+Efficient MCMC algorithm for linear regression models that makes
+use of 'spike-and-slab' priors for some modest regularization on the amount
+of posterior probability for a subset of the coefficients.
 }
 \details{
-This engine provides efficient Bayesian predictions through the \pkg{Boom} R-package. However note
-that not all link and models functions are supported and certain functionalities such as offsets are generally
-not available.
-This engines allows the estimation of linear and non-linear effects via the \code{"only_linear"} option
-specified in \link{train}.
+This engine provides efficient Bayesian predictions through the
+\pkg{Boom} R-package. However note that not all link and models functions are
+supported and certain functionalities such as offsets are generally not
+available. This engines allows the estimation of linear and non-linear
+effects via the \code{"only_linear"} option specified in \link{train}.
 }
 \examples{
 \dontrun{

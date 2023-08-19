@@ -9,19 +9,21 @@ XGBPrior(variable, hyper = "increasing", ...)
 \S4method{XGBPrior}{character,character}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
+Available options are \code{'increasing'}, \code{'decreasing'},
+\code{'convex'}, \code{'concave'}, \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Function to include prior information as monotonic constrain to a
-extreme gradient descent boosting model \code{\link{engine_xgboost}}.
-Monotonic priors enforce directionality in direction of certain variables, however
-specifying a monotonic constrain does not guarantee that the variable is not regularized out
-during model fitting.
+Function to include prior information as monotonic constrain to
+a extreme gradient descent boosting model \code{\link{engine_xgboost}}. Monotonic
+priors enforce directionality in direction of certain variables, however
+specifying a monotonic constrain does not guarantee that the variable is not
+regularized out during model fitting.
 }
 \examples{
 \dontrun{

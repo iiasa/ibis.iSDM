@@ -9,16 +9,18 @@ XGBPriors(variable, hyper = "increasing", ...)
 \S4method{XGBPriors}{character,character}(variable,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'}, \code{'none'}.}
+Available options are \code{'increasing'}, \code{'decreasing'},
+\code{'convex'}, \code{'concave'}, \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-This is a helper function to specify several \link{XGBPrior} with the same
-hyper-parameters, but different variables.
+This is a helper function to specify several \link{XGBPrior} with the
+same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 

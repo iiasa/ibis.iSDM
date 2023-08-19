@@ -3,35 +3,43 @@ NULL
 
 #' Engine for regularized regression models
 #'
-#' @description
-#' This engine allows the estimation of linear coefficients using either ridge, lasso or elastic net regressions techniques.
-#' Backbone of this engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
-#' including the popular \code{'maxnet'} (e.g. Maxent) package.
-#' Ultimately this engine is an equivalent of [engine_breg], but in a "frequentist" setting.
-#' If user aim to emulate a model that most closely resembles maxent within the ibis.iSDM modelling framework,
-#' then this package is the best way of doing so. Compared to the \code{'maxnet'} R-package,
-#' a number of efficiency settings are implemented in particular for cross-validation of alpha and lambda values.
+#' @description This engine allows the estimation of linear coefficients using
+#' either ridge, lasso or elastic net regressions techniques. Backbone of this
+#' engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
+#' including the popular \code{'maxnet'} (e.g. Maxent) package. Ultimately this
+#' engine is an equivalent of [engine_breg], but in a "frequentist" setting. If
+#' user aim to emulate a model that most closely resembles maxent within the
+#' ibis.iSDM modelling framework, then this package is the best way of doing so.
+#' Compared to the \code{'maxnet'} R-package, a number of efficiency settings
+#' are implemented in particular for cross-validation of alpha and lambda
+#' values.
 #'
-#' Limited amount of prior information can be specified for this engine, specifically via offsets or as
-#' [`GLMNETPrior`], which allow to specify priors as regularization constants.
-#' @details
-#' Regularized regressions are effectively GLMs that are fitted with ridge, lasso or elastic-net regularization.
-#' Which of them is chosen is critical dependent on the alpha value:
-#' [*] For \code{alpha} equal to \code{0} a ridge regularization is used. Ridge regularization has the property that
-#' it doesn't remove variables entirely, but instead sets their coefficients to \code{0}.
-#' [*] For \code{alpha} equal to \code{1} a lasso regularization is used. Lassos tend to remove those coefficients
-#' fully from the final model that do not improve the loss function.
-#' [*] For \code{alpha} values between \code{0} and \code{1} a elastic-net regularization is used, which is essentially a combination
-#' of the two.
-#' The optimal lambda parameter can be determined via cross-validation. For this option set \code{"varsel"} in `train()`
-#' to \code{"reg"}.
+#' Limited amount of prior information can be specified for this engine,
+#' specifically via offsets or as [`GLMNETPrior`], which allow to specify priors
+#' as regularization constants.
+#' @details Regularized regressions are effectively GLMs that are fitted with
+#' ridge, lasso or elastic-net regularization. Which of them is chosen is
+#' critical dependent on the alpha value: [*] For \code{alpha} equal to \code{0}
+#' a ridge regularization is used. Ridge regularization has the property that it
+#' doesn't remove variables entirely, but instead sets their coefficients to
+#' \code{0}. [*] For \code{alpha} equal to \code{1} a lasso regularization is
+#' used. Lassos tend to remove those coefficients fully from the final model
+#' that do not improve the loss function. [*] For \code{alpha} values between
+#' \code{0} and \code{1} a elastic-net regularization is used, which is
+#' essentially a combination of the two. The optimal lambda parameter can be
+#' determined via cross-validation. For this option set \code{"varsel"} in
+#' `train()` to \code{"reg"}.
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has to be between \code{0} and \code{1}.
-#' \code{alpha=1} is the lasso penalty, and \code{alpha=0} the ridge penalty (Default: \code{0}).
-#' @param nlambda A [`numeric`] giving the number of lambda values to be used (Default: \code{100}).
-#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually best to let this parameter be
-#' determined deterministically (Default: \code{NULL}).
-#' @param type The mode used for creating posterior predictions. Either making \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has
+#'   to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
+#'   and \code{alpha=0} the ridge penalty (Default: \code{0}).
+#' @param nlambda A [`numeric`] giving the number of lambda values to be used
+#'   (Default: \code{100}).
+#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually
+#'   best to let this parameter be determined deterministically (Default:
+#'   \code{NULL}).
+#' @param type The mode used for creating posterior predictions. Either making
+#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other parameters passed on to glmnet.
 #' @references
 #' * Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
@@ -392,7 +400,7 @@ engine_glmnet <- function(x,
           cv_gn <- try({
             glmnetUtils::cva.glmnet(formula = form,
                       data = df,
-                      alpha = params$alpha, # Elastic net mixing parameter
+                      alpha = seq(0,1,.1), # Elastic net parameters to test
                       lambda = params$lambda, # Overwrite lambda
                       weights = w, # Case weights
                       offset = ofs,
@@ -453,13 +461,30 @@ engine_glmnet <- function(x,
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
           # Attempt prediction
-          out <- predict(object = cv_gn,
-                         newdata = full_sub,
-                         weights = w_full_sub,
-                         newoffset = ofs_pred[full_sub$rowid],
-                         s = determine_lambda(cv_gn), # Determine the best lambda value
-                         type = params$type
-                         )
+          if(inherits(cv_gn, "cv.glmnet")){
+            out <- predict(object = cv_gn,
+                           newdata = full_sub,
+                           weights = w_full_sub,
+                           newoffset = ofs_pred[full_sub$rowid],
+                           s = determine_lambda(cv_gn), # Determine the best lambda value
+                           type = params$type
+            )
+          } else {
+            # Assume cva.glmnet
+            out <- predict(
+              object = cv_gn,
+              newdata = full_sub,
+              alpha = cv_gn$alpha,
+              weights = w_full_sub,
+              newoffset = ofs_pred[full_sub$rowid],
+              s = determine_lambda(cv_gn), # Determine the best lambda value
+              type = params$type
+            )
+            # Determine best model based on cross-validated loss
+            # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
+            # cv_gn <- cv_gn$modlist[[ind]]
+          }
+
 
           # Fill output with summaries of the posterior
           prediction[full_sub$rowid] <- out[,1]
@@ -487,10 +512,12 @@ engine_glmnet <- function(x,
             "prediction" = prediction
           ),
           # Partial effects
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, plot = FALSE, type = NULL, ...){
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
+                             values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.numeric(variable_length)
             )
             check_package("pdp")
@@ -518,23 +545,30 @@ engine_glmnet <- function(x,
             } else {
               rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
             }
-            # if values are set, make sure that they cover the data.frame
-            if(!is.null(values)){
-              assertthat::assert_that(length(x.var) == 1)
-              df2 <- list()
-              df2[[x.var]] <- values
-              # Then add the others
-              for(var in colnames(df)){
-                if(var == x.var) next()
-                df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+
+            if(is.null(newdata)){
+              # if values are set, make sure that they cover the data.frame
+              if(!is.null(values)){
+                assertthat::assert_that(length(x.var) == 1)
+                df2 <- list()
+                df2[[x.var]] <- values
+                # Then add the others
+                for(var in colnames(df)){
+                  if(var == x.var) next()
+                  df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+                }
+                df2 <- df2 |> as.data.frame()
+              } else {
+                df2 <- list()
+                for(i in x.var) {
+                  df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+                }
+                df2 <- do.call(cbind, df2); names(df2) <- x.var
               }
-              df2 <- df2 |> as.data.frame()
             } else {
-              df2 <- list()
-              for(i in x.var) {
-                df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
-              }
-              df2 <- do.call(cbind, df2); names(df2) <- x.var
+              # Assume all variables are present
+              df2 <- newdata |> dplyr::select(any_of(names(df)))
+              assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
             }
 
             # Get offset if set
@@ -630,12 +664,20 @@ engine_glmnet <- function(x,
             ) |> as.data.frame()
 
             # Now create spatial prediction
-            prediction <- emptyraster( self$model$predictors_object$get_data()[[1]] ) # Background
+            prediction <- try({
+              emptyraster( model$predictors_object$get_data()[[1]] )},
+              silent = TRUE) # Background
+            if(inherits(prediction, "try-error")){
+              prediction <- terra::rast(model$predictors[,c("x", "y")],
+                                      crs = terra::crs(model$background),
+                                      type = "xyz") |>
+                emptyraster()
+            }
             prediction[df_sub$rowid] <- pred_gn[,1]
             names(prediction) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot) terra::plot(prediction, col = ibis_colours$viridis_orig)
+            if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
             return(prediction)
           },
           # Convergence check
@@ -655,8 +697,18 @@ engine_glmnet <- function(x,
             # Calculate residuals
             model <- self$model$predictors
             # Get fm
-            fitted_values <- predict(obj, model, s = 'lambda.1se')
-            fitted_min <- predict(obj, model, s = 'lambda.min')
+            if(inherits(obj, "cv.glmnet")){
+              fitted_values <- predict(obj, model, s = 'lambda.1se')
+              fitted_min <- predict(obj, model, s = 'lambda.min')
+            } else {
+              alpha <- sapply(obj$modlist, function(z) min(z$cvup))
+              fitted_values <- predict(obj, model,
+                                       which = which.min(alpha),
+                                       s = 'lambda.1se')
+              fitted_min <- predict(obj, model,
+                                    which = which.min(alpha),
+                                    s = 'lambda.min')
+            }
             rd <- fitted_min[,1] - fitted_values[,1]
             assertthat::assert_that(length(rd)>0)
             return(rd)
@@ -714,23 +766,37 @@ engine_glmnet <- function(x,
             if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
             assertthat::assert_that(nrow(df_sub)>0)
 
-            pred_gn <- glmnetUtils:::predict.cv.glmnet.formula(
-              object = mod,
-              newdata = df_sub,
-              weights = df_sub$w, # The second entry of unique contains the non-observed variables
-              newoffset = ofs,
-              na.action = "na.pass",
-              s = determine_lambda(mod), # Determine best available lambda
-              fam = fam,
-              type = type
-            ) |> as.data.frame()
+            if(inherits(mod, "cv.glmnet")){
+              pred_gn <- predict(
+                object = mod,
+                newdata = df_sub,
+                weights = df_sub$w, # The second entry of unique contains the non-observed variables
+                newoffset = ofs,
+                na.action = "na.pass",
+                s = determine_lambda(mod), # Determine best available lambda
+                fam = fam,
+                type = type
+              ) |> as.data.frame()
+            } else {
+              pred_gn <- predict(
+                object = mod,
+                newdata = df_sub,
+                alpha = mod$alpha,
+                weights = df_sub$w, # The second entry of unique contains the non-observed variables
+                newoffset = ofs,
+                na.action = "na.pass",
+                s = determine_lambda(mod), # Determine the best lambda value
+                fam = fam,
+                type = type
+              )
+            }
             names(pred_gn) <- layer
             assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
             # Now create spatial prediction
-            prediction <- try({emptyraster( self$model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+            prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
             if(inherits(prediction, "try-error")){
-              prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+              prediction <- terra::rast(model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
                 emptyraster()
             }
             # sf::st_as_sf(df_sub, coords = c("x","y") )

@@ -18,7 +18,7 @@
   # Option to have variable names "cleaned" by default
   options('ibis.cleannames' = TRUE)
   # Known seed
-  options('ibis.seed' = 19372)
+  options('ibis.seed' = (rpois(1, 1000) + Sys.getpid()))
   # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
@@ -33,15 +33,17 @@
   options('ibis.futurestrategy' = "multisession")
   options(doFuture.foreach.export = ".export-and-automatic-with-warning")
 
-  # Other dependencies not directly added in DESCRIPTION (to minimize potential issues)
+  # Other dependencies not directly added in DESCRIPTION (to minimize potential
+  # issues)
   options('ibis.dependencies' = c(
     "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
-    "gnlm", "cubelyr",
+    "gnlm", "cubelyr", "matrixStats", "Boruta", "abess",
     "dbarts", "mboost", "rstan", "cmdstanr"
   ))
 
-  # Set default corrrelation coefficient threshold for evaluating correlated predictors
+  # Set default corrrelation coefficient threshold for evaluating correlated
+  # predictors
   options('ibis.corPred' = 0.7)
 
   # Set default settings for pseudo-absence sampling

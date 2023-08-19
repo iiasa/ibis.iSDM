@@ -56,7 +56,7 @@ PredictorDataset <- bdproto(
         }
       } else {
         # For scenario files
-        stars:::as.data.frame.stars( self$data )
+        as.data.frame( self$data )
       }
     } else self$data
   },
@@ -103,7 +103,7 @@ PredictorDataset <- bdproto(
       self$data <- terra::crop(self$data, pol)
     } else {
       # Scenario
-      stars:::st_crop.stars(self$data, pol)
+      sf::st_crop(self$data, pol)
     }
     invisible()
   },
@@ -156,7 +156,7 @@ PredictorDataset <- bdproto(
     } else {
       if(inherits(d, 'stars')){
         return(
-          summary(stars:::as.data.frame.stars(d))
+          summary( as.data.frame(d) )
         )
       } else {
         # Assume raster

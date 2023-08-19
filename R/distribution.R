@@ -3,51 +3,54 @@ NULL
 
 #' Create distribution modelling procedure
 #'
-#' @description
-#' This function creates an object that contains all the data, parameters and settings
-#' for building an (integrated) species distribution model.
-#' Key functions to add data are [`add_biodiversity_poipo`] and the like, [`add_predictors`],
-#' [`add_latent_spatial`], [`engine_glmnet`] or similar, [`add_priors`] and [`add_offset`].
-#' It creates a prototype [`BiodiversityDistribution`] object with its own functions.
-#' After setting input data and parameters, model predictions can then be created
-#' via the [train] function and predictions be created.
+#' @description This function creates an object that contains all the data,
+#' parameters and settings for building an (integrated) species distribution
+#' model. Key functions to add data are [`add_biodiversity_poipo`] and the like,
+#' [`add_predictors`], [`add_latent_spatial`], [`engine_glmnet`] or similar,
+#' [`add_priors`] and [`add_offset`]. It creates a prototype
+#' [`BiodiversityDistribution`] object with its own functions. After setting
+#' input data and parameters, model predictions can then be created via the
+#' [train] function and predictions be created.
 #'
-#' Additionally, it is possible to specify a \code{"limit"} to any predictions conducted on
-#' the background. This can be for instance a buffered layer by a certain dispersal distance (Cooper and Soberon, 2018)
-#' or a categorical layer representing biomes or soil conditions.
-#' Another option is to create a constraint by constructing a minimum convex polygon (MCP) using
-#' the supplied biodiversity data. This option can be enabled by setting
-#' \code{"limits_method"} to \code{"mcp"}. It is also possible to provide a small buffer
-#' to constructed MCP that way.
-#' See the frequently asked question (FAQ) section on the homepage for more information.
+#' Additionally, it is possible to specify a \code{"limit"} to any predictions
+#' conducted on the background. This can be for instance a buffered layer by a
+#' certain dispersal distance (Cooper and Soberon, 2018) or a categorical layer
+#' representing biomes or soil conditions. Another option is to create a
+#' constraint by constructing a minimum convex polygon (MCP) using the supplied
+#' biodiversity data. This option can be enabled by setting
+#' \code{"limits_method"} to \code{"mcp"}. It is also possible to provide a
+#' small buffer to constructed MCP that way. See the frequently asked question
+#' (FAQ) section on the homepage for more information.
 #'
-#' See **Details** for a description of the internal functions available
-#' to modify or summarize data within the created object.
+#' See **Details** for a description of the internal functions available to
+#' modify or summarize data within the created object.
 #'
 #' **Note that any model requires at minimum a single added biodiversity dataset
 #' as well as a specified engine.**
 #'
 #' @param background Specification of the modelling background. Must be a
-#' [`SpatRaster`] or [`sf`] object.
-#' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction surface when
-#' intersected with input data (Default: \code{NULL}).
-#' @param limits_method A [`character`] of the method used for hard limiting a projection.
-#' Available options are \code{"none"} (Default), \code{"zones"} or \code{"mcp"}.
-#' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default \code{0}). Only used if
-#'  \code{"mcp"} is used.
-#' @param limits_clip [`logical`] Should the limits clip all predictors before fitting
-#' a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).
+#'   [`SpatRaster`] or [`sf`] object.
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction
+#'   surface when intersected with input data (Default: \code{NULL}).
+#' @param limits_method A [`character`] of the method used for hard limiting a
+#'   projection. Available options are \code{"none"} (Default), \code{"zones"}
+#'   or \code{"mcp"}.
+#' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default
+#'   \code{0}). Only used if \code{"mcp"} is used.
+#' @param limits_clip [`logical`] Should the limits clip all predictors before
+#'   fitting a model (\code{TRUE}) or just the prediction (\code{FALSE},
+#'   default).
 #'
-#' @details
-#' This function creates a [`BiodiversityDistribution-class`] object that in itself contains
-#' other functions and stores parameters and (pre-)processed data.
-#' A full list of functions available can be queried via \code{"names(object)"}.
-#' Some of the functions are not intended to be manipulated directly,
-#'  but rather through convenience functions (e.g. \code{"object$set_predictors()"}).
-#' Similarly other objects are stored in the [`BiodiversityDistribution-class`] object that
-#' have their own functions as well and can be queried (e.g. \code{"names(object)"}). For a list of
-#' functions see the reference documentation. By default,
-#' if some datasets are not set, then a \code{"Waiver"} object is returned instead.
+#' @details This function creates a [`BiodiversityDistribution-class`] object
+#' that in itself contains other functions and stores parameters and
+#' (pre-)processed data. A full list of functions available can be queried via
+#' \code{"names(object)"}. Some of the functions are not intended to be
+#' manipulated directly, but rather through convenience functions (e.g.
+#' \code{"object$set_predictors()"}). Similarly other objects are stored in the
+#' [`BiodiversityDistribution-class`] object that have their own functions as
+#' well and can be queried (e.g. \code{"names(object)"}). For a list of
+#' functions see the reference documentation. By default, if some datasets are
+#' not set, then a \code{"Waiver"} object is returned instead.
 #'
 #' The following objects can be stored:
 #' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with the added biodiversity data.
@@ -66,11 +69,14 @@ NULL
 #' * \code{object$get_predictor_names()} Returns a [character] vector with the names of all added predictors.
 #' * \code{object$get_prior_variables()} Returns a description of [`priors`] added.
 #'
-#' There are other functions as well but those are better accessed through their respective wrapper functions.
+#' There are other functions as well but those are better accessed through their
+#' respective wrapper functions.
 #'
-#' @returns [`BiodiversityDistribution-class`] object containing data for building a biodiversity distribution modelling problem.
+#' @returns [`BiodiversityDistribution-class`] object containing data for
+#'   building a biodiversity distribution modelling problem.
 #'
-#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and in particular [`BiodiversityDistribution`].
+#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and
+#'   in particular [`BiodiversityDistribution`].
 #'
 #' @references
 #' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
@@ -96,7 +102,8 @@ methods::setGeneric("distribution",
                     function(background, limits = NULL, limits_method = "none", mcp_buffer = 0,limits_clip = FALSE) standardGeneric("distribution"))
 
 #' @name distribution
-#' @usage \S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+#' @usage
+#'   \S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -110,6 +117,10 @@ methods::setMethod(
                             msg = 'No background file supplied or limits misspecified!')
     # Check that arguments are valid
     assertthat::assert_that( inherits(background,'SpatRaster')  )
+
+    # Check that provided background has a valid crs
+    assertthat::assert_that(!is.na(terra::crs(background,describe=TRUE)[['code']]),
+                            msg = "Please provide a background with valid projection!")
 
     # Make an error check that units have a single units
     vals <- unique(background)[[1]]
@@ -127,12 +138,18 @@ methods::setMethod(
       terra::as.polygons(background, dissolve = TRUE)
     )
 
+    # Check crs is set to be sure
+    if(is.na(sf::st_crs(newbg))){
+      newbg <- sf::st_set_crs(newbg, sf::st_crs(background))
+    }
+
     # Rerun the distribution call with the object
     distribution(newbg, limits, limits_method, mcp_buffer, limits_clip)
   })
 
 #' @name distribution
-#' @usage \S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+#' @usage
+#'   \S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -149,6 +166,10 @@ methods::setMethod(
       inherits(background,'sf'),
       unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
+
+    # Check that provided background has a valid crs
+    assertthat::assert_that(!is.na(sf::st_crs(background)),
+                            msg = "Please provide a background with valid projection!")
 
     # Small checks on alternative limit functionalities
     limits_method <- match.arg(limits_method, c("none","zones", "mcp"), several.ok = FALSE)

@@ -7,61 +7,81 @@
 \S4method{pseudoabs_settings}{ANY,numeric,numeric,character,numeric,logical,logical,ANY}(background,nrpoints,min_ratio,method,buffer_distance,inside,layer,bias,...)
 }
 \arguments{
-\item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background points can be sampled. Default is
-\code{NULL} (Default) and the background is then added when the sampling is first called.}
+\item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background
+points can be sampled. Default is \code{NULL} (Default) and the background
+is then added when the sampling is first called.}
 
-\item{nrpoints}{A \code{\link{numeric}} given the number of absence points to be created. Has to be larger than \code{0} and
-normally points are not created in excess of the number of cells of the background (Default: \code{10 000}).}
+\item{nrpoints}{A \code{\link{numeric}} given the number of absence points to be
+created. Has to be larger than \code{0} and normally points are not created
+in excess of the number of cells of the background (Default: \code{10
+  000}).}
 
-\item{min_ratio}{A \code{\link{numeric}} with the minimum ratio of background points relative to the presence points.
-Setting this value to \code{1} generates an equal amount of absence points relative to the presence points.
-Usually ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).}
+\item{min_ratio}{A \code{\link{numeric}} with the minimum ratio of background points
+relative to the presence points. Setting this value to \code{1} generates
+an equal amount of absence points relative to the presence points. Usually
+ignored unless the ratio exceeds the \code{nrpoints} parameters (Default:
+\code{0.25}).}
 
-\item{method}{\code{\link{character}} denoting how the sampling should be done. See details for options (Default: \code{"random"}).}
+\item{method}{\code{\link{character}} denoting how the sampling should be done. See
+details for options (Default: \code{"random"}).}
 
-\item{buffer_distance}{\code{\link{numeric}} A distance from the observations in which pseudo-absence points are not to be generated.
-Note that units follow the units of the projection (e.g. \code{m} or \code{°}). Only used when \code{method = "buffer"}.}
+\item{buffer_distance}{\code{\link{numeric}} A distance from the observations in which
+pseudo-absence points are not to be generated. Note that units follow the
+units of the projection (e.g. \code{m} or \code{°}). Only used when
+\code{method = "buffer"}.}
 
-\item{inside}{A \code{\link{logical}} value of whether absence points should be sampled outside (Default) or inside a
-minimum convex polygon or range provided the respective method is chosen (parameter \code{method = "mcp"} or
+\item{inside}{A \code{\link{logical}} value of whether absence points should be sampled
+outside (Default) or inside a minimum convex polygon or range provided the
+respective method is chosen (parameter \code{method = "mcp"} or
 \code{method = "range"}).}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method \code{'zones'}) object indicating the range of a species.
-Only used with \code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method
+\code{'zones'}) object indicating the range of a species. Only used with
+\code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).}
 
-\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and background. Absence points will
-be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
+\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and
+background. Absence points will be preferentially sampled in areas with
+higher (!) bias. (Default: \code{NULL}).}
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
 }
 \description{
-This function defines the settings for pseudo-absence sampling of the background. For many
-engines such points are necessary to model Poisson (or Binomial) distributed point process data.
-Specifically we call absence points for Binomial (Bernoulli really) distributed responses \code{'pseudo-absence'}
-and absence data for Poisson responses \code{'background'} points. For more details read Renner et al. (2015).
+This function defines the settings for pseudo-absence sampling
+of the background. For many engines such points are necessary to model
+Poisson (or Binomial) distributed point process data. Specifically we call
+absence points for Binomial (Bernoulli really) distributed responses
+\code{'pseudo-absence'} and absence data for Poisson responses
+\code{'background'} points. For more details read Renner et al. (2015).
 
-The function \code{'add_pseudoabsence'} allows to add absence points to any \code{\link{sf}} object. See \strong{Details} for
-additional parameter description and examples on how to 'turn' a presence-only dataset into a presence-(pseudo-)absence.
+The function \code{'add_pseudoabsence'} allows to add absence points to any
+\code{\link{sf}} object. See \strong{Details} for additional parameter description and
+examples on how to 'turn' a presence-only dataset into a
+presence-(pseudo-)absence.
 }
 \details{
-There are multiple methods available for sampling a biased background layer.
-Possible parameters for \code{method} are:
+There are multiple methods available for sampling a biased
+background layer. Possible parameters for \code{method} are:
 \itemize{
 \item \code{'random'} Absence points are generated randomly over the background (Default),
 \item \code{'buffer'} Absence points are generated only within a buffered distance of existing points.
-This option requires the specification of the parameter \code{buffer_distance}.
+This option requires the specification of the parameter
+\code{buffer_distance}.
 \item \code{'mcp'} Can be used to only generate absence points within or outside a
-minimum convex polygon of the presence points. The parameter \code{inside} specifies whether
-points should be sampled inside or outside (Default) the minimum convex polygon.
+minimum convex polygon of the presence points. The parameter \code{inside}
+specifies whether points should be sampled inside or outside (Default) the
+minimum convex polygon.
 \item \code{'range'} Absence points are created either inside or outside a provided additional
-layer that indicates for example a range of species (controlled through parameter \code{inside}).
+layer that indicates for example a range of species (controlled through
+parameter \code{inside}).
 \item \code{'zones'} A ratified (e.g. of type \link{factor}) \code{\link{SpatRaster}} layer depicting zones from which absence
-points are to be sampled. This method checks which points fall within which zones and then samples absence
-points either within or outside these zones exclusively. Both \code{'layer'} and \code{'inside'} have to be set
-for this option.
-\item \code{'target'} Make use of a target background for sampling absence points. Here a \code{\link{SpatRaster}} object
-has to be provided through the parameter \code{'layer'}. Absence points are then sampled exclusively within
-the target areas for grid cells with non-zero values.
+points are to be sampled. This method checks which points fall within which
+zones and then samples absence points either within or outside these zones
+exclusively. Both \code{'layer'} and \code{'inside'} have to be set for this
+option.
+\item \code{'target'} Make use of a target background for sampling absence points.
+Here a \code{\link{SpatRaster}} object has to be provided through the parameter \code{'layer'}.
+Absence points are then sampled exclusively within the target areas for grid
+cells with non-zero values.
 }
 }
 \examples{
@@ -86,9 +106,11 @@ all_my_points <- add_pseudoabsence(
 \references{
 \itemize{
 \item Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process
-models for presence-only analysis. Methods in Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
+models for presence-only analysis. Methods in Ecology and Evolution
+6:366–379. DOI: 10.1111/2041-210X.12352.
 \item Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
-process models for species distribution modeling in ecology. Biometrics, 69(1), 274-281.
+process models for species distribution modeling in ecology. Biometrics,
+69(1), 274-281.
 }
 }
 \keyword{train}

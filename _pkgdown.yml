@@ -113,6 +113,7 @@ reference:
       - threshold
       - ensemble
       - ensemble_partial
+      - ensemble_spartial
       - has_keyword("partial")
 
   - title: Utility functions

@@ -9,21 +9,22 @@ check(obj, stoponwarning = FALSE)
 \S4method{check}{ANY,logical}(obj,stoponwarning)
 }
 \arguments{
-\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
+\item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or
+\code{\link{BiodiversityScenario}} object.}
 
-\item{stoponwarning}{\code{\link{logical}} Should check return a stop if warning is raised? (Default: \code{FALSE}).}
+\item{stoponwarning}{\code{\link{logical}} Should check return a stop if warning is
+raised? (Default: \code{FALSE}).}
 }
 \value{
 Message outputs
 }
 \description{
-Not always is there enough data or sufficient information to robustly
-infer the suitable habitat or niche of a species. As many SDM algorithms are
-essentially regression models, similar assumptions about model convergence,
-homogeneity of residuals and inferrence usually apply (although often
-ignored).
-This function simply checks the respective input object for common issues or
-mistakes.
+Not always is there enough data or sufficient information to
+robustly infer the suitable habitat or niche of a species. As many SDM
+algorithms are essentially regression models, similar assumptions about model
+convergence, homogeneity of residuals and inferrence usually apply (although
+often ignored). This function simply checks the respective input object for
+common issues or mistakes.
 }
 \details{
 Different checks are implemented depending on the supplied object
@@ -52,8 +53,8 @@ Different checks are implemented depending on the supplied object
 }
 }
 \note{
-This function will likely be expanded with additional checks in the future.
-If you have ideas, please let them know per issue.
+This function will likely be expanded with additional checks in the
+future. If you have ideas, please let them know per issue.
 }
 \examples{
 \dontrun{

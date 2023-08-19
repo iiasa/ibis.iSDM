@@ -9,19 +9,21 @@ STANPrior(variable, type, hyper = c(0, 2), ...)
 \S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variable}{A \code{\link{character}} matched against existing predictors or latent
+effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper parameters.
-First entry is treated as mean (Default: \code{0}), the second as the standard variation (Default: \code{2}) of
-a Gaussian distribution on the respective coefficient.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper
+parameters. First entry is treated as mean (Default: \code{0}), the second
+as the standard variation (Default: \code{2}) of a Gaussian distribution on
+the respective coefficient.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-Function to create a new prior for \link{engine_stan} models. Priors currently
-can be set on specific environmental predictors.
+Function to create a new prior for \link{engine_stan} models. Priors
+currently can be set on specific environmental predictors.
 }
 \examples{
 \dontrun{

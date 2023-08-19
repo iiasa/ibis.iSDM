@@ -9,17 +9,19 @@ STANPriors(variables, type, hyper = c(0, 2), ...)
 \S4method{STANPriors}{vector,character,ANY}(variables,type,hyper,...)
 }
 \arguments{
-\item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing predictors or latent effects.}
+\item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing
+predictors or latent effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
+hyper-parameters.}
 
 \item{...}{Variables passed on to prior object}
 }
 \description{
-This is a helper function to specify several \link{STANPrior} with the same
-hyper-parameters, but different variables.
+This is a helper function to specify several \link{STANPrior} with
+the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 

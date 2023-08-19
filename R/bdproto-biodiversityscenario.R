@@ -7,9 +7,8 @@ NULL
 
 #' Prototype for a biodiversity scenario from a trained model
 #'
-#' Base [`proto`] class for any biodiversity scenario objects.
-#' Serves as container that supplies data and functions to
-#' other [`proto`] classes.
+#' Base [`proto`] class for any biodiversity scenario objects. Serves as
+#' container that supplies data and functions to other [`proto`] classes.
 #'
 #' @name BiodiversityScenario-class
 #' @aliases BiodiversityScenario
@@ -156,8 +155,10 @@ BiodiversityScenario <- bdproto(
   # Apply specific threshold
   apply_threshold = function(self, tr = new_waiver()){
     # Assertions
-    if(is.Waiver(tr)) assertthat::assert_that( is.numeric(self$threshold), msg = 'No threshold value found.')
-    assertthat::assert_that( !is.Waiver(self$scenarios), msg = 'No scenarios found.')
+    if(is.Waiver(tr)) assertthat::assert_that( is.numeric(self$threshold),
+                                               msg = 'No threshold value found.')
+    assertthat::assert_that( !is.Waiver(self$scenarios),
+                             msg = 'No scenarios found.')
     # Get prediction and threshold
     sc <- self$get_data()
     if(is.Waiver(tr)){
@@ -268,12 +269,15 @@ BiodiversityScenario <- bdproto(
     Colors <- c(Colors, rainbow(positiveNb, start = 0, end = 0.4))
     if (unilimtedExists) Colors <- c(Colors, "pink")
 
-    # Plot
-    # 0 - Cells that have never been occupied and are unsuitable habitat at the end of the simulation
-    # 1 - Cells that belong to the species' initial distribution and that have remained occupied during the entire simulation.
-    # 1 < value < 30 000 - determine the dispersal step during which it was colonized. E.g. 101 is first dispersal even in first step
-    # 30 0000 - Potentially suitable cells that remained uncolonized
-    # <0 - Negative values indicate cells that were once occupied but have become decolonized. Code as for colonization
+    # Plot 0 - Cells that have never been occupied and are unsuitable habitat at
+    # the end of the simulation
+    # 1 - Cells that belong to the species' initial
+    # distribution and that have remained occupied during the entire simulation.
+    # 1 < value < 30 000 - determine the dispersal step during which it was
+    # colonized. E.g. 101 is first dispersal even in first step 30 0000 -
+    # Potentially suitable cells that remained uncolonized <0 - Negative values
+    # indicate cells that were once occupied but have become decolonized. Code
+    # as for colonization
     dev.new(width = 7, height = 7 * ((ymax(ras) - ymin(ras))/(xmax(ras) - xmin(ras))))
     terra::plot(ras, col = Colors, breaks = c(min(rstVals) - 1, rstVals), legend = FALSE,
          main = "Newly colonized and stable habitats")
@@ -443,7 +447,8 @@ BiodiversityScenario <- bdproto(
       # Get the unit
       ar_unit <- units::deparse_unit(ar$area)
 
-      # TODO: Check whether one could not simply multiply with area (poisson > density, binomial > suitable area)
+      # TODO: Check whether one could not simply multiply with
+      # area (poisson > density, binomial > suitable area)
       mod <- self$get_model()
       scenario <- scenario * ar
       out <- summarise_projection(scenario, fun = "mean", relative = relative)
@@ -572,8 +577,11 @@ BiodiversityScenario <- bdproto(
       is.character(dt)
     )
     # Match input types
-    type <- match.arg(type, c('gtif','gtiff','tif','nc','ncdf', 'feather'), several.ok = FALSE)
-    dt <- match.arg(dt, c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S'), several.ok = FALSE )
+    type <- match.arg(type, c('gtif','gtiff','tif',
+                              'nc','ncdf', 'feather'), several.ok = FALSE)
+    dt <- match.arg(dt, c('LOG1S','INT1S','INT1U',
+                          'INT2S','INT2U','INT4S',
+                          'INT4U','FLT4S','FLT8S'), several.ok = FALSE )
 
     if(file.exists(fname)) warning('Overwritting existing file...')
 

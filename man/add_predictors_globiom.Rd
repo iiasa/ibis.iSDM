@@ -2,7 +2,8 @@
 % Please edit documentation in R/add_predictors_globiom.R
 \name{add_predictors_globiom}
 \alias{add_predictors_globiom}
-\title{Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution object}
+\title{Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution
+object}
 \usage{
 add_predictors_globiom(
   x,
@@ -23,45 +24,57 @@ add_predictors_globiom(
 \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 }
 \arguments{
-\item{x}{A \code{\linkS4class{BiodiversityDistribution}} or \code{\linkS4class{BiodiversityScenario}} object.}
+\item{x}{A \code{\linkS4class{BiodiversityDistribution}} or
+\code{\linkS4class{BiodiversityScenario}} object.}
 
 \item{fname}{A \code{\link{character}} pointing to a netCDF with the GLOBIOM data.}
 
-\item{names}{A \code{\link{vector}} of character names describing the environmental stack in case they should be renamed (Default: \code{NULL}).}
+\item{names}{A \code{\link{vector}} of character names describing the environmental
+stack in case they should be renamed (Default: \code{NULL}).}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be
+preprocessed in any way (Options: \code{'none'},\code{'pca'},
+\code{'scale'}, \code{'norm'})}
 
-\item{derivates}{A Boolean check whether derivate features should be considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
+\item{derivates}{A Boolean check whether derivate features should be
+considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
+\code{'quad'}) )}
 
-\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of knots for derivate creation if relevant (Default: \code{4}).}
+\item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of
+knots for derivate creation if relevant (Default: \code{4}).}
 
-\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2} specifying the covariates (Default: \code{NULL}).}
+\item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2}
+specifying the covariates (Default: \code{NULL}).}
 
-\item{bgmask}{Check whether the environmental data should be masked with the background layer (Default: \code{TRUE})}
+\item{bgmask}{Check whether the environmental data should be masked with the
+background layer (Default: \code{TRUE})}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should be harmonized among predictors (Default: \code{FALSE})}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values
+should be harmonized among predictors (Default: \code{FALSE})}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which uses default prior assumptions.}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
+which uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
 \description{
-This is a customized function to format and add downscaled land-use shares from
-the \href{https://iiasa.github.io/GLOBIOM/}{Global Biosphere Management Model (GLOBIOM)} to a
-\link{distribution} or \link{BiodiversityScenario} in ibis.iSDM. GLOBIOM is a partial-equilibrium model
-developed at IIASA and represents land-use sectors with a rich set of environmental and
-socio-economic parameters, where for instance the agricultural and forestry sector are estimated through
-dedicated process-based models. GLOBIOM outputs are spatial explicit and usually at a half-degree resolution globally.
-For finer grain analyses GLOBIOM outputs can be produced in a downscaled format with a
-customized statistical \href{https://github.com/iiasa/DownScale}{downscaling module}.
+This is a customized function to format and add downscaled
+land-use shares from the \href{https://iiasa.github.io/GLOBIOM/}{Global Biosphere Management Model (GLOBIOM)} to a \link{distribution} or
+\link{BiodiversityScenario} in ibis.iSDM. GLOBIOM is a partial-equilibrium model
+developed at IIASA and represents land-use sectors with a rich set of
+environmental and socio-economic parameters, where for instance the
+agricultural and forestry sector are estimated through dedicated
+process-based models. GLOBIOM outputs are spatial explicit and usually at a
+half-degree resolution globally. For finer grain analyses GLOBIOM outputs can
+be produced in a downscaled format with a customized statistical \href{https://github.com/iiasa/DownScale}{downscaling module}.
 
-The purpose of this script is to format the GLOBIOM outputs of \emph{DownScale} for the use in the
-ibis.iSDM package.
+The purpose of this script is to format the GLOBIOM outputs of \emph{DownScale}
+for the use in the ibis.iSDM package.
 }
 \details{
-See \code{\link[=add_predictors]{add_predictors()}} for additional parameters and customizations.
-For more (manual) control the function for formatting the GLOBIOM data can also be
-called directly via \code{formatGLOBIOM()}.
+See \code{\link[=add_predictors]{add_predictors()}} for additional parameters and
+customizations. For more (manual) control the function for formatting the
+GLOBIOM data can also be called directly via \code{formatGLOBIOM()}.
 }
 \examples{
 \dontrun{

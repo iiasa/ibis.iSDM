@@ -3,23 +3,22 @@ NULL
 
 #' Identify local limiting factor
 #'
-#' @description
-#' Calculates a [`SpatRaster`] of locally limiting factors from a given projected model.
-#' To calculate this first the [`spartial`] effect of each individual covariate
-#' in the model is calculated.
+#' @description Calculates a [`SpatRaster`] of locally limiting factors from a
+#' given projected model. To calculate this first the [`spartial`] effect of
+#' each individual covariate in the model is calculated.
 #'
-#' The effect is estimated as that variable most responsible for decreasing suitability
-#' at that cell. The decrease in suitability is calculated,
-#' for each predictor in turn, relative to thesuitability
-#' that would be achieved if that predictor took the value equal to the mean
-#' The predictor associated with the largest decrease in suitability is
-#' the most limiting factor.
+#' The effect is estimated as that variable most responsible for decreasing
+#' suitability at that cell. The decrease in suitability is calculated, for each
+#' predictor in turn, relative to thesuitability that would be achieved if that
+#' predictor took the value equal to the mean The predictor associated with the
+#' largest decrease in suitability is the most limiting factor.
 #'
-#' @param mod A fitted \code{'DistributionModel'} object from which limited factors are to
-#' be identified.
+#' @param mod A fitted \code{'DistributionModel'} object from which limited
+#'   factors are to be identified.
 #' @param plot Should the result be plotted? (Default: \code{TRUE}).
 #' @concept Partly inspired by the rmaxent package.
-#' @return A `terra` object of the most important variable for a given grid cell.
+#' @return A `terra` object of the most important variable for a given grid
+#'   cell.
 #' @examples
 #' \dontrun{
 #' o <- limiting(fit)

@@ -18,44 +18,51 @@ threshold(
 
 \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 
-\S4method{threshold}{BiodiversityScenario,ANY}(obj,tr,...)
+\S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
 }
 \arguments{
-\item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is to be added.}
+\item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is
+to be added.}
 
-\item{method}{A specifc method for thresholding. See details for available options.}
+\item{method}{A specifc method for thresholding. See details for available
+options.}
 
-\item{value}{A \code{\link{numeric}} value for thresholding if method is fixed (Default: \code{NULL}).}
+\item{value}{A \code{\link{numeric}} value specifying the specific threshold for scenarios
+(Default: \code{NULL} Grab from object).}
 
-\item{point}{A \code{\link{sf}} object containing observational data used for model training.}
+\item{point}{A \code{\link{sf}} object containing observational data used for model
+training.}
 
-\item{format}{\code{\link{character}} indication of whether \code{"binary"}, \code{"normalize"} or \code{"percentile"}
-formatted thresholds are to be created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}
+\item{format}{\code{\link{character}} indication of whether \code{"binary"},
+\code{"normalize"} or \code{"percentile"} formatted thresholds are to be
+created (Default: \code{"binary"}). Also see Muscatello et al. (2021).}
 
-\item{return_threshold}{Should threshold value be returned instead (Default: \code{FALSE})}
+\item{return_threshold}{Should threshold value be returned instead (Default:
+\code{FALSE})}
 
 \item{...}{Any other parameter. Used to fetch value if set somehow.}
-
-\item{tr}{A \code{\link{numeric}} value specifying the specific threshold for scenarios (Default: \code{NULL} Grab from object).}
 }
 \value{
-A \link{SpatRaster} if a \link{SpatRaster} object as input.
-Otherwise the threshold is added to the respective \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.
+A \link{SpatRaster} if a \link{SpatRaster} object as input. Otherwise the
+threshold is added to the respective \code{\link{DistributionModel}} or
+\code{\link{BiodiversityScenario}} object.
 }
 \description{
-It is common in many applications of species distribution modelling that estimated
-continuous suitability surfaces are converted into discrete representations of where
-suitable habitat might or might not exist. This so called \emph{threshold'ing}
-can be done in various ways which are further described in the details.
+It is common in many applications of species distribution
+modelling that estimated continuous suitability surfaces are converted into
+discrete representations of where suitable habitat might or might not exist.
+This so called \emph{threshold'ing} can be done in various ways which are further
+described in the details.
 
-In case a \code{\link{SpatRaster}} is provided as input in this function
-for \code{obj}, it is furthermore necessary to provide a \code{\link{sf}} object for validation as
-there is no \code{\link{DistributionModel}} to read this information from.
+In case a \code{\link{SpatRaster}} is provided as input in this function for
+\code{obj}, it is furthermore necessary to provide a \code{\link{sf}} object for
+validation as there is no \code{\link{DistributionModel}} to read this information
+from.
 \strong{Note:} This of course also allows to estimate the threshold based on withheld data, for instance
 those created from an a-priori cross-validation procedure.
 
-For \code{\link{BiodiversityScenario}} objects, adding this function to the processing pipeline
-stores a threshold attribute in the created \link{scenario} object.
+For \code{\link{BiodiversityScenario}} objects, adding this function to the processing
+pipeline stores a threshold attribute in the created \link{scenario} object.
 }
 \details{
 The following options are currently implemented:
@@ -70,6 +77,7 @@ The following options are currently implemented:
 \item \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
 \item \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
 \item \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
+\item \code{'AUC'} = Determines the optimal AUC of presence records. Requires the \code{"modEvA"} package to be installed.
 }
 }
 \examples{

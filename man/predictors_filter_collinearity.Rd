@@ -13,15 +13,18 @@ predictors_filter_collinearity(
 )
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates for a given species.}
+\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental
+covariates for a given species.}
 
-\item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually variables for which prior
-information is known.}
+\item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually
+variables for which prior information is known.}
 
-\item{cutoff}{A \code{\link{numeric}} variable specifying the maximal correlation cutoff.}
+\item{cutoff}{A \code{\link{numeric}} variable specifying the maximal correlation
+cutoff.}
 
-\item{method}{Which method to use for constructing the correlation matrix (Options: \code{'pearson'} (Default),
-\code{'spearman'}| \code{'kendal'}), \code{"abess"}, or \code{"boruta"}.}
+\item{method}{Which method to use for constructing the correlation matrix
+(Options: \code{'pearson'} (Default), \code{'spearman'}| \code{'kendal'}),
+\code{"abess"}, or \code{"boruta"}.}
 
 \item{...}{Other options for a specific method}
 }

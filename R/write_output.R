@@ -1,17 +1,19 @@
 #' Generic function to write spatial outputs
 #'
-#' @description
-#' The `write_output` function is a generic wrapper to writing any output files (e.g. projections) created with
-#' the [`ibis.iSDM-package`]. It is possible to write outputs of fitted [`DistributionModel`],
-#' [`BiodiversityScenario`] or individual [`terra`] or [`stars`] objects. In case a [`data.frame`]
-#' is supplied, the output is written as csv file.
+#' @description The `write_output` function is a generic wrapper to writing any
+#' output files (e.g. projections) created with the [`ibis.iSDM-package`]. It is
+#' possible to write outputs of fitted [`DistributionModel`],
+#' [`BiodiversityScenario`] or individual [`terra`] or [`stars`] objects. In
+#' case a [`data.frame`] is supplied, the output is written as csv file.
 #' **For creating summaries of distribution and scenario parameters and performance, see `write_summary()`**
-#' @note
-#' By default output files will be overwritten if already existing!
-#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`terra`] or [`stars`] object.
+#' @note By default output files will be overwritten if already existing!
+#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`],
+#'   [`terra`] or [`stars`] object.
 #' @param fname A [`character`] depicting an output filename.
-#' @param dt A [`character`] for the output datatype. Following the [`terra::writeRaster`] options (Default: \code{'FLT4S'}).
-#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param dt A [`character`] for the output datatype. Following the
+#'   [`terra::writeRaster`] options (Default: \code{'FLT4S'}).
+#' @param verbose [`logical`] indicating whether messages should be shown.
+#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -34,7 +36,8 @@ methods::setGeneric("write_output",
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
+#' @usage
+#'   \S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature("ANY", fname = "character"),
@@ -48,7 +51,8 @@ methods::setMethod(
 
     if(verbose && getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
 
-    # This function will only capture the distribution model object and will save them separately
+    # This function will only capture the distribution model object and will
+    # save them separately
     if(any(class(mod) %in% getOption("ibis.engines")) ){
       # FIXME: If errors occur, check harmonization of saving among engines.
       mod$save(fname = fname)
@@ -75,7 +79,8 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
+#' @usage
+#'   \S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "BiodiversityScenario",fname = "character"),
@@ -94,7 +99,8 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
+#' @usage
+#'   \S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "SpatRaster",fname = "character"),
@@ -121,7 +127,8 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
+#' @usage
+#'   \S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "data.frame",fname = "character"),
@@ -142,7 +149,8 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage \S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
+#' @usage
+#'   \S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "stars",fname = "character"),
@@ -265,20 +273,23 @@ writeNetCDF <- function(file, fname,
 
 #' Generic function to write summary outputs from created models.
 #'
-#' @description
-#' The [`write_summary`] function is a wrapper function to create summaries from fitted [`DistributionModel`] or
-#' [`BiodiversityScenario`] objects. This function will extract parameters and statistics about the used data
-#' from the input object and writes the output as either \code{'rds'} or \code{'rdata'} file. Alternative, more open file formats
-#' are under consideration.
-#' @note
-#' No predictions or tabular data is saved through this function.
-#' Use [`write_output()`] to save those.
+#' @description The [`write_summary`] function is a wrapper function to create
+#' summaries from fitted [`DistributionModel`] or [`BiodiversityScenario`]
+#' objects. This function will extract parameters and statistics about the used
+#' data from the input object and writes the output as either \code{'rds'} or
+#' \code{'rdata'} file. Alternative, more open file formats are under
+#' consideration.
+#' @note No predictions or tabular data is saved through this function. Use
+#' [`write_output()`] to save those.
 #' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
-#' @param fname A [`character`] depicting an output filename.
-#' The suffix determines the file type of the output (Options: \code{'rds'}, \code{'rdata'}).
-#' @param partial A [`logical`] value determining whether partial variable contributions should be calculated and added
-#' to the model summary. **Note that this can be rather slow** (Default: \code{FALSE}).
-#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param fname A [`character`] depicting an output filename. The suffix
+#'   determines the file type of the output (Options: \code{'rds'},
+#'   \code{'rdata'}).
+#' @param partial A [`logical`] value determining whether partial variable
+#'   contributions should be calculated and added to the model summary. **Note
+#'   that this can be rather slow** (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown.
+#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @param ... Any other arguments passed on the individual functions.
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
@@ -302,7 +313,8 @@ methods::setGeneric("write_summary",
 
 #' @name write_summary
 #' @rdname write_summary
-#' @usage \S4method{write_summary}{ANY,character,logical,logical}(mod,fname,partial,verbose,...)
+#' @usage
+#'   \S4method{write_summary}{ANY,character,logical,logical}(mod,fname,partial,verbose,...)
 methods::setMethod(
   "write_summary",
   methods::signature(mod = "ANY", fname = "character"),
@@ -449,19 +461,20 @@ methods::setMethod(
 
 #' Save a model for later use
 #'
-#' @description
-#' The `write_model` function (opposed to the `write_output`) is a generic wrapper to writing a
-#' [`DistributionModel`] to disk. It is essentially a wrapper to [`saveRDS`].
-#' Models can be loaded again via the `load_model` function.
+#' @description The `write_model` function (opposed to the `write_output`) is a
+#' generic wrapper to writing a [`DistributionModel`] to disk. It is essentially
+#' a wrapper to [`saveRDS`]. Models can be loaded again via the `load_model`
+#' function.
 #'
-#' @note
-#' By default output files will be overwritten if already existing!
+#' @note By default output files will be overwritten if already existing!
 #'
 #' @param mod Provided [`DistributionModel`] object.
 #' @param fname A [`character`] depicting an output filename.
-#' @param slim A [`logical`] option to whether unnecessary entries in the model object should be deleted.
-#' This deletes for example predictions or any other non-model content from the object (Default: \code{FALSE}).
-#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param slim A [`logical`] option to whether unnecessary entries in the model
+#'   object should be deleted. This deletes for example predictions or any other
+#'   non-model content from the object (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown.
+#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
 #' x <- distribution(background) |>
@@ -484,7 +497,8 @@ methods::setGeneric("write_model",
 
 #' @name write_model
 #' @rdname write_model
-#' @usage \S4method{write_model}{ANY,character,logical,logical}(mod,fname,slim,verbose)
+#' @usage
+#'   \S4method{write_model}{ANY,character,logical,logical}(mod,fname,slim,verbose)
 methods::setMethod(
   "write_model",
   methods::signature(mod = "ANY"),
@@ -526,15 +540,16 @@ methods::setMethod(
 
 #' Load a pre-computed model
 #'
-#' @description
-#' The `load_model` function (opposed to the `write_model`) loads previous saved
-#' [`DistributionModel`]. It is essentially a wrapper to [`readRDS`].
+#' @description The `load_model` function (opposed to the `write_model`) loads
+#' previous saved [`DistributionModel`]. It is essentially a wrapper to
+#' [`readRDS`].
 #'
-#' When models are loaded, they are briefly checked for their validity and presence of
-#' necessary components.
+#' When models are loaded, they are briefly checked for their validity and
+#' presence of necessary components.
 #'
 #' @param fname A [`character`] depicting an output filename.
-#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param verbose [`logical`] indicating whether messages should be shown.
+#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @returns A [`DistributionModel`] object.
 #' @examples \dontrun{
 #' # Load model
@@ -572,9 +587,10 @@ methods::setMethod(
     )
 
     # Get file size
-    fz <- (file.size(fname) * 0.000001) |> round(digits = 3)
+    fz <- file.size(fname) |> structure(class="object_size") |>
+      format(units = "auto")
 
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,' MB)'))
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,')'))
     # Load file
     mod <- readRDS(fname)
 
@@ -602,9 +618,15 @@ methods::setMethod(
 
     # Reload prediction if data.frame found
     if(is.data.frame(mod$fits$prediction)){
-      ras <- terra::rast(mod$fits$prediction, type = "xyz", crs = terra::crs(model$background))
-      mod$fits$prediction <- ras
-      rm(ras)
+      if(nrow(mod$fits$prediction)>0){
+        ras <- terra::rast(mod$fits$prediction,
+                           type = "xyz",
+                           crs = terra::crs(model$background))
+        mod$fits$prediction <- ras
+        rm(ras)
+      } else {
+        mod$fits$prediction <- NULL
+      }
     }
 
     # --- #

@@ -32,34 +32,46 @@ add_biodiversity_polpo(
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
+biodiversity point records.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is
+to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{poisson}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default:
+\code{poisson}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
+\code{NULL}).}
 
-\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any weights used in the modelling.
-Larger weights indicate higher weighting relative to any other datasets. By default set to \code{1} if only
-one dataset is added. A \code{\link{vector}} is also supported but must be of the same length as \code{"polpo"}.}
+\item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
+weights used in the modelling. Larger weights indicate higher weighting
+relative to any other datasets. By default set to \code{1} if only one
+dataset is added. A \code{\link{vector}} is also supported but must be of the same
+length as \code{"polpo"}.}
 
-\item{simulate}{Simulate poipo points within its boundaries. Result are passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
+\item{simulate}{Simulate poipo points within its boundaries. Result are
+passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
 
-\item{simulate_points}{A \code{\link{numeric}} number of points to be created by simulation (Default: \code{100}).}
+\item{simulate_points}{A \code{\link{numeric}} number of points to be created by
+simulation (Default: \code{100}).}
 
-\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference for simulation (Default: \code{NULL}).}
+\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference
+for simulation (Default: \code{NULL}).}
 
-\item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling. Can be set to either.
-\code{'random'} or \code{'regular'}, the latter requiring a raster supplied in the \code{'simulate_weights'}
-parameter.}
+\item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
+Can be set to either. \code{'random'} or \code{'regular'}, the latter
+requiring a raster supplied in the \code{'simulate_weights'} parameter.}
 
-\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate intercept is to be added in
-shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
+\item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
+intercept is to be added in shared likelihood models for engines
+\link{engine_inla}, \link{engine_inlabru} and \link{engine_stan}.}
 
-\item{docheck}{\code{\link{logical}} on whether additional checks should be performed (e.g. intersection tests) (Default: \code{TRUE}).}
+\item{docheck}{\code{\link{logical}} on whether additional checks should be performed
+(e.g. intersection tests) (Default: \code{TRUE}).}
 
-\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
+\item{pseudoabsence_settings}{Either \code{NULL} or a
+\code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
 
 \item{...}{Other parameters passed down.}
 }
@@ -67,19 +79,24 @@ shared likelihood models for engines \link{engine_inla}, \link{engine_inlabru} a
 Adds biodiversity data to \link{distribution} object.
 }
 \description{
-This function can be used to add a \code{\link{sf}} polygon dataset to an existing
-distribution object. Presence-only polygon data is treated differential than point data in
-some engines particular through the way that points are generated.
+This function can be used to add a \code{\link{sf}} polygon dataset to an
+existing distribution object. Presence-only polygon data is treated
+differential than point data in some engines particular through the way that
+points are generated.
 }
 \details{
-The default approach for polygon data is to sample presence-only points across
-the region of the polygons. This function thus adds as a wrapper to \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}} as presence-only
-points are created by the model. If no points are simulated directly (Default) then the polygon is processed
-by \code{\link[=train]{train()}} by creating regular point data over the supplied predictors.
+The default approach for polygon data is to sample presence-only
+points across the region of the polygons. This function thus adds as a
+wrapper to \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}} as presence-only points are created
+by the model. If no points are simulated directly (Default) then the
+polygon is processed by \code{\link[=train]{train()}} by creating regular point data over the
+supplied predictors.
 
-Use \code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}} to create binomial distributed inside-outside points for the given polygon!
+Use \code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}} to create binomial distributed
+inside-outside points for the given polygon!
 
-For an integration of range data as predictor or offset, see \code{\link[=add_predictor_range]{add_predictor_range()}} and \code{\link[=add_offset_range]{add_offset_range()}} instead.
+For an integration of range data as predictor or offset, see
+\code{\link[=add_predictor_range]{add_predictor_range()}} and \code{\link[=add_offset_range]{add_offset_range()}} instead.
 }
 \examples{
 \dontrun{

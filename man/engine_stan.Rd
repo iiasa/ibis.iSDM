@@ -20,26 +20,35 @@ engine_stan(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{chains}{A positive \code{\link{integer}} specifying the number of Markov chains (Default: \code{4} chains).}
+\item{chains}{A positive \code{\link{integer}} specifying the number of Markov chains
+(Default: \code{4} chains).}
 
-\item{iter}{A positive \code{\link{integer}} specifying the number of iterations for each chain (including warmup). (Default: \code{2000}).}
+\item{iter}{A positive \code{\link{integer}} specifying the number of iterations for
+each chain (including warmup). (Default: \code{2000}).}
 
-\item{warmup}{A positive \code{\link{integer}} specifying the number of warmup (aka burnin) iterations per chain.
-If step-size adaptation is on (Default: \code{TRUE}), this also controls the number of iterations for which
-adaptation is run (and hence these warmup samples should not be used for inference).
-The number of warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.}
+\item{warmup}{A positive \code{\link{integer}} specifying the number of warmup (aka
+burnin) iterations per chain. If step-size adaptation is on (Default:
+\code{TRUE}), this also controls the number of iterations for which
+adaptation is run (and hence these warmup samples should not be used for
+inference). The number of warmup iterations should be smaller than
+\code{iter} and the default is \code{iter/2}.}
 
-\item{init}{Initial values for parameters (Default: \code{'random'}). Can also be specified as \link{list} (see: \code{"rstan::stan"})}
+\item{init}{Initial values for parameters (Default: \code{'random'}). Can
+also be specified as \link{list} (see: \code{"rstan::stan"})}
 
-\item{cores}{If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.}
+\item{cores}{If set to NULL take values from specified ibis option
+\code{getOption('ibis.nthread')}.}
 
-\item{algorithm}{Mode used to sample from the posterior. Available options are \code{"sampling"}, \code{"optimize"},
-or \code{"variational"}.
-See \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).}
+\item{algorithm}{Mode used to sample from the posterior. Available options
+are \code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See
+\code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).}
 
-\item{control}{See \code{"rstan::stan"} for more details on specifying the controls.}
+\item{control}{See \code{"rstan::stan"} for more details on specifying the
+controls.}
 
-\item{type}{The mode used for creating posterior predictions. Either summarizing the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either
+summarizing the linear \code{"predictor"} or \code{"response"} (Default:
+\code{"response"}).}
 
 \item{...}{Other variables}
 }
@@ -49,18 +58,21 @@ An \link{Engine}.
 \description{
 Stan is probabilistic programming language that can be used to
 specify most types of statistical linear and non-linear regression models.
-Stan provides full Bayesian inference for continuous-variable models through Markov chain Monte Carlo methods
-such as the No-U-Turn sampler, an adaptive form of Hamiltonian Monte Carlo sampling.
-Stan code has to be written separately and this function acts as compiler to
-build the stan-model.
+Stan provides full Bayesian inference for continuous-variable models
+through Markov chain Monte Carlo methods such as the No-U-Turn sampler, an
+adaptive form of Hamiltonian Monte Carlo sampling. Stan code has to be
+written separately and this function acts as compiler to build the
+stan-model.
 \strong{Requires the \code{"cmdstanr"} package to be installed!}
 }
 \details{
-By default the posterior is obtained through sampling, however stan also supports
-approximate inference forms through penalized maximum likelihood estimation (see Carpenter et al. 2017).
+By default the posterior is obtained through sampling, however stan
+also supports approximate inference forms through penalized maximum
+likelihood estimation (see Carpenter et al. 2017).
 }
 \note{
-The function \code{obj$stancode()} can be used to print out the stancode of the model.
+The function \code{obj$stancode()} can be used to print out the
+stancode of the model.
 }
 \examples{
 \dontrun{

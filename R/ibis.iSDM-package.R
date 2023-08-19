@@ -1,11 +1,13 @@
 #' @keywords internal
 "_PACKAGE"
 
+## usethis namespace: start
 #' @importFrom foreach %do% %dopar%
 #' @importFrom methods as
 #' @importFrom stats effects
-
-## usethis namespace: start
+#' @importFrom stats residuals
+#' @importFrom stats complete.cases
+#' @importFrom graphics par
 ## usethis namespace: end
 NULL
 
@@ -26,6 +28,7 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   "s", "state", "suitability",
                   "tothin", "type", "time",
                   "upper",
+                  "layer", "rug",
                   "var1", "var2", "value", "variable",
                   "x", "y", "z",
                   "."))

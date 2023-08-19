@@ -11,22 +11,27 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{layer}{A \code{\link{SpatRaster}} or \code{\link{sf}} object with the same extent as the model background. Has to be binary and
-is used for a posthoc masking of projected grid cells.}
+\item{layer}{A \code{\link{SpatRaster}} or \code{\link{sf}} object with the same extent as the
+model background. Has to be binary and is used for a posthoc masking of
+projected grid cells.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
-information.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added
+to the scenario. See details for more information.}
 
-\item{...}{passed on parameters. See also the specific methods for adding constraints.}
+\item{...}{passed on parameters. See also the specific methods for adding
+constraints.}
 }
 \description{
-The purpose of boundary constraints is to limit a future projection within a specified area
-(such as for example a range or ecoregion). This can help to limit unreasonable projections into geographic space.
+The purpose of boundary constraints is to limit a future
+projection within a specified area (such as for example a range or
+ecoregion). This can help to limit unreasonable projections into geographic
+space.
 
-Similar to boundary constraints it is also possible to define a \code{"zone"} for the scenario projections, similar
-as was done for model training. The difference to a boundary constraint is that the boundary constraint is applied posthoc
-as a hard cut on any projection, while the zones would allow any projection (and other constraints) to be applied within
-the zone.
+Similar to boundary constraints it is also possible to define a \code{"zone"}
+for the scenario projections, similar as was done for model training. The
+difference to a boundary constraint is that the boundary constraint is
+applied posthoc as a hard cut on any projection, while the zones would allow
+any projection (and other constraints) to be applied within the zone.
 \strong{Note: Setting a boundary constraint for future projections effectively potentially suitable areas!}
 }
 \examples{
@@ -41,6 +46,7 @@ Other constraint:
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
+\code{\link{add_constraint_minsize}()},
 \code{\link{add_constraint}()}
 }
 \concept{constraint}

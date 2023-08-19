@@ -9,26 +9,32 @@
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added to the scenario. See details for more
-information.}
+\item{method}{A \code{\link{character}} indicating the type of constraints to be added
+to the scenario. See details for more information.}
 
-\item{names}{A \code{\link{character}} vector with names of the predictors for which an adaptability threshold should be set (Default: \code{NULL} for all).}
+\item{names}{A \code{\link{character}} vector with names of the predictors for which an
+adaptability threshold should be set (Default: \code{NULL} for all).}
 
-\item{value}{A \code{\link{numeric}} value in units of standard deviation (Default: \code{1}).}
+\item{value}{A \code{\link{numeric}} value in units of standard deviation (Default:
+\code{1}).}
 
-\item{increment}{A \code{\link{numeric}} constant that is added to value at every time step (Default: \code{0}).
-Allows incremental widening of the niche space, thus opening constraints.}
+\item{increment}{A \code{\link{numeric}} constant that is added to value at every time
+step (Default: \code{0}). Allows incremental widening of the niche space,
+thus opening constraints.}
 
-\item{...}{passed on parameters. See also the specific methods for adding constraints.}
+\item{...}{passed on parameters. See also the specific methods for adding
+constraints.}
 }
 \description{
-Adaptability constraints assume that suitable habitat for species in (future) projections might be unsuitable if
-it is outside the range of conditions currently observed for the species.
+Adaptability constraints assume that suitable habitat for
+species in (future) projections might be unsuitable if it is outside the
+range of conditions currently observed for the species.
 
-Currently only \code{nichelimit} is implemented, which adds a simple constrain on the predictor parameter space, which
-can be defined through the \code{"value"} parameter. For example by setting it to \code{1} (Default), any projections
-are constrained to be within the range of at maximum 1 standard deviation from the range of covariates used for model
-training.
+Currently only \code{nichelimit} is implemented, which adds a simple constrain on
+the predictor parameter space, which can be defined through the
+\code{"value"} parameter. For example by setting it to \code{1} (Default),
+any projections are constrained to be within the range of at maximum 1
+standard deviation from the range of covariates used for model training.
 }
 \examples{
 \dontrun{
@@ -42,6 +48,7 @@ Other constraint:
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
+\code{\link{add_constraint_minsize}()},
 \code{\link{add_constraint}()}
 }
 \concept{constraint}

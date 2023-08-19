@@ -11,12 +11,13 @@ sel_predictors(x, names)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{names}{\code{\link{vector}} A Vector of character names describing the environmental stack.}
+\item{names}{\code{\link{vector}} A Vector of character names describing the
+environmental stack.}
 }
 \description{
-This function allows - out of a \code{\link{character}} vector with the names
-of an already added \code{\linkS4class{PredictorDataset}} object - to select a particular set of predictors.
-See Examples.
+This function allows - out of a \code{\link{character}} vector with the
+names of an already added \code{\linkS4class{PredictorDataset}} object - to select a
+particular set of predictors. See Examples.
 }
 \examples{
 \dontrun{

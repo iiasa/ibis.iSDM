@@ -11,15 +11,15 @@ add_log(x, filename)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{filename}{A \code{\link{character}} object.
-The destination must be writeable and filename ends with \code{'txt'}.}
+\item{filename}{A \code{\link{character}} object. The destination must be writeable and
+filename ends with \code{'txt'}.}
 }
 \value{
 Adds a log file to a \code{\link{distribution}} object.
 }
 \description{
-This function allows to specify a file as \linkS4class{Log} file, which is used to save all
-console outputs, prints and messages.
+This function allows to specify a file as \linkS4class{Log} file,
+which is used to save all console outputs, prints and messages.
 }
 \examples{
 \dontrun{
