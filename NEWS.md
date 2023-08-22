@@ -10,6 +10,7 @@
 * Smaller bug fixes to `threshold()` in `scenario()` projections.
 * Improved error messages in several functions.
 * Further documentation fixes towards CRAN submission #38
+* Allow to specify location of biodiversity point records in `threshold()`.
 
 # ibis.iSDM 0.0.7
 #### New features

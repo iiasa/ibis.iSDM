@@ -753,7 +753,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 #'   objects.
 #' @param include_absences A [`logical`] of whether absences should be included
 #'   (Default: \code{FALSE}).
-#' @param point_column [`chracter`] on the column with observed values.
+#' @param point_column [`character`] on the column with observed values.
 #' @param addName [`logical`] Should the name of the feature be added (Default:
 #'   \code{FALSE}).
 #' @param tosf [`logical`] of whether the output should be [`sf`] object

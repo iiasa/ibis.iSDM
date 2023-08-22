@@ -27,6 +27,8 @@ NULL
 #'   (Default: \code{NULL}).
 #' @param point A [`sf`] object containing observational data used for model
 #'   training.
+#' @param field_occurrence A [`character`] location of
+#'   biodiversity point records.
 #' @param format [`character`] indication of whether \code{"binary"},
 #'   \code{"normalize"} or \code{"percentile"} formatted thresholds are to be
 #'   created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
@@ -71,7 +73,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, point = NULL,  format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -81,7 +83,7 @@ methods::setGeneric(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
@@ -123,7 +125,7 @@ methods::setMethod(
       }
       point <- collect_occurrencepoints(model = model,
                                         include_absences = TRUE,
-                                        point_column = "observed",
+                                        point_column = field_occurrence,
                                         addName = TRUE, tosf = TRUE
                                         )
     } else {
@@ -138,7 +140,7 @@ methods::setMethod(
       if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
       suppressMessages(
         abs <- add_pseudoabsence(df = point,
-                                 field_occurrence = 'observed',
+                                 field_occurrence = field_occurrence,
                                  template = bg,
                                  # Assuming that settings are comparable among objects
                                  settings = ass
@@ -176,7 +178,7 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            point = NULL, format = "binary", return_threshold = FALSE, ...) {
+                            point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(point,'sf'),
@@ -223,7 +225,7 @@ methods::setMethod(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
-  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE) {
+  function(obj, method = 'fixed', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'SpatRaster'),
                             is.character(method),
@@ -247,14 +249,14 @@ methods::setMethod(
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(point)) {
-      assertthat::assert_that(utils::hasName(point,"observed"),
-                              msg = "Provided point data needs to have column observed!")
+      assertthat::assert_that(utils::hasName(point,field_occurrence),
+                              msg = "Provided point data needs to include specified occurrence column observed!")
       # If observed is a factor, convert to numeric
       if(is.factor(point$observed)){
         point$observed <- as.numeric(as.character( point$observed ))
       }
       assertthat::assert_that(unique(sf::st_geometry_type(point)) %in% c('POINT','MULTIPOINT'))
-      assertthat::assert_that(utils::hasName(point, 'observed'))
+      assertthat::assert_that(utils::hasName(point, field_occurrence))
       poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
     } else poi_pres <- NULL
 
@@ -307,7 +309,7 @@ methods::setMethod(
         # now. Rather have users install the package here
         check_package("modEvA")
         # Assure that point data is correctly specified
-        assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, 'observed'))
+        assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, field_occurrence))
         point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
         assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
 
