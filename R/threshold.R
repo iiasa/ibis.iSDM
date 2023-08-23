@@ -133,7 +133,7 @@ methods::setMethod(
     }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
+    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       ass <- model$biodiversity[[1]]$pseudoabsence_settings
@@ -146,14 +146,14 @@ methods::setMethod(
                                  settings = ass
         )
       )
-      abs <- subset(abs, select = c('x','y'));abs$observed <- 0
+      abs <- subset(abs, select = c('x','y'));abs[, field_occurrence] <- 0
       abs <- guess_sf(abs)
       abs$name <- 'Background point'; abs$type <- "generated"
       suppressWarnings(
         abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
       )
-      point <- point |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
-      abs <- abs |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
+      point <- point |> dplyr::select(dplyr::all_of(field_occurrence), geometry, dplyr::any_of(c("name", "type")))
+      abs <- abs |> dplyr::select(dplyr::all_of(field_occurrence), geometry, dplyr::any_of(c("name", "type")))
       point <- dplyr::bind_rows(point,abs)
       rm(abs)
     }
@@ -250,14 +250,14 @@ methods::setMethod(
     # Check that raster has at least a mean prediction in name
     if(!is.null(point)) {
       assertthat::assert_that(utils::hasName(point,field_occurrence),
-                              msg = "Provided point data needs to include specified occurrence column observed!")
+                              msg = "Provided point data needs to include specified occurrence column!")
       # If observed is a factor, convert to numeric
-      if(is.factor(point$observed)){
-        point$observed <- as.numeric(as.character( point$observed ))
+      if(is.factor(point[, field_occurrence, drop = TRUE])){
+        point[, field_occurrence] <- as.numeric(as.character(point[, field_occurrence, drop = TRUE]))
       }
       assertthat::assert_that(unique(sf::st_geometry_type(point)) %in% c('POINT','MULTIPOINT'))
       assertthat::assert_that(utils::hasName(point, field_occurrence))
-      poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
+      poi_pres <- point[point[, field_occurrence, drop = TRUE] > 0, ]  # Remove any eventual absence data for a poi_pres evaluation
     } else poi_pres <- NULL
 
     # Loop through each raster
@@ -310,16 +310,17 @@ methods::setMethod(
         check_package("modEvA")
         # Assure that point data is correctly specified
         assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, field_occurrence))
-        point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
-        assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
+        point[, field_occurrence] <- ifelse(point[, field_occurrence, drop = TRUE] > 1,
+                                              1, point[, field_occurrence, drop = TRUE])  # Ensure that observed is <=1
+        assertthat::assert_that(all( unique(point[, field_occurrence, drop = TRUE]) %in% c(0,1) ))
 
         # Re-extract point vals but with the full dataset
         pointVals <- get_rastervalue(coords = point, env = raster_thresh)[[val]]
         assertthat::assert_that(length(pointVals)>2)
         # Calculate the optimal thresholds
         suppressWarnings(
-          opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
-                                    measures = method,
+          opt <- modEvA::optiThresh(obs = point[, field_occurrence, drop = TRUE],
+                                    pred = pointVals, measures = method,
                                     optimize = "each", plot = FALSE)
         )
         if(method %in% opt$optimals.each$measure){
