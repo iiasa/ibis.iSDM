@@ -754,7 +754,7 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
   # Aggregate to minimal scale
   if(is.Raster(template)){
     if(terra::ncol(data) / terra::ncol(template) >= 2){
-      factor <- floor(data@ncols/template@ncols)
+      factor <- floor(terra::ncol(data)/ terra::ncol(template) )
       data <- terra::aggregate(data, fact = factor,
                                fun = func,
                                cores = ifelse(cl, getOption("ibis.nthread"), 1))

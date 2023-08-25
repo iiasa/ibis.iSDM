@@ -772,13 +772,18 @@ methods::setMethod(
       stop("No estimates found!")
     }
 
+    if(length(out)==1){
+      if(getOption("ibis.setupmessages")) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
+      new <- out[[1]]
+    } else {
+      # Now construct an ensemble by calling ensemble directly
+      new <- ensemble(out, method = method,
+                      normalize = normalize,
+                      layer = layer,
+                      min.value = min.value,
+                      uncertainty = "none")
+    }
 
-    # Now construct an ensemble by calling ensemble directly
-    new <- ensemble(out, method = method,
-                    normalize = normalize,
-                    layer = layer,
-                    min.value = min.value,
-                    uncertainty = "none")
     assertthat::assert_that(
       is.Raster(new),msg = "Something went wrong with the ensemble calculation!"
     )

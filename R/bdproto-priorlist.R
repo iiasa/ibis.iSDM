@@ -156,14 +156,21 @@ PriorList <- bdproto(
     ids <- self$ids()
     varn <- self$varnames()
     out <- data.frame(id = character(), class = character(), variable = character(),
-                      type = character(), hyper = character())
-    for(id in ids){
+                      type = character(), hyper = character(), other = character())
+    for(id in as.character(ids)){
       pp <- self$collect(ids)
       co <- data.frame(id = as.character( id ),
                        class = self$classes()[[id]],
                        variable = varn[[id]],
                        type = self$types()[id],
                        hyper = paste0( self$get(varn[id]) ,collapse = " | ") )
+      # Add other things if found
+      for(v in c("lims", "prop")){
+        lim <- try({self$get(varn[id], what = v)},silent = TRUE)
+        if(!inherits(lim, "try-error")){
+          co$other <- paste0(lim, collapse = " | ")
+        }
+      }
       out <- rbind(out, co)
     }
     assertthat::assert_that(nrow(out)>0)

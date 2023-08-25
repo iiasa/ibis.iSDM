@@ -554,7 +554,7 @@ engine_breg <- function(x,
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, names(df), several.ok = FALSE)
+              x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
             }
 
             if(is.null(newdata)){
