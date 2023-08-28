@@ -26,11 +26,17 @@ test_that('Train a distribution model with XGboost', {
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
     engine_xgboost()
 
+  # Make a check
+  expect_no_error( check(x) )
+
   # Train the model
   suppressWarnings(
     mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
   )
+
+  # Make a check
+  expect_no_error( check(mod) )
 
   # Expect summary
   expect_s3_class(summary(mod), "data.frame")

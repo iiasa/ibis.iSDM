@@ -109,7 +109,11 @@ test_that('Setting up a distribution model',{
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
-  x <- x |> engine_inla()
+  suppressWarnings( x <- x |> engine_inla() )
+
+  # Do a check
+  expect_no_error(check(x))
+
   # Mesh is not created yet
   expect_s3_class(x$engine$get_data("mesh"),'Waiver')
   expect_equal(x$engine$name,'<INLA>')

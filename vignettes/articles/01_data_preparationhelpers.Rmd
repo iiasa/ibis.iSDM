@@ -1,0 +1,30 @@
+---
+title: "Preparation of biodiversity and predictor data"
+author: "Martin Jung"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+fontsize: 11pt
+vignette: >
+  %\VignetteIndexEntry{Preparation of biodiversity and predictor data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# Define variables for vignette figures and code execution
+h <- 5.5
+w <- 5.5
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
+```
+
+<TBD>

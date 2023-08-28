@@ -4,6 +4,7 @@
 #### Minor improvements and bug fixes
 * Small fix to `threshold()` now returning threshold values correctly. 
 * Bug fix and error catching to `distribution()` and `ensemble_partial()`,`ensemble_spartial()`
+* Further checks added to `check()` #45
 * Small fix to `alignRasters()`.
 
 # ibis.iSDM 0.0.8

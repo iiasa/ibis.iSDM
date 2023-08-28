@@ -329,10 +329,6 @@ methods::setMethod(
       inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
       msg = "Only objects created through `train()` or `project()` are supported!"
     )
-    # Check writeable or not
-    assertthat::assert_that(
-      assertthat::is.writeable(dirname(fname)),msg = "Given input folder is not writeable!"
-    )
 
     # Get file extension
     ext <- tolower( tools::file_ext(fname) )
@@ -340,7 +336,7 @@ methods::setMethod(
     ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
     fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
     if(file.exists(fname) && (verbose && getOption('ibis.setupmessages'))) myLog('[Output]','yellow','Overwriting existing file...')
-    assertthat::assert_that(assertthat::is.writeable(dirname(fname)))
+    assertthat::assert_that(dir.exists(dirname(fname)))
     # --- #
     # Gather the statistics and parameters from the provided file
     output <- list()

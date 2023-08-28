@@ -71,9 +71,29 @@ methods::setMethod(
     # Type specific checks
     if(inherits(obj,"BiodiversityDistribution")){
 
-      # Are there enough observations?
-      if( sum( obj$biodiversity$get_observations() ) < 200 ){
-        ms$Warnings <- append(ms$Warnings, "Not enough observations found.")
+      # Check if necessary data is there
+      if(is.Waiver(obj$get_biodiversity_types())){
+        ms$Warnings <- append(ms$Warnings, "No biodiversity data added.")
+      } else {
+        # Are there enough observations?
+        if( sum( obj$biodiversity$get_observations() ) < 100 ){
+          ms$Warnings <- append(ms$Warnings, "Less that 100 observations found.")
+        }
+
+        # Count number of observations and predictors
+        t1 <- obj$biodiversity$get_observations() |> as.numeric()
+        t2 <- length( obj$get_predictor_names() )
+        if(!is.Waiver(t2)){
+          if(t2 >= t1){
+            ms$Warnings <- append(ms$Warnings,
+                                  "More predictors than observations.")
+          }
+        }
+      }
+
+      # Check predictors
+      if(is.Waiver(obj$get_predictor_names())){
+        ms$Warnings <- append(ms$Warnings, "No predictors added.")
       }
 
     }
@@ -119,8 +139,10 @@ methods::setMethod(
         }
       }
     }
-    if(inherits(obj, "BiodiversityScenario")){
 
+
+    if(inherits(obj, "BiodiversityScenario")){
+      invisible()
     }
 
     # Check for warnings

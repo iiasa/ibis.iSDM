@@ -27,7 +27,6 @@ Log <- bdproto(
   # Opens the connection to the output filename
   open = function(self){
     assertthat::assert_that(
-      assertthat::is.writeable(dirname(self$filename)),
       assertthat::has_extension(self$filename,'txt')
     )
     try({output = file( self$filename, open = 'wt', method = 'default') },silent = TRUE)
