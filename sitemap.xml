@@ -7,25 +7,28 @@
     <loc>https://iiasa.github.io/ibis.iSDM/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/01_data_preparationhelpers.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/02_integrate_data.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/02_train_simple_model.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_biodiversity_projections.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/03_integrate_data.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_mechanistic_estimation.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/04_biodiversity_projections.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_engine_comparison.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/05_mechanistic_estimation.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/06_package_comparison.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/06_engine_comparison.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/articles/07_frequently-asked-questions.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/07_package_comparison.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/articles/08_frequently-asked-questions.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/articles/Get_started.html</loc>
