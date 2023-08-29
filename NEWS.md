@@ -1,5 +1,6 @@
 # ibis.iSDM 0.0.9 (current dev branch)
 #### New features
+* Added new vignette on available functions for data preparation #67
 
 #### Minor improvements and bug fixes
 * Small fix to `threshold()` now returning threshold values correctly. 

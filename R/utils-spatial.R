@@ -1278,7 +1278,9 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   )
   check_package("dplyr")
   # Match method
-  method <- match.arg(method, choices = c("random", "spatial", "bias", "environmental", "zones"), several.ok = FALSE)
+  method <- match.arg(method,
+                      choices = c("random", "spatial", "bias", "environmental", "zones"),
+                      several.ok = FALSE)
 
   # Label background with id
   bg <- background
@@ -1300,7 +1302,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
   ras <- terra::rasterize(coords, bg) # Get the number of observations per grid cell
 
   # Bounds for thining
-  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
+  totake <- c(lower = minpoints,
+              upper = max( terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
 
   # -- #
   if(method == "random"){
@@ -1374,7 +1377,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
                             is.factor(zones))
 
     if(!terra::compareGeom(bg, zones, stopOnError = FALSE)){
-      zones <- alignRasters(zones, bg, method = "near", func = terra::modal, cl = FALSE)
+      zones <- alignRasters(zones, bg, method = "near",
+                            func = terra::modal, cl = FALSE)
     }
 
     # Output vector
@@ -1398,7 +1402,8 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     # Environmental clustering
 
     if(!terra::compareGeom(bg, env, stopOnError = FALSE)){
-      env <- alignRasters(env, bg, method = "near", func = terra::modal, cl = FALSE)
+      env <- alignRasters(env, bg, method = "near",
+                          func = terra::modal, cl = FALSE)
     }
     # If there are any factors, explode
     if(any(is.factor(env))){
