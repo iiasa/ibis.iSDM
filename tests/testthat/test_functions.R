@@ -272,7 +272,7 @@ test_that('Test data preparation convenience functions', {
   # Similarity function test
   x <- distribution(background) |> add_predictors(predictors)
   expect_error( m1 <- similarity(x, method = "mess") )
-  x <- x |> add_biodiversity_poipo(virtual_points)
+  x <- x |> add_biodiversity_poipo(virtual_points,field_occurrence = "Observed")
   m1 <- similarity(x, method = "mess", plot = FALSE)
   expect_true(is.Raster(m1))
   expect_true(any(is.factor(m1)))

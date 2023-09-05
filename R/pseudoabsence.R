@@ -82,7 +82,7 @@ NULL
 #' # points to the resulting model
 #' all_my_points <- add_pseudoabsence(
 #'                      df = virtual_points,
-#'                       field_occurrence = 'Observed',
+#'                       field_occurrence = 'observed',
 #'                       template = background,
 #'                       settings = ass1)
 #' }

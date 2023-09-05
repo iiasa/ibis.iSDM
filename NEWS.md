@@ -7,6 +7,7 @@
 * Bug fix and error catching to `distribution()` and `ensemble_partial()`,`ensemble_spartial()`
 * Further checks added to `check()` #45
 * Small fix to `alignRasters()`.
+* Small fix to harmonize field_coloumn throughout.
 
 # ibis.iSDM 0.0.8
 #### New features

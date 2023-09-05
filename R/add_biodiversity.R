@@ -71,7 +71,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipo",
   signature = methods::signature("x", "poipo"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
+  function(x, poipo, name = NULL, field_occurrence = "observed", formula = NULL, family = "poisson", link = NULL,
            weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {standardGeneric("add_biodiversity_poipo") })
 
 #' @name add_biodiversity_poipo
@@ -81,7 +81,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipo",
   methods::signature(x = "BiodiversityDistribution", poipo = "sf"),
-  function(x, poipo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
+  function(x, poipo, name = NULL, field_occurrence = "observed", formula = NULL, family = "poisson", link = NULL,
            weight = 1, separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipo, "Spatial") || inherits(poipo, "sf") || inherits(poipo, "data.frame") || inherits(poipo, "tibble"),
@@ -171,7 +171,7 @@ methods::setMethod(
 #' @param name The name of the biodiversity dataset used as internal identifier.
 #' @param field_occurrence A [`numeric`] or [`character`] location of
 #'   biodiversity point records indicating presence/absence. By default set to
-#'   \code{"Observed"} and an error will be thrown if a [`numeric`] column with
+#'   \code{"observed"} and an error will be thrown if a [`numeric`] column with
 #'   that name does not exist.
 #' @param formula A [`character`] or [`formula`] object to be passed. Default
 #'   (\code{NULL}) is to use all covariates (if specified).
@@ -214,7 +214,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_poipa",
   signature = methods::signature("x", "poipa"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+  function(x, poipa, name = NULL, field_occurrence = "observed", formula = NULL, family = "binomial", link = NULL,
            weight = 1, separate_intercept = TRUE, docheck = TRUE, ...) standardGeneric("add_biodiversity_poipa"))
 
 #' @name add_biodiversity_poipa
@@ -224,7 +224,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_poipa",
   methods::signature(x = "BiodiversityDistribution", poipa = "sf"),
-  function(x, poipa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+  function(x, poipa, name = NULL, field_occurrence = "observed", formula = NULL, family = "binomial", link = NULL,
            weight = 1, separate_intercept = TRUE, docheck = TRUE, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(poipa, "Spatial") || inherits(poipa, "sf") || inherits(poipa, "data.frame") || inherits(poipa, "tibble"),
@@ -362,7 +362,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpo",
   signature = methods::signature("x", "polpo"),
-  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL, family = "poisson", link = NULL,
+  function(x, polpo, name = NULL, field_occurrence = "observed", formula = NULL, family = "poisson", link = NULL,
            weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpo"))
 
@@ -373,7 +373,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpo",
   methods::signature(x = "BiodiversityDistribution", polpo = "sf"),
-  function(x, polpo, name = NULL, field_occurrence = "Observed", formula = NULL,family = "poisson", link = NULL,
+  function(x, polpo, name = NULL, field_occurrence = "observed", formula = NULL,family = "poisson", link = NULL,
            weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -559,7 +559,7 @@ NULL
 methods::setGeneric(
   "add_biodiversity_polpa",
   signature = methods::signature("x", "polpa"),
-  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+  function(x, polpa, name = NULL, field_occurrence = "observed", formula = NULL, family = "binomial", link = NULL,
            weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ...) standardGeneric("add_biodiversity_polpa"))
 
@@ -570,7 +570,7 @@ methods::setGeneric(
 methods::setMethod(
   "add_biodiversity_polpa",
   methods::signature(x = "BiodiversityDistribution", polpa = "sf"),
-  function(x, polpa, name = NULL, field_occurrence = "Observed", formula = NULL, family = "binomial", link = NULL,
+  function(x, polpa, name = NULL, field_occurrence = "observed", formula = NULL, family = "binomial", link = NULL,
            weight = 1, simulate = FALSE, simulate_points = 100, simulate_bias = NULL, simulate_strategy = "random",
            separate_intercept = TRUE, docheck = TRUE, pseudoabsence_settings = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),

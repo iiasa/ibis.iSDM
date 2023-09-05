@@ -8,7 +8,7 @@ add_biodiversity_poipa(
   x,
   poipa,
   name = NULL,
-  field_occurrence = "Observed",
+  field_occurrence = "observed",
   formula = NULL,
   family = "binomial",
   link = NULL,
@@ -30,7 +30,7 @@ occurrences.}
 
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
 biodiversity point records indicating presence/absence. By default set to
-\code{"Observed"} and an error will be thrown if a \code{\link{numeric}} column with
+\code{"observed"} and an error will be thrown if a \code{\link{numeric}} column with
 that name does not exist.}
 
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default

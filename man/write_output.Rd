@@ -45,7 +45,7 @@ By default output files will be overwritten if already existing!
 \examples{
 \dontrun{
 x <- distribution(background)  |>
- add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+ add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 write_output(x, "testmodel.tif")

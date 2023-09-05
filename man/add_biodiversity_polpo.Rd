@@ -8,7 +8,7 @@ add_biodiversity_polpo(
   x,
   polpo,
   name = NULL,
-  field_occurrence = "Observed",
+  field_occurrence = "observed",
   formula = NULL,
   family = "poisson",
   link = NULL,
