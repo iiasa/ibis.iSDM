@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-09-05</h4>
+            <h4 data-toc-skip class="date">2023-09-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -417,51 +417,51 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species continuous</span></span>
-<span><span class="co">#&gt;       metric       value</span></span>
-<span><span class="co">#&gt; 1          n 175.0000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.8780350</span></span>
-<span><span class="co">#&gt; 3        mae   0.6725504</span></span>
-<span><span class="co">#&gt; 4    logloss   1.7748511</span></span>
-<span><span class="co">#&gt; 5   normgini  -0.0749004</span></span>
-<span><span class="co">#&gt; 6 cont.boyce   0.2767001</span></span>
+<span><span class="co">#&gt; 1 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species continuous</span></span>
+<span><span class="co">#&gt;       metric        value</span></span>
+<span><span class="co">#&gt; 1          n 175.00000000</span></span>
+<span><span class="co">#&gt; 2       rmse   0.87826460</span></span>
+<span><span class="co">#&gt; 3        mae   0.67259795</span></span>
+<span><span class="co">#&gt; 4    logloss   1.77701891</span></span>
+<span><span class="co">#&gt; 5   normgini  -0.07450199</span></span>
+<span><span class="co">#&gt; 6 cont.boyce   0.27305160</span></span>
 <span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 c7bc56aa-b125-44d5-8ad0-04cf70e9ddbf Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 fbf230ba-1ff8-483a-b1a8-e9a7f9d032bc Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
 <span><span class="co">#&gt; 1                    n 525.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6942857</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7580952</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.4093023</span></span>
-<span><span class="co">#&gt; 5            precision   0.6875000</span></span>
+<span><span class="co">#&gt; 2                  auc   0.7014286</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7676190</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.4190476</span></span>
+<span><span class="co">#&gt; 5            precision   0.7154472</span></span>
 <span><span class="co">#&gt; 6          sensitivity   0.5028571</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8857143</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3885714</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5808581</span></span>
-<span><span class="co">#&gt; 10             logloss   5.9673782</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5853968</span></span>
-<span><span class="co">#&gt; 12               kappa   0.4165391</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2419048</span></span></code></pre></div>
+<span><span class="co">#&gt; 7          specificity   0.9000000</span></span>
+<span><span class="co">#&gt; 8                  tss   0.4028571</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5906040</span></span>
+<span><span class="co">#&gt; 10             logloss   5.9578544</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5885714</span></span>
+<span><span class="co">#&gt; 12               kappa   0.4351852</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2323810</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can
