@@ -68,6 +68,7 @@ jobs:
             any::pdp,
             stan-dev/cmdstanr,
             any::igraph,
+            any::lwgeom,
             any::xgboost,
             any::dbarts,
             any::mboost,

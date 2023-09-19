@@ -34,6 +34,7 @@ Imports:
     ncmeta,
     parallel,
     posterior,
+    lwgeom,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
     sf (>= 1.0),
