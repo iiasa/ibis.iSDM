@@ -278,6 +278,18 @@ references:
     email: Aki.Vehtari@aalto.fi
   year: '2023'
 - type: software
+  title: lwgeom
+  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
+  notes: Imports
+  url: https://github.com/r-spatial/lwgeom/
+  repository: https://CRAN.R-project.org/package=lwgeom
+  authors:
+  - family-names: Pebesma
+    given-names: Edzer
+    email: edzer.pebesma@uni-muenster.de
+    orcid: https://orcid.org/0000-0001-8049-7069
+  year: '2023'
+- type: software
   title: proto
   abstract: 'proto: Prototype Object-Based Programming'
   notes: Imports
@@ -714,6 +726,9 @@ references:
   - family-names: Goodrich
     given-names: Ben
     email: benjamin.goodrich@columbia.edu
+  - family-names: Johnson
+    given-names: Andrew
+    email: andrew.johnson@arjohnsonau.com
   - family-names: Weber
     given-names: Sebastian
     email: sdw.post@waebers.de
