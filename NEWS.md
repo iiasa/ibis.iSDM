@@ -3,6 +3,7 @@
 * Added new vignette on available functions for data preparation #67
 
 #### Minor improvements and bug fixes
+* Small fix to `ensemble()` so that ensembles of future scenarios use correct standardization.
 * Small fix to `threshold()` now returning threshold values correctly. 
 * Bug fix and error catching to `distribution()` and `ensemble_partial()`,`ensemble_spartial()`
 * Further checks added to `check()` #45

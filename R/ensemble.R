@@ -379,10 +379,15 @@ methods::setMethod(
         # Get dimensions
         lmat_dim <- stars::st_dimensions(mods[[1]]$get_data())
       }
+
+      # Normalize stars files
       if(normalize){
+        # Get overall means and max values
+        ovmin <- min(lmat[,4:ncol(lmat)],na.rm = TRUE)
+        ovmax <- max(lmat[,4:ncol(lmat)],na.rm = TRUE)
         lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                                      2, function(x) {
-                                       (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE) )
+                                       (x - ovmin) / (ovmax - ovmin )
                                      })
       }
 
