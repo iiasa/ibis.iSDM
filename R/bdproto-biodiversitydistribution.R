@@ -348,6 +348,7 @@ BiodiversityDistribution <- bdproto(
   plot = function(self){
     message("No generic plotting implemented!")
   },
+  # Summary function
   summary = function(self){
     message("No generic summary function implemented! Try print.")
   }

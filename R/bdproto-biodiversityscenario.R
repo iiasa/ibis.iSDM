@@ -218,6 +218,14 @@ BiodiversityScenario <- bdproto(
   get_data = function(self, what = "scenarios"){
     return(self[[what]])
   },
+  # Set data
+  set_data = function(self, x){
+    # Get projected value
+    ff <- self$scenarios
+    # Set the object
+    ff[["scenarios"]] <- x
+    bdproto(NULL, self, scenarios = ff )
+  },
   # Plot the prediction
   plot = function(self, what = "suitability", which = NULL, ...){
     if(is.Waiver(self$get_data())){
@@ -523,6 +531,40 @@ BiodiversityScenario <- bdproto(
       if(plot) terra::plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
     }
     return(out)
+  },
+  # Masking function
+  mask = function(self, mask, inverse = FALSE){
+    # Check whether prediction has been created
+    projection <- self$get_data()
+    if(!is.Waiver(projection)){
+      # Make valid
+      mask <- sf::st_make_valid(mask)
+      # If mask is sf, rasterize
+      if(!inherits(mask, 'sf')){
+        mask <- terra::as.polygons(mask) |> sf::st_as_sf()
+      }
+      # Check that aligns
+      if(sf::st_crs(projection) != sf::st_crs(mask) ){
+        mask <- mask |> sf::st_transform(crs = sf::st_crs(projection))
+      }
+      # If there are multiple, ajoin
+      if(nrow(mask)>1){
+        mask <- sf::st_combine(mask) |> sf::st_as_sf()
+      }
+
+      # Now mask and save
+      projection <-
+        suppressMessages(
+          suppressWarnings(
+            projection[mask]
+          )
+        )
+
+      # Save data
+      self[["scenarios"]] <- projection
+
+      invisible()
+    }
   },
   # Get centroids
   get_centroid = function(self, patch = FALSE){

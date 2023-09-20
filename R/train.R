@@ -1300,6 +1300,16 @@ methods::setMethod(
             model$predictors_types <- rbind(model$predictors_types,
                                             data.frame(predictors = names(new), type = c('numeric')))
 
+            # Finally if custom formula found, add the variable there.
+            for(other_id in names(model$biodiversity)){
+              if(other_id == id) next() # Skip if current id
+              ff <- model$biodiversity[[other_id]]$equation
+              if(is.formula(ff)){
+                ff <- update.formula(ff, paste0("~ . + ", pred_name))
+                model$biodiversity[[other_id]]$equation <- ff
+              } # Else skip
+            }
+
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")

@@ -123,6 +123,7 @@ Collate:
     'get_data.R'
     'ibis.iSDM-package.R'
     'limiting.R'
+    'mask.R'
     'misc.R'
     'partial.R'
     'plot.R'

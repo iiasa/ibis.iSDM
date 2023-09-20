@@ -100,12 +100,12 @@ built_formula_gdb <- function(model, id, x, settings){
     }
     # Check that bols/bbs are in terms and if not add them for each variable
     if( settings$get("only_linear") ){
-      if( length(grep("bols",attr(stats::terms(form2), "term.labels") ))==0 ){
+      if( length(grep("bols",attr(stats::terms(form), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
         form <- stats::as.formula(paste0("observed ~", paste0("bols(", obj$predictors_names, ")",collapse = " + ")))
       }
     } else {
-      if( length(grep("bbs",attr(stats::terms(form2), "term.labels") ))==0 ){
+      if( length(grep("bbs",attr(stats::terms(form), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
         form <- stats::as.formula(paste0("observed ~", paste0("bbs(", obj$predictors_names, ")",collapse = " + ")))
       }

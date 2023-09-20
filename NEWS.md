@@ -1,6 +1,7 @@
 # ibis.iSDM 0.0.9 (current dev branch)
 #### New features
 * Added new vignette on available functions for data preparation #67
+* Addition of small `mask()` function that emulates the for `terra`.
 
 #### Minor improvements and bug fixes
 * Small fix to `ensemble()` so that ensembles of future scenarios use correct standardization.

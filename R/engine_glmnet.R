@@ -164,7 +164,18 @@ engine_glmnet <- function(x,
 
         # Distribution specific procedure
         fam <- model$biodiversity[[1]]$family
+        form <- model$biodiversity[[1]]$equation
 
+        # -- #
+        # Respecify the predictor names if not matching
+        te <- attr(terms.formula(form), "term.labels")
+        if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
+          model$biodiversity[[1]]$predictors_names <-
+            model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
+          model$biodiversity[[1]]$predictors_types <-
+            model$biodiversity[[1]]$predictors_types |> dplyr::filter(
+            predictors %in% te)
+        }
         # -- #
 
         # If a poisson family is used, weight the observations by their exposure
@@ -194,12 +205,16 @@ engine_glmnet <- function(x,
           if(length(any_missing)>0) {
             presabs <- presabs[-any_missing,] # This works as they are in the same order
             model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+          }
+          df <- subset(df, stats::complete.cases(df))
+          assertthat::assert_that(nrow(presabs) == nrow(df))
+
+          # Check that expect matches
+          if(length(model$biodiversity[[1]]$expect)!=nrow(df)){
             # Fill the absences with 1 as multiplier. This works since absences follow the presences
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, stats::complete.cases(df))
-          assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
@@ -207,7 +222,7 @@ engine_glmnet <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
-                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
+                                   length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 

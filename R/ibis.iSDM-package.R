@@ -4,6 +4,7 @@
 ## usethis namespace: start
 #' @importFrom foreach %do% %dopar%
 #' @importFrom methods as
+#' @importFrom terra mask
 #' @importFrom stats effects
 #' @importFrom stats residuals
 #' @importFrom stats complete.cases

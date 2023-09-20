@@ -90,10 +90,21 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   new.packages <- deps[!(deps %in% utils::installed.packages()[, "Package"])]
   if(length(new.packages)>0){
     if("INLA" %in% new.packages){
-      suppressMessages(
-        utils::install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"),
-                                dependencies = TRUE, quiet = TRUE)
-      )
+      if (!requireNamespace("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+      BiocManager::install(c("graph", "Rgraphviz"), dep=TRUE)
+      # Then install INLA
+      if(R.version$major == "4" && as.numeric(R.version$minor)>3){
+        remotes::install_version("INLA",
+                                 repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/testing"),
+                                 dep=TRUE)
+      } else {
+        install.packages("INLA",
+                         repos=c(getOption("repos"),
+                                 INLA="https://inla.r-inla-download.org/R/stable"),
+                         dep=TRUE)
+      }
+
     }
     suppressMessages(
       utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE,

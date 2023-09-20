@@ -194,6 +194,10 @@ test_that('Scenarios and constraints', {
   mod <- x |> project()
   expect_s3_class(mod$get_data(), "stars")
 
+  # Apply a mask
+  mod$mask(virtual_range)
+  mod <- x |> project() # Project anew
+
   # Calculate centroids
   expect_s3_class(mod$get_centroid(), "sf")
 
