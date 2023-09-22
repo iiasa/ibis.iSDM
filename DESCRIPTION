@@ -48,7 +48,6 @@ Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
     covr,
-    INLA (>= 23.01.31),
     inlabru (>= 2.6.0),
     glmnet (>= 4.1),
     glmnetUtils,
