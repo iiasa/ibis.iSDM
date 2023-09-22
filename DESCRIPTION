@@ -31,10 +31,8 @@ Imports:
     methods,
     ncdf4,
     Matrix,
-    ncmeta,
     parallel,
     posterior,
-    lwgeom,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
     sf (>= 1.0),
@@ -49,6 +47,7 @@ Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
     covr,
+    INLA (>= 23.01.31),
     inlabru (>= 2.6.0),
     glmnet (>= 4.1),
     glmnetUtils,
@@ -74,6 +73,7 @@ Suggests:
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
+Additional_repositories: https://inla.r-inla-download.org/R/testing
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)

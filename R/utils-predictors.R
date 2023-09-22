@@ -918,7 +918,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
   if((requireNamespace("abess", quietly = TRUE))){
 
     # Build model
-    abess_fit <- abess(x = env,
+    abess_fit <- abess::abess(x = env,
                               y = observed,
                               family = family,
                               tune.type = tune.type,
@@ -931,7 +931,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 
     if(anyNA(stats::coef(abess_fit)[,1]) ) {
       # Refit with minimum support size
-      abess_fit <- abess(x = env,
+      abess_fit <- abess::abess(x = env,
                                 y = observed,
                                 family = family,
                                 lambda = lambda,
@@ -1016,7 +1016,7 @@ predictors_filter_boruta <- function( env, obs, method, keep = NULL,
 
   # Apply boruta
   if((requireNamespace("Boruta", quietly = TRUE))){
-    bo_test <- Boruta(env, y = observed,
+    bo_test <- Boruta::Boruta(env, y = observed,
                       maxRuns = iter,
                       # Verbosity
                       doTrace = ifelse(verbose, 1, 0))

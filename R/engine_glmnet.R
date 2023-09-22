@@ -168,7 +168,7 @@ engine_glmnet <- function(x,
 
         # -- #
         # Respecify the predictor names if not matching
-        te <- attr(terms.formula(form), "term.labels")
+        te <- formula_terms(form)
         if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
           model$biodiversity[[1]]$predictors_names <-
             model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
@@ -329,6 +329,12 @@ engine_glmnet <- function(x,
         full <- model$predictors
         w_full <- model$exposure
 
+        # Subset the predictor types to only those present
+        te <- formula_terms(form)
+        model$biodiversity[[1]]$predictors_types <-
+          model$biodiversity[[1]]$predictors_types |> dplyr::filter(predictors %in% te)
+        model$biodiversity[[1]]$predictors_names <-  intersect(model$biodiversity[[1]]$predictors_names, te)
+
         # Get offset and add it to exposure
         if(!is.Waiver(model$offset)){
           # Add offset to full prediction and load vector
@@ -358,6 +364,7 @@ engine_glmnet <- function(x,
         if(!is.Waiver(model$priors)){
           # Reset those contained in the prior object
           for(v in model$priors$varnames()){
+            if(!(v %in% names(p.fac))) next()
             p.fac[v]  <- model$priors$get(v, what = "value")
             lowlim[v] <- model$priors$get(v, what = "lims")[1]
             upplim[v] <- model$priors$get(v, what = "lims")[2]
@@ -582,7 +589,7 @@ engine_glmnet <- function(x,
               }
             } else {
               # Assume all variables are present
-              df2 <- newdata |> dplyr::select(any_of(names(df)))
+              df2 <- newdata |> dplyr::select(dplyr::any_of(names(df)))
               assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
             }
 

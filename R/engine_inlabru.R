@@ -1098,7 +1098,7 @@ engine_inlabru <- function(x,
                   factor(lvl[1], levels = lvl)
               }
             } else {
-              df_partial <- newdata |> dplyr::select(any_of(names(df)))
+              df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
             }
 
             ## plot the unique effect of the covariate

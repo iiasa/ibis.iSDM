@@ -635,13 +635,13 @@ methods::setMethod(
       new[,1] <- sapply(new[,1], function(z) rr[which.min(abs(z - rr))] )
       if(method=="mean"){
         new <- new |> dplyr::group_by(partial_effect) |>
-          dplyr::summarise(sd = sd(mean,na.rm=TRUE),
+          dplyr::summarise(sd = stats::sd(mean,na.rm=TRUE),
                            mean = mean(mean,na.rm=TRUE)
           ) |>
           dplyr::relocate(mean,.before = sd)
       } else {
         new <- new |> dplyr::group_by(partial_effect) |>
-          dplyr::summarise(mad = mad(median,na.rm=TRUE),
+          dplyr::summarise(mad = stats::mad(median,na.rm=TRUE),
                            median = median(median,na.rm=TRUE)
           ) |>
           dplyr::relocate(median,.before = mad)

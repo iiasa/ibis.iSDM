@@ -8,6 +8,11 @@
 #' @importFrom stats effects
 #' @importFrom stats residuals
 #' @importFrom stats complete.cases
+#' @importFrom stats mad
+#' @importFrom stats sd
+#' @importFrom stats terms.formula
+#' @importFrom stats update.formula
+#' @importFrom utils install.packages
 #' @importFrom graphics par
 ## usethis namespace: end
 NULL

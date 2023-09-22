@@ -3,8 +3,9 @@
 test_that('Check that distribution objects are properly inherited', {
   skip_if_not_installed('igraph')
   skip_if_not_installed('abind')
-
   skip_if_not_installed("glmnet")
+  skip_if_not_installed("INLA")
+  # skip_if_not_installed("cmdstanr")
   # skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
   #         message = "No cmdstan path")
 
@@ -78,14 +79,18 @@ test_that('Check that distribution objects are properly inherited', {
   expect_true(is.Waiver(x$engine))
 
   # Priors
-  x |> add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal')))
+  x |> add_predictors(predictors, transform = 'none',derivates = 'none',
+                      priors = priors(GDBPrior(names(predictors)[1],'increasing')))
   expect_true(is.Waiver(x$priors))
-  x |> add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
+  x |> add_latent_spatial(method = "spde",
+                          priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
   # Two different priors
   x |>
-    add_predictors(predictors, transform = 'none',derivates = 'none',priors = priors(INLAPrior(names(predictors)[1],'normal'))) |>
-    add_latent_spatial(method = "spde", priors = priors(INLAPrior('spde','prior.range')))
+    add_predictors(predictors, transform = 'none',derivates = 'none',
+                   priors = priors(INLAPrior(names(predictors)[1],'normal'))) |>
+    add_latent_spatial(method = "spde",
+                       priors = priors(INLAPrior('spde','prior.range')))
   expect_true(is.Waiver(x$priors))
 
   # Check variable removal

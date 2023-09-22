@@ -25,8 +25,6 @@
 
 \item{inverse}{A \code{\link{logical}} flag whether to take inverse of the mask instead
 (Default: \code{FALSE}).}
-
-\item{...}{Other arguements (not defined).}
 }
 \value{
 A respective object of the input type.

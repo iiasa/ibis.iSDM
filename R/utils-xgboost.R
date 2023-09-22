@@ -31,7 +31,7 @@ built_formula_xgboost <- function(obj){
     form <- to_formula(obj$equation)
 
     # Get all variables and check
-    varn <- obj$predictors_names[which( all.vars(form) %in% obj$predictors_names )]
+    varn <- obj$predictors_names[which( obj$predictors_names %in% formula_terms(form))]
     form <- to_formula( paste0("observed ~", paste0(varn, collapse = " + ")) )
     assertthat::assert_that(
       is.formula(form), length(all.vars(form))>1

@@ -17,7 +17,6 @@ NULL
 #' @param mask A [`sf`] or [`SpatRaster`] object.
 #' @param inverse A [`logical`] flag whether to take inverse of the mask instead
 #'  (Default: \code{FALSE}).
-#' @param ... Other arguements (not defined).
 #'
 #' @seealso [terra::mask()]
 #' @aliases mask

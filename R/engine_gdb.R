@@ -626,7 +626,7 @@ engine_gdb <- function(x,
               }
             } else {
               # Assume all present
-              dummy <- newdata |> dplyr::select(any_of(as.character(variables)))
+              dummy <- newdata |> dplyr::select(dplyr::any_of(as.character(variables)))
             }
 
             # Now predict with model

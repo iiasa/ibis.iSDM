@@ -69,6 +69,7 @@ jobs:
             stan-dev/cmdstanr,
             any::igraph,
             any::lwgeom,
+            any::ncmeta,
             any::xgboost,
             any::dbarts,
             any::mboost,
