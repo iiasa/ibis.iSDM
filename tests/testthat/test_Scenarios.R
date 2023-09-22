@@ -3,6 +3,7 @@ test_that('Testing functions for spatial-temporal data in stars', {
 
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
+  skip_if_not_installed('lwgeom')
 
   suppressWarnings( requireNamespace('stars', quietly = TRUE) )
   suppressWarnings( requireNamespace('cubelyr', quietly = TRUE) )
