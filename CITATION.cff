@@ -236,17 +236,6 @@ references:
     orcid: https://orcid.org/0000-0002-3542-2938
   year: '2023'
 - type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Imports
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
-  year: '2023'
-- type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -276,18 +265,6 @@ references:
   - family-names: Vehtari
     given-names: Aki
     email: Aki.Vehtari@aalto.fi
-  year: '2023'
-- type: software
-  title: lwgeom
-  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
-  notes: Imports
-  url: https://github.com/r-spatial/lwgeom/
-  repository: https://CRAN.R-project.org/package=lwgeom
-  authors:
-  - family-names: Pebesma
-    given-names: Edzer
-    email: edzer.pebesma@uni-muenster.de
-    orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'
 - type: software
   title: proto
@@ -861,4 +838,16 @@ references:
   - family-names: Yuan
     given-names: Jiaming
     email: jm.yuan@outlook.com
+  year: '2023'
+- type: software
+  title: stars
+  abstract: 'stars: Spatiotemporal Arrays, Raster and Vector Data Cubes'
+  notes: Imports
+  url: https://r-spatial.github.io/stars/
+  repository: https://CRAN.R-project.org/package=stars
+  authors:
+  - family-names: Pebesma
+    given-names: Edzer
+    email: edzer.pebesma@uni-muenster.de
+    orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'
