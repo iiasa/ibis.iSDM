@@ -79,6 +79,7 @@ test_that('Scenarios and constraints', {
   skip_if_not_installed('glmnet')
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
+  skip_if_not_installed('lwgeom')
   skip_on_travis()
   skip_on_cran()
 

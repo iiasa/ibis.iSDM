@@ -37,6 +37,7 @@ Imports:
     posterior,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
+    lwgeom,
     sf (>= 1.0),
     stars (>= 0.5),
     stats,
@@ -72,8 +73,6 @@ Suggests:
     cubelyr,
     testthat (>= 3.0.0),
     xgboost
-Enhances:
-    stars
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
