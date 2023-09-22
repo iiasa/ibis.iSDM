@@ -19,6 +19,7 @@ Description: Integrated framework of modelling the distribution of species and e
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
+Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
@@ -71,9 +72,10 @@ Suggests:
     cubelyr,
     testthat (>= 3.0.0),
     xgboost
+Enhances:
+    stars
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
-Additional_repositories: https://inla.r-inla-download.org/R/testing
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
