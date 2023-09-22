@@ -307,6 +307,18 @@ references:
   year: '2023'
   version: '>= 1.7-10'
 - type: software
+  title: lwgeom
+  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
+  notes: Imports
+  url: https://github.com/r-spatial/lwgeom/
+  repository: https://CRAN.R-project.org/package=lwgeom
+  authors:
+  - family-names: Pebesma
+    given-names: Edzer
+    email: edzer.pebesma@uni-muenster.de
+    orcid: https://orcid.org/0000-0001-8049-7069
+  year: '2023'
+- type: software
   title: sf
   abstract: 'sf: Simple Features for R'
   notes: Imports
@@ -849,16 +861,4 @@ references:
   - family-names: Yuan
     given-names: Jiaming
     email: jm.yuan@outlook.com
-  year: '2023'
-- type: software
-  title: stars
-  abstract: 'stars: Spatiotemporal Arrays, Raster and Vector Data Cubes'
-  notes: Imports
-  url: https://r-spatial.github.io/stars/
-  repository: https://CRAN.R-project.org/package=stars
-  authors:
-  - family-names: Pebesma
-    given-names: Edzer
-    email: edzer.pebesma@uni-muenster.de
-    orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'
