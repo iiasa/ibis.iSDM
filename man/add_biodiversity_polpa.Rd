@@ -8,7 +8,7 @@ add_biodiversity_polpa(
   x,
   polpa,
   name = NULL,
-  field_occurrence = "Observed",
+  field_occurrence = "observed",
   formula = NULL,
   family = "binomial",
   link = NULL,

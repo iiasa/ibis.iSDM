@@ -107,6 +107,28 @@ PredictorDataset <- bdproto(
     }
     invisible()
   },
+  # Masking function
+  mask = function(self, mask, inverse = FALSE){
+    # Check whether prediction has been created
+    prediction <- self$get_data(df = FALSE)
+    if(!is.Waiver(prediction)){
+      # If mask is sf, rasterize
+      if(inherits(mask, 'sf')){
+        mask <- terra::rasterize(mask, prediction)
+      }
+      # Check that mask aligns
+      if(!terra::compareGeom(prediction, mask)){
+        mask <- terra::resample(mask, prediction, method = "near")
+      }
+      # Now mask and save
+      prediction <- terra::mask(prediction, mask, inverse = inverse)
+
+      # Save data
+      self$fits[["data"]] <- prediction
+
+      invisible()
+    }
+  },
   # Add a new Predictor dataset to this collection
   set_data = function(self, x, value){
     assertthat::assert_that(assertthat::is.string(x),

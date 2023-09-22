@@ -156,8 +156,8 @@ create_mcp <- function(biod, limits){
 
   # Get biodiversity data
   obs <- collect_occurrencepoints(model = biod,
-                                     include_absences = FALSE,
-                                     tosf = TRUE) |>
+                                  include_absences = FALSE,
+                                  tosf = TRUE) |>
     dplyr::select("observed")
 
   # Assing unique id
@@ -346,7 +346,7 @@ raster_centroid <- function(obj, patch = FALSE){
                                    w = df$values),
               stats::weighted.mean(df$y,
                                    w = df$values)
-              )
+    )
 
     cent <- data.frame(x = cent[1], y = cent[2], weight =  base::mean(df$values))
     # Convert to sf coordinate
@@ -441,44 +441,44 @@ rename_geometry <- function(g, name){
 #' @keywords internal, utils
 #' @noRd
 guess_sf <- function(df, geom_name = 'geometry'){
- assertthat::assert_that(
-   inherits(df,'data.frame') || inherits(df, 'sf') || inherits(df, 'tibble')
- )
- # If sf, return immediately
- if(inherits(df, 'sf')) return(df)
- # If there is an attribute, but for some reason the file is not sf, use that one
- if(!is.null(attr(df, "sf_column"))) {
-   df <-  sf::st_as_sf(df)
-   if(attr(df, "sf_column") != geom_name){
-     names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
-     sf::st_geometry(df) <- geom_name
-   }
-   return(df)
- }
- # Commonly used column names
- nx = c("x","X","lon","longitude")
- ny = c("y", "Y", "lat", "latitude")
- ng = c("geom", "geometry", "geometry")
+  assertthat::assert_that(
+    inherits(df,'data.frame') || inherits(df, 'sf') || inherits(df, 'tibble')
+  )
+  # If sf, return immediately
+  if(inherits(df, 'sf')) return(df)
+  # If there is an attribute, but for some reason the file is not sf, use that one
+  if(!is.null(attr(df, "sf_column"))) {
+    df <-  sf::st_as_sf(df)
+    if(attr(df, "sf_column") != geom_name){
+      names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+      sf::st_geometry(df) <- geom_name
+    }
+    return(df)
+  }
+  # Commonly used column names
+  nx = c("x","X","lon","longitude")
+  ny = c("y", "Y", "lat", "latitude")
+  ng = c("geom", "geometry", "geometry")
 
- # Check if geom is present
- if(any( ng %in% names(df) )){
-   attr(df, "sf_column") <- ng[which(ng %in% names(df))]
-   df <- sf::st_as_sf(df)
- }
- # Finally check if any commonly used coordinate name exist
- if(any( nx %in% names(df))){
-   df <- sf::st_as_sf(df, coords = c(nx[which(nx %in% names(df))],
-                                     ny[which(ny %in% names(df))])
-                      )
- }
- # If at this point df is still not a sf object, then it is unlikely to be converted
- assertthat::assert_that(inherits(df, 'sf'),
-                         msg = "Point object could not be converted to an sf object.")
- if(attr(df, "sf_column") != geom_name){
-   names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
-   sf::st_geometry(df) <- geom_name
- }
- return(df)
+  # Check if geom is present
+  if(any( ng %in% names(df) )){
+    attr(df, "sf_column") <- ng[which(ng %in% names(df))]
+    df <- sf::st_as_sf(df)
+  }
+  # Finally check if any commonly used coordinate name exist
+  if(any( nx %in% names(df))){
+    df <- sf::st_as_sf(df, coords = c(nx[which(nx %in% names(df))],
+                                      ny[which(ny %in% names(df))])
+    )
+  }
+  # If at this point df is still not a sf object, then it is unlikely to be converted
+  assertthat::assert_that(inherits(df, 'sf'),
+                          msg = "Point object could not be converted to an sf object.")
+  if(attr(df, "sf_column") != geom_name){
+    names(df)[which(names(df) == attr(df, "sf_column"))] <- geom_name
+    sf::st_geometry(df) <- geom_name
+  }
+  return(df)
 }
 
 #' Kernel density estimation of coordinates
@@ -662,7 +662,7 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
                Raster = as.vector( terra::ext(ex) ),
                sf = as.vector( terra::ext(ex) ),
                numeric = ex
-               )
+  )
   # Rename the vector
   names(ex) <- c("xmin", "xmax", "ymin", "ymax")
 
@@ -937,7 +937,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
     is.Raster(env),
     is.logical(ngb_fill),
     is.logical(rm.na)
-    )
+  )
 
   # Try an extraction
   ex <- try({terra::extract(x = env,
@@ -1411,7 +1411,7 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     # Get a matrix of all environmental data, also with coordinates
     # However first normalize all data
     stk <- terra::as.data.frame(
-        predictor_transform(env, option = "norm"),
+      predictor_transform(env, option = "norm"),
       xy = TRUE)
 
     stk$cid <- 1:nrow(stk)
@@ -1448,8 +1448,15 @@ thin_observations <- function(df, background, env = NULL, method = "random", min
     stop("Not yet implemented!")
   }
 
+  # check if any points were selected to thin
+  if (length(sel) == 0){
+    message("No points were selected during thinning.")
+    return(df)
+  }
+
   # Return subsampled coordinates
   out <- df[sel,]
+
   if(nrow(out)==0) {
     message("Thinning failed for some reason")
     return(df)

@@ -9,6 +9,7 @@ threshold(
   method = "mtp",
   value = NULL,
   point = NULL,
+  field_occurrence = "observed",
   format = "binary",
   return_threshold = FALSE,
   ...
@@ -32,6 +33,9 @@ options.}
 
 \item{point}{A \code{\link{sf}} object containing observational data used for model
 training.}
+
+\item{field_occurrence}{A \code{\link{character}} location of
+biodiversity point records.}
 
 \item{format}{\code{\link{character}} indication of whether \code{"binary"},
 \code{"normalize"} or \code{"percentile"} formatted thresholds are to be

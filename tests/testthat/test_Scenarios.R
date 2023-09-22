@@ -3,6 +3,7 @@ test_that('Testing functions for spatial-temporal data in stars', {
 
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
+  skip_if_not_installed('lwgeom')
 
   suppressWarnings( requireNamespace('stars', quietly = TRUE) )
   suppressWarnings( requireNamespace('cubelyr', quietly = TRUE) )
@@ -78,6 +79,7 @@ test_that('Scenarios and constraints', {
   skip_if_not_installed('glmnet')
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
+  skip_if_not_installed('lwgeom')
   skip_on_travis()
   skip_on_cran()
 
@@ -193,6 +195,10 @@ test_that('Scenarios and constraints', {
   # Test train
   mod <- x |> project()
   expect_s3_class(mod$get_data(), "stars")
+
+  # Apply a mask
+  mod$mask(virtual_range)
+  mod <- x |> project() # Project anew
 
   # Calculate centroids
   expect_s3_class(mod$get_centroid(), "sf")

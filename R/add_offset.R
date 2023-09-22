@@ -397,7 +397,7 @@ methods::setGeneric(
   signature = methods::signature("x", "layer"),
   function(x, layer, distance_max = Inf, family = "poisson", presence_prop = 0.9,
            distance_clip = FALSE, distance_function = "negexp",
-           field_occurrence = "Observed", fraction = NULL,
+           field_occurrence = "observed", fraction = NULL,
            point = FALSE, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
@@ -467,7 +467,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
   function(x, layer, distance_max = Inf, family = "poisson", presence_prop = 0.9,
            distance_clip = FALSE, distance_function = "negexp",
-           field_occurrence = "Observed", fraction = NULL, point = FALSE, add = TRUE ) {
+           field_occurrence = "observed", fraction = NULL, point = FALSE, add = TRUE ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             inherits(layer, 'sf'),
                             is.null(distance_max) || is.numeric(distance_max) || is.infinite(distance_max),
@@ -480,7 +480,7 @@ methods::setMethod(
                             is.character(field_occurrence),
                             is.logical(add)
     )
-    # distance_max = Inf; family = "poisson"; presence_prop = 0.9; distance_clip = FALSE; distance_function = "negexp"; field_occurrence = "Observed"; fraction = NULL; add = TRUE
+    # distance_max = Inf; family = "poisson"; presence_prop = 0.9; distance_clip = FALSE; distance_function = "negexp"; field_occurrence = "observed"; fraction = NULL; add = TRUE
     # Match the type if set
     family <- match.arg(family, c("poisson", "binomial"), several.ok = FALSE)
 

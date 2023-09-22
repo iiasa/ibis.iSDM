@@ -1,3 +1,36 @@
+#' Convert character to formula object
+#'
+#' @param x [`character`] text.
+#' @keywords utils
+#' @noRd
+to_formula <- function(formula){
+  # Convert to formula object
+  if(!is.null(formula)) {
+    formula = stats::as.formula(formula)
+  } else {
+    # Asign a new waiver object
+    formula = new_waiver()
+  }
+  return(formula)
+}
+
+#' Get terms from a formula object
+#'
+#' @param formula A [`formula`] or [`character`] object.
+#' @keywords internal, utils
+#' @noRd
+formula_terms <- function(formula){
+  # Check
+  assertthat::assert_that(
+    is.character(formula) || inherits(formula, "formula")
+  )
+  if(formula == "<Default>") stop("Default formula found!")
+  if(!inherits(formula, "formula")) formula <- stats::as.formula(formula)
+  # Get the terms from the formula
+  te <- attr(terms.formula(formula), "term.labels")
+  return(te)
+}
+
 #' Logistic (invlogit) transformation function
 #' @param x A [`numeric`] value.
 #' @keywords utils
@@ -94,3 +127,189 @@ ilink <- function(x, link = "log"){
   )
 }
 
+#' Create formula matrix
+#'
+#' Function to create list of formulas with all possible combinations of
+#' variables
+#' @param form An input [`formula`] object.
+#' @param response A [`character`] object giving the response. (Default:
+#'   \code{NULL})
+#' @param type Currently implemented are \code{'inla'} (variable groups),
+#'   \code{'All'} (All possible combinations) or \code{'forward'}.
+#' @returns A [`vector`] object with [`formula`] objects.
+#' @examples \dontrun{
+#' formula_combinations(form)
+#' }
+#' @keywords utils
+#' @noRd
+formula_combinations <- function(form, response = NULL, type= 'forward'){
+  assertthat::assert_that(is.formula(form),
+                          is.character(response) || is.null(response),
+                          tolower(type) %in% c('inla','forward','all'))
+  # --- #
+  # Response
+  if(is.null(response)) response <- all.vars(form)[1]
+  # Formula terms
+  te <- attr(stats::terms.formula(form),'term.label')
+  # Varnames
+  varnames <- all.vars(form)
+  varnames <- varnames[varnames %notin% c('spde','spatial.field','observed','Intercept')] # Exclude things not necessarily needed in there
+  # Variable length
+  fl <- length(varnames)
+  # --- #
+  assertthat::assert_that(fl>0, !is.null(response))
+
+  if(tolower(type) == 'inla'){
+    # INLA modelling groups
+    # Instead of selecting variables piece by piece, consider individual groups
+    form_temp <- c()
+    val_int <- grep(pattern = 'Intercept',x = te, value = T)
+    val_lin <- grep(pattern = 'linear',x = te, value = T)
+    val_rw1 <- grep(pattern = 'rw1',x = te,value = TRUE)
+    # Alternative quadratic variables in case rw1 fails
+    if(length(val_rw1)>0){
+      val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_rw1,collapse = '+'))))[-1]
+    } else { val_quad <- all.vars(stats::as.formula(paste('observed ~ ', paste0(val_lin,collapse = '+'))))[-1] }
+    val_spde <- grep(pattern = 'spde',x = te,value = TRUE)
+    val_ofs <- grep(pattern = 'offset',x = te,value = TRUE)
+
+    # Construct formulas ---
+    # Original form
+    form_temp <- c(form_temp, deparse1(form))
+
+    # Intercept only
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 +', paste(val_int,collapse = ' + ') ))
+
+    # Add all linear variables as base
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 +', paste(val_int,collapse = ' + '),
+                          '+', paste0(varnames, collapse = ' + ') ))
+
+    # Intercept + linear effect
+    if(length(val_lin)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '))
+      )
+    }
+    # Intercept + rw1 effects (if existing)
+    if(length(val_rw1)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_rw1,collapse = ' + '))
+      )
+    }
+    # Alternative formulation using quadratic
+    form_temp <- c(form_temp,
+                   paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                          '+',
+                          paste0('I(',val_quad,'^2)',collapse = ' + '))
+    )
+
+    # Intercept + spde
+    if(length(val_spde)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_spde,collapse = ' + '))
+      )
+    }
+    # Intercept + linear + spde
+    if(length(val_spde)>0 && length(val_lin)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_spde,collapse = ' + '),'+',paste(val_lin,collapse = ' + '))
+      )
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 +', paste(val_int,collapse = ' + '),
+                            '+', paste0(varnames, collapse = ' + '),
+                            '+',paste(val_spde,collapse = ' + ')))
+
+    }
+    # intercept + rw1 + spde
+    if(length(val_spde)>0 && length(val_rw1)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_spde,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '))
+      )
+    }
+    if(length(val_spde)>0){
+      # Quad replacement
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_spde,collapse = ' + '),'+',paste0('I(',val_quad,'^2)',collapse = ' + '))
+      )
+    }
+    # intercept + linear + rw1 + spde
+    if(length(val_rw1)>0 && length(val_lin)>0 && length(val_spde)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_spde,collapse = ' + '))
+      )
+
+    }
+    if(length(val_spde)>0){
+      # Quad replacement
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '),'+',paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_spde,collapse = ' + '))
+      )
+    }
+    # intercept + linear + offset
+    if(length(val_lin)>0 && length(val_ofs)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
+      )
+    }
+    # intercept + linear + rw1 + offset
+    if(length(val_rw1)>0 && length(val_lin)>0 && length(val_ofs)>0){
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '),'+',paste(val_rw1,collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
+      )
+    }
+    if(length(val_lin)>0 && length(val_ofs)>0){
+      # Quad replacement
+      form_temp <- c(form_temp,
+                     paste0(response,' ~ 0 + ', paste(val_int,collapse = ' + '),
+                            '+',
+                            paste(val_lin,collapse = ' + '),'+',
+                            paste0('I(',val_quad,'^2)',collapse = ' + '),'+',paste(val_ofs,collapse = ' + '))
+      )
+    }
+
+    # Other types of variable selection
+  } else if(tolower(type) == 'forward'){
+    # Forward variable addition
+    # Note this ignores unique combinations
+    form_temp <- c()
+    for(i in 1:fl) {
+      new <- paste0(response, '~ 0 + ',paste(val_int,collapse = '+'),'+',
+                    paste(varnames[1:i],collapse = ' + ') )
+      form_temp <- c(form_temp, new)
+    }
+
+  } else if(tolower(type) == 'all'){
+    # Construct all possible unique combinations
+    varnames_comb <- lapply(1:length(varnames), function(i){
+      utils::combn(varnames, i) |> apply(2, list) |> unlist(recursive = F)
+    })|> unlist(recursive = F)
+
+    form_temp <- lapply(varnames_comb, function(i) {
+      paste0(response, " ~ ", paste(val_int,collapse = '+'),'+', paste(i, collapse = " + "))
+    })
+  }
+
+  return(form_temp)
+}

@@ -82,7 +82,7 @@ NULL
 #' # points to the resulting model
 #' all_my_points <- add_pseudoabsence(
 #'                      df = virtual_points,
-#'                       field_occurrence = 'Observed',
+#'                       field_occurrence = 'observed',
 #'                       template = background,
 #'                       settings = ass1)
 #' }
@@ -257,7 +257,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
       bias <- terra::resample(bias, background, method = "bilinear")
     }
     # Normalize if not already set
-    if(terra::global(bias, 'max', na.rm = TRUE) > 1 || terra::global(bias, 'min', na.rm = TRUE) < 0 ){
+    if(terra::global(bias, 'max', na.rm = TRUE)[,1] > 1 || terra::global(bias, 'min', na.rm = TRUE)[,1] < 0 ){
       bias <- predictor_transform(bias, option = "norm")
     }
   } else { bias <- NULL }
@@ -276,11 +276,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg1[]==0)]
+      prob_bias <- bias[which(terra::values(bg1)[,1]==0)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
+      abs <- sample(which(terra::values(bg1)[,1]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      abs <- sample(which(bg1[]==0), size = nrpoints, replace = TRUE)
+      abs <- sample(which(terra::values(bg1)[,1]==0), size = nrpoints, replace = TRUE)
     }
   } else if(method == "buffer"){
     assertthat::assert_that(is.numeric(buffer_distance),msg = "Buffer distance parameter not numeric!")
@@ -301,7 +301,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     # Now sample from all cells not occupied
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==1)]
+      prob_bias <- bias[which(bg2[]==1)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
       abs <- sample(which(bg2[]==1), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
@@ -317,7 +317,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     bg2 <- terra::mask(bg1, mask = pol, inverse = !inside)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==0)]
+      prob_bias <- bias[which(bg2[]==0)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
       abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
@@ -340,11 +340,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     bg2 <- terra::mask(bg1, mask = layer, inverse = !inside)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==0)]
+      prob_bias <- bias[which(terra::values(bg2)[,1]==0)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE)
     }
     rm(bg2)
   } else if(method == "zones"){
@@ -379,11 +379,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     bg2 <- terra::mask(bg1, mask = zones)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==0)]
+      prob_bias <- bias[which(terra::values(bg2)[,1]==0)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE)
     }
     rm(bg2)
   } else if(method == "target"){
@@ -398,11 +398,11 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     bg2 <- terra::mask(bg1, mask = layer)
     if(!is.null(bias)){
       # Get probability values for cells where no sampling has been conducted
-      prob_bias <- bias[which(bg2[]==0)]
+      prob_bias <- bias[which(terra::values(bg2)[,1]==0)][,1]
       if(any(is.na(prob_bias))) prob_bias[is.na(prob_bias)] <- 0
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE, prob = prob_bias)
     } else {
-      abs <- sample(which(bg2[]==0), size = nrpoints, replace = TRUE)
+      abs <- sample(which(terra::values(bg2)[,1]==0), size = nrpoints, replace = TRUE)
     }
     rm(bg2)
   } else {

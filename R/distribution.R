@@ -119,8 +119,9 @@ methods::setMethod(
     assertthat::assert_that( inherits(background,'SpatRaster')  )
 
     # Check that provided background has a valid crs
-    assertthat::assert_that(!is.na(terra::crs(background,describe=TRUE)[['code']]),
-                            msg = "Please provide a background with valid projection!")
+    if(!is.na(terra::crs(background,describe=TRUE)[['code']])){
+      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provide a background with a valid projection!')
+    }
 
     # Make an error check that units have a single units
     vals <- unique(background)[[1]]
@@ -219,5 +220,5 @@ methods::setMethod(
     bdproto(NULL, BiodiversityDistribution,
             background = background,
             limits = limits
-            )
+    )
   })

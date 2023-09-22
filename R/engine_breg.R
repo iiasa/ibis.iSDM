@@ -554,7 +554,7 @@ engine_breg <- function(x,
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, names(df), several.ok = FALSE)
+              x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
             }
 
             if(is.null(newdata)){
@@ -588,7 +588,7 @@ engine_breg <- function(x,
                   factor(lvl[1], levels = lvl)
               }
             } else {
-              df_partial <- newdata |> dplyr::select(any_of(names(df)))
+              df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
             }
 
             # For Integrated model, take the last one

@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.0.8
+Version: 0.0.9
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -19,6 +19,7 @@ Description: Integrated framework of modelling the distribution of species and e
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
+Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
@@ -30,12 +31,13 @@ Imports:
     graphics,
     methods,
     ncdf4,
-    Matrix,
     ncmeta,
+    Matrix,
     parallel,
     posterior,
     proto (>= 1.0.0),
     terra (>= 1.7-10),
+    lwgeom,
     sf (>= 1.0),
     stars (>= 0.5),
     stats,
@@ -122,6 +124,7 @@ Collate:
     'get_data.R'
     'ibis.iSDM-package.R'
     'limiting.R'
+    'mask.R'
     'misc.R'
     'partial.R'
     'plot.R'

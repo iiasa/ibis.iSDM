@@ -259,206 +259,211 @@ methods::setMethod(
       assertthat::assert_that(is.Raster(out))
 
       return(out)
-  } else if(is.Raster(mods[[1]])) {
-    # Check that layer is present in supplied mods
-    if(!is.null(layer)){
-      assertthat::assert_that(
-        all( sapply(mods, function(x) layer %in% names(x) ) ),
-        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-      )
-    } else { layer <- 1 } # Take the first one
-    # TODO:
-    if(length(layer)>1) stop("Not implemented yet")
-    # Get prediction stacks from all mods
-    ll_ras <- sapply(mods, function(x) x[[layer]])
-    # Ensure that the layers have the same resolution, otherwise align
-    if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-      if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
-      ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
-    }
-    ras <- terra::rast(ll_ras)
-    # Apply threshold if set. Set to 0 thus reducing the value of the ensembled
-    # layer.
-    if(!is.null(min.value)) ras[ras < min.value] <- 0
+    } else if(is.Raster(mods[[1]])) {
+      # Check that layer is present in supplied mods
+      if(!is.null(layer)){
+        assertthat::assert_that(
+          all( sapply(mods, function(x) layer %in% names(x) ) ),
+          msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+        )
+      } else { layer <- 1 } # Take the first one
+      # TODO:
+      if(length(layer)>1) stop("Not implemented yet")
+      # Get prediction stacks from all mods
+      ll_ras <- sapply(mods, function(x) x[[layer]])
+      # Ensure that the layers have the same resolution, otherwise align
+      if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
+        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+        ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
+      }
+      ras <- terra::rast(ll_ras)
+      # Apply threshold if set. Set to 0 thus reducing the value of the ensembled
+      # layer.
+      if(!is.null(min.value)) ras[ras < min.value] <- 0
 
-    # If normalize before running an ensemble if parameter set
-    if(normalize) ras <- predictor_transform(ras, option = "norm")
+      # If normalize before running an ensemble if parameter set
+      if(normalize) ras <- predictor_transform(ras, option = "norm")
 
-    # Now ensemble per layer entry
-    out <- terra::rast()
-    for(lyr in layer){
+      # Now ensemble per layer entry
+      out <- terra::rast()
+      for(lyr in layer){
+
+        # Now create the ensemble depending on the option
+        if(method == 'mean'){
+          new <- terra::mean( ras, na.rm = TRUE)
+        } else if(method == 'median'){
+          new <- terra::median( ras, na.rm = TRUE)
+        } else if(method == 'max'){
+          new <- max(ras, na.rm = TRUE)
+        } else if(method == 'min'){
+          new <- min(ras, na.rm = TRUE)
+        } else if(method == 'weighted.mean'){
+          new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
+        } else if(method == 'threshold.frequency'){
+          # Check that thresholds are available
+          stop("This function does not (yet) work with directly provided Raster objects.")
+
+        } else if(method == 'min.sd'){
+          # If method 'min.sd' furthermore check that there is a sd object for all
+          # of them
+          assertthat::assert_that(
+            all( sapply(mods, function(x) "sd" %in% names(mods) ) ),
+            msg = "Method \'min.sd\' needs parametrized uncertainty (sd) for all objects."
+          )
+          # Also get SD prediction from models
+          ras_sd <- c( sapply(mods, function(x) x[['sd']]))
+          # Get the id of the layer where standard deviation is lower
+          min_sd <- terra::where.min(ras_sd)
+          new <- emptyraster(ras)
+          for(cl in terra::unique(min_sd)){
+            new[min_sd == cl] <- ras[[cl]][min_sd == cl]
+          }
+        } else if(method == 'pca'){
+          # Calculate a pca on the layers and return the first axes
+          new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
+        }
+        # Rename
+        names(new) <- paste0("ensemble_", lyr)
+        # Add attributes on the method of ensemble
+        attr(new, "method") <- method
+        if(uncertainty != "none"){
+          if(uncertainty == "pca") {
+            stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+          }
+          # Add uncertainty
+          ras_uncertainty <- switch (uncertainty,
+                                     "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
+                                     "cv" = terra::app(ras, fun = "sd", na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
+                                     "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
+          )
+          names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
+          # Add attributes on the method of ensembling
+          attr(ras_uncertainty, "method") <- uncertainty
+          # Add all layers to out
+          suppressWarnings( out <- c(out, new, ras_uncertainty) )
+        } else {
+          suppressWarnings( out <- c(out, new) )
+        }
+      }
+
+      assertthat::assert_that(is.Raster(out))
+      return(out)
+    } else {
+      # Scenario objects as stars or Scenario objects
+      if(all(sapply(mods, function(z) inherits(z, "stars")))){
+        # Check that layer is in stars
+        if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
+          if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
+          layer <- names(mods[[1]])[1]
+        }
+        # Format to table
+        lmat <- do.call("rbind", mods) |> as.data.frame()
+        # Get dimensions
+        lmat_dim <- stars::st_dimensions(mods[[1]])
+
+      } else {
+        # Check that layers all have a prediction layer
+        assertthat::assert_that(
+          all( sapply(mods, function(x) !is.Waiver(x$get_data()) ) ),
+          msg = "All distribution models need a fitted scenario object!"
+        )
+        # Check that layer is present in supplied mods
+        assertthat::assert_that(
+          all( sapply(mods, function(x) layer %in% names(x$get_data()) ) ),
+          msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+        )
+        # Get projected suitability from all mods
+        lmat <- stars::st_as_stars(
+          sapply(mods, function(x) x$get_data()[layer])
+        ) |> as.data.frame()
+        # Get dimensions
+        lmat_dim <- stars::st_dimensions(mods[[1]]$get_data())
+      }
+
+      # Normalize stars files
+      if(normalize){
+        # Get overall means and max values
+        ovmin <- min(lmat[,4:ncol(lmat)],na.rm = TRUE)
+        ovmax <- max(lmat[,4:ncol(lmat)],na.rm = TRUE)
+        lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                                     2, function(x) {
+                                       (x - ovmin) / (ovmax - ovmin )
+                                     })
+      }
 
       # Now create the ensemble depending on the option
       if(method == 'mean'){
-        new <- terra::mean( ras, na.rm = TRUE)
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) mean(x, na.rm = TRUE))
       } else if(method == 'median'){
-        new <- terra::median( ras, na.rm = TRUE)
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) stats::median(x, na.rm = TRUE))
       } else if(method == 'max'){
-        new <- max(ras, na.rm = TRUE)
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) max(x, na.rm = TRUE))
       } else if(method == 'min'){
-        new <- min(ras, na.rm = TRUE)
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) min(x, na.rm = TRUE))
       } else if(method == 'weighted.mean'){
-        new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
       } else if(method == 'threshold.frequency'){
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
         # Check that thresholds are available
-        stop("This function does not (yet) work with directly provided Raster objects.")
-
       } else if(method == 'min.sd'){
-        # If method 'min.sd' furthermore check that there is a sd object for all
-        # of them
-        assertthat::assert_that(
-          all( sapply(mods, function(x) "sd" %in% names(mods) ) ),
-          msg = "Method \'min.sd\' needs parametrized uncertainty (sd) for all objects."
-        )
-        # Also get SD prediction from models
-        ras_sd <- c( sapply(mods, function(x) x[['sd']]))
-        # Get the id of the layer where standard deviation is lower
-        min_sd <- terra::where.min(ras_sd)
-        new <- emptyraster(ras)
-        for(cl in terra::unique(min_sd)){
-          new[min_sd == cl] <- ras[[cl]][min_sd == cl]
-        }
+        stop("This has not been reasonably implemented in this context.")
       } else if(method == 'pca'){
-        # Calculate a pca on the layers and return the first axes
-        new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
+        stop("This has not been reasonably implemented in this context.")
       }
-      # Rename
-      names(new) <- paste0("ensemble_", lyr)
-      # Add attributes on the method of ensemble
-      attr(new, "method") <- method
-      if(uncertainty != "none"){
-        if(uncertainty == "pca") {
-          stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
-        }
-        # Add uncertainty
-        ras_uncertainty <- switch (uncertainty,
-                                   "sd" = terra::app(ras, fun = "sd", na.rm = TRUE),
-                                   "cv" = terra::app(ras, fun = "sd", na.rm = TRUE) / terra::mean(ras, na.rm = TRUE),
-                                   "range" = max(ras, na.rm = TRUE) - min(ras, na.rm = TRUE)
-        )
-        names(ras_uncertainty) <- paste0(uncertainty, "_", lyr)
-        # Add attributes on the method of ensembling
-        attr(ras_uncertainty, "method") <- uncertainty
-        # Add all layers to out
-        suppressWarnings( out <- c(out, new, ras_uncertainty) )
-      } else {
-        suppressWarnings( out <- c(out, new) )
-      }
-    }
-
-    assertthat::assert_that(is.Raster(out))
-    return(out)
-  } else {
-    # Scenario objects as stars or Scenario objects
-    if(all(sapply(mods, function(z) inherits(z, "stars")))){
-      # Check that layer is in stars
-      if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
-        layer <- names(mods[[1]])[1]
-      }
-      # Format to table
-      lmat <- do.call("rbind", mods) |> as.data.frame()
-      # Get dimensions
-      lmat_dim <- stars::st_dimensions(mods[[1]])
-
-    } else {
-      # Check that layers all have a prediction layer
-      assertthat::assert_that(
-        all( sapply(mods, function(x) !is.Waiver(x$get_data()) ) ),
-        msg = "All distribution models need a fitted scenario object!"
-      )
-      # Check that layer is present in supplied mods
-      assertthat::assert_that(
-        all( sapply(mods, function(x) layer %in% names(x$get_data()) ) ),
-        msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-      )
-      # Get projected suitability from all mods
-      lmat <- stars::st_as_stars(
-        sapply(mods, function(x) x$get_data()[layer])
-      ) |> as.data.frame()
-      # Get dimensions
-      lmat_dim <- stars::st_dimensions(mods[[1]]$get_data())
-    }
-    if(normalize){
-      lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                                   2, function(x) {
-                                     (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE) )
-                                   })
-    }
-
-    # Now create the ensemble depending on the option
-    if(method == 'mean'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) mean(x, na.rm = TRUE))
-    } else if(method == 'median'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) stats::median(x, na.rm = TRUE))
-    } else if(method == 'max'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) max(x, na.rm = TRUE))
-    } else if(method == 'min'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) min(x, na.rm = TRUE))
-    } else if(method == 'weighted.mean'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
-    } else if(method == 'threshold.frequency'){
-      out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                   1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
-      # Check that thresholds are available
-    } else if(method == 'min.sd'){
-      stop("This has not been reasonably implemented in this context.")
-    } else if(method == 'pca'){
-      stop("This has not been reasonably implemented in this context.")
-    }
-    # Add dimensions to output
-    out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
-
-    # Convert to stars
-    out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
-    # Rename dimension names
-    out <- out |> stars::st_set_dimensions(names = c("x", "y", "band"))
-    # Rename
-    names(out) <- paste0("ensemble_", layer)
-    # Add attributes on the method of ensemble
-    attr(out, "method") <- method
-
-    # --- #
-    if(uncertainty != 'none'){
-      if(uncertainty == "pca") {
-       stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
-      }
-      # Add uncertainty
-      out_uncertainty <- switch (uncertainty,
-                                 "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE)),
-                                 "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
-                                 "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
-      )
-      if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
       # Add dimensions to output
-      out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+      out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
 
       # Convert to stars
-      out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+      out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
       # Rename dimension names
-      out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = c("x", "y", "band"))
+      out <- out |> stars::st_set_dimensions(names = c("x", "y", "band"))
       # Rename
-      names(out_uncertainty) <- paste0(uncertainty, "_", layer)
-      # Add attributes on the method of ensembling
-      attr(out_uncertainty, "method") <- uncertainty
+      names(out) <- paste0("ensemble_", layer)
+      # Add attributes on the method of ensemble
+      attr(out, "method") <- method
+
       # --- #
-      # Combine both ensemble and uncertainty
-      ex <- stars:::c.stars(out, out_uncertainty)
+      if(uncertainty != 'none'){
+        if(uncertainty == "pca") {
+          stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
+        }
+        # Add uncertainty
+        out_uncertainty <- switch (uncertainty,
+                                   "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE)),
+                                   "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
+                                   "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+        )
+        if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
+        # Add dimensions to output
+        out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+
+        # Convert to stars
+        out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+        # Rename dimension names
+        out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = c("x", "y", "band"))
+        # Rename
+        names(out_uncertainty) <- paste0(uncertainty, "_", layer)
+        # Add attributes on the method of ensembling
+        attr(out_uncertainty, "method") <- uncertainty
+        # --- #
+        # Combine both ensemble and uncertainty
+        ex <- stars:::c.stars(out, out_uncertainty)
+        # Correct projection is unset
+        if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
+      } else {
+        # Only the output
+        ex <- out
+      }
       # Correct projection is unset
       if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
-    } else {
-      # Only the output
-      ex <- out
-    }
-    # Correct projection is unset
-    if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
-    assertthat::assert_that(inherits(ex, "stars"))
-    return(ex)
+      assertthat::assert_that(inherits(ex, "stars"))
+      return(ex)
     }
   }
 )
@@ -598,13 +603,19 @@ methods::setMethod(
       out <- rbind(out, o)
     }
 
+    # Catch error in case none of them computed
+    if(nrow(out)==0){
+      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      stop("No estimates found!")
+    }
+
     # Now composite the ensemble depending on the option
     if(method == 'mean'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
-                                  FUN = function(x = out[[layer]]) {
-                                    return(cbind( mean = mean(x,na.rm = TRUE),
-                                                  sd = stats::sd(x,na.rm = TRUE)))
-                                    }) |> as.matrix() |> as.data.frame()
+                       FUN = function(x = out[[layer]]) {
+                         return(cbind( mean = mean(x,na.rm = TRUE),
+                                       sd = stats::sd(x,na.rm = TRUE)))
+                       }) |> as.matrix() |> as.data.frame()
       colnames(new) <- c("partial_effect", "mean", "sd")
     } else if(method == 'median'){
       new <- aggregate(out[,layer], by = list(partial_effect = out$partial_effect),
@@ -624,13 +635,13 @@ methods::setMethod(
       new[,1] <- sapply(new[,1], function(z) rr[which.min(abs(z - rr))] )
       if(method=="mean"){
         new <- new |> dplyr::group_by(partial_effect) |>
-          dplyr::summarise(sd = sd(mean,na.rm=TRUE),
+          dplyr::summarise(sd = stats::sd(mean,na.rm=TRUE),
                            mean = mean(mean,na.rm=TRUE)
-                           ) |>
-        dplyr::relocate(mean,.before = sd)
+          ) |>
+          dplyr::relocate(mean,.before = sd)
       } else {
         new <- new |> dplyr::group_by(partial_effect) |>
-          dplyr::summarise(mad = mad(median,na.rm=TRUE),
+          dplyr::summarise(mad = stats::mad(median,na.rm=TRUE),
                            median = median(median,na.rm=TRUE)
           ) |>
           dplyr::relocate(median,.before = mad)
@@ -719,7 +730,7 @@ methods::setMethod(
       assertthat::assert_that(all(x.var %in% names(newdata)),
                               msg = "Variable not found in newdata!")
       template <- terra::rast(mods[[1]]$model$predictors[,c("x", "y")],
-                                crs = terra::crs(mods[[1]]$model$background),type = "xyz") |>
+                              crs = terra::crs(mods[[1]]$model$background),type = "xyz") |>
         emptyraster()
       newdata <- alignRasters(newdata, template,cl = FALSE)
       assertthat::assert_that(is.Raster(template),
@@ -729,15 +740,11 @@ methods::setMethod(
       means <- terra::global(newdata, "mean", na.rm = TRUE)
       assertthat::assert_that(x.var %in% rownames(means))
       # Set all variables except x.var to the means
-      nd <- newdata
+      nd <- newdata |> terra::as.data.frame(xy = TRUE, na.rm = FALSE)
       for(val in names(nd)){
-        if(val %in% x.var) next()
-        nd[[val]] <- terra::setValues(nd[[val]], means[rownames(means)==val,1],
-                            keeptime = TRUE, keepnames = TRUE)
-        nd[[val]] <- terra::mask(nd[[val]], newdata[[val]])
+        if(val %in% c(x.var,"x", "y")) next()
+        nd[[val]][!is.na(nd[[val]])] <- means[rownames(means)==val,1]
       }
-      assertthat::assert_that(is.Raster(nd))
-      nd <- terra::as.data.frame(nd, xy = TRUE, na.rm = FALSE)
     }
 
     # Now for each object get the partial values for the target variable
@@ -764,12 +771,24 @@ methods::setMethod(
       # Append to output object
       out[[as.character(obj$id)]] <- o
     }
-    # Now construct an ensemble by calling ensemble directly
-    new <- ensemble(out, method = method,
-                    normalize = normalize,
-                    layer = layer,
-                    min.value = min.value,
-                    uncertainty = "none")
+    # Catch error in case none of them computed
+    if(length(out)==0){
+      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      stop("No estimates found!")
+    }
+
+    if(length(out)==1){
+      if(getOption("ibis.setupmessages")) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
+      new <- out[[1]]
+    } else {
+      # Now construct an ensemble by calling ensemble directly
+      new <- ensemble(out, method = method,
+                      normalize = normalize,
+                      layer = layer,
+                      min.value = min.value,
+                      uncertainty = "none")
+    }
+
     assertthat::assert_that(
       is.Raster(new),msg = "Something went wrong with the ensemble calculation!"
     )

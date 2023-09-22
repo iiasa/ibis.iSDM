@@ -50,6 +50,12 @@ test_that('Setting up a distribution model',{
   expect_true(is.Waiver(x$engine))
   expect_error(train(x)) # Try to solve without solver
 
+  # Apply a mask
+  expect_no_error( x$biodiversity$mask(virtual_range) )
+  x <- distribution(background) |> add_biodiversity_poipo(virtual_points,
+                                                         field_occurrence = 'Observed',
+                                                         name = 'Virtual points')
+
   # And a range off
   invisible( suppressWarnings( suppressMessages(y <- x |> add_offset_range(virtual_range))) )
   expect_equal(y$get_offset(),'range_distance')
@@ -109,7 +115,11 @@ test_that('Setting up a distribution model',{
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
-  x <- x |> engine_inla()
+  suppressWarnings( x <- x |> engine_inla() )
+
+  # Do a check
+  expect_no_error(check(x))
+
   # Mesh is not created yet
   expect_s3_class(x$engine$get_data("mesh"),'Waiver')
   expect_equal(x$engine$name,'<INLA>')

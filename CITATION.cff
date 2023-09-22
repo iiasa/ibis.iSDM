@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.0.8
+version: 0.0.9
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -64,7 +64,7 @@ references:
   - family-names: Hesselbarth
     given-names: Maximilian H.K.
   year: '2023'
-  version: 0.0.5
+  version: 0.0.9
 - type: software
   title: assertthat
   abstract: 'assertthat: Easy Pre and Post Assertions'
@@ -218,6 +218,17 @@ references:
     email: dpierce@ucsd.edu
   year: '2023'
 - type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Imports
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2023'
+- type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
   notes: Imports
@@ -234,17 +245,6 @@ references:
   - family-names: Jagan
     given-names: Mikael
     orcid: https://orcid.org/0000-0002-3542-2938
-  year: '2023'
-- type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Imports
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
   year: '2023'
 - type: software
   title: parallel
@@ -306,6 +306,18 @@ references:
     orcid: https://orcid.org/0000-0001-5872-2872
   year: '2023'
   version: '>= 1.7-10'
+- type: software
+  title: lwgeom
+  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
+  notes: Imports
+  url: https://github.com/r-spatial/lwgeom/
+  repository: https://CRAN.R-project.org/package=lwgeom
+  authors:
+  - family-names: Pebesma
+    given-names: Edzer
+    email: edzer.pebesma@uni-muenster.de
+    orcid: https://orcid.org/0000-0001-8049-7069
+  year: '2023'
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
@@ -714,6 +726,9 @@ references:
   - family-names: Goodrich
     given-names: Ben
     email: benjamin.goodrich@columbia.edu
+  - family-names: Johnson
+    given-names: Andrew
+    email: andrew.johnson@arjohnsonau.com
   - family-names: Weber
     given-names: Sebastian
     email: sdw.post@waebers.de

@@ -80,6 +80,10 @@ test_that('Add further tests for model fits', {
   expect_s4_class(o, "SpatRaster")
 
   # ----------- #
+  # Clip the projected data with an external mask
+  expect_no_error( mod$mask(virtual_range) )
+
+  # ----------- #
   # Write model outputs
   tf <- base::tempfile()
   expect_no_error(write_summary(mod, paste0(tf, ".rds")))

@@ -722,7 +722,8 @@ engine_stan <- function(x,
               }
               df_partial <- df_partial |> as.data.frame()
             } else {
-              df_partial <- newdata |> dplyr::select(any_of(model$predictors_names))
+              df_partial <- newdata |> dplyr::select(
+                dplyr::any_of(model$predictors_names))
             }
 
             # For Integrated model, follow poisson

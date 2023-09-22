@@ -84,6 +84,22 @@ BiodiversityDatasetCollection <- bdproto(
     # Return coordinates
     if(utils::hasName(o,'geom')) sf::st_coordinates(o) else o[,c('x','y')]
   },
+  # Masking function
+  mask = function(self, mask, inverse = FALSE){
+    # Check whether prediction has been created
+    biob <- self$data
+    if(!is.Waiver(biob)){
+      # If mask is SpatRaster, convert to polygons
+      if(!inherits(mask, 'sf')){
+        mask <- terra::as.polygons(mask) |> sf::st_as_sf()
+      }
+      # Now for each element in biob, mask
+      for(id in names(biob)){
+        biob[[id]]$mask(mask, inverse = inverse)
+      }
+      invisible()
+    }
+  },
   # Remove a specific biodiversity dataset by id
   rm_data = function(self, id) {
     assertthat::assert_that(is.Id(id) || is.character(id),
@@ -300,5 +316,25 @@ BiodiversityDataset <- bdproto(
   # Collect info statistics
   get_observations = function(self) {
     nrow(self$data)
-  }
+  },
+  # Masking function
+  mask = function(self, mask, inverse = FALSE){
+    # Check whether prediction has been created
+    biob <- self$data
+    if(!is.Waiver(biob)){
+      # If mask is SpatRaster, convert to polygons
+      if(!inherits(mask, 'sf')){
+        mask <- terra::as.polygons(mask) |> sf::st_as_sf()
+      }
+      # Now for each element in biob, mask
+      biob <-
+        suppressMessages(
+          suppressWarnings(
+            sf::st_crop(guess_sf(biob), mask)
+          )
+        )
+      self$data <- biob
+      invisible()
+    }
+  },
 )

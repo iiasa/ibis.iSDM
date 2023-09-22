@@ -27,6 +27,8 @@ NULL
 #'   (Default: \code{NULL}).
 #' @param point A [`sf`] object containing observational data used for model
 #'   training.
+#' @param field_occurrence A [`character`] location of
+#'   biodiversity point records.
 #' @param format [`character`] indication of whether \code{"binary"},
 #'   \code{"normalize"} or \code{"percentile"} formatted thresholds are to be
 #'   created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
@@ -71,7 +73,7 @@ NULL
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
-  function(obj, method = 'mtp', value = NULL, point = NULL,  format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
+  function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
 
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
@@ -81,7 +83,7 @@ methods::setGeneric(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
-  function(obj, method = 'mtp', value = NULL, point = NULL, format = "binary", return_threshold = FALSE, ...) {
+  function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
     assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
@@ -123,7 +125,7 @@ methods::setMethod(
       }
       point <- collect_occurrencepoints(model = model,
                                         include_absences = TRUE,
-                                        point_column = "observed",
+                                        point_column = field_occurrence,
                                         addName = TRUE, tosf = TRUE
                                         )
     } else {
@@ -131,27 +133,27 @@ methods::setMethod(
     }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if((!any(point$observed==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
+    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       ass <- model$biodiversity[[1]]$pseudoabsence_settings
       if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
       suppressMessages(
         abs <- add_pseudoabsence(df = point,
-                                 field_occurrence = 'observed',
+                                 field_occurrence = field_occurrence,
                                  template = bg,
                                  # Assuming that settings are comparable among objects
                                  settings = ass
         )
       )
-      abs <- subset(abs, select = c('x','y'));abs$observed <- 0
+      abs <- subset(abs, select = c('x','y'));abs[, field_occurrence] <- 0
       abs <- guess_sf(abs)
       abs$name <- 'Background point'; abs$type <- "generated"
       suppressWarnings(
         abs <- sf::st_set_crs(abs, value = sf::st_crs(obj$get_data('prediction')))
       )
-      point <- point |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
-      abs <- abs |> dplyr::select(observed, geometry, dplyr::any_of(c("name", "type")))
+      point <- point |> dplyr::select(dplyr::all_of(field_occurrence), geometry, dplyr::any_of(c("name", "type")))
+      abs <- abs |> dplyr::select(dplyr::all_of(field_occurrence), geometry, dplyr::any_of(c("name", "type")))
       point <- dplyr::bind_rows(point,abs)
       rm(abs)
     }
@@ -176,7 +178,7 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
-                            point = NULL, format = "binary", return_threshold = FALSE, ...) {
+                            point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(point,'sf'),
@@ -223,7 +225,7 @@ methods::setMethod(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
-  function(obj, method = 'fixed', value = NULL, point = NULL, format = "binary", return_threshold = FALSE) {
+  function(obj, method = 'fixed', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE) {
     assertthat::assert_that(is.Raster(obj),
                             inherits(obj,'SpatRaster'),
                             is.character(method),
@@ -247,15 +249,15 @@ methods::setMethod(
 
     # Check that raster has at least a mean prediction in name
     if(!is.null(point)) {
-      assertthat::assert_that(utils::hasName(point,"observed"),
-                              msg = "Provided point data needs to have column observed!")
+      assertthat::assert_that(utils::hasName(point,field_occurrence),
+                              msg = "Provided point data needs to include specified occurrence column!")
       # If observed is a factor, convert to numeric
-      if(is.factor(point$observed)){
-        point$observed <- as.numeric(as.character( point$observed ))
+      if(is.factor(point[, field_occurrence, drop = TRUE])){
+        point[, field_occurrence] <- as.numeric(as.character(point[, field_occurrence, drop = TRUE]))
       }
       assertthat::assert_that(unique(sf::st_geometry_type(point)) %in% c('POINT','MULTIPOINT'))
-      assertthat::assert_that(utils::hasName(point, 'observed'))
-      poi_pres <- subset(point, observed > 0) # Remove any eventual absence data for a poi_pres evaluation
+      assertthat::assert_that(utils::hasName(point, field_occurrence))
+      poi_pres <- point[point[, field_occurrence, drop = TRUE] > 0, ]  # Remove any eventual absence data for a poi_pres evaluation
     } else poi_pres <- NULL
 
     # Loop through each raster
@@ -307,17 +309,18 @@ methods::setMethod(
         # now. Rather have users install the package here
         check_package("modEvA")
         # Assure that point data is correctly specified
-        assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, 'observed'))
-        point$observed <- ifelse(point$observed>1, 1, point$observed) # Ensure that observed is <=1
-        assertthat::assert_that(all( unique(point$observed) %in% c(0,1) ))
+        assertthat::assert_that(inherits(point, 'sf'), utils::hasName(point, field_occurrence))
+        point[, field_occurrence] <- ifelse(point[, field_occurrence, drop = TRUE] > 1,
+                                              1, point[, field_occurrence, drop = TRUE])  # Ensure that observed is <=1
+        assertthat::assert_that(all( unique(point[, field_occurrence, drop = TRUE]) %in% c(0,1) ))
 
         # Re-extract point vals but with the full dataset
         pointVals <- get_rastervalue(coords = point, env = raster_thresh)[[val]]
         assertthat::assert_that(length(pointVals)>2)
         # Calculate the optimal thresholds
         suppressWarnings(
-          opt <- modEvA::optiThresh(obs = point$observed, pred = pointVals,
-                                    measures = method,
+          opt <- modEvA::optiThresh(obs = point[, field_occurrence, drop = TRUE],
+                                    pred = pointVals, measures = method,
                                     optimize = "each", plot = FALSE)
         )
         if(method %in% opt$optimals.each$measure){

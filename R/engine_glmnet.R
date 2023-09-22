@@ -164,7 +164,18 @@ engine_glmnet <- function(x,
 
         # Distribution specific procedure
         fam <- model$biodiversity[[1]]$family
+        form <- model$biodiversity[[1]]$equation
 
+        # -- #
+        # Respecify the predictor names if not matching
+        te <- formula_terms(form)
+        if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
+          model$biodiversity[[1]]$predictors_names <-
+            model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
+          model$biodiversity[[1]]$predictors_types <-
+            model$biodiversity[[1]]$predictors_types |> dplyr::filter(
+            predictors %in% te)
+        }
         # -- #
 
         # If a poisson family is used, weight the observations by their exposure
@@ -194,12 +205,16 @@ engine_glmnet <- function(x,
           if(length(any_missing)>0) {
             presabs <- presabs[-any_missing,] # This works as they are in the same order
             model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+          }
+          df <- subset(df, stats::complete.cases(df))
+          assertthat::assert_that(nrow(presabs) == nrow(df))
+
+          # Check that expect matches
+          if(length(model$biodiversity[[1]]$expect)!=nrow(df)){
             # Fill the absences with 1 as multiplier. This works since absences follow the presences
             model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
                                                  rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
           }
-          df <- subset(df, stats::complete.cases(df))
-          assertthat::assert_that(nrow(presabs) == nrow(df))
 
           # Overwrite observation data
           model$biodiversity[[1]]$observations <- presabs
@@ -207,7 +222,7 @@ engine_glmnet <- function(x,
           # Preprocessing security checks
           assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
                                    any(!is.na(presabs[['observed']])),
-                                   length(model$biodiversity[[1]]$expect)==nrow(model$biodiversity[[1]]$observations),
+                                   length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$observations),
                                    nrow(df) == nrow(model$biodiversity[[1]]$observations)
           )
 
@@ -314,6 +329,12 @@ engine_glmnet <- function(x,
         full <- model$predictors
         w_full <- model$exposure
 
+        # Subset the predictor types to only those present
+        te <- formula_terms(form)
+        model$biodiversity[[1]]$predictors_types <-
+          model$biodiversity[[1]]$predictors_types |> dplyr::filter(predictors %in% te)
+        model$biodiversity[[1]]$predictors_names <-  intersect(model$biodiversity[[1]]$predictors_names, te)
+
         # Get offset and add it to exposure
         if(!is.Waiver(model$offset)){
           # Add offset to full prediction and load vector
@@ -343,6 +364,7 @@ engine_glmnet <- function(x,
         if(!is.Waiver(model$priors)){
           # Reset those contained in the prior object
           for(v in model$priors$varnames()){
+            if(!(v %in% names(p.fac))) next()
             p.fac[v]  <- model$priors$get(v, what = "value")
             lowlim[v] <- model$priors$get(v, what = "lims")[1]
             upplim[v] <- model$priors$get(v, what = "lims")[2]
@@ -567,7 +589,7 @@ engine_glmnet <- function(x,
               }
             } else {
               # Assume all variables are present
-              df2 <- newdata |> dplyr::select(any_of(names(df)))
+              df2 <- newdata |> dplyr::select(dplyr::any_of(names(df)))
               assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
             }
 

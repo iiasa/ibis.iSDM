@@ -18,7 +18,7 @@
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
 #' x <- distribution(background)  |>
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
 #'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_output(x, "testmodel.tif")
@@ -294,7 +294,7 @@ writeNetCDF <- function(file, fname,
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
 #' x <- distribution(background) |>
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points')  |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points')  |>
 #'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_summary(x, "testmodel.rds")
@@ -329,10 +329,6 @@ methods::setMethod(
       inherits(mod, "DistributionModel") || inherits(mod, "BiodiversityScenario"),
       msg = "Only objects created through `train()` or `project()` are supported!"
     )
-    # Check writeable or not
-    assertthat::assert_that(
-      assertthat::is.writeable(dirname(fname)),msg = "Given input folder is not writeable!"
-    )
 
     # Get file extension
     ext <- tolower( tools::file_ext(fname) )
@@ -340,7 +336,7 @@ methods::setMethod(
     ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
     fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
     if(file.exists(fname) && (verbose && getOption('ibis.setupmessages'))) myLog('[Output]','yellow','Overwriting existing file...')
-    assertthat::assert_that(assertthat::is.writeable(dirname(fname)))
+    assertthat::assert_that(dir.exists(dirname(fname)))
     # --- #
     # Gather the statistics and parameters from the provided file
     output <- list()
@@ -478,7 +474,7 @@ methods::setMethod(
 #' @returns No R-output is created. A file is written to the target direction.
 #' @examples \dontrun{
 #' x <- distribution(background) |>
-#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
 #'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_model(x, "testmodel.rds")

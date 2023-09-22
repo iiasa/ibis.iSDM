@@ -12,7 +12,7 @@ add_offset_range(
   presence_prop = 0.9,
   distance_clip = FALSE,
   distance_function = "negexp",
-  field_occurrence = "Observed",
+  field_occurrence = "observed",
   fraction = NULL,
   point = FALSE,
   add = TRUE

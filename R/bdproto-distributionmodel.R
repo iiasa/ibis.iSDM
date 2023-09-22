@@ -352,7 +352,7 @@ DistributionModel <- bdproto(
   },
   # Set fit for this Model
   set_data = function(self, x, value) {
-    # Get biodiversity dataset collection
+    # Get projected value
     ff <- self$fits
     # Set the object
     ff[[x]] <- value
@@ -452,6 +452,35 @@ DistributionModel <- bdproto(
       cent <- raster_centroid(obj, patch = FALSE)
     }
     return(cent)
+  },
+  # Masking function
+  mask = function(self, mask, inverse = FALSE){
+    # Check whether prediction has been created
+    prediction <- self$get_data()
+    if(!is.Waiver(prediction)){
+      # If mask is sf, rasterize
+      if(inherits(mask, 'sf')){
+        mask <- terra::rasterize(mask, prediction)
+      }
+      # Check that mask aligns
+      if(!terra::compareGeom(prediction,mask)){
+        mask <- terra::resample(mask, prediction, method = "near")
+      }
+      # Now mask and save
+      prediction <- terra::mask(prediction, mask, inverse = inverse)
+
+      # Save data
+      self$fits[["prediction"]] <- prediction
+
+      # Do the same for any thresholds eventually found
+      tr <- grep("threshold", self$show_rasters(), value = TRUE)
+      if(length(tr)){
+        m <- self$get_data(x = tr)
+        m <- terra::mask(m, mask, inverse = inverse)
+        self$fits[[tr]] <- m
+      }
+      invisible()
+    }
   },
   # Save object
   save = function(self, fname, type = 'gtif', dt = 'FLT4S'){

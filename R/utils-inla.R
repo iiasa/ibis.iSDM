@@ -1186,7 +1186,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
 
 #' Prediction coordinates for INLA
 #'
-#' @param mesh A [INLA::inla.mesh] object.
+#' @param mesh A \code{"INLA::inla.mesh"} object.
 #' @param background A [sf] object containing the background region.
 #' @param cov A [data.frame] or [matrix] with the covariates for the modelling.
 #' @param proj_stepsize A numeric indication on the prediction stepsize to be
