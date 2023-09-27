@@ -35,7 +35,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,7 +107,52 @@ Jung</h4>
 <div class="section level2">
 <h2 id="mechanistic-species-distribution">Mechanistic species distribution<a class="anchor" aria-label="anchor" href="#mechanistic-species-distribution"></a>
 </h2>
-<p>Arriving in upcoming release</p>
+<p>This vignette describes the available options of how mechanistic
+approaches can be added to the ibis.iSDM outputs, or how ibis.iSDM
+outputs can be used as input to separate mechanistic modelling
+approaches.</p>
+<p>Before we delve into the options to do mechanistic SDMs in the
+ibis.iSDM package, it is useful to remind us what the term ‘mechanism’
+actually means. In the literature there are a range of different
+definitions, sometimes referring to mechanistic SDMs as those that
+incorporate ecological processes (e.g. demography, dispersal,
+eco-evolutionary principles). Yet often, correlative SDMs are also
+declared “mechanistic” if they somehow incorporate a specific
+correlation or response function towards an environmental variable. For
+example, the microclimatic limits to persistence or the presence of
+biotic interactions (estimated through a separate SDM of a different
+species) are also sometimes referred to as mechanisms.</p>
+<p>The latter approaches - which is largely a fine-tuning of response
+function - can be emulated through creating specific derivates or by
+adding covariate priors (<code><a href="../reference/add_priors.html">add_priors()</a></code>) or model predictors
+(<code><a href="../reference/add_predictors_model.html">add_predictors_model()</a></code>) to a SDM. Some types of
+integration can also be directly modelled through integration. More
+details are provided in other vignettes such as the <a href="01_data_preparationhelpers.html">data preparation</a> for creating
+derivates or the vignette on <a href="03_integrate_data.html">data
+integration</a></p>
+<div class="section level3">
+<h3 id="adding-ecological-processes-to-correlative-sdms">Adding ecological processes to correlative SDMs<a class="anchor" aria-label="anchor" href="#adding-ecological-processes-to-correlative-sdms"></a>
+</h3>
+<p>There are a range of wrappers to other mechanistic packages
+implemented in ibis.iSDM. These wrappers support the convenient addition
+of ecological processes such as dispersal to scenarios <a href="04_biodiversity_projections.html">data integration</a>. Or they
+enable ibis.iSDM outputs to directly become inputs to further
+simulations.</p>
+<p>Most of these mechanistic approaches require quite extensive model
+understanding and in many cases training. Furthermore a range of
+parameters are usually required so that outputs are meaningful. It is
+beyond the scope of this vignette to provide an introduction to the
+various options. Rather, it is only demonstrated how linkages between
+ibis.iSDM and other models can be made, and the reader is referred to
+the original publication underlying each approach (see help page for
+references).</p>
+<pre><code><span><span class="co">#&gt;  glmnet kissmig </span></span>
+<span><span class="co">#&gt;    TRUE    TRUE</span></span></code></pre>
+<div class="section level4">
+<h4 id="adding-dispersal-to-scenarios-with-kissmig">Adding dispersal to scenarios with <code>kissmig</code><a class="anchor" aria-label="anchor" href="#adding-dispersal-to-scenarios-with-kissmig"></a>
+</h4>
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
