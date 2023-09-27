@@ -1,4 +1,10 @@
-# ibis.iSDM 0.0.9 (current dev branch)
+# ibis.iSDM 0.1.0 (current dev branch)
+#### New features
+
+#### Minor improvements and bug fixes
+
+
+# ibis.iSDM 0.0.9
 #### New features
 * Added new vignette on available functions for data preparation #67
 * Addition of small `mask()` function that emulates the for `terra`.
