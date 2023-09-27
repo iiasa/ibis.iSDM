@@ -26,4 +26,51 @@ knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 
 # Mechanistic species distribution
 
-Arriving in upcoming release
+This vignette describes the available options of how mechanistic approaches can
+be added to the ibis.iSDM outputs, or how ibis.iSDM outputs can be used as input
+to separate mechanistic modelling approaches.
+
+Before we delve into the options to do mechanistic SDMs in the ibis.iSDM package,
+it is useful to remind us what the term 'mechanism' actually means. In the literature
+there are a range of different definitions, sometimes referring to mechanistic
+SDMs as those that incorporate ecological processes (e.g. demography, dispersal, eco-evolutionary principles).
+Yet often, correlative SDMs are also declared "mechanistic" if they somehow incorporate
+a specific correlation or response function towards an environmental variable. For example,
+the microclimatic limits to persistence or the presence of biotic interactions (estimated through a
+separate SDM of a different species) are also sometimes referred to as mechanisms.
+
+The latter approaches - which is largely a fine-tuning of response function - can 
+be emulated through creating specific derivates or by adding covariate priors 
+(`add_priors()`) or model predictors (`add_predictors_model()`) to 
+a SDM. Some types of integration can also be directly modelled through integration.
+More details are provided in other vignettes such as the [data preparation](01_data_preparationhelpers.html)
+for creating derivates or the vignette on [data integration](03_integrate_data.html)
+
+## Adding ecological processes to correlative SDMs
+
+There are a range of wrappers to other mechanistic packages implemented in 
+ibis.iSDM. These wrappers support the convenient addition of ecological processes
+such as dispersal to scenarios [data integration](04_biodiversity_projections.html).
+Or they enable ibis.iSDM outputs to directly become inputs to further simulations.
+
+Most of these mechanistic approaches require quite extensive model understanding 
+and in many cases training. Furthermore a range of parameters are usually required
+so that outputs are meaningful. It is beyond the scope of this vignette to provide
+an introduction to the various options. Rather, it is only demonstrated how linkages
+between ibis.iSDM and other models can be made, and the reader is referred to the original
+publication underlying each approach (see help page for references).
+
+```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+# Install for this vignette if not present
+# Function to check for installed packages and install them if they are not installed
+install <- function(packages){
+  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
+  if (length(new.packages)) 
+    install.packages(new.packages, dependencies = TRUE)
+  sapply(packages, require, character.only = TRUE)
+}
+install(c("glmnet", "kissmig"))
+```
+
+### Adding dispersal to scenarios with `kissmig`
+

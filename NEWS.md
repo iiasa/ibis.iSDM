@@ -1,5 +1,7 @@
 # ibis.iSDM 0.1.0 (current dev branch)
 #### New features
+* Added a small convenience wrapper to add model outputs to another model `add_predictors_model()`
+* Started and added mechanistic SDM vignette #67
 
 #### Minor improvements and bug fixes
 
