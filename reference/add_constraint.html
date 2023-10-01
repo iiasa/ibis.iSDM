@@ -164,10 +164,13 @@ the prediction.</p></li>
 </ul><p><strong>Adaptability</strong>:</p><ul><li><p><code>nichelimit</code> - Specifies a limit on the environmental niche to only allow a modest amount of extrapolation beyond the known occurrences. This
 can be particular useful to limit the influence of increasing marginal
 responses and avoid biologically unrealistic projections.</p></li>
-</ul><p><strong>Boundary</strong>:</p><ul><li><p><code>boundary</code> - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
+</ul><p><strong>Boundary and size</strong>:</p><ul><li><p><code>boundary</code> - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
 the provide layer. Similar as specifying projection limits (see
 <code><a href="distribution.html">distribution</a></code>), but can be used to specifically constrain a projection
 within a certain area (e.g. a species range or an island).</p></li>
+<li><p><code>minsize</code> - Allows to specify a certain size that must be satisfied
+in order for a thresholded patch to be occupied. Can be thought of as a minimum
+size requirement. See <code><a href="add_constraint_minsize.html">add_constraint_minsize()</a></code> for the required parameters.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -181,11 +184,13 @@ within a certain area (e.g. a species range or an island).</p></li>
     <div class="dont-index"><p><code><a href="add_constraint_dispersal.html">add_constraint_dispersal</a></code>, <code><a href="add_constraint_connectivity.html">add_constraint_connectivity</a></code>,
 <code><a href="add_constraint_adaptability.html">add_constraint_adaptability</a></code>, <code><a href="add_constraint_boundary.html">add_constraint_boundary</a></code></p>
 <p>Other constraint: 
+<code><a href="add_constraint_MigClim.html">add_constraint_MigClim</a>()</code>,
 <code><a href="add_constraint_adaptability.html">add_constraint_adaptability</a>()</code>,
 <code><a href="add_constraint_boundary.html">add_constraint_boundary</a>()</code>,
 <code><a href="add_constraint_connectivity.html">add_constraint_connectivity</a>()</code>,
 <code><a href="add_constraint_dispersal.html">add_constraint_dispersal</a>()</code>,
-<code><a href="add_constraint_minsize.html">add_constraint_minsize</a>()</code></p></div>
+<code><a href="add_constraint_minsize.html">add_constraint_minsize</a>()</code>,
+<code><a href="simulate_population_steps.html">simulate_population_steps</a>()</code></p></div>
     </div>
 
     <div class="section level2">

@@ -159,6 +159,10 @@ can be used to specifically constrain a projection within a certain area
 <code><a href="threshold.html">threshold()</a></code> to a <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object enables the
 computation of thresholds at every step based on the threshold used for the
 main model (threshold values are taken from there).</p>
+<p>It is also possible to make a complementary simulation with the <code>steps</code>
+package, which can be provided via <code><a href="simulate_population_steps.html">simulate_population_steps()</a></code> to the
+<code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object. Similar as with thresholds, estimates
+values will then be added to the outputs.</p>
 <p>Finally this function also allows temporal stabilization across prediction
 steps via enabling the parameter <code>stabilize</code> and checking the
 <code>stablize_method</code> argument. Stabilization can for instance be helpful in
