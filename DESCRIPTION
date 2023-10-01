@@ -142,6 +142,7 @@ Collate:
     'pseudoabsence.R'
     'scenario.R'
     'similarity.R'
+    'simulate_population_steps.R'
     'summary.R'
     'threshold.R'
     'train.R'

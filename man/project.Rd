@@ -71,6 +71,11 @@ Many constrains also requires thresholds to be calculated. Adding
 computation of thresholds at every step based on the threshold used for the
 main model (threshold values are taken from there).
 
+It is also possible to make a complementary simulation with the \code{steps}
+package, which can be provided via \code{\link[=simulate_population_steps]{simulate_population_steps()}} to the
+\code{\linkS4class{BiodiversityScenario}} object. Similar as with thresholds, estimates
+values will then be added to the outputs.
+
 Finally this function also allows temporal stabilization across prediction
 steps via enabling the parameter \code{stabilize} and checking the
 \code{stablize_method} argument. Stabilization can for instance be helpful in

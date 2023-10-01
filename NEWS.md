@@ -1,12 +1,15 @@
 # ibis.iSDM 0.1.0 (current dev branch)
+
 #### New features
 * Added a small convenience wrapper to add model outputs to another model `add_predictors_model()`
-* Started and added mechanistic SDM vignette #67
+* Started adding mechanistic SDM vignette #67
+* Wrapper for *steps* implemented via `simulate_population_steps()` #68
 
 #### Minor improvements and bug fixes
-
+* Minor bug fixes in `scenario()` object, and MigClim and Kissmig wrappers.
 
 # ibis.iSDM 0.0.9
+
 #### New features
 * Added new vignette on available functions for data preparation #67
 * Addition of small `mask()` function that emulates the for `terra`.
@@ -21,6 +24,7 @@
 * Improved error messages and handling of formula's.
 
 # ibis.iSDM 0.0.8
+
 #### New features
 * Implemented min size constraint (`add_constraint_minsize()`) #56
 * Added a function for estimating partial effects of ensembles `ensemble_spartial()`.
@@ -34,6 +38,7 @@
 * Allow to specify location of biodiversity point records in `threshold()`.
 
 # ibis.iSDM 0.0.7
+
 #### New features
 * Added method proximity to `add_control_bias()` to place lower weights on points closer to another.
 * Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.

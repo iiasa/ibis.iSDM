@@ -63,7 +63,7 @@ NULL
 #'
 #' @name add_constraint_MigClim
 #' @aliases add_constraint_MigClim
-#' @family constrain
+#' @family constraint
 #' @keywords scenario
 #' @exportMethod add_constraint_MigClim
 #' @export

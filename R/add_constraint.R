@@ -61,11 +61,15 @@ NULL
 #'   can be particular useful to limit the influence of increasing marginal
 #'   responses and avoid biologically unrealistic projections.
 #'
-#' **Boundary**:
+#' **Boundary and size**:
 #' * \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
 #'   the provide layer. Similar as specifying projection limits (see
 #'   [`distribution`]), but can be used to specifically constrain a projection
 #'   within a certain area (e.g. a species range or an island).
+#'
+#' * \code{minsize} - Allows to specify a certain size that must be satisfied
+#'   in order for a thresholded patch to be occupied. Can be thought of as a minimum
+#'   size requirement. See `add_constraint_minsize()` for the required parameters.
 #'
 #' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #' @references
@@ -106,7 +110,8 @@ methods::setMethod(
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
-                                    "hardbarrier","resistance", "boundary",
+                                    "hardbarrier","resistance",
+                                    "boundary", "minsize",
                                     "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
@@ -126,8 +131,10 @@ methods::setMethod(
                   # --- #
                   "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
                   # --- #
-                  "boundary" = add_constraint_boundary(mod, ...)
-                  )
+                  "boundary" = add_constraint_boundary(mod, ...),
+                  # --- #
+                  "minsize" = add_constraint_minsize(mod, ...)
+    )
     return(o)
   }
 )
@@ -352,7 +359,7 @@ methods::setMethod(
     is.vector(params) || is.list(params),
     is.null(resistance) || is.logical(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold))==2
+    length(unique(baseline_threshold)[,1])==2
   )
 
   check_package('kissmig')
@@ -366,12 +373,15 @@ methods::setMethod(
   # Simulate kissmig for a given threshold and suitability raster
   km <- kissmig::kissmig(O = terra_to_raster( baseline_threshold ),
                          # Rescale newsuit to 0-1
-                         S = predictor_transform(new_suit, 'norm'),
+                         S = predictor_transform(new_suit, 'norm') |>
+                           terra_to_raster(),
                          it = as.numeric( params['iteration'] ),
                          type = params['type'],
                          pext = as.numeric(params['pext']),
                          pcor = as.numeric(params['pcor'])
                         )
+  # Convert to terra again
+  km <- terra::rast(km)
   if(is.factor(km)) km <- terra::as.int(km)
 
   # Now multiply the net suitability projection with this mask Thus removing any
