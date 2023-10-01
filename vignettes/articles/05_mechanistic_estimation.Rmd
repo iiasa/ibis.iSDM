@@ -87,8 +87,6 @@ op <- try({
                         build_vignettes = FALSE) # For steps
 },silent = TRUE)
 if(inherits(op, "try-error")) stop("steps could not be installed for this vignette!")
-# Don't print out as many messages
-options("ibis.setupmessages" = FALSE)
 ```
 
 ### Adding dispersal to scenarios with `KISSMig`
@@ -106,6 +104,9 @@ simulator can be added as a dispersal constraint (among others) to scenario obje
 library(ibis.iSDM)
 library(terra)
 library(ggplot2)
+# Don't print out as many messages
+options("ibis.setupmessages" = FALSE)
+
 # Background and biodiversity data
 background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points', quiet = TRUE)
@@ -125,7 +126,7 @@ names(pred_current) <- tools::file_path_sans_ext( basename(ll) )
 
 # Get future predictors
 # These we will load in some time steps using the stars package and ignoring the first time step
-pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', seq(2,86,by=10))
+suppressWarnings( pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', seq(2,86,by=10)) )
 sf::st_crs(pred_future) <- sf::st_crs(4326) # Set projection
 # Rename future predictors to those of current
 names(pred_future) <- names(pred_current)
@@ -138,7 +139,7 @@ fit <- distribution(background) |>
   add_predictors(pred_current, transform = 'scale',derivates = 'none') |> 
   engine_glmnet(alpha = 0) |> 
   # Train the model
-  train() |> 
+  train(verbose = FALSE) |> 
   # Add simple percentile thresholds
   threshold(method = 'percentile', value = .33)
 
@@ -188,8 +189,8 @@ sc2 <- sc |>
                            )
 
 # Project two scenarios with varying local extinction probability
-df1 <- project(sc1) |> summary()
-df2 <- project(sc2) |> summary()
+df1 <- project(sc1, verbose = FALSE) |> summary()
+df2 <- project(sc2, verbose = FALSE) |> summary()
 df <- dplyr::bind_rows(df1 |> dplyr::mutate(scenario = "low"),
                        df2 |> dplyr::mutate(scenario = "high") )
 # ------ #
