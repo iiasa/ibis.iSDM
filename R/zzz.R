@@ -39,7 +39,9 @@
     "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
     "gnlm", "cubelyr", "matrixStats", "Boruta", "abess",
-    "dbarts", "mboost", "rstan", "cmdstanr"
+    "dbarts", "mboost", "rstan", "cmdstanr",
+    # Mechanistic stuff
+    "poems"
   ))
 
   # Set default corrrelation coefficient threshold for evaluating correlated

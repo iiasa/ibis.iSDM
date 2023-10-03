@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.0.9
+version: 0.1.0
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -306,6 +306,18 @@ references:
     orcid: https://orcid.org/0000-0001-5872-2872
   year: '2023'
   version: '>= 1.7-10'
+- type: software
+  title: lwgeom
+  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
+  notes: Imports
+  url: https://github.com/r-spatial/lwgeom/
+  repository: https://CRAN.R-project.org/package=lwgeom
+  authors:
+  - family-names: Pebesma
+    given-names: Edzer
+    email: edzer.pebesma@uni-muenster.de
+    orcid: https://orcid.org/0000-0001-8049-7069
+  year: '2023'
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
@@ -849,16 +861,4 @@ references:
   - family-names: Yuan
     given-names: Jiaming
     email: jm.yuan@outlook.com
-  year: '2023'
-- type: software
-  title: stars
-  abstract: 'stars: Spatiotemporal Arrays, Raster and Vector Data Cubes'
-  notes: Imports
-  url: https://r-spatial.github.io/stars/
-  repository: https://CRAN.R-project.org/package=stars
-  authors:
-  - family-names: Pebesma
-    given-names: Edzer
-    email: edzer.pebesma@uni-muenster.de
-    orcid: https://orcid.org/0000-0001-8049-7069
   year: '2023'

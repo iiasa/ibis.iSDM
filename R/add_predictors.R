@@ -9,6 +9,8 @@ NULL
 #' the [distribution] object. This function furthermore allows to transform or
 #' create derivates of provided predictors.
 #'
+#' @details
+#'
 #' A transformation takes the provided rasters and for instance rescales them or
 #' transforms them through a principal component analysis ([prcomp]). In
 #' contrast, derivates leave the original provided predictors alone, but instead

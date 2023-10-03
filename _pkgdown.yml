@@ -95,6 +95,7 @@ reference:
     contents:
       - scenario
       - project
+      - simulate_population_steps
       - starts_with("add_constrain")
       - has_keyword("scenarios")
 
