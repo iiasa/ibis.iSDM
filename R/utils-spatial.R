@@ -978,7 +978,10 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   # Convert to factor if any
   if(any(is.factor(env))){
     # MH: Shouldn't this be a factor already? Anyhow, previous code didnt work for more than 1 column
-    ex[,names(env)[which(is.factor(env))]] <- lapply(ex[,names(env)[which(is.factor(env))]], factor)
+    if (sum(is.factor(env)) == 1) {
+      ex[,names(env)[which(is.factor(env))]] <- factor(ex[,names(env)[which(is.factor(env))]])
+    } else {
+      ex[,names(env)[which(is.factor(env))]] <- lapply(ex[,names(env)[which(is.factor(env))]], factor)}
   }
 
   if(rm.na){
