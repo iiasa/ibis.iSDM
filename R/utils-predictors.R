@@ -863,7 +863,7 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
   deletecol <- unique(deletecol)
 
   # Which variables to discard
-  o <- names(env)[deletecol]
+  o <- names(x)[deletecol]
   if(length(singular_var)>0) o <- unique( c(o,  names(singular_var) ) )
   o
 }
