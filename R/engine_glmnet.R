@@ -348,7 +348,8 @@ engine_glmnet <- function(x,
         # Then add each factor level if set
         if(any(model$predictors_types$type=="factor")){
           fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
-          p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
+          # return penalty factor for each level of each factor (even if level values are identical across factors)
+          p.fac <- c(p.fac, rep(1, sum(apply(df[, fac, drop = FALSE], 2, function(x) length(unique(x))))))
         }
         # Duplicate p.fac container for lower and upper limits
         lowlim <- rep(-Inf, length(p.fac)) |> stats::setNames(names(p.fac))
