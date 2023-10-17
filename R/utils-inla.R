@@ -1262,7 +1262,7 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
     # )
     preds <- sp::SpatialPointsDataFrame(coords = predcoords,
                                         data = preds,
-                                        proj4string = mesh$crs
+                                        proj4string = sp::CRS(SRS_string = mesh$crs)
     )
     # Remove missing data
     preds <- subset(preds, stats::complete.cases(preds@data))

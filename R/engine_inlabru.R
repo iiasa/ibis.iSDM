@@ -411,7 +411,7 @@ engine_inlabru <- function(x,
           # Convert to sp
           ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
                                             data = ips[, names(ips) %notin% c('x','y')],
-                                            proj4string = self$get_data('mesh')$crs
+                                            proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
           )
           # Select only the predictor names
           ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
@@ -625,9 +625,17 @@ engine_inlabru <- function(x,
 
         # Set number of threads via set.Options
         inlabru::bru_safe_inla(quietly = TRUE)
-        INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
-                             blas.num.threads = getOption('ibis.nthread')
-                             )
+
+        # MH: seems like blas.num.threads not available on windows?
+        if (.Platform$OS.type == "windows") {
+          # Set number of threads via set.Options
+          INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
+        } else {
+          # Set number of threads via set.Options
+          INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
+                               blas.num.threads = getOption('ibis.nthread'))
+        }
+
 
         # Set any other bru options via verbosity of fitting
         inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
@@ -978,7 +986,7 @@ engine_inlabru <- function(x,
               # Convert predictors to SpatialPixelsDataFrame as required for inlabru
               newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
                                                   data = newdata[, names(newdata) %notin% c('x','y')],
-                                                  proj4string = self$get_data('mesh')$crs
+                                                  proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
               )
               newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
               newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
@@ -1154,7 +1162,7 @@ engine_inlabru <- function(x,
             # Convert predictors to SpatialPixelsDataFrame as required for inlabru
             df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
                                                 data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                proj4string = self$get_data('mesh')$crs
+                                                proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
             )
             df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
             suppressWarnings(
