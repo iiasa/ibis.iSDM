@@ -10,6 +10,7 @@
 * Bug fix related to CRS classes of sp and sf
 * Bug fix related to blas.num.threads
 * Bug fix related to CRS in `engine_inla()`
+* Bug fix in `engine_stan()` related to background layer
 
 # ibis.iSDM 0.0.9
 

@@ -213,7 +213,7 @@ engine_stan <- function(x,
           if('poipo' == model$biodiversity[[i]]$type){
 
             # Get background layer
-            bg <- x$engine$get_data('template')
+            bg <- self$get_data("template") # model$engine$get_data('template')
             assertthat::assert_that(!is.na(terra::global(bg, "min", na.rm = TRUE)[,1] ))
 
             # Add pseudo-absence points
