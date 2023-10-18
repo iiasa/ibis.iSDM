@@ -626,16 +626,9 @@ engine_inlabru <- function(x,
         # Set number of threads via set.Options
         inlabru::bru_safe_inla(quietly = TRUE)
 
-        # MH: seems like blas.num.threads not available on windows?
-        if (.Platform$OS.type == "windows") {
-          # Set number of threads via set.Options
-          INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
-        } else {
-          # Set number of threads via set.Options
-          INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
-                               blas.num.threads = getOption('ibis.nthread'))
-        }
 
+        # Set number of threads via set.Options
+        INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
 
         # Set any other bru options via verbosity of fitting
         inlabru::bru_options_set(bru_verbose = settings$get('verbose'))

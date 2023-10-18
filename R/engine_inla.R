@@ -500,17 +500,8 @@ engine_inla <- function(x,
         # Messenger
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
-        # MH: seems like blas.num.threads not available on windows?
-        if (.Platform$OS.type == "windows") {
-          # Set number of threads via set.Options
-          INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
-        } else {
-          # Set number of threads via set.Options
-          INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
-                               blas.num.threads = getOption('ibis.nthread'))
-        }
-
-
+        # Set number of threads via set.Options
+        INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
 
         # --- Prepare general inputs ---
         # Check whether spatial latent effects were added
