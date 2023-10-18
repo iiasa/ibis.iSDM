@@ -8,7 +8,8 @@
 #### Minor improvements and bug fixes
 * Minor bug fixes in `scenario()` object, and MigClim and Kissmig wrappers.
 * Bug fix related to CRS classes of sp and sf
-* Bug fix related to blas.num.threads on Windows
+* Bug fix related to blas.num.threads
+* Bug fix related to CRS in `engine_inla()`
 
 # ibis.iSDM 0.0.9
 
