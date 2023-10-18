@@ -809,7 +809,7 @@ engine_inla <- function(x,
           # )
           suppressWarnings(
             prediction <- terra::rast(cbind( as.data.frame(predcoords), post), type = "xyz",
-                                      crs = terra::crs(self$get_data('mesh')$crs))
+                                      crs = terra::crs(self$get_data('mesh')$crs$wkt))
           )
 
           prediction <- terra::mask(prediction, model$background) # Mask with background
