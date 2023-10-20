@@ -6,6 +6,7 @@
 * Wrapper for *steps* implemented via `simulate_population_steps()` #68
 
 #### Minor improvements and bug fixes
+* Added R-universe installation option as alternative to github #38
 * Minor bug fixes in `scenario()` object, and MigClim and Kissmig wrappers.
 * Bug fix related to CRS classes of sp and sf
 * Bug fix related to blas.num.threads
