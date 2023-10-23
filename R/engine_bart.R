@@ -319,7 +319,8 @@ engine_bart <- function(x,
 
         # All other needed data for model fitting
         equation <- model$biodiversity[[1]]$equation
-        data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
+        data <- cbind(model$biodiversity[[1]]$predictors,
+                      data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE]) )
         # Subset to predictor names
         data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
         if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)

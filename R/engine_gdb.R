@@ -324,7 +324,8 @@ engine_gdb <- function(x,
 
         # All other needed data for model fitting
         equation <- model$biodiversity[[1]]$equation
-        data <- cbind(model$biodiversity[[1]]$predictors, data.frame(observed = model$biodiversity[[1]]$observations[,'observed']) )
+        data <- cbind(model$biodiversity[[1]]$predictors,
+                      data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE]) )
         w <- model$biodiversity[[1]]$expect
 
         # Select predictors

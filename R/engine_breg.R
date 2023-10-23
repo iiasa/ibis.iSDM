@@ -321,7 +321,7 @@ engine_breg <- function(x,
         if(!is.null(li)) if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
-                    data.frame(observed = model$biodiversity[[1]]$observations[,'observed'])
+                    data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE])
                     )
         df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed"))
         w <- model$biodiversity[[1]]$expect # The expected exposure
