@@ -196,7 +196,8 @@ engine_inlabru <- function(x,
         bdry$loc <- INLA::inla.mesh.map(bdry$loc)
 
         # Get all coordinates of observations
-        locs <- collect_occurrencepoints(model, include_absences = FALSE)
+        locs <- collect_occurrencepoints(model, include_absences = FALSE,
+                                         tosf = FALSE)
         locs <- locs[,c("x","y")] # Take only the coordinates
 
         # Try and infer mesh parameters if not set

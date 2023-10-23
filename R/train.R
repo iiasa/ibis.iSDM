@@ -462,6 +462,9 @@ methods::setMethod(
         } else { model[['biodiversity']][[id]][['pseudoabsence_settings']] <- getOption("ibis.pseudoabsence")}
       }
 
+      # convert observations to sf object first regardless of type
+      model$biodiversity[[id]]$observations <- guess_sf(model$biodiversity[[id]]$observations)
+
       # Aggregate observations if poipo
       if(aggregate_observations && model[['biodiversity']][[id]][['type']] == "poipo"){
         model$biodiversity[[id]]$observations <- aggregate_observations2grid(
@@ -474,7 +477,7 @@ methods::setMethod(
       }
 
       # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
-      env <- get_rastervalue(coords = guess_sf(model$biodiversity[[id]]$observations),
+      env <- get_rastervalue(coords = model$biodiversity[[id]]$observations,
                              env = model$predictors_object$get_data(df = FALSE),
                              rm.na = FALSE)
 
