@@ -39,7 +39,7 @@ built_formula_bart <- function(obj){
     assertthat::assert_that(
       is.formula(form),
       attr(stats::terms(form), "response")==1, # Has Response
-      all( all.vars(form) %in% c('observed','w', model[['predictors_names']]) )
+      all( all.vars(form) %in% c('observed','w', obj[['predictors_names']]) )
     )
   }
   return(form)
