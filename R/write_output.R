@@ -385,9 +385,10 @@ methods::setMethod(
 
       # Model summary in a tibble and formula
       output[["output"]][["summary"]] <- mod$summary()
-      if(!is.null(mod$get_data("prediction") )){
-        output[["output"]][["resolution"]] <- terra::res( mod$get_data("prediction") )
-        output[["output"]][["prediction"]] <- names( mod$get_data("prediction") )
+      pred <- mod$get_data("prediction")
+      if(!is.null(pred) && !is.Waiver(pred)){
+        output[["output"]][["resolution"]] <- terra::res( pred )
+        output[["output"]][["prediction"]] <- names( pred )
       } else {
         output[["output"]][["resolution"]] <- NA
         output[["output"]][["prediction"]] <- NA

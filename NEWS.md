@@ -10,6 +10,7 @@
 * Minor bug fixes in `scenario()` object, and MigClim and Kissmig wrappers.
 * Bug fix related to CRS classes of sp and sf
 * Bug fix related to blas.num.threads
+* Bug fix that crashed `write_summary()` outputs when no prediction was made.
 * Bug fix related to CRS in `engine_inla()`
 * Bug fix in `engine_stan()` related to background layer
 
