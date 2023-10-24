@@ -13,6 +13,8 @@
 * Bug fix that crashed `write_summary()` outputs when no prediction was made.
 * Bug fix related to CRS in `engine_inla()`
 * Bug fix in `engine_stan()` related to background layer
+* Class of biodiversity data is identical for PO and PA
+* Bug fix in `built_formula_glmnet()` and response
 
 # ibis.iSDM 0.0.9
 
