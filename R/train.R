@@ -257,7 +257,8 @@ methods::setMethod(
       model[['predictors_names']] <- x$get_predictor_names()
       # Get predictor types
       lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric') )
+      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric'),
+                                                row.names = NULL)
       # Assign attribute to predictors to store the name of object
       model[['predictors_object']] <- x$predictors
       rm(lu)
@@ -481,6 +482,14 @@ methods::setMethod(
                              env = model$predictors_object$get_data(df = FALSE),
                              rm.na = FALSE)
 
+      # select only columns needed by equation
+      if (model$biodiversity[[id]]$equation != "<Default>") {
+
+        env <- subset(env, select = c("ID", "x", "y", attr(stats::terms.formula(model$biodiversity[[id]]$equation),
+                                                           "term.labels")))
+
+      }
+
       # Remove missing values as several engines can't deal with those easily
       miss <- stats::complete.cases(env)
       if(sum( !miss )>0 && getOption('ibis.setupmessages')) {
@@ -559,8 +568,8 @@ methods::setMethod(
 
       # Save predictors extracted for biodiversity extraction
       model[['biodiversity']][[id]][['predictors']] <- env
-      model[['biodiversity']][[id]][['predictors_names']] <- model[['predictors_names']][which( model[['predictors_names']] %notin% co )]
-      model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']]$predictors %notin% co,]
+      model[['biodiversity']][[id]][['predictors_names']] <- names(env)[names(env) %notin% c("ID", "x", "y", "Intercept")]
+      model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']][, "predictors"] %in% names(env), ]
     }
 
     # If the method of integration is weights and there are more than 2 datasets, combine

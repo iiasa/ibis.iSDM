@@ -166,17 +166,17 @@ engine_glmnet <- function(x,
         fam <- model$biodiversity[[1]]$family
         form <- model$biodiversity[[1]]$equation
 
-        # -- #
-        # Respecify the predictor names if not matching
-        te <- formula_terms(form)
-        if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
-          model$biodiversity[[1]]$predictors_names <-
-            model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
-          model$biodiversity[[1]]$predictors_types <-
-            model$biodiversity[[1]]$predictors_types |> dplyr::filter(
-            predictors %in% te)
-        }
-        # -- #
+        # # -- #
+        # # Respecify the predictor names if not matching
+        # te <- formula_terms(form)
+        # if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
+        #   model$biodiversity[[1]]$predictors_names <-
+        #     model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
+        #   model$biodiversity[[1]]$predictors_types <-
+        #     model$biodiversity[[1]]$predictors_types |> dplyr::filter(
+        #     predictors %in% te)
+        # }
+        # # -- #
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
