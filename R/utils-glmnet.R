@@ -30,7 +30,7 @@ built_formula_glmnet <- function(obj){
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
-    if(obj$family=='poisson') form <- stats::update.formula(obj$equation, observed/w ~ .)
+    if(obj$family=='poisson') form <- stats::update.formula(form, observed/w ~ .)
     # Security checks
     assertthat::assert_that(
       is.formula(form),

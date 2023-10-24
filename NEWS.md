@@ -15,6 +15,7 @@
 * Bug fix in `engine_stan()` related to background layer
 * Class of biodiversity data is identical for PO and PA
 * Bug fix in `built_formula_glmnet()` and response
+* Bug fix in `built_formula_gdb()` and response
 
 # ibis.iSDM 0.0.9
 

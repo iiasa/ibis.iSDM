@@ -29,13 +29,9 @@ built_formula_bart <- function(obj){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(stats::terms(form), "response")==0){
-      if(obj$type == "poipo"){
-        form <- stats::update.formula(form, "observed/w ~ .")
-      } else {
-        form <- stats::update.formula(form, "observed ~ .")
-      }
-    }
+    if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
+    if(obj$type == "poipo") form <- stats::update.formula(form, "observed/w ~ .")
+    # security checks
     assertthat::assert_that(
       is.formula(form),
       attr(stats::terms(form), "response")==1, # Has Response
