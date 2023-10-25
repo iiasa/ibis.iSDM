@@ -19,6 +19,11 @@ built_formula_inla <- function(model, id, x, settings){
     inherits(settings, 'Settings'),
     msg = "Error in model object. This function is not meant to be called outside ouf train()."
   )
+
+  # check if all intercepts are identical
+  assertthat::assert_that(length(unique(sapply(model$biodiversity, function(i) i$use_intercept))) == 1,
+                          msg = "'separate_intercept' must be identical for all datasets.")
+
   # Get object from model
   obj <- model$biodiversity[[id]]
 
@@ -174,21 +179,15 @@ built_formula_inla <- function(model, id, x, settings){
     if(obj$equation=='<Default>'){
       # Check whether to use dataset specific intercepts
       if(length(types)>1 && obj$use_intercept){
-        ii <- paste0('Intercept_',
-                     make.names(tolower(bionames)),'_',types,
-                     # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                     # sapply( model$biodiversity, function(x) x$type ),
-                     collapse = " + "
-        )
+        ii <- paste0('Intercept_', make.names(tolower(bionames)),'_', types,
+                     collapse = " + ")
+        ii <- paste0(" - 1 + ", ii) # hack to remove global
       } else {ii <- ""}
+
       # Go through each variable and build formula for likelihood
-      form <- to_formula(paste("observed ~ ", "Intercept +",
-                               paste(obj$predictors_names, collapse = " + "),
-                               # Check whether a single dataset is provided, otherwise add other intercepts
-                               # # If multiple datasets, remove intercept
-                               ifelse(length(ids) > 1, paste0("-1 + ", ii), ""),
-                               collapse = " ")
-      )
+      form <- to_formula(paste0(paste0("observed ~ ", "Intercept + ",
+                                       paste0(obj$predictors_names, collapse = " + ")),
+                                ii)) # adding separated intercepts or empty string
 
       # Add offset if specified TODO: Not quite sure if this formulation works
       # for inlabru predictor expressions
@@ -214,19 +213,20 @@ built_formula_inla <- function(model, id, x, settings){
       # Convert to formula to be safe
       form <- to_formula( obj$equation )
       # Add generic Intercept if not set in formula
-      if("Intercept" %notin% all.vars(form)) form <- stats::update.formula(form, ". ~ . + Intercept")
+      if("Intercept" %notin% all.vars(form)) form <- stats::update.formula(form, ". ~ Intercept + .")
       # If length of ids is larger than 1, add dataset specific intercept too
       # Check whether to use dataset specific intercepts
       if(length(types)>1 && obj$use_intercept){
-        form <- stats::update.formula(form,
-                               paste0(". ~ . + ",
-                                      paste0('Intercept_',
-                                             make.names(tolower( bionames )), '_', types)
-                                             # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                             # sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                                      )
-        )
-      }
+        ii <- paste0('Intercept_', make.names(tolower(bionames)),'_', types,
+                     collapse = " + ")
+        ii <- paste0(" - 1 + ", ii) # hack to remove global
+      } else {ii <- ""}
+
+      # get all predictors of formulat
+      rhs <- all.vars(form)[all.vars(form) != "observed"]
+
+      # update formula adding intercepts etc. (see above <Default>)
+      form <- to_formula(paste0(paste0("observed ~ ", paste0(rhs, collapse = " + ")), ii))
 
       if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
         if(attr(x$get_latent(), "method") != "poly"){
