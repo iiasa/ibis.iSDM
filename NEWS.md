@@ -17,6 +17,7 @@
 * Bug fix in `built_formula_glmnet()` and response
 * Bug fix in `built_formula_gdb()` and response
 * Each model$biodiversity stores only predictors of current ID
+* Bug fix in `built_formula_inla()` for INLABRU
 
 # ibis.iSDM 0.0.9
 
