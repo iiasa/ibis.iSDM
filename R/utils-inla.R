@@ -61,18 +61,19 @@ built_formula_inla <- function(model, id, x, settings){
         }
       }
 
-      # Construct formula with all variables
-      form <- paste('observed', '~ 0 ',
-                    ifelse(length(types) > 1 && obj$use_intercept, # Check whether a single intercept model is to be constructed
-                           paste(' + Intercept + ',paste0('Intercept_',
-                                              make.names(tolower( bionames )), '_', types,
-                                              # make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                              # sapply( model$biodiversity, function(x) x$type ),
-                           collapse = ' + ')
-                           ),
-                           ""
-                    )
-      )
+      # Check whether to use dataset specific intercepts
+      if(length(types)>1 && obj$use_intercept){
+        ii <- paste0('Intercept_', make.names(tolower(bionames)),'_', types,
+                     collapse = " + ")
+        ii <- paste0("0 + ", ii) # hack to remove global
+      } else {ii <- ""}
+
+      # Go through each variable and build formula for likelihood
+      form <- paste0(paste0("observed ~ Intercept + ", ii))
+
+      # remove global intercept term
+      if(ii != "") form <- gsub(x = form, pattern = "Intercept \\+ ", replacement = "")
+
       # Check whether priors have been specified and if yes, use those
       if(!is.Waiver(priors)){
         # Loop through all provided INLA priors
@@ -128,17 +129,18 @@ built_formula_inla <- function(model, id, x, settings){
         # No priors specified, simply add variables with default
         # Linear for those with few observations
         if(length(var_lin)>0){
-          form <- paste(form, ' + ',paste('f(', var_lin,', model = \'linear\')', collapse = ' + ' ) )
+          form <- paste0(form, paste0('f(', var_lin,', model = \'linear\')', collapse = ' + '))
         }
         # Random walk where feasible
         if(length(var_rw1)>0){
-          form <- paste(form, ifelse(length(var_lin) == 0,'+',''), paste('f(INLA::inla.group(', var_rw1,'),',
-                                                                         # 'scale.model = TRUE,',
-                                                                         # Add RW effects with pc priors. PC priors is on the KL distance
-                                                                         # (difference between probability distributions), P(sigma >2)=0.05
-                                                                         # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
-                                                                         'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
-                                                                         'model = \'rw1\')', collapse = ' + ' ) )
+          form <- paste(form, ifelse(length(var_lin) == 0, '+', ''),
+                        paste('f(INLA::inla.group(', var_rw1,'),',
+                              # 'scale.model = TRUE,',
+                              # Add RW effects with pc priors. PC priors is on the KL distance
+                              # (difference between probability distributions), P(sigma >2)=0.05
+                              # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015
+                              'hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5))),',
+                              'model = \'rw1\')', collapse = ' + ' ) )
         }
       }
       form <- to_formula(form) # Convert to formula
@@ -148,16 +150,19 @@ built_formula_inla <- function(model, id, x, settings){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
           form <- stats::update.formula(form, paste0(" ~ . + ",
-                                              x$engine$get_equation_latent_spatial(
-                                                method = attr(x$get_latent(),'method'),
-                                                vars = which(ids == id),
-                                                separate_spde = attr(x$get_latent(),'separate_spde')
-                                              )
-            )
+                                                     x$engine$get_equation_latent_spatial(
+                                                       method = attr(x$get_latent(),'method'),
+                                                       vars = which(ids == id),
+                                                       separate_spde = attr(x$get_latent(),'separate_spde')
+                                                     )
+          )
           )
         }
       }
     } else{
+
+      # MH: Add intercept stuff as well
+
       # If custom supplied formula, check that variable names match supplied predictors
       if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
       form <- to_formula( obj$equation )
@@ -172,7 +177,7 @@ built_formula_inla <- function(model, id, x, settings){
         all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
       )
     }
-  # -------------------- INLABRU formula----------------
+    # -------------------- INLABRU formula----------------
   } else if(x$get_engine() == "<INLABRU>"){
 
     # Default equation found (e.g. no separate specification of effects)
@@ -196,9 +201,9 @@ built_formula_inla <- function(model, id, x, settings){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
           form <- stats::update.formula(form, paste0(" ~ . + ",
-                                              # For SPDE components, simply add spatial.field
-                                              paste0("spatial.field", which(ids == id))
-            )
+                                                     # For SPDE components, simply add spatial.field
+                                                     paste0("spatial.field", which(ids == id))
+          )
           )
         }
       }
@@ -232,9 +237,9 @@ built_formula_inla <- function(model, id, x, settings){
         if(attr(x$get_latent(), "method") != "poly"){
           # Update with spatial term
           form <- stats::update.formula(form, paste0(" ~ . + ",
-                                              # For SPDE components, simply add spatial.field
-                                              paste0("spatial.field",which(ids == id))
-            )
+                                                     # For SPDE components, simply add spatial.field
+                                                     paste0("spatial.field",which(ids == id))
+          )
           )
         }
       }
@@ -259,7 +264,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
                           is.character(variant)
-                          )
+  )
   check_package("deldir")
   # Function from SDraw
   voronoi.polygons <- function (x, bounding.polygon = NULL, range.expand = 0.1)
@@ -306,12 +311,12 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
     if (!is.null(bounding.polygon)) {
       bounding.polygon <- rgeos::gUnion(bounding.polygon, bounding.polygon)
       voronoi.clipped <- rgeos::gIntersection(voronoi, bounding.polygon,
-                                       byid = TRUE, id = row.names(voronoi))
+                                              byid = TRUE, id = row.names(voronoi))
       df <- data.frame(voronoi)
       df$area <- sapply(methods::slot(voronoi.clipped, "polygons"),
                         methods::slot, "area")
       voronoi <- sp::SpatialPolygonsDataFrame(voronoi.clipped,
-                                          df)
+                                              df)
     }
     voronoi
   }
@@ -340,19 +345,19 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
         return(0)
       }
     })
-   assertthat::assert_that(assertthat::are_equal(round( sum(w) ), round( rgeos::gArea(region.poly) ) )) # Security check
-   if(relative) w <- w / sum(w)
+    assertthat::assert_that(assertthat::are_equal(round( sum(w) ), round( rgeos::gArea(region.poly) ) )) # Security check
+    if(relative) w <- w / sum(w)
   } else {
     # Convert to Spatial Polygons
     polys <- sp::SpatialPolygons(lapply(1:length(tiles), function(i) {
-       p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
-       n <- nrow(p)
-       sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
+      p <- cbind(tiles[[i]]$x, tiles[[i]]$y)
+      n <- nrow(p)
+      sp::Polygons(list(sp::Polygon(p[c(1:n, 1), ])), i)
     }),proj4string = mesh$crs)
 
     # Calculate area of each polygon in km2
     w <- sf::st_area(
-       sf::st_as_sf(polys)
+      sf::st_as_sf(polys)
     ) |> units::set_units(km^2) |> as.numeric()
     # Relative area
     if(relative) w <- w / sum(w)
@@ -377,14 +382,14 @@ mesh_as_sf <- function(mesh) {
   # Now convert the delaunay triangles to spatial polygons
   dp <- lapply(X = 1:nrow(tv),
                FUN = function(index, points, pointindex) {
-    # Retrieve the vertex coordinates of the current triangle
-    cur <- pointindex[index, ]
-    # Construct a Polygons object to contain the triangle
-    sp::Polygons(list(
-      sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
-      ID = index
-      )
-  }, points = mesh$loc[, c(1, 2)], pointindex = tv) |>
+                 # Retrieve the vertex coordinates of the current triangle
+                 cur <- pointindex[index, ]
+                 # Construct a Polygons object to contain the triangle
+                 sp::Polygons(list(
+                   sp::Polygon( points[c(cur, cur[1]), ], hole = FALSE)),
+                   ID = index
+                 )
+               }, points = mesh$loc[, c(1, 2)], pointindex = tv) |>
     # Convert the polygons to a SpatialPolygons object
     sp::SpatialPolygons(., proj4string = mesh$crs) |>
     # Convert to sf
@@ -481,7 +486,7 @@ coords_in_mesh <- function(mesh, coords) {
     loc = mesh$loc,
     tv = mesh$graph$tv,
     points2mesh = loc
-    )
+  )
   # Return vector with point not in
   return(loc_inside$p2m.t[,1]!=0)
 }
@@ -537,7 +542,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
   assertthat::assert_that(is.character(type),
                           type %in% names(model$summary.fixed),
                           all( rownames(model$summary.fixed) %in% names(preds) )
-                          )
+  )
   if(type !='mean') warning('Predictions other than __mean__ unlikely to work well...!')
 
   # Output raster
@@ -547,7 +552,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
     preds <- get_rastervalue(coords = coords,
                              env = preds,
                              rm.na = FALSE
-                             )
+    )
     # Set Intercept variables
     for(val in grep('Intercept',rownames(model$summary.fixed),value = TRUE)){
       preds[[val]] <- 1
@@ -583,9 +588,9 @@ coef_prediction <- function(mesh, mod, type = 'mean',
     if(nrow(coords)!= nrow(ofs)){
       # Recalculate average predictors for new coordinates
       ofs <- get_ngbvalue(coords = coords,
-                            env = ofs,
-                            longlat = terra::is.lonlat(mesh$crs),
-                            field_space = c('x','y'))
+                          env = ofs,
+                          longlat = terra::is.lonlat(mesh$crs),
+                          field_space = c('x','y'))
     }
     # ofs[is.na(ofs[,3]),3] <- 0
     out <- out + ofs[,3]
@@ -650,12 +655,12 @@ post_prediction <- function(mod, nsamples = 100,
   # --- #
   # Simulate from approximated posterior
   samples <- INLA::inla.posterior.sample(n = nsamples,
-                                     result = model,
-                                     # seed = seed,
-                                     use.improved.mean = TRUE, # marginal means?
-                                     num.threads = ifelse(getOption("ibis.nthread")>1, getOption("ibis.nthread"),NULL),
-                                     parallel.configs = TRUE,
-                                     verbose = TRUE
+                                         result = model,
+                                         # seed = seed,
+                                         use.improved.mean = TRUE, # marginal means?
+                                         num.threads = ifelse(getOption("ibis.nthread")>1, getOption("ibis.nthread"),NULL),
+                                         parallel.configs = TRUE,
+                                         verbose = TRUE
   )
 
   # inlabru extract entries function and names standardization functions
@@ -813,12 +818,12 @@ post_prediction <- function(mod, nsamples = 100,
 
     for (nm in estim) {
       smy[[nm]] <- post_summarize(
-          lapply(
-            vals,
-            function(v) v[[nm]]
-          ),
-          x = vals[[1]][, covar, drop = FALSE]
-        )
+        lapply(
+          vals,
+          function(v) v[[nm]]
+        ),
+        x = vals[[1]][, covar, drop = FALSE]
+      )
     }
     is.annot <- vapply(names(smy), function(v) all(smy[[v]]$sd == 0), TRUE)
     annot <- do.call(cbind, lapply(smy[is.annot], function(v) v[, 1]))
@@ -849,13 +854,13 @@ post_prediction <- function(mod, nsamples = 100,
     smy <- list()
     for(nm in vals.names) {
       tmp <- post_summarize(
-          lapply(
-            vals,
-            function(v) v[[nm]]
-          )
+        lapply(
+          vals,
+          function(v) v[[nm]]
         )
+      )
       if(!drop &&
-          (NROW(preds) == NROW(tmp))) {
+         (NROW(preds) == NROW(tmp))) {
         smy[[nm]] <- expand_to_dataframe(preds, tmp)
       } else {
         smy[[nm]] <- tmp
@@ -1039,9 +1044,9 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
   # Make a mesh projection
   suppressWarnings(
     projgrid <- INLA::inla.mesh.projector(mesh,
-                                  xlim = range(bdry[,1]),
-                                  ylim = range(bdry[,2]),
-                                  dims = Nxy)
+                                          xlim = range(bdry[,1]),
+                                          ylim = range(bdry[,2]),
+                                          dims = Nxy)
   )
 
   if(!inherits(background, "sf")) background <- sf::st_as_sf( background )
@@ -1062,10 +1067,10 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
 
   suppressMessages(
     suppressWarnings(
-    # cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
-    #                                    proj4string = methods::as(background.g,'Spatial')@proj4string),
-    #                            y = background.g))
-    check <- sf::st_intersects(projpoints, background.g)
+      # cellsIn <- !is.na(sp::over(x = sp::SpatialPoints(projgrid$lattice$loc,
+      #                                    proj4string = methods::as(background.g,'Spatial')@proj4string),
+      #                            y = background.g))
+      check <- sf::st_intersects(projpoints, background.g)
     )
   )
   assertthat::assert_that(is.list(check))
@@ -1177,11 +1182,11 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
   # --- #
   # Return a list with the projection grid
   return(list(
-              stk_proj = stk_proj,
-              predcoords = predcoords,
-              cellsIn = cellsIn
-              )
-    )
+    stk_proj = stk_proj,
+    predcoords = predcoords,
+    cellsIn = cellsIn
+  )
+  )
 }
 
 #' Prediction coordinates for INLA
@@ -1370,9 +1375,9 @@ manual_inla_priors <- function(prior){
               return(log_dens);"
 
   switch (prior,
-    'halfcauchy' = return(HC.prior),
-    'uniform'  = return(UN.prior),
-    'halfnormal' = return(HN.prior)
+          'halfcauchy' = return(HC.prior),
+          'uniform'  = return(UN.prior),
+          'halfnormal' = return(HN.prior)
   )
 }
 
@@ -1396,13 +1401,13 @@ manual_inla_priors <- function(prior){
 inla.backstep <- function(master_form,
                           stack_data_resp, stk_inference,fam, cf, li = 1,
                           response = NULL, keep = NULL
-                          ){
+){
   assertthat::assert_that(is.formula(master_form),
                           is.list(stack_data_resp),inherits(stk_inference,'inla.data.stack'),
                           is.character(fam), is.list(cf), !missing(li),
                           is.null(response) || response %in% all.vars(master_form),
                           is.null(keep) || is.character(keep) || is.vector(keep)
-                          )
+  )
   # Get response term
   if(is.null(response)) response <- all.vars(master_form)[1]
   # Formula terms
