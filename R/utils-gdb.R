@@ -102,12 +102,12 @@ built_formula_gdb <- function(model, id, x, settings){
     if( settings$get("only_linear") ){
       if( length(grep("bols",attr(stats::terms(form), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
-        form <- stats::as.formula(paste0("observed ~", paste0("bols(", obj$predictors_names, ")",collapse = " + ")))
+        form <- stats::as.formula(paste0("observed ~ ", paste0("bols(", all.vars(form)[-1], ")", collapse = " + ")))
       }
     } else {
       if( length(grep("bbs",attr(stats::terms(form), "term.labels") ))==0 ){
         # Assume that each variable as none, so add
-        form <- stats::as.formula(paste0("observed ~", paste0("bbs(", obj$predictors_names, ")",collapse = " + ")))
+        form <- stats::as.formula(paste0("observed ~ ", paste0("bbs(", all.vars(form)[-1], ")", collapse = " + ")))
       }
     }
 

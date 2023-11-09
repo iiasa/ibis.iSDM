@@ -501,8 +501,7 @@ engine_inla <- function(x,
         if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
 
         # Set number of threads via set.Options
-        INLA::inla.setOption(num.threads = getOption('ibis.nthread'),
-                             blas.num.threads = getOption('ibis.nthread'))
+        INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
 
         # --- Prepare general inputs ---
         # Check whether spatial latent effects were added
@@ -810,7 +809,7 @@ engine_inla <- function(x,
           # )
           suppressWarnings(
             prediction <- terra::rast(cbind( as.data.frame(predcoords), post), type = "xyz",
-                                      crs = terra::crs(self$get_data('mesh')$crs@projargs) )
+                                      crs = terra::crs(self$get_data('mesh')$crs$wkt))
           )
 
           prediction <- terra::mask(prediction, model$background) # Mask with background

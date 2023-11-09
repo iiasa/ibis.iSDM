@@ -393,7 +393,7 @@ methods::setMethod(
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
-  function(obj, value = NULL,...) {
+  function(obj, value = NULL, ...) {
 
     # Get Dots
     dots <- list(...)

@@ -166,17 +166,17 @@ engine_glmnet <- function(x,
         fam <- model$biodiversity[[1]]$family
         form <- model$biodiversity[[1]]$equation
 
-        # -- #
-        # Respecify the predictor names if not matching
-        te <- formula_terms(form)
-        if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
-          model$biodiversity[[1]]$predictors_names <-
-            model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
-          model$biodiversity[[1]]$predictors_types <-
-            model$biodiversity[[1]]$predictors_types |> dplyr::filter(
-            predictors %in% te)
-        }
-        # -- #
+        # # -- #
+        # # Respecify the predictor names if not matching
+        # te <- formula_terms(form)
+        # if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
+        #   model$biodiversity[[1]]$predictors_names <-
+        #     model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
+        #   model$biodiversity[[1]]$predictors_types <-
+        #     model$biodiversity[[1]]$predictors_types |> dplyr::filter(
+        #     predictors %in% te)
+        # }
+        # # -- #
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
@@ -321,7 +321,7 @@ engine_glmnet <- function(x,
 
         form <- model$biodiversity[[1]]$equation
         df <- cbind(model$biodiversity[[1]]$predictors,
-                    data.frame(observed = model$biodiversity[[1]]$observations[,'observed'])
+                    data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE])
         )
         df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed"))
         w <- df$w <- model$biodiversity[[1]]$expect # The expected exposure
@@ -348,7 +348,8 @@ engine_glmnet <- function(x,
         # Then add each factor level if set
         if(any(model$predictors_types$type=="factor")){
           fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
-          p.fac <- c(p.fac, rep(1, length( unique(df[,fac]) ) ))
+          # return penalty factor for each level of each factor (even if level values are identical across factors)
+          p.fac <- c(p.fac, rep(1, sum(apply(df[, fac, drop = FALSE], 2, function(x) length(unique(x))))))
         }
         # Duplicate p.fac container for lower and upper limits
         lowlim <- rep(-Inf, length(p.fac)) |> stats::setNames(names(p.fac))

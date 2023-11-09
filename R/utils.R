@@ -587,10 +587,10 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
                                   # select = c(point_column, attr(z, "sf_column"))) |>
                         rename_geometry("geometry")
                     } else {
-                      o <- sf::st_coordinates( guess_sf( z )[,1:2])
+                      o <- sf::st_coordinates(guess_sf(z)[,1:2])
                       colnames(o) <- c("x", "y")
                       o <- as.data.frame(o)
-                      o[[point_column]] <- z[,point_column]
+                      o[[point_column]] <- z[,point_column, drop = TRUE]
                       o[["type"]] <- x$type
                     }
                     if(addName) suppressWarnings( o$name <- x$name )

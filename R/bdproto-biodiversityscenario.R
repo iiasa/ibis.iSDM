@@ -48,6 +48,9 @@ BiodiversityScenario <- bdproto(
     # Thresholds
     tr <- self$get_threshold()
 
+    # Any other simulation outputs modules
+    simmods <- self$get_simulation()
+
     message(paste0(
       ifelse(is.Waiver(self$limits),"Spatial-temporal scenario:","Spatial-temporal scenario (limited):"),
                    '\n  Used model: ',ifelse(is.Waiver(fit) || isFALSE(fit), text_red('None'), class(fit)[1] ),
@@ -57,6 +60,7 @@ BiodiversityScenario <- bdproto(
                    ifelse(!is.Waiver(cs)||!is.Waiver(tr), "\n --------- ", ""),
                    ifelse(is.Waiver(cs),"", paste0("\n  Constraints:    ", text_green(paste(paste0(names(cs),' (',cs,')'),collapse = ', ')) ) ),
                    ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3),' (',names(tr[1]),')') ),
+                   ifelse(is.Waiver(simmods),"", paste0("\n  Simulations:    ", text_green(paste(paste0(names(simmods),' (',simmods[[1]][[1]],')'),collapse = ', ')) ) ),
                    "\n --------- ",
                    "\n  Scenarios fitted: ", ifelse(is.Waiver(self$scenarios),text_yellow('None'), text_green('Yes'))
       )
@@ -194,6 +198,16 @@ BiodiversityScenario <- bdproto(
       bdproto(NULL, self, constraints = x)
     }
   },
+  # Get simulation options and parameters
+  get_simulation = function(self){
+    if('simulation' %notin% names(self)) return( new_waiver() )
+    return( self$simulation )
+  },
+  # Set simulation objects
+  set_simulation = function(self, x ){
+    # We only take a single simulation so far
+    bdproto(NULL, self, simulation = x)
+  },
   # Get Predictors
   get_predictors = function(self){
     return(self$predictors)
@@ -232,6 +246,8 @@ BiodiversityScenario <- bdproto(
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
       invisible()
     } else {
+      assertthat::assert_that(what %in% names( self$get_data() ),
+                              msg = paste(what, "not found in scenario projections?"))
       # Get unique number of data values. Surely there must be an easier val
       vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
       vals <- base::length(stats::na.omit(vals))

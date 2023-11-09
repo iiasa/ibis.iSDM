@@ -37,13 +37,21 @@ terra_to_raster <- function(input){
   assertthat::assert_that(
     is.Raster(input)
   )
-  message("Converting a SpatRaster to raster, which should not be necessary!")
+  if(getOption('ibis.setupmessages')) message("Converting a SpatRaster to raster, which should not be necessary!")
   # Check that package is available
   check_package("raster")
   if(!isNamespaceLoaded("raster")) { attachNamespace("raster");requireNamespace("raster") }
 
-  out <- terra::as.raster(input)
-  if(terra::nlyr(input)>1) out <- raster::stack(out)
+  # Make a distinction between single and multiple band layers
+  if(terra::nlyr(input)==1){
+    out <- raster::raster(input)
+  } else {
+    out <- raster::stack(input)
+  }
+  # If time specified, set those again
+  if(!all(is.na(terra::time(input)))){
+    out <- raster::setZ(out, terra::time(input))
+  }
   return(out)
 }
 
@@ -969,7 +977,11 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   }
   # Convert to factor if any
   if(any(is.factor(env))){
-    ex[,names(env)[which(is.factor(env))]] <- factor(ex[,names(env)[which(is.factor(env))]])
+    # MH: Shouldn't this be a factor already? Anyhow, previous code didnt work for more than 1 column
+    if (sum(is.factor(env)) == 1) {
+      ex[,names(env)[which(is.factor(env))]] <- factor(ex[,names(env)[which(is.factor(env))]])
+    } else {
+      ex[,names(env)[which(is.factor(env))]] <- lapply(ex[,names(env)[which(is.factor(env))]], factor)}
   }
 
   if(rm.na){

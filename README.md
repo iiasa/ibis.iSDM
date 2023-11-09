@@ -16,6 +16,8 @@
 Status](https://codecov.io/gh/iiasa/ibis.iSDM/branch/master/graph/badge.svg)](https://app.codecov.io/gh/iiasa/ibis.iSDM?branch=master)
 [![Published
 in](https://img.shields.io/badge/Ecological_Informatics-green?style=plastic&label=Published%20in&link=https%3A%2F%2Fdoi.org%2F10.1016%2Fj.ecoinf.2023.102127)](https://doi.org/10.1016/j.ecoinf.2023.102127)
+[![ibis.iSDM status
+badge](https://iiasa.r-universe.dev/badges/ibis.iSDM)](https://iiasa.r-universe.dev/ibis.iSDM)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/ibis.iSDM)](https://CRAN.R-project.org/package=ibis.iSDM)
 <!-- badges: end -->
@@ -32,11 +34,12 @@ for an introduction to iSDMs.
 ## Installation
 
 The latest version can be installed from GitHub. A CRAN release is
-planned.
+planned, but in the meantime the package can be found on R-universe as
+well.
 
 ``` r
-# For CRAN installation (Not yet done)
-# install.packages("ibis.iSDM")
+# For installation (Not yet done)
+install.packages("ibis.iSDM", repos = "https://iiasa.r-universe.dev")
 
 # For Installation directly from github
 install.packages("remotes")

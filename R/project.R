@@ -14,6 +14,7 @@ NULL
 #' @details In the background the function \code{x$project()} for the respective
 #' model object is called, where \code{x} is fitted model object. For specifics
 #' on the constraints, see the relevant \code{constrain} functions, respectively:
+#'
 #' * [`add_constraint()`] for generic wrapper to add any of the available constrains.
 #' * [`add_constraint_dispersal()`] for specifying dispersal constraint on the temporal projections at each step.
 #' * [`add_constraint_MigClim()`] Using the \pkg{MigClim} R-package to simulate dispersal in projections.
@@ -32,6 +33,11 @@ NULL
 #' [`threshold()`] to a [`BiodiversityScenario-class`] object enables the
 #' computation of thresholds at every step based on the threshold used for the
 #' main model (threshold values are taken from there).
+#'
+#' It is also possible to make a complementary simulation with the \code{steps}
+#' package, which can be provided via [`simulate_population_steps()`] to the
+#' [`BiodiversityScenario-class`] object. Similar as with thresholds, estimates
+#' values will then be added to the outputs.
 #'
 #' Finally this function also allows temporal stabilization across prediction
 #' steps via enabling the parameter \code{stabilize} and checking the
@@ -175,7 +181,9 @@ methods::setMethod(
     if(inherits(baseline_threshold, 'SpatRaster')){
       baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
     }
+    # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
+    scenario_simulations <- mod$get_simulation()
 
     # Create a template for use
     template <- emptyraster( mod$get_predictors()$get_data() )
@@ -208,13 +216,15 @@ methods::setMethod(
     assertthat::assert_that(nrow(df)>0,
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
+
     df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
     df$time <- to_POSIXct( df$time )
     # Convert all units classes to numeric or character to avoid problems
     df <- units::drop_units(df)
 
     # ------------------ #
-    if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability projections for ', length(unique(df$time)), ' timesteps.')
+    if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability projections for ',
+                                              length(unique(df$time)), ' timesteps.')
 
     # Now for each unique element, loop and project in order
     proj <- terra::rast()
@@ -496,6 +506,23 @@ methods::setMethod(
       }
     }
 
+    # Optional simulation steps
+    if(!is.Waiver(scenario_simulations)){
+      if("steps" %in% scenario_simulations$simulation$method ){
+        pops <- .simulate_steps(proj, scenario_simulations)
+        if(!is.null(pops)){
+          assertthat::assert_that(is.Raster(pops))
+          pops <- stars::st_as_stars(pops,
+                                     crs = sf::st_crs(new_crs)
+          ); names(pops) <- 'population'
+        }
+      }
+    } else {
+      pops <- NULL
+    }
+
+    # --------------------------------- #
+    # # # # # # # # # # # # # # # # # # #
     # Finally convert to stars and rename
     proj <- stars::st_as_stars(proj,
                                crs = sf::st_crs(new_crs)
@@ -510,8 +537,24 @@ methods::setMethod(
       if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
         proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))
       }
-      proj <- stars:::c.stars(proj, proj_thresh)
+      # Try
+      new <- try({ c(proj, proj_thresh) },silent = TRUE)
+      if(inherits(new, "try-error")){
+        # Replace dimensions and check again.
+        # This error likely originates from some part of the modelling routing
+        # reprojecting input layers
+        stars::st_dimensions(proj_thresh) <- stars::st_dimensions(proj)
+        new <- try({ c(proj, proj_thresh) },silent = TRUE)
+      }
+      proj <- new; rm(new)
     }
+    if(!is.null(pops)){
+      stars::st_dimensions(pops) <- stars::st_dimensions(proj)
+
+      proj <- try({ c(proj, pops) },silent = TRUE)
+    }
+    # # # # # # # # # # # # # # # # # # #
+    # --------------------------------- #
 
     # Return output by adding it to the scenario object
     bdproto(NULL, mod,

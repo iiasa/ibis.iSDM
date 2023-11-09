@@ -213,7 +213,7 @@ engine_stan <- function(x,
           if('poipo' == model$biodiversity[[i]]$type){
 
             # Get background layer
-            bg <- x$engine$get_data('template')
+            bg <- self$get_data("template") # model$engine$get_data('template')
             assertthat::assert_that(!is.na(terra::global(bg, "min", na.rm = TRUE)[,1] ))
 
             # Add pseudo-absence points
@@ -237,12 +237,16 @@ engine_stan <- function(x,
             if(length(any_missing)>0){
               presabs <- presabs[-any_missing,] # This works as they are in the same order
               model$biodiversity[[i]]$expect <- model$biodiversity[[i]]$expect[-any_missing]
-              # Fill the absences with 1 as multiplier. This works since absences follow the presences
-              model$biodiversity[[i]]$expect <- c( model$biodiversity[[i]]$expect,
-                                                   rep(1, nrow(presabs)-length(model$biodiversity[[i]]$expect) ))
             }
             df <- subset(df, stats::complete.cases(df))
             assertthat::assert_that(nrow(presabs) == nrow(df))
+
+            # Check that expect matches
+            if(length(model$biodiversity[[1]]$expect)!=nrow(df)){
+              # Fill the absences with 1 as multiplier. This works since absences follow the presences
+              model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                                   rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+            }
 
             # Overwrite observation data
             model$biodiversity[[i]]$observations <- presabs

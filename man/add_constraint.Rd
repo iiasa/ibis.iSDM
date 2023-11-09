@@ -82,12 +82,15 @@ can be particular useful to limit the influence of increasing marginal
 responses and avoid biologically unrealistic projections.
 }
 
-\strong{Boundary}:
+\strong{Boundary and size}:
 \itemize{
 \item \code{boundary} - Applies a hard boundary constraint on the projection, thus disallowing an expansion of a range outside
 the provide layer. Similar as specifying projection limits (see
 \code{\link{distribution}}), but can be used to specifically constrain a projection
 within a certain area (e.g. a species range or an island).
+\item \code{minsize} - Allows to specify a certain size that must be satisfied
+in order for a thresholded patch to be occupied. Can be thought of as a minimum
+size requirement. See \code{add_constraint_minsize()} for the required parameters.
 }
 }
 \examples{
@@ -111,11 +114,13 @@ within a certain area (e.g. a species range or an island).
 \code{\link{add_constraint_adaptability}}, \code{\link{add_constraint_boundary}}
 
 Other constraint: 
+\code{\link{add_constraint_MigClim}()},
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()}
+\code{\link{add_constraint_minsize}()},
+\code{\link{simulate_population_steps}()}
 }
 \concept{constraint}
 \keyword{scenario}

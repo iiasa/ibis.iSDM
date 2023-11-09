@@ -20,7 +20,7 @@ built_formula_glmnet <- function(obj){
   # Default equation found
   if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
     # Construct formula with all variables
-    form <- paste( 'observed', ifelse(obj$family=='poisson', '/w', ''), ' ~ ')
+    form <- paste0('observed', ifelse(obj$family=='poisson', '/w', ''), ' ~ ')
     # Add linear predictors
     form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
     # Convert to formula
@@ -29,14 +29,13 @@ built_formula_glmnet <- function(obj){
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
-    if(attr(stats::terms(form), "response")==0){
-      form <- stats::update.formula(form, "observed ~ .")
-    }
+    if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
+    if(obj$family=='poisson') form <- stats::update.formula(form, observed/w ~ .)
     # Security checks
     assertthat::assert_that(
       is.formula(form),
       attr(stats::terms(form), "response")==1, # Has Response
-      all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
+      all( all.vars(form) %in% c('observed', "w", obj[['predictors_names']]) )
     )
   }
 

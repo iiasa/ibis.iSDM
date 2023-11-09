@@ -105,6 +105,16 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
     )
   }
 
+  # Addition of rangeShifter
+  check_package("devtools")
+  try({
+    devtools::install_github("https://github.com/RangeShifter/RangeShiftR-package", ref = "main")
+  })
+  # Try and Add steps
+  try({
+    remotes::install_github("steps-dev/steps", build_vignettes = TRUE)
+  })
+
   # Update packages if set
   if(update){
     if("INLA" %in% deps){

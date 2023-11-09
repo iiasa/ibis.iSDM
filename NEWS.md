@@ -1,4 +1,26 @@
-# ibis.iSDM 0.0.9 (current dev branch)
+# ibis.iSDM 0.1.0 (current dev branch)
+
+#### New features
+* Added a small convenience wrapper to add model outputs to another model `add_predictors_model()`
+* Started adding mechanistic SDM vignette #67
+* Wrapper for *steps* implemented via `simulate_population_steps()` #68
+
+#### Minor improvements and bug fixes
+* Added R-universe installation option as alternative to github #38
+* Minor bug fixes in `scenario()` object, and MigClim and Kissmig wrappers.
+* Bug fix related to CRS classes of sp and sf
+* Bug fix related to blas.num.threads
+* Bug fix that crashed `write_summary()` outputs when no prediction was made.
+* Bug fix related to CRS in `engine_inla()`
+* Bug fix in `engine_stan()` related to background layer
+* Class of biodiversity data is identical for PO and PA
+* Bug fix in `built_formula_glmnet()` and response
+* Bug fix in `built_formula_gdb()` and response
+* Each model$biodiversity stores only predictors of current ID
+* Bug fix in `built_formula_inla()` for INLABRU
+
+# ibis.iSDM 0.0.9
+
 #### New features
 * Added new vignette on available functions for data preparation #67
 * Addition of small `mask()` function that emulates the for `terra`.
@@ -13,6 +35,7 @@
 * Improved error messages and handling of formula's.
 
 # ibis.iSDM 0.0.8
+
 #### New features
 * Implemented min size constraint (`add_constraint_minsize()`) #56
 * Added a function for estimating partial effects of ensembles `ensemble_spartial()`.
@@ -26,6 +49,7 @@
 * Allow to specify location of biodiversity point records in `threshold()`.
 
 # ibis.iSDM 0.0.7
+
 #### New features
 * Added method proximity to `add_control_bias()` to place lower weights on points closer to another.
 * Added helper functions `get_data()` and the option to apply `threshold()` directly on BiodiversityScenarios.
