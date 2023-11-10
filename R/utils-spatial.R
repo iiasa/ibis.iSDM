@@ -1224,15 +1224,20 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'   effectively removes data prior to any estimation and its use should be
 #'   considered with care (see also Steen et al. 2021).
 #'
-#' @details Currently implemented thinning methods:
+#' @details
 #'
-#'  * \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
-#'   Does not account for any spatial or environmental distance between
-#'   observations.
-#'  * \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
-#'   Points are preferentially thinned from grid cells which are in the 25% most
-#'   biased (larger values assumed greater bias) and have high point density.
-#'   Thins the observations up to \code{"minpoints"}.
+#' All methods only remove points from "over-sampled" grid cells/areas. These are
+#' defined as all cells/area which either have more points than \code{minpoints} or
+#' more points than the global minimum point count per cell (whichever is larger).
+#'
+#' Currently implemented thinning methods:
+#'
+#'  * \code{"random"}: Samples at random across all over-sampled grid cells returning
+#'   at minimum \code{"minpoints"} .
+#'   Does not account for any spatial or environmental distance between observations.
+#'  * \code{"bias"}: This option removes explicitly points that are considered biased (parameter \code{"env"}) only.
+#'   Points are only thinned from grid cells which are above the bias quantile (larger values
+#'   equals greater bias). Thins the observations up to \code{"minpoints"}.
 #'  * \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 #'   each occupied zone. Careful: If the zones are relatively wide this can
 #'   remove quite a few observations.
@@ -1244,7 +1249,7 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'   iteratively until the minimum distance between points is crossed.  The
 #'   \code{"mindistance"} parameter has to be set for this function to work.
 #'
-#' @param df A [`sf`] or [`data.frame`] object with observed occurrence points.
+#' @param data A [`sf`] object with observed occurrence points.
 #'   All methods threat presence-only and presence-absence occurrence points
 #'   equally.
 #' @param background A [`SpatRaster`] object with the background of the study
@@ -1255,11 +1260,18 @@ explode_factorized_raster <- function(ras, name = NULL){
 #' @param method A [`character`] of the method to be applied (Default:
 #'   \code{"random"}).
 #' @param minpoints A [`numeric`] giving the number of data points at minimum to
-#'   take (Default: \code{10}).
+#'   remain (Default: \code{10}).
 #' @param mindistance A [`numeric`] for the minimum distance of neighbouring
 #'   observations (Default: \code{NULL}).
-#' @param zones A [`SpatRaster`] to be supplied when option \code{"method"} is
+#' @param zones A [`SpatRaster`] to be supplied when option \code{"zones"} is
 #'   chosen (Default: \code{NULL}).
+#' @param probs A [`numeric`] used as quantile threshold in \code{"bias"} method.
+#'   (Default: \code{0.75}).
+#' @param global A [`logical`] if during \code{"bias"} method global or local, extracted
+#'   bias values are used as threshold. (Default: \code{TRUE}).
+#' @param centers A [`numeric`] used as number of centers for \code{"environmental"} method.
+#'   (Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
+#'   is bigger).
 #' @param verbose [`logical`] of whether to print some statistics about the
 #'   thinning outcome (Default: \code{TRUE}).
 #' @examples
@@ -1276,207 +1288,272 @@ explode_factorized_raster <- function(ras, name = NULL){
 #' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.
 #' @keywords utils
 #' @export
-thin_observations <- function(df, background, env = NULL, method = "random", minpoints = 10, mindistance = NULL,
-                              zones = NULL, verbose = TRUE){
+thin_observations <- function(data, background, env = NULL, method = "random", minpoints = 10, mindistance = NULL,
+                              zones = NULL, probs = 0.75, global = TRUE, centers = NULL, verbose = TRUE){
   assertthat::assert_that(
-    inherits(df, "sf") || inherits(df, "data.frame"),
-    nrow(df) > 0,
+    inherits(data, "sf"),
+    nrow(data) > 0,
     is.Raster(background),
     is.Raster(env) || is.null(env),
     is.character(method),
     is.numeric(minpoints) && minpoints > 0,
     is.null(mindistance) || is.numeric(mindistance),
-    is.Raster(zones) || is.null(zones)
+    (is.Raster(zones) && is.factor(zones)) || is.null(zones),
+    is.numeric(probs) && probs > 0 && probs < 1 && length(probs)==1,
+    is.logical(global),
+    is.null(centers) || is.numeric(centers)
   )
   check_package("dplyr")
   # Match method
   method <- match.arg(method, choices = c("random", "spatial", "bias", "environmental", "zones"), several.ok = FALSE)
 
-  # Label background with id
-  bg <- background
-  bg[] <- 1:terra::ncell(bg)
-  bg <- terra::mask(bg, background)
-
-  # Check that environment has the same projection
-  if(is.Raster(env) && method == "environmental"){
-    assertthat::assert_that( terra::compareGeom(bg, env, stopOnError = FALSE) )
-  }
   # Check that CRS is the same as background
-  if(sf::st_crs(df) != sf::st_crs(bg)){
+  if(sf::st_crs(data) != sf::st_crs(background)){
     message("Projection is different from input data. Reprojecting!")
-    df <- df |> sf::st_transform(crs = sf::st_crs(bg))
+    data <- data |> sf::st_transform(crs = sf::st_crs(background))
   }
 
   # Take coordinates of supplied data and rasterize
-  coords <- sf::st_coordinates( df )
-  ras <- terra::rasterize(coords, bg) # Get the number of observations per grid cell
+  coords <- sf::st_coordinates(data)
+  ras <- terra::rasterize(coords, background, fun = sum) # Get the number of observations per grid cell
 
-  # Bounds for thining
-  totake <- c(lower = minpoints, upper = max( terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
+  # Bounds for thinning
+  # MH: Would be nice if upper is either for cells (random, bias) or zones/cluster
+  totake <- c(lower = minpoints, upper = max(terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
 
   # -- #
   if(method == "random"){
     # For each unique grid cell id, get the minimum value up to a maximum of the
     # points by sampling at random from the occupied grid cells
 
-    # Output vector
-    sel <- vector()
+    # extract cell id for each point
+    ex <- cbind(id = 1:nrow(coords),
+                terra::extract(ras, coords, cell = TRUE))
 
-    ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords)[,1]
-    )
-    ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
+    # remove NA points
+    ex <- subset(ex, stats::complete.cases(ex))
 
-    ex <- dplyr::left_join(ex,
-                           ex |> dplyr::group_by(cid) |> dplyr::summarise(N = dplyr::n()),
-                           by = "cid"
-    )
-    # Points to take
-    sel <- append(sel, ex$id[which(ex$N <= min(totake))] )
+    # Points to return
+    sel <- ex$id[which(ex$sum <= totake[["lower"]])]
 
     # For those where we have more than the minimum, take at random the upper
     # limits of observations
-    ex$oversampled <- ifelse(ex$N >= totake["upper"], 1, 0)
-    if(dplyr::n_distinct(ex$oversampled) > 1){
+    ex$oversampled <- ifelse(ex$sum > totake[["upper"]], 1, 0)
+    if(sum(ex$oversampled) > 1){
       # If there any oversampled
       # Now sample at random up to the maximum amount.
-      o <- ex  |> dplyr::filter(oversampled == 1) |>
-        dplyr::group_by(cid) |>
-        dplyr::slice_sample(n = min(totake))
-      if(nrow(o)>0) sel <- append(sel, o$id)
-      rm(o)
+      o <- dplyr::filter(ex, oversampled == 1) |>
+        dplyr::group_by(cell) |>
+        dplyr::slice_sample(n = totake[["lower"]])
+      if(nrow(o) > 0) sel <- c(sel, o$id)
     }
+
     if(anyDuplicated(sel)) sel <- unique(sel)
+    try({rm(o, ex)}, silent = TRUE)
 
-    try({rm(ex)},silent = TRUE)
   } else if(method == "bias"){
-    assertthat::assert_that(is.Raster(env),
-                            terra::nlyr(env)==1,
+    assertthat::assert_that(terra::nlyr(env)==1,
                             msg = "Bias requires a single SpatRaster layer given to env.")
-    sel <- vector()
 
-    # Convert bias layer into percentile (largest being)
-    bias_perc <- terra::global(env, fun = quantile, na.rm = TRUE)[["X75."]]
+    # make sure name is known
+    names(env) <- "bias"
 
     # Now extract
-    ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords)[,1],
-                     pres = terra::extract(ras, coords)[,1],
-                     bias = terra::extract(env, coords)[,1]
-    )
-    ex <- subset(ex, stats::complete.cases(ex)) # Don't need missing points
-    # Now identify those to be thinned
-    ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$pres < totake[1]), 1, 0)
-    # Now thin those points that are to be thinned
-    if(length(unique(ex$tothin))>1){
-      ss <- ex |> dplyr::filter(tothin == 1) |>
-        dplyr::group_by(cid) |>
-        dplyr::slice_sample(n = totake[1], weight_by = bias, replace = T) |>
-        dplyr::distinct()
+    ex <- cbind(id = 1:nrow(coords),
+                terra::extract(ras, coords, cells = TRUE),
+                terra::extract(env, coords))
 
-      # Points to take
-      sel <- append(sel, ex$id[ex$tothin==0] )
-      sel <- append(sel, ss$id )
-      try({rm(ss, ex)},silent = TRUE)
+    # remove NA points
+    ex <- subset(ex, stats::complete.cases(ex))
+
+    # Points to return
+    sel <- ex$id[which(ex$sum <= totake[["lower"]])]
+
+    # Convert bias layer into percentile (largest being)
+    if (global) {
+      bias_perc <- terra::global(env, fun = quantile, probs = probs, na.rm = TRUE)[,1]
+    } else {
+      bias_perc <- stats::quantile(ex$bias, probs = probs)[[1]]
     }
+
+    # Now identify those to be thinned
+    ex$tothin <- ifelse((ex$bias >= bias_perc) & (ex$sum > totake[["upper"]]), 1, 0)
+    # Now thin those points that are to be thinned
+    if(sum(ex$tothin) > 1){
+      o <- dplyr::filter(ex, tothin == 1) |>
+        dplyr::group_by(cell) |>
+        # MH: If grouped by cell the weight doesnt make sense cause all points have same value
+        dplyr::slice_sample(n = totake[["lower"]], weight_by = bias)
+      if(nrow(o) > 0) sel <- c(sel, o$id)
+    }
+
+    if(anyDuplicated(sel)) sel <- unique(sel)
+    suppressWarnings(try({rm(o, ex)}))
 
   } else if(method == "zones"){
     # Thinning by zones
-    assertthat::assert_that(is.Raster(zones),
-                            is.factor(zones))
+    assertthat::assert_that(terra::nlyr(zones)==1)
 
-    if(!terra::compareGeom(bg, zones, stopOnError = FALSE)){
-      zones <- alignRasters(zones, bg, method = "near", func = terra::modal, cl = FALSE)
+    if(!terra::compareGeom(background, zones, stopOnError = FALSE)){
+      zones <- alignRasters(zones, background, method = "near", func = terra::modal, cl = FALSE)
     }
 
-    # Output vector
-    sel <- vector()
+    # make sure name is known
+    names(zones) <- "zone"
 
-    ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords)[,1],
-                     zones = terra::extract(zones, coords)[,1]
-    )
-    # Now for each zone, take the minimum amount at random
-    ss <- ex |>
-      dplyr::group_by(zones) |>
-      dplyr::slice_sample(n = max(totake[1]), replace = TRUE) |>
-      dplyr::distinct()
+    # extract cell id and zones
+    ex <- cbind(id = 1:nrow(coords),
+                terra::extract(zones, coords, cells = TRUE))
 
-    # Take the zone data points
-    sel <- append(sel, ss$id )
-    try({rm(ss, ex)},silent = TRUE)
+    # remove NA points
+    ex <- subset(ex, stats::complete.cases(ex))
+
+    # count points per zone
+    ex <- dplyr::left_join(x = ex, y = dplyr::group_by(ex, zone) |>
+                             dplyr::summarise(sum = dplyr::n()),
+                           by = "zone")
+
+    # Points to return
+    sel <- ex$id[which(ex$sum <= totake[["lower"]])]
+
+    # Now identify those to be thinned
+    ex$tothin <- ifelse(ex$sum > totake[["upper"]], 1, 0)
+    if(sum(ex$tothin) > 1){
+      o <- dplyr::filter(ex, tothin == 1) |>
+        dplyr::group_by(zone) |>
+        dplyr::slice_sample(n = totake[["lower"]])
+      if(nrow(o) > 0) sel <- c(sel, o$id)
+    }
+
+    if(anyDuplicated(sel)) sel <- unique(sel)
+    suppressWarnings(try({rm(o, ex)}))
 
   } else if(method == "environmental"){
     # Environmental clustering
 
-    if(!terra::compareGeom(bg, env, stopOnError = FALSE)){
-      env <- alignRasters(env, bg, method = "near", func = terra::modal, cl = FALSE)
+    if(!terra::compareGeom(background, env, stopOnError = FALSE)){
+      env <- alignRasters(env, background, method = "near", func = terra::modal, cl = FALSE)
     }
+
     # If there are any factors, explode
     if(any(is.factor(env))){
       env <- explode_factorized_raster(env)
     }
 
-    # Output vector
-    sel <- vector()
+    # pick number of clusters automatically
+    if (is.null(centers)) centers <-  max(3, terra::nlyr(env) - 1)
 
     # Get a matrix of all environmental data, also with coordinates
     # However first normalize all data
     stk <- terra::as.data.frame(
       predictor_transform(env, option = "norm"),
-      xy = TRUE)
+      xy = TRUE, cell = TRUE)
 
-    stk$cid <- 1:nrow(stk)
     stk <- subset(stk, stats::complete.cases(stk))
 
     # Cluster
-    E <- stats::kmeans(x = subset(stk, select = -cid),
-                       centers = ncol(stk)-1, iter.max = 50)
+    E <- stats::kmeans(x = subset(stk, select = -cell),
+                       centers = centers, iter.max = 50)
 
     stk$cluster <- E$cluster
 
     # Now fill an empty raster and re-xtract
     new <- emptyraster(env)
-    new[stk$cid] <- stk$cluster
+    new[stk$cell] <- stk$cluster
+    names(new) <- "cluster"
 
-    # Now re-extract and sampling points
-    ex <- data.frame(id = 1:nrow(coords),
-                     cid = terra::extract(bg, coords)[,1],
-                     zones = terra::extract(new, coords)[,1]
-    )
+    # extract cell id and zones
+    ex <- cbind(id = 1:nrow(coords),
+                terra::extract(new, coords, cells = TRUE))
 
-    # Now for each zone, take the minimum amount at random
-    ss <- ex |>
-      dplyr::group_by(zones) |>
-      dplyr::slice_sample(n = max(totake[1]), replace = TRUE) |>
-      dplyr::distinct()
+    # remove NA points
+    ex <- subset(ex, stats::complete.cases(ex))
 
-    # Take the zone data points
-    sel <- append(sel, ss$id )
+    # count points per cluster
+    ex <- dplyr::left_join(x = ex, y = dplyr::group_by(ex, cluster) |>
+                             dplyr::summarise(sum = dplyr::n()),
+                           by = "cluster")
 
-    try({rm(new, stk, ss, ex, E)},silent = TRUE)
+    # Points to return
+    sel <- ex$id[which(ex$sum <= totake[["lower"]])]
+
+    # Now identify those to be thinned
+    ex$tothin <- ifelse(ex$sum > totake[["upper"]], 1, 0)
+    if(sum(ex$tothin) > 1){
+      o <- dplyr::filter(ex, tothin == 1) |>
+        dplyr::group_by(cluster) |>
+        dplyr::slice_sample(n = totake[["lower"]])
+      if(nrow(o) > 0) sel <- c(sel, o$id)
+    }
+
+    if(anyDuplicated(sel)) sel <- unique(sel)
+    suppressWarnings(try({rm(o, ex, E, stk, new)}))
+
   } else if(method == "spatial"){
     # Spatial thinning
     stop("Not yet implemented!")
+
+    # check_package("spatstat.geom")
+    # check_package("spatstat.explore")
+    #
+    # # convert data to ppp object
+    # bg_owin <- spatstat.geom::as.owin(terra::as.data.frame(background, xy = TRUE)[, c(1,2)])
+    # coords_ppp <- suppressWarnings(spatstat.geom::as.ppp(X = coords, W = bg_owin))
+    #
+    # # convert to raster
+    # lambda_xy <- spatstat.explore::density.ppp(coords_ppp) |>
+    #   terra::rast()
+    #
+    # # set CRS
+    # terra::crs(lambda_xy) <- terra::crs(background)
+    # names(lambda_xy) <- "lambda"
+    #
+    # # Now extract
+    # ex <- cbind(id = 1:nrow(coords),
+    #             terra::extract(ras, coords, cells = TRUE),
+    #             terra::extract(lambda_xy, coords))
+    #
+    # # remove NA points
+    # ex <- subset(ex, stats::complete.cases(ex))
+    #
+    # # Points to return
+    # sel <- ex$id[which(ex$sum <= totake[["lower"]])]
+    #
+    # # For those where we have more than the minimum, take at random the upper
+    # # limits of observations
+    # ex$oversampled <- ifelse(ex$sum > totake[["upper"]], 1, 0)
+    # if(sum(ex$oversampled) > 1){
+    #   # If there any oversampled
+    #   # Now sample at random up to the maximum amount.
+    #   o <- dplyr::filter(ex, oversampled == 1) |>
+    #     dplyr::group_by(cell) |>
+    #     # MH: Same as bias, above doesnt make sense grouped for cell
+    #     dplyr::slice_sample(n = totake[["lower"]], weight_by = lambda)
+    #   if(nrow(o) > 0) sel <- c(sel, o$id)
+    # }
+    #
+    # if(anyDuplicated(sel)) sel <- unique(sel)
+    # suppressWarnings(try({rm(o, ex, bg_owin, lambda_xy, coords_ppp)}))
+
   }
 
   # check if any points were selected to thin
   if (length(sel) == 0){
     message("No points were selected during thinning.")
-    return(df)
+    return(data)
   }
 
   # Return subsampled coordinates
-  out <- df[sel,]
+  out <- data[sel,]
 
   if(nrow(out)==0) {
     message("Thinning failed for some reason")
-    return(df)
+    return(data)
   } else {
     if(verbose){
       message(paste0(
         "(", method, ")", " thinning completed! \n",
-        "Original number of records: ", nrow(df), "\n",
+        "Original number of records: ", nrow(data), "\n",
         "Number of retained records: ", nrow(out))
       )
     }

@@ -1,4 +1,9 @@
-# ibis.iSDM 0.1.0 (current dev branch)
+# ibis.iSDM 0.1.1 (current dev branch)
+
+#### Minor improvements and bug fixes
+* Several bug fixes in `thin_observations` and `global` argument for bias-method
+
+# ibis.iSDM 0.1.0
 
 #### New features
 * Added a small convenience wrapper to add model outputs to another model `add_predictors_model()`

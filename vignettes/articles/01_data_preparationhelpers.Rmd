@@ -175,7 +175,7 @@ for an alternative implementation and rationale for thinning.
 plot(virtual_species['Observed'], main = "Original data")
 
 # Random thinning. Note the messages of number of thinned points
-point1 <- thin_observations(df = virtual_species,
+point1 <- thin_observations(data = virtual_species,
                   background = background,
                   method = 'random',
                   minpoints = 1 # Retain at minimum one point per grid cell!
@@ -187,7 +187,7 @@ plot(point1['Observed'], main = "Random thinning")
 # across the niche defined by a set of covariates
 covariates <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 
-point2 <- thin_observations(df = virtual_species,
+point2 <- thin_observations(data = virtual_species,
                   background = background,
                   env = covariates,
                   method = 'environmental',

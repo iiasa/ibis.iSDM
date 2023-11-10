@@ -5,18 +5,20 @@
 \title{Functionality for geographic and environmental thinning}
 \usage{
 thin_observations(
-  df,
+  data,
   background,
   env = NULL,
   method = "random",
   minpoints = 10,
   mindistance = NULL,
   zones = NULL,
+  probs = 0.75,
+  centers = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{df}{A \code{\link{sf}} or \code{\link{data.frame}} object with observed occurrence points.
+\item{data}{A \code{\link{sf}} object with observed occurrence points.
 All methods threat presence-only and presence-absence occurrence points
 equally.}
 
@@ -31,13 +33,20 @@ method is set to \code{"environmental"} or \code{"bias"} (Default:
 \code{"random"}).}
 
 \item{minpoints}{A \code{\link{numeric}} giving the number of data points at minimum to
-take (Default: \code{10}).}
+remain (Default: \code{10}).}
 
 \item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring
 observations (Default: \code{NULL}).}
 
-\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"method"} is
+\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"zones"} is
 chosen (Default: \code{NULL}).}
+
+\item{probs}{A \code{\link{numeric}} used as quantile threshold in \code{"bias"} method.
+(Default: \code{0.75}).}
+
+\item{centers}{A \code{\link{numeric}} used as number of centers for \code{"environmental"} method.
+(Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
+is bigger).}
 
 \item{verbose}{\code{\link{logical}} of whether to print some statistics about the
 thinning outcome (Default: \code{TRUE}).}
@@ -55,15 +64,17 @@ effectively removes data prior to any estimation and its use should be
 considered with care (see also Steen et al. 2021).
 }
 \details{
+Most methods only remove points from "over-sampled" grid cells. These are
+defined as all cells which either have more points than \code{minpoints} or
+more points than the global minimum point count per cell (whichever is larger).
+
 Currently implemented thinning methods:
 \itemize{
 \item \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
-Does not account for any spatial or environmental distance between
-observations.
-\item \code{"bias"}: This option removed explicitly points that are considered biased (parameter \code{"env"}) only.
-Points are preferentially thinned from grid cells which are in the 25\% most
-biased (larger values assumed greater bias) and have high point density.
-Thins the observations up to \code{"minpoints"}.
+Does not account for any spatial or environmental distance between observations.
+\item \code{"bias"}: This option removes explicitly points that are considered biased (parameter \code{"env"}) only.
+Points are only thinned from grid cells which are above the bias quantile (larger values
+equals greater bias). Thins the observations up to \code{"minpoints"}.
 \item \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
 each occupied zone. Careful: If the zones are relatively wide this can
 remove quite a few observations.

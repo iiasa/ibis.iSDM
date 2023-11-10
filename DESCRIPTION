@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -72,7 +72,9 @@ Suggests:
     geosphere,
     cubelyr,
     testthat (>= 3.0.0),
-    xgboost
+    xgboost, 
+    spatstat.geom, 
+    spatstat.explore
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3
