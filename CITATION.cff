@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.0
+version: 0.1.1
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -732,6 +732,10 @@ references:
   - family-names: Weber
     given-names: Sebastian
     email: sdw.post@waebers.de
+  - family-names: Badr
+    given-names: Hamada S.
+    email: badr@jhu.edu
+    orcid: https://orcid.org/0000-0002-9808-2344
   year: '2023'
   version: '>= 2.21.0'
 - type: software
@@ -861,4 +865,44 @@ references:
   - family-names: Yuan
     given-names: Jiaming
     email: jm.yuan@outlook.com
+  year: '2023'
+- type: software
+  title: spatstat.geom
+  abstract: 'spatstat.geom: Geometrical Functionality of the ''spatstat'' Family'
+  notes: Suggests
+  url: http://spatstat.org/
+  repository: https://CRAN.R-project.org/package=spatstat.geom
+  authors:
+  - family-names: Baddeley
+    given-names: Adrian
+    email: Adrian.Baddeley@curtin.edu.au
+    orcid: https://orcid.org/0000-0001-9499-8382
+  - family-names: Turner
+    given-names: Rolf
+    email: rolfturner@posteo.net
+    orcid: https://orcid.org/0000-0001-5521-5218
+  - family-names: Rubak
+    given-names: Ege
+    email: rubak@math.aau.dk
+    orcid: https://orcid.org/0000-0002-6675-533X
+  year: '2023'
+- type: software
+  title: spatstat.explore
+  abstract: 'spatstat.explore: Exploratory Data Analysis for the ''spatstat'' Family'
+  notes: Suggests
+  url: http://spatstat.org/
+  repository: https://CRAN.R-project.org/package=spatstat.explore
+  authors:
+  - family-names: Baddeley
+    given-names: Adrian
+    email: Adrian.Baddeley@curtin.edu.au
+    orcid: https://orcid.org/0000-0001-9499-8382
+  - family-names: Turner
+    given-names: Rolf
+    email: rolfturner@posteo.net
+    orcid: https://orcid.org/0000-0001-5521-5218
+  - family-names: Rubak
+    given-names: Ege
+    email: rubak@math.aau.dk
+    orcid: https://orcid.org/0000-0002-6675-533X
   year: '2023'
