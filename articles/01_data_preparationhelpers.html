@@ -35,7 +35,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-11-09</h4>
+            <h4 data-toc-skip class="date">2023-11-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -249,14 +249,14 @@ discards data!</strong></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Random thinning. Note the messages of number of thinned points</span></span>
-<span><span class="va">point1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/thin_observations.html">thin_observations</a></span><span class="op">(</span>df <span class="op">=</span> <span class="va">virtual_species</span>,</span>
+<span><span class="va">point1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/thin_observations.html">thin_observations</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">virtual_species</span>,</span>
 <span>                  background <span class="op">=</span> <span class="va">background</span>,</span>
 <span>                  method <span class="op">=</span> <span class="st">'random'</span>,</span>
 <span>                  minpoints <span class="op">=</span> <span class="fl">1</span> <span class="co"># Retain at minimum one point per grid cell!</span></span>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (random) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 148</span></span>
+<span><span class="co">#&gt; Number of retained records: 175</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point1</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Random thinning"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-2.png" width="700" style="display: block; margin: auto;"></p>
@@ -266,7 +266,7 @@ discards data!</strong></p>
 <span><span class="co"># across the niche defined by a set of covariates</span></span>
 <span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">point2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/thin_observations.html">thin_observations</a></span><span class="op">(</span>df <span class="op">=</span> <span class="va">virtual_species</span>,</span>
+<span><span class="va">point2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/thin_observations.html">thin_observations</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">virtual_species</span>,</span>
 <span>                  background <span class="op">=</span> <span class="va">background</span>,</span>
 <span>                  env <span class="op">=</span> <span class="va">covariates</span>,</span>
 <span>                  method <span class="op">=</span> <span class="st">'environmental'</span>,</span>
@@ -274,7 +274,7 @@ discards data!</strong></p>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (environmental) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 45</span></span>
+<span><span class="co">#&gt; Number of retained records: 28</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Environmentally stratified data"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" width="700" style="display: block; margin: auto;"></p>
