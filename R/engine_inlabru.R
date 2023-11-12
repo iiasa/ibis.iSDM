@@ -931,6 +931,8 @@ engine_inlabru <- function(x,
 
         # Compute end of computation time
         settings$set('end.time', Sys.time())
+        # Save the parameters in settings
+        for(entry in names(params)) settings$set(entry, params[[entry]])
 
         # Definition of INLA Model object ----
         out <- bdproto(
@@ -1138,7 +1140,8 @@ engine_inlabru <- function(x,
             return(o |> as.data.frame() )
           },
           # (S)partial effect
-          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = "response"){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL,
+                              plot = TRUE, type = NULL){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
             # Check that provided model exists and variable exist in model
@@ -1147,8 +1150,16 @@ engine_inlabru <- function(x,
             assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
                                     is.character(x.var),
-                                    is.null(constant) || is.numeric(constant)
+                                    is.null(constant) || is.numeric(constant),
+                                    is.null(newdata) || is.data.frame(newdata),
+                                    is.null(type) || is.character(type)
             )
+            # Settings
+            settings <- self$settings
+            # Set type
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
 
             # Match variable name
             x.var <- match.arg(x.var, mod$names.fixed, several.ok = FALSE)

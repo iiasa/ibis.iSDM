@@ -773,7 +773,8 @@ engine_stan <- function(x,
             return(pred_part) # Return the partial data
           },
           # Spatial partial effect plots
-          spartial = function(self, x.var, constant = NULL, plot = TRUE,type = "predictor", ...){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL,
+                              plot = TRUE,type = "predictor", ...){
             # Get model object and check that everything is in order
             mod <- self$get_data('fit_best')
             model <- self$model
@@ -830,22 +831,16 @@ engine_stan <- function(x,
                                                    mode = type # Linear predictor
             )
 
-            prediction <- try({
-              emptyraster( self$get_data('prediction') )},silent = TRUE) # Background
-            if(inherits(prediction, "try-error")){
-              prediction <- terra::rast(model$predictors[,c("x", "y")],
-                                      crs = terra::crs(model$background),
-                                      type = "xyz") |>
-                emptyraster()
-            }
-            prediction <- fill_rasters(pred_part, prediction)
+            # Get container
+            template <- model_to_background(model)
+            template <- fill_rasters(pred_part, template)
 
             # Do plot and return result
             if(plot){
-              terra::plot(prediction[[c("mean","sd")]],
+              terra::plot(template[[c("mean","sd")]],
                           col = ibis_colours$ohsu_palette)
             }
-            return(prediction)
+            return(template)
           },
           # Model convergence check
           has_converged = function(self){

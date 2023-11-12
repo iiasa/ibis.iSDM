@@ -495,7 +495,7 @@ engine_gdb <- function(x,
         for(entry in names(params)) settings$set(entry, params[[entry]])
         for(entry in names(bc)) settings$set(entry, bc[[entry]])
 
-        # Create output
+        # Definition of GDB Model object ----
         out <- bdproto(
           "GDB-Model",
           DistributionModel,

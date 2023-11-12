@@ -632,7 +632,8 @@ engine_breg <- function(x,
             return(pred_part)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL,
+                              plot = TRUE, type = NULL){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     "model" %in% names(self),
                                     is.null(constant) || is.numeric(constant),
@@ -670,8 +671,6 @@ engine_breg <- function(x,
 
             # Make spatial container for prediction
             template <- model_to_background(model)
-            # Assign a cellid to df to match the file later
-            # df$cellid <-
 
             # Add all others as constant
             if(is.null(constant)){
@@ -709,14 +708,14 @@ engine_breg <- function(x,
             pred_part$cv <- pred_part$sd / pred_part$mean
 
             # Now create spatial prediction
-            prediction <- fill_rasters(pred_part, template)
+            template <- fill_rasters(pred_part, template)
 
             # Do plot and return result
             if(plot){
-              terra::plot(prediction, col = ibis_colours$ohsu_palette,
-                   main = paste0("Spartial effect of ", x.var,collapse = ","))
+              terra::plot(template, col = ibis_colours$ohsu_palette,
+                   main = paste0("Spartial effect of ", x.var, collapse = ","))
             }
-            return(prediction)
+            return(template)
           },
           # Get coefficients from breg
           get_coefficients = function(self){
