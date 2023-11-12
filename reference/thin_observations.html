@@ -105,6 +105,7 @@ considered with care (see also Steen et al. 2021).</p>
 <span>  mindistance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  zones <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  probs <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  global <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  centers <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -154,6 +155,11 @@ chosen (Default: <code>NULL</code>).</p></dd>
 (Default: <code>0.75</code>).</p></dd>
 
 
+<dt>global</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> if during <code>"bias"</code> method global or local, extracted
+bias values are used as threshold. (Default: <code>TRUE</code>).</p></dd>
+
+
 <dt>centers</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> used as number of centers for <code>"environmental"</code> method.
 (Default: <code>NULL</code>). If not set, automatically set to three or nlayers - 1 (whatever
@@ -167,10 +173,11 @@ thinning outcome (Default: <code>TRUE</code>).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Most methods only remove points from "over-sampled" grid cells. These are
-defined as all cells which either have more points than <code>minpoints</code> or
+    <p>All methods only remove points from "over-sampled" grid cells/areas. These are
+defined as all cells/area which either have more points than <code>minpoints</code> or
 more points than the global minimum point count per cell (whichever is larger).</p>
-<p>Currently implemented thinning methods:</p><ul><li><p><code>"random"</code>: Samples at random up to number of <code>"minpoints"</code> across all occupied grid cells.
+<p>Currently implemented thinning methods:</p><ul><li><p><code>"random"</code>: Samples at random across all over-sampled grid cells returning
+at minimum <code>"minpoints"</code> .
 Does not account for any spatial or environmental distance between observations.</p></li>
 <li><p><code>"bias"</code>: This option removes explicitly points that are considered biased (parameter <code>"env"</code>) only.
 Points are only thinned from grid cells which are above the bias quantile (larger values
