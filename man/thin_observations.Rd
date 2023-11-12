@@ -13,6 +13,7 @@ thin_observations(
   mindistance = NULL,
   zones = NULL,
   probs = 0.75,
+  global = TRUE,
   centers = NULL,
   verbose = TRUE
 )
@@ -44,6 +45,9 @@ chosen (Default: \code{NULL}).}
 \item{probs}{A \code{\link{numeric}} used as quantile threshold in \code{"bias"} method.
 (Default: \code{0.75}).}
 
+\item{global}{A \code{\link{logical}} if during \code{"bias"} method global or local, extracted
+bias values are used as threshold. (Default: \code{TRUE}).}
+
 \item{centers}{A \code{\link{numeric}} used as number of centers for \code{"environmental"} method.
 (Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
 is bigger).}
@@ -64,13 +68,14 @@ effectively removes data prior to any estimation and its use should be
 considered with care (see also Steen et al. 2021).
 }
 \details{
-Most methods only remove points from "over-sampled" grid cells. These are
-defined as all cells which either have more points than \code{minpoints} or
+All methods only remove points from "over-sampled" grid cells/areas. These are
+defined as all cells/area which either have more points than \code{minpoints} or
 more points than the global minimum point count per cell (whichever is larger).
 
 Currently implemented thinning methods:
 \itemize{
-\item \code{"random"}: Samples at random up to number of \code{"minpoints"} across all occupied grid cells.
+\item \code{"random"}: Samples at random across all over-sampled grid cells returning
+at minimum \code{"minpoints"} .
 Does not account for any spatial or environmental distance between observations.
 \item \code{"bias"}: This option removes explicitly points that are considered biased (parameter \code{"env"}) only.
 Points are only thinned from grid cells which are above the bias quantile (larger values

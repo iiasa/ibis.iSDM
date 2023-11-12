@@ -543,16 +543,19 @@ engine_glmnet <- function(x,
                                     is.null(newdata) || is.data.frame(newdata),
                                     is.numeric(variable_length)
             )
-            check_package("pdp")
             # Settings
             settings <- self$settings
 
             mod <- self$get_data('fit_best')
             model <- self$model
-            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
             co <- stats::coef(mod) |> row.names() # Get model coefficient names
             # Set type
             if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
+
+            # Get data
+            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
 
             # Match x.var to argument
             if(is.null(x.var)){
@@ -603,18 +606,31 @@ engine_glmnet <- function(x,
             assertthat::assert_that(all( x.var %in% colnames(df) ),
                                     msg = 'Variable not in predicted model.')
 
+            # HACK: Overwrite lambda to make sure pdp uses it.
+            mod$lambda.1se <- determine_lambda(mod)
+            # Inverse link function
+            ilf <- switch (settings$get('type'),
+                           "link" = NULL,
+                           "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
+                                               exp, logistic)
+            )
+
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
               if(!is.Waiver(of)){
                 # Predict with offset
-                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
+                                   ice = FALSE, center = FALSE,
                                    type = "regression", newoffset = of,
+                                   inv.link = ilf,
                                    plot = FALSE, rug = TRUE, train = df)
               } else {
-                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                   type = "regression",
-                                   plot = FALSE, rug = TRUE, train = df)
+                p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
+                                   ice = FALSE, center = FALSE,
+                                   type = "regression", inv.link = ilf,
+                                   plot = FALSE, rug = TRUE, train = df
+                                   )
               }
               p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
@@ -636,10 +652,11 @@ engine_glmnet <- function(x,
             return(pp)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = NULL){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
             assertthat::assert_that(is.character(x.var),
                                     "model" %in% names(self),
                                     is.null(constant) || is.numeric(constant),
+                                    is.null(newdata) || is.data.frame(newdata),
                                     is.logical(plot),
                                     is.character(type) || is.null(type)
             )
@@ -654,8 +671,15 @@ engine_glmnet <- function(x,
             model <- self$model
             # For Integrated model, take the last one
             fam <- model$biodiversity[[length(model$biodiversity)]]$family
-            df <- model$predictors
-            df$w <- model$exposure
+
+            # If new data is set
+            if(!is.null(newdata)){
+              df <- newdata
+            } else {
+              df <- model$predictors
+              df$w <- model$exposure
+            }
+            assertthat::assert_that(all(x.var %in% colnames(df)))
             df$rowid <- 1:nrow(df)
             # Match x.var to argument
             x.var <- match.arg(x.var, names(df), several.ok = FALSE)
@@ -687,21 +711,13 @@ engine_glmnet <- function(x,
             ) |> as.data.frame()
 
             # Now create spatial prediction
-            prediction <- try({
-              emptyraster( model$predictors_object$get_data()[[1]] )},
-              silent = TRUE) # Background
-            if(inherits(prediction, "try-error")){
-              prediction <- terra::rast(model$predictors[,c("x", "y")],
-                                      crs = terra::crs(model$background),
-                                      type = "xyz") |>
-                emptyraster()
-            }
-            prediction[df_sub$rowid] <- pred_gn[,1]
-            names(prediction) <- paste0("spartial_",x.var)
+            template <- model_to_background(model)
+            template[df_sub$rowid] <- pred_gn[,1]
+            names(template) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
-            return(prediction)
+            if(plot) terra::plot(template, col = ibis_colours$ohsu_palette)
+            return(template)
           },
           # Convergence check
           has_converged = function(self){

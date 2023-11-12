@@ -492,6 +492,7 @@ engine_gdb <- function(x,
         # Compute end of computation time
         settings$set('end.time', Sys.time())
         # Also append boosting control option to settings
+        for(entry in names(params)) settings$set(entry, params[[entry]])
         for(entry in names(bc)) settings$set(entry, bc[[entry]])
 
         # Create output
@@ -504,7 +505,6 @@ engine_gdb <- function(x,
           fits = list(
             "fit_best" = fit_gdb,
             "fit_cv" = cvm,
-            "params" = params,
             "fit_best_equation" = equation,
             "prediction" = prediction
           ),
@@ -517,13 +517,11 @@ engine_gdb <- function(x,
             # Get model
             mod <- self$get_data('fit_best')
             model <- self$model
+            settings <- self$settings
             assertthat::assert_that(inherits(mod,'mboost'),msg = 'No model found!')
-            if(is.null(type)) type <- self$get_data('params')$type
+            if(is.null(type)) type <- settings$get('type')
             # Check that all variables are in provided data.frame
             assertthat::assert_that(all( as.character(mboost::extract(mod,'variable.names')) %in% names(newdata) ))
-
-            # Also get settings for bias values
-            settings <- self$settings
 
             # Clamp?
             if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
@@ -570,7 +568,8 @@ engine_gdb <- function(x,
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
             assertthat::assert_that( all( x.var %in% variables), msg = 'x.var variable not found in model!' )
 
-            if(is.null(type)) type <- self$get_data('params')$type
+            settings <- self$settings
+            if(is.null(type)) type <- settings$get('type')
             model <- self$model
 
             # Special treatment for factors
@@ -669,7 +668,7 @@ engine_gdb <- function(x,
             return(out)
           },
           # Spatial partial effect plots
-          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = NULL, ...){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL, ...){
             assertthat::assert_that('fit_best' %in% names(self$fits),
                                     is.character(x.var), length(x.var) == 1)
             # Get model and make empty template
@@ -678,43 +677,46 @@ engine_gdb <- function(x,
             # Also check that what is present in coefficients of model
             variables <- as.character( mboost::extract(mod,'variable.names') )
             assertthat::assert_that(x.var %in% variables,
-                                    msg = "Variable not found in model!" )
+                                    msg = "Variable not found in model! Regularized out?" )
+
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
 
             # Make template of target variable(s)
-            template <- try({
-              emptyraster( self$model$predictors_object$get_data()[[1]] )},
-              silent = TRUE) # Background
-            if(inherits(template, "try-error")){
-              template <- terra::rast(model$predictors[,c("x", "y")],
-                                      crs = terra::crs(model$background),
-                                      type = "xyz") |>
-                emptyraster()
-            }
+            template <- model_to_background(model)
 
             # Get target variables and predict
-            target <- model$predictors
+            if(!is.null(newdata)){
+              df <- newdata
+            } else {
+              df <- model$predictors
+            }
+            assertthat::assert_that(x.var %in% colnames(df),
+                                    msg = "Variable not found in provided data.")
+
             # Set all variables other the target variable to constant
             if(is.null(constant)){
               # Calculate mean
               nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
-              constant <- apply(target[,nn], 2, function(x) mean(x, na.rm=T))
+              constant <- apply(df[,nn], 2, function(x) mean(x, na.rm=T))
               for(v in variables[ variables %notin% x.var]){
-                if(v %notin% names(target) ) next()
-                target[!is.na(target[v]),v] <- constant[v]
+                if(v %notin% colnames(df) ) next()
+                df[!is.na(df[v]),v] <- constant[v]
               }
             } else {
-              target[!is.na(target[,x.var]), variables] <- constant
+              df[!is.na(df[,x.var]), variables] <- constant
             }
-            target$rowid <- as.numeric( rownames(target) )
-            assertthat::assert_that(nrow(target)==ncell(template))
+            df$rowid <- as.numeric( rownames(df) )
+            assertthat::assert_that(nrow(df)==ncell(template))
 
             pp <- suppressWarnings(
-              mboost::predict.mboost(mod, newdata = target, which = x.var,
-                                     type = 'link', aggregate = 'sum')
+              mboost::predict.mboost(mod, newdata = df, which = x.var,
+                                     type = settings$get('type'), aggregate = 'sum')
             )
             # If both linear and smooth effects are in model
-            if(length(target$rowid[which(!is.na(target[[x.var]]))] ) == length(pp[,ncol(pp)])){
-              template[ target$rowid[which(!is.na(target[[x.var]]))] ] <- pp[,ncol(pp)]
+            if(length(df$rowid[which(!is.na(df[[x.var]]))] ) == length(pp[,ncol(pp)])){
+              template[ df$rowid[which(!is.na(df[[x.var]]))] ] <- pp[,ncol(pp)]
             } else { template[] <- pp[, ncol(pp) ]}
             names(template) <- paste0('partial__',x.var)
 
@@ -757,7 +759,8 @@ engine_gdb <- function(x,
             cofs$variable <- gsub('bols\\(|bbs\\(|bmono\\(', '', cofs$variable)
             cofs$variable <- sapply(strsplit(cofs$variable, ","), function(z) z[[1]])
             cofs$variable <- gsub('\\)', '', cofs$variable)
-            names(cofs) <- c("Feature", "Weights", "Beta")
+            cofs <- cofs |> dplyr::select(variable, beta)
+            names(cofs) <- c("Feature", "Beta")
             return(cofs)
           },
           # Spatial latent effect
@@ -773,7 +776,8 @@ engine_gdb <- function(x,
                                     msg = 'No spatial effect found in model!')
 
             # Make template of target variable(s)
-            temp <- emptyraster( model$predictors_object$get_data() )
+            template <- model_to_background(model)
+
             # Get target variables and predict
             target <- self$model$predictors[,c('x','y')]
 
@@ -781,17 +785,16 @@ engine_gdb <- function(x,
               mboost::predict.mboost(mod, newdata = target, which = c('x','y'))
             )
             assertthat::assert_that(nrow(target)==nrow(y))
-            temp[] <- y[,2]
-            names(temp) <- paste0('partial__','space')
+            template[] <- y[,2]
+            names(template) <- paste0('partial__','space')
             # Mask with background
-            temp <- terra::mask(temp, self$model$background )
+            template <- terra::mask(template, model$background )
 
+            # Plot both partial spatial partial
             if(plot){
-              # Plot both partial spatial partial
-              terra::plot(temp, main = expression(f[partial]), col = ibis_colours$divg_bluegreen )
+              terra::plot(template, main = expression(f[partial]), col = ibis_colours$divg_bluegreen )
             }
-
-            return(temp)
+            return(template)
 
           }
         )

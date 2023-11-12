@@ -301,7 +301,7 @@ raster_to_stars <- function(obj){
     new_env[[names(obj)[i]]] <- o
   }
 
-  new_env <- do.call(stars:::c.stars, new_env)
+  new_env <- do.call(c, new_env)
   assertthat::assert_that(inherits(new_env, "stars"),
                           stars::st_dimensions(new_env) |> length() == 3)
 

@@ -85,6 +85,8 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 #'   is to be calculated.
 #' @param constant A [numeric] constant to be inserted for all other variables.
 #'   Default calculates the [mean] per variable.
+#' @param newdata A [`data.frame`] on which to calculate the spartial for. Can be
+#' for example created from a raster file (Default: \code{NULL}).
 #' @param plot A [logical] indication of whether the result is to be plotted?
 #' @param ... Other engine specific parameters.
 #' @seealso [partial]
@@ -105,25 +107,26 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 methods::setGeneric(
   "spartial",
   signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, plot = FALSE, ...) standardGeneric("spartial"))
+  function(mod, x.var, constant = NULL, newdata = NULL, plot = FALSE, ...) standardGeneric("spartial"))
 
 #' @name spartial
 #' @rdname spartial
 #' @usage
-#'   \S4method{spartial}{ANY,character,ANY,logical}(mod,x.var,constant,plot,...)
+#'   \S4method{spartial}{ANY,character,ANY,ANY,logical}(mod,x.var,constant,newdata,plot,...)
 methods::setMethod(
   "spartial",
   methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, plot = FALSE, ...) {
+  function(mod, x.var, constant = NULL, newdata = NULL, plot = FALSE, ...) {
     assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             is.character(x.var),
                             is.null(constant) || is.numeric(constant),
+                            is.null(newdata) || is.data.frame(newdata),
                             is.logical(plot)
     )
     # Work around to call partial response directly
     if(inherits(mod,'DistributionModel')){
-      spartial.DistributionModel(mod, x.var, constant, plot, ...)
+      spartial.DistributionModel(mod, x.var, constant, newdata, plot, ...)
     } else {
       stop('Spatial partial response calculation not supported!')
     }

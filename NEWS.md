@@ -1,7 +1,8 @@
 # ibis.iSDM 0.1.1 (current dev branch)
 
 #### Minor improvements and bug fixes
-* Several bug fixes in `thin_observations` and `global` argument for bias-method
+* Several bug fixes in `thin_observations` and `global` argument for bias-method.
+* Harmonization of parameters for `spartial()` and addressing #80
 
 # ibis.iSDM 0.1.0
 

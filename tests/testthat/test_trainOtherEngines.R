@@ -59,6 +59,14 @@ test_that('Train a distribution model with XGboost', {
   expect_s3_class(mod$get_centroid(), "sf")
   expect_s3_class(tr$get_centroid(), "sf")
 
+  # Some partial calculations
+  expect_no_error(ex <- partial(mod, x.var = "CLC3_132_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Spartial
+  expect_no_error(ex <- spartial(mod, x.var = "CLC3_132_mean_50km"))
+  expect_s4_class(ex, "SpatRaster")
+
   ex_sd <- ensemble(mod, mod, uncertainty = "sd")
   ex_range <- ensemble(mod, mod, uncertainty = "range")
   ex_pca <- ensemble(mod, mod, uncertainty = "pca")
@@ -133,6 +141,9 @@ test_that('Train a distribution model with Breg', {
   expect_s3_class(mod$get_centroid(), "sf")
   expect_s3_class(tr$get_centroid(), "sf")
 
+  # Does normal spartial work as expected?
+  expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km") )
+
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
@@ -141,7 +152,7 @@ test_that('Train a distribution model with Breg', {
   expect_s3_class(ex, 'data.frame')
 
   # Do ensemble spartials work
-  mod2 <- x |> train(only_linear = TRUE)
+  mod2 <- x |> train(only_linear = TRUE,verbose = FALSE)
   expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
   expect_true(is.Raster(ex))
 
@@ -190,6 +201,7 @@ test_that('Train a distribution model with GDB', {
   expect_s3_class(summary(mod), "data.frame")
   expect_s3_class(mod$show_duration(), "difftime")
   expect_equal(length(mod$show_rasters()), 1) # Now predictions found
+  expect_s3_class(mod$settings, "Settings")
 
   # --- #
   # Some checks
@@ -205,6 +217,13 @@ test_that('Train a distribution model with GDB', {
   expect_s3_class(mod$get_centroid(), "sf")
   expect_s3_class(tr$get_centroid(), "sf")
 
+  # Nor conventional partials work
+  expect_no_error(ex <- partial(mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do spartials work
+  expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km"))
+
   ex <- ensemble(mod, mod)
   expect_s4_class(ex, "SpatRaster")
 
@@ -213,7 +232,7 @@ test_that('Train a distribution model with GDB', {
   expect_s3_class(ex, 'data.frame')
 
   # Do ensemble spartials work
-  mod2 <- x |> train(only_linear = TRUE)
+  mod2 <- x |> train(only_linear = TRUE,verbose = FALSE)
   expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
   expect_true(is.Raster(ex))
 
@@ -223,6 +242,11 @@ test_that('Train a distribution model with GDB', {
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
+  # Expect data.frame
+  expect_s3_class(mod$get_coefficients(), 'data.frame')
+
+  # Expect formula
+  expect_s3_class(mod$get_equation(), 'formula')
 })
 
 # ---- #
@@ -279,7 +303,18 @@ test_that('Train a distribution model with glmnet', {
   expect_s3_class(mod$get_centroid(), "sf")
   expect_s3_class(tr$get_centroid(), "sf")
 
-  ex <- ensemble(mod, mod)
+  # Partials and spartials
+  expect_no_error(ex <- partial(mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Spartial
+  expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km"))
+  expect_s4_class(ex, 'SpatRaster')
+
+  suppressWarnings(
+    suppressMessages( mod2 <- train(x |> engine_glmnet(alpha = 0),verbose = FALSE) )
+  )
+  expect_no_error(ex <- ensemble(mod, mod2))
   expect_s4_class(ex, "SpatRaster")
 
   # Do ensemble partials work?

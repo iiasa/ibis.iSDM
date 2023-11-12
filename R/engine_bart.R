@@ -555,11 +555,17 @@ engine_bart <- function(x,
             }
           },
           # Spatial partial dependence plot option from embercardo
-          spartial = function(self, x.var = NULL, equal = FALSE,
+          spartial = function(self, x.var = NULL, newdata = NULL, equal = FALSE,
                               smooth = 1, transform = TRUE, type = NULL){
             fit <- self$get_data('fit_best')
             model <- self$model
-            predictors <- model$predictors_object$get_data()
+            if(is.null(newdata)){
+              predictors <- model$predictors_object$get_data()
+            } else {
+              predictors <- newdata
+              assertthat::assert_that(x.var %in% colnames(predictors),
+                                      msg = 'Variable not in provided data!')
+            }
             assertthat::assert_that(x.var %in% attr(fit$fit$data@x,'term.labels'),
                                     msg = 'Variable not in predicted model' )
 

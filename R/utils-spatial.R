@@ -993,7 +993,44 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   return(ex)
 }
 
-#' Create new raster stack from a given data.frame
+#' Create background raster from a model object
+#'
+#' @description
+#' This is an internal function that converts a model object
+#' to a background layer that can be used to fill a prediction.
+#'
+#' @param model A [`list`] object created from a DistributionModel.
+#' @keywords utils, internal
+#' @return A [`SpatRaster-class`] object
+#' @noRd
+model_to_background <- function(model){
+  assertthat::assert_that(
+    is.list(model),
+    inherits(model$background, "sf") || is.Raster(model$background)
+  )
+
+  # Try and create the template from the predictors object
+  template <- try({
+    emptyraster( model$predictors_object$get_data()[[1]] )},
+    silent = TRUE) # Background
+
+  # If the template creation fails, create it from the model predictors
+  if(inherits(template, "try-error")){
+    template <- try({
+      terra::rast(model$predictors[,c("x", "y")],
+                            crs = terra::crs(model$background),
+                            type = "xyz") |>
+      emptyraster()
+    },silent = TRUE)
+  }
+
+  # If that also failed, raise error
+  if(inherits(template, "try-error")) stop("No file to create a background raster from?")
+  assertthat::assert_that(is.Raster(template))
+  return(template)
+}
+
+#' Fill a raster stack with a given data.frame
 #'
 #' @param post A data.frame
 #' @param background A [`SpatRaster-class`] object for the background raster.
