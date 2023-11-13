@@ -178,7 +178,7 @@ plot(virtual_species['Observed'], main = "Original data")
 point1 <- thin_observations(data = virtual_species,
                   background = background,
                   method = 'random',
-                  minpoints = 1 # Retain at minimum one point per grid cell!
+                  remainpoints = 1 # Retain at minimum one point per grid cell!
                   )
 
 plot(point1['Observed'], main = "Random thinning")
@@ -191,7 +191,7 @@ point2 <- thin_observations(data = virtual_species,
                   background = background,
                   env = covariates,
                   method = 'environmental',
-                  minpoints = 5 # Retain at minimum five points!
+                  remainpoints = 5 # Retain at minimum five points!
                   )
 
 plot(point2['Observed'], main = "Environmentally stratified data")

@@ -1255,8 +1255,8 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'   model-based control can alleviate some of the effects of sampling bias, it
 #'   can often be desirable to account for some sampling biases through spatial
 #'   thinning (Aiello‐Lammens et al. 2015). This is an approach based on the
-#'   assumption that oversampled grid cells contribute little more than bias,
-#'   rather than strengthing any environmental responses. This function provides
+#'   assumption that over-sampled grid cells contribute little more than bias,
+#'   rather than strengthening any environmental responses. This function provides
 #'   some methods to apply spatial thinning approaches. Note that this
 #'   effectively removes data prior to any estimation and its use should be
 #'   considered with care (see also Steen et al. 2021).
@@ -1264,24 +1264,25 @@ explode_factorized_raster <- function(ras, name = NULL){
 #' @details
 #'
 #' All methods only remove points from "over-sampled" grid cells/areas. These are
-#' defined as all cells/area which either have more points than \code{minpoints} or
-#' more points than the global minimum point count per cell (whichever is larger).
+#' defined as all cells/areas which either have more points than \code{remainpoints} or
+#' more points than the global minimum point count per cell/area (whichever is larger).
 #'
 #' Currently implemented thinning methods:
 #'
 #'  * \code{"random"}: Samples at random across all over-sampled grid cells returning
-#'   at minimum \code{"minpoints"} .
-#'   Does not account for any spatial or environmental distance between observations.
-#'  * \code{"bias"}: This option removes explicitly points that are considered biased (parameter \code{"env"}) only.
-#'   Points are only thinned from grid cells which are above the bias quantile (larger values
-#'   equals greater bias). Thins the observations up to \code{"minpoints"}.
-#'  * \code{"zones"}: Assesses for each observation that it falls with a maximum of \code{"minpoints"} into
-#'   each occupied zone. Careful: If the zones are relatively wide this can
-#'   remove quite a few observations.
+#'   only \code{"remainpoints"} from over-sampled cells. Does not account for any
+#'   spatial or environmental distance between observations.
+#'  * \code{"bias"}: This option removes explicitly points that are considered biased only
+#'   (based on \code{"env"}). Points are only thinned from grid cells which are above the bias
+#'   quantile (larger values equals greater bias). Thins the observations returning
+#'   \code{"remainpoints"} from each over-sampled and biased cell.
+#'  * \code{"zones"}: Thins observations from each zone that is above the over-sampled
+#'   threshold and returns  \code{"remainpoints"} for each zone. Careful: If the zones are
+#'   relatively wide this can remove quite a few observations.
 #'  * \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
 #'   that the full environmental niche has been comprehensively sampled and is
-#'   covered by the provided covariates \code{env}. We then obtain an number
-#'   equal to (\code{"minpoints"}) of observations for each cluster.
+#'   covered by the provided covariates \code{env}. For each over-sampled cluster,
+#'   we then obtain (\code{"remainpoints"}) by thinning points.
 #'  * \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
 #'   iteratively until the minimum distance between points is crossed.  The
 #'   \code{"mindistance"} parameter has to be set for this function to work.
@@ -1296,7 +1297,7 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'   \code{NULL}).
 #' @param method A [`character`] of the method to be applied (Default:
 #'   \code{"random"}).
-#' @param minpoints A [`numeric`] giving the number of data points at minimum to
+#' @param remainpoints A [`numeric`] giving the number of data points at minimum to
 #'   remain (Default: \code{10}).
 #' @param mindistance A [`numeric`] for the minimum distance of neighbouring
 #'   observations (Default: \code{NULL}).
@@ -1304,8 +1305,9 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'   chosen (Default: \code{NULL}).
 #' @param probs A [`numeric`] used as quantile threshold in \code{"bias"} method.
 #'   (Default: \code{0.75}).
-#' @param global A [`logical`] if during \code{"bias"} method global or local, extracted
-#'   bias values are used as threshold. (Default: \code{TRUE}).
+#' @param global A [`logical`] if during \code{"bias"} method global (entire \code{env} raster)
+#'   or local (extracted at point locations) bias values are used as for quantile threshold.
+#'   (Default: \code{TRUE}).
 #' @param centers A [`numeric`] used as number of centers for \code{"environmental"} method.
 #'   (Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
 #'   is bigger).
@@ -1325,7 +1327,7 @@ explode_factorized_raster <- function(ras, name = NULL){
 #' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.
 #' @keywords utils
 #' @export
-thin_observations <- function(data, background, env = NULL, method = "random", minpoints = 10, mindistance = NULL,
+thin_observations <- function(data, background, env = NULL, method = "random", remainpoints = 10, mindistance = NULL,
                               zones = NULL, probs = 0.75, global = TRUE, centers = NULL, verbose = TRUE){
   assertthat::assert_that(
     inherits(data, "sf"),
@@ -1333,7 +1335,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
     is.Raster(background),
     is.Raster(env) || is.null(env),
     is.character(method),
-    is.numeric(minpoints) && minpoints > 0,
+    is.numeric(remainpoints) && remainpoints > 0,
     is.null(mindistance) || is.numeric(mindistance),
     (is.Raster(zones) && is.factor(zones)) || is.null(zones),
     is.numeric(probs) && probs > 0 && probs < 1 && length(probs)==1,
@@ -1354,18 +1356,18 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
   coords <- sf::st_coordinates(data)
   ras <- terra::rasterize(coords, background, fun = sum) # Get the number of observations per grid cell
 
-  # Bounds for thinning
-  # MH: Would be nice if upper is either for cells (random, bias) or zones/cluster
-  totake <- c(lower = minpoints, upper = max(terra::global(ras, "min", na.rm = TRUE)[,1], minpoints))
+  # Lower and upper bounds for thinning
+  totake <- c(lower = remainpoints, upper = max(terra::global(ras, "min", na.rm = TRUE)[,1],
+                                                remainpoints))
 
   # -- #
   if(method == "random"){
+
     # For each unique grid cell id, get the minimum value up to a maximum of the
     # points by sampling at random from the occupied grid cells
 
     # extract cell id for each point
-    ex <- cbind(id = 1:nrow(coords),
-                terra::extract(ras, coords, cell = TRUE))
+    ex <- cbind(id = 1:nrow(coords), terra::extract(ras, coords, cell = TRUE))
 
     # remove NA points
     ex <- subset(ex, stats::complete.cases(ex))
@@ -1445,10 +1447,15 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
     # remove NA points
     ex <- subset(ex, stats::complete.cases(ex))
 
+    # count points per cluster
+    points_zone <- dplyr::group_by(ex, zone) |>
+      dplyr::summarise(sum = dplyr::n())
+
     # count points per zone
-    ex <- dplyr::left_join(x = ex, y = dplyr::group_by(ex, zone) |>
-                             dplyr::summarise(sum = dplyr::n()),
-                           by = "zone")
+    ex <- dplyr::left_join(x = ex, y = points_zone, by = "zone")
+
+    # Upper bound for thinning
+    totake["upper"] <- max(min(points_zone$sum), remainpoints)
 
     # Points to return
     sel <- ex$id[which(ex$sum <= totake[["lower"]])]
@@ -1507,9 +1514,14 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
     ex <- subset(ex, stats::complete.cases(ex))
 
     # count points per cluster
-    ex <- dplyr::left_join(x = ex, y = dplyr::group_by(ex, cluster) |>
-                             dplyr::summarise(sum = dplyr::n()),
-                           by = "cluster")
+    points_cluster <- dplyr::group_by(ex, cluster) |>
+      dplyr::summarise(sum = dplyr::n())
+
+    # count points per cluster
+    ex <- dplyr::left_join(x = ex, y = points_cluster, by = "cluster")
+
+    # Upper bound for thinning
+    totake["upper"] <- max(min(points_cluster$sum), remainpoints)
 
     # Points to return
     sel <- ex$id[which(ex$sum <= totake[["lower"]])]
@@ -1529,7 +1541,9 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
   } else if(method == "spatial"){
     # Spatial thinning
     stop("Not yet implemented!")
+  }
 
+  # else if (method == "intensity") {
     # check_package("spatstat.geom")
     # check_package("spatstat.explore")
     #
@@ -1571,8 +1585,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", m
     #
     # if(anyDuplicated(sel)) sel <- unique(sel)
     # suppressWarnings(try({rm(o, ex, bg_owin, lambda_xy, coords_ppp)}))
-
-  }
+  # }
 
   # check if any points were selected to thin
   if (length(sel) == 0){

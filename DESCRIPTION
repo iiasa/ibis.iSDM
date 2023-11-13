@@ -72,9 +72,7 @@ Suggests:
     geosphere,
     cubelyr,
     testthat (>= 3.0.0),
-    xgboost, 
-    spatstat.geom, 
-    spatstat.explore
+    xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 RoxygenNote: 7.2.3

@@ -216,7 +216,7 @@ test_that('Test data preparation convenience functions', {
   # --- #
   # Apply thinning methods
   pp1 <- thin_observations(data = virtual_points, background = background,
-                           method = "random", minpoints = 3,verbose = FALSE)
+                           method = "random", remainpoints = 3,verbose = FALSE)
   expect_gt(nrow(pp1),0)
   # - #
   expect_error(pp2 <- thin_observations(data = virtual_points, background = background,
