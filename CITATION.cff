@@ -638,6 +638,7 @@ references:
   authors:
   - family-names: Csárdi
     given-names: Gábor
+    email: csardi.gabor@gmail.com
   - family-names: FitzJohn
     given-names: Rich
   year: '2023'
