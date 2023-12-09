@@ -5,11 +5,19 @@ NULL
 #'
 #' @description This function creates a new [BiodiversityScenario-class] object
 #' that contains the projections of a model.
+#' @note
+#' If a limit has been defined already during [train()], for example by adding
+#' an extrapolation limit [add_control_extrapolation()], this zonal layer can be
+#' reused for the projections. **Note: This effectively fixes the projections to certain areas.**
+#'
 #' @param fit A [`BiodiversityDistribution`] object containing a trained model.
 #' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
 #'   surface when intersected with the prediction data (Default: \code{NULL}).
 #'   This can for instance be set as an expert-delineated constrain to limit
 #'   spatial projections.
+#' @param reuse_limits A [`logical`] on whether to reuse limits if found in the
+#' trained [`BiodiversityDistribution`] object (Default: \code{FALSE}). See also notes!
+#'
 #' @param copy_model A [`logical`] of whether the model object is to be copied
 #'   to the scenario object. Note that setting this option to \code{TRUE} can
 #'   increase the required amount of memory (Default: \code{FALSE}).
@@ -24,18 +32,19 @@ NULL
 #' @export
 methods::setGeneric("scenario",
                     signature = methods::signature("fit"),
-                    function(fit, limits = NULL, copy_model = FALSE) standardGeneric("scenario"))
+                    function(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE) standardGeneric("scenario"))
 
 #' @name scenario
-#' @usage \S4method{scenario}{ANY,ANY,logical}(fit,limits,copy_model)
+#' @usage \S4method{scenario}{ANY,ANY,logical,logical}(fit,limits,reuse_limits,copy_model)
 #' @rdname scenario
 methods::setMethod(
   "scenario",
   methods::signature(fit = "ANY"),
-  function(fit, limits = NULL, copy_model = FALSE) {
+  function(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(fit) || inherits(fit,'DistributionModel'),
                             inherits(limits, 'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            is.logical(reuse_limits),
                             is.logical(copy_model),
                             msg = 'No trained model supplied!')
 
@@ -65,6 +74,17 @@ methods::setMethod(
       # Get fir column and rename
       limits <- limits[,1]; names(limits) <- c('limit','geometry')
     }
+
+    # Also check if limits are to be reused if found
+    if(reuse_limits){
+      # Check if limits have been found.
+      if(fit$has_limits()){
+        if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Found existing extrapolation limits and will reuse them!")
+        settings <- fit$settings
+        limits <- settings$get('limits')[['layer']]
+      }
+    }
+
     if(is.null(limits)){
       # Convert to waiver if NULL
       limits <- new_waiver()

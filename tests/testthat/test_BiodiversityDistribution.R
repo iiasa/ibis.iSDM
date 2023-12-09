@@ -71,7 +71,7 @@ test_that('Setting up a distribution model',{
   expect_no_error(y <- x |> add_control_bias(predictors$hmi_mean_50km,method = "offset",bias_value = 0))
   expect_equal(y$get_offset(),"hmi_mean_50km")
   expect_no_error(y <- x |> add_control_bias(method = "proximity",bias_value = 0))
-  expect_length(y$bias$bias_value, 2)
+  expect_length(y$control$bias_value, 2)
 
   # Add Predictors
   x <- x |> add_predictors(predictors)

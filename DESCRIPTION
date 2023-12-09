@@ -92,6 +92,7 @@ Collate:
     'add_constraint.R'
     'add_constraint_MigClim.R'
     'add_control_bias.R'
+    'add_control_extrapolation.R'
     'add_latent.R'
     'bdproto-log.R'
     'add_log.R'

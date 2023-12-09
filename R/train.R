@@ -203,6 +203,9 @@ methods::setMethod(
     # Start time
     settings$set('start.time', Sys.time())
 
+    # Load control
+    control <- x$get_control()
+
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
 
@@ -386,23 +389,26 @@ methods::setMethod(
     } else { model[['offset']] <- new_waiver() }
 
     # Setting up variable bias control if method == partial
-    if(!is.Waiver( x$get_biascontrol())){
-      bias <- x$bias
-      if(bias$method == "partial"){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
-        settings$set("bias_variable", names(bias$layer) )
-        settings$set("bias_value", bias$bias_value )
-        # Check that variable is already in the predictors object
-        if(!(names(bias$layer) %in% model$predictors_names)){
-          model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
-          # Also set predictor names
-          model[['predictors_names']] <- model$predictors_object$get_names()
-          model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
-          # Get predictor types
-          lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-          model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu, 'factor', 'numeric') )
+    if(!is.Waiver( control )){
+      if(control$type == "bias"){
+        bias <- control
+        if(bias$method == "partial"){
+          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
+          settings$set("bias_variable", names(bias$layer) )
+          settings$set("bias_value", bias$bias_value )
+          # Check that variable is already in the predictors object
+          if(!(names(bias$layer) %in% model$predictors_names)){
+            model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
+            # Also set predictor names
+            model[['predictors_names']] <- model$predictors_object$get_names()
+            model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+            # Get predictor types
+            lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
+            model[['predictors_types']] <- data.frame(predictors = names(lu),
+                                                      type = ifelse(lu, 'factor', 'numeric') )
+          }
+          assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
         }
-        assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
       }
     }
 
@@ -607,24 +613,26 @@ methods::setMethod(
     }
 
     # Add proximity weights if relevant option is found
-    if(!is.Waiver( x$get_biascontrol())){
-      bias <- x$bias
-      if(bias$method == "proximity"){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
-        assertthat::assert_that(length(model$biodiversity)==1,
-                                msg = "This method is not yet implemented for multiple datasets.")
+    if(!is.Waiver( control )){
+      if(control$type == "bias"){
+        bias <- control
+        if(bias$method == "proximity"){
+          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
+          assertthat::assert_that(length(model$biodiversity)==1,
+                                  msg = "This method is not yet implemented for multiple datasets.")
 
-        # For each biodiversity dataset collect the points and reassign weights
-        poi <- collect_occurrencepoints(model = model,
-                                        include_absences = TRUE,
-                                        addName = TRUE,
-                                        tosf = TRUE)
-        neww <- sf_proximity_weight(poi = poi,
-                                    maxdist = bias$bias_value[1],
-                                    alpha = bias$bias_value[2])
-        # Now set the expectation respectively
-        model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect * exp(neww)
-        rm(neww)
+          # For each biodiversity dataset collect the points and reassign weights
+          poi <- collect_occurrencepoints(model = model,
+                                          include_absences = TRUE,
+                                          addName = TRUE,
+                                          tosf = TRUE)
+          neww <- sf_proximity_weight(poi = poi,
+                                      maxdist = bias$bias_value[1],
+                                      alpha = bias$bias_value[2])
+          # Now set the expectation respectively
+          model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect * exp(neww)
+          rm(neww)
+        }
       }
     }
 
@@ -661,20 +669,22 @@ methods::setMethod(
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
-    # -  Applying prediction filter based on model input data if specified
+    # Applying prediction filter based on model input data if specified
     # Check if MCP should be calculated
     if(!is.Waiver(x$get_limits())){
       # Build MCP based zones ?
       if(x$limits$limits_method=="mcp"){
         # Create a polygon using all available information
         # Then overwrite limits
-        x <- x$set_limits(x = create_mcp(model, x$limits),
-                          mcp_buffer = x$limits$mcp_buffer,
-                          limits_clip = x$limits$limits_clip)
+        l <- list("layer" = create_mcp(model, x$limits),
+                    "limits_method" = "mcp",
+                    "mcp_buffer" = x$limits$mcp_buffer,
+                    "limits_clip" = x$limits$limits_clip)
+        x <- x$set_limits(x = l)
         zones <- x$limits$layer
         assertthat::assert_that(!is.null(zones),
                                 utils::hasName(zones, "limit"))
-      } else {
+      } else if(x$limits$limits_method=="zones") {
         # Zones
         # Get biodiversity data
         coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
@@ -694,6 +704,50 @@ methods::setMethod(
         )
         # Limit zones
         zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
+      } else if(x$limits$limits_method %in% c("nt2", "mess")){
+          # If there are more than one data source, raise warning
+          if(length(model$biodiversity)>1){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                      'MESS and Novelty index work only for a single datasource. Combining all presence points...')
+            coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
+                                               tosf = TRUE)
+            refs <- terra::extract(model$predictors_object$get_data(), coords)
+          } else {
+            refs <- model$biodiversity[[1]]$predictors
+          }
+
+          # Multivariate novelty index for the training data
+          if(x$limits$limits_method=="nt2"){
+            rip <- .nt12(prodat = model$predictors_object$get_data(),
+                         refdat = refs)[["novel"]]
+            # Get only within reference to make a mask
+            rip <- switch (x$limits$novel,
+                           "within" = (rip %in% c("Reference","Within reference")),
+                           "outside" = (rip %in% c("Reference", "Within reference", "Outside reference"))
+            )
+            rip <- terra::mask(rip,  model[['background']])
+          } else {
+            # MESS index
+            nt2 <- .mess(covs = model$predictors_object$get_data(),
+                         ref = refs, full = FALSE)
+            # Calculate interpolation/extrapolated
+            rip <- terra::classify(nt2$mis,
+                                   c( terra::global(nt2$mis,'min', na.rm = TRUE)[,1], 0,
+                                      terra::global(nt2$mis,'max', na.rm = TRUE)[,1]))
+            rip <- terra::as.factor(rip)
+            for(i in 1:terra::nlyr(rip)){
+              ca <- data.frame(ID = levels(rip[[i]])[[1]][,1])
+              ca[names(rip[[i]])] <- c('Extrapolation','Interpolation')
+              levels(rip[[i]]) <- ca
+            }
+            rip <- rip == 'Interpolation'
+            rm(nt2)
+          }
+        # Convert to polygon
+        zones <- terra::as.polygons(rip) |> sf::st_as_sf()
+        names(zones)[1] <- "limit"
+        zones <- subset(zones, limit==1) # Only use valid areas
+        try({ rm(nt2) },silent = TRUE)
       }
 
       if(nrow(zones)==0){
@@ -746,10 +800,12 @@ methods::setMethod(
         #   )), "spatial_offset" ] <- NA # Fill with NA
         # }
       }
-
-      x <- x$set_limits(x = zones,
-                        mcp_buffer = x$limits$mcp_buffer,
-                        limits_clip = x$limits$limits_clip)
+      # Reset the zones, but save the created layer
+      l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
+                "mcp_buffer" = x$limits$mcp_buffer,
+                "limits_clip" = x$limits$limits_clip)
+      settings$set("limits", l)
+      x <- x$set_limits(x = l)
       rm(zones)
     }
 
@@ -1411,9 +1467,11 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
     # Clip to limits again to be sure
-    if(!is.Waiver(x$limits)) {
+    if(!is.Waiver(x$get_limits())) {
       if(settings$get('inference_only')==FALSE){
-        out <- out$set_data("prediction", terra::mask(out$get_data("prediction"), x$limits$layer))
+        out <- out$set_data("prediction",
+                            terra::mask(out$get_data("prediction"),
+                                        settings$get("limits")$layer))
       }
       out$settings$set("has_limits", TRUE)
     } else {

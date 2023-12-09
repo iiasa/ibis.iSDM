@@ -165,7 +165,7 @@ methods::setMethod(
                             msg = 'No background file supplied!')
     assertthat::assert_that(
       inherits(background,'sf'),
-      unique(st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
+      unique(sf::st_geometry_type(background)) %in% c('MULTIPOLYGON','POLYGON')
     )
 
     # Check that provided background has a valid crs

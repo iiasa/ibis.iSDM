@@ -1,5 +1,8 @@
 # ibis.iSDM 0.1.1 (current dev branch)
 
+#### New features
+* Harmonized controls settings and added option to contrain extrapolation `add_control_extrapolation()`
+
 #### Minor improvements and bug fixes
 * Several bug fixes and improvements in `thin_observations`
 * `global`, `probs`, and `centers` argument for better control of `thin_observations`

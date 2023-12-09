@@ -549,7 +549,7 @@ BiodiversityScenario <- bdproto(
     return(out)
   },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     projection <- self$get_data()
     if(!is.Waiver(projection)){

@@ -1,4 +1,4 @@
-#' Add a specified variable which should be controlled for somehow.
+#' Add a control to a BiodiversityModel object to control biases
 #'
 #' @description Sampling and other biases are pervasive drivers of the spatial
 #' location of biodiversity datasets. While the integration of other, presumably
@@ -10,10 +10,11 @@
 #' control the biases in a model, by including a specified variable ("layer") in
 #' the model, but "partialling" it out during the projection phase. Specifically
 #' the variable is set to a specified value ("bias_value"), which is by default
-#' the minimum value observed across the background. [*] \code{"offset"} - Dummy
+#' the minimum value observed across the background.
+#' [*] \code{"offset"} - Dummy
 #' method that points to the [`add_offset_bias()`] functionality (see note).
-#' Makes use of offsets to factor out a specified bias variable. [*]
-#' \code{"proximity"} - Use the proximity or distance between points as a weight
+#' Makes use of offsets to factor out a specified bias variable.
+#' [*] \code{"proximity"} - Use the proximity or distance between points as a weight
 #' in the model. This option effectively places greater weight on points farther
 #' away. *Note:* In the best case this can control for spatial bias and
 #' aggregation, in the worst case it can place a lot of emphasis on points that
@@ -71,7 +72,8 @@
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' * Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly estimating spatial sampling effort and habitat suitability for multiple species from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 #' @returns Adds bias control option to a [`distribution`] object.
-#' @keywords bias, offset
+#' @keywords bias, offset, control
+#' @seealso [add_control_extrapolation()]
 #' @aliases add_control_bias
 #' @examples
 #' \dontrun{
@@ -133,11 +135,11 @@ methods::setMethod(
       if(method == "partial"){
         if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias controlled variable...')
 
-        if(!is.Waiver(x$get_biascontrol())){
+        if(!is.Waiver(x$get_control())){
           if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Overwriting existing bias variable...')
         }
         # Add to bias control
-        x <- x$set_biascontrol(layer, method, bias_value)
+        x <- x$set_control(type = "bias", layer, method, bias_value)
 
       } else if(method == "offset") {
         x <- x |> add_offset_bias(layer = layer, add = add)
@@ -147,7 +149,7 @@ methods::setMethod(
       # Here we use proximity as a weight to any points. Those will be applied
       # during the model training, thus we simply define the bias control here
       if(is.null(maxdist)) maxdist <- 0
-      x <- x$set_biascontrol(method = method, value = c(maxdist, alpha))
+      x <- x$set_control(type = "bias", method = method, value = c(maxdist, alpha))
     }
     return(x)
   }

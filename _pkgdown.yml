@@ -79,6 +79,7 @@ reference:
       - starts_with("sel_")
       - starts_with("rm_")
       - starts_with("get_")
+      - has_keyword("control")
 
 
   - title: Engines

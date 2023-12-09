@@ -20,6 +20,7 @@ DistributionModel <- bdproto(
   "DistributionModel",
   id = character(), # An id for any trained model
   model = list(),
+  settings = new_waiver(),
   fits = list(), # List of fits with data
   # Print message with summary of model
   print = function(self) {
@@ -453,8 +454,18 @@ DistributionModel <- bdproto(
     }
     return(cent)
   },
+  # Has Limits
+  has_limits = function(self){
+    # Check for settings
+    settings <- self$settings
+    if(!is.Waiver(settings)){
+      return(
+        settings$get('has_limits')
+      )
+    }
+  },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     prediction <- self$get_data()
     if(!is.Waiver(prediction)){
@@ -467,7 +478,7 @@ DistributionModel <- bdproto(
         mask <- terra::resample(mask, prediction, method = "near")
       }
       # Now mask and save
-      prediction <- terra::mask(prediction, mask, inverse = inverse)
+      prediction <- terra::mask(prediction, mask, inverse = inverse, ...)
 
       # Save data
       self$fits[["prediction"]] <- prediction
@@ -476,7 +487,7 @@ DistributionModel <- bdproto(
       tr <- grep("threshold", self$show_rasters(), value = TRUE)
       if(length(tr)){
         m <- self$get_data(x = tr)
-        m <- terra::mask(m, mask, inverse = inverse)
+        m <- terra::mask(m, mask, inverse = inverse, ...)
         self$fits[[tr]] <- m
       }
       invisible()

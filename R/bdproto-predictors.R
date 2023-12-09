@@ -108,7 +108,7 @@ PredictorDataset <- bdproto(
     invisible()
   },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     prediction <- self$get_data(df = FALSE)
     if(!is.Waiver(prediction)){
@@ -121,7 +121,7 @@ PredictorDataset <- bdproto(
         mask <- terra::resample(mask, prediction, method = "near")
       }
       # Now mask and save
-      prediction <- terra::mask(prediction, mask, inverse = inverse)
+      prediction <- terra::mask(prediction, mask, inverse = inverse, ...)
 
       # Save data
       self$fits[["data"]] <- prediction

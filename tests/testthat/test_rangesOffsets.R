@@ -43,7 +43,7 @@ test_that('Load ranges and add them to distribution object', {
 
   # Add bias variable
   suppressWarnings( y <- x |> add_control_bias(layer = predictors$hmi_mean_50km,bias_value = 0) )
-  expect_type(y$bias, 'list')
-  expect_length(y$get_biascontrol(), 3)
+  expect_type(y$control, 'list')
+  expect_length(y$get_control(), 4)
 
 })

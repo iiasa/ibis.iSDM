@@ -318,7 +318,7 @@ BiodiversityDataset <- bdproto(
     nrow(self$data)
   },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     biob <- self$data
     if(!is.Waiver(biob)){
