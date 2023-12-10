@@ -116,6 +116,7 @@ Collate:
     'engine_bart.R'
     'engine_breg.R'
     'engine_gdb.R'
+    'engine_glm.R'
     'engine_glmnet.R'
     'utils-inla.R'
     'engine_inla.R'

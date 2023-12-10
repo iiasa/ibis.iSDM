@@ -178,3 +178,29 @@ tidy_glmnet_summary <- function(obj){
   }
   return(ms)
 }
+
+#' Tidy GLM summary
+#'
+#' @description This helper function summarizes the coefficients from a glm
+#' model.
+#' @param obj An object created with [stats::glm.fit()]
+#' @keywords internal, utils
+#' @noRd
+tidy_glm_summary <- function(obj){
+  assertthat::assert_that(
+    inherits(obj, 'glm')
+  )
+
+  # Summarize
+  ms <- stats::summary.glm(obj)$coefficients |>
+    as.data.frame() |>
+    tibble::rownames_to_column(var = "variable")
+
+  # Remove intercept
+  int <- grep("Intercept",ms$variable,ignore.case = TRUE)
+  if(length(int)>0) ms <- ms[-int,]
+
+  # Rename the estimate and std.error column
+  ms <- ms |> dplyr::rename(mean = "Estimate", se = "Std. Error")
+  return(ms)
+}

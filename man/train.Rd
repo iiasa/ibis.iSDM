@@ -174,5 +174,5 @@ necessarily make sense or are useful.
 }
 \seealso{
 \link{engine_gdb}, \link{engine_xgboost}, \link{engine_bart}, \link{engine_inla},
-\link{engine_inlabru}, \link{engine_breg}, \link{engine_stan}
+\link{engine_inlabru}, \link{engine_breg}, \link{engine_stan}, \link{engine_glm}
 }

@@ -160,6 +160,25 @@ DistributionModel <- bdproto(
                "")
       ))
 
+    } else if(inherits(self, 'GLM-Model')) {
+      obj <- self$get_data('fit_best')
+
+      # Summarise coefficients within 1 standard deviation
+      ms <- tidy_glm_summary(obj)
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[1mStrongest summary effects:\033[22m',
+        '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
+        '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
+      ))
+
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -267,6 +286,8 @@ DistributionModel <- bdproto(
       xgboost::xgb.importance(model = self$get_data(obj))
     } else if(inherits(self, 'GLMNET-Model')){
       tidy_glmnet_summary(self$get_data(obj))
+    } else if(inherits(self, 'GLM-Model')){
+      tidy_glm_summary(self$get_data(obj))
     }
   },
   # Model convergence check
@@ -302,6 +323,14 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = what)
     } else if(inherits(self, 'GLMNET-Model')) {
+      if(what == "fixed"){
+        ms <- tidy_glm_summary(mod)
+        graphics::dotchart(ms$mean,
+                 labels = ms$variable,
+                 frame.plot = FALSE,
+                 color = "grey20")
+      } else{ plot(self$get_data(x)) }
+    } else if(inherits(self, 'GLM-Model')) {
       if(what == "fixed"){
         glmnet:::plot.glmnet(self$get_data(x)$glmnet.fit, xvar = "lambda") # Deviance explained
       } else{ plot(self$get_data(x)) }

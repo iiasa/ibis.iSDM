@@ -3,11 +3,6 @@
 test_that('Check that distribution objects are properly inherited', {
   skip_if_not_installed('igraph')
   skip_if_not_installed('abind')
-  skip_if_not_installed("glmnet")
-  skip_if_not_installed("INLA")
-  # skip_if_not_installed("cmdstanr")
-  # skip_if(condition = tryCatch(expr = cmdstanr::cmdstan_path(), error = function(e) return(TRUE)),
-  #         message = "No cmdstan path")
 
   # Load packages
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
@@ -73,9 +68,7 @@ test_that('Check that distribution objects are properly inherited', {
   expect_true(is.Waiver(x$latentfactors))
 
   # Engine
-  x |> engine_gdb(boosting_iterations = 500)
-  expect_true(is.Waiver(x$engine))
-  x |> engine_glmnet()
+  x |> engine_glm()
   expect_true(is.Waiver(x$engine))
 
   # Priors

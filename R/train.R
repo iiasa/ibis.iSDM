@@ -117,7 +117,7 @@ NULL
 #' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
 #' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for countrywide α‐diversity and species distributions: illustration using &gt;6,000 plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
 #' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],
-#'   [engine_inlabru], [engine_breg], [engine_stan]
+#'   [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
 #' @returns A [DistributionModel] object.
 #' @examples
 #' \dontrun{
@@ -1458,8 +1458,103 @@ methods::setMethod(
             model$priors <- po
           }
         } # End of multiple ides
-      }
-      # End of GLMNET engine
+      } # End of GLMNET engine
+    } else if (inherits(x$engine,"GLM-Engine") ){
+      # ----------------------------------------------------------- #
+      if(method_integration == "prior") warning("Priors not supported for GLM!")
+      #### GLM Engine ####
+      # For each formula, process in sequence
+      for(id in ids){
+
+        # We use the same function as for glmnet here
+        model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+
+        # Remove those not part of the modelling
+        model2 <- model
+        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
+
+        # Now train the model and create a predicted distribution model
+        settings2 <- settings
+        if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
+        }
+        out <- x$engine$train(model2, settings2)
+
+        # Add Prediction of model to next object if multiple are supplied
+        if(length(ids)>1 && id != ids[length(ids)]){
+          if(method_integration == "predictor"){
+            # Add to predictors frame
+            new <- out$get_data("prediction")[["mean"]]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+            names(new) <- pred_name
+            # Add the object to the overall prediction object
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
+
+            # Now for each biodiversity dataset and the overall predictors
+            # extract and add as variable
+            for(k in names(model$biodiversity)){
+              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
+              env <- env[names(new)]
+              # Add
+              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
+              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
+                                                            names(env) )
+              model$biodiversity[[k]]$predictors_types <- rbind(
+                model$biodiversity[[k]]$predictors_types,
+                data.frame(predictors = names(env), type = c('numeric'))
+              )
+            }
+            # Add to overall predictors
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
+            model$predictors_names <- c(model$predictors_names, names(new))
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = names(new), type = c('numeric')))
+
+            # Finally if custom formula found, add the variable there.
+            for(other_id in names(model$biodiversity)){
+              if(other_id == id) next() # Skip if current id
+              ff <- model$biodiversity[[other_id]]$equation
+              if(is.formula(ff)){
+                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+                model$biodiversity[[other_id]]$equation <- ff
+              } # Else skip
+            }
+
+          } else if(method_integration == "offset"){
+            # Adding the prediction as offset
+            new <- out$get_data("prediction")
+            # Back transforming offset to linear scale
+            new[] <- switch (model$biodiversity[[id]]$family,
+                             "binomial" = ilink(new[], link = "logit"),
+                             "poisson" = ilink(new[], link = "log")
+            )
+            if(is.Waiver(model$offset)){
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
+              names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
+              model[['offset']] <- ofs
+              # Also add offset object for faster extraction
+              model[['offset_object']] <- new
+            } else {
+              # New offset
+              news <- sum( model[['offset_object']], new, na.rm = TRUE)
+              news <- terra::mask(news, x$background)
+              model[['offset_object']] <- news
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
+              names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
+              model[['offset']] <- ofs
+              rm(news)
+            }
+            rm(new)
+          }
+        } # End of multiple ides
+      } # End of GLM engine
     } else { stop('Specified Engine not implemented yet.') }
 
     if(is.null(out)) return(NULL)

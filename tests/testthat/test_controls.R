@@ -1,12 +1,9 @@
 # ---- #
-# Train a full distribution model with glmnet
+# Train a full distribution model with glm base model
 test_that('Test controls', {
 
-  skip_if_not_installed('glmnet')
   skip_on_travis()
   skip_on_cran()
-
-  suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
 
   # No messages
   options(ibis.setupmessages = FALSE)
@@ -50,7 +47,7 @@ test_that('Test controls', {
   # Train the model with limits set
   x <-  x |> add_control_extrapolation(layer = zones, method = "zones")
   suppressWarnings(
-    mod <- train(x |> engine_glmnet(alpha = 1), "test", inference_only = FALSE, only_linear = TRUE,
+    mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
   )
 

@@ -1,89 +1,63 @@
 #' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
 NULL
 
-#' Engine for regularized regression models
+#' Engine for Generalized linear models (GLM)
 #'
-#' @description This engine allows the estimation of linear coefficients using
-#' either ridge, lasso or elastic net regressions techniques. Backbone of this
-#' engine is the \pkg{glmnet} R-package which is commonly used in SDMs,
-#' including the popular \code{'maxnet'} (e.g. Maxent) package. Ultimately this
-#' engine is an equivalent of [engine_breg], but in a "frequentist" setting. If
-#' user aim to emulate a model that most closely resembles maxent within the
-#' ibis.iSDM modelling framework, then this package is the best way of doing so.
-#' Compared to the \code{'maxnet'} R-package, a number of efficiency settings
-#' are implemented in particular for cross-validation of alpha and lambda
-#' values.
+#' @description
+#' This engine implements a basic generalized linear modle (GLM) for creating
+#' species distribution models. The main purpose of this engine is to support
+#' a basic, dependency-free method for inference and projection that can be used
+#' within the package for examples and vignettes. That being said, the engine is
+#' fully functional as any other engine.
 #'
-#' Limited amount of prior information can be specified for this engine,
-#' specifically via offsets or as [`GLMNETPrior`], which allow to specify priors
-#' as regularization constants.
-#' @details Regularized regressions are effectively GLMs that are fitted with
-#' ridge, lasso or elastic-net regularization. Which of them is chosen is
-#' critical dependent on the alpha value: [*] For \code{alpha} equal to \code{0}
-#' a ridge regularization is used. Ridge regularization has the property that it
-#' doesn't remove variables entirely, but instead sets their coefficients to
-#' \code{0}. [*] For \code{alpha} equal to \code{1} a lasso regularization is
-#' used. Lassos tend to remove those coefficients fully from the final model
-#' that do not improve the loss function. [*] For \code{alpha} values between
-#' \code{0} and \code{1} a elastic-net regularization is used, which is
-#' essentially a combination of the two. The optimal lambda parameter can be
-#' determined via cross-validation. For this option set \code{"varsel"} in
-#' `train()` to \code{"reg"}.
+#' The basic implementation of GLMs here is part of a general class oflinear models
+#' and has - with exception of offsets - only minimal options to integrate other
+#' sources of information such as priors or joint integration. The general
+#' recommendation is to [engine_glmnet()] instead for regularization support.
+#' However basic GLMs can in some cases be useful for quick projections or
+#' for [ensemble()] of small models (a practice common for rare species).
+#'
+#' @details
+#' This engine is essentially a wrapper for [stats::glm.fit()], however with customized
+#' settings to support offsets and weights.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has
-#'   to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
-#'   and \code{alpha=0} the ridge penalty (Default: \code{0}).
-#' @param nlambda A [`numeric`] giving the number of lambda values to be used
-#'   (Default: \code{100}).
-#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually
-#'   best to let this parameter be determined deterministically (Default:
-#'   \code{NULL}).
+#' @param control A [`list`] containing parameters for controlling the fitting
+#' process (Default: \code{NULL}).
 #' @param type The mode used for creating posterior predictions. Either making
 #'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
-#' @param ... Other parameters passed on to glmnet.
+#' @param ... Other parameters passed on to [stats::glm()].
 #' @references
-#' * Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
-#' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
-#' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
+#' * Hastie, T. J. and Pregibon, D. (1992) Generalized linear models. Chapter 6 of Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
 #' @family engine
 #' @returns An [Engine].
-#' @aliases engine_glmnet
+#' @aliases engine_glm
 #' @examples
-#' \dontrun{
-#' # Add GLMNET as an engine
-#' x <- distribution(background) |> engine_glmnet(iter = 1000)
-#' }
-#' @name engine_glmnet
+#' # Load background
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#'
+#' # Add GLM as an engine
+#' x <- distribution(background) |> engine_glm()
+#' x
+#' @name engine_glm
 NULL
-#' @rdname engine_glmnet
+#' @rdname engine_glm
 #' @export
 
-engine_glmnet <- function(x,
-                          alpha = 0,
-                          nlambda = 100,
-                          lambda = NULL,
-                          type = "response",
-                          ...) {
+engine_glm <- function(x,
+                       control = NULL,
+                       type = "response",
+                       ...) {
 
-  # Check whether glmnet package is available
-  check_package('glmnet')
-  if(!("glmnet" %in% loadedNamespaces()) || ('glmnet' %notin% utils::sessionInfo()$otherPkgs) ) {
-    try({requireNamespace('glmnet');attachNamespace("glmnet")},silent = TRUE)
-  }
-  check_package('glmnetUtils') # glmnetUtils is a helper functions for formulas
-  if(!("glmnetUtils" %in% loadedNamespaces()) || ('glmnetUtils' %notin% utils::sessionInfo()$otherPkgs) ) {
-    try({requireNamespace('glmnetUtils');attachNamespace("glmnetUtils")},silent = TRUE)
-  }
+  # Check whether package is available (Default installed)
+  check_package('stats')
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                           inherits(x$background,'sf'),
-                          is.numeric(alpha),
-                          is.numeric(lambda) || is.null(lambda),
-                          is.numeric(nlambda),
+                          is.null(control) || is.list(control),
                           is.character(type)
   )
-  assertthat::assert_that(alpha>=0, alpha <=1)
   type <- match.arg(type, choices = c("predictor","link", "response"),several.ok = FALSE)
   if(type=="predictor") type <- "link" # Convenience conversion
 
@@ -105,11 +79,14 @@ engine_glmnet <- function(x,
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
 
+  # Specify default control
+  if(is.null(control)){
+    control <- stats::glm.control()
+  }
+
   # Set up the parameter list
   params <- list(
-    alpha = alpha,
-    lambda = lambda,
-    nlambda = nlambda,
+    control = control,
     type = type,
     ...
   )
@@ -120,9 +97,9 @@ engine_glmnet <- function(x,
   # Set engine in distribution object
   x$set_engine(
     bdproto(
-      "GLMNET-Engine",
+      "GLM-Engine",
       Engine,
-      name = "<GLMNET>",
+      name = "<GLM>",
       data = list(
         'template' = template,
         'params' = params
@@ -165,18 +142,6 @@ engine_glmnet <- function(x,
         # Distribution specific procedure
         fam <- model$biodiversity[[1]]$family
         form <- model$biodiversity[[1]]$equation
-
-        # # -- #
-        # # Respecify the predictor names if not matching
-        # te <- formula_terms(form)
-        # if(length(te) != nrow(model$biodiversity[[1]]$predictors_types)){
-        #   model$biodiversity[[1]]$predictors_names <-
-        #     model$biodiversity[[1]]$predictors_names[model$biodiversity[[1]]$predictors_names %in% te]
-        #   model$biodiversity[[1]]$predictors_types <-
-        #     model$biodiversity[[1]]$predictors_types |> dplyr::filter(
-        #     predictors %in% te)
-        # }
-        # # -- #
 
         # If a poisson family is used, weight the observations by their exposure
         if(fam == "poisson"){
@@ -305,8 +270,6 @@ engine_glmnet <- function(x,
 
         # Get parameters control
         params <- self$get_data('params')
-        # Set glmnet control
-        glmnet::glmnet.control(factory = TRUE) # Reset to default
 
         # All other needed data for model fitting
         fam <- model$biodiversity[[1]]$family
@@ -342,36 +305,6 @@ engine_glmnet <- function(x,
           ofs_pred <- model$offset[,'spatial_offset']
         } else { ofs <- NULL; ofs_pred <- NULL }
 
-        # Check priors, e.g penalty factors
-        p.fac <- rep(1, sum( model$biodiversity[[1]]$predictors_types$type=="numeric") ) # Added plus 1 for the weight?
-        names(p.fac) <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="numeric")]
-        # Then add each factor level if set
-        if(any(model$predictors_types$type=="factor")){
-          fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
-          # return penalty factor for each level of each factor (even if level values are identical across factors)
-          p.fac <- c(p.fac, rep(1, sum(apply(df[, fac, drop = FALSE], 2, function(x) length(unique(x))))))
-        }
-        # Duplicate p.fac container for lower and upper limits
-        lowlim <- rep(-Inf, length(p.fac)) |> stats::setNames(names(p.fac))
-        upplim <- rep(Inf, length(p.fac)) |> stats::setNames(names(p.fac))
-
-        # Trick for creation for some default lambda values for the regularization multiplier
-        if(is.null(params$lambda)){
-          reg <- default.regularization(p = df$observed, m = stats::model.matrix(form, df)) * c(1, p.fac) # add 1 for the intercept
-          params$lambda <- 10^(seq(4, 0, length.out = 200)) * sum(p.fac)/length(p.fac) * sum(p.fac)/sum(w)
-          if(anyNA(params$lambda)) params$lambda <- NULL
-        }
-
-        if(!is.Waiver(model$priors)){
-          # Reset those contained in the prior object
-          for(v in model$priors$varnames()){
-            if(!(v %in% names(p.fac))) next()
-            p.fac[v]  <- model$priors$get(v, what = "value")
-            lowlim[v] <- model$priors$get(v, what = "lims")[1]
-            upplim[v] <- model$priors$get(v, what = "lims")[2]
-          }
-        }
-
         # Clamp?
         if( settings$get("clamp") ) full <- clamp_predictions(model, full)
 
@@ -379,88 +312,55 @@ engine_glmnet <- function(x,
         # Expand predictors if non-linear is specified in settings
         if(settings$get('only_linear') == FALSE){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
-                                                    'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
-          # linear_predictors <- attr(terms.formula(form), "term.labels")
-          # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
-          #
-          # form <- stats::update.formula(form,
-          #                        paste0(
-          #                          ". ~ . +",
-          #                          paste0("I(", linear_predictors,"^2)",collapse = " + "),
-          #                          " + ",
-          #                          paste0(m[lower.tri(m)], collapse = " + ")
-          #                        ))
-          # # Update penalty factors and limits
-          # for(var in attr(terms.formula(form), "term.labels")){
-          #   if(!(var %in% p.fac)){
-          #     v <- 1 # Take the maximum regularization penalty by default
-          #     vlow <- -Inf; vupp <- Inf
-          #     names(v) <- var; names(vlow) <- var; names(vupp) <- var
-          #     p.fac <- append(p.fac, v)
-          #     lowlim <- append(lowlim, vlow); upplim <- append(upplim, vupp)
-          #   }
-          # }
+                                                    'Non-linearity to glm is best introduced by adding derivates. Ignored!')
         }
 
         assertthat::assert_that(
           is.null(w) || length(w) == nrow(df),
           is.null(ofs) || is.vector(ofs),
           is.null(ofs_pred) || is.vector(ofs_pred),
-          length(p.fac) == length(lowlim),
           all(w >= 0,na.rm = TRUE)
         )
-
         # --- #
         # Determine the optimal lambda through k-fold cross-validation
         if(getOption("ibis.runparallel")){
           if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
-                                                          strategy = getOption("ibis.futurestrategy"))
+                                                         strategy = getOption("ibis.futurestrategy"))
         }
         # Depending if regularized should be set, specify this separately
         if( (settings$get('optim_hyperparam')) ){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
-                                                    'Finding optimal hyper parameters alpha and lambda.')
-          cv_gn <- try({
-            glmnetUtils::cva.glmnet(formula = form,
-                      data = df,
-                      alpha = seq(0,1,.1), # Elastic net parameters to test
-                      lambda = params$lambda, # Overwrite lambda
-                      weights = w, # Case weights
-                      offset = ofs,
-                      family = fam,
-                      penalty.factor = p.fac,
-                      # Option for limiting the coefficients
-                      lower.limits = lowlim,
-                      upper.limits = upplim,
-                      standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                      maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-                      parallel = getOption("ibis.runparallel"),
-                      trace.it = settings$get("verbose"),
-                      nfolds = 10  # number of folds for cross-validation
-            )
-          },silent = FALSE)
+          if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                    'No hyperparameter optimization for glm implemented!')
         } else {
-          cv_gn <- try({
-            glmnetUtils::cv.glmnet(formula = form,
-                                   data = df,
-                                   alpha = params$alpha, # Elastic net mixing parameter
-                                   lambda = params$lambda, # Overwrite lambda
-                                   weights = w, # Case weights
-                                   offset = ofs,
-                                   family = fam,
-                                   penalty.factor = p.fac,
-                                   # Option for limiting the coefficients
-                                   lower.limits = lowlim,
-                                   upper.limits = upplim,
-                                   standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                                   maxit = (10^5)*2, # Increase the maximum number of passes for lambda
-                                   parallel = getOption("ibis.runparallel"),
-                                   trace.it = settings$get("verbose"),
-                                   nfolds = 10  # number of folds for cross-validation
+          if(!is.null(ofs)){
+            # Split since GLM cannot handle NULL offsets
+            suppressWarnings(
+              fit_glm <- try({
+                stats::glm(formula = form,
+                           data = df,
+                           weights = w, # Case weights
+                           offset = ofs,
+                           family = fam,
+                           na.action = "na.pass",
+                           control = params$control
+                )
+              },silent = FALSE)
             )
-          },silent = FALSE)
+          } else {
+            suppressWarnings(
+              fit_glm <- try({
+                stats::glm(formula = form,
+                           data = df,
+                           weights = w, # Case weights
+                           family = fam,
+                           na.action = "na.pass",
+                           control = params$control
+                )
+              },silent = FALSE)
+            )
+          }
         }
-        if(inherits(cv_gn, "try-error")) stop("Model failed to converge with provided input data!")
+        if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
 
         # --- #
         # Predict spatially
@@ -484,35 +384,25 @@ engine_glmnet <- function(x,
           assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
           # Attempt prediction
-          if(inherits(cv_gn, "cv.glmnet")){
-            out <- predict(object = cv_gn,
-                           newdata = full_sub,
-                           weights = w_full_sub,
-                           newoffset = ofs_pred[full_sub$rowid],
-                           s = determine_lambda(cv_gn), # Determine the best lambda value
-                           type = params$type
-            )
+          out <- try({
+            stats::predict.glm(object = fit_glm,
+                               newdata = full,
+                               type = params$type,
+                               se.fit = TRUE,
+                               na.action = "na.pass",
+                               weights = w_full
+                               )
+          },silent = TRUE)
+          if(!inherits(out,"try-error")){
+            # Fill output with summaries of the posterior
+            prediction <- fill_rasters(out |> as.data.frame(),
+                                       background = prediction)[[1:2]]
+            names(prediction) <- c("mean", "se")
+            prediction <- terra::mask(prediction, self$get_data("template"))
+
           } else {
-            # Assume cva.glmnet
-            out <- predict(
-              object = cv_gn,
-              newdata = full_sub,
-              alpha = cv_gn$alpha,
-              weights = w_full_sub,
-              newoffset = ofs_pred[full_sub$rowid],
-              s = determine_lambda(cv_gn), # Determine the best lambda value
-              type = params$type
-            )
-            # Determine best model based on cross-validated loss
-            # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
-            # cv_gn <- cv_gn$modlist[[ind]]
+            stop("GLM prediction failed!")
           }
-
-
-          # Fill output with summaries of the posterior
-          prediction[full_sub$rowid] <- out[,1]
-          names(prediction) <- "mean"
-          prediction <- terra::mask(prediction, self$get_data("template"))
           try({rm(out, full, full_sub)},silent = TRUE)
         } else {
           # No prediction done
@@ -524,13 +414,13 @@ engine_glmnet <- function(x,
         # Definition of GLMNET Model object ----
         # Create output
         out <- bdproto(
-          "GLMNET-Model",
+          "GLM-Model",
           DistributionModel,
           id = model$id,
           model = model,
           settings = settings,
           fits = list(
-            "fit_best" = cv_gn,
+            "fit_best" = fit_glm,
             "fit_best_equation" = form,
             "prediction" = prediction
           ),
@@ -548,7 +438,7 @@ engine_glmnet <- function(x,
 
             mod <- self$get_data('fit_best')
             model <- self$model
-            co <- stats::coef(mod) |> row.names() # Get model coefficient names
+            co <- stats::coefficients(mod) |> names() # Get model coefficient names
             # Set type
             if(is.null(type)) type <- self$settings$get("type")
             type <- match.arg(type, c("link", "response"), several.ok = FALSE)
@@ -606,8 +496,6 @@ engine_glmnet <- function(x,
             assertthat::assert_that(all( x.var %in% colnames(df) ),
                                     msg = 'Variable not in predicted model.')
 
-            # HACK: Overwrite lambda to make sure pdp uses it.
-            mod$lambda.1se <- determine_lambda(mod)
             # Inverse link function
             ilf <- switch (settings$get('type'),
                            "link" = NULL,
@@ -630,7 +518,7 @@ engine_glmnet <- function(x,
                                    ice = FALSE, center = FALSE,
                                    type = "regression", inv.link = ilf,
                                    plot = FALSE, rug = TRUE, train = df
-                                   )
+                )
               }
               p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
@@ -683,84 +571,62 @@ engine_glmnet <- function(x,
             df$rowid <- 1:nrow(df)
             # Match x.var to argument
             x.var <- match.arg(x.var, names(df), several.ok = FALSE)
-            df_sub <- subset(df, stats::complete.cases(df))
-            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid,3] else ofs <- NULL
-            assertthat::assert_that(nrow(df_sub)>0)
 
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(df_sub)) if(!n %in% c(x.var, "rowid", "w")) df_sub[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
+              for(n in names(df)) if(!n %in% c(x.var, "rowid", "w")) df[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
             } else {
-              for(n in names(df_sub)) if(!n %in% c(x.var, "rowid", "w")) df_sub[[n]] <- constant
+              for(n in names(df)) if(!n %in% c(x.var, "rowid", "w")) df[[n]] <- constant
             }
             # Reclassify factor levels
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_sub[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
+              df[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
                 factor(lvl[1], levels = lvl)
             }
-            # Predict with lambda
-            pred_gn <- predict(
+
+            # Predict
+            pred_glm <- stats::predict.glm(
               object = mod,
-              newdata = df_sub,
-              weights = df_sub$w, # The second entry of unique contains the non-observed variables
-              newoffset = ofs,
-              s = determine_lambda(mod), # Determine best available lambda
+              newdata = df,
+              weights = df$w, # The second entry of unique contains the non-observed variables
+              se.fit = FALSE,
+              na.action = "na.pass",
               fam = fam,
               type = type
             ) |> as.data.frame()
+            assertthat::assert_that(nrow(pred_glm)>0, nrow(pred_glm) == nrow(df))
 
             # Now create spatial prediction
-            template <- model_to_background(model)
-            template[df_sub$rowid] <- pred_gn[,1]
-            names(template) <- paste0("spartial_",x.var)
+            prediction <- fill_rasters(pred_glm, model_to_background(model))
+            names(prediction) <- paste0("spartial_",x.var)
 
             # Do plot and return result
-            if(plot) terra::plot(template, col = ibis_colours$ohsu_palette)
-            return(template)
+            if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
+            return(prediction)
           },
           # Convergence check
           has_converged = function(self){
-            fit <- self$get_data("fit_best")
-            if(is.Waiver(fit)) return(FALSE)
-            # Get lambdas
-            lmd <- fit$lambda
-            if(determine_lambda(fit) == min(lmd)) return(FALSE)
-            return(TRUE)
+            obj <- self$get_data("fit_best")
+            return( obj$converged )
           },
           # Residual function
-          get_residuals = function(self){
+          get_residuals = function(self, type = NULL){
             # Get best object
             obj <- self$get_data("fit_best")
             if(is.Waiver(obj)) return(obj)
+            settings <- self$settings
+            if(is.null(type)) type <- settings$get('type')
             # Calculate residuals
-            model <- self$model$predictors
-            # Get fm
-            if(inherits(obj, "cv.glmnet")){
-              fitted_values <- predict(obj, model, s = 'lambda.1se')
-              fitted_min <- predict(obj, model, s = 'lambda.min')
-            } else {
-              alpha <- sapply(obj$modlist, function(z) min(z$cvup))
-              fitted_values <- predict(obj, model,
-                                       which = which.min(alpha),
-                                       s = 'lambda.1se')
-              fitted_min <- predict(obj, model,
-                                    which = which.min(alpha),
-                                    s = 'lambda.min')
-            }
-            rd <- fitted_min[,1] - fitted_values[,1]
-            assertthat::assert_that(length(rd)>0)
+            rd <- stats::residuals.glm(obj, type = type)
             return(rd)
           },
           # Get coefficients from glmnet
           get_coefficients = function(self){
             # Returns a vector of the coefficients with direction/importance
             obj <- self$get_data("fit_best")
-            cofs <- tidy_glmnet_summary(obj)
-            names(cofs) <- c("Feature", "Beta")
-            # Remove intercept(s)
-            int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
-            if(length(int)>0) cofs <- cofs[-int,]
+            cofs <- tidy_glm_summary(obj)
+            names(cofs)[1:2] <- c("Feature", "Beta")
             return(cofs)
           },
           # Engine-specific projection function
@@ -799,42 +665,40 @@ engine_glmnet <- function(x,
 
             df <- newdata
             df$w <- model$exposure # Also get exposure variable
-            # Make a subset of non-na values
             df$rowid <- 1:nrow(df)
-            df_sub <- base::subset(df, stats::complete.cases(df))
-            if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
-            assertthat::assert_that(nrow(df_sub)>0)
+            if(!is.Waiver(model$offset)) ofs <- model$offset else ofs <- NULL
+            assertthat::assert_that(nrow(df)>0)
 
-            if(inherits(mod, "cv.glmnet")){
-              pred_gn <- predict(
+            if(is.null(ofs)){
+              pred_glm <- stats::predict.glm(
                 object = mod,
-                newdata = df_sub,
-                weights = df_sub$w, # The second entry of unique contains the non-observed variables
-                newoffset = ofs,
+                newdata = df,
+                weights = df$w, # The second entry of unique contains the non-observed variables
+                se.fit = FALSE,
                 na.action = "na.pass",
-                s = determine_lambda(mod), # Determine best available lambda
                 fam = fam,
                 type = type
               ) |> as.data.frame()
             } else {
-              pred_gn <- predict(
+              pred_glm <- stats::predict.glm(
                 object = mod,
-                newdata = df_sub,
-                alpha = mod$alpha,
-                weights = df_sub$w, # The second entry of unique contains the non-observed variables
-                newoffset = ofs,
+                newdata = df,
+                weights = df$w, # The second entry of unique contains the non-observed variables
+                offset = ofs,
+                se.fit = FALSE,
                 na.action = "na.pass",
-                s = determine_lambda(mod), # Determine the best lambda value
                 fam = fam,
                 type = type
-              )
+              ) |> as.data.frame()
             }
-            names(pred_gn) <- layer
-            assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
+
+            names(pred_glm) <- layer
+            assertthat::assert_that(nrow(pred_glm)>0, nrow(pred_glm) == nrow(df))
 
             # Now create spatial prediction
-            prediction <- model_to_background(model)
-            prediction[df_sub$rowid] <- pred_gn[, layer]
+            prediction <- fill_rasters(pred_glm,
+                                       model_to_background(model)
+                                       )
 
             return(prediction)
           }

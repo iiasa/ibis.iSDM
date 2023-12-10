@@ -22,6 +22,7 @@
   # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
+                             'GLM-Model',
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
   # Names of priors
   options('ibis.priors' = c('INLAPrior', 'BARTPrior', 'GDBPrior','GLMNETPrior',

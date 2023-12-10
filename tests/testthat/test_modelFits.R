@@ -1,10 +1,7 @@
 # Further tests for model fits
 test_that('Add further tests for model fits', {
 
-  skip_if_not_installed('glmnet')
-  skip_if_not_installed('pdp')
-  skip_on_travis()
-  skip_on_cran()
+  skip_if_not_installed("pdp")
 
   # Set to verbose
   options("ibis.setupmessages" = FALSE)
@@ -23,23 +20,29 @@ test_that('Add further tests for model fits', {
   # Add pseudo absence
   abs <- pseudoabs_settings(nrpoints = 0,min_ratio = 1,method = "mcp")
   suppressMessages(
-    virtual_points <- add_pseudoabsence(virtual_points,template = background, field_occurrence = "Observed", settings = abs)
+    virtual_points2 <- add_pseudoabsence(virtual_points,template = background, field_occurrence = "Observed", settings = abs)
   )
 
   # Create testing and training data
-  ind <- sample(1:nrow(virtual_points), 70)
-  train_data <- virtual_points[-ind,]
-  test_data <- virtual_points[ind,]
+  ind <- sample(1:nrow(virtual_points2), 70)
+  train_data <- virtual_points2[-ind,]
+  test_data <- virtual_points2[ind,]
 
   # Now set them one up step by step
   x <- distribution(background) |>
-    add_biodiversity_poipa(train_data, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
-    engine_glmnet()
+    engine_glm()
 
-  # Train the model
+  # Train 2 model
   suppressWarnings(
-    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+    mod <- train(x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
+                                             name = 'Virtual points',docheck = F),
+                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+  )
+  suppressWarnings(
+    mod_poipo <- train(x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed',
+                                                   name = 'Virtual points',docheck = F),
+                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
   )
   expect_s4_class(mod$get_data(), "SpatRaster")
 
@@ -66,6 +69,11 @@ test_that('Add further tests for model fits', {
   expect_s3_class(val, "data.frame")
 
   # ----------- #
+  # Project with separate data
+  pp <- mod$project(predictors |> as.data.frame(xy = TRUE, na.rm = FALSE))
+  expect_s4_class(pp, "SpatRaster")
+
+  # ----------- #
   # Partial stuff
   pp <- partial(mod, x.var = "bio19_mean_50km",plot = FALSE)
   expect_s3_class(pp, "data.frame")
@@ -82,6 +90,12 @@ test_that('Add further tests for model fits', {
   # ----------- #
   # Clip the projected data with an external mask
   expect_no_error( mod$mask(virtual_range) )
+
+  # ----------- #
+  # Other functions
+  pp <- mod$get_centroid()
+  expect_s3_class(pp, "sf")
+  expect_length(mod$show_rasters(), 2)
 
   # ----------- #
   # Write model outputs
