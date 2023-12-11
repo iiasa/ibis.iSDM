@@ -417,11 +417,12 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   sf::st_geometry(abs) <- attr(df, "sf_column") # Rename geom column to be the same as for df
   assertthat::assert_that( nrow(abs) > 0,
                            all(names(abs) %in% names(df)))
+
   # Unique to remove any duplicate values (otherwise double counted cells)
-  # FIXME: Ignoring this as one might want to stress contrast to biases cells
-  # abs <- unique(abs)
+  # MJ: Need this as otherwise nrow(abs) can exceed ncell(bg1).
+  abs <- unique(abs)
   # Combine with presence information and return
-  out <- rbind.data.frame(subset(df, select = names(abs)),
+  out <- rbind(subset(df, select = names(abs)),
                           abs)
   return(out)
 }

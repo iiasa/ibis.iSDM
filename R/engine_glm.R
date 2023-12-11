@@ -155,6 +155,7 @@ engine_glm <- function(x,
                                        template = bg,
                                        settings = model$biodiversity[[1]]$pseudoabsence_settings)
           if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
+
           # Sample environmental points for absence only points
           abs <- subset(presabs, observed == 0)
           # Re-extract environmental information for absence points
@@ -291,6 +292,7 @@ engine_glm <- function(x,
         # Get full prediction container
         full <- model$predictors
         w_full <- model$exposure
+        assertthat::assert_that(nrow(df)<=nrow(full)) # Security check?
 
         # Subset the predictor types to only those present
         te <- formula_terms(form)
@@ -303,6 +305,10 @@ engine_glm <- function(x,
           # Add offset to full prediction and load vector
           ofs <- model$biodiversity[[1]]$offset[, 'spatial_offset']
           ofs_pred <- model$offset[,'spatial_offset']
+          # Add to data.frame and form
+          form <- stats::update.formula(form, . ~ . + offset(spatial_offset))
+          df$spatial_offset <- ofs
+          full$spatial_offset <- ofs_pred
         } else { ofs <- NULL; ofs_pred <- NULL }
 
         # Clamp?
@@ -332,21 +338,6 @@ engine_glm <- function(x,
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
                                                     'No hyperparameter optimization for glm implemented!')
         } else {
-          if(!is.null(ofs)){
-            # Split since GLM cannot handle NULL offsets
-            suppressWarnings(
-              fit_glm <- try({
-                stats::glm(formula = form,
-                           data = df,
-                           weights = w, # Case weights
-                           offset = ofs,
-                           family = fam,
-                           na.action = "na.pass",
-                           control = params$control
-                )
-              },silent = FALSE)
-            )
-          } else {
             suppressWarnings(
               fit_glm <- try({
                 stats::glm(formula = form,
@@ -358,7 +349,6 @@ engine_glm <- function(x,
                 )
               },silent = FALSE)
             )
-          }
         }
         if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
 

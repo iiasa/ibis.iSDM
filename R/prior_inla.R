@@ -148,7 +148,13 @@ methods::setMethod(
 
     assertthat::assert_that(length(variables)>1, msg = 'Only one prior variable supplied. Use INLAPrior')
     # Match supplied type in case someone has been lazy
-    type <- match.arg(type, names(INLA::inla.models()$prior), several.ok = FALSE)
+    gg <- try({find.package("INLA")}, silent = TRUE)
+    if(!inherits(gg, "try-error")){
+      pn <- names(INLA::inla.models()$prior)
+    } else {
+      pn <- c("normal", "gaussian","gamma","flat","pc", "pc.range","pc.prec")
+    }
+    type <- match.arg(type, pn, several.ok = FALSE)
 
     multiple_priors <- list()
     for(k in variables){

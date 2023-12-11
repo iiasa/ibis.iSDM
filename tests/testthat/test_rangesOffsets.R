@@ -62,17 +62,18 @@ test_that('Load ranges and add them to distribution object', {
       add_predictors(predictors) |>
       add_biodiversity_poipo(virtual_points,field_occurrence = "Observed") |>
       add_predictor_range(virtual_range) |>
-      # add_offset_elevation(elev = predictors$elevation_mean_50km,pref = c(100,800)) |>
-      # add_offset_bias(layer = predictors$hmi_mean_50km) |>
+      add_offset_elevation(elev = predictors$elevation_mean_50km,pref = c(100,800)) |>
+      add_offset_bias(layer = predictors$hmi_mean_50km) |>
       engine_glm()
   )
-  # expect_length(x$get_offset(), 2)
+  expect_length(x$get_offset(), 2)
 
   # Train
   suppressWarnings(
     fit <- train(x,only_linear = T)
   )
   expect_s4_class(fit$get_data(), "SpatRaster")
+  expect_true(fit$has_offset())
   # --------- #
 
 })

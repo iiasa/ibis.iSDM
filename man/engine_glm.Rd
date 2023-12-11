@@ -41,6 +41,7 @@ settings to support offsets and weights.
 \examples{
 # Load background
 background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+
 # Add GLM as an engine
 x <- distribution(background) |> engine_glm()
 x

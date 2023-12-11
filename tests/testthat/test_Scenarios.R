@@ -76,14 +76,12 @@ test_that('Testing functions for spatial-temporal data in stars', {
 # Test scenario creation and constraints
 test_that('Scenarios and constraints', {
 
-  skip_if_not_installed('glmnet')
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
   skip_if_not_installed('lwgeom')
   skip_on_travis()
   skip_on_cran()
 
-  suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
   suppressWarnings( requireNamespace('igraph', quietly = TRUE) )
   suppressWarnings( requireNamespace('stars', quietly = TRUE) )
   suppressWarnings( requireNamespace('geosphere', quietly = TRUE) )
@@ -134,7 +132,7 @@ test_that('Scenarios and constraints', {
   fit <- distribution(background) |>
     add_biodiversity_poipa(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(pred_current) |>
-    engine_glmnet(alpha = 0) |>
+    engine_glm() |>
     train("test", inference_only = FALSE, verbose = FALSE) |>
     threshold(method = "perc", value = .3)
 
@@ -197,7 +195,7 @@ test_that('Scenarios and constraints', {
   expect_s3_class(mod$get_data(), "stars")
 
   # Apply a mask
-  mod$mask(virtual_range)
+  expect_no_error( mod$mask(virtual_range) )
   mod <- x |> project() # Project anew
 
   # Calculate centroids
@@ -228,7 +226,9 @@ test_that('Scenarios and constraints', {
   expect_s3_class(mod |> get_data(), "stars")
 
   # Make a first projection
-  mod <- sc |> add_predictors(pred_future) |> project()
+  expect_no_error(
+    mod <- sc |> add_predictors(pred_future) |> project()
+  )
   suppressWarnings( expect_s3_class(summary(mod), "data.frame") )
   invisible(
     suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(plot = FALSE), "stars") )
@@ -238,8 +238,11 @@ test_that('Scenarios and constraints', {
   # These will throw errors as we haven't added thresholds
   expect_error(mod$plot_relative_change())
   expect_error(mod$summary_beforeafter())
+
   # Now add threshold
-  mod <- sc |> add_predictors(pred_future) |> threshold() |> project()
+  expect_no_error(
+    mod <- sc |> add_predictors(pred_future) |> threshold() |> project()
+  )
   expect_s3_class(mod$summary_beforeafter(), "data.frame")
   expect_true(inherits(mod$plot_relative_change(plot=FALSE), "SpatRaster"))
 

@@ -151,19 +151,29 @@ predictions can be obtained from the same data and parameters and not all
 necessarily make sense or are useful.
 }
 \examples{
-\dontrun{
- # Fit a linear penalized logistic regression model via stan
+ # Load example data
+ background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+ # Get test species
+ virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+
+ # Get list of test predictors
+ ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = T)
+ # Load them as rasters
+ predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+ # Use a basic GLM to fit a SDM
  x <- distribution(background) |>
-        # Presence-absence data
-        add_biodiversity_poipa(surveydata) |>
+        # Presence-only data
+        add_biodiversity_poipo(virtual_points) |>
         # Add predictors and scale them
         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
-        # Use Stan for estimation
-        engine_stan(chains = 2, iter = 1000, warmup = 500)
- # Train the model
+        # Use GLM as engine
+        engine_glm()
+
+ # Train the model, Also filter out co-linear predictors using a pearson threshold
  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
  mod
-}
+
 }
 \references{
 \itemize{

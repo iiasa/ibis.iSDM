@@ -493,6 +493,14 @@ DistributionModel <- bdproto(
       )
     }
   },
+  # Has offset
+  has_offset = function(self){
+    model <- self$model$offset
+    if(!is.Waiver(model$offset)) return( TRUE )
+    # Also check whether offset is somehow in the equation
+    ind <- attr(terms.formula(fit$get_equation()), "offset")
+    if(!is.null(ind)) return( TRUE )
+  },
   # Masking function
   mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
