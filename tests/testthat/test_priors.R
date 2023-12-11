@@ -2,7 +2,7 @@
 test_that('Create and add priors', {
 
   # MH: Quick-and-dirty fix for now
-  # skip_if_not_installed('INLA')
+  skip_if_not_installed('INLA')
 
   # Create list of priors
   p1 <- priors( INLAPrior(variable = 'bias',type = 'normal',

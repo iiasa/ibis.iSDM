@@ -133,7 +133,7 @@ NULL
 #'  # Use a basic GLM to fit a SDM
 #'  x <- distribution(background) |>
 #'         # Presence-only data
-#'         add_biodiversity_poipo(virtual_points) |>
+#'         add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
 #'         # Add predictors and scale them
 #'         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
 #'         # Use GLM as engine

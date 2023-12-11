@@ -3,6 +3,7 @@
 test_that('Check that distribution objects are properly inherited', {
   skip_if_not_installed('igraph')
   skip_if_not_installed('abind')
+  skip_if_not_installed('INLA')
 
   # Load packages
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
