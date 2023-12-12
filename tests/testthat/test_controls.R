@@ -62,7 +62,7 @@ test_that('Test controls', {
   x <- x$rm_limits()
   x <-  x |> add_control_extrapolation(method = "mess")
   suppressWarnings(
-    mod <- train(x |> engine_glmnet(alpha = 1), "test", inference_only = FALSE, only_linear = TRUE,
+    mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
   )
 

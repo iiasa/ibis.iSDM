@@ -325,7 +325,7 @@ test_that('Train a distribution model with glmnet', {
   expect_s4_class(ex, 'SpatRaster')
 
   suppressWarnings(
-    suppressMessages( mod2 <- train(x |> engine_glmnet(alpha = 0),verbose = FALSE) )
+    suppressMessages( mod2 <- train(x |> engine_glmnet(alpha = 1),verbose = FALSE) )
   )
   expect_no_error(ex <- ensemble(mod, mod2))
   expect_s4_class(ex, "SpatRaster")

@@ -17,7 +17,7 @@ test_that('Load ranges and add them to distribution object', {
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = TRUE)
   # Load them as rasters
   predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -61,12 +61,13 @@ test_that('Load ranges and add them to distribution object', {
     x <- distribution(background) |>
       add_predictors(predictors) |>
       add_biodiversity_poipo(virtual_points,field_occurrence = "Observed") |>
-      add_predictor_range(virtual_range) |>
+      add_offset_range(virtual_range,distance_function = "linear",distance_max = 300,
+                       distance_clip = TRUE) |>
       add_offset_elevation(elev = predictors$elevation_mean_50km,pref = c(100,800)) |>
       add_offset_bias(layer = predictors$hmi_mean_50km) |>
       engine_glm()
   )
-  expect_length(x$get_offset(), 2)
+  expect_length(x$get_offset(), 3)
 
   # Train
   suppressWarnings(

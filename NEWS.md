@@ -5,6 +5,7 @@
 * Harmonized controls settings and added option to contrain extrapolation `add_control_extrapolation()`
 
 #### Minor improvements and bug fixes
+* Minor corrective fixes and additions to `add_offset()`.
 * Switch to `engine_glm()` in many of the unittests for better coverage.
 * Several bug fixes and improvements in `thin_observations`
 * `global`, `probs`, and `centers` argument for better control of `thin_observations`

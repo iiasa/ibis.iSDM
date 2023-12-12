@@ -48,7 +48,7 @@ indicating that 10\% of all records are likely outside the range.}
 after the maximum distance (Default: \code{FALSE}).}
 
 \item{distance_function}{A \code{\link{character}} specifying the distance function to
-be used. Available are negative exponential kernels (\code{"negexp"},
+be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
 default) and a five parameters logistic curve (code{"logcurve"}) as
 proposed by Merow et al. 2017.}
 
@@ -91,8 +91,13 @@ to a very small constant (\code{1e-10}).
 }
 \examples{
 \dontrun{
- # Adds the offset to a distribution object
- distribution(background) |> add_offset_range(species_range)
+ # Train a presence-only model with a simple offset
+ fit <- distribution(background) |>
+ add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
+ add_predictors(predictors) |>
+ add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve", distance_clip = TRUE ) |>
+ engine_glm() |>
+ train()
 }
 }
 \references{

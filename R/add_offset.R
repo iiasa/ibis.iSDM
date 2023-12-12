@@ -362,7 +362,7 @@ methods::setMethod(
 #' @param distance_clip [`logical`] as to whether distance should be clipped
 #'   after the maximum distance (Default: \code{FALSE}).
 #' @param distance_function A [`character`] specifying the distance function to
-#'   be used. Available are negative exponential kernels (\code{"negexp"},
+#'   be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
 #'   default) and a five parameters logistic curve (code{"logcurve"}) as
 #'   proposed by Merow et al. 2017.
 #' @param point An optional [`sf`] layer with points or [`logical`] argument. In
@@ -380,8 +380,13 @@ methods::setMethod(
 #' @aliases add_offset_range
 #' @examples
 #' \dontrun{
-#'  # Adds the offset to a distribution object
-#'  distribution(background) |> add_offset_range(species_range)
+#'  # Train a presence-only model with a simple offset
+#'  fit <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
+#'  add_predictors(predictors) |>
+#'  add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve", distance_clip = TRUE ) |>
+#'  engine_glm() |>
+#'  train()
 #' }
 #' @keywords prior, offset
 #' @family offset
@@ -480,12 +485,12 @@ methods::setMethod(
                             is.character(field_occurrence),
                             is.logical(add)
     )
-    # distance_max = Inf; family = "poisson"; presence_prop = 0.9; distance_clip = FALSE; distance_function = "negexp"; field_occurrence = "observed"; fraction = NULL; add = TRUE
+    # distance_max = Inf; family = "poisson"; presence_prop = 0.9; distance_clip = FALSE; distance_function = "negexp"; field_occurrence = "observed"; fraction = NULL; add = TRUE;point =NULL
     # Match the type if set
     family <- match.arg(family, c("poisson", "binomial"), several.ok = FALSE)
 
     # Distance function
-    distance_function <- match.arg(distance_function, c("negexp", "logcurve"), several.ok = FALSE)
+    distance_function <- match.arg(distance_function, c("linear","negexp", "logcurve"), several.ok = FALSE)
 
     # Check that necessary dependency is present for log curve
     if(distance_function=="logcurve"){
@@ -565,6 +570,7 @@ methods::setMethod(
       }
       # Inverse of distance
       if(is.infinite(distance_max)) distance_max <- terra::global(dis, "max", na.rm = TRUE)[,1]
+      suppressWarnings( ar <- terra::cellSize(ras_range, unit = "km") ) # Calculate area in km
       # ---- #
       if(distance_function == "negexp"){
         alpha <- 1 / (distance_max / 4 ) # Divide by 4 for a quarter in each direction
@@ -576,7 +582,6 @@ methods::setMethod(
 
         # Inside I want all X across the entire area for the PPMs, indicating a
         # lambda per area of at least X/A (per unit area) within the range
-        suppressWarnings( ar <- terra::cellSize(ras_range, unit = "km") ) # Calculate area in km
         pres <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (presence_prop) )
         abs <- 1 + ( ( terra::global(ar * ras_range, "sum", na.rm = TRUE)[,1] / terra::global(ar, "sum", na.rm = TRUE)[,1]) * (1-presence_prop) )
         # Now set all values inside the range to pres and outside to abs
@@ -586,7 +591,6 @@ methods::setMethod(
         ras_range <- ras_range * dis
         # Normalize the result by dividing by the sum
         ras_range <- ras_range / terra::global(ras_range, "sum", na.rm = TRUE)[,1]
-
       } else if(distance_function == "logcurve"){
         # Extract the point values from the raster
         ex <- get_rastervalue(coords = point, env = dis)
@@ -617,6 +621,10 @@ methods::setMethod(
                                skew = co["skew"])
         attr(ras_range, "logistic_coefficients") <- co
 
+      } else if (distance_function == "linear") {
+        # Multiply with distance layer
+        ras_range <-  abs( dis / terra::global(ras_range, "sum", na.rm = TRUE)[,1]) * -1
+        ras_range[is.na(ras_range)] <- terra::global(ras_range, "min", na.rm = TRUE)[,1]
       } else {
         stop("Distance method not yet implemented.")
       }
@@ -637,14 +645,14 @@ methods::setMethod(
 
     # -------------- #
     # Log transform for better scaling
-    if(family == "negexp"){
+    if(family %in% c("negexp", "linear")){
       ras_range <- switch (family,
                            "poisson" = terra::app(ras_range, log),
                            "binomial" = terra::app(ras_range, logistic)
       )
     }
     # Rescaling does not affect relative differences.
-    ras_range <- terra::scale(ras_range, scale = FALSE)
+    ras_range <- terra::scale(ras_range, scale = F)
     names(ras_range) <- "range_distance"
 
     assertthat::assert_that(
