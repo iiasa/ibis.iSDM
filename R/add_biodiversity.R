@@ -58,7 +58,7 @@ NULL
 #' virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 #' # Define model
 #' x <- distribution(background) |>
-#'   add_biodiversity_poipo(virtual_points)
+#'   add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
 #' x
 #' @name add_biodiversity_poipo
 NULL
