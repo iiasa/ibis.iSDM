@@ -17,6 +17,7 @@
 #'   # Interpolate stars stack
 #'   sc <- interpolate_gaps( stack, "annual")
 #' }
+#' @export
 interpolate_gaps <- function(env, date_interpolation = "annual"){
   assertthat::assert_that(
     inherits(env, "stars"),
