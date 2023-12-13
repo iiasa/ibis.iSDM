@@ -133,6 +133,7 @@ reference:
       - predictor_transform
       - predictor_derivate
       - predictor_filter
+      - interpolate_gaps
       - run_stan
       - wrap_stanmodel
       - sanitize_names
