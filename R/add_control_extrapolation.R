@@ -102,7 +102,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, layer, method = "mcp", mcp_buffer = 0, novel = "within", limits_clip = FALSE) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            missing(layer) || (is.Raster(layer) || is.sf(layer)),
+                            missing(layer) || (is.Raster(layer) || inherits(layer, "sf")),
                             (is.numeric(mcp_buffer) && mcp_buffer >=0),
                             is.logical(limits_clip),
                             is.character(novel),
@@ -114,7 +114,7 @@ methods::setMethod(
 
     # Apply method specific settings
     if(method == "zones"){
-      assertthat::assert_that((is.Raster(layer) || is.sf(layer)),
+      assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf")),
                               msg = "No zone layer specified!")
 
       if(inherits(layer,'SpatRaster')){

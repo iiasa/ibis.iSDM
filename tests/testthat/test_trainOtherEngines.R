@@ -9,6 +9,9 @@ test_that('Train a distribution model with XGboost', {
   suppressWarnings( requireNamespace('xgboost', quietly = TRUE) )
   suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
+
   # Load data
   # Background Raster
   background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
@@ -102,6 +105,9 @@ test_that('Train a distribution model with Breg', {
 
   suppressWarnings( requireNamespace('BoomSpikeSlab', quietly = TRUE) )
 
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
+
   # Load data
   # Background Raster
   background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
@@ -180,6 +186,9 @@ test_that('Train a distribution model with GDB', {
   skip_on_cran()
 
   suppressWarnings( requireNamespace('mboost', quietly = TRUE) )
+
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
 
   # Load data
   # Background Raster
@@ -271,6 +280,9 @@ test_that('Train a distribution model with glmnet', {
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
   suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
+
   # Load data
   # Background Raster
   background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
@@ -324,8 +336,10 @@ test_that('Train a distribution model with glmnet', {
   expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km"))
   expect_s4_class(ex, 'SpatRaster')
 
+  pp <- priors(GLMNETPrior("CLC3_312_mean_50km",hyper = 1)) # Always reatin Forest
   suppressWarnings(
-    suppressMessages( mod2 <- train(x |> engine_glmnet(alpha = 1),verbose = FALSE) )
+    suppressMessages( mod2 <- train(x |> add_priors(pp) |>
+                                      engine_glmnet(alpha = 1),verbose = FALSE) )
   )
   expect_no_error(ex <- ensemble(mod, mod2))
   expect_s4_class(ex, "SpatRaster")
@@ -335,7 +349,7 @@ test_that('Train a distribution model with glmnet', {
   expect_s3_class(ex, 'data.frame')
 
   # Do ensemble spartials work
-  mod2 <- x |> train(only_linear = TRUE)
+  mod2 <- x |> add_priors(pp) |> train(only_linear = TRUE)
   expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
   expect_true(is.Raster(ex))
 
@@ -365,6 +379,9 @@ test_that('Train a distribution model with glmnet', {
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
+  # Expect formula
+  expect_s3_class(mod$get_equation(), "formula")
+
 })
 
 # ---- #
@@ -376,6 +393,9 @@ test_that('Train a distribution model with bart', {
   skip_on_cran()
 
   suppressWarnings( requireNamespace('dbarts', quietly = TRUE) )
+
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
 
   # Load data
   # Background Raster
@@ -444,6 +464,9 @@ test_that('Train a distribution model with INLABRU', {
   skip_on_cran()
 
   suppressWarnings( requireNamespace('inlabru', quietly = TRUE) )
+
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
 
   # Load data
   # Background Raster

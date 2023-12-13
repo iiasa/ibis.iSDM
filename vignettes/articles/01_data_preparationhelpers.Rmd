@@ -349,4 +349,43 @@ plot(!terra::noNA(new$aspect_mean_50km), main = "Missing observations")
 
 ## Preparing and altering future scenario data
 
-< Upcoming :) >
+Creating in scenarios in R requires input predictors to be formatted in a different
+format than before. The *ibis.iSDM* package here makes extensive use of `stars`
+to prepare and load multi-dimensional data. 
+
+One common issue here that predictors are not in the requested time dimension. For
+example climate data might only be available at a decadal scale (e.g. 2020, 2030, 2040),
+yet predictions are often required on a finer temporal grain.
+
+For this purpose the *ibis.iSDM* contains a dedicated function (`interpolate_gaps()`),
+that can also be directly called within `project()`.
+
+```{r}
+
+# Load some stars rasters
+ll <- list.files(system.file('extdata/predictors_presfuture/',
+                             package = 'ibis.iSDM',
+                             mustWork = TRUE),full.names = TRUE)
+
+# Load the same files future ones
+suppressWarnings(
+  pred_future <- stars::read_stars(ll) |> dplyr::slice('Time', seq(1, 86, by = 10))
+)
+sf::st_crs(pred_future) <- sf::st_crs(4326)
+
+# The predictors are here only available every 10 years
+stars::st_get_dimension_values(pred_future, 3)
+
+# --- #
+# The ibis.iSDM contains here a function to make interpolation among timesteps,
+# thus filling gaps in between.
+
+# As an example,
+# Here we make a temporal interpolation to create an annual time series
+new <- interpolate_gaps(pred_future, date_interpolation = "annual")
+
+stars::st_get_dimension_values(new, 3)
+
+
+```
+

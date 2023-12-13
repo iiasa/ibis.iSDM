@@ -13,7 +13,7 @@ test_that('Testing functions for spatial-temporal data in stars', {
   # Load some stars rasters
   ll <- list.files(system.file('extdata/predictors_presfuture/',
                                package = 'ibis.iSDM',
-                               mustWork = TRUE),full.names = T)
+                               mustWork = TRUE),full.names = TRUE)
 
   # Load the same files future ones
   suppressWarnings(
@@ -55,6 +55,13 @@ test_that('Testing functions for spatial-temporal data in stars', {
     summarise_projection(pred_future[1],fun = "mean"),
     "data.frame"
   )
+
+  # Make a simple interpolation
+  expect_no_error(
+    new <- interpolate_gaps(pred_future, date_interpolation = "annual")
+  )
+  expect_length(new, 9)
+  expect_length(stars::st_get_dimension_values(new, 3), 81)
 
   # --- #
   # Create threshold

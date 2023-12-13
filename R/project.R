@@ -131,12 +131,14 @@ methods::setMethod(
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
-    # Interpolate dates if set
+    # Interpolate predictor set if specified
     if(date_interpolation!="none"){
       if(getOption('ibis.setupmessages')) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
-      o <- approximate_gaps(env = new_preds$get_data(), date_interpolation = date_interpolation)
+
+      new <- interpolate_gaps(new_preds$get_data(),
+                              date_interpolation = date_interpolation)
       # Set new data
-      #new_preds$set_data()
+      new_preds$set_data(new)
     }
 
     # Get limits if present

@@ -3,6 +3,7 @@
 #### New features
 * Added default `engine_glm()` for dependency-free inference and projection.
 * Harmonized controls settings and added option to contrain extrapolation `add_control_extrapolation()`
+* Adding a function for temporal interpolation of predictors #52
 
 #### Minor improvements and bug fixes
 * Minor corrective fixes and additions to `add_offset()`.

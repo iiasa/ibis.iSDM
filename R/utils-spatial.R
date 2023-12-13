@@ -1367,7 +1367,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
     # points by sampling at random from the occupied grid cells
 
     # extract cell id for each point
-    ex <- cbind(id = 1:nrow(coords), terra::extract(ras, coords, cell = TRUE))
+    ex <- cbind(id = 1:nrow(coords), terra::extract(ras, coords, cells = TRUE))
 
     # remove NA points
     ex <- subset(ex, stats::complete.cases(ex))
