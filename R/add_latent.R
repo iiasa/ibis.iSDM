@@ -18,9 +18,9 @@ NULL
 #'
 #' @details There are several different options some of which depend on the
 #'   engine used. In case a unsupported method for an engine is chosen this is
-#'   modified to the next similar method
+#'   modified to the next similar method.
 #'
-#'   Available are:
+#'   **Available are:**
 #'
 #'   [*] \code{"spde"} - stochastic partial differential equation (SPDE) for
 #'   [`engine_inla`] and [`engine_inlabru`]. SPDE effects aim at capturing the
@@ -32,10 +32,12 @@ NULL
 #'   elevation. Note that calculations of SPDE's can be computationally costly.
 #' * \code{"car"} - conditional autocorrelative errors (CAR) for [`engine_inla`]. Not yet implemented in full.
 #' * \code{"kde"} - additional covariate of the kernel density of input point observations.
-#' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
-#' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
-#'   to the nearest other grid cell with values. Applied across all datasets in
-#'   the [`BiodiversityDistribution-class`]) object. Available for all Engines.
+#' * \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation.
+#'   This method assumed that a transformation of spatial coordinates can if - included as additional predictor -
+#'   explain some of the variance in the distribution. This method does not interact with species occurrences.
+#' * \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each point
+#'   to the nearest other grid cell with known species occurrence. Originally proposed by Allouche et al. (2008)
+#'   and can be applied across all datasets in the [`BiodiversityDistribution-class`]) object.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param method A [`character`] describing what kind of spatial effect is to be
@@ -49,7 +51,7 @@ NULL
 #' @param ... Other parameters passed down
 #' @returns Adds latent spatial effect to a [`distribution`] object.
 #' @references
-#' * Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+#' * Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating distance constraints into species distribution models. Journal of Applied Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x
 #' * Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 #'
 #' @keywords latent

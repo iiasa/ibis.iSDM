@@ -98,6 +98,32 @@ test_that('Add further tests for model fits', {
   expect_length(mod$show_rasters(), 2)
 
   # ----------- #
+  # Adding a range of latent constraints
+  y <- x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
+                                   name = 'Virtual points',docheck = F)
+  suppressWarnings(
+    mod1 <- train(y |> add_latent_spatial(method = "poly"), "test", inference_only = FALSE,
+                  only_linear = TRUE, varsel = "none", verbose = FALSE)
+  )
+  expect_true(length( grep("spatialtrend", mod1$get_coefficients()[,1] ) )>0)
+  suppressWarnings(
+    mod2 <- train(y |> add_latent_spatial(method = "nnd"), "test", inference_only = FALSE,
+                  only_linear = TRUE, varsel = "none", verbose = FALSE)
+  )
+  expect_true(length( grep("nearestpoint", mod2$get_coefficients()[,1] ) )>0)
+  suppressWarnings(
+    mod3 <- train(y |> add_latent_spatial(method = "kde"), "test", inference_only = FALSE,
+                  only_linear = TRUE, varsel = "none", verbose = FALSE)
+  )
+  expect_true(length( grep("kde", mod3$get_coefficients()[,1] ) )>0)
+
+  # Make an ensemble
+  expect_no_error(
+    o <- ensemble(mod1, mod2, mod3, method = "median")
+  )
+  expect_s4_class(o, "SpatRaster")
+
+  # ----------- #
   # Write model outputs
   tf <- base::tempfile()
   expect_no_error(write_summary(mod, paste0(tf, ".rds")))

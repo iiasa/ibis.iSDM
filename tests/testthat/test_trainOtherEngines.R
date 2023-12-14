@@ -290,7 +290,7 @@ test_that('Train a distribution model with glmnet', {
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
   # Load them as rasters
   predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -345,7 +345,7 @@ test_that('Train a distribution model with glmnet', {
   expect_s4_class(ex, "SpatRaster")
 
   # Do ensemble partials work?
-  expect_no_error(ex <- ensemble_partial(mod,mod, x.var = "CLC3_312_mean_50km"))
+  expect_no_error(ex <- ensemble_partial(mod,mod2, x.var = "CLC3_312_mean_50km"))
   expect_s3_class(ex, 'data.frame')
 
   # Do ensemble spartials work

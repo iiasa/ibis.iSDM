@@ -94,10 +94,10 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
         utils::install.packages("BiocManager")
       BiocManager::install(c("graph", "Rgraphviz"), dep=TRUE)
       # Then install INLA
-       utils::install.packages("INLA",
-                         repos=c(getOption("repos"),
-                                 INLA="https://inla.r-inla-download.org/R/stable"),
-                         dep=TRUE)
+      utils::install.packages("INLA",
+                       repos=c(getOption("repos"),
+                               INLA="https://inla.r-inla-download.org/R/stable"),
+                       dep=TRUE)
     }
     suppressMessages(
       utils::install.packages(new.packages, dependencies = TRUE, quiet = TRUE,
