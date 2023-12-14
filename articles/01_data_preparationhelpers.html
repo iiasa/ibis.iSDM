@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-12-12</h4>
+            <h4 data-toc-skip class="date">2023-12-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -274,7 +274,7 @@ discards data!</strong></p>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (environmental) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 28</span></span>
+<span><span class="co">#&gt; Number of retained records: 27</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Environmentally stratified data"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" width="700" style="display: block; margin: auto;"></p>
@@ -441,7 +441,61 @@ preparation.</p>
 <div class="section level2">
 <h2 id="preparing-and-altering-future-scenario-data">Preparing and altering future scenario data<a class="anchor" aria-label="anchor" href="#preparing-and-altering-future-scenario-data"></a>
 </h2>
-<p>&lt; Upcoming :) &gt;</p>
+<p>Creating in scenarios in R requires input predictors to be formatted
+in a different format than before. The <em>ibis.iSDM</em> package here
+makes extensive use of <code>stars</code> to prepare and load
+multi-dimensional data.</p>
+<p>One common issue here that predictors are not in the requested time
+dimension. For example climate data might only be available at a decadal
+scale (e.g. 2020, 2030, 2040), yet predictions are often required on a
+finer temporal grain.</p>
+<p>For this purpose the <em>ibis.iSDM</em> contains a dedicated function
+(<code><a href="../reference/interpolate_gaps.html">interpolate_gaps()</a></code>), that can also be directly called
+within <code><a href="../reference/project.html">project()</a></code>.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Load some stars rasters</span></span>
+<span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/predictors_presfuture/'</span>,</span>
+<span>                             package <span class="op">=</span> <span class="st">'ibis.iSDM'</span>,</span>
+<span>                             mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load the same files future ones</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span></span>
+<span>  <span class="va">pred_future</span> <span class="op">&lt;-</span> <span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/read_stars.html" class="external-link">read_stars</a></span><span class="op">(</span><span class="va">ll</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="st">'Time'</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">86</span>, by <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">pred_future</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The predictors are here only available every 10 years</span></span>
+<span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">pred_future</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Units: [(days since 1970-1-1)]</span></span>
+<span><span class="co">#&gt; [1] 16436 20089 23741 27394 31046 34699 38351 42004 45656</span></span>
+<span></span>
+<span><span class="co"># --- #</span></span>
+<span><span class="co"># The ibis.iSDM contains here a function to make interpolation among timesteps,</span></span>
+<span><span class="co"># thus filling gaps in between.</span></span>
+<span></span>
+<span><span class="co"># As an example,</span></span>
+<span><span class="co"># Here we make a temporal interpolation to create an annual time series</span></span>
+<span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interpolate_gaps.html">interpolate_gaps</a></span><span class="op">(</span><span class="va">pred_future</span>, date_interpolation <span class="op">=</span> <span class="st">"annual"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">new</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "2015-07-02" "2025-07-02" "2035-07-02" "2045-07-02" "2055-07-02"</span></span>
+<span><span class="co">#&gt;  [6] "2065-07-02" "2075-07-02" "2085-07-02" "2095-07-02" "2016-07-02"</span></span>
+<span><span class="co">#&gt; [11] "2017-07-02" "2018-07-02" "2019-07-02" "2020-07-02" "2021-07-02"</span></span>
+<span><span class="co">#&gt; [16] "2022-07-02" "2023-07-02" "2024-07-02" "2026-07-02" "2027-07-02"</span></span>
+<span><span class="co">#&gt; [21] "2028-07-02" "2029-07-02" "2030-07-02" "2031-07-02" "2032-07-02"</span></span>
+<span><span class="co">#&gt; [26] "2033-07-02" "2034-07-02" "2036-07-02" "2037-07-02" "2038-07-02"</span></span>
+<span><span class="co">#&gt; [31] "2039-07-02" "2040-07-02" "2041-07-02" "2042-07-02" "2043-07-02"</span></span>
+<span><span class="co">#&gt; [36] "2044-07-02" "2046-07-02" "2047-07-02" "2048-07-02" "2049-07-02"</span></span>
+<span><span class="co">#&gt; [41] "2050-07-02" "2051-07-02" "2052-07-02" "2053-07-02" "2054-07-02"</span></span>
+<span><span class="co">#&gt; [46] "2056-07-02" "2057-07-02" "2058-07-02" "2059-07-02" "2060-07-02"</span></span>
+<span><span class="co">#&gt; [51] "2061-07-02" "2062-07-02" "2063-07-02" "2064-07-02" "2066-07-02"</span></span>
+<span><span class="co">#&gt; [56] "2067-07-02" "2068-07-02" "2069-07-02" "2070-07-02" "2071-07-02"</span></span>
+<span><span class="co">#&gt; [61] "2072-07-02" "2073-07-02" "2074-07-02" "2076-07-02" "2077-07-02"</span></span>
+<span><span class="co">#&gt; [66] "2078-07-02" "2079-07-02" "2080-07-02" "2081-07-02" "2082-07-02"</span></span>
+<span><span class="co">#&gt; [71] "2083-07-02" "2084-07-02" "2086-07-02" "2087-07-02" "2088-07-02"</span></span>
+<span><span class="co">#&gt; [76] "2089-07-02" "2090-07-02" "2091-07-02" "2092-07-02" "2093-07-02"</span></span>
+<span><span class="co">#&gt; [81] "2094-07-02"</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
