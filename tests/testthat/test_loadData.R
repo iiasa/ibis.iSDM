@@ -14,7 +14,7 @@ test_that('Check that data can be loaded.',{
   expect_true(unique(sf::st_geometry_type(virtual_range)) == 'POLYGON')
 
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
   expect_gt(length(ll),0)
   expect_true(all( assertthat::has_extension(ll,'tif') ))
 

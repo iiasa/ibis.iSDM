@@ -1,4 +1,18 @@
-# ibis.iSDM 0.1.0 (current dev branch)
+# ibis.iSDM 0.1.1 (current dev branch)
+
+#### New features
+* Added default `engine_glm()` for dependency-free inference and projection.
+* Harmonized controls settings and added option to contrain extrapolation `add_control_extrapolation()`
+* Adding a function for temporal interpolation of predictors #52
+
+#### Minor improvements and bug fixes
+* Minor corrective fixes and additions to `add_offset()`.
+* Switch to `engine_glm()` in many of the unittests for better coverage.
+* Several bug fixes and improvements in `thin_observations`
+* `global`, `probs`, and `centers` argument for better control of `thin_observations`
+* Harmonization of parameters for `spartial()` and addressing #80
+
+# ibis.iSDM 0.1.0
 
 #### New features
 * Added a small convenience wrapper to add model outputs to another model `add_predictors_model()`

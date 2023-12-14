@@ -20,6 +20,7 @@ DistributionModel <- bdproto(
   "DistributionModel",
   id = character(), # An id for any trained model
   model = list(),
+  settings = new_waiver(),
   fits = list(), # List of fits with data
   # Print message with summary of model
   print = function(self) {
@@ -159,6 +160,25 @@ DistributionModel <- bdproto(
                "")
       ))
 
+    } else if(inherits(self, 'GLM-Model')) {
+      obj <- self$get_data('fit_best')
+
+      # Summarise coefficients within 1 standard deviation
+      ms <- tidy_glm_summary(obj)
+
+      message(paste0(
+        'Trained ',class(self)[1],' (',self$show(),')',
+        '\n  \033[1mStrongest summary effects:\033[22m',
+        '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
+        '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
+        ifelse(has_prediction,
+               paste0("\n  Prediction fitted: ",text_green("yes")),
+               ""),
+        ifelse(!is.na(has_threshold),
+               paste0("\n  Threshold created: ",text_green("yes")),
+               "")
+      ))
+
     } else {
       message(paste0(
         'Trained distribution model (',self$show(),')',
@@ -266,6 +286,8 @@ DistributionModel <- bdproto(
       xgboost::xgb.importance(model = self$get_data(obj))
     } else if(inherits(self, 'GLMNET-Model')){
       tidy_glmnet_summary(self$get_data(obj))
+    } else if(inherits(self, 'GLM-Model')){
+      tidy_glm_summary(self$get_data(obj))
     }
   },
   # Model convergence check
@@ -301,6 +323,14 @@ DistributionModel <- bdproto(
     } else if(inherits(self, 'INLA-Model')) {
       plot_inla_marginals(self$get_data(x),what = what)
     } else if(inherits(self, 'GLMNET-Model')) {
+      if(what == "fixed"){
+        ms <- tidy_glm_summary(mod)
+        graphics::dotchart(ms$mean,
+                 labels = ms$variable,
+                 frame.plot = FALSE,
+                 color = "grey20")
+      } else{ plot(self$get_data(x)) }
+    } else if(inherits(self, 'GLM-Model')) {
       if(what == "fixed"){
         glmnet:::plot.glmnet(self$get_data(x)$glmnet.fit, xvar = "lambda") # Deviance explained
       } else{ plot(self$get_data(x)) }
@@ -453,8 +483,26 @@ DistributionModel <- bdproto(
     }
     return(cent)
   },
+  # Has Limits
+  has_limits = function(self){
+    # Check for settings
+    settings <- self$settings
+    if(!is.Waiver(settings)){
+      return(
+        settings$get('has_limits')
+      )
+    }
+  },
+  # Has offset
+  has_offset = function(self){
+    model <- self$model$offset
+    if(!is.Waiver(model$offset)) return( TRUE )
+    # Also check whether offset is somehow in the equation
+    ind <- attr(terms.formula(fit$get_equation()), "offset")
+    if(!is.null(ind)) return( TRUE )
+  },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     prediction <- self$get_data()
     if(!is.Waiver(prediction)){
@@ -467,7 +515,7 @@ DistributionModel <- bdproto(
         mask <- terra::resample(mask, prediction, method = "near")
       }
       # Now mask and save
-      prediction <- terra::mask(prediction, mask, inverse = inverse)
+      prediction <- terra::mask(prediction, mask, inverse = inverse, ...)
 
       # Save data
       self$fits[["prediction"]] <- prediction
@@ -476,7 +524,7 @@ DistributionModel <- bdproto(
       tr <- grep("threshold", self$show_rasters(), value = TRUE)
       if(length(tr)){
         m <- self$get_data(x = tr)
-        m <- terra::mask(m, mask, inverse = inverse)
+        m <- terra::mask(m, mask, inverse = inverse, ...)
         self$fits[[tr]] <- m
       }
       invisible()

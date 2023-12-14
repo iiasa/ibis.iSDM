@@ -220,7 +220,7 @@ methods::setMethod(
       foreach::foreach(i = 1:raster::nlayers(popN)) %do% {
         max_pop <- ceiling(raster::cellStats(popN[[i]], max, na.rm = T))
         pop_values <- popN[[i]][idx]
-        popN[[i]][idx] <- rbinom(prob = (pop_values/max_pop),
+        popN[[i]][idx] <- stats::rbinom(prob = (pop_values/max_pop),
                                  size = max_pop,
                                  n = length(pop_values))
         popN[[i]]

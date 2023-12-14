@@ -215,27 +215,27 @@ test_that('Test data preparation convenience functions', {
 
   # --- #
   # Apply thinning methods
-  pp1 <- thin_observations(df = virtual_points, background = background,
-                                      method = "random", minpoints = 100,verbose = FALSE)
+  pp1 <- thin_observations(data = virtual_points, background = background,
+                           method = "random", remainpoints = 3,verbose = FALSE)
   expect_gt(nrow(pp1),0)
   # - #
-  expect_error(pp2 <- thin_observations(df = virtual_points, background = background,
+  expect_error(pp2 <- thin_observations(data = virtual_points, background = background,
                            method = "bias", verbose = FALSE))
-  pp2 <- thin_observations(df = virtual_points, background = background,
+  pp2 <- thin_observations(data = virtual_points, background = background,
                            env = predictors$hmi_mean_50km,
                            method = "bias", verbose = FALSE)
   expect_gt(nrow(pp2),0)
   # - #
-  pp3 <- thin_observations(df = virtual_points, background = background,
+  pp3 <- thin_observations(data = virtual_points, background = background,
                            zones = as.factor(predictors$koeppen_50km),
                            method = "zones", verbose = FALSE)
   expect_gt(nrow(pp3),0)
   # - #
-  pp4 <- thin_observations(df = virtual_points, background = background,
+  pp4 <- thin_observations(data = virtual_points, background = background,
                            env = predictors,
                            method = "environmental", verbose = FALSE)
   expect_gt(nrow(pp4),0)
-  # pp5 <- thin_observations(df = virtual_points, background = background,
+  # pp5 <- thin_observations(data = virtual_points, background = background,
   #                          env = predictors,
   #                          method = "spatial", verbose = FALSE)
   # expect_gt(nrow(pp5),0)

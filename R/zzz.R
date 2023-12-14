@@ -22,6 +22,7 @@
   # Known engines
   options('ibis.engines' = c('GDB-Model','BART-Model',
                              'INLABRU-Model','BREG-Model','GLMNET-Model',
+                             'GLM-Model',
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
   # Names of priors
   options('ibis.priors' = c('INLAPrior', 'BARTPrior', 'GDBPrior','GLMNETPrior',
@@ -39,9 +40,9 @@
     "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
     "gnlm", "cubelyr", "matrixStats", "Boruta", "abess",
-    "dbarts", "mboost", "rstan", "cmdstanr",
+    "dbarts", "mboost", "rstan", "cmdstanr", "biscale",
     # Mechanistic stuff
-    "poems"
+    "poems", "BiocManager"
   ))
 
   # Set default corrrelation coefficient threshold for evaluating correlated

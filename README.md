@@ -60,7 +60,7 @@ Jung, Martin. 2023. “An Integrated Species Distribution Modelling
 Framework for Heterogeneous Biodiversity Data.” Ecological Informatics,
 102127, [DOI](https://doi.org/10.1016/j.ecoinf.2023.102127)
 
-## Acknowledgement <a href="https://iiasa.ac.at"><img src="vignettes/figures/IIASA-50_blue.png" alt="IIASA" align="right" width="300"/></a>
+## Acknowledgement <a href="https://iiasa.ac.at"><img src="vignettes/figures/iiasa_logo_blue.png" alt="IIASA" align="right" width="300"/></a>
 
 **ibis.iSDM** is developed and maintained by the Biodiversity, Ecology
 and Conservation group at the International Institute for Applied

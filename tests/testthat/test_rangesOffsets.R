@@ -1,12 +1,12 @@
-# First check that INLA works
+# First check that offsets work
 test_that('Load ranges and add them to distribution object', {
-  skip_on_travis()
-  skip_on_cran()
-  skip_if_not_installed('INLA')
+
+  # Igraph should be by default installed, but check
   skip_if_not_installed('igraph')
-
   suppressWarnings( requireNamespace("igraph", quietly = TRUE) )
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
 
+  # Set to verbose
   options("ibis.setupmessages" = FALSE)
 
   # --- #
@@ -17,7 +17,7 @@ test_that('Load ranges and add them to distribution object', {
   virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
   virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
   # Get list of test predictors
-  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = T)
+  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = TRUE)
   # Load them as rasters
   predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 
@@ -41,9 +41,40 @@ test_that('Load ranges and add them to distribution object', {
   virtual_range_ras <- terra::aggregate(virtual_range_ras, 5)
   suppressWarnings( expect_s3_class( x |> add_predictor_range(virtual_range_ras), class = "BiodiversityDistribution" ) )
 
-  # Add bias variable
-  suppressWarnings( y <- x |> add_control_bias(layer = predictors$hmi_mean_50km,bias_value = 0) )
-  expect_type(y$bias, 'list')
-  expect_length(y$get_biascontrol(), 3)
+  # --------- #
+  # Add offsets
+  y <- x |> add_offset_bias(layer = predictors$hmi_mean_50km)
+  expect_equal(y$get_offset(), "hmi_mean_50km")
+
+  y <- x |> add_offset(layer = virtual_range)
+  expect_s4_class(y$offset, "SpatRaster")
+
+  suppressWarnings(
+    y <- x |> add_offset_elevation(elev = predictors$elevation_mean_50km,pref = c(100,800))
+  )
+  expect_s4_class(y$offset, "SpatRaster")
+  # --------- #
+
+  # --------- #
+  # Build a full model with various elements
+  suppressWarnings(
+    x <- distribution(background) |>
+      add_predictors(predictors) |>
+      add_biodiversity_poipo(virtual_points,field_occurrence = "Observed") |>
+      add_offset_range(virtual_range,distance_function = "linear",distance_max = 300,
+                       distance_clip = TRUE) |>
+      add_offset_elevation(elev = predictors$elevation_mean_50km,pref = c(100,800)) |>
+      add_offset_bias(layer = predictors$hmi_mean_50km) |>
+      engine_glm()
+  )
+  expect_length(x$get_offset(), 3)
+
+  # Train
+  suppressWarnings(
+    fit <- train(x,only_linear = T)
+  )
+  expect_s4_class(fit$get_data(), "SpatRaster")
+  expect_true(fit$has_offset())
+  # --------- #
 
 })

@@ -163,7 +163,7 @@ methods::setMethod(
         graphics::par(mfrow=c(3,1))
         terra::plot(exp(out$NT1),col = ibis_colours[['viridis_plasma']],main = paste0('Univariate extrapolation\n(exp. transformed)'))
         terra::plot(log(out$NT2),col = ibis_colours[['viridis_orig']],main = paste0('Non-analogous dissimilarity\n(log. transformed)'))
-        terra::plot(out$novel,col = ibis_colours[['distinct_random']][4:6],main = paste0('Novel conditions (method: ',method,')'))
+        terra::plot(out$novel,col = ibis_colours[['distinct_random']][4:7],main = paste0('Novel conditions (method: ',method,')'))
         graphics::par(par.ori)
       }
     } else {
@@ -206,9 +206,10 @@ methods::setMethod(
                    ref  = ex,
                    full = full)
       # Calculate interpolation/extrapolated
-      rip <- terra::global(out$mis,
+      rip <- terra::classify(out$mis,
                            c(terra::global(out$mis,'min', na.rm = TRUE)[,1], 0,
-                             terra::global(out$mis,'max', na.rm = TRUE)[,1]), na.rm = TRUE)
+                             terra::global(out$mis,'max', na.rm = TRUE)[,1]),
+                           na.rm = TRUE)
       rip <- terra::as.factor(rip)
       for(i in 1:terra::nlyr(rip)){
         ca <- data.frame(ID = levels(rip[[i]])[[1]][,1])
@@ -289,6 +290,13 @@ methods::setMethod(
 #' @keywords internal
 .nt12 <- function(prodat, refdat){
   check_package("matrixStats")
+  assertthat::assert_that(
+    is.data.frame(refdat) || is.matrix(refdat)
+  )
+  # If not matching, check if this can be corrected
+  if(terra::nlyr(prodat) != ncol(refdat)){
+    refdat <- subset(refdat, select = names(prodat))
+  }
 
   # Input checks
   assertthat::assert_that(is.Raster(prodat),
@@ -368,12 +376,14 @@ methods::setMethod(
   # non-analogous covariate combinations
   o_high <- nt2 > 1
 
+  nt_novel[o_low == 0] <- 0
   nt_novel[o_low == 1] <- 1
   nt_novel[o_mid == 1] <- 2
   nt_novel[o_high == 1] <- 3
   nt_novel <- terra::as.factor(nt_novel)
-  levels(nt_novel) <- data.frame(ID = c(1,2,3),
-                            what = c('Outside reference','Within reference','Novel combinations'))
+  levels(nt_novel) <- data.frame(ID = c(0,1,2,3),
+                            what = c('Reference','Within reference',
+                                     'Outside reference','Novel combinations'))
 
   # Create output stack
   out <- c(nt1, nt2, nt_novel)
@@ -390,9 +400,20 @@ methods::setMethod(
 #' @noRd
 #' @keywords internal
 .mess <- function(covs, ref, full=FALSE) {
+  assertthat::assert_that(
+    is.data.frame(ref) || is.matrix(ref),
+    nrow(ref)>0,
+    is.logical(full)
+  )
+  # If not matching, check if this can be corrected
+  if(terra::nlyr(covs) != ncol(ref)){
+    ref <- subset(ref, select = names(covs))
+  }
+  assertthat::assert_that(terra::nlyr(covs) == ncol(ref))
+
   # Convert to data.frame
   if(!is.data.frame(ref)) {
-    ref <- as.data.frame(ref,na.rm = FALSE)
+    ref <- as.data.frame(ref, na.rm = FALSE)
   }
   # Make dummy template rasters
   if(is.Raster(covs)) {

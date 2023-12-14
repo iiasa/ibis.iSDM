@@ -115,18 +115,28 @@ methods::setMethod(
         ms$Warnings <- append(ms$Warnings, "No coefficients in the model!")
       }
 
+      # Check if some coefficients are clear outliers
+      if(nrow(obj$get_coefficients())>0){
+        co <- obj$get_coefficients()
+        # Remove large outlier from coefficient and check if that results in NA (outlier)
+        co <- rm_outlier_revjack(co[[2]], procedure = "missing")
+        if(anyNA(co)){
+          ms$Warnings <- append(ms$Warnings, "Likely unstable coefficient in model (outlier)!")
+        }
+      }
+
       # Check if threshold exists, if so if it is equal to maximum
       if(!is.Waiver(obj$get_thresholdvalue())){
         # Get prediction
         pred <- obj$get_data()
-        if(obj$get_thresholdvalue() >= terra::global(pred,"max",na.rm=TRUE)[,1]){
+        if(obj$get_thresholdvalue() >= terra::global(pred[[1]],"max",na.rm=TRUE)[,1]){
           ms$Warnings <- append(ms$Warnings, "Threshold larger than prediction!")
         }
       }
 
       # Check for positive outliers in Prediction
       if(!is.Waiver( obj$get_data() )){
-        pred <- obj$get_data()
+        pred <- obj$get_data()[['mean']]
         # Calculate outliers using the mad
         pmed <- terra::global(pred, median, na.rm = TRUE)[,1]
         abs_dev <- abs(pred[]-pmed)[,1]

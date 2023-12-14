@@ -117,22 +117,32 @@ NULL
 #' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
 #' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for countrywide α‐diversity and species distributions: illustration using &gt;6,000 plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
 #' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],
-#'   [engine_inlabru], [engine_breg], [engine_stan]
+#'   [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
 #' @returns A [DistributionModel] object.
 #' @examples
-#' \dontrun{
-#'  # Fit a linear penalized logistic regression model via stan
+#'  # Load example data
+#'  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#'  # Get test species
+#'  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+#'
+#'  # Get list of test predictors
+#'  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = TRUE)
+#'  # Load them as rasters
+#'  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+#'
+#'  # Use a basic GLM to fit a SDM
 #'  x <- distribution(background) |>
-#'         # Presence-absence data
-#'         add_biodiversity_poipa(surveydata) |>
+#'         # Presence-only data
+#'         add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
 #'         # Add predictors and scale them
 #'         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
-#'         # Use Stan for estimation
-#'         engine_stan(chains = 2, iter = 1000, warmup = 500)
-#'  # Train the model
+#'         # Use GLM as engine
+#'         engine_glm()
+#'
+#'  # Train the model, Also filter out co-linear predictors using a pearson threshold
 #'  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
 #'  mod
-#' }
+#'
 #' @name train
 #' @exportMethod train
 #' @aliases train, train-method
@@ -202,6 +212,9 @@ methods::setMethod(
     settings$data <- c( settings$data, mc$... )
     # Start time
     settings$set('start.time', Sys.time())
+
+    # Load control
+    control <- x$get_control()
 
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
@@ -386,23 +399,26 @@ methods::setMethod(
     } else { model[['offset']] <- new_waiver() }
 
     # Setting up variable bias control if method == partial
-    if(!is.Waiver( x$get_biascontrol())){
-      bias <- x$bias
-      if(bias$method == "partial"){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
-        settings$set("bias_variable", names(bias$layer) )
-        settings$set("bias_value", bias$bias_value )
-        # Check that variable is already in the predictors object
-        if(!(names(bias$layer) %in% model$predictors_names)){
-          model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
-          # Also set predictor names
-          model[['predictors_names']] <- model$predictors_object$get_names()
-          model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
-          # Get predictor types
-          lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-          model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu, 'factor', 'numeric') )
+    if(!is.Waiver( control )){
+      if(control$type == "bias"){
+        bias <- control
+        if(bias$method == "partial"){
+          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
+          settings$set("bias_variable", names(bias$layer) )
+          settings$set("bias_value", bias$bias_value )
+          # Check that variable is already in the predictors object
+          if(!(names(bias$layer) %in% model$predictors_names)){
+            model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
+            # Also set predictor names
+            model[['predictors_names']] <- model$predictors_object$get_names()
+            model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+            # Get predictor types
+            lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
+            model[['predictors_types']] <- data.frame(predictors = names(lu),
+                                                      type = ifelse(lu, 'factor', 'numeric') )
+          }
+          assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
         }
-        assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
       }
     }
 
@@ -607,24 +623,26 @@ methods::setMethod(
     }
 
     # Add proximity weights if relevant option is found
-    if(!is.Waiver( x$get_biascontrol())){
-      bias <- x$bias
-      if(bias$method == "proximity"){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
-        assertthat::assert_that(length(model$biodiversity)==1,
-                                msg = "This method is not yet implemented for multiple datasets.")
+    if(!is.Waiver( control )){
+      if(control$type == "bias"){
+        bias <- control
+        if(bias$method == "proximity"){
+          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
+          assertthat::assert_that(length(model$biodiversity)==1,
+                                  msg = "This method is not yet implemented for multiple datasets.")
 
-        # For each biodiversity dataset collect the points and reassign weights
-        poi <- collect_occurrencepoints(model = model,
-                                        include_absences = TRUE,
-                                        addName = TRUE,
-                                        tosf = TRUE)
-        neww <- sf_proximity_weight(poi = poi,
-                                    maxdist = bias$bias_value[1],
-                                    alpha = bias$bias_value[2])
-        # Now set the expectation respectively
-        model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect * exp(neww)
-        rm(neww)
+          # For each biodiversity dataset collect the points and reassign weights
+          poi <- collect_occurrencepoints(model = model,
+                                          include_absences = TRUE,
+                                          addName = TRUE,
+                                          tosf = TRUE)
+          neww <- sf_proximity_weight(poi = poi,
+                                      maxdist = bias$bias_value[1],
+                                      alpha = bias$bias_value[2])
+          # Now set the expectation respectively
+          model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect * exp(neww)
+          rm(neww)
+        }
       }
     }
 
@@ -661,20 +679,22 @@ methods::setMethod(
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
 
-    # -  Applying prediction filter based on model input data if specified
+    # Applying prediction filter based on model input data if specified
     # Check if MCP should be calculated
     if(!is.Waiver(x$get_limits())){
       # Build MCP based zones ?
       if(x$limits$limits_method=="mcp"){
         # Create a polygon using all available information
         # Then overwrite limits
-        x <- x$set_limits(x = create_mcp(model, x$limits),
-                          mcp_buffer = x$limits$mcp_buffer,
-                          limits_clip = x$limits$limits_clip)
+        l <- list("layer" = create_mcp(model, x$limits),
+                    "limits_method" = "mcp",
+                    "mcp_buffer" = x$limits$mcp_buffer,
+                    "limits_clip" = x$limits$limits_clip)
+        x <- x$set_limits(x = l)
         zones <- x$limits$layer
         assertthat::assert_that(!is.null(zones),
                                 utils::hasName(zones, "limit"))
-      } else {
+      } else if(x$limits$limits_method=="zones") {
         # Zones
         # Get biodiversity data
         coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
@@ -694,6 +714,50 @@ methods::setMethod(
         )
         # Limit zones
         zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
+      } else if(x$limits$limits_method %in% c("nt2", "mess")){
+          # If there are more than one data source, raise warning
+          if(length(model$biodiversity)>1){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+                                                      'MESS and Novelty index work only for a single datasource. Combining all presence points...')
+            coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
+                                               tosf = TRUE)
+            refs <- terra::extract(model$predictors_object$get_data(), coords)
+          } else {
+            refs <- model$biodiversity[[1]]$predictors
+          }
+
+          # Multivariate novelty index for the training data
+          if(x$limits$limits_method=="nt2"){
+            rip <- .nt12(prodat = model$predictors_object$get_data(),
+                         refdat = refs)[["novel"]]
+            # Get only within reference to make a mask
+            rip <- switch (x$limits$novel,
+                           "within" = (rip %in% c("Reference","Within reference")),
+                           "outside" = (rip %in% c("Reference", "Within reference", "Outside reference"))
+            )
+            rip <- terra::mask(rip,  model[['background']])
+          } else {
+            # MESS index
+            nt2 <- .mess(covs = model$predictors_object$get_data(),
+                         ref = refs, full = FALSE)
+            # Calculate interpolation/extrapolated
+            rip <- terra::classify(nt2$mis,
+                                   c( terra::global(nt2$mis,'min', na.rm = TRUE)[,1], 0,
+                                      terra::global(nt2$mis,'max', na.rm = TRUE)[,1]))
+            rip <- terra::as.factor(rip)
+            for(i in 1:terra::nlyr(rip)){
+              ca <- data.frame(ID = levels(rip[[i]])[[1]][,1])
+              ca[names(rip[[i]])] <- c('Extrapolation','Interpolation')
+              levels(rip[[i]]) <- ca
+            }
+            rip <- rip == 'Interpolation'
+            rm(nt2)
+          }
+        # Convert to polygon
+        zones <- terra::as.polygons(rip) |> sf::st_as_sf()
+        names(zones)[1] <- "limit"
+        zones <- subset(zones, limit==1) # Only use valid areas
+        try({ rm(nt2) },silent = TRUE)
       }
 
       if(nrow(zones)==0){
@@ -746,10 +810,12 @@ methods::setMethod(
         #   )), "spatial_offset" ] <- NA # Fill with NA
         # }
       }
-
-      x <- x$set_limits(x = zones,
-                        mcp_buffer = x$limits$mcp_buffer,
-                        limits_clip = x$limits$limits_clip)
+      # Reset the zones, but save the created layer
+      l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
+                "mcp_buffer" = x$limits$mcp_buffer,
+                "limits_clip" = x$limits$limits_clip)
+      settings$set("limits", l)
+      x <- x$set_limits(x = l)
       rm(zones)
     }
 
@@ -1402,8 +1468,103 @@ methods::setMethod(
             model$priors <- po
           }
         } # End of multiple ides
-      }
-      # End of GLMNET engine
+      } # End of GLMNET engine
+    } else if (inherits(x$engine,"GLM-Engine") ){
+      # ----------------------------------------------------------- #
+      if(method_integration == "prior") warning("Priors not supported for GLM!")
+      #### GLM Engine ####
+      # For each formula, process in sequence
+      for(id in ids){
+
+        # We use the same function as for glmnet here
+        model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+
+        # Remove those not part of the modelling
+        model2 <- model
+        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
+
+        # Now train the model and create a predicted distribution model
+        settings2 <- settings
+        if(id != ids[length(ids)]){
+          # For predictors and offsets
+          settings2$set('inference_only', FALSE)
+        } else {
+          settings2$set('inference_only', inference_only)
+        }
+        out <- x$engine$train(model2, settings2)
+
+        # Add Prediction of model to next object if multiple are supplied
+        if(length(ids)>1 && id != ids[length(ids)]){
+          if(method_integration == "predictor"){
+            # Add to predictors frame
+            new <- out$get_data("prediction")[["mean"]]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+            names(new) <- pred_name
+            # Add the object to the overall prediction object
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
+
+            # Now for each biodiversity dataset and the overall predictors
+            # extract and add as variable
+            for(k in names(model$biodiversity)){
+              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
+                                     env = new)
+              env <- env[names(new)]
+              # Add
+              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
+              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
+                                                            names(env) )
+              model$biodiversity[[k]]$predictors_types <- rbind(
+                model$biodiversity[[k]]$predictors_types,
+                data.frame(predictors = names(env), type = c('numeric'))
+              )
+            }
+            # Add to overall predictors
+            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
+            model$predictors_names <- c(model$predictors_names, names(new))
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = names(new), type = c('numeric')))
+
+            # Finally if custom formula found, add the variable there.
+            for(other_id in names(model$biodiversity)){
+              if(other_id == id) next() # Skip if current id
+              ff <- model$biodiversity[[other_id]]$equation
+              if(is.formula(ff)){
+                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+                model$biodiversity[[other_id]]$equation <- ff
+              } # Else skip
+            }
+
+          } else if(method_integration == "offset"){
+            # Adding the prediction as offset
+            new <- out$get_data("prediction")
+            # Back transforming offset to linear scale
+            new[] <- switch (model$biodiversity[[id]]$family,
+                             "binomial" = ilink(new[], link = "logit"),
+                             "poisson" = ilink(new[], link = "log")
+            )
+            if(is.Waiver(model$offset)){
+              ofs <- terra::as.data.frame(new, xy = TRUE, na.rm = FALSE)
+              names(ofs)[which(names(ofs)==names(new))] <- "spatial_offset"
+              model[['offset']] <- ofs
+              # Also add offset object for faster extraction
+              model[['offset_object']] <- new
+            } else {
+              # New offset
+              news <- sum( model[['offset_object']], new, na.rm = TRUE)
+              news <- terra::mask(news, x$background)
+              model[['offset_object']] <- news
+              ofs <- terra::as.data.frame(news, xy = TRUE, na.rm = FALSE)
+              names(ofs)[which(names(ofs)=="layer")] <- "spatial_offset"
+              model[['offset']] <- ofs
+              rm(news)
+            }
+            rm(new)
+          }
+        } # End of multiple ides
+      } # End of GLM engine
     } else { stop('Specified Engine not implemented yet.') }
 
     if(is.null(out)) return(NULL)
@@ -1411,9 +1572,11 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
     # Clip to limits again to be sure
-    if(!is.Waiver(x$limits)) {
+    if(!is.Waiver(x$get_limits())) {
       if(settings$get('inference_only')==FALSE){
-        out <- out$set_data("prediction", terra::mask(out$get_data("prediction"), x$limits$layer))
+        out <- out$set_data("prediction",
+                            terra::mask(out$get_data("prediction"),
+                                        settings$get("limits")$layer))
       }
       out$settings$set("has_limits", TRUE)
     } else {

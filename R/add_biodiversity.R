@@ -52,15 +52,14 @@ NULL
 #' @keywords biodiversity
 #' @aliases add_biodiversity_poipo
 #' @examples
-#' \dontrun{
-#'  background <- terra::rast("inst/extdata/europegrid_50km.tif")
-#'  # Load virtual species
-#'  virtual_species <- sf::st_read("inst/extdata/input_data.gpkg", "points")
+#' # Load background
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#' # Load virtual species
+#' virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 #' # Define model
 #' x <- distribution(background) |>
-#'   add_biodiversity_poipo(virtual_species)
+#'   add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
 #' x
-#' }
 #' @name add_biodiversity_poipo
 NULL
 

@@ -660,8 +660,17 @@ engine_xgboost <- function(x,
             assertthat::assert_that(is.character(x.var) || is.null(x.var))
             if(!is.null(constant)) message("Constant is ignored for xgboost!")
             check_package("pdp")
+
+            # Settings
+            settings <- self$settings
             mod <- self$get_data('fit_best')
             model <- self$model
+
+            # Set type
+            if(is.null(type)) type <- self$settings$get("type")
+            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+            settings$set("type", type)
+
             df <- model$biodiversity[[length( model$biodiversity )]]$predictors
             df <- subset(df, select = mod$feature_names)
             if(!is.null(newdata)){
@@ -720,16 +729,27 @@ engine_xgboost <- function(x,
                                     all( names(df) == mod$feature_names ),
                                     msg = 'Variable not in predicted model.')
 
+            # Inverse link function
+            ilf <- switch (settings$get('type'),
+                           "link" = NULL,
+                           "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
+                                               exp, logistic)
+            )
+
             pp <- data.frame()
             pb <- progress::progress_bar$new(total = length(x.var))
             for(v in x.var){
               if(!is.Waiver(of)){
                 # Predict with offset
                 p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                   plot = FALSE, rug = TRUE, newoffset = of, train = df)
+                                   plot = FALSE, rug = TRUE,
+                                   inv.link = ilf,
+                                   newoffset = of, train = df)
               } else {
                 p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                                   plot = FALSE, rug = TRUE, train = df)
+                                   plot = FALSE, rug = TRUE,
+                                   inv.link = ilf,
+                                   train = df)
               }
               p1 <- p1[,c(x.var, "yhat")]
               names(p1) <- c("partial_effect", "mean")
@@ -751,27 +771,23 @@ engine_xgboost <- function(x,
             return(pp)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL, plot = TRUE, ...){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL, plot = TRUE, ...){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
-                                    "model" %in% names(self))
+                                    "model" %in% names(self),
+                                    is.null(newdata) || is.data.frame(newdata))
 
             # Get data
             mod <- self$get_data('fit_best')
             model <- self$model
-            params <- self$settings
+            settings <- self$settings
             x.var <- match.arg(x.var, model$predictors_names, several.ok = FALSE)
 
             # Get predictor
             df <- subset(model$predictors, select = mod$feature_names)
             # Convert all non x.vars to the mean
+
             # Make template of target variable(s)
-            template <- try({emptyraster( model$predictors_object$get_data() )},silent = TRUE)
-            if(inherits(template, "try-error")){
-              template <- terra::rast(model$predictors[,c("x", "y")],
-                                        crs = terra::crs(model$background),
-                                        type = "xyz") |>
-                emptyraster()
-            }
+            template <- model_to_background(model)
 
             # Set all variables other the target variable to constant
             if(!is.null(constant)){
@@ -784,7 +800,7 @@ engine_xgboost <- function(x,
             #     df[!is.na(df[v]),v] <- as.numeric( constant[v] )
             #   }
             # } else {
-              df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
+            df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
             }
             df <- xgboost::xgb.DMatrix(data = as.matrix(df))
 
@@ -799,13 +815,7 @@ engine_xgboost <- function(x,
               as.data.frame()
             # Get only target variable
             pp <- subset(pp, select = x.var)
-            # suppressWarnings(
-            #   pp <- predict(
-            #     object = mod,
-            #     newdata = df
-            #   )
-            # )
-            # if(params$get('objective')[[1]]=="binary:logitraw") pp <- ilink(pp, "cloglog")
+            # if(settings$get('objective')[[1]]=="binary:logitraw") pp <- ilink(pp, "cloglog")
             assertthat::assert_that(terra::ncell(template) == nrow(pp))
 
             # Fill output with summaries of the posterior

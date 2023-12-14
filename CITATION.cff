@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.0
+version: 0.1.1
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -345,6 +345,25 @@ references:
   year: '2023'
   version: '>= 0.5'
 - type: software
+  title: zoo
+  abstract: 'zoo: S3 Infrastructure for Regular and Irregular Time Series (Z''s Ordered
+    Observations)'
+  notes: Imports
+  url: https://zoo.R-Forge.R-project.org/
+  repository: https://CRAN.R-project.org/package=zoo
+  authors:
+  - family-names: Zeileis
+    given-names: Achim
+    email: Achim.Zeileis@R-project.org
+    orcid: https://orcid.org/0000-0003-0918-3766
+  - family-names: Grothendieck
+    given-names: Gabor
+    email: ggrothendieck@gmail.com
+  - family-names: Ryan
+    given-names: Jeffrey A.
+    email: jeff.a.ryan@gmail.com
+  year: '2023'
+- type: software
   title: stats
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -638,6 +657,7 @@ references:
   authors:
   - family-names: Csárdi
     given-names: Gábor
+    email: csardi.gabor@gmail.com
   - family-names: FitzJohn
     given-names: Rich
   year: '2023'
@@ -732,6 +752,10 @@ references:
   - family-names: Weber
     given-names: Sebastian
     email: sdw.post@waebers.de
+  - family-names: Badr
+    given-names: Hamada S.
+    email: badr@jhu.edu
+    orcid: https://orcid.org/0000-0002-9808-2344
   year: '2023'
   version: '>= 2.21.0'
 - type: software

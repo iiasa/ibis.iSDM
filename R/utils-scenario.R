@@ -3,31 +3,38 @@
 #' @description This function linearly approximates shares between time steps,
 #' so that gaps for instance between 2010 and 2020 are filled with data for
 #' 2010, 2011, 2012, etc.
+#'
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events
 #'   should be interpolated. See [`project()`].
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have
 #'   the same.
 #' @keywords scenario
-#' @aliases approximate_gaps
-#' @noRd
-approximate_gaps <- function(env, date_interpolation = "annual"){
+#' @aliases interpolate_gaps
+#' @importFrom zoo na.approx
+#' @examples
+#' \dontrun{
+#'   # Interpolate stars stack
+#'   sc <- interpolate_gaps( stack, "annual")
+#' }
+#' @export
+interpolate_gaps <- function(env, date_interpolation = "annual"){
   assertthat::assert_that(
     inherits(env, "stars"),
     is.character(date_interpolation)
   )
   check_package("dplyr")
+
   date_interpolation <- match.arg(date_interpolation,
                                   c("none", "yearly", "annual", "monthly", "daily"),
                                   several.ok = FALSE)
   if(date_interpolation=="none") return(env)
 
-  stop("Functionality still work in progress")
   # --- #
   # Get individual time steps at interval
   times <- stars::st_get_dimension_values(env, which = names(dim(env))[3], center = TRUE)
   times <- to_POSIXct(times)
-  tzone <- attr(as.POSIXlt(times), "tzone")[2] # Get timezone
+  tzone <- attr(as.POSIXlt(times), "tzone") # Get timezone
   assertthat::assert_that(tzone != "", length(times)>=2)
   # Interpolate time steps
   inc <- switch (date_interpolation,
@@ -36,45 +43,47 @@ approximate_gaps <- function(env, date_interpolation = "annual"){
                  "monthly" = "month",
                  "daily" = "day"
   )
+  # Create new time layer
   new_times <- seq.Date(from = as.Date(times[1],tz = tzone),
-                        to = as.Date(times[length(times)],tz = tzone), by = inc)
+                        to = as.Date(times[length(times)],tz = tzone),
+                        by = inc)
   new_times <- to_POSIXct(new_times)
+  ori.dims <- names(stars::st_dimensions(env))
 
-  # Linearly approximate all attributes for new object
-  # FIXME: Probably terribly memory inefficient but works
-  # MH: Should this be stars:::as.data.frame.stars?
-  new <- as.data.frame(env)
-  assertthat::assert_that(assertthat::has_name(new,c("x","y","time")))
-  new <- dplyr::right_join(new, expand.grid(x = unique(new$x), y = unique(new$y), time = new_times),
-                          by = c("x", "y","time"))
-  # Sort by time
-  new <- new[order(new$time),]
-  # Now linearly interpolate the missing values per grid cell
-  new2 <- apply(new[,4:ncol(new)], 2, function(z){
-    # if(inherits(z, "POSIXct")) return(z)
-    if(all(is.na(z))) return(z)
-    stats::approx(y = z, x = as.numeric(new$time), method = "linear")
-  })
+  # Now for each variable, interpolate
+  out <- list()
+  if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = length(env))
+  for(v in names(env)){
+    if(getOption('ibis.setupmessages')) pb$tick()
 
-  # Steps:
-  # empty_stars
-  # Join with existing one
-  # approxNA
+    # Get the variable
+    o <- Reduce(c, stars_to_raster(env[v]) )
 
-  tt <- as.numeric(new_times)
-  # Calc pixel-wise linear slope
-  out <- stars::st_apply(
-    env,
-    1:2,
-    function(x) {
-      if (anyNA(x))
-        NA_real_
-      else
-        stats::lm.fit(cbind(1, tt), x)$coefficients[2]
-    }
+    # Create empty copies per times
+    nt <- new_times[new_times %notin% terra::time(o)]
+    oo <- rep(emptyraster(o, vals = NA), length(nt))
+    terra::time(oo) <- nt
+    oo <- c(o,oo)
+    names(oo) <- paste0(v,'_',as.numeric(terra::time(oo)))
+
+    # Linearly approximate gaps and save in list
+    out[[v]] <- terra::approximate(x = oo,
+                            method = "linear",
+                            yleft = NA,
+                            yright = NA) |> stars::st_as_stars()
+  }
+
+  # Combine
+  out <- Reduce(c, out)
+  # Rename again
+  names(out) <- names(env)
+
+  # Checks
+  assertthat::assert_that(
+    is.stars(out),
+    all( names(out) %in% names(env) )
   )
-
-  # new <- stars::st_redimension(out, along = list(time = new_times))
+  return(out)
 }
 
 #' Aggregate stars variables across dimensions
@@ -301,7 +310,7 @@ raster_to_stars <- function(obj){
     new_env[[names(obj)[i]]] <- o
   }
 
-  new_env <- do.call(stars:::c.stars, new_env)
+  new_env <- do.call(c, new_env)
   assertthat::assert_that(inherits(new_env, "stars"),
                           stars::st_dimensions(new_env) |> length() == 3)
 

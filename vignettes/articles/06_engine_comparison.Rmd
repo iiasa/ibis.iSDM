@@ -20,7 +20,8 @@ Stating the name and function call of each engine and its supported model comple
 
 | Name                                              |     Complexity      |  Engine  | `offsets` | `priors` | Joint likel. | `ensemble` | 
 |---------------------------------------------------|:----------:|:------------:|:------------:|:------------:|:------------:|-------------:|
-| Regularized elastic net regression (GLMNET)       |  ln        |  [`engine_glmnet`]   |  x |  `GLMNETPrior()` |  | x |
+| Generalized linear model (GLM)       |  ln        |  [`engine_glm()`]   |  x |   |  | x |
+| Regularized elastic net regression (GLMNET)       |  ln        |  [`engine_glmnet()`]   |  x |  `GLMNETPrior()` |  | x |
 | Bayesian additive regression trees (BART)         |  nl        |  [`engine_bart()`]   | (x)|  `BARTPrior()` |   | x |
 | Bayesian regularized regression (BREG)            |  ln        |  [`engine_breg()`]   |    |  `BREGPrior()` |  | x |
 | Gradient descent boosting (GDB)                   |  ln/nl     |   [`engine_gdb()`]   |  x |  `GDBPrior()` |  | x |

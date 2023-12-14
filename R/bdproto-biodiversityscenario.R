@@ -354,6 +354,8 @@ BiodiversityScenario <- bdproto(
 
     # Not get the baseline raster
     baseline <- self$get_model()$get_data(thresh_reference)
+    # Get only the variable
+    if(terra::nlyr(baseline)>1) baseline <- terra::subset(baseline, grep(variable, names(baseline)))
     # And the last scenario prediction
     scenario <- self$get_data()['threshold']
     time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
@@ -549,7 +551,7 @@ BiodiversityScenario <- bdproto(
     return(out)
   },
   # Masking function
-  mask = function(self, mask, inverse = FALSE){
+  mask = function(self, mask, inverse = FALSE, ...){
     # Check whether prediction has been created
     projection <- self$get_data()
     if(!is.Waiver(projection)){

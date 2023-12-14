@@ -5,9 +5,9 @@
 \alias{spartial.DistributionModel}
 \title{Obtain spatial partial effects of trained model}
 \usage{
-spartial(mod, x.var, constant = NULL, plot = FALSE, ...)
+spartial(mod, x.var, constant = NULL, newdata = NULL, plot = FALSE, ...)
 
-\S4method{spartial}{ANY,character,ANY,logical}(mod,x.var,constant,plot,...)
+\S4method{spartial}{ANY,character,ANY,ANY,logical}(mod,x.var,constant,newdata,plot,...)
 
 \method{spartial}{DistributionModel}(mod, ...)
 }
@@ -19,6 +19,9 @@ is to be calculated.}
 
 \item{constant}{A \link{numeric} constant to be inserted for all other variables.
 Default calculates the \link{mean} per variable.}
+
+\item{newdata}{A \code{\link{data.frame}} on which to calculate the spartial for. Can be
+for example created from a raster file (Default: \code{NULL}).}
 
 \item{plot}{A \link{logical} indication of whether the result is to be plotted?}
 

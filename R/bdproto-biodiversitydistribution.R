@@ -28,7 +28,7 @@ BiodiversityDistribution <- bdproto(
   biodiversity  = bdproto(NULL, BiodiversityDatasetCollection),
   predictors    = new_waiver(),
   priors        = new_waiver(),
-  bias          = new_waiver(),
+  control       = new_waiver(),
   latentfactors = new_waiver(),
   offset        = new_waiver(),
   log           = new_waiver(),
@@ -44,8 +44,12 @@ BiodiversityDistribution <- bdproto(
                  paste0( "\n  offset:         <", name_atomic(self$get_offset()),">" ) )
     pio <- ifelse(is.Waiver(self$priors),
                   '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
-    bv <- ifelse(is.Waiver(self$bias), '',
-                 paste0( "\n  bias control:   <", self$bias$method, ">" ) )
+    bv <- ifelse(is.Waiver(self$control), '',
+                 paste0( "\n  control:   <", name_atomic(
+                   paste0( self$control$type, " - ", self$control$method)
+                 ), ">" ) )
+    li <- ifelse(is.Waiver(self$limits), '',
+                 paste0( "\n  limits:         <",paste0( self$limits$limits_method,collapse = ", "), ">" ))
     en <- ifelse(is.null(self$get_engine()),
                  text_red("<NONE>"), self$get_engine() )
 
@@ -62,6 +66,7 @@ BiodiversityDistribution <- bdproto(
                    "\n  latent:         ", paste(self$get_latent(), collapse = ', '),
                    of,
                    bv,
+                   li,
                    "\n  log:            ", self$get_log(),
                    "\n  engine:         ", en
                    )
@@ -85,13 +90,13 @@ BiodiversityDistribution <- bdproto(
     return(o)
   },
   # Set limits
-  set_limits = function(self, x, mcp_buffer = 0, limits_clip = FALSE){
-    assertthat::assert_that(is.Raster(x) || inherits(x, "sf"),
-                            msg = "Provide a SpatRaster or sf object!")
-    # Construct limits object assuming zones
-    x <- list(layer = x, limits_method = "zones",
-                   "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
-
+  set_limits = function(self, x){
+    # Specify list
+    assertthat::assert_that(is.list(x),
+                            msg = "Provide a prepared list for the limits!")
+    assertthat::assert_that(
+      utils::hasName(x, "layer"), utils::hasName(x, "limits_method")
+    )
     bdproto(NULL, self, limits = x )
   },
   # Get provided limits
@@ -237,31 +242,44 @@ BiodiversityDistribution <- bdproto(
       at[['logistic_coefficients']] <- attr(self$offset, "logistic_coefficients")
     return(at)
   },
-  # set_biascontrol
-  set_biascontrol = function(self, x, method, value){
+  # set_control
+  set_control = function(self, type = "bias", x, method, value){
     assertthat::assert_that(missing(x) || is.Raster(x),
                             all(is.numeric(value)))
-    if(missing(x)) {
-      assertthat::assert_that(method == "proximity",
-                              msg = paste0("Supply a layer for method ", method))
-      x <- NULL
+    # Check type of control
+    type <- match.arg(type, c("bias", "extrapolation"), several.ok = FALSE)
+    if(type == "bias"){
+      if(missing(x)) {
+        assertthat::assert_that(method == "proximity",
+                                msg = paste0("Supply a layer for method ", method))
+        x <- NULL
+      }
+      bdproto(NULL, self, control = list(type = type, layer = x,
+                                         method = method, bias_value = value) )
+    } else if(type == "extrapolation"){
+      bdproto(NULL, self, control = list(type = type, layer = x, method = method, value = value) )
     }
-    bdproto(NULL, self, bias = list(layer = x, method = method, bias_value = value) )
   },
   # Get bias control (print name)
-  get_biascontrol = function(self){
-    if(is.Waiver(self$bias)) return( self$bias )
-    names( self$bias )
+  get_control = function(self, type = "bias"){
+    # Check type of control
+    type <- match.arg(type, c("bias", "extrapolation"), several.ok = FALSE)
+    control <- self$control
+    if(is.Waiver(control)) return( control )
+    if(control$type == "bias" && type == "bias") names( control )
   },
   # Remove bias controls
-  rm_biascontrol = function(self){
-    bdproto(NULL, self, bias = new_waiver() )
+  rm_control = function(self){
+    bdproto(NULL, self, control = new_waiver() )
   },
   # Plot bias variable
   plot_bias = function(self){
-    if(is.Waiver(self$bias)) return( self$bias )
-    terra::plot(self$bias$layer,
-                col = ibis_colours$viridis_plasma, main = "Bias variable")
+    if(is.Waiver(self$control)) return( self$control )
+    control <- self$control
+    if(control$type == "bias"){
+      terra::plot(control$layer,
+                  col = ibis_colours$viridis_plasma, main = "Bias variable")
+    }
   },
   # Get log
   get_log = function(self){

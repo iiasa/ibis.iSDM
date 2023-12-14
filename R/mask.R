@@ -42,22 +42,22 @@ NULL
 #' @method mask DistributionModel
 #' @keywords utils
 #' @export
-mask.DistributionModel <- function(x, mask, inverse = FALSE) x$mask(mask,inverse)
+mask.DistributionModel <- function(x, mask, inverse = FALSE, ...) x$mask(mask,inverse,...)
 
 #' @rdname mask
 #' @method mask BiodiversityDatasetCollection
 #' @keywords utils
 #' @export
-mask.BiodiversityDatasetCollection <- function(x, mask, inverse = FALSE) x$mask(mask,inverse)
+mask.BiodiversityDatasetCollection <- function(x, mask, inverse = FALSE, ...) x$mask(mask,inverse,...)
 
 #' @rdname mask
 #' @method mask PredictorDataset
 #' @keywords utils
 #' @export
-mask.PredictorDataset <- function(x, mask, inverse = FALSE) x$mask(mask,inverse)
+mask.PredictorDataset <- function(x, mask, inverse = FALSE, ...) x$mask(mask,inverse,...)
 
 #' @rdname mask
 #' @method mask BiodiversityScenario
 #' @keywords utils
 #' @export
-mask.BiodiversityScenario <- function(x, mask, inverse = FALSE) x$mask(mask,inverse)
+mask.BiodiversityScenario <- function(x, mask, inverse = FALSE, ...) x$mask(mask,inverse,...)

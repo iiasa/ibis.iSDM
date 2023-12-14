@@ -157,7 +157,8 @@ tidy_glmnet_summary <- function(obj){
   if(inherits(obj, "cva.glmnet")){
     # Get best alpha
     alpha <- sapply(obj$modlist, function(z) min(z$cvup))
-    ms <- stats::coef(obj, which = which.min(alpha)) |>
+    ms <- stats::coef(obj, which = which.min(alpha),
+                      s = lambda) |>
       as.matrix() |> as.data.frame()
   } else {
     # Summarise coefficients within 1 standard deviation
@@ -170,10 +171,36 @@ tidy_glmnet_summary <- function(obj){
   ms <- subset(ms, mean != 0) # Remove regularized coefficients for some clean up.
   if(nrow(ms)>0){
     # Reorder
-    ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
+    ms <- ms[order(ms$mean, decreasing = TRUE),] # Sort
     rownames(ms) <- NULL
   } else {
     ms <- data.frame()
   }
+  return(ms)
+}
+
+#' Tidy GLM summary
+#'
+#' @description This helper function summarizes the coefficients from a glm
+#' model.
+#' @param obj An object created with [stats::glm.fit()]
+#' @keywords internal, utils
+#' @noRd
+tidy_glm_summary <- function(obj){
+  assertthat::assert_that(
+    inherits(obj, 'glm')
+  )
+
+  # Summarize
+  ms <- stats::summary.glm(obj)$coefficients |>
+    as.data.frame() |>
+    tibble::rownames_to_column(var = "variable")
+
+  # Remove intercept
+  int <- grep("Intercept",ms$variable,ignore.case = TRUE)
+  if(length(int)>0) ms <- ms[-int,]
+
+  # Rename the estimate and std.error column
+  ms <- ms |> dplyr::rename(mean = "Estimate", se = "Std. Error")
   return(ms)
 }

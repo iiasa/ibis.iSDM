@@ -67,7 +67,7 @@ determined via cross-validation. For this option set \code{"varsel"} in
 }
 \examples{
 \dontrun{
-# Add BREG as an engine
+# Add GLMNET as an engine
 x <- distribution(background) |> engine_glmnet(iter = 1000)
 }
 }
@@ -83,6 +83,7 @@ Other engine:
 \code{\link{engine_bart}()},
 \code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
+\code{\link{engine_glm}()},
 \code{\link{engine_inlabru}()},
 \code{\link{engine_inla}()},
 \code{\link{engine_stan}()},

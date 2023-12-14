@@ -79,6 +79,7 @@ reference:
       - starts_with("sel_")
       - starts_with("rm_")
       - starts_with("get_")
+      - has_keyword("control")
 
 
   - title: Engines
@@ -132,6 +133,7 @@ reference:
       - predictor_transform
       - predictor_derivate
       - predictor_filter
+      - interpolate_gaps
       - run_stan
       - wrap_stanmodel
       - sanitize_names

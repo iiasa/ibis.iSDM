@@ -118,6 +118,7 @@ Other engine:
 \code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
 \code{\link{engine_glmnet}()},
+\code{\link{engine_glm}()},
 \code{\link{engine_inla}()},
 \code{\link{engine_stan}()},
 \code{\link{engine_xgboost}()}

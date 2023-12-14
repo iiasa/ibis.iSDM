@@ -632,7 +632,8 @@ engine_breg <- function(x,
             return(pred_part)
           },
           # Spatial partial dependence plot
-          spartial = function(self, x.var, constant = NULL, plot = TRUE, type = NULL){
+          spartial = function(self, x.var, constant = NULL, newdata = NULL,
+                              plot = TRUE, type = NULL){
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
                                     "model" %in% names(self),
                                     is.null(constant) || is.numeric(constant),
@@ -649,7 +650,15 @@ engine_breg <- function(x,
 
             mod <- self$get_data('fit_best')
             model <- self$model
-            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+
+            # Check if newdata is defined, if yes use that one instead
+            if(!is.null(newdata)){
+              df <- newdata
+              assertthat::assert_that(nrow(df) == nrow(model$biodiversity[[1]]$predictors))
+            } else {
+              # df <- model$biodiversity[[1]]$predictors
+              df <- model$predictors
+            }
             df <- subset(df, select = attr(mod$terms, "term.labels"))
             w <- model$biodiversity[[1]]$expect # Also get exposure variable
 
@@ -661,23 +670,18 @@ engine_breg <- function(x,
             }
 
             # Make spatial container for prediction
-            suppressWarnings(
-              df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                                       data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                       proj4string = sp::CRS(sp::proj4string(methods::as(model$background, "Spatial")))
-              )
-            )
-            df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
+            template <- model_to_background(model)
 
             # Add all others as constant
             if(is.null(constant)){
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
+              for(n in names(df)) if(n != x.var) df[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
             } else {
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+              for(n in names(df)) if(n != x.var) df[[n]] <- constant
             }
+
             if(any(model$predictors_types$type=="factor")){
               lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_partial[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
+              df[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
                 factor(lvl[1], levels = lvl)
               # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
             }
@@ -687,7 +691,7 @@ engine_breg <- function(x,
 
             pred_breg <- predict_boom(
               obj = mod,
-              newdata = df_partial@data,
+              newdata = df,
               w = unique(w)[2], # The second entry of unique contains the non-observed variables
               fam = fam,
               params = settings$data # Use the settings as list
@@ -704,21 +708,14 @@ engine_breg <- function(x,
             pred_part$cv <- pred_part$sd / pred_part$mean
 
             # Now create spatial prediction
-            prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-            if(inherits(prediction, "try-error")){
-              prediction <- terra::rast(model$predictors[,c("x", "y")],
-                                        crs = terra::crs(model$background),
-                                        type = "xyz") |>
-                emptyraster()
-            }
-            prediction <- fill_rasters(pred_part, prediction)
+            template <- fill_rasters(pred_part, template)
 
             # Do plot and return result
             if(plot){
-              terra::plot(prediction, col = ibis_colours$ohsu_palette,
-                   main = paste0("Spartial effect of ", x.var,collapse = ","))
+              terra::plot(template, col = ibis_colours$ohsu_palette,
+                   main = paste0("Spartial effect of ", x.var, collapse = ","))
             }
-            return(prediction)
+            return(template)
           },
           # Get coefficients from breg
           get_coefficients = function(self){

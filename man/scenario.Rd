@@ -4,9 +4,9 @@
 \alias{scenario}
 \title{Create a new scenario based on trained model parameters}
 \usage{
-scenario(fit, limits = NULL, copy_model = FALSE)
+scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 
-\S4method{scenario}{ANY,ANY,logical}(fit,limits,copy_model)
+\S4method{scenario}{ANY,ANY,logical,logical}(fit,limits,reuse_limits,copy_model)
 }
 \arguments{
 \item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}
@@ -16,6 +16,9 @@ surface when intersected with the prediction data (Default: \code{NULL}).
 This can for instance be set as an expert-delineated constrain to limit
 spatial projections.}
 
+\item{reuse_limits}{A \code{\link{logical}} on whether to reuse limits if found in the
+trained \code{\link{BiodiversityDistribution}} object (Default: \code{FALSE}). See also notes!}
+
 \item{copy_model}{A \code{\link{logical}} of whether the model object is to be copied
 to the scenario object. Note that setting this option to \code{TRUE} can
 increase the required amount of memory (Default: \code{FALSE}).}
@@ -23,6 +26,11 @@ increase the required amount of memory (Default: \code{FALSE}).}
 \description{
 This function creates a new \linkS4class{BiodiversityScenario} object
 that contains the projections of a model.
+}
+\note{
+If a limit has been defined already during \code{\link[=train]{train()}}, for example by adding
+an extrapolation limit \code{\link[=add_control_extrapolation]{add_control_extrapolation()}}, this zonal layer can be
+reused for the projections. \strong{Note: This effectively fixes the projections to certain areas.}
 }
 \examples{
 \dontrun{
