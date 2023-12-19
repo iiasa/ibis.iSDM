@@ -43,7 +43,7 @@ NULL
 #' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
 #' of models constructed with different link functions, e.g. logistic vs [log].
 #' In this case the \code{"normalize"} parameter has to be set.
-#' @param ... Provided [`DistributionModel`] objects.
+#' @param ... Provided [`DistributionModel`] or [`SpatRaster`] objects.
 #' @param method Approach on how the ensemble is to be created. See details for
 #'   available options (Default: \code{'mean'}).
 #' @param weights (*Optional*) weights provided to the ensemble function if
@@ -132,14 +132,6 @@ methods::setMethod(
                                   'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
     uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
-
-    # Check that weight lengths is equal to provided distribution objects
-    if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
-    # If weights vector is numeric, standardize the weights
-    if(is.numeric(weights)) {
-      if(any(weights < 0)) weights[weights < 0] <- 0 # Assume those contribute anything
-      weights <- weights / sum(weights)
-    }
 
     # For Distribution model ensembles
     if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){
@@ -287,6 +279,14 @@ methods::setMethod(
 
       # If normalize before running an ensemble if parameter set
       if(normalize) ras <- predictor_transform(ras, option = "norm")
+
+      # Check that weight lengths is equal to provided distribution objects
+      if(!is.null(weights) && !is.numeric(layer)) assertthat::assert_that(length(weights) == length(mods))
+      # If weights vector is numeric, standardize the weights
+      if(is.numeric(weights)) {
+        if(any(weights < 0)) weights[weights < 0] <- 0 # Assume those contribute anything
+        weights <- weights / sum(weights)
+      }
 
       # Now ensemble per layer entry
       out <- terra::rast()

@@ -126,6 +126,11 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
     pp <- ensemble(ras, method = "mean", layer = "mean")
   )
   expect_s4_class(pp, "SpatRaster")
+  # Also test weighted mean
+  expect_no_error(
+    pp <- ensemble(ras, method = "weighted.mean", weights = runif(3, 0.5,1))
+  )
+
 
   # Check centroid calculation
   expect_s3_class(raster_centroid(r1), "sf")
