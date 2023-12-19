@@ -30,7 +30,7 @@ options."><meta name="twitter:card" content="summary"><meta name="twitter:creato
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -148,8 +148,8 @@ Default (<code>FALSE</code>) uses a copy of the first added likelihood.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>There are several different options some of which depend on the
 engine used. In case a unsupported method for an engine is chosen this is
-modified to the next similar method</p>
-<p>Available are:</p>
+modified to the next similar method.</p>
+<p><strong>Available are:</strong></p>
 <p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"spde"</code> - stochastic partial differential equation (SPDE) for
 <code><a href="engine_inla.html">engine_inla</a></code> and <code><a href="engine_inlabru.html">engine_inlabru</a></code>. SPDE effects aim at capturing the
 variation of the response variable in space, once all of the covariates are
@@ -159,15 +159,17 @@ positively correlated with the response variable, but is not included in
 the model, we could see a higher posterior mean in areas with higher
 elevation. Note that calculations of SPDE's can be computationally costly.</p><ul><li><p><code>"car"</code> - conditional autocorrelative errors (CAR) for <code><a href="engine_inla.html">engine_inla</a></code>. Not yet implemented in full.</p></li>
 <li><p><code>"kde"</code> - additional covariate of the kernel density of input point observations.</p></li>
-<li><p><code>"poly"</code> - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.</p></li>
-<li><p><code>"nnd"</code> - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
-to the nearest other grid cell with values. Applied across all datasets in
-the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object. Available for all Engines.</p></li>
+<li><p><code>"poly"</code> - spatial trend correction by adding coordinates as polynominal transformation.
+This method assumed that a transformation of spatial coordinates can if - included as additional predictor -
+explain some of the variance in the distribution. This method does not interact with species occurrences.</p></li>
+<li><p><code>"nnd"</code> - nearest neighbour distance. This function calculates the euclidean distance from each point
+to the nearest other grid cell with known species occurrence. Originally proposed by Allouche et al. (2008)
+and can be applied across all datasets in the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Fletcher, R., &amp; Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.</p></li>
+<ul><li><p>Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating distance constraints into species distribution models. Journal of Applied Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x</p></li>
 <li><p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p></li>
 </ul></div>
 

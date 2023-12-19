@@ -35,7 +35,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2023-12-14</h4>
+            <h4 data-toc-skip class="date">2023-12-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/03_integrate_data.Rmd" class="external-link"><code>vignettes/articles/03_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>03_integrate_data.Rmd</code></div>
@@ -328,7 +328,7 @@ function.</p>
 <span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priors.html">priors</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
 <span><span class="co"># The variables and values in this object can be queried as well</span></span>
 <span><span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; bab7f962-b206-4a42-b9e3-8663fd2e25c9 </span></span>
+<span><span class="co">#&gt; 67b28789-c9e2-4671-abaf-8409b5908eee </span></span>
 <span><span class="co">#&gt;                 "CLC3_211_mean_50km"</span></span>
 <span></span>
 <span><span class="co"># Priors can then be added via </span></span>
@@ -534,19 +534,19 @@ an overview on which engines support which level of integration.</p>
 <span><span class="co"># Note how an overall intercept as well as separate intercepts for each dataset are added.</span></span>
 <span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 11 × 8</span></span></span>
-<span><span class="co">#&gt;    variable                  mean      sd      q05     q50     q95    mode   kld</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept              -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1    -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species.pro… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1    -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species.pro… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1    -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km        -<span style="color: #BB0000;">0.127</span>   0.134   -<span style="color: #BB0000;">0.347</span>  -<span style="color: #BB0000;">0.127</span>   0.093<span style="text-decoration: underline;">1</span> -<span style="color: #BB0000;">0.127</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km        -<span style="color: #BB0000;">0.441</span>   0.121   -<span style="color: #BB0000;">0.640</span>  -<span style="color: #BB0000;">0.441</span>  -<span style="color: #BB0000;">0.242</span>  -<span style="color: #BB0000;">0.441</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km         0.480   0.087<span style="text-decoration: underline;">4</span>   0.336   0.480   0.624   0.480      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km      0.404   0.049<span style="text-decoration: underline;">4</span>   0.323   0.404   0.485   0.404      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km      0.061<span style="text-decoration: underline;">3</span>  0.049<span style="text-decoration: underline;">8</span>  -<span style="color: #BB0000;">0.020</span><span style="color: #BB0000; text-decoration: underline;">6</span>  0.061<span style="text-decoration: underline;">3</span>  0.143   0.061<span style="text-decoration: underline;">3</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km      0.893   0.078<span style="text-decoration: underline;">7</span>   0.764   0.893   1.02    0.893      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km      0.992   0.066<span style="text-decoration: underline;">3</span>   0.883   0.992   1.10    0.992      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km     0.027<span style="text-decoration: underline;">6</span>  0.085<span style="text-decoration: underline;">6</span>  -<span style="color: #BB0000;">0.113</span>   0.027<span style="text-decoration: underline;">6</span>  0.168   0.027<span style="text-decoration: underline;">6</span>     0</span></span></code></pre></div>
+<span><span class="co">#&gt;    variable                   mean      sd      q05     q50    q95    mode   kld</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept               -<span style="color: #BB0000;">0.330</span>  25.8    -<span style="color: #BB0000;">4.28</span><span style="color: #949494;">e</span>+1 -<span style="color: #BB0000;">0.330</span>  42.1   -<span style="color: #BB0000;">0.330</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_species.proj… -<span style="color: #BB0000;">0.330</span>  25.8    -<span style="color: #BB0000;">4.28</span><span style="color: #949494;">e</span>+1 -<span style="color: #BB0000;">0.330</span>  42.1   -<span style="color: #BB0000;">0.330</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_species.proj… -<span style="color: #BB0000;">0.330</span>  25.8    -<span style="color: #BB0000;">4.28</span><span style="color: #949494;">e</span>+1 -<span style="color: #BB0000;">0.330</span>  42.1   -<span style="color: #BB0000;">0.330</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km         -<span style="color: #BB0000;">0.093</span><span style="color: #BB0000; text-decoration: underline;">6</span>  0.133  -<span style="color: #BB0000;">3.13</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> -<span style="color: #BB0000;">0.093</span><span style="color: #BB0000; text-decoration: underline;">6</span>  0.126 -<span style="color: #BB0000;">0.093</span><span style="color: #BB0000; text-decoration: underline;">6</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km         -<span style="color: #BB0000;">0.461</span>   0.121  -<span style="color: #BB0000;">6.60</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> -<span style="color: #BB0000;">0.461</span>  -<span style="color: #BB0000;">0.261</span> -<span style="color: #BB0000;">0.461</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km          0.469   0.087<span style="text-decoration: underline;">7</span>  3.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span>  0.469   0.613  0.469      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km       0.404   0.048<span style="text-decoration: underline;">8</span>  3.23<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span>  0.404   0.484  0.404      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km       0.078<span style="text-decoration: underline;">8</span>  0.046<span style="text-decoration: underline;">5</span>  2.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>  0.078<span style="text-decoration: underline;">8</span>  0.155  0.078<span style="text-decoration: underline;">8</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km       0.894   0.079<span style="text-decoration: underline;">0</span>  7.64<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span>  0.894   1.02   0.894      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km       1.01    0.066<span style="text-decoration: underline;">5</span>  9.00<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span>  1.01    1.12   1.01       0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km      0.028<span style="text-decoration: underline;">5</span>  0.084<span style="text-decoration: underline;">2</span> -<span style="color: #BB0000;">1.10</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span>  0.028<span style="text-decoration: underline;">5</span>  0.167  0.028<span style="text-decoration: underline;">5</span>     0</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
