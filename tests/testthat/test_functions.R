@@ -119,6 +119,14 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_error(ensemble(r1, r2, r3, layer = "lyr.1", uncertainty = "pca"),
                regexp = "Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
 
+  # Ensemble with single raster layer but multiple bands
+  # Joined together
+  ras <- c(r1,r2,r3); names(ras) <- c("r1", "r2", "r3")
+  expect_no_error(
+    pp <- ensemble(ras, method = "mean", layer = "mean")
+  )
+  expect_s4_class(pp, "SpatRaster")
+
   # Check centroid calculation
   expect_s3_class(raster_centroid(r1), "sf")
   expect_s3_class(raster_centroid(r1,patch = TRUE), "sf")
@@ -147,8 +155,6 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
 
   # --- #
 })
-
-
 
 # ---- #
 # Other generic functions in the package
@@ -195,10 +201,17 @@ test_that('Test pseudo-absence options', {
   expect_error(pseudoabs_settings(method = "cool"))
 
   # Add custom options
-  abs <- pseudoabs_settings(nrpoints = 1000, min_ratio = 1, method = "buffer",inside = FALSE, buffer_distance = 100)
+  abs <- pseudoabs_settings(nrpoints = 1000, min_ratio = 1, method = "buffer",
+                            inside = FALSE, buffer_distance = 100)
   expect_s3_class(abs, "Settings")
   expect_equal(abs$get("nrpoints"), 1000)
 
+  s <- abs$summary()
+  expect_s3_class(s, "data.frame")
+  expect_true(s$value[s$name == "nrpoints"] == 1000)
+
+  # Expect error as model not yet fitted
+  expect_error(abs$duration())
 })
 
 # ---- #

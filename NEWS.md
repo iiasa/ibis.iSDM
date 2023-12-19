@@ -1,4 +1,12 @@
-# ibis.iSDM 0.1.1 (current dev branch)
+# ibis.iSDM 0.1.2 (current dev branch)
+
+#### New features
+
+#### Minor improvements and bug fixes
+* Support of multi-band rasters in `ensemble()` for convenience.
+* Fix of bug in `threshold()` for supplied point data and improved error messages.
+
+# ibis.iSDM 0.1.1
 
 #### New features
 * Added default `engine_glm()` for dependency-free inference and projection.
@@ -8,8 +16,8 @@
 #### Minor improvements and bug fixes
 * Minor corrective fixes and additions to `add_offset()`.
 * Switch to `engine_glm()` in many of the unittests for better coverage.
-* Several bug fixes and improvements in `thin_observations`
-* `global`, `probs`, and `centers` argument for better control of `thin_observations`
+* Several bug fixes and improvements in `thin_observations()`
+* `global`, `probs`, and `centers` argument for better control of `thin_observations()`
 * Harmonization of parameters for `spartial()` and addressing #80
 
 # ibis.iSDM 0.1.0

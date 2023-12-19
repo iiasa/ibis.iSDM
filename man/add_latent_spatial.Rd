@@ -50,9 +50,9 @@ options.
 \details{
 There are several different options some of which depend on the
 engine used. In case a unsupported method for an engine is chosen this is
-modified to the next similar method
+modified to the next similar method.
 
-Available are:
+\strong{Available are:}
 
 \link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for
 \code{\link{engine_inla}} and \code{\link{engine_inlabru}}. SPDE effects aim at capturing the
@@ -65,10 +65,12 @@ elevation. Note that calculations of SPDE's can be computationally costly.
 \itemize{
 \item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}. Not yet implemented in full.
 \item \code{"kde"} - additional covariate of the kernel density of input point observations.
-\item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation. Available for all Engines.
-\item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each grid cell
-to the nearest other grid cell with values. Applied across all datasets in
-the \code{\linkS4class{BiodiversityDistribution}}) object. Available for all Engines.
+\item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation.
+This method assumed that a transformation of spatial coordinates can if - included as additional predictor -
+explain some of the variance in the distribution. This method does not interact with species occurrences.
+\item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each point
+to the nearest other grid cell with known species occurrence. Originally proposed by Allouche et al. (2008)
+and can be applied across all datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.
 }
 }
 \examples{
@@ -78,7 +80,7 @@ the \code{\linkS4class{BiodiversityDistribution}}) object. Available for all Eng
 }
 \references{
 \itemize{
-\item Fletcher, R., & Fortin, M. (2018). Spatial ecology and conservation modeling. Springer International Publishing.
+\item Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating distance constraints into species distribution models. Journal of Applied Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x
 \item Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 }
 }

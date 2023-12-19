@@ -118,13 +118,10 @@ methods::setMethod(
     }
 
     # Further checks
-    assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
-                            msg = "No use calculating an ensemble on one object only..."
-    )
     assertthat::assert_that(
       is.character(method),
       is.null(min.value) || is.numeric(min.value),
-      is.null(layer) || is.character(layer),
+      is.null(layer) || ( is.character(layer) && length(layer) == 1 ),
       is.null(weights) || is.vector(weights),
       is.logical(normalize),
       is.character(uncertainty)
@@ -146,6 +143,9 @@ methods::setMethod(
 
     # For Distribution model ensembles
     if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){
+      assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
+                              msg = "No use calculating an ensemble on one object only..."
+      )
       # Check that layers all have a prediction layer
       assertthat::assert_that(
         all( sapply(mods, function(x) !is.Waiver(x$get_data('prediction')) ) ),
@@ -261,22 +261,26 @@ methods::setMethod(
       return(out)
     } else if(is.Raster(mods[[1]])) {
       # Check that layer is present in supplied mods
-      if(!is.null(layer)){
-        assertthat::assert_that(
-          all( sapply(mods, function(x) layer %in% names(x) ) ),
-          msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-        )
-      } else { layer <- 1 } # Take the first one
-      # TODO:
-      if(length(layer)>1) stop("Not implemented yet")
-      # Get prediction stacks from all mods
-      ll_ras <- sapply(mods, function(x) x[[layer]])
-      # Ensure that the layers have the same resolution, otherwise align
-      if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
-        ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
+      if(terra::nlyr(mods[[1]])>1 && length(mods) == 1){
+        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Single multiband raster found. Ignoring parameter layer and ensemble.')
+        layer <- 1
+        ras <- mods[[1]]
+      } else {
+        if(!is.null(layer)){
+          assertthat::assert_that(
+            all( sapply(mods, function(x) layer %in% names(x) ) ),
+            msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+          )
+        } else { layer <- 1 } # Take the first one
+        # Get prediction stacks from all mods
+        ll_ras <- sapply(mods, function(x) x[[layer]])
+        # Ensure that the layers have the same resolution, otherwise align
+        if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
+          if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+          ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
+        }
+        ras <- terra::rast(ll_ras)
       }
-      ras <- terra::rast(ll_ras)
       # Apply threshold if set. Set to 0 thus reducing the value of the ensembled
       # layer.
       if(!is.null(min.value)) ras[ras < min.value] <- 0

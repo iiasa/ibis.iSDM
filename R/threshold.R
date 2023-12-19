@@ -129,15 +129,22 @@ methods::setMethod(
                                         addName = TRUE, tosf = TRUE
                                         )
     } else {
+      assertthat::assert_that(inherits(point, 'sf'),
+                              utils::hasName(point, field_occurrence),
+                              msg = paste0("Field ", field_occurrence, " not found in the layer!"))
       assertthat::assert_that(sf::st_crs(point) == sf::st_crs(obj$get_data('prediction')))
     }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
+    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity'))){
       if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       ass <- model$biodiversity[[1]]$pseudoabsence_settings
       if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
+
+      # Rename geometry to be consistent
+      point <- rename_geometry(point, "geometry")
+
       suppressMessages(
         abs <- add_pseudoabsence(df = point,
                                  field_occurrence = field_occurrence,
@@ -162,7 +169,8 @@ methods::setMethod(
     if(!inherits(point,"sf")){ point <- guess_sf(point) }
 
     # Now self call threshold
-    out <- .stackthreshold(obj = ras,method = method, value = value,point = point, format = format,
+    out <- .stackthreshold(obj = ras,method = method, value = value, point = point,
+                           field_occurrence = field_occurrence, format = format,
                            return_threshold = return_threshold)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj and clean up old thresholds before
@@ -182,18 +190,27 @@ methods::setMethod(
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(point,'sf'),
+                          is.character(field_occurrence),
                           is.null(value) || is.numeric(value),
                           is.character(format)
   )
   # Match format
   format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
 
+  # Check for field occurrence field
+  if(!is.null(point)){
+    assertthat::assert_that(inherits(point, 'sf'),
+                            utils::hasName(point, field_occurrence),
+                            msg = paste0("Field ", field_occurrence, " not found in the layer!"))
+  }
+
   # Apply threshold on each entry
   if(return_threshold){
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, point = point,  format = format, return_threshold = return_threshold, ...) )
+                                                                value = value, point = point, field_occurrence = field_occurrence,
+                                                 format = format, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
@@ -212,7 +229,8 @@ methods::setMethod(
     }
     # Now loop
     out <- threshold(obj, method = method,
-                     value = value, point = point, format = format,
+                     value = value, point = point, field_occurrence = field_occurrence,
+                     format = format,
                      return_threshold = return_threshold, ...)
   }
   return(out)
