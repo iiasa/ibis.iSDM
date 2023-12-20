@@ -444,7 +444,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
         # curvilinear extrapolations for Europe Hacky approach now is to convert
         # to raster, crop, project and then convert back. Only use if gdalUtils
         # is installed
-        if(("gdalUtils" %in% utils::installed.packages()[,1])&&use_gdalutils){
+        if(("gdalUtilities" %in% utils::installed.packages()[,1])&&use_gdalutils){
           ff <- hack_project_stars(ff, template, use_gdalutils)
         } else {
           # Make background

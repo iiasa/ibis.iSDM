@@ -722,11 +722,11 @@ hack_project_stars <- function(obj, template, use_gdalutils = TRUE){
     sub <- obj[v]
 
     if(use_gdalutils){
-      check_package("gdalUtils")
+      check_package("gdalUtilities")
       # Write output
       stars::write_stars(sub, file.path(td, "ReprojectedStars.tif"))
       suppressWarnings(
-        gdalUtils::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
+        gdalUtilities::gdalwarp(srcfile = file.path(td, "ReprojectedStars.tif"),
                             dstfile = file.path(td, "ReprojectedStars_temp.tif"),
                             s_srs = "EPSG:4296",
                             tr = terra::res(template),

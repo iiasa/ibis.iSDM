@@ -40,6 +40,7 @@
     "pdp", "scales", "biscale", "modEvA", "dplyr", "geodist", "geosphere", "progress",
     "glmnet", "glmnetUtils", "xgboost","BoomSpikeSlab", "INLA", "inlabru",
     "gnlm", "cubelyr", "matrixStats", "Boruta", "abess",
+    "gdalUtilities", # New gdalUtilities package
     "dbarts", "mboost", "rstan", "cmdstanr", "biscale",
     # Mechanistic stuff
     "poems", "BiocManager"
