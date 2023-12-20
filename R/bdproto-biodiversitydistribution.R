@@ -45,7 +45,7 @@ BiodiversityDistribution <- bdproto(
     pio <- ifelse(is.Waiver(self$priors),
                   '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
     bv <- ifelse(is.Waiver(self$control), '',
-                 paste0( "\n  control:   <", name_atomic(
+                 paste0( "\n  control:        <", name_atomic(
                    paste0( self$control$type, " - ", self$control$method)
                  ), ">" ) )
     li <- ifelse(is.Waiver(self$limits), '',
@@ -247,7 +247,7 @@ BiodiversityDistribution <- bdproto(
     assertthat::assert_that(missing(x) || is.Raster(x),
                             all(is.numeric(value)))
     # Check type of control
-    type <- match.arg(type, c("bias", "extrapolation"), several.ok = FALSE)
+    type <- match.arg(type, c("bias"), several.ok = FALSE)
     if(type == "bias"){
       if(missing(x)) {
         assertthat::assert_that(method == "proximity",
@@ -256,17 +256,15 @@ BiodiversityDistribution <- bdproto(
       }
       bdproto(NULL, self, control = list(type = type, layer = x,
                                          method = method, bias_value = value) )
-    } else if(type == "extrapolation"){
-      bdproto(NULL, self, control = list(type = type, layer = x, method = method, value = value) )
     }
   },
   # Get bias control (print name)
   get_control = function(self, type = "bias"){
     # Check type of control
-    type <- match.arg(type, c("bias", "extrapolation"), several.ok = FALSE)
+    type <- match.arg(type, c("bias"), several.ok = FALSE)
     control <- self$control
     if(is.Waiver(control)) return( control )
-    if(control$type == "bias" && type == "bias") names( control )
+    if(control$type == "bias" && type == "bias") return( control )
   },
   # Remove bias controls
   rm_control = function(self){

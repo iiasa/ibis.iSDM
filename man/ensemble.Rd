@@ -7,7 +7,7 @@
 \S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 }
 \arguments{
-\item{...}{Provided \code{\link{DistributionModel}} objects.}
+\item{...}{Provided \code{\link{DistributionModel}} or \code{\link{SpatRaster}} objects.}
 
 \item{method}{Approach on how the ensemble is to be created. See details for
 available options (Default: \code{'mean'}).}
