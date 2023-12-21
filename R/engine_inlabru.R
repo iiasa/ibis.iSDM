@@ -1222,7 +1222,7 @@ engine_inlabru <- function(x,
             if(plot){
               o <- pred_cov
               ggplot2::ggplot() +
-                ggplot2::theme_classic(base_size = 18) +
+                ggplot2::theme_classic() +
                 inlabru::gg(o, ggplot2::aes(fill = mean)) +
                 ggplot2::scale_fill_gradientn(colours = ibis_colours$ohsu_palette) +
                 ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))

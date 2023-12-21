@@ -575,7 +575,8 @@ engine_gdb <- function(x,
             # Special treatment for factors
             if(is.null(newdata)){
               variable_range <- list()
-              dummy <- as.data.frame(matrix(nrow = variable_length))
+              dummy <- as.data.frame(matrix(nrow = variable_length, ncol = length(x.var)))
+              names(dummy) <- x.var
               # Loop through the provided variables
               for(v in x.var){
                 if(any(model$predictors_types$type=="factor")){
@@ -646,7 +647,7 @@ engine_gdb <- function(x,
                 # Combine with
                 out <- rbind(out, data.frame(variable = v,
                                              partial_effect = dummy[[v]],
-                                             mean = pp[,grep("bbs", colnames(pp))] )
+                                             mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
                 )
               } else {
                 # Combine with

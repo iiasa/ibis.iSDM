@@ -639,7 +639,7 @@ engine_breg <- function(x,
             if(plot){
               # Make a plot
               g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
-                ggplot2::theme_classic(base_size = 18) +
+                ggplot2::theme_classic() +
                 ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95), fill = "grey90") +
                 ggplot2::geom_line(ggplot2::aes(y = mean)) +
                 ggplot2::facet_wrap(. ~ variable, scales = "free") +
