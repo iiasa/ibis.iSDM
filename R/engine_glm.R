@@ -441,7 +441,7 @@ engine_glm <- function(x,
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, names(df), several.ok = FALSE)
+              x.var <- match.arg(x.var, names(df), several.ok = TRUE)
             }
 
             # Calculate range of predictors
@@ -512,7 +512,7 @@ engine_glm <- function(x,
               }
               p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
-              p1$variable <- v
+              p1 <- cbind(variable = v, p1)
               pp <- rbind(pp, p1)
               rm(p1)
               if(length(x.var) > 1) pb$tick()
@@ -520,11 +520,11 @@ engine_glm <- function(x,
 
             if(plot){
               # Make a plot
-              g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
-                ggplot2::theme_classic(base_size = 18) +
-                ggplot2::geom_line() +
-                ggplot2::labs(x = "", y = expression(hat(y))) +
-                ggplot2::facet_wrap(~variable,scales = 'free')
+              g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
+                ggplot2::theme_classic() +
+                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                ggplot2::labs(x = "", y = "Partial effect")
               print(g)
             }
             return(pp)

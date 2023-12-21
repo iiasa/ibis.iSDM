@@ -81,7 +81,7 @@ varimp.bart <- function(model){
 #'
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: \code{"All"}).
+#' @param x.var The predictor variables to be mapped (Default: \code{NULL}).
 #' @param equal Whether equal spacing on x breaks or quantiles is applied
 #'   (Default: \code{FALSE}).
 #' @param smooth Smoothing factor for the x breaks (works like partials).
@@ -110,13 +110,13 @@ varimp.bart <- function(model){
 #' @aliases bart_partial_effect
 #' @keywords utils
 #' @noRd
-bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
+bart_partial_effect <- function (model, x.var = NULL, equal = FALSE,
                                  smooth = 1, transform = TRUE, values = NULL,
                                  variable_length = 100,plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
-    is.null(x.vars) || is.character(x.vars),
+    is.null(x.var) || is.character(x.var),
     is.logical(transform),
     is.logical(equal),
     is.numeric(smooth),
@@ -131,15 +131,15 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
   # If no x.vars are specified, use all
   if(!is.null(values)){
     raw <- list()
-    raw[[x.vars]] <- values
+    raw[[x.var]] <- values
     raw <- raw |> as.data.frame()
   } else {
-    if (is.null(x.vars)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.vars]
+    if (is.null(x.var)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.var]
   }
 
   # Define binning in equal area width or not
   if(equal) {
-    if(!is.null(x.vars) && length(x.vars) == 1) {
+    if(!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
     }
     else {
@@ -162,12 +162,12 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
         }
       }
     }
-    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev,
+    pd <- dbarts::pdbart(model, xind = x.var, levs = lev,
                          keepevery = variable_length, pl = FALSE)
 
   } else {
     levq = c(0.05, seq(0.1, 0.9, length.out = (variable_length-2)/smooth), 0.95)
-    pd <- dbarts::pdbart(model, xind = x.vars, levquants = levq,
+    pd <- dbarts::pdbart(model, xind = x.var, levquants = levq,
                          keepevery = 10, #levs = list(levq),
                          pl = FALSE)
   }
@@ -175,7 +175,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
   out <- data.frame()
   # Summarize the posterior
   for(i in 1:length(pd$fd)){
-    df <- data.frame(partial_effect = pd$levs[[i]])
+    df <- data.frame(variable =  pd$xlbs[[i]], partial_effect = pd$levs[[i]])
     # Summarize quantiles and sd from posterior
     ms <- as.data.frame(
       cbind( apply(pd$fd[[i]], 2, function(x) mean(x, na.rm = TRUE)),
@@ -187,27 +187,20 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
     if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, stats::pnorm)
     ms$cv <- ms$sd / ms$mean
-    ms$variable <- pd$xlbs[[i]]
     df <- cbind(df, ms)
     out <- rbind(out, df);rm(df)
   }
 
   # Create plot if specified
   if(plot){
-    # Construct overall plot. Might fail for multiple variables
-    g <- ggplot2::ggplot(out, ggplot2::aes(x = partial_effect, y = q50)) +
-      ggplot2::labs(title = "", y = expression(y^q50), x = unique(out$variable)) +
-      ggplot2::theme_light(base_size = 20) +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95),
-                           fill = "deepskyblue1", alpha = 0.3) +
-      ggplot2::geom_line(linewidth = 1.25) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
-                     axis.title.y = ggplot2::element_text(vjust = 1.7))
-    # If multiple variables, add facets
-    if(length(unique(out$variable))>1){
-      g <- g + ggplot2::facet_wrap(~variable)
-    }
-    g
+    # Construct overall plot.
+    g <- ggplot2::ggplot(data = out, ggplot2::aes(x = partial_effect)) +
+      ggplot2::theme_classic() +
+      ggplot2::geom_ribbon(aes(ymin = q05, ymax = q95), fill = "grey90") +
+      ggplot2::geom_line(aes(y = mean)) +
+      ggplot2::facet_wrap(. ~ variable, scales = "free") +
+      ggplot2::labs(x = "", y = "Partial effect")
+    print(g)
   }
   # Return the partial results
   return(out)
@@ -217,7 +210,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
 #'
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: All).
+#' @param x.var The predictor variables to be mapped (Default: All).
 #' @param equal Whether equal spacing on x breaks or quantiles is applied
 #'   (Default: \code{FALSE}).
 #' @param smooth Smoothing factor for the x breaks (works like partials).
@@ -231,20 +224,20 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
 #' @aliases bart_partial_space
 #' @keywords utils
 #' @noRd
-bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
+bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(
     inherits(model,'bart'),
     is.Raster(envs),
-    is.null(x.vars) || is.character(x.vars),
+    is.null(x.var) || is.character(x.var),
     is.logical(equal), is.numeric(smooth),
     is.logical(transform)
   )
   # No x.vars chosen, take all variables
-  if (is.null(x.vars)) raw <- model$fit$data@x else raw <- model$fit$data@x[, x.vars]
+  if (is.null(x.var)) raw <- model$fit$data@x else raw <- model$fit$data@x[, x.var]
 
   if (equal == TRUE) {
-    if (!is.null(x.vars) && length(x.vars) == 1) {
+    if (!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
     }
     else {
@@ -270,7 +263,7 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
     lev = c(0.05, seq(0.1, 0.9, 0.1/smooth), 0.95)
   }
   # Use barts to get partial effects
-  pd <- dbarts::pdbart(model, xind = x.vars, levquants = lev, pl = FALSE)
+  pd <- dbarts::pdbart(model, xind = x.var, levquants = lev, pl = FALSE)
   # Loop through
   for(i in 1:length(pd$fd)) {
     # Get first rasterlayer class

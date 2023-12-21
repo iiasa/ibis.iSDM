@@ -683,7 +683,7 @@ engine_xgboost <- function(x,
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, mod$feature_names, several.ok = FALSE)
+              x.var <- match.arg(x.var, mod$feature_names, several.ok = TRUE)
             }
 
             # Calculate range of predictors
@@ -751,21 +751,21 @@ engine_xgboost <- function(x,
                                    inv.link = ilf,
                                    train = df)
               }
-              p1 <- p1[,c(x.var, "yhat")]
+              p1 <- p1[,c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
-              p1$variable <- v
+              p1 <- cbind(variable = v, p1)
               pp <- rbind(pp, p1)
               if(length(x.var) > 1) pb$tick()
             }
 
             if(plot){
               # Make a plot
-              pm <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect, y = mean)) +
-                ggplot2::theme_classic(base_size = 18) +
-                ggplot2::geom_line() +
-                ggplot2::labs(x = "", y = expression(hat(y))) +
-                ggplot2::facet_wrap(~variable,scales = 'free')
-              print(pm)
+              g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
+                ggplot2::theme_classic() +
+                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                ggplot2::labs(x = "", y = "Partial effect")
+              print(g)
             }
             # Return the data
             return(pp)

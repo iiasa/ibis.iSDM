@@ -537,10 +537,10 @@ engine_bart <- function(x,
           partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
                              values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
             model <- self$get_data('fit_best')
-            assertthat::assert_that(x.var %in% attr(model$fit$data@x,'term.labels') || is.null(x.var),
+            assertthat::assert_that(all(x.var %in% attr(model$fit$data@x,'term.labels')) || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
             if(is.null(newdata)){
-              bart_partial_effect(model, x.vars = x.var,
+              bart_partial_effect(model, x.var = x.var,
                                   transform = self$settings$data$binary,
                                   variable_length = variable_length,
                                   values = values,
@@ -548,7 +548,7 @@ engine_bart <- function(x,
                                   plot = plot )
             } else {
               # Set the values to newdata
-              bart_partial_effect(model, x.vars = x.var,
+              bart_partial_effect(model, x.var = x.var,
                                   transform = self$settings$data$binary,
                                   values = newdata[[x.var]],
                                   plot = plot)
@@ -563,10 +563,10 @@ engine_bart <- function(x,
               predictors <- model$predictors_object$get_data()
             } else {
               predictors <- newdata
-              assertthat::assert_that(x.var %in% colnames(predictors),
+              assertthat::assert_that(all(x.var %in% colnames(predictors)),
                                       msg = 'Variable not in provided data!')
             }
-            assertthat::assert_that(x.var %in% attr(fit$fit$data@x,'term.labels'),
+            assertthat::assert_that(all(x.var %in% attr(fit$fit$data@x,'term.labels')),
                                     msg = 'Variable not in predicted model' )
 
             if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')

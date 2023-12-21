@@ -344,7 +344,7 @@ DistributionModel <- bdproto(
         inlabru::gg(self$get_data(x)$summary.fixed, bar = TRUE)
     } else if(inherits(self, 'BART-Model')){
       message('Calculating partial dependence plots')
-      self$partial(self$get_data(x), x.vars = what, ...)
+      self$partial(self$get_data(x), x.var = what, ...)
     } else if(inherits(self, 'BREG-Model')){
       obj <- self$get_data(x)
       if(what == "fixed") what <- "coefficients"
@@ -367,7 +367,7 @@ DistributionModel <- bdproto(
         xgboost::xgb.plot.multi.trees(obj)
       }
     } else {
-      self$partial(self$get_data(x), x.vars = NULL)
+      self$partial(self$get_data(x), x.var = NULL)
     }
   },
   # Get equation

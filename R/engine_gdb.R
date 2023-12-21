@@ -659,11 +659,12 @@ engine_gdb <- function(x,
 
             # If plot, make plot, otherwise
             if(plot){
-              par.ori <- graphics::par(no.readonly = TRUE)
-              graphics::par(mfrow = c(1,2))
-              mboost::plot.mboost(self$get_data('fit_best'), which = x.var, newdata = dummy)
-              if(utils::hasName(par.ori, "pin")) par.ori$pin <- NULL
-              graphics::par(par.ori)
+              g <- ggplot2::ggplot(data = out, ggplot2::aes(x = partial_effect)) +
+                ggplot2::theme_classic() +
+                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                ggplot2::labs(x = "", y = "Partial effect")
+              print(g)
             }
             return(out)
           },

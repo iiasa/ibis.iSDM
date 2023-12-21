@@ -558,7 +558,7 @@ engine_breg <- function(x,
             if(is.null(x.var)){
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, colnames(df), several.ok = FALSE)
+              x.var <- match.arg(x.var, colnames(df), several.ok = TRUE)
             }
 
             if(is.null(newdata)){
@@ -569,67 +569,85 @@ engine_breg <- function(x,
               } else {
                 rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
               }
+              assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
               df_partial <- list()
               if(!is.null(values)){ assertthat::assert_that(length(values) >= 1) }
-
               # Add all others as constant
               if(is.null(constant)){
                 for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
               } else {
                 for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
               }
-              if(!is.null(values)){
-                df_partial[[x.var]] <- values
-              } else {
-                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-              }
-
-              df_partial <- df_partial |> as.data.frame()
-              if(any(model$predictors_types$type=="factor")){
-                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-                df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
-                  factor(lvl[1], levels = lvl)
-              }
             } else {
               df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
             }
 
-            # For Integrated model, take the last one
-            fam <- model$biodiversity[[length(model$biodiversity)]]$family
+            # create list to store results
+            o <- vector(mode = "list", length = length(x.var))
+            names(o) <- x.var
 
-            pred_breg <- predict_boom(
-              obj = mod,
-              newdata = df_partial,
-              w = unique(w)[2], # The second entry of unique contains the non-observed variables
-              fam = fam,
-              params = settings$data # Use the settings as list
-            )            # Also attach the partial variable
+            # loop through x.var
+            for(v in x.var) {
 
-            # Summarize the partial effect
-            pred_part <- cbind(
-              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-              matrixStats::rowSds(pred_breg, na.rm = TRUE),
-              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-              apply(pred_breg, 1, mode)
-            ) |> as.data.frame()
-            names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-            pred_part$cv <- pred_part$sd / pred_part$mean
-            # And attach the variable
-            pred_part <- cbind("partial_effect" = df_partial[[x.var]], pred_part)
+              df2 <- df_partial
+
+              if(!is.null(values)){
+                df2[[v]] <- values
+              } else {
+                df2[[v]] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+              }
+              df2 <- as.data.frame(df2)
+
+              if(any(model$predictors_types$type=="factor")){
+                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+                df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
+              }
+
+              # For Integrated model, take the last one
+              fam <- model$biodiversity[[length(model$biodiversity)]]$family
+
+              pred_breg <- predict_boom(
+                obj = mod,
+                newdata = df2,
+                w = unique(w)[2], # The second entry of unique contains the non-observed variables
+                fam = fam,
+                params = settings$data # Use the settings as list
+              )            # Also attach the partial variable
+
+              # Summarize the partial effect
+              pred_part <- cbind(
+                matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+                matrixStats::rowSds(pred_breg, na.rm = TRUE),
+                matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+                apply(pred_breg, 1, mode)
+              ) |> as.data.frame()
+
+              names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+              pred_part$cv <- pred_part$sd / pred_part$mean
+              pred_part <- cbind("partial_effect" = df2[[v]], pred_part)
+
+              # Add variable name for consistency
+              pred_part <- cbind("variable" = v, pred_part)
+
+              o[[v]] <- pred_part
+
+            }
+
+            o <- do.call(what = rbind, args = c(o, make.row.names = FALSE))
 
             if(plot){
               # Make a plot
-              g <- ggplot2::ggplot(data = pred_part,
-                                   ggplot2::aes(x = partial_effect, y = q50, ymin = q05, ymax = q95)) +
+              g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
                 ggplot2::theme_classic(base_size = 18) +
-                ggplot2::geom_ribbon(fill = 'grey90') +
-                ggplot2::geom_line() +
-                ggplot2::labs(x = paste0("partial of ",x.var), y = expression(hat(y)))
+                ggplot2::geom_ribbon(aes(ymin = q05, ymax = q95), fill = "grey90") +
+                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                ggplot2::labs(x = "", y = "Partial effect")
               print(g)
             }
             # Return the data
-            return(pred_part)
+            return(o)
           },
           # Spatial partial dependence plot
           spartial = function(self, x.var, constant = NULL, newdata = NULL,

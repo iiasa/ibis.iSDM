@@ -1068,10 +1068,16 @@ engine_inlabru <- function(x,
 
             # Match variable name
             if(!is.null(mod$summary.random)) vn <- names(mod$summary.random) else vn <- ""
-            x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = FALSE)
+
+            if(x.var == ""){
+              x.var <- colnames(df)
+            } else {
+              x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = TRUE)
+            }
+
 
             if(is.null(newdata)){
-              # Make a prediction via inlabru
+              # Calculate range of predictors
               if(any(model$predictors_types$type=="factor")){
                 rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                              function(x) range(x, na.rm = TRUE)) |> as.data.frame()
@@ -1089,55 +1095,71 @@ engine_inlabru <- function(x,
               } else {
                 for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
               }
-              if(!is.null(values)){
-                df_partial[[x.var]] <- values
-              } else {
-                df_partial[[x.var]] <- seq(rr[1,x.var], rr[2,x.var], length.out = variable_length)
-              }
-              df_partial <- df_partial |> as.data.frame()
-
-              if(any(model$predictors_types$type=="factor")){
-                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-                df_partial[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
-                  factor(lvl[1], levels = lvl)
-              }
             } else {
               df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
             }
 
-            ## plot the unique effect of the covariate
-            fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-            pred_cov <- predict(object = mod,
-                                newdata = df_partial,
-                                formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
-                                n.samples = 100,
-                                probs = c(0.05,0.5,0.95)
-                                )
-            pred_cov$cv <- pred_cov$sd / pred_cov$mean
+            # create list to store results
+            o <- vector(mode = "list", length = length(x.var))
+            names(o) <- x.var
 
-            o <- pred_cov
-            names(o)[grep(x.var, names(o))] <- "partial_effect"
-            if(utils::packageVersion("inlabru") <= '2.5.2'){
-              # Older version where probs are ignored
-              o <- subset(o, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
-              names(o) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
-            } else {
-              o <- subset(o, select = c("partial_effect", "mean", "sd", "q0.05", "q0.5", "q0.95", "cv"))
-              names(o) <- c("partial_effect", "mean", "sd", "lower", "median", "upper", "cv")
+             # loop through x.var
+            for(v in x.var) {
+
+              df2 <- df_partial
+
+              if(!is.null(values)){
+                df2[[v]] <- values
+              } else {
+                df2[[v]] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+              }
+              df2 <- as.data.frame(df2)
+
+              if(any(model$predictors_types$type=="factor")){
+                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+                df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
+              }
+
+              ## plot the unique effect of the covariate
+              fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+              pred_cov <- predict(object = mod,
+                                  newdata = df2,
+                                  formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+                                  n.samples = 100,
+                                  probs = c(0.05,0.5,0.95)
+              )
+
+              pred_cov$cv <- pred_cov$sd / pred_cov$mean
+              names(pred_cov)[grep(v, names(pred_cov))] <- "partial_effect"
+
+              if(utils::packageVersion("inlabru") <= '2.5.2'){
+                # Older version where probs are ignored
+                pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
+                names(pred_cov) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
+              } else {
+                pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "q0.05", "q0.5", "q0.95", "cv"))
+                names(pred_cov) <- c("partial_effect", "mean", "sd", "lower", "median", "upper", "cv")
+              }
+
+              pred_cov <- cbind(variable = v, pred_cov)
+
+              o[[v]] <- pred_cov
+
             }
+
+            o <- do.call(what = rbind, args = c(o, make.row.names = FALSE))
 
             # Do plot and return result
             if(plot){
-              pm <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect, y = median,
-                                                     ymin = lower,
-                                                     ymax = upper) ) +
+              g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
                 ggplot2::theme_classic() +
-                ggplot2::geom_ribbon(fill = "grey90") +
-                ggplot2::geom_line() +
-                ggplot2::labs(x = x.var, y = "Partial effect")
-              print(pm)
+                ggplot2::geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey90") +
+                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                ggplot2::labs(x = "", y = "Partial effect")
+              print(g)
             }
-            return(o |> as.data.frame() )
+            return(o)
           },
           # (S)partial effect
           spartial = function(self, x.var, constant = NULL, newdata = NULL,
