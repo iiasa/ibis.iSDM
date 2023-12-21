@@ -644,7 +644,7 @@ engine_glmnet <- function(x,
               # Make a plot
               g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
                 ggplot2::theme_classic() +
-                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::geom_line(ggplot2::aes(y = mean)) +
                 ggplot2::facet_wrap(. ~ variable, scales = "free") +
                 ggplot2::labs(x = "", y = "Partial effect")
               print(g)

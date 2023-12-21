@@ -1153,8 +1153,8 @@ engine_inlabru <- function(x,
             if(plot){
               g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
                 ggplot2::theme_classic() +
-                ggplot2::geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey90") +
-                ggplot2::geom_line(aes(y = mean)) +
+                ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "grey90") +
+                ggplot2::geom_line(ggplot2::aes(y = mean)) +
                 ggplot2::facet_wrap(. ~ variable, scales = "free") +
                 ggplot2::labs(x = "", y = "Partial effect")
               print(g)
