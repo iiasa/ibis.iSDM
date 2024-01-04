@@ -664,7 +664,7 @@ engine_gdb <- function(x,
                 ggplot2::theme_classic() +
                 ggplot2::geom_line(ggplot2::aes(y = mean)) +
                 ggplot2::facet_wrap(. ~ variable, scales = "free") +
-                ggplot2::labs(x = "", y = "Partial effect")
+                ggplot2::labs(x = "Variable", y = "Partial effect")
               print(g)
             }
             return(out)

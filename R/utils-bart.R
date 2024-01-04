@@ -199,7 +199,7 @@ bart_partial_effect <- function (model, x.var = NULL, equal = FALSE,
       ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95), fill = "grey90") +
       ggplot2::geom_line(ggplot2::aes(y = mean)) +
       ggplot2::facet_wrap(. ~ variable, scales = "free") +
-      ggplot2::labs(x = "", y = "Partial effect")
+      ggplot2::labs(x = "Variable", y = "Partial effect")
     print(g)
   }
   # Return the partial results
