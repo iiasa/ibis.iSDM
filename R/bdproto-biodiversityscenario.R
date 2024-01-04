@@ -495,7 +495,7 @@ BiodiversityScenario <- bdproto(
                                      ymin = suitability_q25,
                                      ymax = suitability_q75)) +
           ggplot2::theme_classic(base_size = 18) +
-          ggplot2::geom_ribbon(fill = "grey90") +
+          ggplot2::geom_ribbon(fill = "grey85") +
           ggplot2::geom_line(size = 2) +
           ggplot2::labs(x = "Time", y = expression(Area(km^2)), title = "Relative suitable habitat")
       }
@@ -541,12 +541,12 @@ BiodiversityScenario <- bdproto(
     if(oftype == "stars"){
       if(plot){
         suppressWarnings(
-          stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+          stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey85",ibis_colours$divg_bluered[11:20]))
         )
       }
     } else {
       out <- terra::rast(out)
-      if(plot) terra::plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey90",ibis_colours$divg_bluered[11:20]))
+      if(plot) terra::plot(out, col = c(ibis_colours$divg_bluered[1:10],"grey85",ibis_colours$divg_bluered[11:20]))
     }
     return(out)
   },

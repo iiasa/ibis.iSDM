@@ -11,8 +11,8 @@ NULL
 #' @keywords internal
 #' @noRd
 ibis_colours <- list(
-  sdm_colour = colorRampPalette(c('grey90','steelblue4','steelblue1','gold','red1','red4'))(100),
-  prob_colour = colorRampPalette(c("grey90","springgreen4","cornflowerblue","dodgerblue4","yellow","orange","mediumvioletred","red"))(100),
+  sdm_colour = colorRampPalette(c('grey85','steelblue4','steelblue1','gold','red1','red4'))(100),
+  prob_colour = colorRampPalette(c("grey85","springgreen4","cornflowerblue","dodgerblue4","yellow","orange","mediumvioletred","red"))(100),
   ohsu_palette = colorRampPalette(c("white","#fbcc3f", "#56ab6c", "#5e9dcc", "#575d5f"))(100),
   divg_bluegreen = c("#2C194C","#284577","#4B76A0","#8CA7C3","#D0DCE6","#D4E6D6","#98C39B","#5C9F61","#3E7229","#434C01"),
   divg_bluered = c("#4E193D","#44234E","#3B3264","#34487B","#376091","#4B7BA5","#6996B6","#8DADC3","#B1BEC7","#CCC1BE","#D8B7A7",

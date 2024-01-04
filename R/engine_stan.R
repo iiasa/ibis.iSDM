@@ -765,7 +765,7 @@ engine_stan <- function(x,
                                                            ymin = mean-stats::sd,
                                                            ymax = mean+stats::sd) ) +
                 ggplot2::theme_classic() +
-                ggplot2::geom_ribbon(fill = "grey90") +
+                ggplot2::geom_ribbon(fill = "grey85") +
                 ggplot2::geom_line() +
                 ggplot2::labs(x = x.var, y = "Partial effect")
               print(pm)
