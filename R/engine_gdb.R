@@ -557,16 +557,23 @@ engine_gdb <- function(x,
             return(temp)
           },
           # Partial effect
-          partial = function(self, x.var, constant = NULL, variable_length = 100, values = NULL,
+          partial = function(self, x.var = NULL , constant = NULL, variable_length = 100, values = NULL,
                              newdata = NULL, plot = FALSE, type = NULL){
             # Assert that variable(s) are in fitted model
-            assertthat::assert_that( is.character(x.var),inherits(self$get_data('fit_best'), 'mboost'),
-                                     is.numeric(variable_length),
-                                     is.null(newdata) || is.data.frame(newdata),
-                                     all(is.character(x.var)))
+            assertthat::assert_that(is.character(x.var) || is.null(x.var),
+                                    inherits(self$get_data('fit_best'), 'mboost'),
+                                    is.numeric(variable_length),
+                                    is.null(newdata) || is.data.frame(newdata))
+
             # Unlike the effects function, build specific predictor for target variable(s) only
             variables <- mboost::extract(self$get_data('fit_best'),'variable.names')
-            assertthat::assert_that( all( x.var %in% variables), msg = 'x.var variable not found in model!' )
+
+            # Match x.var to argument
+            if(is.null(x.var)) {
+              x.var <- variables
+            } else {
+              assertthat::assert_that(all( x.var %in% variables), msg = 'x.var variable not found in model!' )
+            }
 
             settings <- self$settings
             if(is.null(type)) type <- settings$get('type')

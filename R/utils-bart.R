@@ -110,9 +110,9 @@ varimp.bart <- function(model){
 #' @aliases bart_partial_effect
 #' @keywords utils
 #' @noRd
-bart_partial_effect <- function (model, x.var = NULL, equal = FALSE,
-                                 smooth = 1, transform = TRUE, values = NULL,
-                                 variable_length = 100,plot = TRUE) {
+bart_partial_effect <- function(model, x.var, equal = FALSE,
+                                smooth = 1, transform = TRUE, values = NULL,
+                                variable_length = 100,plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
@@ -128,13 +128,14 @@ bart_partial_effect <- function (model, x.var = NULL, equal = FALSE,
   if (inherits(model,"bart")) {
     fitobj <- model$fit
   }
+
   # If no x.vars are specified, use all
   if(!is.null(values)){
     raw <- list()
     raw[[x.var]] <- values
     raw <- raw |> as.data.frame()
   } else {
-    if (is.null(x.var)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.var]
+    raw <- fitobj$data@x[, x.var]
   }
 
   # Define binning in equal area width or not

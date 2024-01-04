@@ -556,6 +556,7 @@ engine_glmnet <- function(x,
 
             # Get data
             df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+            df <- subset(df, select = all.vars(mod$terms))
 
             # Match x.var to argument
             if(is.null(x.var)){

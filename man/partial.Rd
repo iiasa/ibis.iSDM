@@ -7,7 +7,7 @@
 \usage{
 partial(
   mod,
-  x.var,
+  x.var = NULL,
   constant = NULL,
   variable_length = 100,
   values = NULL,

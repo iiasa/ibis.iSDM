@@ -1049,7 +1049,7 @@ engine_inlabru <- function(x,
             return(out)
           },
           # Partial response
-          partial = function(self, x.var, constant = NULL, variable_length = 100,
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
                              values = NULL, newdata = NULL, plot = TRUE, type = "response"){
             # We use inlabru's functionalities to sample from the posterior
             # a given variable. A prediction is made over a generated fitted data.frame
@@ -1057,9 +1057,11 @@ engine_inlabru <- function(x,
             mod <- self$get_data('fit_best')
             model <- self$model
             df <- model$biodiversity[[1]]$predictors
+            df <- subset(df, select = mod$names.fixed[mod$names.fixed != "Intercept"])
+
             assertthat::assert_that(inherits(mod,'bru'),
                                     'model' %in% names(self),
-                                    is.character(x.var),
+                                    is.character(x.var) || is.null(x.var),
                                     is.numeric(variable_length), variable_length >=1,
                                     is.null(constant) || is.numeric(constant),
                                     is.null(newdata) || is.data.frame(newdata),
@@ -1067,14 +1069,14 @@ engine_inlabru <- function(x,
             )
 
             # Match variable name
+            # MH: This can be an empty list which !is.null?
             if(!is.null(mod$summary.random)) vn <- names(mod$summary.random) else vn <- ""
 
-            if(x.var == ""){
+            if(is.null(x.var)) {
               x.var <- colnames(df)
             } else {
               x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = TRUE)
             }
-
 
             if(is.null(newdata)){
               # Calculate range of predictors

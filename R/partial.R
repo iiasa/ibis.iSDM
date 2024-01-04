@@ -38,8 +38,8 @@ NULL
 #' @name partial
 methods::setGeneric(
   "partial",
-  signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, newdata = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
+  signature = methods::signature("mod"),
+  function(mod, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, newdata = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
 
 #' @name partial
 #' @rdname partial
@@ -47,12 +47,11 @@ methods::setGeneric(
 #'   \S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
 methods::setMethod(
   "partial",
-  methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, variable_length = 100,
+  methods::signature(mod = "ANY"),
+  function(mod, x.var = NULL, constant = NULL, variable_length = 100,
            values = NULL, newdata = NULL, plot = FALSE, type = "response",...) {
-    assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
-                            is.character(x.var),
+                            is.character(x.var) || is.null(x.var),
                             is.null(constant) || is.numeric(constant),
                             is.numeric(variable_length),
                             is.null(newdata) || is.data.frame(newdata),

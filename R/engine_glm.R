@@ -435,7 +435,8 @@ engine_glm <- function(x,
             settings$set("type", type)
 
             # Get data
-            df <- model$biodiversity[[length( model$biodiversity )]]$predictors
+            df <- model$biodiversity[[length(model$biodiversity)]]$predictors
+            df <- subset(df, select = attr(mod$terms, "term.labels"))
 
             # Match x.var to argument
             if(is.null(x.var)){

@@ -536,9 +536,19 @@ engine_bart <- function(x,
           # Partial effects
           partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
                              values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+
             model <- self$get_data('fit_best')
+
             assertthat::assert_that(all(x.var %in% attr(model$fit$data@x,'term.labels')) || is.null(x.var),
                                     msg = 'Variable not in predicted model' )
+
+            # Match x.var to argument
+            if(is.null(x.var)){
+              x.var <- attr(model$fit$data@x,'term.labels')
+            } else {
+              x.var <- match.arg(x.var, attr(model$fit$data@x,'term.labels'), several.ok = TRUE)
+            }
+
             if(is.null(newdata)){
               bart_partial_effect(model, x.var = x.var,
                                   transform = self$settings$data$binary,
