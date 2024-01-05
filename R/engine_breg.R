@@ -539,8 +539,8 @@ engine_breg <- function(x,
                                     is.null(constant) || is.numeric(constant),
                                     is.null(type) || is.character(type),
                                     is.null(newdata) || is.data.frame(newdata),
-                                    is.numeric(variable_length)
-            )
+                                    is.numeric(variable_length))
+
             # Settings
             settings <- self$settings
             # Set type
@@ -562,13 +562,9 @@ engine_breg <- function(x,
             }
 
             if(is.null(newdata)){
-              # Calculate range of predictors
-              if(any(model$predictors_types$type=="factor")){
-                rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                             function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-              } else {
-                rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-              }
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+
               assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
               df_partial <- list()
@@ -579,6 +575,8 @@ engine_breg <- function(x,
               } else {
                 for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
               }
+              # Convert list to data.frame (same class as if newdata is provided)
+              df_partial <- do.call(cbind, df_partial) |> as.data.frame()
             } else {
               df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
             }
@@ -593,12 +591,12 @@ engine_breg <- function(x,
               df2 <- df_partial
 
               if(!is.null(values)){
-                df2[[v]] <- values
+                df2[, v] <- values
               } else {
-                df2[[v]] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+                df2[, v] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
               }
-              df2 <- as.data.frame(df2)
 
+              # FIXME: What does this do? Why within this loop?
               if(any(model$predictors_types$type=="factor")){
                 lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
                 df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
