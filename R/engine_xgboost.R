@@ -676,7 +676,7 @@ engine_xgboost <- function(x,
             if(!is.null(newdata)){
               newdata <- subset(newdata, select = names(df))
               assertthat::assert_that(nrow(newdata)>1,ncol(newdata)>1,
-                                      all( names(df) %in% names(df) ))
+                                      all(names(df) %in% names(newdata)))
             }
 
             # Match x.var to argument
@@ -687,22 +687,17 @@ engine_xgboost <- function(x,
             }
 
             # Calculate range of predictors
-            if(any(model$predictors_types$type=="factor")){
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            } else {
-              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            }
+            rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                         function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
             if(is.null(newdata)){
               # if values are set, make sure that they cover the data.frame
               if(!is.null(values)){
-                assertthat::assert_that(length(x.var) == 1)
                 df2 <- list()
                 df2[[x.var]] <- values
                 # Then add the others
                 for(var in colnames(df)){
-                  if(var == x.var) next()
+                  if(var %in% x.var) next()
                   df2[[var]] <- mean(df[[var]], na.rm = TRUE)
                 }
                 df2 <- df2 |> as.data.frame()
@@ -716,18 +711,13 @@ engine_xgboost <- function(x,
               }
             } else {
               # Assume that newdata container has all the variables for the grid
-              df2 <- newdata
+              df2 <- dplyr::select(newdata, dplyr::any_of(x.var))
             }
 
             # Get offset if set
             if(!is.Waiver(model$offset)){
               of <- model$offset$spatial_offset
             } else of <- new_waiver()
-
-            # Check that variables are in
-            assertthat::assert_that(all( x.var %in% colnames(df) ),
-                                    all( names(df) == mod$feature_names ),
-                                    msg = 'Variable not in predicted model.')
 
             # Inverse link function
             ilf <- switch (settings$get('type'),

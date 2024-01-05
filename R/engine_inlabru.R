@@ -1069,23 +1069,20 @@ engine_inlabru <- function(x,
             )
 
             # Match variable name
-            # MH: This can be an empty list which !is.null?
-            if(!is.null(mod$summary.random)) vn <- names(mod$summary.random) else vn <- ""
+            # MH: mod$summary.random was empty list which is !is.null, thus changed condition
+            if(length(mod$summary.random) > 0) vn <- names(mod$summary.random) else vn <- ""
 
             if(is.null(x.var)) {
               x.var <- colnames(df)
             } else {
-              x.var <- match.arg(x.var, c( mod$names.fixed, vn), several.ok = TRUE)
+              x.var <- match.arg(x.var, c(mod$names.fixed, vn), several.ok = TRUE)
             }
 
             if(is.null(newdata)){
               # Calculate range of predictors
-              if(any(model$predictors_types$type=="factor")){
-                rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                             function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-              } else {
-                rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-              }
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+
               assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
 
               df_partial <- list()
@@ -1097,8 +1094,12 @@ engine_inlabru <- function(x,
               } else {
                 for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
               }
+
+              # MH: Make sure same class as if !is.null(newdata)
+              df_partial <- as.data.frame(do.call(cbind, df_partial))
+
             } else {
-              df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
+              df_partial <- dplyr::select(newdata, dplyr::any_of(names(df)))
             }
 
             # create list to store results
@@ -1111,12 +1112,12 @@ engine_inlabru <- function(x,
               df2 <- df_partial
 
               if(!is.null(values)){
-                df2[[v]] <- values
+                df2[, v] <- values
               } else {
-                df2[[v]] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+                df2[, v] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
               }
-              df2 <- as.data.frame(df2)
 
+              # MH: What is this? Why is it done inside the loop?
               if(any(model$predictors_types$type=="factor")){
                 lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
                 df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)

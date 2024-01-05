@@ -142,22 +142,18 @@ bart_partial_effect <- function(model, x.var, equal = FALSE,
   if(equal) {
     if(!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
-    }
-    else {
-      minmax <- data.frame(mins = apply(raw, 2, min), maxs = apply(raw,
-                                                                   2, max))
+    } else {
+      minmax <- data.frame(mins = apply(raw, 2, min), maxs = apply(raw, 2, max))
     }
     lev <- lapply(c(1:nrow(minmax)), function(i) {
-      seq(minmax$mins[i], minmax$maxs[i], (minmax$maxs[i] -
-                                             minmax$mins[i])/(variable_length * smooth))
+      seq(minmax$mins[i], minmax$maxs[i], (minmax$maxs[i] - minmax$mins[i])/(variable_length * smooth))
     })
     for (i in 1:length(lev)) {
       if (length(lev) == 1) {
-        if (length(unique(raw)) == 2) {
+        if (length(unique(raw)) == 2) { # MH: What is this?
           lev[[i]] <- unique(raw)
         }
-      }
-      else {
+      } else {
         if (length(unique(raw[, i])) == 2) {
           lev[[i]] <- unique(raw[, i])
         }

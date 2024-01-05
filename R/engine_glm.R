@@ -437,21 +437,18 @@ engine_glm <- function(x,
             # Get data
             df <- model$biodiversity[[length(model$biodiversity)]]$predictors
             df <- subset(df, select = attr(mod$terms, "term.labels"))
+            variables <- names(df)
 
             # Match x.var to argument
             if(is.null(x.var)){
-              x.var <- colnames(df)
+              x.var <- variables
             } else {
-              x.var <- match.arg(x.var, names(df), several.ok = TRUE)
+              x.var <- match.arg(x.var, variables, several.ok = TRUE)
             }
 
             # Calculate range of predictors
-            if(any(model$predictors_types$type=="factor")){
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            } else {
-              rr <- sapply(df, function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-            }
+            rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                         function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
             if(is.null(newdata)){
               # if values are set, make sure that they cover the data.frame
@@ -474,7 +471,7 @@ engine_glm <- function(x,
               }
             } else {
               # Assume all variables are present
-              df2 <- newdata |> dplyr::select(dplyr::any_of(names(df)))
+              df2 <- dplyr::select(newdata, dplyr::any_of(variables))
               assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
             }
 
@@ -482,10 +479,6 @@ engine_glm <- function(x,
             if(!is.Waiver(model$offset)){
               of <- model$offset$spatial_offset
             } else of <- new_waiver()
-
-            # Check that variables are in
-            assertthat::assert_that(all( x.var %in% colnames(df) ),
-                                    msg = 'Variable not in predicted model.')
 
             # Inverse link function
             ilf <- switch (settings$get('type'),
@@ -511,7 +504,7 @@ engine_glm <- function(x,
                                    plot = FALSE, rug = TRUE, train = df
                 )
               }
-              p1 <- p1[,c(v, "yhat")]
+              p1 <- p1[, c(v, "yhat")]
               names(p1) <- c("partial_effect", "mean")
               p1 <- cbind(variable = v, p1)
               pp <- rbind(pp, p1)
