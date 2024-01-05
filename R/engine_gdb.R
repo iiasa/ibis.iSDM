@@ -557,7 +557,7 @@ engine_gdb <- function(x,
             return(temp)
           },
           # Partial effect
-          partial = function(self, x.var = NULL , constant = NULL, variable_length = 100, values = NULL,
+          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
                              newdata = NULL, plot = FALSE, type = NULL){
             # Assert that variable(s) are in fitted model
             assertthat::assert_that(is.character(x.var) || is.null(x.var),
@@ -572,98 +572,76 @@ engine_gdb <- function(x,
             if(is.null(x.var)) {
               x.var <- variables
             } else {
-              assertthat::assert_that(all( x.var %in% variables), msg = 'x.var variable not found in model!' )
+              x.var <- match.arg(x.var, variables, several.ok = TRUE)
             }
 
+            # extract settings and model
             settings <- self$settings
             if(is.null(type)) type <- settings$get('type')
             model <- self$model
 
-            # Special treatment for factors
-            if(is.null(newdata)){
-              variable_range <- list()
-              dummy <- as.data.frame(matrix(nrow = variable_length, ncol = length(x.var)))
-              names(dummy) <- x.var
-              # Loop through the provided variables
-              for(v in x.var){
-                if(any(model$predictors_types$type=="factor")){
-                  if(any(x.var %in% model$predictors_types$predictors[model$predictors_types$type=="factor"])){
-                    for(v in x.var){
-                      variable_range[[v]] <- levels(model$predictors[,v])
-                    }
-                  } else {
-                    variable_range[[v]] <- range(model$predictors[[v]],na.rm = TRUE)
-                  }
-                } else {
-                  variable_range[[v]] <- range(model$predictors[[v]],na.rm = TRUE)
-                }
+            # create dummy data
+            if(is.null(newdata)) {
+              dummy <- as.data.frame(matrix(nrow = variable_length, ncol = length(variables)))
+              names(dummy) <- variables
 
-                # Create dummy data.frame
-                if(is.character(variable_range[[v]])){
-                  # For factors, just add them
-                  dummy[, v] <- factor(variable_range[[v]])
-                } else {
-                  # If custom input values are specified
-                  if(!is.null(values)){
-                    variable_length <- length(values)
-                    assertthat::assert_that(length(values) >=1)
-                    dummy[, v] <- values
-                  } else {
-                    dummy[, v] <- seq(variable_range[[v]][1],variable_range[[v]][2],
-                                      length.out = variable_length)
-                  }
-                }
-              }
-              # For the others
               if(is.null(constant)){
-                if(any(model$predictors_types$type=='factor')){
-                  # Numeric names
-                  nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
-                  constant <- apply(model$predictors[,nn], 2, function(x) mean(x, na.rm=T))
-                  dummy <- cbind(dummy,t(constant))
-                  # For each factor duplicate the entire matrix and add factor levels
-                  # nf <- self$model$predictors_types$predictors[which(self$model$predictors_types$type=='factor')]
-                  # for(n in nf){
-                  #   var <- data.frame( factor( rep(levels(self$model$predictors[,nf]), nrow(dummy)) ) )
-                  #   names(var) <- n
-                  #   dummy <- cbind(dummy,var);rm(var)
-                  # }
-                } else {
-                  # Calculate mean
-                  constant <- apply(model$predictors, 2, function(x) mean(x, na.rm=T))
-                  dummy <- cbind(dummy, t(constant))
-                }
+                # FIXME: What about factors?
+                nn <- model$predictors_types$predictors[which(model$predictors_types$type=='numeric')]
+                constant <- as.list(apply(model$predictors[, nn], 2, function(x) mean(x, na.rm = TRUE)))
+                dummy[, nn] <- constant[nn]
               } else {
-                dummy[,variables] <- constant
+                dummy[, variables] <- constant
               }
+
             } else {
               # Assume all present
-              dummy <- newdata |> dplyr::select(dplyr::any_of(as.character(variables)))
+              dummy <- dplyr::select(newdata, dplyr::any_of(as.character(variables)))
             }
 
-            # Now predict with model
-            suppressWarnings(
-              pp <- mboost::predict.mboost(object = self$get_data('fit_best'), newdata = dummy,
-                                           which = x.var,
-                                           type = type, aggregate = 'sum')
-            )
-            # Check duplicates. If bbs is present and non-linear, use bbs estimate
-            out <- data.frame()
+            # create out list
+            out <- vector(mode = "list", length = length(x.var))
+            names(out) <- x.var
+
+            # calc effect for each x.var
             for(v in x.var){
+
+              dummy_temp <- dummy
+
+              # create partial effect range
+              if(v %in% model$predictors_types$predictors[model$predictors_types$type=="factor"]){
+                range_temp <- levels(model$predictors[,v])
+                dummy_temp[, v] <- factor(range_temp)
+              } else {
+                if(!is.null(values)){
+                  variable_length <- length(values)
+                  assertthat::assert_that(length(values) >= 1)
+                  dummy_temp[, v] <- values
+                } else {
+                  range_temp <- range(model$predictors[[v]], na.rm = TRUE)
+                  dummy_temp[, v] <- seq(range_temp[1], range_temp[2], length.out = variable_length)
+                }
+              }
+
+              # Now predict with model
+              suppressWarnings(pp <- mboost::predict.mboost(object = self$get_data('fit_best'),
+                                                            newdata = dummy_temp, which = v,
+                                                            type = type, aggregate = 'sum'))
+
+              # Check duplicates. If bbs is present and non-linear, use bbs estimate
               if(!self$settings$data$only_linear){
                 # Combine with
-                out <- rbind(out, data.frame(variable = v,
-                                             partial_effect = dummy[[v]],
-                                             mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
-                )
+                out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+                                       mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
               } else {
                 # Combine with
-                out <- rbind(out, data.frame(variable = v,
-                                             partial_effect = dummy[[v]],
-                                             mean = pp[,grep(v, colnames(pp))] )
-                )
+                out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+                                       mean = pp[,grep(v, colnames(pp))])
               }
             }
+
+            # bind to one data.frame
+            out <- do.call(what = rbind, args = c(out, make.row.names = FALSE))
 
             # If plot, make plot, otherwise
             if(plot){
