@@ -27,7 +27,6 @@
 #' @name write_output
 #' @aliases write_output
 #' @keywords utils
-#' @exportMethod write_output
 #' @export
 NULL
 methods::setGeneric("write_output",
@@ -293,7 +292,6 @@ writeNetCDF <- function(file, fname,
 
 #' @name write_summary
 #' @aliases write_summary
-#' @exportMethod write_summary
 #' @export
 NULL
 methods::setGeneric("write_summary",
@@ -473,7 +471,6 @@ methods::setMethod(
 #' @aliases write_model
 #' @seealso load_model
 #' @keywords utils
-#' @exportMethod write_model
 #' @export
 NULL
 methods::setGeneric("write_model",
@@ -545,7 +542,6 @@ methods::setMethod(
 #' @aliases load_model
 #' @seealso write_model
 #' @keywords utils
-#' @exportMethod load_model
 #' @export
 NULL
 methods::setGeneric("load_model",

@@ -68,7 +68,6 @@ NULL
 
 #' @name threshold
 #' @rdname threshold
-#' @exportMethod threshold
 #' @export
 methods::setGeneric(
   "threshold",

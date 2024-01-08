@@ -69,7 +69,6 @@ NULL
 
 #' @name add_predictors_model
 #' @rdname add_predictors_model
-#' @exportMethod add_predictors_model
 #' @export
 methods::setGeneric(
   "add_predictors_model",

@@ -70,7 +70,6 @@ NULL
 
 #' @name add_biodiversity_poipo
 #' @rdname add_biodiversity_poipo
-#' @exportMethod add_biodiversity_poipo
 #' @export
 methods::setGeneric(
   "add_biodiversity_poipo",
@@ -211,7 +210,6 @@ NULL
 
 #' @name add_biodiversity_poipa
 #' @rdname add_biodiversity_poipa
-#' @exportMethod add_biodiversity_poipa
 #' @export
 methods::setGeneric(
   "add_biodiversity_poipa",
@@ -357,7 +355,6 @@ NULL
 
 #' @name add_biodiversity_polpo
 #' @rdname add_biodiversity_polpo
-#' @exportMethod add_biodiversity_polpo
 #' @export
 methods::setGeneric(
   "add_biodiversity_polpo",
@@ -552,7 +549,6 @@ NULL
 
 #' @name add_biodiversity_polpa
 #' @rdname add_biodiversity_polpa
-#' @exportMethod add_biodiversity_polpa
 #' @export
 methods::setGeneric(
   "add_biodiversity_polpa",

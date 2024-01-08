@@ -25,7 +25,6 @@ NULL
 
 #' @name add_priors
 #' @rdname add_priors
-#' @exportMethod add_priors
 #' @export
 methods::setGeneric(
   "add_priors",
@@ -103,7 +102,6 @@ NULL
 
 #' @name rm_priors
 #' @rdname rm_priors
-#' @exportMethod rm_priors
 #' @export
 methods::setGeneric(
   "rm_priors",
@@ -157,7 +155,6 @@ NULL
 
 #' @name get_priors
 #' @rdname get_priors
-#' @exportMethod get_priors
 #' @export
 methods::setGeneric(
   "get_priors",

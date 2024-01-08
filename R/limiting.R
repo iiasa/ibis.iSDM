@@ -30,7 +30,6 @@ NULL
 #' @keywords partial
 #'
 #' @name limiting
-#' @exportMethod limiting
 #' @export
 methods::setGeneric("limiting",
                     signature = methods::signature("mod"),

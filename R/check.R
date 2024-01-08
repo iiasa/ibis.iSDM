@@ -47,7 +47,6 @@ NULL
 
 #' @name check
 #' @rdname check
-#' @exportMethod check
 #' @export
 methods::setGeneric(
   "check",

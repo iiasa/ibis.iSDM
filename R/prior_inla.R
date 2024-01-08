@@ -54,7 +54,6 @@ NULL
 
 #' @name INLAPrior
 #' @rdname INLAPrior
-#' @exportMethod INLAPrior
 #' @export
 methods::setGeneric(
   "INLAPrior",
@@ -120,7 +119,6 @@ methods::setMethod(
 #'   hyper-parameters.
 #' @param ... Variables passed on to prior object.
 #' @rdname INLAPriors
-#' @exportMethod INLAPriors
 #' @aliases INLAPriors
 #' @keywords priors
 #' @family prior

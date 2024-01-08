@@ -152,14 +152,12 @@ NULL
 #'  mod
 #'
 #' @name train
-#' @exportMethod train
 #' @aliases train, train-method
 #' @export
 NULL
 
 #' @name train
 #' @rdname train
-#' @exportMethod train
 #' @export
 methods::setGeneric(
   "train",

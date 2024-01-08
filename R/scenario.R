@@ -22,7 +22,6 @@ NULL
 #'   to the scenario object. Note that setting this option to \code{TRUE} can
 #'   increase the required amount of memory (Default: \code{FALSE}).
 #' @aliases scenario
-#' @exportMethod scenario
 #' @name scenario
 #'
 #' @examples

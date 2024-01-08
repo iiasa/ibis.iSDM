@@ -80,7 +80,6 @@ NULL
 #' @aliases simulate_population_steps
 #' @family constraint
 #' @keywords scenario
-#' @exportMethod simulate_population_steps
 #' @export
 NULL
 methods::setGeneric("simulate_population_steps",

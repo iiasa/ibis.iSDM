@@ -33,7 +33,6 @@ NULL
 
 #' @name GDBPrior
 #' @rdname GDBPrior
-#' @exportMethod GDBPrior
 #' @export
 methods::setGeneric(
   "GDBPrior",
@@ -76,7 +75,6 @@ methods::setMethod(
 #' the same hyper-parameters, but different variables.
 #' @name GDBPriors
 #' @rdname GDBPriors
-#' @exportMethod GDBPriors
 #' @inheritParams GDBPrior
 #' @aliases GDBPriors
 #' @keywords priors

@@ -31,7 +31,6 @@ NULL
 
 #' @name XGBPrior
 #' @rdname XGBPrior
-#' @exportMethod XGBPrior
 #' @export
 methods::setGeneric(
   "XGBPrior",
@@ -73,7 +72,6 @@ methods::setMethod(
 #' @description This is a helper function to specify several [XGBPrior] with the
 #' same hyper-parameters, but different variables.
 #' @rdname XGBPriors
-#' @exportMethod XGBPriors
 #' @inheritParams XGBPrior
 #' @aliases XGBPriors
 #' @family prior

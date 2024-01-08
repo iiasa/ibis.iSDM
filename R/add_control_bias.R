@@ -86,7 +86,6 @@ NULL
 
 #' @name add_control_bias
 #' @rdname add_control_bias
-#' @exportMethod add_control_bias
 #' @export
 methods::setGeneric(
   "add_control_bias",

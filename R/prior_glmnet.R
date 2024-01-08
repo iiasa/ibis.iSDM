@@ -45,7 +45,6 @@ NULL
 
 #' @name GLMNETPrior
 #' @rdname GLMNETPrior
-#' @exportMethod GLMNETPrior
 #' @export
 methods::setGeneric(
   "GLMNETPrior",
@@ -96,7 +95,6 @@ methods::setMethod(
 #' @description This is a helper function to specify several [GLMNETPrior] with
 #' the same hyper-parameters, but different variables.
 #' @rdname GLMNETPriors
-#' @exportMethod GLMNETPriors
 #' @inheritParams GLMNETPrior
 #' @aliases GLMNETPriors
 #' @family prior

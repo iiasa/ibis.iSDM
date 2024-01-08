@@ -88,7 +88,6 @@ NULL
 #' @family constraint
 #' @aliases add_constraint
 #' @keywords scenario
-#' @exportMethod add_constraint
 #' @export
 NULL
 methods::setGeneric("add_constraint",
@@ -147,7 +146,6 @@ methods::setMethod(
 #' @inheritParams add_constraint
 #' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constraint_dispersal
 #' @export
 NULL
 methods::setGeneric("add_constraint_dispersal",
@@ -402,7 +400,6 @@ methods::setMethod(
 #'   barrier for use in connectivity constrains (Default: \code{NULL}).
 #' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constraint_connectivity
 #' @export
 NULL
 methods::setGeneric("add_constraint_connectivity",
@@ -514,7 +511,6 @@ methods::setMethod(
 #' }
 #'
 #' @keywords scenario
-#' @exportMethod add_constraint_adaptability
 #' @export
 NULL
 methods::setGeneric("add_constraint_adaptability",
@@ -665,7 +661,6 @@ methods::setMethod(
 #'
 #' @name add_constraint_minsize
 #' @keywords scenario
-#' @exportMethod add_constraint_minsize
 #' @export
 NULL
 methods::setGeneric("add_constraint_minsize",
@@ -738,7 +733,6 @@ methods::setMethod(
 #' }
 #'
 #' @keywords scenario
-#' @exportMethod add_constraint_boundary
 #' @export
 NULL
 methods::setGeneric("add_constraint_boundary",

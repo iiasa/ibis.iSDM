@@ -63,7 +63,6 @@ NULL
 
 #' @name similarity
 #' @rdname similarity
-#' @exportMethod similarity
 #' @export
 methods::setGeneric(
   "similarity",

@@ -28,7 +28,6 @@ NULL
 
 #' @name priors
 #' @rdname priors
-#' @exportMethod priors
 #' @export
 methods::setGeneric(
   "priors",
@@ -132,7 +131,6 @@ NULL
 
 #' @name priors
 #' @rdname priors
-#' @exportMethod priors
 #' @export
 methods::setGeneric(
   "priors",

@@ -21,7 +21,6 @@ NULL
 
 #' @name add_log
 #' @rdname add_log
-#' @exportMethod add_log
 #' @export
 methods::setGeneric(
   "add_log",

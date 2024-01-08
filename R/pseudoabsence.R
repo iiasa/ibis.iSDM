@@ -96,7 +96,6 @@ NULL
 #' @name pseudoabs_settings
 #' @aliases pseudoabs_settings
 #' @keywords train
-#' @exportMethod pseudoabs_settings
 #' @export
 NULL
 methods::setGeneric("pseudoabs_settings",

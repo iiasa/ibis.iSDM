@@ -51,7 +51,6 @@ NULL
 
 #' @name BREGPrior
 #' @rdname BREGPrior
-#' @exportMethod BREGPrior
 #' @export
 methods::setGeneric(
   "BREGPrior",
@@ -97,7 +96,6 @@ methods::setMethod(
 #' @description This is a helper function to specify several [BREGPrior] with
 #' the same hyper-parameters, but different variables.
 #' @rdname BREGPriors
-#' @exportMethod BREGPriors
 #' @inheritParams BREGPrior
 #' @aliases BREGPriors
 #' @family prior

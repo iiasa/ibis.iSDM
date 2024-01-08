@@ -35,7 +35,6 @@ NULL
 
 #' @name BARTPrior
 #' @rdname BARTPrior
-#' @exportMethod BARTPrior
 #' @export
 methods::setGeneric(
   "BARTPrior",
@@ -76,7 +75,6 @@ methods::setMethod(
 #' @description This is a helper function to specify several [BARTPrior] objects
 #' with the same hyper-parameters, but different variables.
 #' @rdname BARTPriors
-#' @exportMethod BARTPriors
 #' @inheritParams BARTPrior
 #' @aliases BARTPriors
 #' @family prior

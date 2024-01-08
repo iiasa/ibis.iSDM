@@ -46,7 +46,6 @@ NULL
 
 #' @name add_offset
 #' @rdname add_offset
-#' @exportMethod add_offset
 #' @export
 methods::setGeneric(
   "add_offset",
@@ -166,7 +165,6 @@ NULL
 
 #' @name rm_offset
 #' @rdname rm_offset
-#' @exportMethod rm_offset
 #' @export
 methods::setGeneric(
   "rm_offset",
@@ -244,7 +242,6 @@ NULL
 
 #' @name add_offset_bias
 #' @rdname add_offset_bias
-#' @exportMethod add_offset_bias
 #' @export
 methods::setGeneric(
   "add_offset_bias",
@@ -392,7 +389,6 @@ NULL
 
 #' @name add_offset_range
 #' @rdname add_offset_range
-#' @exportMethod add_offset_range
 #' @export
 methods::setGeneric(
   "add_offset_range",
@@ -856,7 +852,6 @@ NULL
 
 #' @name add_offset_elevation
 #' @rdname add_offset_elevation
-#' @exportMethod add_offset_elevation
 #' @export
 methods::setGeneric(
   "add_offset_elevation",

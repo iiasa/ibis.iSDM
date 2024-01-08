@@ -31,7 +31,6 @@ NULL
 
 #' @name STANPrior
 #' @rdname STANPrior
-#' @exportMethod STANPrior
 #' @export
 methods::setGeneric(
   "STANPrior",
@@ -89,7 +88,6 @@ methods::setMethod(
 #' @family prior
 #' @aliases STANPriors
 #' @keywords priors
-#' @exportMethod STANPriors
 #' @export
 methods::setGeneric(
   "STANPriors",

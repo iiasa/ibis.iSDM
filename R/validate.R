@@ -63,7 +63,6 @@
 #' @name validate
 #' @aliases validate
 #' @keywords train
-#' @exportMethod validate
 #' @export
 NULL
 methods::setGeneric("validate",

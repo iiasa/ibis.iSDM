@@ -85,7 +85,6 @@ NULL
 
 #' @name add_control_extrapolation
 #' @rdname add_control_extrapolation
-#' @exportMethod add_control_extrapolation
 #' @export
 methods::setGeneric(
   "add_control_extrapolation",

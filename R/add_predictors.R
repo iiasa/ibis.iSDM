@@ -86,7 +86,6 @@ NULL
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @exportMethod add_predictors
 #' @export
 methods::setGeneric(
   "add_predictors",
@@ -298,7 +297,6 @@ NULL
 
 #' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @exportMethod add_predictor_elevationpref
 #' @export
 methods::setGeneric(
   "add_predictor_elevationpref",
@@ -432,7 +430,6 @@ NULL
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @exportMethod add_predictor_range
 #' @export
 methods::setGeneric(
   "add_predictor_range",
@@ -612,7 +609,6 @@ NULL
 
 #' @name rm_predictors
 #' @rdname rm_predictors
-#' @exportMethod rm_predictors
 #' @export
 methods::setGeneric(
   "rm_predictors",
@@ -661,7 +657,6 @@ NULL
 
 #' @name sel_predictors
 #' @rdname sel_predictors
-#' @exportMethod sel_predictors
 #' @export
 methods::setGeneric(
   "sel_predictors",

@@ -79,7 +79,6 @@ NULL
 #' @name ensemble
 #' @aliases ensemble
 #' @keywords train
-#' @exportMethod ensemble
 #' @export
 NULL
 methods::setGeneric("ensemble",
@@ -519,7 +518,6 @@ methods::setMethod(
 #' @name ensemble_partial
 #' @aliases ensemble_partial
 #' @keywords train, partial
-#' @exportMethod ensemble_partial
 #' @export
 NULL
 methods::setGeneric("ensemble_partial",
@@ -673,7 +671,6 @@ methods::setMethod(
 #' @name ensemble_spartial
 #' @aliases ensemble_spartial
 #' @keywords train, partial
-#' @exportMethod ensemble_spartial
 #' @export
 NULL
 methods::setGeneric("ensemble_spartial",

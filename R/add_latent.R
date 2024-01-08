@@ -65,7 +65,6 @@ NULL
 
 #' @name add_latent_spatial
 #' @rdname add_latent_spatial
-#' @exportMethod add_latent_spatial
 #' @export
 methods::setGeneric(
   "add_latent_spatial",
@@ -121,7 +120,6 @@ NULL
 
 #' @name rm_latent
 #' @rdname rm_latent
-#' @exportMethod rm_latent
 #' @export
 methods::setGeneric(
   "rm_latent",

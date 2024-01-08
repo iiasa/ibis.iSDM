@@ -84,7 +84,6 @@ NULL
 #' @keywords scenarios
 #' @import terra
 #' @name project
-#' @exportMethod project
 #' @aliases project, project-method
 #' @export
 NULL

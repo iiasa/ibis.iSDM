@@ -57,7 +57,6 @@ NULL
 
 #' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @exportMethod add_predictors_globiom
 #' @export
 methods::setGeneric(
   "add_predictors_globiom",

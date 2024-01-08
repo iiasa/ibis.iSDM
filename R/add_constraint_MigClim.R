@@ -65,7 +65,6 @@ NULL
 #' @aliases add_constraint_MigClim
 #' @family constraint
 #' @keywords scenario
-#' @exportMethod add_constraint_MigClim
 #' @export
 NULL
 methods::setGeneric("add_constraint_MigClim",
