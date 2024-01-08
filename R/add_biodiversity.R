@@ -43,8 +43,11 @@ NULL
 #'   regression. See Renner et al. 2015 for an overview.
 #'
 #' @references
-#' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
-#' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+#' * Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology.
+#' Ecol. Model. 135: 147–186.
+#' * Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips,
+#' G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis.
+#' Methods in Ecology and Evolution 6:366–379.
 #' @seealso See other functions for adding biodiversity data, i.e.
 #' [`add_biodiversity_poipa`]
 #' @family add_biodiversity
@@ -53,9 +56,11 @@ NULL
 #' @aliases add_biodiversity_poipo
 #' @examples
 #' # Load background
-#' background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+#' package='ibis.iSDM',mustWork = TRUE))
 #' # Load virtual species
-#' virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+#' virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg',
+#' package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 #' # Define model
 #' x <- distribution(background) |>
 #'   add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")

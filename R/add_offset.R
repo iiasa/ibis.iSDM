@@ -28,7 +28,9 @@
 #'   this parameter to \code{FALSE} replaces the current offsets with the new
 #'   one (Default: \code{TRUE}).
 #' @references
-#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and
+#' range estimates with Maxent and point process models by integrating spatially explicit
+#' information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds an offset to a [`distribution`] object.
 #' @family offset
 #' @aliases add_offset
@@ -378,7 +380,8 @@ methods::setMethod(
 #'  fit <- distribution(background) |>
 #'  add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
 #'  add_predictors(predictors) |>
-#'  add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve", distance_clip = TRUE ) |>
+#'  add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve",
+#'  distance_clip = TRUE ) |>
 #'  engine_glm() |>
 #'  train()
 #' }

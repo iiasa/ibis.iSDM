@@ -107,7 +107,8 @@ to a very small constant (\code{1e-10}).
  fit <- distribution(background) |>
  add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
  add_predictors(predictors) |>
- add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve", distance_clip = TRUE ) |>
+ add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve",
+ distance_clip = TRUE ) |>
  engine_glm() |>
  train()
 }
