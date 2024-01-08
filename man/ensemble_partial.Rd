@@ -4,7 +4,14 @@
 \alias{ensemble_partial}
 \title{Function to create an ensemble of partial effects from multiple models}
 \usage{
-\S4method{ensemble_partial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdata,normalize)
+\S4method{ensemble_partial}{ANY}(
+  ...,
+  x.var,
+  method = "mean",
+  layer = "mean",
+  newdata = NULL,
+  normalize = TRUE
+)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects from which partial

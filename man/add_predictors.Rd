@@ -19,15 +19,80 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRaster}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,stars}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+\S4method{add_predictors}{BiodiversityScenario,SpatRaster}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+\S4method{add_predictors}{BiodiversityScenario,stars}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

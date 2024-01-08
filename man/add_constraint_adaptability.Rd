@@ -4,7 +4,14 @@
 \alias{add_constraint_adaptability}
 \title{Adds an adaptability constraint to a scenario object}
 \usage{
-\S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
+\S4method{add_constraint_adaptability}{BiodiversityScenario}(
+  mod,
+  method = "nichelimit",
+  names = NULL,
+  value = 1,
+  increment = 0,
+  ...
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

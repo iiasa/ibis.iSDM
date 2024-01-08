@@ -26,7 +26,6 @@ methods::setGeneric("get_data",
 
 #' @name get_data
 #' @rdname get_data
-#' @usage \S4method{get_data}{ANY,character}(obj,what)
 methods::setMethod(
   "get_data",
   methods::signature("ANY"),

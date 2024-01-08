@@ -4,7 +4,16 @@
 \alias{simulate_population_steps}
 \title{Simulate population dynamics following the steps approach}
 \usage{
-\S4method{simulate_population_steps}{BiodiversityScenario,matrix,numeric,ANY,ANY,ANY,ANY,logical}(mod,vital_rates,replicates,carrying_capacity,dispersal,density_dependence,include_suitability)
+\S4method{simulate_population_steps}{BiodiversityScenario,matrix}(
+  mod,
+  vital_rates,
+  replicates = 1,
+  carrying_capacity = NULL,
+  initial = NULL,
+  dispersal = NULL,
+  density_dependence = NULL,
+  include_suitability = TRUE
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

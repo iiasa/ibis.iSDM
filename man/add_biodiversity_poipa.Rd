@@ -18,7 +18,19 @@ add_biodiversity_poipa(
   ...
 )
 
-\S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf,character,character,ANY,character,character,numeric,logical,logical}(x,poipa,name,field_occurrence,formula,family,link,weight,separate_intercept,docheck)
+\S4method{add_biodiversity_poipa}{BiodiversityDistribution,sf}(
+  x,
+  poipa,
+  name = NULL,
+  field_occurrence = "observed",
+  formula = NULL,
+  family = "binomial",
+  link = NULL,
+  weight = 1,
+  separate_intercept = TRUE,
+  docheck = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

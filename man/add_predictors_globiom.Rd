@@ -19,9 +19,33 @@ add_predictors_globiom(
   ...
 )
 
-\S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
+\S4method{add_predictors_globiom}{BiodiversityDistribution,character}(
+  x,
+  fname,
+  names = NULL,
+  transform = "none",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+\S4method{add_predictors_globiom}{BiodiversityScenario,character}(
+  x,
+  fname,
+  names = NULL,
+  transform = "none",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  priors = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{BiodiversityDistribution}} or

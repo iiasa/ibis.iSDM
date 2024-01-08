@@ -43,8 +43,6 @@ methods::setGeneric(
 
 #' @name partial
 #' @rdname partial
-#' @usage
-#'   \S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
 methods::setMethod(
   "partial",
   methods::signature(mod = "ANY"),
@@ -110,8 +108,6 @@ methods::setGeneric(
 
 #' @name spartial
 #' @rdname spartial
-#' @usage
-#'   \S4method{spartial}{ANY,character,ANY,ANY,logical}(mod,x.var,constant,newdata,plot,...)
 methods::setMethod(
   "spartial",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -184,7 +180,6 @@ methods::setGeneric(
 
 #' @name partial_density
 #' @rdname partial_density
-#' @usage \S4method{partial_density}{ANY,character,logical}(mod,x.var,df,...)
 methods::setMethod(
   "partial_density",
   methods::signature(mod = "ANY", x.var = "character"),

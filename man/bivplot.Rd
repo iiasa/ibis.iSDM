@@ -15,7 +15,16 @@ bivplot(
   ...
 )
 
-\S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
+\S4method{bivplot}{ANY}(
+  mod,
+  xvar = "mean",
+  yvar = "sd",
+  plot = TRUE,
+  fname = NULL,
+  title = NULL,
+  col = "BlueGold",
+  ...
+)
 }
 \arguments{
 \item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}}

@@ -4,9 +4,23 @@
 \alias{validate}
 \title{Validation of a fitted distribution object}
 \usage{
-\S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
+\S4method{validate}{ANY}(
+  mod,
+  method = "continuous",
+  layer = "mean",
+  point = NULL,
+  point_column = "observed",
+  ...
+)
 
-\S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
+\S4method{validate}{SpatRaster}(
+  mod,
+  method = "continuous",
+  layer = NULL,
+  point = NULL,
+  point_column = "observed",
+  ...
+)
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors.

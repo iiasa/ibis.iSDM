@@ -54,7 +54,6 @@ methods::setGeneric(
 
 #' @name GLMNETPrior
 #' @rdname GLMNETPrior
-#' @usage \S4method{GLMNETPrior}{character,numeric,ANY}(variable,hyper,lims,...)
 methods::setMethod(
   "GLMNETPrior",
   methods::signature(variable = "character"),
@@ -110,8 +109,6 @@ methods::setGeneric(
 
 #' @name GLMNETPriors
 #' @rdname GLMNETPriors
-#' @usage
-#'   \S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
 methods::setMethod(
   "GLMNETPriors",
   methods::signature(variable = "character"),

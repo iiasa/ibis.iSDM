@@ -17,7 +17,17 @@ partial(
   ...
 )
 
-\S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
+\S4method{partial}{ANY}(
+  mod,
+  x.var = NULL,
+  constant = NULL,
+  variable_length = 100,
+  values = NULL,
+  newdata = NULL,
+  plot = FALSE,
+  type = "response",
+  ...
+)
 
 \method{partial}{DistributionModel}(mod, ...)
 }

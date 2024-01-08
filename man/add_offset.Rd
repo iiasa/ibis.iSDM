@@ -6,9 +6,9 @@
 \usage{
 add_offset(x, layer, add = TRUE)
 
-\S4method{add_offset}{BiodiversityDistribution,SpatRaster,logical}(x,layer,add)
+\S4method{add_offset}{BiodiversityDistribution,SpatRaster}(x, layer, add = TRUE)
 
-\S4method{add_offset}{BiodiversityDistribution,sf,logical}(x,layer,add)
+\S4method{add_offset}{BiodiversityDistribution,sf}(x, layer, add = TRUE)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

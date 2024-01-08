@@ -162,8 +162,6 @@ methods::setGeneric(
 
 #' @name train
 #' @rdname train
-#' @usage
-#'   \S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),

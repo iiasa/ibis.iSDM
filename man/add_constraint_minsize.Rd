@@ -4,7 +4,13 @@
 \alias{add_constraint_minsize}
 \title{Adds a size constraint on a scenario}
 \usage{
-\S4method{add_constraint_minsize}{BiodiversityScenario,numeric,character,logical}(mod,value,unit,establishment_step)
+\S4method{add_constraint_minsize}{BiodiversityScenario,numeric}(
+  mod,
+  value,
+  unit = "km2",
+  establishment_step = FALSE,
+  ...
+)
 }
 \arguments{
 \item{value}{A \code{\link{numeric}} value describing the minimum amount of area of a

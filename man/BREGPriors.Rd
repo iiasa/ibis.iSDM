@@ -6,7 +6,7 @@
 \usage{
 BREGPriors(variable, hyper = NULL, ip = NULL)
 
-\S4method{BREGPriors}{character,ANY,ANY}(variable,hyper,ip)
+\S4method{BREGPriors}{character}(variable, hyper = NULL, ip = NULL)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors.}

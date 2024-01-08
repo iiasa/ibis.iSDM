@@ -12,7 +12,13 @@ add_latent_spatial(
   ...
 )
 
-\S4method{add_latent_spatial}{BiodiversityDistribution,character,ANY,logical}(x,method,priors,separate_spde,...)
+\S4method{add_latent_spatial}{BiodiversityDistribution}(
+  x,
+  method = "spde",
+  priors = NULL,
+  separate_spde = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

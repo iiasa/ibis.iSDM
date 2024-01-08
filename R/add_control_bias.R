@@ -95,8 +95,6 @@ methods::setGeneric(
 
 #' @name add_control_bias
 #' @rdname add_control_bias
-#' @usage
-#'   \S4method{add_control_bias}{BiodiversityDistribution,SpatRaster,character,ANY,numeric,numeric,logical}(x,layer,method,bias_value,maxdist,alpha,add)
 methods::setMethod(
   "add_control_bias",
   methods::signature(x = "BiodiversityDistribution"),

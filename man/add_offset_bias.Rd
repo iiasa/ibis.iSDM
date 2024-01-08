@@ -6,7 +6,7 @@
 \usage{
 add_offset_bias(x, layer, add = TRUE, points = NULL)
 
-\S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster,logical,ANY}(x,layer,add,points)
+\S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster}(x, layer, add = TRUE, points = NULL)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

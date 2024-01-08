@@ -13,7 +13,14 @@ add_control_extrapolation(
   limits_clip = FALSE
 )
 
-\S4method{add_control_extrapolation}{BiodiversityDistribution,SpatRaster,character,numeric,character,logical}(x,layer,method,mcp_buffer,novel,limits_clip)
+\S4method{add_control_extrapolation}{BiodiversityDistribution}(
+  x,
+  layer,
+  method = "mcp",
+  mcp_buffer = 0,
+  novel = "within",
+  limits_clip = FALSE
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

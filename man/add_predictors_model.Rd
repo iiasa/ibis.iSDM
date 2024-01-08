@@ -14,7 +14,15 @@ add_predictors_model(
   ...
 )
 
-\S4method{add_predictors_model}{BiodiversityDistribution,ANY,character,character,logical,ANY}(x,model,transform,derivates,threshold_only,priors,...)
+\S4method{add_predictors_model}{BiodiversityDistribution}(
+  x,
+  model,
+  transform = "scale",
+  derivates = "none",
+  threshold_only = FALSE,
+  priors = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

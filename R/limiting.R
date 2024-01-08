@@ -38,7 +38,6 @@ methods::setGeneric("limiting",
 
 #' @name limiting
 #' @rdname limiting
-#' @usage \S4method{limiting}{ANY,logical}(mod,plot)
 methods::setMethod(
   "limiting",
   methods::signature("ANY"),

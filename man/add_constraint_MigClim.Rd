@@ -5,7 +5,19 @@
 \title{Add constrains to the modelled distribution projection using the MigClim
 approach}
 \usage{
-\S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
+\S4method{add_constraint_MigClim}{BiodiversityScenario}(
+  mod,
+  rcThresholdMode = "continuous",
+  dispSteps = 1,
+  dispKernel = c(1, 0.4, 0.16, 0.06, 0.03),
+  barrierType = "strong",
+  lddFreq = 0,
+  lddRange = c(1000, 10000),
+  iniMatAge = 1,
+  propaguleProdProb = c(0.2, 0.6, 0.8, 0.95),
+  replicateNb = 10,
+  dtmp = terra::terraOptions(print = F)$tempdir
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

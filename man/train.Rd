@@ -20,7 +20,19 @@ train(
   ...
 )
 
-\S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
+\S4method{train}{BiodiversityDistribution}(
+  x,
+  runname,
+  filter_predictors = "none",
+  optim_hyperparam = FALSE,
+  inference_only = FALSE,
+  only_linear = TRUE,
+  method_integration = "predictor",
+  aggregate_observations = TRUE,
+  clamp = FALSE,
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}

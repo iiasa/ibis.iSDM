@@ -4,7 +4,7 @@
 \alias{add_constraint}
 \title{Add a constraint to an existing \code{scenario}}
 \usage{
-\S4method{add_constraint}{BiodiversityScenario,character}(mod,method)
+\S4method{add_constraint}{BiodiversityScenario}(mod, method, ...)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

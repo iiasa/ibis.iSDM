@@ -14,7 +14,15 @@ add_control_bias(
   add = TRUE
 )
 
-\S4method{add_control_bias}{BiodiversityDistribution,SpatRaster,character,ANY,numeric,numeric,logical}(x,layer,method,bias_value,maxdist,alpha,add)
+\S4method{add_control_bias}{BiodiversityDistribution}(
+  x,
+  layer,
+  method = "partial",
+  bias_value = NULL,
+  maxdist = NULL,
+  alpha = 1,
+  add = TRUE
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

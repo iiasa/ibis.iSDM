@@ -6,7 +6,7 @@
 \usage{
 get_priors(mod, target_engine, ...)
 
-\S4method{get_priors}{ANY,character}(mod,target_engine,...)
+\S4method{get_priors}{ANY,character}(mod, target_engine, ...)
 }
 \arguments{
 \item{mod}{A fitted \code{\linkS4class{DistributionModel}} object. If instead a

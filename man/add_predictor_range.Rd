@@ -13,9 +13,22 @@ add_predictor_range(
   priors = NULL
 )
 
-\S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
+\S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster}(
+  x,
+  layer,
+  method = "precomputed_range",
+  fraction = NULL,
+  priors = NULL
+)
 
-\S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
+\S4method{add_predictor_range}{BiodiversityDistribution,sf}(
+  x,
+  layer,
+  method = "distance",
+  distance_max = Inf,
+  fraction = NULL,
+  priors = NULL
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

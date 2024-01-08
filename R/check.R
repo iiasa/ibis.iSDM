@@ -56,7 +56,7 @@ methods::setGeneric(
 
 #' @name check
 #' @rdname check
-#' @usage \S4method{check}{ANY,logical}(obj,stoponwarning)
+
 methods::setMethod(
   "check",
   methods::signature(obj = "ANY"),

@@ -12,9 +12,21 @@ distribution(
   limits_clip = FALSE
 )
 
-\S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+\S4method{distribution}{SpatRaster}(
+  background,
+  limits = NULL,
+  limits_method = "none",
+  mcp_buffer = 0,
+  limits_clip = FALSE
+)
 
-\S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+\S4method{distribution}{sf}(
+  background,
+  limits = NULL,
+  limits_method = "none",
+  mcp_buffer = 0,
+  limits_clip = FALSE
+)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a

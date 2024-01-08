@@ -4,7 +4,15 @@
 \alias{ensemble_spartial}
 \title{Function to create an ensemble of spartial effects from multiple models}
 \usage{
-\S4method{ensemble_spartial}{ANY,character,character,character,ANY,numeric,logical}(...,x.var,method,layer,newdata,min.value,normalize)
+\S4method{ensemble_spartial}{ANY}(
+  ...,
+  x.var,
+  method = "mean",
+  layer = "mean",
+  newdata = NULL,
+  min.value = NULL,
+  normalize = TRUE
+)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} objects from which partial

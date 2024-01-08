@@ -79,8 +79,6 @@ methods::setGeneric(
 
 #' @name add_predictors_model
 #' @rdname add_predictors_model
-#' @usage
-#'   \S4method{add_predictors_model}{BiodiversityDistribution,ANY,character,character,logical,ANY}(x,model,transform,derivates,threshold_only,priors,...)
 methods::setMethod(
   "add_predictors_model",
   methods::signature(x = "BiodiversityDistribution", model = "ANY"),

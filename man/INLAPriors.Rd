@@ -6,7 +6,7 @@
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 
-\S4method{INLAPriors}{vector,character,ANY}(variables,type,hyper,...)
+\S4method{INLAPriors}{vector,character}(variables, type, hyper = c(0, 0.001), ...)
 }
 \arguments{
 \item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing

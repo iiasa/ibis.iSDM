@@ -9,7 +9,15 @@
 \usage{
 \method{project}{BiodiversityScenario}(x, ...)
 
-\S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
+\S4method{project}{BiodiversityScenario}(
+  x,
+  date_interpolation = "none",
+  stabilize = FALSE,
+  stabilize_method = "loess",
+  layer = "mean",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that

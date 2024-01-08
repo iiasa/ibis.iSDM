@@ -6,7 +6,7 @@
 \usage{
 limiting(mod, plot = TRUE)
 
-\S4method{limiting}{ANY,logical}(mod,plot)
+\S4method{limiting}{ANY}(mod, plot = TRUE)
 }
 \arguments{
 \item{mod}{A fitted \code{'DistributionModel'} object from which limited

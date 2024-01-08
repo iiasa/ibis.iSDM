@@ -4,15 +4,45 @@
 \alias{write_output}
 \title{Generic function to write spatial outputs}
 \usage{
-\S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{ANY,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 
-\S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{BiodiversityScenario,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 
-\S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{SpatRaster,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 
-\S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{data.frame,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 
-\S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{stars,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}},

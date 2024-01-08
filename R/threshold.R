@@ -78,8 +78,6 @@ methods::setGeneric(
 #' Generic threshold with supplied DistributionModel object
 #' @name threshold
 #' @rdname threshold
-#' @usage
-#'   \S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
@@ -238,8 +236,6 @@ methods::setMethod(
 
 #' @name threshold
 #' @rdname threshold
-#' @usage
-#'   \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
@@ -407,7 +403,6 @@ methods::setMethod(
 #'   (Default: \code{NULL} Grab from object).
 #' @param ... Any other parameter. Used to fetch value if set somehow.
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),

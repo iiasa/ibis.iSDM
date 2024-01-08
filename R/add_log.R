@@ -30,7 +30,6 @@ methods::setGeneric(
 
 #' @name add_log
 #' @rdname add_log
-#' @usage \S4method{add_log}{BiodiversityDistribution,character}(x,filename)
 methods::setMethod(
   "add_log",
   methods::signature(x = "BiodiversityDistribution", filename = "character"),

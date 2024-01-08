@@ -4,9 +4,9 @@
 \alias{add_constraint_boundary}
 \title{Adds a boundary constraint to a scenario object}
 \usage{
-\S4method{add_constraint_boundary}{BiodiversityScenario,sf,character}(mod,layer,method)
+\S4method{add_constraint_boundary}{BiodiversityScenario,sf}(mod, layer, method = "boundary", ...)
 
-\S4method{add_constraint_boundary}{BiodiversityScenario,ANY,character}(mod,layer,method)
+\S4method{add_constraint_boundary}{BiodiversityScenario,ANY}(mod, layer, method = "boundary", ...)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

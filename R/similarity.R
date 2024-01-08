@@ -74,8 +74,6 @@ methods::setGeneric(
 #' Similarity of used predictors from a trained distribution model
 #' @name similarity
 #' @rdname similarity
-#' @usage
-#'   \S4method{similarity}{BiodiversityDistribution,character,character,character,logical,logical}(obj,ref_type,method,predictor_names,full,plot,...)
 methods::setMethod(
   "similarity",
   methods::signature(obj = "BiodiversityDistribution"),
@@ -175,8 +173,6 @@ methods::setMethod(
 #' Similarity of used predictors by providing a SpatRaster directly
 #' @name similarity
 #' @rdname similarity
-#' @usage
-#'   \S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
 methods::setMethod(
   "similarity",
   methods::signature(obj = "SpatRaster"),

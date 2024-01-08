@@ -4,7 +4,15 @@
 \alias{ensemble}
 \title{Function to create an ensemble of multiple fitted models}
 \usage{
-\S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
+\S4method{ensemble}{ANY}(
+  ...,
+  method = "mean",
+  weights = NULL,
+  min.value = NULL,
+  layer = "mean",
+  normalize = FALSE,
+  uncertainty = "cv"
+)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} or \code{\link{SpatRaster}} objects.}

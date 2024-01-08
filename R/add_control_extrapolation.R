@@ -95,8 +95,6 @@ methods::setGeneric(
 
 #' @name add_control_extrapolation
 #' @rdname add_control_extrapolation
-#' @usage
-#'   \S4method{add_control_extrapolation}{BiodiversityDistribution,SpatRaster,character,numeric,character,logical}(x,layer,method,mcp_buffer,novel,limits_clip)
 methods::setMethod(
   "add_control_extrapolation",
   methods::signature(x = "BiodiversityDistribution"),

@@ -4,7 +4,12 @@
 \alias{write_model}
 \title{Save a model for later use}
 \usage{
-\S4method{write_model}{ANY,character,logical,logical}(mod,fname,slim,verbose)
+\S4method{write_model}{ANY}(
+  mod,
+  fname,
+  slim = FALSE,
+  verbose = getOption("ibis.setupmessages")
+)
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} object.}

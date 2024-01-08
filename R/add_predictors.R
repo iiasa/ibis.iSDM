@@ -96,8 +96,6 @@ methods::setGeneric(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
@@ -113,8 +111,6 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
@@ -259,8 +255,6 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
@@ -313,8 +307,6 @@ methods::setGeneric(
 
 #' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @usage
-#'   \S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
 methods::setMethod(
   "add_predictor_elevationpref",
   methods::signature(x = "BiodiversityDistribution", layer = "ANY", lower = "numeric", upper = "numeric"),
@@ -450,8 +442,6 @@ methods::setGeneric(
 #' Function for when distance raster is directly supplied (precomputed)
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage
-#'   \S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -508,8 +498,6 @@ methods::setMethod(
 
 #' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage
-#'   \S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
@@ -633,7 +621,6 @@ methods::setGeneric(
 
 #' @name rm_predictors
 #' @rdname rm_predictors
-#' @usage \S4method{rm_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "rm_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
@@ -683,7 +670,6 @@ methods::setGeneric(
 
 #' @name sel_predictors
 #' @rdname sel_predictors
-#' @usage \S4method{sel_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "sel_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
@@ -711,8 +697,6 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
@@ -729,8 +713,6 @@ methods::setMethod(
 
 #' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),

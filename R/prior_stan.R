@@ -40,7 +40,6 @@ methods::setGeneric(
 
 #' @name STANPrior
 #' @rdname STANPrior
-#' @usage \S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 methods::setMethod(
   "STANPrior",
   methods::signature(variable = "character", type = "character"),
@@ -99,7 +98,6 @@ methods::setGeneric(
 
 #' @name STANPriors
 #' @rdname STANPriors
-#' @usage \S4method{STANPriors}{vector,character,ANY}(variables,type,hyper,...)
 methods::setMethod(
   "STANPriors",
   methods::signature(variables = "vector", type = "character"),

@@ -93,8 +93,6 @@ methods::setGeneric("simulate_population_steps",
 
 #' @name simulate_population_steps
 #' @rdname simulate_population_steps
-#' @usage
-#'   \S4method{simulate_population_steps}{BiodiversityScenario,matrix,numeric,ANY,ANY,ANY,ANY,logical}(mod,vital_rates,replicates,carrying_capacity,dispersal,density_dependence,include_suitability)
 methods::setMethod(
   "simulate_population_steps",
   methods::signature(mod = "BiodiversityScenario", vital_rates = "matrix"),

@@ -6,7 +6,7 @@
 \usage{
 GLMNETPriors(variable, hyper = 0, lims = c(-Inf, Inf))
 
-\S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
+\S4method{GLMNETPriors}{character}(variable, hyper = 0, lims = c(-Inf, Inf))
 }
 \arguments{
 \item{variable}{A \code{\link{character}} variable passed on to the prior object.}

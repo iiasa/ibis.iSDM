@@ -73,7 +73,6 @@ methods::setGeneric("validate",
 
 #' @name validate
 #' @rdname validate
-#' @usage \S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "ANY"),
@@ -228,8 +227,6 @@ methods::setMethod(
 
 #' @name validate
 #' @rdname validate
-#' @usage
-#'   \S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
 methods::setMethod(
   "validate",
   methods::signature(mod = "SpatRaster"),

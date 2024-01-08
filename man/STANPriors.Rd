@@ -6,7 +6,7 @@
 \usage{
 STANPriors(variables, type, hyper = c(0, 2), ...)
 
-\S4method{STANPriors}{vector,character,ANY}(variables,type,hyper,...)
+\S4method{STANPriors}{vector,character}(variables, type, hyper = c(0, 2), ...)
 }
 \arguments{
 \item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing

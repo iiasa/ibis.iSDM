@@ -15,9 +15,27 @@ similarity(
   ...
 )
 
-\S4method{similarity}{BiodiversityDistribution,character,character,character,logical,logical}(obj,ref_type,method,predictor_names,full,plot,...)
+\S4method{similarity}{BiodiversityDistribution}(
+  obj,
+  ref,
+  ref_type = "poipo",
+  method = "mess",
+  predictor_names = NULL,
+  full = FALSE,
+  plot = TRUE,
+  ...
+)
 
-\S4method{similarity}{SpatRaster,sf,character,logical,logical}(obj,ref,method,full,plot,...)
+\S4method{similarity}{SpatRaster}(
+  obj,
+  ref,
+  ref_type = "poipo",
+  method = "mess",
+  predictor_names = NULL,
+  full = FALSE,
+  plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or

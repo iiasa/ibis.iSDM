@@ -6,7 +6,7 @@
 \usage{
 partial_density(mod, x.var, df = FALSE, ...)
 
-\S4method{partial_density}{ANY,character,logical}(mod,x.var,df,...)
+\S4method{partial_density}{ANY,character}(mod, x.var, df = FALSE, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} object. Requires a fitted model and

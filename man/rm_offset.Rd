@@ -6,7 +6,7 @@
 \usage{
 rm_offset(x, layer = NULL)
 
-\S4method{rm_offset}{BiodiversityDistribution,character}(x,layer)
+\S4method{rm_offset}{BiodiversityDistribution}(x, layer = NULL)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

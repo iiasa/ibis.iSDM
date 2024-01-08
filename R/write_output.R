@@ -36,8 +36,6 @@ methods::setGeneric("write_output",
 
 #' @name write_output
 #' @rdname write_output
-#' @usage
-#'   \S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature("ANY", fname = "character"),
@@ -79,8 +77,6 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage
-#'   \S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "BiodiversityScenario",fname = "character"),
@@ -99,8 +95,6 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage
-#'   \S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "SpatRaster",fname = "character"),
@@ -127,8 +121,6 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage
-#'   \S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "data.frame",fname = "character"),
@@ -149,8 +141,6 @@ methods::setMethod(
 
 #' @name write_output
 #' @rdname write_output
-#' @usage
-#'   \S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
 methods::setMethod(
   "write_output",
   methods::signature(mod = "stars",fname = "character"),
@@ -313,8 +303,6 @@ methods::setGeneric("write_summary",
 
 #' @name write_summary
 #' @rdname write_summary
-#' @usage
-#'   \S4method{write_summary}{ANY,character,logical,logical}(mod,fname,partial,verbose,...)
 methods::setMethod(
   "write_summary",
   methods::signature(mod = "ANY", fname = "character"),
@@ -494,8 +482,6 @@ methods::setGeneric("write_model",
 
 #' @name write_model
 #' @rdname write_model
-#' @usage
-#'   \S4method{write_model}{ANY,character,logical,logical}(mod,fname,slim,verbose)
 methods::setMethod(
   "write_model",
   methods::signature(mod = "ANY"),
@@ -568,7 +554,6 @@ methods::setGeneric("load_model",
 
 #' @name load_model
 #' @rdname load_model
-#' @usage \S4method{load_model}{character,logical}(fname,verbose)
 methods::setMethod(
   "load_model",
   methods::signature(fname = "character"),

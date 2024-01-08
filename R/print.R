@@ -104,11 +104,9 @@ print.Id <- function(x, ...) message("id: ", x)
 #' @name print
 #' @rdname print
 #' @keywords misc
-#' @usage \S4method{print}{Id}(x)
 methods::setMethod("print", "Id", function(x, ...) print.Id(x))
 
 #' @name print
 #' @rdname print
 #' @keywords misc
-#' @usage \S4method{print}{tbl_df}(x)
 methods::setMethod("print", "tbl_df", function(x, ...) base::print(x, ...))

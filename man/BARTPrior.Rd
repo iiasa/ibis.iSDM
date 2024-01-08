@@ -6,7 +6,7 @@
 \usage{
 BARTPrior(variable, hyper = 0.75, ...)
 
-\S4method{BARTPrior}{character,numeric}(variable,hyper,...)
+\S4method{BARTPrior}{character}(variable, hyper = 0.75, ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent

@@ -6,7 +6,7 @@
 \usage{
 INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)
 
-\S4method{INLAPrior}{character,character,ANY}(variable,type,hyper,...)
+\S4method{INLAPrior}{character,character}(variable, type = "normal", hyper = c(0, 0.001), ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent

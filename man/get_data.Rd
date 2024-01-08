@@ -6,7 +6,7 @@
 \usage{
 get_data(obj, what = NULL)
 
-\S4method{get_data}{ANY,character}(obj,what)
+\S4method{get_data}{ANY}(obj, what = NULL)
 }
 \arguments{
 \item{obj}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}

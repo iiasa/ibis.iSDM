@@ -4,7 +4,7 @@
 \alias{add_constraint_dispersal}
 \title{Adds a dispersal constrain to a scenario object.}
 \usage{
-\S4method{add_constraint_dispersal}{BiodiversityScenario,character,numeric}(mod,method,value)
+\S4method{add_constraint_dispersal}{BiodiversityScenario}(mod, method, value = NULL, type = NULL, ...)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

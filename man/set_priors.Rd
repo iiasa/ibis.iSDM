@@ -6,7 +6,7 @@
 \usage{
 set_priors(x, priors = NULL, ...)
 
-\S4method{set_priors}{BiodiversityDistribution,ANY}(x,priors,...)
+\S4method{set_priors}{BiodiversityDistribution}(x, priors = NULL, ...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

@@ -6,7 +6,7 @@
 \usage{
 GDBPriors(variable, hyper = "increasing", ...)
 
-\S4method{GDBPriors}{character,character}(variable,hyper,...)
+\S4method{GDBPriors}{character}(variable, hyper = "increasing", ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors

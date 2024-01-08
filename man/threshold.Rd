@@ -15,11 +15,37 @@ threshold(
   ...
 )
 
-\S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
+\S4method{threshold}{ANY}(
+  obj,
+  method = "mtp",
+  value = NULL,
+  point = NULL,
+  field_occurrence = "observed",
+  format = "binary",
+  return_threshold = FALSE,
+  ...
+)
 
-\S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
+\S4method{threshold}{SpatRaster}(
+  obj,
+  method = "fixed",
+  value = NULL,
+  point = NULL,
+  field_occurrence = "observed",
+  format = "binary",
+  return_threshold = FALSE
+)
 
-\S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
+\S4method{threshold}{BiodiversityScenario}(
+  obj,
+  method = "mtp",
+  value = NULL,
+  point = NULL,
+  field_occurrence = "observed",
+  format = "binary",
+  return_threshold = FALSE,
+  ...
+)
 }
 \arguments{
 \item{obj}{A \link{BiodiversityScenario} object to which an existing threshold is

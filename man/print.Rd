@@ -46,9 +46,9 @@
 
 \method{print}{Id}(x, ...)
 
-\S4method{print}{Id}(x)
+\S4method{print}{Id}(x, ...)
 
-\S4method{print}{tbl_df}(x)
+\S4method{print}{tbl_df}(x, ...)
 }
 \arguments{
 \item{x}{Any object created through the package.}
