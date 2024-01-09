@@ -12,8 +12,6 @@
 #'
 #' @keywords scenario
 #'
-#' @importFrom zoo na.approx
-#'
 #' @examples
 #' \dontrun{
 #'   # Interpolate stars stack
