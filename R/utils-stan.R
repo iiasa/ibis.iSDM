@@ -496,6 +496,5 @@ methods::setGeneric("stancode",
                     function(obj, ...) standardGeneric("stancode"))
 
 #' @rdname stancode
-#' @method stancode DistributionModel
 #' @export
 stancode.DistributionModel <- function(obj, ...) obj$stancode()

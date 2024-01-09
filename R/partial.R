@@ -71,7 +71,6 @@ methods::setMethod(
 )
 
 #' @rdname partial
-#' @method partial DistributionModel
 #' @export
 partial.DistributionModel <- function(mod, ...) mod$partial(...)
 
@@ -139,7 +138,6 @@ methods::setMethod(
 )
 
 #' @rdname spartial
-#' @method spartial DistributionModel
 #' @export
 spartial.DistributionModel <- function(mod, ...) mod$spartial(...)
 

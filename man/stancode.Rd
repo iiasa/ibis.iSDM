@@ -7,7 +7,7 @@
 \usage{
 stancode(obj, ...)
 
-\method{stancode}{DistributionModel}(obj, ...)
+stancode.DistributionModel(obj, ...)
 }
 \arguments{
 \item{obj}{Any prepared object.}

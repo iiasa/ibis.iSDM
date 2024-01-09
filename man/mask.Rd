@@ -8,13 +8,13 @@
 \alias{mask.BiodiversityScenario}
 \title{Mask data with an external layer}
 \usage{
-\method{mask}{DistributionModel}(x, mask, inverse = FALSE, ...)
+mask.DistributionModel(x, mask, inverse = FALSE, ...)
 
-\method{mask}{BiodiversityDatasetCollection}(x, mask, inverse = FALSE, ...)
+mask.BiodiversityDatasetCollection(x, mask, inverse = FALSE, ...)
 
-\method{mask}{PredictorDataset}(x, mask, inverse = FALSE, ...)
+mask.PredictorDataset(x, mask, inverse = FALSE, ...)
 
-\method{mask}{BiodiversityScenario}(x, mask, inverse = FALSE, ...)
+mask.BiodiversityScenario(x, mask, inverse = FALSE, ...)
 }
 \arguments{
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},

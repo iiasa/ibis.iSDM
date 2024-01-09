@@ -19,31 +19,31 @@
 \alias{print,tbl_df-method}
 \title{Print}
 \usage{
-\method{print}{distribution}(x, ...)
+print.distribution(x, ...)
 
-\method{print}{BiodiversityDistribution}(x, ...)
+print.BiodiversityDistribution(x, ...)
 
-\method{print}{BiodiversityDatasetCollection}(x, ...)
+print.BiodiversityDatasetCollection(x, ...)
 
-\method{print}{BiodiversityDataset}(x, ...)
+print.BiodiversityDataset(x, ...)
 
-\method{print}{PredictorDataset}(x, ...)
+print.PredictorDataset(x, ...)
 
-\method{print}{DistributionModel}(x, ...)
+print.DistributionModel(x, ...)
 
-\method{print}{BiodiversityScenario}(x, ...)
+print.BiodiversityScenario(x, ...)
 
-\method{print}{Prior}(x, ...)
+print.Prior(x, ...)
 
-\method{print}{PriorList}(x, ...)
+print.PriorList(x, ...)
 
-\method{print}{Engine}(x, ...)
+print.Engine(x, ...)
 
-\method{print}{Settings}(x, ...)
+print.Settings(x, ...)
 
-\method{print}{Log}(x, ...)
+print.Log(x, ...)
 
-\method{print}{Id}(x, ...)
+print.Id(x, ...)
 
 \S4method{print}{Id}(x, ...)
 

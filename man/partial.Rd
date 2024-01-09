@@ -30,7 +30,7 @@ partial(
   ...
 )
 
-\method{partial}{DistributionModel}(mod, ...)
+partial.DistributionModel(mod, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model within.}

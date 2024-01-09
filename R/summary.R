@@ -42,32 +42,26 @@ NULL
 NULL
 
 #' @rdname summary
-#' @method summary distribution
 #' @export
 summary.distribution <- function(object, ...) object$summary()
 
 #' @rdname summary
-#' @method summary DistributionModel
 #' @export
 summary.DistributionModel <- function(object, ...) object$summary()
 
 #' @rdname summary
-#' @method summary PredictorDataset
 #' @export
 summary.PredictorDataset <- function(object, ...) object$summary()
 
 #' @rdname summary
-#' @method summary BiodiversityScenario
 #' @export
 summary.BiodiversityScenario <- function(object, ...) object$summary()
 
 #' @rdname summary
-#' @method summary PriorList
 #' @export
 summary.PriorList <- function(object, ...) object$summary()
 
 #' @rdname summary
-#' @method summary Settings
 #' @export
 summary.Settings <- function(object, ...) object$summary()
 
@@ -90,6 +84,5 @@ summary.Settings <- function(object, ...) object$summary()
 NULL
 
 #' @rdname coef
-#' @method coef DistributionModel
 #' @export
 coef.DistributionModel <- function(object, ...) object$get_coefficients()

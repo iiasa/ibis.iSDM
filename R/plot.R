@@ -36,27 +36,22 @@ NULL
 NULL
 
 #' @rdname plot
-#' @method plot DistributionModel
 #' @export
 plot.DistributionModel <- function(x, what = "mean", ...) x$plot(what,...)
 
 #' @rdname plot
-#' @method plot BiodiversityDatasetCollection
 #' @export
 plot.BiodiversityDatasetCollection <- function(x, ...) x$plot(...)
 
 #' @rdname plot
-#' @method plot PredictorDataset
 #' @export
 plot.PredictorDataset <- function(x, ...) x$plot(...)
 
 #' @rdname plot
-#' @method plot Engine
 #' @export
 plot.Engine <- function(x,...) x$plot(...)
 
 #' @rdname plot
-#' @method plot BiodiversityScenario
 #' @export
 plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
