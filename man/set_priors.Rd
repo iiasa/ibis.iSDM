@@ -5,8 +5,6 @@
 \title{Add priors to an existing distribution object}
 \usage{
 set_priors(x, priors = NULL, ...)
-
-\S4method{set_priors}{BiodiversityDistribution}(x, priors = NULL, ...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -31,6 +29,7 @@ added as parameter via \link{add_predictors}
   add_priors(pp)
 
 }
+
 }
 \seealso{
 Other prior: 

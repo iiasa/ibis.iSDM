@@ -2,11 +2,14 @@
 #'
 #' @description This function built a formula for a `engine_breg()` model.
 #' @param obj A [`list()`] object containing the prepared model data for a given
-#'   biodiversity dataset.
-#' @author Martin Jung
+#' biodiversity dataset.
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#' @keywords internal
 built_formula_breg <- function(obj){
   assertthat::assert_that(
     is.list(obj),
@@ -47,16 +50,19 @@ built_formula_breg <- function(obj){
 #'
 #' @description For more information see helpfile of [`BREGPrior`] and the
 #' respective package helpfiles.
+#'
 #' @param form A [`formula`] object.
 #' @param data A [`data.frame`] with all variables (response and predictors) in
-#'   the formula. Needs to contain the observed y_hat variable as well.
+#' the formula. Needs to contain the observed y_hat variable as well.
 #' @param priors A [`PriorList`] object with [`BREGPrior`] priors.
 #' @param family A [`character`] object giving either `poisson` or `binomial`.
-#' @param exposure A [`numeric`] vector giving the exposure for `poisson` family
-#'   priors.
+#' @param exposure A [`numeric`] vector giving the exposure for `poisson` family priors.
+#'
 #' @returns A [`SpikeSlabPriorBase`] object for use with a [`Boom`] engine
 #'   trained model
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
   assertthat::assert_that(
@@ -139,18 +145,19 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 #' @description Helper function to create a prediction with [engine_breg] fitted
 #' models.
 #'
-#' @note By Default 20% of the iterations are considered as burnin.
 #' @param obj A [list] containing the fitted model.
-#' @param newdata A [`data.frame`] with all the predictor used for model
-#'   fitting.
-#' @param fam A [`character`] denoting the family used for estimation. This is
-#'   necessary as prediction methods differ among the various functions.
-#' @param params A [`list`] with parameters for estimation. Normally created
-#'   during model fitting.
+#' @param newdata A [`data.frame`] with all the predictor used for model fitting.
+#' @param fam A [`character`] denoting the family used for estimation. This is necessary
+#' as prediction methods differ among the various functions.
+#' @param params A [`list`] with parameters for estimation. Normally created during
+#' model fitting.
 #' @param w A [`numeric`] [`vector`] containing the exposure variables for PPMs.
-#'   Can be \code{NULL} if the model is not a PPM.
+#' Can be \code{NULL} if the model is not a PPM.
+#'
+#' @note By Default 20% of the iterations are considered as burnin.
+#'
 #' @returns A [`data.frame`] with the respective prediction.
-#' @aliases predict_boom
+#'
 #' @keywords utils, internal
 #' @noRd
 predict_boom <- function(obj, newdata, fam, params, w = NULL) {

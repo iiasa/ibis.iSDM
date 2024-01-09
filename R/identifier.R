@@ -14,6 +14,7 @@ NULL
 #' @return \code{"Id"} object.
 #'
 #' @seealso [uuid::UUIDgenerate()].
+#' @keywords misc
 #'
 #' @examples
 #' # create new id
@@ -28,9 +29,6 @@ NULL
 #' # check if it is an Id object
 #' is.Id(i)
 #'
-#' @aliases Id, new_id
-#' @name new_id
-#' @keywords misc
 #' @export
 new_id <- function() {
   x <- uuid::UUIDgenerate()
@@ -39,16 +37,20 @@ new_id <- function() {
 }
 
 #' As Id
+#'
 #' @param x A [`character`] to be converted as id.
 #' @param ... Other arguements
-#' @rdname as
+#'
 #' @keywords misc
+#'
+#' @name as.Id
+NULL
+
+#' @rdname as.Id
 #' @export
 as.Id <- function(x, ...) UseMethod("as.Id")
 
-#' As Id character
-#' @rdname as
-#' @keywords misc
+#' @rdname as.Id
 #' @export
 as.Id.character <- function(x, ...) {
   class(x) <- c("Id", class(x))
@@ -58,35 +60,44 @@ as.Id.character <- function(x, ...) {
 #' Check whether a provided object is truly of a specific type
 #'
 #' @param x A provided Id object
-#' @rdname is
+#'
 #' @return Boolean evaluation with [logical] output.
+#'
 #' @keywords misc
+#'
 #' @export
 is.Id <- function(x) inherits(x, "Id")
 
 #' Is the provided object of type waiver?
-#' @param x A provided [Waiver] object
-#' @rdname is
+#'
+#' @param x A provided \code{Waiver} object
+#'
 #' @return Boolean evaluation with [logical] output.
+#'
 #' @keywords misc
+#'
 #' @export
 is.Waiver <- function(x) inherits(x, "Waiver")
 
 #' Check whether a formula is valid
 #'
 #' @param x A [`character`] object
+#'
 #' @return Boolean evaluation with [logical] output.
-#' @rdname is
+#'
 #' @keywords misc
+#'
 #' @export
 is.formula <- function(x) inherits(x, "formula")
 
 #' Tests if an input is a SpatRaster object.
 #'
 #' @param x an R Object.
+#'
 #' @return Boolean evaluation with [logical] output.
-#' @rdname is
+#'
 #' @keywords misc
+#'
 #' @export
 is.Raster <- function(x)
 {
@@ -96,9 +107,11 @@ is.Raster <- function(x)
 #' Tests if an input is a stars object.
 #'
 #' @param x an R Object.
+#'
 #' @return Boolean evaluation with [logical] output.
-#' @rdname is
+#'
 #' @keywords misc
+#'
 #' @export
 is.stars <- function(x)
 {

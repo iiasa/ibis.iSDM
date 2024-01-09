@@ -2,7 +2,6 @@
 % Please edit documentation in R/utils-predictors.R
 \name{predictors_filter_boruta}
 \alias{predictors_filter_boruta}
-\alias{predictor_filter_boruta}
 \title{All relevant feature selection using Boruta}
 \usage{
 predictors_filter_boruta(
@@ -16,8 +15,8 @@ predictors_filter_boruta(
 )
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental
-covariates for a given species.}
+\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates
+for a given species.}
 
 \item{method}{Which method to use for constructing the correlation matrix
 (Options: \code{'pearson'} (Default), \code{'spearman'}| \code{'kendal'}),
@@ -33,8 +32,8 @@ Increase if too many tentative left.}
 
 \item{...}{Other options for a specific method}
 
-\item{observed}{A \code{\link{vector}} with observational records to use for
-determining variable importance.}
+\item{observed}{A \code{\link{vector}} with observational records to use for determining
+variable importance.}
 }
 \value{
 A \code{\link{vector}} of variable names to exclude.
@@ -52,7 +51,8 @@ randomForest models.
 }
 \references{
 \itemize{
-\item Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
+\item Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta
+Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
 }
 }
 \keyword{internal}

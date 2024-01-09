@@ -2,6 +2,8 @@
 % Please edit documentation in R/add_predictors_globiom.R
 \name{add_predictors_globiom}
 \alias{add_predictors_globiom}
+\alias{add_predictors_globiom,BiodiversityDistribution,character-method}
+\alias{add_predictors_globiom,BiodiversityScenario,character-method}
 \title{Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution
 object}
 \usage{
@@ -48,21 +50,18 @@ add_predictors_globiom(
 )
 }
 \arguments{
-\item{x}{A \code{\linkS4class{BiodiversityDistribution}} or
-\code{\linkS4class{BiodiversityScenario}} object.}
+\item{x}{A \code{\linkS4class{BiodiversityDistribution}} or \code{\linkS4class{BiodiversityScenario}} object.}
 
 \item{fname}{A \code{\link{character}} pointing to a netCDF with the GLOBIOM data.}
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental
 stack in case they should be renamed (Default: \code{NULL}).}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be
-preprocessed in any way (Options: \code{'none'},\code{'pca'},
-\code{'scale'}, \code{'norm'})}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed
+in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 
-\item{derivates}{A Boolean check whether derivate features should be
-considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-\code{'quad'}) )}
+\item{derivates}{A Boolean check whether derivate features should be considered
+(Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
 
 \item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of
 knots for derivate creation if relevant (Default: \code{4}).}
@@ -73,8 +72,8 @@ specifying the covariates (Default: \code{NULL}).}
 \item{bgmask}{Check whether the environmental data should be masked with the
 background layer (Default: \code{TRUE})}
 
-\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values
-should be harmonized among predictors (Default: \code{FALSE})}
+\item{harmonize_na}{A \code{\link{logical}} value indicating of whether NA values should
+be harmonized among predictors (Default: \code{FALSE})}
 
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
 which uses default prior assumptions.}
@@ -106,6 +105,7 @@ GLOBIOM data can also be called directly via \code{formatGLOBIOM()}.
         add_predictors_globiom(fname = "", transform = 'none')
  obj
 }
+
 }
 \seealso{
 \link{add_predictors}

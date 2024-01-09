@@ -19,6 +19,7 @@ This functions prints a message with a custom header and colour.
 }
 \examples{
 myLog("[Setup]", "red", "Some error occurred during data preparation.")
+
 }
 \keyword{internal,}
 \keyword{utils}

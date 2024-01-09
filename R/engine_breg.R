@@ -6,35 +6,41 @@ NULL
 #' @description Efficient MCMC algorithm for linear regression models that makes
 #' use of 'spike-and-slab' priors for some modest regularization on the amount
 #' of posterior probability for a subset of the coefficients.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param iter [`numeric`] on the number of MCMC iterations to run (Default: \code{10000}).
+#' @param nthread [`numeric`] on the number of CPU-threads to use for data augmentation.
+#' @param type The mode used for creating posterior predictions. Either making
+#' \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param ... Other none specified parameters passed on to the model.
+#'
 #' @details This engine provides efficient Bayesian predictions through the
 #' \pkg{Boom} R-package. However note that not all link and models functions are
 #' supported and certain functionalities such as offsets are generally not
 #' available. This engines allows the estimation of linear and non-linear
 #' effects via the \code{"only_linear"} option specified in [train].
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter [`numeric`] on the number of MCMC iterations to run (Default:
-#'   \code{10000}).
-#' @param nthread [`numeric`] on the number of CPU-threads to use for data
-#'   augmentation.
-#' @param type The mode used for creating posterior predictions. Either making
-#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
-#' @param ... Other none specified parameters passed on to the model.
-#' @references
-#' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
-#' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
-#' @family engine
+#'
 #' @returns An [Engine].
-#' @aliases engine_breg
+#'
+#' @references
+#' * Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple
+#' kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
+#' * Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression.
+#' R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
+#'
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add BREG as an engine
 #' x <- distribution(background) |> engine_breg(iter = 1000)
 #' }
+#'
 #' @name engine_breg
 NULL
+
 #' @rdname engine_breg
 #' @export
-
 engine_breg <- function(x,
                         iter = 10000,
                         nthread = getOption('ibis.nthread'),

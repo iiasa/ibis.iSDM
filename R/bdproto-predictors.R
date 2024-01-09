@@ -7,12 +7,13 @@ NULL
 
 #' PredictorDataset prototype description
 #'
-#' @name PredictorDataset-class
-#' @aliases PredictorDataset
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name PredictorDataset-class
 NULL
 
+#' @rdname PredictorDataset-class
 #' @export
 PredictorDataset <- bdproto(
   "PredictorDataset",

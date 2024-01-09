@@ -11,22 +11,23 @@ NULL
 #' function.
 #'
 #' @param x A [`Prior-class`] object added to the list.
-#' @param ... One or multiple additional [`Prior-class`] object added to the
-#'   list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#'
 #' @returns A [`PriorList`] object.
+#'
+#' @seealso [`Prior-class`], [`PriorList-class`]
+#' @family prior
+#'
 #' @examples
 #' \dontrun{
 #' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 #' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 #' priors(p1, p2)
 #' }
-#' @seealso [`Prior-class`], [`PriorList-class`]
-#' @family prior
-#' @aliases priors
+#'
 #' @name priors
 NULL
 
-#' @name priors
 #' @rdname priors
 #' @export
 methods::setGeneric(
@@ -34,7 +35,6 @@ methods::setGeneric(
   signature = methods::signature('x'),
   function(x,...) standardGeneric("priors"))
 
-#' @name priors
 #' @rdname priors
 methods::setMethod(
   "priors",
@@ -114,22 +114,23 @@ methods::setMethod(
 #' objects can then be added to a [distribution] object with the [add_priors]
 #' function.
 #'
-#' @param ... One or multiple additional [`Prior-class`] object added to the
-#'   list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#'
 #' @returns A [`PriorList`] object.
+#'
+#' @seealso [`Prior-class`], [`PriorList-class`]
+#' @family prior
+#'
 #' @examples
 #' \dontrun{
 #' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 #' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 #' priors(p1, p2)
 #' }
-#' @seealso [`Prior-class`], [`PriorList-class`]
-#' @family prior
-#' @aliases priors
+#'
 #' @name priors
 NULL
 
-#' @name priors
 #' @rdname priors
 #' @export
 methods::setGeneric(
@@ -137,7 +138,6 @@ methods::setGeneric(
   signature = methods::signature('x'),
   function(x,...) standardGeneric("priors"))
 
-#' @name priors
 #' @rdname priors
 methods::setMethod(
   "priors",

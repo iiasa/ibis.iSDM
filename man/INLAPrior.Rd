@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_inla.R
 \name{INLAPrior}
 \alias{INLAPrior}
+\alias{INLAPrior,character,character-method}
 \title{Create a new INLA prior}
 \usage{
 INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)
@@ -14,9 +15,8 @@ effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
-hyper-parameters. See description. The default values are set to a mean of
-\code{0} and a precision of \code{0.001}.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.
+See description. The default values are set to a mean of \code{0} and a precision of \code{0.001}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -56,8 +56,11 @@ already regularize the coefficients to some degree.
 }
 \references{
 \itemize{
-\item Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
-\item Simpson, D., Rue, H., Riebler, A., Martins, T. G., & Sørbye, S. H. (2017). Penalising model component complexity: A principled, practical approach to constructing priors. Statistical science, 32(1), 1-28.
+\item Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017).
+Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.
+\item Simpson, D., Rue, H., Riebler, A., Martins, T. G., & Sørbye, S. H. (2017).
+Penalising model component complexity: A principled, practical approach to constructing
+priors. Statistical science, 32(1), 1-28.
 }
 }
 \seealso{

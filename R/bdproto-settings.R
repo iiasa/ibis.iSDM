@@ -7,15 +7,17 @@ NULL
 
 #' Prototype for model settings object
 #'
+#' @description
 #' Basic proto object for Settings object, a List that stores settings used
 #' related to model training
 #'
-#' @name Settings-class
-#' @aliases Settings
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name Settings-class
 NULL
 
+#' @rdname Settings-class
 #' @export
 Settings <- bdproto(
   "Settings",

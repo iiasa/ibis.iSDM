@@ -13,13 +13,12 @@ alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 \item{template}{\code{\linkS4class{SpatRaster}} or \code{\link{sf}} object from which geometry can
 be extracted.}
 
-\item{method}{method for resampling (Options: \code{"near"} or
-\code{"bilinear"}).}
+\item{method}{method for resampling (Options: \code{"near"} or \code{"bilinear"}).}
 
 \item{func}{function for resampling (Default: \link{mean}).}
 
-\item{cl}{\code{\link{logical}} value if multicore computation should be used (Default:
-\code{TRUE}).}
+\item{cl}{\code{\link{logical}} value if multicore computation should be used
+(Default: \code{TRUE}).}
 }
 \value{
 New \code{\link{SpatRaster}} object aligned to the supplied template layer.
@@ -40,5 +39,6 @@ bilinear resampling recommended for continuous data. See also help from
  # Align one raster to another
  ras1 <- alignRasters( ras1, ras2, method = "near", cl = FALSE)
 }
+
 }
 \keyword{utils}

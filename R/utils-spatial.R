@@ -1,13 +1,15 @@
 #' Are SpatRasters comparable?
 #'
-#' This function checks if two `SpatRaster-class` objects are comparable.
+#' @description This function checks if two `SpatRaster-class` objects are comparable.
 #'
 #' @param x [`SpatRaster-class`] object.
 #' @param y [`SpatRaster-class`] or [`sf`] object.
-#' @keywords internal, utils
-#' @aliases is_comparable_raster
+#'
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have
-#'   the same resolution, extent, dimensionality, and coordinate system.
+#' the same resolution, extent, dimensionality, and coordinate system.
+#'
+#' @keywords internal, utils
+#'
 #' @noRd
 is_comparable_raster <- function(x, y) {
   if(inherits(y, "sf")){
@@ -31,7 +33,9 @@ is_comparable_raster <- function(x, y) {
 #' function does the job.
 #'
 #' @param input A [`SpatRaster`] object to convert to raster.
+#'
 #' @keywords internal, utils
+#'
 #' @noRd
 terra_to_raster <- function(input){
   assertthat::assert_that(
@@ -57,12 +61,15 @@ terra_to_raster <- function(input){
 
 #' Do extents intersect?
 #'
-#' Verify if the extents of two spatial objects intersect or not.
+#' @description Verify if the extents of two spatial objects intersect or not.
 #'
 #' @param x [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
 #' @param y [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
-#' @keywords internal, utils
+#'
 #' @return [`logical`].
+#'
+#' @keywords internal, utils
+#'
 #' @noRd
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
@@ -75,12 +82,15 @@ intersecting_extents <- function(x, y) {
 }
 
 #' Extract polygon data from intersecting point data
+#'
 #' @param poly A [sf] object.
 #' @param points A [`Spatial`] or [sf] object.
-#' @param coords A [vector] pointing to the coordinate columns. (Default:
-#'   \code{c("x", "y")})
-#' @keywords utils, internal
+#' @param coords A [vector] pointing to the coordinate columns. (Default: \code{c("x", "y")})
+#'
 #' @return An object with the spatial intersection
+#'
+#' @keywords utils, internal
+#'
 #' @noRd
 point_in_polygon <- function(poly, points, coords = c('x','y')){
   assertthat::assert_that(
@@ -149,13 +159,16 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #'
 #' @description This function create a minimum convex polygon based on supplied
 #' spatial data.
+#'
+#' @param biod A [`list`] supplied by description.
+#'
 #' @note This is an internal function that makes use of data prepared within the
 #' `train` call.
-#' @param biod A [`list`] supplied by description.
+#'
 #' @returns A [`sf`] object.
-#' @aliases create_mcp
-#' @keywords internal
+#'
 #' @noRd
+#' @keywords internal
 create_mcp <- function(biod, limits){
   assertthat::assert_that(
     is.list(biod), length(biod)>=1,
@@ -213,16 +226,18 @@ create_mcp <- function(biod, limits){
 #'
 #' @param df A [`sf`] object with point information.
 #' @param zones A [`sf`] or [`SpatRaster`] object with polygons of the zones to
-#'   be used for occurrence masking.
+#' be used for occurrence masking.
 #' @param buffer_width A [`numeric`] value specifying the buffer width. Ignored
-#'   if a Zones layer is provided.
+#' if a Zones layer is provided.
 #' @param column A [`character`] giving the column in which zonal ids are found.
-#'   Only used when zones is of type [`sf`] (Default: \code{"limits"}).
+#' Only used when zones is of type [`sf`] (Default: \code{"limits"}).
 #' @param template An optional [`SpatRaster`] object on which which the zones
-#'   should be rasterized (Default: \code{NULL}).
+#' should be rasterized (Default: \code{NULL}).
+#'
 #' @returns A [`sf`] or [`SpatRaster`] object.
-#' @aliases create_zonaloccurrence_mask
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
   assertthat::assert_that(
@@ -300,17 +315,20 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
 #' provided object is binary or continuous format. A [`logical`] patch parameter
 #' can be supplied to support decomposition into individual patches.
 #'
+#' @param obj A [`SpatRaster`] object.
+#' @param path A [`logical`] flag whether centroids should be calculated per patch
+#' (Default: \code{FALSE}).
+#'
 #' @details If a \code{patch==TRUE}, then `terra::patches()` is used to generate
 #' ids for individuals patches. Furthermore, if a supplied \code{obj} is a
 #' continious SpatRaster, e.g. has more than 2 unique values and is not
 #' categorical, then a weighted average of the coordinates is returned by
 #' default.
 #'
-#' @param obj A [`SpatRaster`] object.
-#' @param path A [`logical`] flag whether centroids should be calculated per
-#'   patch (Default: \code{FALSE}).
 #' @returns A [`sf`] POINT object.
+#'
 #' @keywords internal, utils
+#'
 #' @noRd
 raster_centroid <- function(obj, patch = FALSE){
   assertthat::assert_that(is.Raster(obj),
@@ -373,11 +391,13 @@ raster_centroid <- function(obj, patch = FALSE){
 #' @param miny Minimum y value, or the most southern latitude
 #' @param maxx Maximum x value, or the most eastern longitude
 #' @param maxy Maximum y value, or the most northern latitude
-#' @param all A [`vector`] of length 4, with the elements: minx, miny, maxx,
-#'   maxy
+#' @param all A [`vector`] of length 4, with the elements: minx, miny, maxx, maxy
+#'
 #' @return An object of class [`character`], a Well Known Text (WKT) string of
-#'   the form 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
+#' the form 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
+#'
 #' @keywords internal, utils
+#'
 #' @noRd
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
@@ -396,8 +416,11 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #'
 #' @param e An [`extent`] object.
 #' @param f [`numeric`] value to increase the extent (Default: \code{0.1}).
-#' @keywords utils, internal
+#'
 #' @return Returns the unified total [`extent`] object.
+#'
+#' @keywords utils, internal
+#'
 #' @noRd
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'SpatExtent'),
@@ -419,10 +442,11 @@ extent_expand <- function(e,f=0.1){
 #'
 #' @param g A [`sf`] object containing some data.
 #' @param name A [`character`] with the new name for the geometry.
-#' @source
-#'   https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
-#' @aliases rename_geometry
+#'
+#' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
+#'
 #' @keywords internal, utils
+#'
 #' @noRd
 rename_geometry <- function(g, name){
   assertthat::assert_that(
@@ -439,14 +463,16 @@ rename_geometry <- function(g, name){
 #' Convert a data.frame or tibble to simple features
 #'
 #' @description This function tries to guess the coordinate field and converts a
-#'   data.frame to a simple feature.
+#' data.frame to a simple feature.
 #'
 #' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
 #' @param geom_name A [`character`] indicating the name of the geometry column
-#'   (Default: \code{'geometry'}).
+#' (Default: \code{'geometry'}).
+#'
 #' @returns A [`sf`] object.
-#' @aliases guess_sf
+#'
 #' @keywords internal, utils
+#'
 #' @noRd
 guess_sf <- function(df, geom_name = 'geometry'){
   assertthat::assert_that(
@@ -494,13 +520,17 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #' @description Takes input point coordinates as [`sf`] layer and estimates the
 #' Gaussian Kernel density over a specified bandwidth for constructing a
 #' bivariate Gaussian kernel (see also [`MASS::kde2d()`]).
-#' @details Requires the `MASS` R-package to be installed!
+#'
 #' @param points A \code{POINTS} [`sf`] object.
 #' @param background A template [`SpatRaster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
+#'
+#' @details Requires the `MASS` R-package to be installed!
+#'
 #' @returns A [`SpatRaster`] with the density of point observations.
-#' @aliases st_kde
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 st_kde <- function(points, background, bandwidth = 3){
   assertthat::assert_that(
@@ -543,16 +573,16 @@ st_kde <- function(points, background, bandwidth = 3){
 #' @description Function to define proximity weights for a given dataset.
 #'
 #' @param poi	[`sf`] object with points.
-#' @param maxdist [`numeric`] of Maximum distance beyond which a two
-#'   neighbouring points are assumed to have no effect on one another for
-#'   calculation of weights. If not set, use quarter distance to centroid from a
-#'   minimum convex polygon.
+#' @param maxdist [`numeric`] of Maximum distance beyond which a two neighbouring
+#' points are assumed to have no effect on one another for calculation of weights.
+#' If not set, use quarter distance to centroid from a minimum convex polygon.
 #' @param alpha Scaling parameter (Default: \code{1}).
 #'
-#' @concept Inspired from
-#'   https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
-#' @keywords utils, internal
 #' @return A numeric vector of weights.
+#'
+#' @keywords utils, internal
+#' @concept Inspired from https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
+#'
 #' @noRd
 sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
   assertthat::assert_that(
@@ -613,11 +643,14 @@ sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
 #'
 #' @description Converts a polygon [`sf`] layer to a point layer by rasterizing
 #' it over a provided [SpatRaster].
+#'
 #' @param poly A \code{POLYGON} or \code{MULTIPOLYGON} [`sf`] object.
 #' @param template A template [`SpatRaster`] object.
-#' @param field_occurrence A [`character`] specifying the occurrence field.
-#'   Should contain information on the type.
+#' @param field_occurrence A [`character`] specifying the occurrence field. Should
+#' contain information on the type.
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 polygon_to_points <- function(poly, template, field_occurrence ) {
   assertthat::assert_that(
@@ -644,17 +677,16 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 
 #' Calculate the dimensions from a provided extent object
 #'
-#' @description Calculate the dimensions of an extent (either an extent object
-#'   or four-element vector in the right order), either in projected or
-#'   spherical space.
-#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a
-#'   [`SpatRaster`], [`Spatial*`] or [`sf`] object.
-#' @param lonlat A [`logical`] indication whether the extent is WGS 84
-#'   projection (Default: \code{TRUE}).
-#' @param output_unit [`character`] determining the units. Allowed is 'm' and
-#'   'km' (Default: \code{'km'}).
-#' @aliases extent_dimensions
+#' @description Calculate the dimensions of an extent (either an extent object or
+#' four-element vector in the right order), either in projected or spherical space.
+#'
+#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`],
+#' [`Spatial*`] or [`sf`] object.
+#' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
+#' @param output_unit [`character`] determining the units. Allowed is 'm' and km' (Default: \code{'km'}).
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = 'km') {
   assertthat::assert_that(inherits(ex, 'SpatExtent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'SpatRaster') || inherits(ex, 'Spatial'),
@@ -713,6 +745,7 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
 #' Align a [`SpatRaster-class`] object to another by harmonizing geometry and
 #' extend.
 #'
+#' @description
 #' If the data is not in the same projection as the template, the alignment will
 #' be computed by reprojection only. If the data has already the same
 #' projection, the data set will be cropped and aggregated prior to resampling
@@ -720,23 +753,26 @@ extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = '
 #'
 #' @param data [`SpatRaster-class`] object to be resampled.
 #' @param template [`SpatRaster-class`] or [`sf`] object from which geometry can
-#'   be extracted.
-#' @param method method for resampling (Options: \code{"near"} or
-#'   \code{"bilinear"}).
+#' be extracted.
+#' @param method method for resampling (Options: \code{"near"} or \code{"bilinear"}).
 #' @param func function for resampling (Default: [mean]).
-#' @param cl [`logical`] value if multicore computation should be used (Default:
-#'   \code{TRUE}).
-#' @keywords utils
+#' @param cl [`logical`] value if multicore computation should be used
+#' (Default: \code{TRUE}).
+#'
 #' @details Nearest Neighbour resampling (near) is recommended for discrete and
 #' bilinear resampling recommended for continuous data. See also help from
 #' [terra::resample] for other options.
+#'
 #' @return New [`SpatRaster`] object aligned to the supplied template layer.
-#' @aliases alignRasters
+#'
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  # Align one raster to another
 #'  ras1 <- alignRasters( ras1, ras2, method = "near", cl = FALSE)
 #' }
+#'
 #' @export
 alignRasters <- function(data, template, method = "bilinear", func = mean, cl = TRUE){
   # Security checks
@@ -780,15 +816,19 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' @description This function creates an empty copy of a provided
 #' \code{SpatRaster} object. It is primarily used in the package to create the
 #' outputs for the predictions.
+#'
 #' @param x A \code{SpatRaster*} object corresponding.
 #' @param ... other arguments that can be passed to \code{\link{terra}}
+#'
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
+#'
 #' @keywords utils
-#' @aliases emptyraster
+#'
 #' @examples
 #' require(terra)
 #' r <- rast(matrix(1:100, 5, 20))
 #' emptyraster(r)
+#'
 #' @export
 emptyraster <- function(x, ...) { # add name, filename,
   assertthat::assert_that(is.Raster(x) || inherits(x, "stars"))
@@ -807,22 +847,30 @@ emptyraster <- function(x, ...) { # add name, filename,
 #' biodiversity observations and independent predictors, and operates directly
 #' on provided data.frames.
 #' **Note that despite being parallized this function can be rather slow for large data volumes of data!**
+#'
 #' @param coords A [`matrix`], [`data.frame`] or [`sf`] object.
 #' @param env A [`data.frame`] object with the predictors.
-#' @param longlat A [`logical`] variable indicating whether the projection is
-#'   long-lat.
+#' @param longlat A [`logical`] variable indicating whether the projection is long-lat.
 #' @param field_space A [`vector`] highlight the columns from which coordinates
-#'   are to be extracted (Default: \code{c('x','y')}).
+#' are to be extracted (Default: \code{c('x','y')}).
 #' @param cheap A [`logical`] variable whether the dataset is considered to be
-#'   large and faster computation could help.
+#' large and faster computation could help.
 #' @param ... other options.
+#'
+#' @details Nearest neighbour matching is done via the [geodist] R-package (\code{geodist::geodist}).
+#'
+#' @note If multiple values are of equal distance during the nearest neighbour check,
+#' then the results is by default averaged.
+#'
 #' @return A [`data.frame`] with the extracted covariate data from each provided
 #'   data point.
-#' @details Nearest neighbour matching is done via the [geodist] R-package
-#'   (\code{geodist::geodist}).
-#' @note If multiple values are of equal distance during the nearest neighbour
-#'   check, then the results is by default averaged.
-#' @aliases get_ngbvalue
+#'
+#' @references
+#' * Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic
+#' Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
+#'
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  # Create matchup table
@@ -831,9 +879,6 @@ emptyraster <- function(x, ...) { # add name, filename,
 #'                   )
 #' }
 #'
-#' @references
-#' * Mark Padgham and Michael D. Sumner (2021). geodist: Fast, Dependency-Free Geodesic Distance Calculations. R package version 0.0.7. https://CRAN.R-project.org/package=geodist
-#' @keywords utils
 #' @export
 get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), cheap = FALSE, ...) {
   # Security checks
@@ -922,22 +967,27 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' [`SpatRaster`], [`SpatRasterDataset`] or [`SpatRasterCollection`] object. For
 #' points where or NA values were extracted a small buffer is applied to try and
 #' obtain the remaining values.
-#' @details It is essentially a wrapper for [`terra::extract`].
+#'
 #' @param coords A [`data.frame`], [`matrix`] or [`sf`] object.
 #' @param env A [`SpatRaster`] object with the provided predictors.
 #' @param ngb_fill [`logical`] on whether cells should be interpolated from
-#'   neighbouring values.
+#' neighbouring values.
 #' @param rm.na [`logical`] parameter which - if set - removes all rows with a
-#'   missing data point (\code{NA}) from the result.
+#' missing data point (\code{NA}) from the result.
+#'
+#' @details It is essentially a wrapper for [`terra::extract`].
+#'
 #' @return A [`data.frame`] with the extracted covariate data from each provided
-#'   data point.
+#' data point.
+#'
 #' @keywords utils
-#' @aliases get_rastervalue
+#'
 #' @examples
 #' \dontrun{
 #' # Extract values
 #' vals <- get_rastervalue(coords, env)
 #' }
+#'
 #' @export
 get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   assertthat::assert_that(
@@ -1000,8 +1050,11 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
 #' to a background layer that can be used to fill a prediction.
 #'
 #' @param model A [`list`] object created from a DistributionModel.
-#' @keywords utils, internal
+#'
 #' @return A [`SpatRaster-class`] object
+#'
+#' @keywords utils, internal
+#'
 #' @noRd
 model_to_background <- function(model){
   assertthat::assert_that(
@@ -1034,9 +1087,11 @@ model_to_background <- function(model){
 #'
 #' @param post A data.frame
 #' @param background A [`SpatRaster-class`] object for the background raster.
+#'
+#' @return A [`SpatRaster-class`] object with number of columns equal to \code{ncol(post)}.
+#'
 #' @keywords internal, utils
-#' @return A [`SpatRaster-class`] object with number of columns equal to
-#'   \code{ncol(post)}.
+#'
 #' @noRd
 fill_rasters <- function(post, background){
   assertthat::assert_that(
@@ -1082,19 +1137,26 @@ fill_rasters <- function(post, background){
 
 #' Create a polynomial transformation from coordinates
 #'
-#' @description This function transforms the coordinates of a supplied file
-#'   through a polynomial transform. By default it applies weights and a QR
-#'   decomposition for numerical stability.
+#' @description This function transforms the coordinates of a supplied file through
+#' a polynomial transform. By default it applies weights and a QR decomposition
+#' for numerical stability.
+#'
 #' @param coords A [`data.frame`], [`matrix`] or [`sf`] object with coordinates
-#'   (2 columns named x-y).
-#' @param degree The number of degrees used for polynominal transformation
-#'   (Default: \code{2}).
+#' (2 columns named x-y).
+#' @param degree The number of degrees used for polynominal transformation (Default: \code{2}).
 #' @param weights Set by default to the inverse of the number of coordinates.
+#'
 #' @returns A data.frame with transformed coordinates.
-#' @keywords utils
-#' @keywords internal
+#'
 #' @references
-#' * Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R., Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E., Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community ecology in the age of multivariate multiscale spatial analysis. Ecological Monographs 82, 257–275.
+#' * Dray S., Plissier R., Couteron P., Fortin M.J., Legendre P., Peres-Neto P.R.,
+#' Bellier E., Bivand R., Blanchet F.G., De Caceres M., Dufour A.B., Heegaard E.,
+#' Jombart T., Munoz F., Oksanen J., Thioulouse J., Wagner H.H. (2012). Community
+#' ecology in the age of multivariate multiscale spatial analysis. Ecological
+#' Monographs 82, 257–275.
+#'
+#' @keywords utils, internal
+#'
 #' @noRd
 polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
   assertthat::assert_that(
@@ -1125,10 +1187,13 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
 
 #' Clean up raster layer from disk
 #'
-#' Completely deletes for instance a temporary created [`SpatRaster`] object.
+#' @description Completely deletes for instance a temporary created [`SpatRaster`] object.
+#'
 #' @param A [`SpatRaster`] object.
 #' @param verbose Print progress (Default: \code{FALSE}).
+#'
 #' @keywords utils
+#'
 #' @noRd
 clean_rasterfile <- function(x, verbose = FALSE)
 {
@@ -1160,15 +1225,16 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #' Split raster factor levels to stack
 #'
 #' @description Takes a single raster that is a [`factor`] and creates a new
-#'   [`SpatRaster`] that contains the individual levels.
+#' [`SpatRaster`] that contains the individual levels.
 #'
 #' @param ras A [`SpatRaster`] object that is a [`factor`]. Alternatively a
-#'   [`SpatRaster`] object can be supplied in which only factor variables are
-#'   'exploded'.
+#' [`SpatRaster`] object can be supplied in which only factor variables are exploded'.
 #' @param name An optional [`character`] name for the [`SpatRaster`].
-#' @aliases explode_factorized_raster
+#'
 #' @returns A [`SpatRaster`] object.
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 explode_factorized_raster <- function(ras, name = NULL){
   assertthat::assert_that(is.Raster(ras),
@@ -1251,68 +1317,75 @@ explode_factorized_raster <- function(ras, name = NULL){
 #' Functionality for geographic and environmental thinning
 #'
 #' @description For most species distribution modelling approaches it is assumed
-#'   that occurrence records are unbiased, which is rarely the case. While
-#'   model-based control can alleviate some of the effects of sampling bias, it
-#'   can often be desirable to account for some sampling biases through spatial
-#'   thinning (Aiello‐Lammens et al. 2015). This is an approach based on the
-#'   assumption that over-sampled grid cells contribute little more than bias,
-#'   rather than strengthening any environmental responses. This function provides
-#'   some methods to apply spatial thinning approaches. Note that this
-#'   effectively removes data prior to any estimation and its use should be
-#'   considered with care (see also Steen et al. 2021).
+#' that occurrence records are unbiased, which is rarely the case. While
+#' model-based control can alleviate some of the effects of sampling bias, it
+#' can often be desirable to account for some sampling biases through spatial
+#' thinning (Aiello‐Lammens et al. 2015). This is an approach based on the
+#' assumption that over-sampled grid cells contribute little more than bias,
+#' rather than strengthening any environmental responses. This function provides
+#' some methods to apply spatial thinning approaches. Note that this
+#' effectively removes data prior to any estimation and its use should be
+#' considered with care (see also Steen et al. 2021).
+#'
+#' @param data A [`sf`] object with observed occurrence points. All methods threat
+#' presence-only and presence-absence occurrence points equally.
+#' @param background A [`SpatRaster`] object with the background of the study
+#' region. Use for assessing point density.
+#' @param env A [`SpatRaster`] object with environmental covariates. Needed when
+#' method is set to \code{"environmental"} or \code{"bias"} (Default: \code{NULL}).
+#' @param method A [`character`] of the method to be applied (Default: \code{"random"}).
+#' @param remainpoints A [`numeric`] giving the number of data points at minimum to
+#' remain (Default: \code{10}).
+#' @param mindistance A [`numeric`] for the minimum distance of neighbouring observations
+#' (Default: \code{NULL}).
+#' @param zones A [`SpatRaster`] to be supplied when option \code{"zones"} is chosen
+#' (Default: \code{NULL}).
+#' @param probs A [`numeric`] used as quantile threshold in \code{"bias"} method.
+#' (Default: \code{0.75}).
+#' @param global A [`logical`] if during \code{"bias"} method global (entire \code{env} raster)
+#' or local (extracted at point locations) bias values are used as for quantile threshold.
+#' (Default: \code{TRUE}).
+#' @param centers A [`numeric`] used as number of centers for \code{"environmental"} method.
+#' (Default: \code{NULL}). If not set, automatically set to three or nlayers - 1
+#' (whatever is bigger).
+#' @param verbose [`logical`] of whether to print some statistics about the thinning
+#' outcome (Default: \code{TRUE}).
 #'
 #' @details
-#'
 #' All methods only remove points from "over-sampled" grid cells/areas. These are
 #' defined as all cells/areas which either have more points than \code{remainpoints} or
 #' more points than the global minimum point count per cell/area (whichever is larger).
 #'
 #' Currently implemented thinning methods:
+#' * \code{"random"}: Samples at random across all over-sampled grid cells returning
+#' only \code{"remainpoints"} from over-sampled cells. Does not account for any
+#' spatial or environmental distance between observations.
+#' * \code{"bias"}: This option removes explicitly points that are considered biased
+#' only (based on \code{"env"}). Points are only thinned from grid cells which are
+#' above the bias quantile (larger values equals greater bias). Thins the observations
+#' returning \code{"remainpoints"} from each over-sampled and biased cell.
+#' * \code{"zones"}: Thins observations from each zone that is above the over-sampled
+#' threshold and returns  \code{"remainpoints"} for each zone. Careful: If the
+#' zones are relatively wide this can remove quite a few observations.
+#' * \code{"environmental"}: This approach creates an observation-wide clustering
+#' (k-means) under the assumption that the full environmental niche has been comprehensively
+#' sampled and is covered by the provided covariates \code{env}. For each over-sampled
+#' cluster, we then obtain (\code{"remainpoints"}) by thinning points.
+#' * \code{"spatial"}: Calculates the spatial distance between all observations.
+#' Then points are removed iteratively until the minimum distance between points
+#' is crossed. The \code{"mindistance"} parameter has to be set for this function to work.
 #'
-#'  * \code{"random"}: Samples at random across all over-sampled grid cells returning
-#'   only \code{"remainpoints"} from over-sampled cells. Does not account for any
-#'   spatial or environmental distance between observations.
-#'  * \code{"bias"}: This option removes explicitly points that are considered biased only
-#'   (based on \code{"env"}). Points are only thinned from grid cells which are above the bias
-#'   quantile (larger values equals greater bias). Thins the observations returning
-#'   \code{"remainpoints"} from each over-sampled and biased cell.
-#'  * \code{"zones"}: Thins observations from each zone that is above the over-sampled
-#'   threshold and returns  \code{"remainpoints"} for each zone. Careful: If the zones are
-#'   relatively wide this can remove quite a few observations.
-#'  * \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
-#'   that the full environmental niche has been comprehensively sampled and is
-#'   covered by the provided covariates \code{env}. For each over-sampled cluster,
-#'   we then obtain (\code{"remainpoints"}) by thinning points.
-#'  * \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
-#'   iteratively until the minimum distance between points is crossed.  The
-#'   \code{"mindistance"} parameter has to be set for this function to work.
+#' @references
+#' * Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., &
+#'  Anderson, R. P. (2015). spThin: an R package for spatial thinning of species
+#'  occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
+#' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial
+#'  thinning and class balancing: Key choices lead to variation in the performance
+#'  of species distribution models with citizen science data. Methods in Ecology and
+#'  Evolution, 12(2), 216-226.
 #'
-#' @param data A [`sf`] object with observed occurrence points.
-#'   All methods threat presence-only and presence-absence occurrence points
-#'   equally.
-#' @param background A [`SpatRaster`] object with the background of the study
-#'   region. Use for assessing point density.
-#' @param env A [`SpatRaster`] object with environmental covariates. Needed when
-#'   method is set to \code{"environmental"} or \code{"bias"} (Default:
-#'   \code{NULL}).
-#' @param method A [`character`] of the method to be applied (Default:
-#'   \code{"random"}).
-#' @param remainpoints A [`numeric`] giving the number of data points at minimum to
-#'   remain (Default: \code{10}).
-#' @param mindistance A [`numeric`] for the minimum distance of neighbouring
-#'   observations (Default: \code{NULL}).
-#' @param zones A [`SpatRaster`] to be supplied when option \code{"zones"} is
-#'   chosen (Default: \code{NULL}).
-#' @param probs A [`numeric`] used as quantile threshold in \code{"bias"} method.
-#'   (Default: \code{0.75}).
-#' @param global A [`logical`] if during \code{"bias"} method global (entire \code{env} raster)
-#'   or local (extracted at point locations) bias values are used as for quantile threshold.
-#'   (Default: \code{TRUE}).
-#' @param centers A [`numeric`] used as number of centers for \code{"environmental"} method.
-#'   (Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
-#'   is bigger).
-#' @param verbose [`logical`] of whether to print some statistics about the
-#'   thinning outcome (Default: \code{TRUE}).
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  # Thin a certain number of observations
@@ -1321,11 +1394,7 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'  # using a bias layer
 #'  thin_points <- thin_observations(points, background, method = "bias", env = bias)
 #' }
-#' @aliases thin_observations
-#' @references
-#' * Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., & Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
-#' * Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.
-#' @keywords utils
+#'
 #' @export
 thin_observations <- function(data, background, env = NULL, method = "random", remainpoints = 10, mindistance = NULL,
                               zones = NULL, probs = 0.75, global = TRUE, centers = NULL, verbose = TRUE){

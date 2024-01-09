@@ -2,8 +2,16 @@
 % Please edit documentation in R/write_output.R
 \name{write_model}
 \alias{write_model}
+\alias{write_model,ANY-method}
 \title{Save a model for later use}
 \usage{
+write_model(
+  mod,
+  fname,
+  slim = FALSE,
+  verbose = getOption("ibis.setupmessages")
+)
+
 \S4method{write_model}{ANY}(
   mod,
   fname,
@@ -20,8 +28,8 @@
 object should be deleted. This deletes for example predictions or any other
 non-model content from the object (Default: \code{FALSE}).}
 
-\item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
-Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites
+\code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 }
 \value{
 No R-output is created. A file is written to the target direction.

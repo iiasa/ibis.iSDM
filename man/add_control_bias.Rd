@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_control_bias.R
 \name{add_control_bias}
 \alias{add_control_bias}
+\alias{add_control_bias,BiodiversityDistribution-method}
 \title{Add a control to a BiodiversityModel object to control biases}
 \usage{
 add_control_bias(
@@ -106,19 +107,24 @@ through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting th
    add_predictors(covariates) |>
    add_control_bias(biasvariable, bias_value = NULL)
 }
+
 }
 \references{
 \itemize{
-\item Warton, D.I., Renner, I.W. and Ramp, D., 2013. Model-based control of observer bias for the analysis of presence-only data in ecology. PloS one, 8(11), p.e79168.
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
-\item Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly estimating spatial sampling effort and habitat suitability for multiple species from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
+\item Warton, D.I., Renner, I.W. and Ramp, D., 2013. Model-based control of observer
+bias for the analysis of presence-only data in ecology. PloS one, 8(11), p.e79168.
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly
+estimating spatial sampling effort and habitat suitability for multiple species
+from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 }
 }
 \seealso{
 \code{\link[=add_control_extrapolation]{add_control_extrapolation()}}
 }
-\concept{The spatial bias weighting was inspired by code in the
-  \code{enmSdmX} package.}
+\concept{The spatial bias weighting was inspired by code in the \code{enmSdmX} package.}
 \keyword{bias,}
 \keyword{control}
 \keyword{offset,}

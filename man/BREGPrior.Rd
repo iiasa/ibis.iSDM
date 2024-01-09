@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPrior}
 \alias{BREGPrior}
+\alias{BREGPrior,character-method}
 \title{Create a new spike and slab prior for Bayesian generalized linear models}
 \usage{
 BREGPrior(variable, hyper = NULL, ip = NULL)
@@ -54,10 +55,13 @@ p1
 p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 p2
 }
+
 }
 \references{
 \itemize{
-\item Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster, Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection" Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
+\item Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster,
+Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection"
+Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
 }
 }
 \seealso{

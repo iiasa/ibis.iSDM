@@ -15,7 +15,8 @@
 \description{
 Similar as \code{\link{summary}}, this helper function obtains the
 coefficients from a given \link{DistributionModel} object.
-\strong{Note:}
+}
+\note{
 For models trained with machine-learning approaches (e.g. \code{\link{engine_bart}}
 etc) this function will return variable importance estimates rather than
 linear coefficients. Similar can be said for trained non-linear models.

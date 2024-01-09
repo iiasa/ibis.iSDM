@@ -4,12 +4,35 @@ NULL
 #' Engine for extreme gradient boosting (XGBoost)
 #'
 #' @description Allows to estimate eXtreme gradient descent boosting for
-#'   tree-based or linear boosting regressions. The XGBoost engine is a
-#'   flexible, yet powerful engine with many customization options, supporting
-#'   multiple options to perform single and multi-class regression and
-#'   classification tasks. For a full list of options users are advised to have
-#'   a look at the [xgboost::xgb.train] help file and
-#'   [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io).
+#' tree-based or linear boosting regressions. The XGBoost engine is a
+#' flexible, yet powerful engine with many customization options, supporting
+#' multiple options to perform single and multi-class regression and
+#' classification tasks. For a full list of options users are advised to have
+#' a look at the [xgboost::xgb.train] help file and
+#' [https://xgboost.readthedocs.io](https://xgboost.readthedocs.io).
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param booster A [`character`] of the booster to use. Either \code{"gbtree"}
+#' or \code{"gblinear"} (Default: \code{gblinear})
+#' @param learning_rate [`numeric`] value indicating the learning rate (eta).
+#' Lower values generally being better but also computationally more costly.
+#' (Default: \code{1e-3})
+#' @param iter [`numeric`] value giving the the maximum number of boosting
+#' iterations for cross-validation (Default: \code{8e3L}).
+#' @param gamma [`numeric`] A regularization parameter in the model. Lower
+#' values for better estimates (Default: \code{3}). Also see \code{"reg_lambda"}
+#' parameter for the L2 regularization on the weights
+#' @param reg_lambda [`numeric`] L2 regularization term on weights (Default: \code{0}).
+#' @param reg_alpha [`numeric`] L1 regularization term on weights (Default: \code{0}).
+#' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
+#' @param subsample [`numeric`] The ratio used for subsampling to prevent overfitting.
+#' Also used for creating a random tresting dataset (Default: \code{0.75}).
+#' @param colsample_bytree [`numeric`] Sub-sample ratio of columns when constructing
+#' each tree (Default: \code{0.4}).
+#' @param min_child_weight [`numeric`] Broadly related to the number of instances
+#' necessary for each node (Default: \code{3}).
+#' @param nthread [`numeric`] on the number of CPU-threads to use.
+#' @param ... Other none specified parameters.
 #'
 #' @details The default parameters have been set relatively conservative as to
 #' reduce overfitting.
@@ -18,49 +41,30 @@ NULL
 #' variables. Within ibis this is possible via [`XGBPrior`]. However constraints
 #' are available only for the \code{"gbtree"} baselearners.
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param booster A [`character`] of the booster to use. Either \code{"gbtree"}
-#'   or \code{"gblinear"} (Default: \code{gblinear})
-#' @param learning_rate [`numeric`] value indicating the learning rate (eta).
-#'   Lower values generally being better but also computationally more costly.
-#'   (Default: \code{1e-3})
-#' @param iter [`numeric`] value giving the the maximum number of boosting
-#'   iterations for cross-validation (Default: \code{8e3L}).
-#' @param gamma [`numeric`] A regularization parameter in the model. Lower
-#'   values for better estimates (Default: \code{3}). Also see
-#'   \code{"reg_lambda"} parameter for the L2 regularization on the weights
-#' @param reg_lambda [`numeric`] L2 regularization term on weights (Default:
-#'   \code{0}).
-#' @param reg_alpha [`numeric`] L1 regularization term on weights (Default:
-#'   \code{0}).
-#' @param max_depth [`numeric`] The Maximum depth of a tree (Default: \code{3}).
-#' @param subsample [`numeric`] The ratio used for subsampling to prevent
-#'   overfitting. Also used for creating a random tresting dataset (Default:
-#'   \code{0.75}).
-#' @param colsample_bytree [`numeric`] Sub-sample ratio of columns when
-#'   constructing each tree (Default: \code{0.4}).
-#' @param min_child_weight [`numeric`] Broadly related to the number of
-#'   instances necessary for each node (Default: \code{3}).
-#' @param nthread [`numeric`] on the number of CPU-threads to use.
-#' @param ... Other none specified parameters.
 #' @note
 #' *'Machine learning is statistics minus any checking of models and assumptions‘* ~ Brian D. Ripley, useR! 2004, Vienna
-#' @seealso [xgboost::xgb.train]
-#' @references
-#' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
-#' @family engine
-#' @aliases engine_xgboost
+#'
 #' @returns An [Engine].
+#'
+#' @references
+#' * Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System",
+#' 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016,
+#' https://arxiv.org/abs/1603.02754
+#'
+#' @seealso [xgboost::xgb.train]
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add xgboost as an engine
 #' x <- distribution(background) |> engine_xgboost(iter = 4000)
 #' }
+#'
 #' @name engine_xgboost
 NULL
+
 #' @rdname engine_xgboost
 #' @export
-
 engine_xgboost <- function(x,
                         booster = "gbtree",
                         iter = 8e3L,

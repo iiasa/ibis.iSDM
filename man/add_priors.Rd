@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_priors.R
 \name{add_priors}
 \alias{add_priors}
+\alias{add_priors,BiodiversityDistribution-method}
 \title{Add priors to an existing distribution object}
 \usage{
 add_priors(x, priors = NULL, ...)
@@ -31,6 +32,7 @@ added as parameter via \link{add_predictors}
   add_priors(pp)
 
 }
+
 }
 \seealso{
 Other prior: 

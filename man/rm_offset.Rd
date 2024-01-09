@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_offset.R
 \name{rm_offset}
 \alias{rm_offset}
+\alias{rm_offset,BiodiversityDistribution-method}
 \title{Function to remove an offset}
 \usage{
 rm_offset(x, layer = NULL)
@@ -25,6 +26,7 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 \dontrun{
  rm_offset(model) -> model
 }
+
 }
 \seealso{
 Other offset: 

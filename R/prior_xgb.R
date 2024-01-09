@@ -10,26 +10,28 @@ NULL
 #' regularized out during model fitting.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent
-#'   effects.
-#' @param hyper A [`character`] object describing the type of constrain.
-#'   Available options are \code{'increasing'}, \code{'decreasing'},
-#'   \code{'convex'}, \code{'concave'}, \code{'none'}.
+#' effects.
+#' @param hyper A [`character`] object describing the type of constrain. Available
+#' options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+#' \code{'none'}.
 #' @param ... Variables passed on to prior object.
+#'
 #' @references
-#' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
+#' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015).
+#' Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
+#'
 #' @seealso [`Prior-class`] and [`GDBPrior`].
+#' @family prior
+#' @keywords priors
+#'
 #' @examples
 #' \dontrun{
 #'  pp <- XGBPrior("forest", "increasing")
 #' }
 #'
-#' @family prior
-#' @keywords priors
-#' @aliases XGBPrior
 #' @name XGBPrior
 NULL
 
-#' @name XGBPrior
 #' @rdname XGBPrior
 #' @export
 methods::setGeneric(
@@ -37,7 +39,6 @@ methods::setGeneric(
   signature = methods::signature("variable", "hyper"),
   function(variable, hyper = 'increasing', ...) standardGeneric("XGBPrior"))
 
-#' @name XGBPrior
 #' @rdname XGBPrior
 methods::setMethod(
   "XGBPrior",
@@ -68,21 +69,25 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables are supplied for XGBOOST
-#' @name XGBPriors
+
 #' @description This is a helper function to specify several [XGBPrior] with the
 #' same hyper-parameters, but different variables.
-#' @rdname XGBPriors
+#'
 #' @inheritParams XGBPrior
-#' @aliases XGBPriors
+#'
 #' @family prior
 #' @keywords priors
+#'
+#' @name XGBPriors
+NULL
+
+#' @rdname XGBPriors
 #' @export
 methods::setGeneric(
   "XGBPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("XGBPriors"))
 
-#' @name XGBPriors
 #' @rdname XGBPriors
 methods::setMethod(
   "XGBPriors",

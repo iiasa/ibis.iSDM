@@ -7,14 +7,16 @@ NULL
 
 #' Prototype for the trained Model object
 #'
+#' @description
 #' All trained Models should inherit the options here
 #'
-#' @name DistributionModel-class
-#' @aliases DistributionModel
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name DistributionModel-class
 NULL
 
+#' @rdname DistributionModel-class
 #' @export
 DistributionModel <- bdproto(
   "DistributionModel",

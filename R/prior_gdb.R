@@ -12,26 +12,27 @@ NULL
 #' __Important:__ Specifying a monotonic constrain for the [engine_gdb] does not
 #' guarantee that the variable is retained in the model as it can still be
 #' regularized out.
+#'
+#' @param variable A [`character`] matched against existing predictors variables.
+#' @param hyper A [`character`] object describing the type of constrain. Available
+#' options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+#' \code{'positive'}, \code{'negative'} or \code{'none'}.
+#' @param ... Variables passed on to prior object.
+#'
 #' @note Similar priors can also be defined for the [`engine_xgboost`] via
 #' [`XGBPrior()`].
 #'
-#' @param variable A [`character`] matched against existing predictors
-#'   variables.
-#' @param hyper A [`character`] object describing the type of constrain.
-#'   Available options are \code{'increasing'}, \code{'decreasing'},
-#'   \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
-#'   \code{'none'}.
-#' @param ... Variables passed on to prior object.
 #' @references
-#' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
+#' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species
+#'  distribution models. Ecology, 92(10), 1895-1901.
+#'
 #' @seealso [`Prior-class`], [`XGBPrior`]
 #' @keywords priors
 #' @family prior
-#' @aliases GDBPrior
+#'
 #' @name GDBPrior
 NULL
 
-#' @name GDBPrior
 #' @rdname GDBPrior
 #' @export
 methods::setGeneric(
@@ -39,7 +40,6 @@ methods::setGeneric(
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("GDBPrior"))
 
-#' @name GDBPrior
 #' @rdname GDBPrior
 methods::setMethod(
   "GDBPrior",
@@ -73,19 +73,22 @@ methods::setMethod(
 #'
 #' @description This is a helper function to specify several [GLMNETPrior] with
 #' the same hyper-parameters, but different variables.
-#' @name GDBPriors
-#' @rdname GDBPriors
+#'
 #' @inheritParams GDBPrior
-#' @aliases GDBPriors
+#'
 #' @keywords priors
 #' @family prior
+#'
+#' @name GDBPriors
+NULL
+
+#' @rdname GDBPriors
 #' @export
 methods::setGeneric(
   "GDBPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("GDBPriors"))
 
-#' @name GDBPriors
 #' @rdname GDBPriors
 methods::setMethod(
   "GDBPriors",

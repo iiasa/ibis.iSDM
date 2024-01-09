@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_biodiversity.R
 \name{add_biodiversity_polpo}
 \alias{add_biodiversity_polpo}
+\alias{add_biodiversity_polpo,BiodiversityDistribution,sf-method}
 \title{Add biodiversity polygon dataset to a distribution object (presence-only)}
 \usage{
 add_biodiversity_polpo(
@@ -55,11 +56,9 @@ biodiversity point records.}
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is
 to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default:
-\code{poisson}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{poisson}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
-\code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
 weights used in the modelling. Larger weights indicate higher weighting
@@ -87,8 +86,7 @@ intercept is to be added in shared likelihood models for engines
 \item{docheck}{\code{\link{logical}} on whether additional checks should be performed
 (e.g. intersection tests) (Default: \code{TRUE}).}
 
-\item{pseudoabsence_settings}{Either \code{NULL} or a
-\code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
+\item{pseudoabsence_settings}{Either \code{NULL} or a \code{\link[=pseudoabs_settings]{pseudoabs_settings()}} created settings object.}
 
 \item{...}{Other parameters passed down.}
 }
@@ -113,6 +111,7 @@ Use \code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}} to create bi
 inside-outside points for the given polygon!
 
 For an integration of range data as predictor or offset, see
+
 \code{\link[=add_predictor_range]{add_predictor_range()}} and \code{\link[=add_offset_range]{add_offset_range()}} instead.
 }
 \examples{

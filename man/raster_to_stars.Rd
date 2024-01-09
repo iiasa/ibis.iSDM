@@ -22,6 +22,7 @@ object.
  # Convert stars to SpatRaster
  stars_to_raster(obj)
 }
+
 }
 \seealso{
 \code{stars_to_raster}

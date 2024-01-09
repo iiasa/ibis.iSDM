@@ -13,8 +13,7 @@ interpolate_gaps(env, date_interpolation = "annual")
 should be interpolated. See \code{\link[=project]{project()}}.}
 }
 \value{
-\code{\link{logical}} indicating if the two \code{\linkS4class{SpatRaster}} objects have
-the same.
+\code{\link{logical}} indicating if the two \code{\linkS4class{SpatRaster}} objects have the same
 }
 \description{
 This function linearly approximates shares between time steps,
@@ -26,5 +25,6 @@ so that gaps for instance between 2010 and 2020 are filled with data for
   # Interpolate stars stack
   sc <- interpolate_gaps( stack, "annual")
 }
+
 }
 \keyword{scenario}

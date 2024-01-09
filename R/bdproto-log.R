@@ -7,14 +7,16 @@ NULL
 
 #' Log prototype.
 #'
+#' @description
 #' Basic proto object for Log, any Log inherit from here
 #'
-#' @name Log-class
-#' @aliases Log
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name Log-class
 NULL
 
+#' @rdname Log-class
 #' @export
 Log <- bdproto(
   "Log",

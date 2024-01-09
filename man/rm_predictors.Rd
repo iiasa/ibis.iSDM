@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_predictors.R
 \name{rm_predictors}
 \alias{rm_predictors}
+\alias{rm_predictors,BiodiversityDistribution,character-method}
 \title{Remove specific predictors from a \link{distribution} object}
 \usage{
 rm_predictors(x, names)
@@ -24,4 +25,5 @@ distribution(background) |>
  add_predictors(my_covariates) |>
  rm_predictors(names = "Urban")
 }
+
 }

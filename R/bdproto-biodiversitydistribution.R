@@ -14,12 +14,13 @@ NULL
 #' @details Run [names()] on a [`distribution`] object to show all available
 #' functions.
 #'
-#' @name BiodiversityDistribution-class
-#' @aliases BiodiversityDistribution
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name BiodiversityDistribution-class
 NULL
 
+#' @rdname BiodiversityDistribution-class
 #' @export
 BiodiversityDistribution <- bdproto(
   "BiodiversityDistribution",

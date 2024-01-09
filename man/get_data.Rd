@@ -2,6 +2,7 @@
 % Please edit documentation in R/get_data.R
 \name{get_data}
 \alias{get_data}
+\alias{get_data,ANY-method}
 \title{Small helper function to obtain predictions from an object}
 \usage{
 get_data(obj, what = NULL)
@@ -33,5 +34,6 @@ lazy character matching if what is supplied.
  # Assumes previously computed model
  get_data(fit)
 }
+
 }
 \keyword{utils}

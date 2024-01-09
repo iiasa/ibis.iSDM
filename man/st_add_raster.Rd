@@ -12,8 +12,7 @@ st_add_raster(obj, new)
 \item{new}{A \code{\link{SpatRaster}} object with additional covariates to be added.}
 }
 \value{
-A \code{\link{stars}} object with the names of the \code{\link{SpatRaster}} object
-added.
+A \code{\link{stars}} object with the names of the \code{\link{SpatRaster}} object added.
 }
 \description{
 Often it is necessary to add static variables to existing stars

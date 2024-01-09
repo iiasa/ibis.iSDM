@@ -2,8 +2,19 @@
 % Please edit documentation in R/ensemble.R
 \name{ensemble_spartial}
 \alias{ensemble_spartial}
+\alias{ensemble_spartial,ANY-method}
 \title{Function to create an ensemble of spartial effects from multiple models}
 \usage{
+ensemble_spartial(
+  ...,
+  x.var,
+  method = "mean",
+  layer = "mean",
+  newdata = NULL,
+  min.value = NULL,
+  normalize = TRUE
+)
+
 \S4method{ensemble_spartial}{ANY}(
   ...,
   x.var,
@@ -15,9 +26,8 @@
 )
 }
 \arguments{
-\item{...}{Provided \code{\link{DistributionModel}} objects from which partial
-responses can be called. In the future provided data.frames might be
-supported as well.}
+\item{...}{Provided \code{\link{DistributionModel}} objects from which partial responses
+can be called. In the future provided data.frames might be supported as well.}
 
 \item{x.var}{A \code{\link{character}} of the variable from which an ensemble is to be
 created.}
@@ -26,12 +36,11 @@ created.}
 options (Default: \code{'mean'}).}
 
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
-(Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
-names in ensembles of \code{SpatRaster} objects.}
+(Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer names
+in ensembles of \code{SpatRaster} objects.}
 
 \item{newdata}{A optional \code{\link{data.frame}} or \code{\link{SpatRaster}} object supplied to
-the model (DefaultL \code{NULL}). \emph{Note: This object needs to have
-identical names as the original predictors.}}
+the model (DefaultL \code{NULL}). This object needs to have identical names as the original predictors.}
 
 \item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
 to be surpassed in each layer before calculating and ensemble
@@ -41,8 +50,7 @@ to be surpassed in each layer before calculating and ensemble
 normalized to a scale of 0-1 (Default: \code{TRUE}).}
 }
 \value{
-A \link{SpatRaster} object with the combined partial effects of the
-supplied models.
+A \link{SpatRaster} object with the combined partial effects of the supplied models.
 }
 \description{
 Similar to the \code{ensemble()} function, this function creates an
@@ -65,15 +73,16 @@ Possible options for creating an ensemble includes:
 }
 \note{
 If a list is supplied, then it is assumed that each entry in the list
-is a fitted \code{\link{DistributionModel}} object. Take care not to create an
-ensemble of models constructed with different link functions, e.g. logistic
-vs \link{log}. By default the response functions of each model are normalized.
+is a fitted \code{\link{DistributionModel}} object. Take care not to create an ensemble
+of models constructed with different link functions, e.g. logistic vs \link{log}.
+By default the response functions of each model are normalized.
 }
 \examples{
 \dontrun{
  # Assumes previously computed models
  ex <- ensemble_spartial(mod1, mod2, mod3, method = "mean")
 }
+
 }
 \keyword{partial}
 \keyword{train,}

@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPriors}
 \alias{BREGPriors}
+\alias{BREGPriors,character-method}
 \title{Helper function when multiple variables are supplied for a BREG prior}
 \usage{
 BREGPriors(variable, hyper = NULL, ip = NULL)

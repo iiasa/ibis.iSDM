@@ -14,6 +14,8 @@ NULL
 #' @param ... not used.
 #'
 #' @seealso [base::summary()].
+#' @keywords summary
+#'
 #' @examples
 #' \dontrun{
 #' # Example with a trained model
@@ -34,43 +36,38 @@ NULL
 #'  pp <- priors(p1,p2)
 #'  summary(pp)
 #' }
-#' @keywords summary
+#'
+#'
 #' @name summary
 NULL
 
 #' @rdname summary
 #' @method summary distribution
-#' @keywords summary
 #' @export
 summary.distribution <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary DistributionModel
-#' @keywords summary
 #' @export
 summary.DistributionModel <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary PredictorDataset
-#' @keywords summary
 #' @export
 summary.PredictorDataset <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary BiodiversityScenario
-#' @keywords summary
 #' @export
 summary.BiodiversityScenario <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary PriorList
-#' @keywords summary
 #' @export
 summary.PriorList <- function(object, ...) object$summary()
 
 #' @rdname summary
 #' @method summary Settings
-#' @keywords summary
 #' @export
 summary.Settings <- function(object, ...) object$summary()
 
@@ -78,19 +75,21 @@ summary.Settings <- function(object, ...) object$summary()
 #'
 #' @description Similar as [`summary`], this helper function obtains the
 #' coefficients from a given [DistributionModel] object.
-#' **Note:**
-#' For models trained with machine-learning approaches (e.g. [`engine_bart`]
-#' etc) this function will return variable importance estimates rather than
-#' linear coefficients. Similar can be said for trained non-linear models.
+#'
 #' @param object Any prepared object.
 #' @param ... not used.
+#'
+#' @note For models trained with machine-learning approaches (e.g. [`engine_bart`]
+#' etc) this function will return variable importance estimates rather than
+#' linear coefficients. Similar can be said for trained non-linear models.
+#'
 #' @seealso [stats::coef()].
 #' @keywords coef
+#'
 #' @name coef
 NULL
 
 #' @rdname coef
 #' @method coef DistributionModel
-#' @keywords coef
 #' @export
 coef.DistributionModel <- function(object, ...) object$get_coefficients()

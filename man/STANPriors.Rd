@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_stan.R
 \name{STANPriors}
 \alias{STANPriors}
+\alias{STANPriors,vector,character-method}
 \title{Helper function when multiple variables and types are supplied for STAN}
 \usage{
 STANPriors(variables, type, hyper = c(0, 2), ...)
@@ -14,8 +15,7 @@ predictors or latent effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
-hyper-parameters.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.}
 
 \item{...}{Variables passed on to prior object}
 }

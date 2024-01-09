@@ -16,7 +16,5 @@ as.Id(x, ...)
 }
 \description{
 As Id
-
-As Id character
 }
 \keyword{misc}

@@ -84,17 +84,14 @@ NULL
 #' @keywords scenarios
 #' @import terra
 #' @name project
-#' @aliases project, project-method
 #' @export
 NULL
 
 #' @rdname project
 #' @method project BiodiversityScenario
-#' @keywords scenarios
 #' @export
 project.BiodiversityScenario <- function(x,...) project(x,...)
 
-#' @name project
 #' @rdname project
 methods::setMethod(
   "project",

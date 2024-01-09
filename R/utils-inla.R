@@ -1,14 +1,18 @@
 #' Built formula for INLA model
 #'
 #' @description This function built a formula for a `engine_inla()` model.
+#'
 #' @param model A [`list()`] object containing the prepared model data.
 #' @param id The id for the species formula.
 #' @param x A [`BiodiversityDistribution`] object.
 #' @param settings A [`Settings`] object.
-#' @author Martin Jung
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#' @keywords internal
 built_formula_inla <- function(model, id, x, settings){
   assertthat::assert_that(
     is.list(model),
@@ -253,12 +257,13 @@ built_formula_inla <- function(model, id, x, settings){
 #'
 #' @param mesh [`inla.mesh`] mesh object.
 #' @param region.poly A supplied [`region.poly`] object.
-#' @param variant A character to which type of area calculation (Default:
-#'   \code{'gpc'}).
-#' @param relative Should the total amount of area converted to relatives
-#'   (Default: \code{FALSE}).
+#' @param variant A character to which type of area calculation (Default: \code{'gpc'}).
+#' @param relative Should the total amount of area converted to relatives (Default: \code{FALSE}).
+#'
 #' @returns A [`vector`] with the area of each polygon.
+#'
 #' @keywords utils
+#'
 #' @noRd
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE){
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
@@ -368,9 +373,13 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 }
 
 #' Mesh to polygon script
+#'
 #' @param mesh [`inla.mesh`] mesh object.
+#'
 #' @returns A [`sf`] object.
+#'
 #' @keywords utils
+#'
 #' @noRd
 mesh_as_sf <- function(mesh) {
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
@@ -418,8 +427,11 @@ mesh_boundary <- function(mesh){
 #'
 #' @param mesh A [`inla.mesh`] object.
 #' @param region.poly A [`SpatialPolygons`] object.
+#'
 #' @source https://www.sciencedirect.com/science/article/pii/S221167531830099X
+#'
 #' @keywords utils
+#'
 #' @noRd
 mesh_barrier <- function(mesh, region.poly){
   assertthat::assert_that(
@@ -493,6 +505,7 @@ coords_in_mesh <- function(mesh, coords) {
 
 #' Manual prediction by matrix multiplication
 #'
+#' @description
 #' Spatial predictions with INLA can be quite computationally costly. Assuming
 #' that model coefficients are fixed and linear, it is possible to obtain
 #' comparable predictions simply by matrix multiplication.
@@ -505,7 +518,8 @@ coords_in_mesh <- function(mesh, coords) {
 #' @param type The summary statistic to use.
 #' @param backtransf Either NULL or a function.
 #' @param coords A [matrix] with coordinates or \code{NULL}. If \code{NULL}
-#'   coordinates are recreated from predictors.
+#' coordinates are recreated from predictors.
+#'
 #' @keywords utils
 #' @noRd
 coef_prediction <- function(mesh, mod, type = 'mean',
@@ -606,11 +620,12 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 #' Direct prediction by posterior simulation
 #'
 #' @param mod A trained distribution model.
-#' @param nsamples [`numeric`] on the number of samples to be taken from the
-#'   posterior.
+#' @param nsamples [`numeric`] on the number of samples to be taken from the posterior.
 #' @param backtransf Either \code{NULL} or a function.
 #' @param seed A random seed that can be specified.
+#'
 #' @keywords utils
+#'
 #' @noRd
 post_prediction <- function(mod, nsamples = 100,
                             backtransf = NULL,
@@ -933,13 +948,14 @@ post_prediction <- function(mod, nsamples = 100,
 }
 
 #' Make Integration stack
+#'
 #' @param mesh The background projection mesh.
 #' @param mesh.area The area of the mesh, has to match the number of integration
-#'   points.
+#' points.
 #' @param model A prepared model object.
 #' @param id A id supplied to name this object.
-#' @param joint Whether a model with multiple likelihood functions is to be
-#'   specified.
+#' @param joint Whether a model with multiple likelihood functions is to be specified.
+#'
 #' @keywords utils, internal
 #' @noRd
 inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALSE){
@@ -1007,11 +1023,12 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 #' @param type Name to use.
 #' @param background A [`sf`] formatted background layer.
 #' @param spde An spde field if specified.
-#' @param res Approximate resolution to the projection grid (default:
-#'   \code{NULL}).
+#' @param res Approximate resolution to the projection grid (default: \code{NULL}).
 #' @param settings A settings object.
 #' @param joint Whether more than 2 likelihoods are estimated.
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, background,
                                        res = NULL, spde = NULL, settings = NULL,joint = FALSE){
@@ -1194,11 +1211,11 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
 #' @param mesh A \code{"INLA::inla.mesh"} object.
 #' @param background A [sf] object containing the background region.
 #' @param cov A [data.frame] or [matrix] with the covariates for the modelling.
-#' @param proj_stepsize A numeric indication on the prediction stepsize to be
-#'   used.
-#' @param spatial A [logical] flag whether a spatialpoints [data.frame] should
-#'   be returned.
+#' @param proj_stepsize A numeric indication on the prediction stepsize to be used.
+#' @param spatial A [logical] flag whether a spatialpoints [data.frame] should be returned.
+#'
 #' @keywords utils
+#'
 #' @noRd
 inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatial = TRUE){
   assertthat::assert_that(
@@ -1284,7 +1301,9 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
 #' @param m A trained INLA model object.
 #' @param what A [`character`].
 #' @param ... Other options to based on.
+#'
 #' @keywords utils
+#'
 #' @noRd
 #TODO: Lot more to add here, including options on what to extract
 tidy_inla_summary <- function(m, what = 'fixed',...){
@@ -1343,8 +1362,11 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
 #' Additional INLA priors not already available.
 #'
 #' @param prior Which prior to pick as [`character`].
+#'
 #' @source https://becarioprecario.bitbucket.io/inla-gitbook/ch-priors.html#sec:newpriors
+#'
 #' @keywords utils
+#'
 #' @noRd
 manual_inla_priors <- function(prior){
 
@@ -1386,6 +1408,7 @@ manual_inla_priors <- function(prior){
 #' @description Best model is assessed through their within-sample predictive
 #' accuracy via conditional predictive ordinate (CPO) Ideally this procedure is
 #' replaced by a proper regularizing prior at some point...
+#'
 #' @param form A supplied [`formula`] object.
 #' @param stack_data_resp A list containing inla stack data.
 #' @param stk_inference An inla.data.stack object.
@@ -1393,10 +1416,12 @@ manual_inla_priors <- function(prior){
 #' @param cf List of link functions to be used.
 #' @param li Internal indication for the link function (Default: \code{1}).
 #' @param response The response variable. If not specified, extract from formula
-#'   (default: \code{NULL}).
+#' (default: \code{NULL}).
 #' @param keep A [`vector`] of variables that are to be removed from model
-#'   iterations (default: \code{NULL}).
+#' iterations (default: \code{NULL}).
+#'
 #' @keywords utils
+#'
 #' @noRd
 inla.backstep <- function(master_form,
                           stack_data_resp, stk_inference,fam, cf, li = 1,

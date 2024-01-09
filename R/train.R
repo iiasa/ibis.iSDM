@@ -4,114 +4,102 @@ NULL
 #' Train the model from a given engine
 #'
 #' @description This function trains a [distribution()] model with the specified
-#'   engine and furthermore has some generic options that apply to all engines
-#'   (regardless of type). See Details with regards to such options.
+#' engine and furthermore has some generic options that apply to all engines
+#' (regardless of type). See Details with regards to such options.
 #'
-#'   Users are advised to check the help files for individual engines for advice
-#'   on how the estimation is being done.
-#' @details This function acts as a generic training function that - based on
-#'   the provided [`BiodiversityDistribution-class`] object creates a new
-#'   distribution model. The resulting object contains both a \code{"fit_best"}
-#'   object of the estimated model and, if \code{inference_only} is \code{FALSE}
-#'   a [SpatRaster] object named \code{"prediction"} that contains the spatial
-#'   prediction of the model. These objects can be requested via
-#'   \code{object$get_data("fit_best")}.
-#'
-#'   Other parameters in this function:
-#'
-#' * \code{"filter_predictors"} The parameter can be set to various options to remove highly correlated variables or those
-#'   with little additional information gain from the model prior to any
-#'   estimation. Available options are \code{"none"} (Default) \code{"pearson"}
-#'   for applying a \code{0.7} correlation cutoff, \code{"abess"} for the
-#'   regularization framework by Zhu et al. (2020), or \code{"RF"} or
-#'   \code{"randomforest"} for removing the least important variables according
-#'   to a randomForest model. **Note**: This function is only applied on
-#'   predictors for which no prior has been provided (e.g. potentially
-#'   non-informative ones).
-#'
-#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter search for several models, which can improve
-#'   prediction accuracy although through the a substantial increase in
-#'   computational cost.
-#'
-#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
-#'   the engine does not support joint integration of likelihoods. See also
-#'   Miller et al. (2019) in the references for more details on different types
-#'   of integration. Of course, if users want more control about this aspect,
-#'   another option is to fit separate models and make use of the [add_offset],
-#'   [add_offset_range] and [ensemble] functionalities.
-#'
-#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors to the range of values observed
-#'   during model training.
-#'
-#' @note There are no silver bullets in (correlative) species distribution
-#'   modelling and for each model the analyst has to understand the objective,
-#'   workflow and parameters than can be used to modify the outcomes. Different
-#'   predictions can be obtained from the same data and parameters and not all
-#'   necessarily make sense or are useful.
+#' Users are advised to check the help files for individual engines for advice
+#' on how the estimation is being done.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
-#' @param filter_predictors A [`character`] defining if and how highly
-#'   correlated predictors are to be removed prior to any model estimation.
-#'   Available options are:
+#' @param filter_predictors A [`character`] defining if and how highly correlated
+#' predictors are to be removed prior to any model estimation. Available options are:
 #' * \code{"none"} No prior variable removal is performed (Default).
-#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
-#'   remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
-#'   Note that this effectively fits a separate generalized linear model to
-#'   reduce the number of covariates.
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise
+#' comparisons to identify and remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the
+#' \code{"abess"} package (see References). Note that this effectively fits a separate
+#' generalized linear model to reduce the number of covariates.
 #' * \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
-#'
 #' @param optim_hyperparam Parameter to tune the model by iterating over input
-#'   parameters or selection of predictors included in each iteration. Can be
-#'   set to \code{TRUE} if extra precision is needed (Default: \code{FALSE}).
-#'
-#' @param inference_only By default the engine is used to create a spatial
-#'   prediction of the suitability surface, which can take time. If only
-#'   inferences of the strength of relationship between covariates and
-#'   observations are required, this parameter can be set to \code{TRUE} to
-#'   ignore any spatial projection (Default: \code{FALSE}).
-#' @param only_linear Fit model only on linear baselearners and functions.
-#'   Depending on the engine setting this option to \code{FALSE} will result in
-#'   non-linear relationships between observations and covariates, often
-#'   increasing processing time (Default: \code{TRUE}). How non-linearity is
-#'   captured depends on the used engine.
+#' parameters or selection of predictors included in each iteration. Can be set
+#' to \code{TRUE} if extra precision is needed (Default: \code{FALSE}).
+#' @param inference_only By default the engine is used to create a spatial prediction
+#' of the suitability surface, which can take time. If only inferences of the strength
+#' of relationship between covariates and observations are required, this parameter
+#' can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE}).
+#' @param only_linear Fit model only on linear baselearners and functions. Depending
+#' on the engine setting this option to \code{FALSE} will result in non-linear
+#' relationships between observations and covariates, often increasing processing
+#' time (Default: \code{TRUE}). How non-linearity is captured depends on the used engine.
 #' @param method_integration A [`character`] with the type of integration that
-#'   should be applied if more than one [`BiodiversityDataset-class`] object is
-#'   provided in \code{x}. Particular relevant for engines that do not support
-#'   the integration of more than one dataset. Integration methods are generally
-#'   sensitive to the order in which they have been added to the
-#'   [`BiodiversityDistribution`] object.
-#'
-#'   Available options are:
-#' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
-#'   added to the predictor stack and thus are predictors for subsequent models
-#'   (Default).
-#' * \code{"offset"} The predicted output of the first (or previously fitted) models are
-#'   added as spatial offsets to subsequent models. Offsets are back-transformed
-#'   depending on the model family. This option might not be supported for every
-#'   [`Engine`].
-#' * \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
-#'   are combined and incorporated in the prediction as a factor interaction
-#'   with the "weaker" data source being partialed out during prediction. Here
-#'   the first dataset added determines the reference level (see Leung et al.
-#'   2019 for a description).
-#' * \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
-#'   Might not work with any engine!
-#' * \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
-#'   Individual weight multipliers can be determined while setting up the model
-#'   (**Note: Default is 1**). Datasets are then combined for estimation and
-#'   weighted respectively, thus giving for example presence-only records less
-#'   weight than survey records.
-#'
-#' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
-#' @param aggregate_observations [`logical`] on whether observations covering
-#'   the same grid cell should be aggregated (Default: \code{TRUE}).
+#' should be applied if more than one [`BiodiversityDataset-class`] object is
+#' provided in \code{x}. Particular relevant for engines that do not support the
+#' integration of more than one dataset. Integration methods are generally sensitive
+#' to the order in which they have been added to the [`BiodiversityDistribution`] object.
+#' Available options are:
+#' * \code{"predictor"} The predicted output of the first (or previously fitted)
+#' models are added to the predictor stack and thus are predictors for subsequent
+#' models (Default).
+#' * \code{"offset"} The predicted output of the first (or previously fitted) models
+#' are added as spatial offsets to subsequent models. Offsets are back-transformed
+#' depending on the model family. This option might not be supported for every [`Engine`].
+#' * \code{"interaction"} Instead of fitting several separate models, the observations
+#' from each dataset are combined and incorporated in the prediction as a factor
+#' interaction with the "weaker" data source being partialed out during prediction.
+#' Here the first dataset added determines the reference level (see Leung et al.
+#' 2019 for a description).
+#' * \code{"prior"} In this option we only make use of the coefficients from a
+#' previous model to define priors to be used in the next model. Might not work with any engine!
+#' * \code{"weight"} This option only works for multiple biodiversity datasets
+#' with the same type (e.g. \code{"poipo"}). Individual weight multipliers can be
+#' determined while setting up the model (**Note**: Default is 1). Datasets are
+#' then combined for estimation and weighted respectively, thus giving for example
+#' presence-only records less weight than survey records. **Note** that this parameter
+#' is ignored for engines that support joint likelihood estimation.
+#' @param aggregate_observations [`logical`] on whether observations covering the
+#' same grid cell should be aggregated (Default: \code{TRUE}).
 #' @param clamp [`logical`] whether predictions should be clamped to the range
-#'   of predictor values observed during model fitting (Default: \code{FALSE}).
-#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out
-#'   further information during the model fitting (Default: \code{FALSE}).
+#' of predictor values observed during model fitting (Default: \code{FALSE}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further
+#' information during the model fitting (Default: \code{FALSE}).
 #' @param ... further arguments passed on.
+#'
+#' @details This function acts as a generic training function that - based on the
+#' provided [`BiodiversityDistribution-class`] object creates a new distribution model.
+#' The resulting object contains both a \code{"fit_best"} object of the estimated
+#' model and, if \code{inference_only} is \code{FALSE} a [SpatRaster] object named
+#' \code{"prediction"} that contains the spatial prediction of the model. These
+#' objects can be requested via \code{object$get_data("fit_best")}.
+#'
+#' Other parameters in this function:
+#' * \code{"filter_predictors"} The parameter can be set to various options to
+#' remove highly correlated variables or those with little additional information
+#' gain from the model prior to any estimation. Available options are \code{"none"}
+#' (Default) \code{"pearson"} for applying a \code{0.7} correlation cutoff, \code{"abess"}
+#' for the regularization framework by Zhu et al. (2020), or \code{"RF"} or
+#' \code{"randomforest"} for removing the least important variables according to a
+#' randomForest model. **Note**: This function is only applied on predictors for
+#' which no prior has been provided (e.g. potentially non-informative ones).
+#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter
+#' search for several models, which can improve prediction accuracy although through
+#' the a substantial increase in computational cost.
+#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`]
+#' is supplied and when the engine does not support joint integration of likelihoods.
+#' See also Miller et al. (2019) in the references for more details on different types
+#' of integration. Of course, if users want more control about this aspect, another
+#' option is to fit separate models and make use of the [add_offset], [add_offset_range]
+#' and [ensemble] functionalities.
+#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors
+#' to the range of values observed during model training.
+#'
+#' @note There are no silver bullets in (correlative) species distribution modelling
+#' and for each model the analyst has to understand the objective, workflow and
+#' parameters than can be used to modify the outcomes. Different predictions can
+#' be obtained from the same data and parameters and not all necessarily make sense or are useful.
+#'
+#' @returns A [DistributionModel] object.
+#'
 #' @references
 #' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past
 #' and promising future for data integration methods to estimate species’ distributions.
@@ -121,9 +109,10 @@ NULL
 #' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for
 #'  countrywide α‐diversity and species distributions: illustration using &gt;6,000
 #'  plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
+#'
 #' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],
-#'   [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
-#' @returns A [DistributionModel] object.
+#' [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
+#'
 #' @examples
 #'  # Load example data
 #'  background <- terra::rast(system.file('extdata/europegrid_50km.tif',
@@ -152,11 +141,8 @@ NULL
 #'  mod
 #'
 #' @name train
-#' @aliases train, train-method
-#' @export
 NULL
 
-#' @name train
 #' @rdname train
 #' @export
 methods::setGeneric(
@@ -166,7 +152,6 @@ methods::setGeneric(
            only_linear = TRUE, method_integration = "predictor",
            aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) standardGeneric("train"))
 
-#' @name train
 #' @rdname train
 methods::setMethod(
   "train",

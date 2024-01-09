@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_biodiversity.R
 \name{add_biodiversity_poipo}
 \alias{add_biodiversity_poipo}
+\alias{add_biodiversity_poipo,BiodiversityDistribution,sf-method}
 \title{Add biodiversity point dataset to a distribution object (presence-only)}
 \usage{
 add_biodiversity_poipo(
@@ -37,22 +38,18 @@ add_biodiversity_poipo(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipo}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-only point
-occurrences.}
+\item{poipo}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-only point occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
-biodiversity point records.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
 
 \item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is
 to use all covariates (if specified).}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default:
-\code{'Poisson'}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'Poisson'}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
-\code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: code{NULL}).}
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
 weights used in the modelling. Larger weights indicate higher weighting
@@ -100,8 +97,8 @@ virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg',
 package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 # Define model
 x <- distribution(background) |>
-  add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
-x
+add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
+
 }
 \references{
 \itemize{
@@ -113,9 +110,6 @@ Methods in Ecology and Evolution 6:366–379.
 }
 }
 \seealso{
-See other functions for adding biodiversity data, i.e.
-\code{\link{add_biodiversity_poipa}}
-
 Other add_biodiversity: 
 \code{\link{add_biodiversity_poipa}()},
 \code{\link{add_biodiversity_polpa}()},

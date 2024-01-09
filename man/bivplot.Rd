@@ -2,6 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{bivplot}
 \alias{bivplot}
+\alias{bivplot,ANY-method}
 \title{Bivariate plot wrapper for distribution objects}
 \usage{
 bivplot(
@@ -30,11 +31,9 @@ bivplot(
 \item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}}
 object with \code{prediction} model within.}
 
-\item{xvar}{A \code{\link{character}} denoting the value on the x-axis (Default:
-\code{'mean'}).}
+\item{xvar}{A \code{\link{character}} denoting the value on the x-axis (Default: \code{'mean'}).}
 
-\item{yvar}{A \code{\link{character}} denoting the value on the y-axis (Default:
-\code{'sd'}).}
+\item{yvar}{A \code{\link{character}} denoting the value on the y-axis (Default: \code{'sd'}).}
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted
 (Default: \code{TRUE})?}
@@ -42,12 +41,11 @@ object with \code{prediction} model within.}
 \item{fname}{A \code{\link{character}} specifying the output filename a created figure
 should be written to.}
 
-\item{title}{Allows to respecify the title through a \code{\link{character}} (Default:
-\code{NULL}).}
+\item{title}{Allows to respecify the title through a \code{\link{character}} (Default:\code{NULL}).}
 
-\item{col}{A \code{\link{character}} stating the colour palette to use. Has to be
-either a predefined value or a vector of colours. See
-\code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.}
+\item{col}{A \code{\link{character}} stating the colour palette to use. Has to be either
+a predefined value or a vector of colours. See \code{"biscale::bi_pal_manual"}.
+Default: \code{"BlueGold"}.}
 
 \item{...}{Other engine specific parameters.}
 }

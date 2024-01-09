@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_latent.R
 \name{rm_latent}
 \alias{rm_latent}
+\alias{rm_latent,BiodiversityDistribution-method}
 \title{Function to remove a latent effect}
 \usage{
 rm_latent(x)
@@ -22,6 +23,7 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 \dontrun{
  rm_latent(model) -> model
 }
+
 }
 \seealso{
 add_latent_spatial

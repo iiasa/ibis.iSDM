@@ -34,5 +34,6 @@ INLA is handled in a special way as it is not available via cran.
   # Install and update all dependencies
   ibis_dependencies()
 }
+
 }
 \keyword{misc}

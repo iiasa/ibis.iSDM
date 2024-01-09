@@ -2,8 +2,20 @@
 % Please edit documentation in R/simulate_population_steps.R
 \name{simulate_population_steps}
 \alias{simulate_population_steps}
+\alias{simulate_population_steps,BiodiversityScenario,matrix-method}
 \title{Simulate population dynamics following the steps approach}
 \usage{
+simulate_population_steps(
+  mod,
+  vital_rates,
+  replicates = 1,
+  carrying_capacity = NULL,
+  initial = NULL,
+  dispersal = NULL,
+  density_dependence = NULL,
+  include_suitability = TRUE
+)
+
 \S4method{simulate_population_steps}{BiodiversityScenario,matrix}(
   mod,
   vital_rates,
@@ -33,15 +45,14 @@ for scaling. This is not yet implemented}).}
 provided, then initial populations are guessed (see details) from the projected
 suitability rasters (Default: \code{NULL}).}
 
-\item{dispersal}{A dispersal object defined by the
-\code{steps} package (Default: \code{NULL}).}
+\item{dispersal}{A dispersal object defined by the \code{steps} package (Default: \code{NULL}).}
 
 \item{density_dependence}{Specification of density dependence defined by the
 \code{steps} package (Default: \code{NULL}).}
 
-\item{include_suitability}{A \code{\link{logical}} flag on whether the projected
-suitability estimates should be used (Default: \code{TRUE}) or only the initial
-conditions set to the first time step.}
+\item{include_suitability}{A \code{\link{logical}} flag on whether the projected suitability
+estimates should be used (Default: \code{TRUE}) or only the initial conditions
+set to the first time step.}
 }
 \value{
 Adds flag to a \code{\link{BiodiversityScenario}} object to indicate that
@@ -55,9 +66,8 @@ information. The simulation is done using the \emph{steps} package (Visintin et
 al. 2020) and conducted after a habitat suitability projection has been
 created. \emph{steps} is a spatially explicit population models coded mostly in R.
 
-For a detailed description of \emph{steps} parameters, please see
-the respective reference and help files. Default assumptions underlying this
-wrapper are presented in the details
+For a detailed description of \emph{steps} parameters, please see the respective reference
+and help files. Default assumptions underlying this wrapper are presented in the details
 }
 \details{
 In order for this function to work the \emph{steps} package has to be installed
@@ -79,7 +89,6 @@ packages.
 }
 \examples{
 \dontrun{
-
 # Define vital rates
 vt <- matrix(c(0.0,0.5,0.75,
                0.5,0.2,0.0,

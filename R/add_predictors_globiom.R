@@ -18,44 +18,43 @@ NULL
 #'
 #' The purpose of this script is to format the GLOBIOM outputs of *DownScale*
 #' for the use in the ibis.iSDM package.
+#'
+#' @param x A [`BiodiversityDistribution-class`] or [`BiodiversityScenario-class`] object.
+#' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
+#' @param names A [`vector`] of character names describing the environmental
+#' stack in case they should be renamed (Default: \code{NULL}).
+#' @param transform A [`vector`] stating whether predictors should be preprocessed
+#' in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be considered
+#' (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
+#' knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#' specifying the covariates (Default: \code{NULL}).
+#' @param bgmask Check whether the environmental data should be masked with the
+#' background layer (Default: \code{TRUE})
+#' @param harmonize_na A [`logical`] value indicating of whether NA values should
+#' be harmonized among predictors (Default: \code{FALSE})
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
+#' which uses default prior assumptions.
+#' @param ... Other parameters passed down
+#'
 #' @details See [`add_predictors()`] for additional parameters and
 #' customizations. For more (manual) control the function for formatting the
 #' GLOBIOM data can also be called directly via `formatGLOBIOM()`.
 #'
-#' @param x A [`BiodiversityDistribution-class`] or
-#'   [`BiodiversityScenario-class`] object.
-#' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
-#' @param names A [`vector`] of character names describing the environmental
-#'   stack in case they should be renamed (Default: \code{NULL}).
-#' @param transform A [`vector`] stating whether predictors should be
-#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
-#'   \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be
-#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-#'   \code{'quad'}) )
-#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
-#'   knots for derivate creation if relevant (Default: \code{4}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2}
-#'   specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the
-#'   background layer (Default: \code{TRUE})
-#' @param harmonize_na A [`logical`] value indicating of whether NA values
-#'   should be harmonized among predictors (Default: \code{FALSE})
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
-#'   which uses default prior assumptions.
-#' @param ... Other parameters passed down
 #' @seealso [add_predictors]
-#' @aliases add_predictors_globiom
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
 #'         add_predictors_globiom(fname = "", transform = 'none')
 #'  obj
 #' }
+#'
 #' @name add_predictors_globiom
 NULL
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
 #' @export
 methods::setGeneric(
@@ -65,7 +64,6 @@ methods::setGeneric(
            bgmask = TRUE, harmonize_na = FALSE,
            priors = NULL, ...) standardGeneric("add_predictors_globiom"))
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
 methods::setMethod(
   "add_predictors_globiom",
@@ -178,7 +176,6 @@ methods::setMethod(
   }
 )
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
 methods::setMethod(
   "add_predictors_globiom",
@@ -287,30 +284,30 @@ methods::setMethod(
 #' @description This function expects a downscaled GLOBIOM output as created in
 #' the BIOCLIMA project. Likely of little use for anyone outside IIASA.
 #'
-#' @param fname A filename in [`character`] pointing to a GLOBIOM output in
-#'   netCDF format.
-#' @param oftype A [`character`] denoting the output type (Default:
-#'   \code{'raster'}).
+#' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
+#' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
 #' @param ignore A [`vector`] of variables to be ignored (Default: \code{NULL}).
 #' @param period A [`character`] limiting the period to be returned from the
-#'   formatted data. Options include \code{"reference"} for the first entry,
-#'   \code{"projection"} for all entries but the first, and \code{"all"} for all
-#'   entries (Default: \code{"reference"}).
+#' formatted data. Options include \code{"reference"} for the first entry, \code{"projection"}
+#' for all entries but the first, and \code{"all"} for all entries (Default: \code{"reference"}).
 #' @param template An optional [`SpatRaster`] object towards which projects
-#'   should be transformed.
+#' should be transformed.
 #' @param shares_to_area A [`logical`] on whether shares should be corrected to
-#'   areas (if identified).
-#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack
-#'   around.
+#' areas (if identified).
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack-around.
 #' @param verbose [`logical`] on whether to be chatty.
-#' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
-#' @aliases formatGLOBIOM
 #'
-#' @examples \dontrun{
+#' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
+#'
+#' @keywords internal, utils
+#'
+#' @examples
+#' \dontrun{
 #' # Expects a filename pointing to a netCDF file.
 #' covariates <- formatGLOBIOM(fname)
 #' }
-#' @keywords internal, utils
+#'
+#' @export
 formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
                           period = "all", template = NULL, shares_to_area = FALSE,
                           use_gdalutils = FALSE,

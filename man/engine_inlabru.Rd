@@ -25,18 +25,16 @@ engine_inlabru(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{optional_mesh}{A directly supplied \code{"INLA"} mesh (Default:
-\code{NULL})}
+\item{optional_mesh}{A directly supplied \code{"INLA"} mesh (Default: \code{NULL})}
 
 \item{max.edge}{The largest allowed triangle edge length, must be in the same
-scale units as the coordinates. Default is an educated guess (Default:
-\code{NULL}).}
+scale units as the coordinates. Default is an educated guess (Default: \code{NULL}).}
 
-\item{offset}{interpreted as a numeric factor relative to the approximate
-data diameter. Default is an educated guess (Default: \code{NULL}).}
+\item{offset}{interpreted as a numeric factor relative to the approximate data
+diameter. Default is an educated guess (Default: \code{NULL}).}
 
-\item{cutoff}{The minimum allowed distance between points on the mesh.
-Default is an educated guess (Default: \code{NULL}).}
+\item{cutoff}{The minimum allowed distance between points on the mesh. Default
+is an educated guess (Default: \code{NULL}).}
 
 \item{proj_stepsize}{The stepsize in coordinate units between cells of the
 projection grid (Default: \code{NULL})}
@@ -45,18 +43,16 @@ projection grid (Default: \code{NULL})}
 are \code{"auto"} ("default"), \code{"adaptative"}, \code{"gaussian"},
 \code{"simplified.laplace"} & \code{"laplace"}.}
 
-\item{int.strategy}{Integration strategy. Options are
-\code{"auto"},\code{"grid"}, \code{"eb"} ("default") & \code{"ccd"}.}
+\item{int.strategy}{Integration strategy. Options are \code{"auto"}, \code{"grid"},
+\code{"eb"} ("default") & \code{"ccd"}.}
 
 \item{area}{Accepts a \code{\link{character}} denoting the type of area calculation to
 be done on the mesh (Default: \code{'gpc2'}).}
 
-\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it
-passed.}
+\item{timeout}{Specify a timeout for INLA models in sec. Afterwards it passed.}
 
-\item{type}{The mode used for creating posterior predictions. Either
-summarizing the linear \code{"predictor"} or \code{"response"} (Default:
-\code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either summarizing
+the linear \code{"predictor"} or \code{"response"} (Default:\code{"response"}).}
 
 \item{...}{Other variables}
 }
@@ -104,12 +100,19 @@ Priors can be set via \link{INLAPrior}.
 # Add inlabru as an engine
 x <- distribution(background) |> engine_inlabru()
 }
+
 }
 \references{
 \itemize{
-\item Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.
-\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
-\item Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
+\item Bachl, F. E., Lindgren, F., Borchers, D. L., & Illian, J. B. (2019). inlabru:
+an R package for Bayesian spatial modelling from ecological survey data.
+Methods in Ecology and Evolution, 10(6), 760-766.
+\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going
+Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.”
+Biometrika 1 (103): 49–70.
+\item Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023).
+Integrated species distribution models fitted in INLA are sensitive to mesh
+parameterisation. Ecography, e06391.
 }
 }
 \seealso{

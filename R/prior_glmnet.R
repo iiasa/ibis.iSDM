@@ -22,12 +22,16 @@ NULL
 #'
 #' @param variable A [`character`] variable passed on to the prior object.
 #' @param hyper A [`numeric`] value between \code{0} and \code{1} that state the
-#'   penalization factor. By default this is set to \code{0}, implying the
-#'   \code{"variable"} provided is not regularized at all.
+#' penalization factor. By default this is set to \code{0}, implying the \code{"variable"}
+#' provided is not regularized at all.
 #' @param lims A [`numeric`] [`vector`] of the lower and upper limits for each
-#'   coefficient (Default: \code{c(-Inf, Inf)}).
+#' coefficient (Default: \code{c(-Inf, Inf)}).
 #' @param ... Variables passed on to prior object.
+#'
 #' @seealso [`Prior-class`]
+#' @keywords priors
+#' @family prior
+#'
 #' @examples
 #' \dontrun{
 #' # Retain variable
@@ -37,13 +41,10 @@ NULL
 #' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(0, Inf))
 #' p2
 #' }
-#' @keywords priors
-#' @family prior
-#' @aliases GLMNETPrior
+#'
 #' @name GLMNETPrior
 NULL
 
-#' @name GLMNETPrior
 #' @rdname GLMNETPrior
 #' @export
 methods::setGeneric(
@@ -51,7 +52,6 @@ methods::setGeneric(
   signature = methods::signature("variable"),
   function(variable, hyper = 0, lims = c(-Inf, Inf), ...) standardGeneric("GLMNETPrior"))
 
-#' @name GLMNETPrior
 #' @rdname GLMNETPrior
 methods::setMethod(
   "GLMNETPrior",
@@ -91,21 +91,25 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables are supplied for a GLMNET prior
-#' @name GLMNETPriors
+
 #' @description This is a helper function to specify several [GLMNETPrior] with
 #' the same hyper-parameters, but different variables.
-#' @rdname GLMNETPriors
+#'
 #' @inheritParams GLMNETPrior
-#' @aliases GLMNETPriors
+#'
 #' @family prior
 #' @keywords priors
+#'
+#' @name GLMNETPriors
+NULL
+
+#' @rdname GLMNETPriors
 #' @export
 methods::setGeneric(
   "GLMNETPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = 0, lims = c(-Inf, Inf)) standardGeneric("GLMNETPriors"))
 
-#' @name GLMNETPriors
 #' @rdname GLMNETPriors
 methods::setMethod(
   "GLMNETPriors",

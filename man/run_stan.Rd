@@ -27,21 +27,18 @@ run_stan(
 \item{data}{A \code{\link{list}} with all the parameters required to run the model_code
 in stan.}
 
-\item{algorithm}{A \code{\link{character}} giving the algorithm to use. Either
-\code{'sampling'} (Default), \code{'optimize'} or \code{'variational'} for
-penalized likelihood estimation.}
+\item{algorithm}{A \code{\link{character}} giving the algorithm to use. Either \code{'sampling'}
+(Default), \code{'optimize'} or \code{'variational'} for penalized likelihood estimation.}
 
-\item{chains}{A \code{\link{numeric}} indicating the number of chains to use for
-estimation.}
+\item{chains}{A \code{\link{numeric}} indicating the number of chains to use for estimation.}
 
-\item{cores}{Number of threads for sampling. Default set to
-\code{'getOption("ibis.nthread")'}. See \code{\link[=ibis_options]{ibis_options()}}.}
+\item{cores}{Number of threads for sampling. Default set to \code{'getOption("ibis.nthread")'}.
+See \code{\link[=ibis_options]{ibis_options()}}.}
 
 \item{threads}{\code{\link{numeric}} giving the number of threads to be run per chain.
 Has to be specified in accordance with cores.}
 
-\item{iter}{A \code{\link{numeric}} value giving the number of MCMC samples to
-generate.}
+\item{iter}{A \code{\link{numeric}} value giving the number of MCMC samples to generate.}
 
 \item{warmup}{\code{\link{numeric}} for the number of warm-up samples for MCMC. Default
 set to 1/2 of iter.}
@@ -65,8 +62,7 @@ A rstan object
 }
 \description{
 This function fits a stan model using the light-weight interface
-provided by cmdstanr. The code was adapted from McElreath rethinking
-package.
+provided by cmdstanr. The code was adapted from McElreath rethinking package.
 }
 \seealso{
 rethinking R package

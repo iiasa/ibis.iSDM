@@ -9,6 +9,11 @@ NULL
 #' models and penalize regressions by assuming most predictors having an effect
 #' of \code{0}.
 #'
+#' @param variable A [`character`] matched against existing predictors.
+#' @param hyper A [`numeric`] estimate of the mean regression coefficients.
+#' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability
+#' of the target variable (Default: \code{NULL}).
+#'
 #' @details The Zellner-style spike and slab prior for generalized linear models
 #' are specified as described in the \pkg{Boom} R-package. Currently supported
 #' are two options which work for models with \code{Poisson} and \code{binomial}
@@ -27,13 +32,16 @@ NULL
 #' coefficients and their direction, one can still provide an estimate of the
 #' inclusion probability. In other words:
 #' **The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.**
-#' @param variable A [`character`] matched against existing predictors.
-#' @param hyper A [`numeric`] estimate of the mean regression coefficients.
-#' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability
-#'   of the target variable (Default: \code{NULL}).
+#'
 #' @references
-#' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster, Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection" Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
+#' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster,
+#' Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection"
+#' Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
+#'
 #' @seealso [`Prior-class`]
+#' @family prior
+#' @keywords priors
+#'
 #' @examples
 #' \dontrun{
 #' # Positive coefficient
@@ -43,13 +51,10 @@ NULL
 #' p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 #' p2
 #' }
-#' @family prior
-#' @keywords priors
-#' @aliases BREGPrior
+#'
 #' @name BREGPrior
 NULL
 
-#' @name BREGPrior
 #' @rdname BREGPrior
 #' @export
 methods::setGeneric(
@@ -57,7 +62,6 @@ methods::setGeneric(
   signature = methods::signature("variable"),
   function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPrior"))
 
-#' @name BREGPrior
 #' @rdname BREGPrior
 methods::setMethod(
   "BREGPrior",
@@ -92,21 +96,25 @@ methods::setMethod(
 )
 
 #' Helper function when multiple variables are supplied for a BREG prior
-#' @name BREGPriors
+
 #' @description This is a helper function to specify several [BREGPrior] with
 #' the same hyper-parameters, but different variables.
-#' @rdname BREGPriors
+#'
 #' @inheritParams BREGPrior
-#' @aliases BREGPriors
+#'
 #' @family prior
 #' @keywords priors
+#'
+#' @name BREGPriors
+NULL
+
+#' @rdname BREGPriors
 #' @export
 methods::setGeneric(
   "BREGPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPriors"))
 
-#' @name BREGPriors
 #' @rdname BREGPriors
 methods::setMethod(
   "BREGPriors",

@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_elevation}
 \alias{add_offset_elevation}
+\alias{add_offset_elevation,BiodiversityDistribution,SpatRaster,numeric-method}
 \title{Specify elevational preferences as offset}
 \usage{
 add_offset_elevation(x, elev, pref, rate = 0.0089, add = TRUE)
@@ -50,11 +51,17 @@ recommended by Ellis-Soto et al.
  # Adds the offset to a distribution object
  distribution(background) |> add_offset_elevation(dem, pref = c(400, 1200))
 }
+
 }
 \references{
 \itemize{
-\item Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale 1 km hummingbird diversity derived from fusing point records with lateral and elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale
+1 km hummingbird diversity derived from fusing point records with lateral and
+elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+https://doi.org/10.1111/geb.12453
 }
 }
 \seealso{

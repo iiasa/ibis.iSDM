@@ -5,35 +5,42 @@
 #' possible to write outputs of fitted [`DistributionModel`],
 #' [`BiodiversityScenario`] or individual [`terra`] or [`stars`] objects. In
 #' case a [`data.frame`] is supplied, the output is written as csv file.
-#' **For creating summaries of distribution and scenario parameters and performance, see `write_summary()`**
-#' @note By default output files will be overwritten if already existing!
-#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`],
-#'   [`terra`] or [`stars`] object.
+#' **For creating summaries of distribution and scenario parameters and performance,
+#' see `write_summary()`**
+#'
+#' @param mod Provided [`DistributionModel`], [`BiodiversityScenario`], [`terra`]
+#' or [`stars`] object.
 #' @param fname A [`character`] depicting an output filename.
-#' @param dt A [`character`] for the output datatype. Following the
-#'   [`terra::writeRaster`] options (Default: \code{'FLT4S'}).
-#' @param verbose [`logical`] indicating whether messages should be shown.
-#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param dt A [`character`] for the output datatype. Following the [`terra::writeRaster`]
+#' options (Default: \code{'FLT4S'}).
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites
+#' `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
 #' @param ... Any other arguments passed on the individual functions.
+#'
+#' @note By default output files will be overwritten if already existing!
+#'
 #' @returns No R-output is created. A file is written to the target direction.
-#' @examples \dontrun{
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
 #' x <- distribution(background)  |>
 #'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
 #'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_output(x, "testmodel.tif")
 #' }
-
+#'
 #' @name write_output
-#' @aliases write_output
-#' @keywords utils
-#' @export
 NULL
+
+#' @rdname write_output
+#' @export
 methods::setGeneric("write_output",
                     signature = methods::signature("mod", "fname"),
                     function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) standardGeneric("write_output"))
 
-#' @name write_output
 #' @rdname write_output
 methods::setMethod(
   "write_output",
@@ -74,7 +81,6 @@ methods::setMethod(
     }
 )
 
-#' @name write_output
 #' @rdname write_output
 methods::setMethod(
   "write_output",
@@ -92,7 +98,6 @@ methods::setMethod(
   }
 )
 
-#' @name write_output
 #' @rdname write_output
 methods::setMethod(
   "write_output",
@@ -118,7 +123,6 @@ methods::setMethod(
   }
 )
 
-#' @name write_output
 #' @rdname write_output
 methods::setMethod(
   "write_output",
@@ -138,7 +142,6 @@ methods::setMethod(
   }
 )
 
-#' @name write_output
 #' @rdname write_output
 methods::setMethod(
   "write_output",
@@ -170,12 +173,15 @@ methods::setMethod(
 #' Saves a raster file in Geotiff format
 #'
 #' @description Functions that acts as a wrapper to [terra::writeRaster].
+#'
 #' @param file A [`terra`] SpatRaster object to be saved.
 #' @param fname A [`character`] stating the output destination.
 #' @param dt The datatype to be written (Default: *Float64*).
 #' @param varNA The nodata value to be used (Default: \code{-9999}).
 #' @param ... Other options.
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   assertthat::assert_that(
@@ -213,7 +219,9 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
 #' @param dt The datatype to be written. Default is Float64
 #' @param varNA The nodata value to be used. Default: \code{-9999}.
 #' @param ... Other options.
+#'
 #' @keywords utils, internal
+#'
 #' @noRd
 writeNetCDF <- function(file, fname,
                         varName, varUnit = NULL,
@@ -268,19 +276,24 @@ writeNetCDF <- function(file, fname,
 #' data from the input object and writes the output as either \code{'rds'} or
 #' \code{'rdata'} file. Alternative, more open file formats are under
 #' consideration.
+#'
+#' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
+#' @param fname A [`character`] depicting an output filename. The suffix determines
+#' the file type of the output (Options: \code{'rds'}, \code{'rdata'}).
+#' @param partial A [`logical`] value determining whether partial variable
+#' contributions should be calculated and added to the model summary. **Note** that
+#' this can be rather slow (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown.
+#' Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' @param ... Any other arguments passed on the individual functions.
+#'
 #' @note No predictions or tabular data is saved through this function. Use
 #' [`write_output()`] to save those.
-#' @param mod Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
-#' @param fname A [`character`] depicting an output filename. The suffix
-#'   determines the file type of the output (Options: \code{'rds'},
-#'   \code{'rdata'}).
-#' @param partial A [`logical`] value determining whether partial variable
-#'   contributions should be calculated and added to the model summary. **Note
-#'   that this can be rather slow** (Default: \code{FALSE}).
-#' @param verbose [`logical`] indicating whether messages should be shown.
-#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
-#' @param ... Any other arguments passed on the individual functions.
+#'
 #' @returns No R-output is created. A file is written to the target direction.
+#'
+#' @keywords utils
+#'
 #' @examples \dontrun{
 #' x <- distribution(background) |>
 #'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points')  |>
@@ -288,18 +301,16 @@ writeNetCDF <- function(file, fname,
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_summary(x, "testmodel.rds")
 #' }
-#' @keywords utils
-
 #' @name write_summary
-#' @aliases write_summary
-#' @export
 NULL
+
+#' @rdname write_summary
+#' @export
 methods::setGeneric("write_summary",
                     signature = methods::signature("mod","fname"),
                     function(mod, fname, partial = FALSE,
                              verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
 
-#' @name write_summary
 #' @rdname write_summary
 methods::setMethod(
   "write_summary",
@@ -449,16 +460,21 @@ methods::setMethod(
 #' a wrapper to [`saveRDS`]. Models can be loaded again via the `load_model`
 #' function.
 #'
-#' @note By default output files will be overwritten if already existing!
-#'
 #' @param mod Provided [`DistributionModel`] object.
 #' @param fname A [`character`] depicting an output filename.
 #' @param slim A [`logical`] option to whether unnecessary entries in the model
-#'   object should be deleted. This deletes for example predictions or any other
-#'   non-model content from the object (Default: \code{FALSE}).
-#' @param verbose [`logical`] indicating whether messages should be shown.
-#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' object should be deleted. This deletes for example predictions or any other
+#' non-model content from the object (Default: \code{FALSE}).
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites
+#' `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#'
+#' @note By default output files will be overwritten if already existing!
+#'
 #' @returns No R-output is created. A file is written to the target direction.
+#'
+#' @seealso load_model
+#' @keywords utils
+#'
 #' @examples \dontrun{
 #' x <- distribution(background) |>
 #'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
@@ -466,18 +482,15 @@ methods::setMethod(
 #'  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 #' write_model(x, "testmodel.rds")
 #' }
-
 #' @name write_model
-#' @aliases write_model
-#' @seealso load_model
-#' @keywords utils
-#' @export
 NULL
+
+#' @rdname write_model
+#' @export
 methods::setGeneric("write_model",
                     signature = methods::signature("mod"),
                     function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) standardGeneric("write_model"))
 
-#' @name write_model
 #' @rdname write_model
 methods::setMethod(
   "write_model",
@@ -529,26 +542,29 @@ methods::setMethod(
 #'
 #' @param fname A [`character`] depicting an output filename.
 #' @param verbose [`logical`] indicating whether messages should be shown.
-#'   Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#' Overwrites `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#'
 #' @returns A [`DistributionModel`] object.
+#'
+#' @seealso write_model
+#' @keywords utils
+#'
 #' @examples \dontrun{
 #' # Load model
 #' mod <- load_model("testmodel.rds")
 #'
 #' summary(mod)
 #' }
-
+#'
 #' @name load_model
-#' @aliases load_model
-#' @seealso write_model
-#' @keywords utils
-#' @export
 NULL
+
+#' @rdname load_model
+#' @export
 methods::setGeneric("load_model",
                     signature = methods::signature("fname"),
                     function(fname, verbose = getOption("ibis.setupmessages")) standardGeneric("load_model"))
 
-#' @name load_model
 #' @rdname load_model
 methods::setMethod(
   "load_model",

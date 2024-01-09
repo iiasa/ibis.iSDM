@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPriors}
 \alias{GDBPriors}
+\alias{GDBPriors,character-method}
 \title{Helper function when multiple variables are supplied for a GDB prior}
 \usage{
 GDBPriors(variable, hyper = "increasing", ...)
@@ -9,13 +10,11 @@ GDBPriors(variable, hyper = "increasing", ...)
 \S4method{GDBPriors}{character}(variable, hyper = "increasing", ...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors
-variables.}
+\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
-\code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'positive'}, \code{'negative'} or \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }

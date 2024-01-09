@@ -17,26 +17,24 @@ posterior_predict_stanfit(
 \arguments{
 \item{obj}{A \code{"stanfit"} object (as used by rstan).}
 
-\item{form}{A \code{\link{formula}} object created for the
-\link{DistributionModel}.}
+\item{form}{A \code{\link{formula}} object created for the \link{DistributionModel}.}
 
 \item{newdata}{A \link{data.frame} with new data to be used for prediction.}
 
-\item{mode}{A \code{\link{character}} of whether the linear \code{predictor} or the
-\code{response} is to be summarized.}
+\item{mode}{A \code{\link{character}} of whether the linear \code{predictor} or the \code{response}
+is to be summarized.}
 
-\item{family}{A \code{\link{character}} giving the family for simulating linear
-response values (Default: \code{NULL})}
+\item{family}{A \code{\link{character}} giving the family for simulating linear response
+values (Default: \code{NULL})}
 
 \item{offset}{A \link{vector} with an optionally specified offset.}
 
-\item{draws}{\link{numeric} indicating whether a specific number of draws should
-be taken.}
+\item{draws}{\link{numeric} indicating whether a specific number of draws should be taken.}
 }
 \description{
 This function does simulates from the posterior of a created
-stan model, therefore providing a fast and efficient way to project
-coefficients obtained from Bayesian models to new/novel contexts.
+stan model, therefore providing a fast and efficient way to project coefficients
+obtained from Bayesian models to new/novel contexts.
 }
 \references{
 \itemize{

@@ -2,7 +2,6 @@
 % Please edit documentation in R/identifier.R
 \name{new_id}
 \alias{new_id}
-\alias{Id,}
 \title{Identifier}
 \usage{
 new_id()

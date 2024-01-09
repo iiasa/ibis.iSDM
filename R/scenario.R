@@ -5,35 +5,37 @@ NULL
 #'
 #' @description This function creates a new [BiodiversityScenario-class] object
 #' that contains the projections of a model.
+#'
+#' @param fit A [`BiodiversityDistribution`] object containing a trained model.
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
+#' surface when intersected with the prediction data (Default: \code{NULL}).
+#' This can for instance be set as an expert-delineated constrain to limit spatial
+#' projections.
+#' @param reuse_limits A [`logical`] on whether to reuse limits if found in the
+#' trained [`BiodiversityDistribution`] object (Default: \code{FALSE}). See also notes!
+#' @param copy_model A [`logical`] of whether the model object is to be copied to
+#' the scenario object. Note that setting this option to \code{TRUE} can increase
+#' the required amount of memory (Default: \code{FALSE}).
+#'
 #' @note
 #' If a limit has been defined already during [train()], for example by adding
 #' an extrapolation limit [add_control_extrapolation()], this zonal layer can be
 #' reused for the projections. **Note: This effectively fixes the projections to certain areas.**
 #'
-#' @param fit A [`BiodiversityDistribution`] object containing a trained model.
-#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
-#'   surface when intersected with the prediction data (Default: \code{NULL}).
-#'   This can for instance be set as an expert-delineated constrain to limit
-#'   spatial projections.
-#' @param reuse_limits A [`logical`] on whether to reuse limits if found in the
-#' trained [`BiodiversityDistribution`] object (Default: \code{FALSE}). See also notes!
-#'
-#' @param copy_model A [`logical`] of whether the model object is to be copied
-#'   to the scenario object. Note that setting this option to \code{TRUE} can
-#'   increase the required amount of memory (Default: \code{FALSE}).
-#' @aliases scenario
-#' @name scenario
-#'
 #' @examples
 #' \dontrun{
 #'   scenario(fit, limits = island_area)
 #' }
+#'
+#' @name scenario
+NULL
+
+#' @rdname scenario
 #' @export
 methods::setGeneric("scenario",
                     signature = methods::signature("fit"),
                     function(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE) standardGeneric("scenario"))
 
-#' @name scenario
 #' @rdname scenario
 methods::setMethod(
   "scenario",

@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_bart.R
 \name{BARTPrior}
 \alias{BARTPrior}
+\alias{BARTPrior,character-method}
 \title{Create a tree-based split probability prior for BART}
 \usage{
 BARTPrior(variable, hyper = 0.75, ...)
@@ -36,8 +37,11 @@ model.
 }
 \references{
 \itemize{
-\item Chipman, H., George, E., and McCulloch, R. (2009) BART: Bayesian Additive Regression Trees.
-\item Chipman, H., George, E., and McCulloch R. (2006) Bayesian Ensemble Learning. Advances in Neural Information Processing Systems 19, Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+\item Chipman, H., George, E., and McCulloch, R. (2009) BART: Bayesian Additive
+Regression Trees.
+\item Chipman, H., George, E., and McCulloch R. (2006) Bayesian Ensemble Learning.
+Advances in Neural Information Processing Systems 19, Scholkopf, Platt and Hoffman,
+Eds., MIT Press, Cambridge, MA, 265-272.
 }
 }
 \seealso{

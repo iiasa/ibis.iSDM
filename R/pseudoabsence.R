@@ -15,6 +15,31 @@ NULL
 #' examples on how to 'turn' a presence-only dataset into a
 #' presence-(pseudo-)absence.
 #'
+#' @param background A [`SpatRaster`] or [`sf`] object over which background
+#' points can be sampled. Default is \code{NULL} (Default) and the background
+#' is then added when the sampling is first called.
+#' @param nrpoints A [`numeric`] given the number of absence points to be
+#' created. Has to be larger than \code{0} and normally points are not created
+#' in excess of the number of cells of the background (Default: \code{10000}).
+#' @param method [`character`] denoting how the sampling should be done. See
+#' details for options (Default: \code{"random"}).
+#' @param buffer_distance [`numeric`] A distance from the observations in which
+#' pseudo-absence points are not to be generated. Note that units follow the
+#' units of the projection (e.g. \code{m} or \code{°}). Only used when \code{method = "buffer"}.
+#' @param inside A [`logical`] value of whether absence points should be sampled
+#' outside (Default) or inside a minimum convex polygon or range provided the
+#' respective method is chosen (parameter \code{method = "mcp"} or \code{method = "range"}).
+#' @param min_ratio A [`numeric`] with the minimum ratio of background points
+#' relative to the presence points. Setting this value to \code{1} generates
+#' an equal amount of absence points relative to the presence points. Usually
+#' ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).
+#' @param layer A [`sf`] or [`SpatRaster`] (in the case of method \code{'zones'})
+#' object indicating the range of a species. Only used with \code{method = "range"}
+#' or \code{method = "zones"} (Default: \code{NULL}).
+#' @param bias A [`SpatRaster`] with the same extent and projection and background.
+#' Absence points will be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).
+#' @param ... Any other settings to be added to the pseudoabs settings.
+#'
 #' @details There are multiple methods available for sampling a biased
 #' background layer. Possible parameters for \code{method} are:
 #'
@@ -39,35 +64,16 @@ NULL
 #' Absence points are then sampled exclusively within the target areas for grid
 #' cells with non-zero values.
 #'
-#' @param background A [`SpatRaster`] or [`sf`] object over which background
-#'   points can be sampled. Default is \code{NULL} (Default) and the background
-#'   is then added when the sampling is first called.
-#' @param nrpoints A [`numeric`] given the number of absence points to be
-#'   created. Has to be larger than \code{0} and normally points are not created
-#'   in excess of the number of cells of the background (Default: \code{10
-#'   000}).
-#' @param method [`character`] denoting how the sampling should be done. See
-#'   details for options (Default: \code{"random"}).
-#' @param buffer_distance [`numeric`] A distance from the observations in which
-#'   pseudo-absence points are not to be generated. Note that units follow the
-#'   units of the projection (e.g. \code{m} or \code{°}). Only used when
-#'   \code{method = "buffer"}.
-#' @param inside A [`logical`] value of whether absence points should be sampled
-#'   outside (Default) or inside a minimum convex polygon or range provided the
-#'   respective method is chosen (parameter \code{method = "mcp"} or
-#'   \code{method = "range"}).
-#' @param min_ratio A [`numeric`] with the minimum ratio of background points
-#'   relative to the presence points. Setting this value to \code{1} generates
-#'   an equal amount of absence points relative to the presence points. Usually
-#'   ignored unless the ratio exceeds the \code{nrpoints} parameters (Default:
-#'   \code{0.25}).
-#' @param layer A [`sf`] or [`SpatRaster`] (in the case of method
-#'   \code{'zones'}) object indicating the range of a species. Only used with
-#'   \code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).
-#' @param bias A [`SpatRaster`] with the same extent and projection and
-#'   background. Absence points will be preferentially sampled in areas with
-#'   higher (!) bias. (Default: \code{NULL}).
-#' @param ... Any other settings to be added to the pseudoabs settings.
+#' @references
+#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G,
+#' Warton DI. 2015. Point process models for presence-only analysis. Methods in
+#' Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
+#' * Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
+#' process models for species distribution modeling in ecology. Biometrics,
+#' 69(1), 274-281.
+#'
+#' @keywords train
+#'
 #' @examples
 #' \dontrun{
 #' # This setting generates 10000 pseudo-absence points outside the
@@ -86,25 +92,18 @@ NULL
 #'                       template = background,
 #'                       settings = ass1)
 #' }
-#' @references
-#' * Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process
-#' models for presence-only analysis. Methods in Ecology and Evolution
-#' 6:366–379. DOI: 10.1111/2041-210X.12352.
-#' * Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
-#' process models for species distribution modeling in ecology. Biometrics,
-#' 69(1), 274-281.
+#'
 #' @name pseudoabs_settings
-#' @aliases pseudoabs_settings
-#' @keywords train
-#' @export
 NULL
+
+#' @rdname pseudoabs_settings
+#' @export
 methods::setGeneric("pseudoabs_settings",
                     signature = methods::signature("background"),
                     function(background = NULL, nrpoints = 10000, min_ratio = 0.25,
                              method = "random", buffer_distance = 10000, inside = FALSE,
                              layer = NULL, bias = NULL, ...) standardGeneric("pseudoabs_settings"))
 
-#' @name pseudoabs_settings
 #' @rdname pseudoabs_settings
 methods::setMethod(
   "pseudoabs_settings",
@@ -159,6 +158,15 @@ methods::setMethod(
 #' targeted background sampling or by sampling them within/outside a given
 #' range.
 #'
+#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
+#' @param field_occurrence A [`character`] name of the column containing the presence
+#' information (Default: \code{observed}).
+#' @param template A [`SpatRaster`] object that is aligned with the predictors
+#' (Default: \code{NULL}). If set to \code{NULL}, then \code{background} in
+#' the [`pseudoabs_settings()`] has to be a [`SpatRaster`] object.
+#' @param settings A [`pseudoabs_settings()`] objects. Absence settings are
+#' taken from [ibis_options] otherwise (Default).
+#'
 #' @details A [`pseudoabs_settings()`] object can be added to setup how absence
 #' points should be sampled. A \code{bias} parameter can be set to specify a
 #' bias layer to sample from, for instance a layer of accessibility. Note that
@@ -166,29 +174,24 @@ methods::setMethod(
 #' datasets whether certain areas are truly absent. By default, the
 #' pseudo-absence points are not sampled in areas in which there are already
 #' presence points.
+#'
+#' @returns A [`data.frame`] containing the newly created pseudo absence points.
+#'
 #' @note This method removes all columns from the input \code{df} object other
 #' than the \code{field_occurrence} column and the coordinate columns (which
 #' will be created if not already present).
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point
-#'   data.
-#' @param field_occurrence A [`character`] name of the column containing the
-#'   presence information (Default: \code{observed}).
-#' @param template A [`SpatRaster`] object that is aligned with the predictors
-#'   (Default: \code{NULL}). If set to \code{NULL}, then \code{background} in
-#'   the [`pseudoabs_settings()`] has to be a [`SpatRaster`] object.
-#' @param settings A [`pseudoabs_settings()`] objects. Absence settings are
-#'   taken from [ibis_options] otherwise (Default).
+#'
 #' @references
 #' * Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in
 #' presence‐only species distribution modelling. Diversity and Distributions,
 #' 21(5), 595-608.
-#' * Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D.,
-#' Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014.
+#' * Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J.,
+#' Stuart-Smith, R.D., Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014.
 #' Statistical solutions for error and bias in global citizen science datasets.
 #' Biological Conservation, 173, pp.144-154.
+#'
 #' @keywords train
-#' @aliases add_pseudoabsence
-#' @returns A [`data.frame`] containing the newly created pseudo absence points.
+#'
 #' @export
 add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL, settings = getOption("ibis.pseudoabsence")){
   assertthat::assert_that(

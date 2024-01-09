@@ -5,6 +5,8 @@
 \alias{stancode.DistributionModel}
 \title{Show the stan code from a trained model}
 \usage{
+stancode(obj, ...)
+
 \method{stancode}{DistributionModel}(obj, ...)
 }
 \arguments{

@@ -7,6 +7,13 @@
 #' spatial-explicit estimates into one offset by calculating the sum of all
 #' spatial-explicit layers.
 #'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target
+#' feature.
+#' @param add [`logical`] specifying whether new offset is to be added. Setting
+#' this parameter to \code{FALSE} replaces the current offsets with the new
+#' one (Default: \code{TRUE}).
+#'
 #' @details This function allows to set any specific offset to a regression
 #' model. The offset has to be provided as spatial [`SpatRaster`] object. This
 #' function simply adds the layer to a [`distribution()`] object.
@@ -21,30 +28,26 @@
 #' work for all engines. Offsets specified for non-supported engines are ignored
 #' during the estimation
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target
-#'   feature.
-#' @param add [`logical`] specifying whether new offset is to be added. Setting
-#'   this parameter to \code{FALSE} replaces the current offsets with the new
-#'   one (Default: \code{TRUE}).
+#' @returns Adds an offset to a [`distribution`] object.
+#'
 #' @references
 #' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and
 #' range estimates with Maxent and point process models by integrating spatially explicit
 #' information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
-#' @returns Adds an offset to a [`distribution`] object.
+#'
 #' @family offset
-#' @aliases add_offset
 #' @keywords prior, offset
+#'
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) |>
 #'    add_predictors(covariates) |>
 #'    add_offset(nicheEstimate)
 #' }
+#'
 #' @name add_offset
 NULL
 
-#' @name add_offset
 #' @rdname add_offset
 #' @export
 methods::setGeneric(
@@ -52,7 +55,6 @@ methods::setGeneric(
   signature = methods::signature("x", "layer"),
   function(x, layer, add = TRUE) standardGeneric("add_offset"))
 
-#' @name add_offset
 #' @rdname add_offset
 methods::setMethod(
   "add_offset",
@@ -97,7 +99,6 @@ methods::setMethod(
   }
 )
 
-#' @name add_offset
 #' @rdname add_offset
 methods::setMethod(
   "add_offset",
@@ -152,18 +153,20 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param layer A `character` pointing to the specific layer to be removed. If
 #'   set to \code{NULL}, then all offsets are removed from the object.
+#'
 #' @returns Removes an offset from a [`distribution`] object.
+#'
+#' @family offset
+#' @keywords prior, offset, internal
+#'
 #' @examples
 #' \dontrun{
 #'  rm_offset(model) -> model
 #' }
-#' @family offset
-#' @keywords prior, offset, internal
-#' @aliases rm_offset
+#'
 #' @name rm_offset
 NULL
 
-#' @name rm_offset
 #' @rdname rm_offset
 #' @export
 methods::setGeneric(
@@ -171,7 +174,6 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, layer = NULL) standardGeneric("rm_offset"))
 
-#' @name rm_offset
 #' @rdname rm_offset
 methods::setMethod(
   "rm_offset",
@@ -208,6 +210,11 @@ methods::setMethod(
 #' spatial-explicit estimates into one offset by calculating the sum of all
 #' spatial-explicit layers.
 #'
+#' @inheritParams add_offset
+#' @param points An optional [`sf`] object with key points. The location of the
+#' points are then used to calculate the probability that a cell has been
+#' sampled while accounting for area differences. (Default: \code{NULL}).
+#'
 #' @details This functions emulates the use of the [`add_offset()`] function,
 #' however applies an inverse transformation to remove the provided layer from
 #' the overall offset. So if for instance a offset is already specified (such as
@@ -221,26 +228,26 @@ methods::setMethod(
 #' consider using the function [`add_offset_range()`] or the \code{bossMaps}
 #' R-package.
 #'
-#' @inheritParams add_offset
-#' @param points An optional [`sf`] object with key points. The location of the
-#'   points are then used to calculate the probability that a cell has been
-#'   sampled while accounting for area differences. (Default: \code{NULL}).
+#' @returns Adds a bias offset to a [`distribution`] object.
+#'
 #' @references
-#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+#' niche and range estimates with Maxent and point process models by integrating
+#' spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#'
 #' @family offset
 #' @keywords prior, offset
-#' @aliases add_offset_bias
-#' @returns Adds a bias offset to a [`distribution`] object.
+#'
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) |>
 #'    add_predictors(covariates) |>
 #'    add_offset_bias(samplingBias)
 #' }
+#'
 #' @name add_offset_bias
 NULL
 
-#' @name add_offset_bias
 #' @rdname add_offset_bias
 #' @export
 methods::setGeneric(
@@ -248,7 +255,6 @@ methods::setGeneric(
   signature = methods::signature("x", "layer"),
   function(x, layer, add = TRUE, points = NULL) standardGeneric("add_offset_bias"))
 
-#' @name add_offset_bias
 #' @rdname add_offset_bias
 methods::setMethod(
   "add_offset_bias",
@@ -329,6 +335,34 @@ methods::setMethod(
 #' This tries to fit a 5-parameter logistic function to estimate the distance
 #' from the range (Merow et al. 2017).
 #'
+#' @inheritParams add_offset
+#' @param distance_max A [`numeric`] threshold on the maximum distance beyond
+#' the range that should be considered to have a high likelihood of containing
+#' species occurrences (Default: \code{Inf} \code{"m"}). Can be set to
+#' \code{NULL} or \code{0} to indicate that no distance should be calculated.
+#' @param family A [`character`] denoting the type of model to which this offset
+#' is to be added. By default it assumes a \code{'poisson'} distributed model
+#' and as a result the output created by this function will be
+#' log-transformed. If however a \code{'binomial'} distribution is chosen,
+#' than the output will be \code{`logit`} transformed. For integrated models
+#' leave at default.
+#' @param presence_prop [`numeric`] giving the proportion of all records
+#' expected to be inside the range. By default this is set to \code{0.9}
+#' indicating that 10% of all records are likely outside the range.
+#' @param distance_clip [`logical`] as to whether distance should be clipped
+#' after the maximum distance (Default: \code{FALSE}).
+#' @param distance_function A [`character`] specifying the distance function to
+#' be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
+#' default) and a five parameters logistic curve (code{"logcurve"}) as
+#' proposed by Merow et al. 2017.
+#' @param point An optional [`sf`] layer with points or [`logical`] argument. In
+#' the case of the latter the point data is ignored (Default: \code{FALSE}).
+#' @param field_occurrence A [`numeric`] or [`character`] location of
+#' biodiversity point records.
+#' @param fraction An optional [`SpatRaster`] object that is multiplied with
+#' digitized raster layer. Can be used to for example to remove or reduce the
+#' expected value (Default: \code{NULL}).
+#'
 #' @details The output created by this function creates a [`SpatRaster`] to be
 #' added to a provided distribution object. Offsets in regression models are
 #' likelihood specific as they are added directly to the overall estimate of
@@ -338,39 +372,21 @@ methods::setMethod(
 #' before export. Background values (e.g. beyond \code{"distance_max"}) are set
 #' to a very small constant (\code{1e-10}).
 #'
-#' @inheritParams add_offset
-#' @param distance_max A [`numeric`] threshold on the maximum distance beyond
-#'   the range that should be considered to have a high likelihood of containing
-#'   species occurrences (Default: \code{Inf} \code{"m"}). Can be set to
-#'   \code{NULL} or \code{0} to indicate that no distance should be calculated.
-#' @param family A [`character`] denoting the type of model to which this offset
-#'   is to be added. By default it assumes a \code{'poisson'} distributed model
-#'   and as a result the output created by this function will be
-#'   log-transformed. If however a \code{'binomial'} distribution is chosen,
-#'   than the output will be \code{`logit`} transformed. For integrated models
-#'   leave at default.
-#' @param presence_prop [`numeric`] giving the proportion of all records
-#'   expected to be inside the range. By default this is set to \code{0.9}
-#'   indicating that 10% of all records are likely outside the range.
-#' @param distance_clip [`logical`] as to whether distance should be clipped
-#'   after the maximum distance (Default: \code{FALSE}).
-#' @param distance_function A [`character`] specifying the distance function to
-#'   be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
-#'   default) and a five parameters logistic curve (code{"logcurve"}) as
-#'   proposed by Merow et al. 2017.
-#' @param point An optional [`sf`] layer with points or [`logical`] argument. In
-#'   the case of the latter the point data is ignored (Default: \code{FALSE}).
-#' @param field_occurrence A [`numeric`] or [`character`] location of
-#'   biodiversity point records.
-#' @param fraction An optional [`SpatRaster`] object that is multiplied with
-#'   digitized raster layer. Can be used to for example to remove or reduce the
-#'   expected value (Default: \code{NULL}).
-#' @seealso \code{"bossMaps"}
-#' @references
-#' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
-#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #' @returns Adds a range offset to a [`distribution`] object.
-#' @aliases add_offset_range
+#'
+#' @references
+#' * Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert
+#' maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258.
+#' https://doi.org/10.1111/geb.12539
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+#' niche and range estimates with Maxent and point process models by integrating
+#' spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+#' https://doi.org/10.1111/geb.12453
+#'
+#' @seealso \code{"bossMaps"}
+#' @family offset
+#' @keywords prior, offset
+#'
 #' @examples
 #' \dontrun{
 #'  # Train a presence-only model with a simple offset
@@ -382,12 +398,10 @@ methods::setMethod(
 #'  engine_glm() |>
 #'  train()
 #' }
-#' @keywords prior, offset
-#' @family offset
+#'
 #' @name add_offset_range
 NULL
 
-#' @name add_offset_range
 #' @rdname add_offset_range
 #' @export
 methods::setGeneric(
@@ -399,7 +413,6 @@ methods::setGeneric(
            point = FALSE, add = TRUE) standardGeneric("add_offset_range"))
 
 #' Function for when raster is directly supplied (precomputed)
-#' @name add_offset_range
 #' @rdname add_offset_range
 methods::setMethod(
   "add_offset_range",
@@ -454,7 +467,6 @@ methods::setMethod(
   }
 )
 
-#' @name add_offset_range
 #' @rdname add_offset_range
 methods::setMethod(
   "add_offset_range",
@@ -681,12 +693,13 @@ methods::setMethod(
 #' @param y A [`numeric`] of the response.
 #' @param x A [`numeric`] of the variable.
 #' @param family A [`character`] with the family. Default is `binomial`.
-#' @param search A [`logical`] whether grid search by AIC be conducted (Default:
-#'   \code{TRUE}).
+#' @param search A [`logical`] whether grid search by AIC be conducted (Default: \code{TRUE}).
 #' @param iniParam The initial parameters for the logistic curve.
+#'
 #' @returns A [`numeric`] vector with the coefficients of regression.
-#' @keywords internal
+#'
 #' @noRd
+#' @keywords internal
 .searchLogisticCurve <- function(y, x, family, search = TRUE,
                                  iniParam = c(upper = 1,
                                               lower = 0,
@@ -814,6 +827,19 @@ methods::setMethod(
 #' @description This function implements the elevation preferences offset
 #' defined in Ellis‐Soto et al. (2021). The code here was adapted from the
 #' Supporting materials script.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param elev A [`SpatRaster`] with the elevation for a given background.
+#' @param pref A [`numeric`] vector of length \code{2} giving the lower and
+#' upper bound of known elevational preferences. Can be set to \code{Inf} if
+#' unknown.
+#' @param rate A [`numeric`] for the rate used in the offset (Default:
+#' \code{.0089}). This parameter specifies the decay to near zero probability
+#' at elevation above and below the expert limits.
+#' @param add [`logical`] specifying whether new offset is to be added. Setting
+#' this parameter to \code{FALSE} replaces the current offsets with the new
+#' one (Default: \code{TRUE}).
+#'
 #' @details Specifically this functions calculates a continuous decay and
 #' decreasing probability of a species to occur from elevation limits. It
 #' requires a [`SpatRaster`] with elevation information. A generalized logistic
@@ -824,33 +850,30 @@ methods::setMethod(
 #' Note that all offsets created by this function are by default log-transformed
 #' before export. In addition this function also mean-centers the output as
 #' recommended by Ellis-Soto et al.
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param elev A [`SpatRaster`] with the elevation for a given background.
-#' @param pref A [`numeric`] vector of length \code{2} giving the lower and
-#'   upper bound of known elevational preferences. Can be set to \code{Inf} if
-#'   unknown.
-#' @param rate A [`numeric`] for the rate used in the offset (Default:
-#'   \code{.0089}). This parameter specifies the decay to near zero probability
-#'   at elevation above and below the expert limits.
-#' @param add [`logical`] specifying whether new offset is to be added. Setting
-#'   this parameter to \code{FALSE} replaces the current offsets with the new
-#'   one (Default: \code{TRUE}).
-#' @references
-#' * Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale 1 km hummingbird diversity derived from fusing point records with lateral and elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
-#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+#'
 #' @returns Adds a elevational offset to a [`distribution`] object.
-#' @aliases add_offset_elevation
+#'
+#' @references
+#' * Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale
+#' 1 km hummingbird diversity derived from fusing point records with lateral and
+#' elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119
+#' * Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+#' niche and range estimates with Maxent and point process models by integrating
+#' spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+#' https://doi.org/10.1111/geb.12453
+#'
+#' @keywords prior, offset
+#' @family offset
+#'
 #' @examples
 #' \dontrun{
 #'  # Adds the offset to a distribution object
 #'  distribution(background) |> add_offset_elevation(dem, pref = c(400, 1200))
 #' }
-#' @keywords prior, offset
-#' @family offset
+#'
 #' @name add_offset_elevation
 NULL
 
-#' @name add_offset_elevation
 #' @rdname add_offset_elevation
 #' @export
 methods::setGeneric(
@@ -858,8 +881,6 @@ methods::setGeneric(
   signature = methods::signature("x", "elev", "pref"),
   function(x, elev, pref, rate = .0089, add = TRUE) standardGeneric("add_offset_elevation"))
 
-
-#' @name add_offset_elevation
 #' @rdname add_offset_elevation
 methods::setMethod(
   "add_offset_elevation",

@@ -1,15 +1,26 @@
 #' Validation of a fitted distribution object
 #'
 #' @description This function conducts a model evaluation based on either on the
-#'   fitted point data or any supplied independent.
-#' **Currently only supporting point datasets. For validation of integrated models more work is needed.**
+#' fitted point data or any supplied independent. **Currently only supporting point
+#' datasets. For validation of integrated models more work is needed.**
+#'
+#' @param mod A fitted [`BiodiversityDistribution`] object with set predictors.
+#' Alternatively one can also provide directly a [`SpatRaster`], however in this
+#' case the `point` layer also needs to be provided.
+#' @param method Should the validation be conducted on the continious prediction
+#' or a (previously calculated) thresholded layer in binary format? Note that
+#' depending on the method different metrics can be computed. See Details.
+#' @param layer In case multiple layers exist, which one to use? (Default: \code{'mean'}).
+#' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
+#' @param point_column A [`character`] vector with the name of the column containing
+#' the independent observations. (Default: \code{'observed'}).
+#' @param ... Other parameters that are passed on. Currently unused.
 #'
 #' @details The \code{'validate'} function calculates different validation
-#'   metrics depending on the output type.
+#' metrics depending on the output type.
 #'
-#'   The output metrics for each type are defined as follows:
+#' The output metrics for each type are defined as follows:
 #' **Continuous:**
-#'
 #' * \code{'n'} = Number of observations.
 #' * \code{'rmse'} = Root Mean Square Error, \deqn{ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} }
 #' * \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
@@ -18,7 +29,6 @@
 #' * \code{'cont.boyce'} = Continuous Boyce index, TBD
 #'
 #' **Discrete:**
-#'
 #' * \code{'n'} = Number of observations.
 #' * \code{'auc'} = Area under the curve, TBD
 #' * \code{'overall.accuracy'} = Overall Accuracy, TBD
@@ -31,46 +41,41 @@
 #' * \code{'logloss'} = Log loss, TBD
 #' * \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
 #' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
-#' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
-#'   where TP is true positive, TN a true negative, FP the false positive and FN
-#'   the false negative.
+#' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} },
+#' where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed. where TP
+#' is true positive, TN a true negative, FP the false positive and FN the false negative.
 #'
-#' @param mod A fitted [`BiodiversityDistribution`] object with set predictors.
-#'   Alternatively one can also provide directly a [`SpatRaster`], however in
-#'   this case the `point` layer also needs to be provided.
-#' @param method Should the validation be conducted on the continious prediction
-#'   or a (previously calculated) thresholded layer in binary format? Note that
-#'   depending on the method different metrics can be computed. See Details.
-#' @param layer In case multiple layers exist, which one to use? (Default:
-#'   \code{'mean'}).
-#' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
-#' @param point_column A [`character`] vector with the name of the column
-#'   containing the independent observations. (Default: \code{'observed'}).
-#' @param ... Other parameters that are passed on. Currently unused.
+#' @note If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
+#'
 #' @returns Return a tidy [`tibble`] with validation results.
-#' @note If you use the Boyce Index, please cite the original Hirzel et al.
-#'   (2006) paper.
+#'
+#' @keywords train
 #'
 #' @references
-#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-#' * Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
+#' of species occurrence with presence-only data. J. Biogeogr. 40, 778–789.
+#' https://doi.org/10.1111/jbi.12058
+#' * Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006).
+#' Evaluating the ability of habitat suitability models to predict species presences.
+#' Ecological modelling, 199(2), 142-152.
+#'
 #' @examples
 #' \dontrun{
 #'  # Assuming that mod is a distribution object and has a thresholded layer
 #'  mod <- threshold(mod, method = "TSS")
 #'  validate(mod, method = "discrete")
 #'  }
+#'
 #' @name validate
-#' @aliases validate
-#' @keywords train
-#' @export
 NULL
+
+#' @rdname validate
+#' @export
 methods::setGeneric("validate",
                     signature = methods::signature("mod"),
                     function(mod, method = 'continuous', layer = "mean",
                              point = NULL, point_column = 'observed', ...) standardGeneric("validate"))
 
-#' @name validate
 #' @rdname validate
 methods::setMethod(
   "validate",
@@ -224,7 +229,6 @@ methods::setMethod(
   }
 )
 
-#' @name validate
 #' @rdname validate
 methods::setMethod(
   "validate",

@@ -1,12 +1,16 @@
 #' Built formula for BART model
 #'
 #' @description This function built a formula for a `engine_bart()` model.
+#'
 #' @param obj A [`list()`] object containing the prepared model data for a given
-#'   biodiversity dataset.
-#' @author Martin Jung
+#' biodiversity dataset.
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#' @keywords internal
 built_formula_bart <- function(obj){
   assertthat::assert_that(
     is.list(obj),
@@ -46,11 +50,14 @@ built_formula_bart <- function(obj){
 #' @description Variable importance measured in the proportion of total branches
 #' used for a given variable. Explicitly dropped variables are included as
 #' \code{0}.
+#'
 #' @param model A fitted [dbarts] model.
-#' @concept Taken from the \pkg{embarcadero} package.
+#'
 #' @return A [`data.frame`] with the variable importance information.
-#' @aliases varimp.bart
+#'
 #' @keywords utils, internal
+#' @concept Taken from the \pkg{embarcadero} package.
+#'
 #' @noRd
 varimp.bart <- function(model){
   assertthat::assert_that(class(model) == 'bart',
@@ -82,20 +89,24 @@ varimp.bart <- function(model){
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
 #' @param x.var The predictor variables to be mapped (Default: \code{NULL}).
-#' @param equal Whether equal spacing on x breaks or quantiles is applied
-#'   (Default: \code{FALSE}).
-#' @param smooth Smoothing factor for the x breaks (works like partials).
-#'   (Default: \code{1}).
-#' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if
-#'   response was not binomial.
-#' @param values Either a [`numeric`] vector of supplied value ranges or
-#'   \code{NULL} (Default).
-#' @param variable_length A [`numeric`] on the number of partial effects to be
-#'   derived.
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
+#' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response
+#' was not binomial.
+#' @param values Either a [`numeric`] vector of supplied value ranges or \code{NULL} (Default).
+#' @param variable_length A [`numeric`] on the number of partial effects to be derived.
 #' @param plot Whether a model should be created (Default: \code{TRUE}).
-#' @concept Function taken and adapted from the [embarcadero] package.
+#'
+#' @return A [`SpatRaster`] layer containing the partial effect
+#'
 #' @references
-#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+#' regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858.
+#' https://doi.org/10.1111/2041-210X.13389
+#'
+#' @keywords utils
+#' @concept Function taken and adapted from the [embarcadero] package.
+#'
 #' @examples
 #' \dontrun{
 #' mod <- distribution(background) |>
@@ -106,9 +117,7 @@ varimp.bart <- function(model){
 #' bart_partial_effect(mod, "bio01mean.tif")
 #'
 #' }
-#' @return A [`SpatRaster`] layer containing the partial effect
-#' @aliases bart_partial_effect
-#' @keywords utils
+#'
 #' @noRd
 bart_partial_effect <- function(model, x.var, equal = FALSE,
                                 smooth = 1, transform = TRUE, values = NULL,
@@ -208,18 +217,20 @@ bart_partial_effect <- function(model, x.var, equal = FALSE,
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
 #' @param x.var The predictor variables to be mapped (Default: All).
-#' @param equal Whether equal spacing on x breaks or quantiles is applied
-#'   (Default: \code{FALSE}).
-#' @param smooth Smoothing factor for the x breaks (works like partials).
-#'   (Default: \code{1}).
-#' @param transform Backtransform using pnorm or not. Set to FALSE if response
-#'   was not Binomial.
-#' @concept Taken and adapted from embarcadero package.
-#' @references
-#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
+#' @param transform Backtransform using pnorm or not. Set to FALSE if response was not Binomial.
+#'
 #' @return A [`SpatRaster`] layer containing the partial effect.
-#' @aliases bart_partial_space
+#'
+#' @references
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+#' regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858.
+#' https://doi.org/10.1111/2041-210X.13389
+#'
 #' @keywords utils
+#' @concept Taken and adapted from embarcadero package.
+#'
 #' @noRd
 bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks

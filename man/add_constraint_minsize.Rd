@@ -2,8 +2,17 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_minsize}
 \alias{add_constraint_minsize}
+\alias{add_constraint_minsize,BiodiversityScenario,numeric-method}
 \title{Adds a size constraint on a scenario}
 \usage{
+add_constraint_minsize(
+  mod,
+  value,
+  unit = "km2",
+  establishment_step = FALSE,
+  ...
+)
+
 \S4method{add_constraint_minsize}{BiodiversityScenario,numeric}(
   mod,
   value,
@@ -13,6 +22,8 @@
 )
 }
 \arguments{
+\item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
+
 \item{value}{A \code{\link{numeric}} value describing the minimum amount of area of a
 given patch}
 
@@ -22,6 +33,9 @@ given patch}
 \item{establishment_step}{A \code{\link{logical}} flag indicating whether a given patch
 is only to be removed if wasn't small in a previous time step (not yet
 implemented!)}
+
+\item{...}{passed on parameters. See also the specific methods for adding
+constraints.}
 }
 \description{
 This function applies a minimum size constraint on a \code{scenario()} created

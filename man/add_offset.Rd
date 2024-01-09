@@ -2,6 +2,8 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset}
 \alias{add_offset}
+\alias{add_offset,BiodiversityDistribution,SpatRaster-method}
+\alias{add_offset,BiodiversityDistribution,sf-method}
 \title{Specify a spatial explicit offset}
 \usage{
 add_offset(x, layer, add = TRUE)
@@ -53,6 +55,7 @@ during the estimation
    add_predictors(covariates) |>
    add_offset(nicheEstimate)
 }
+
 }
 \references{
 \itemize{

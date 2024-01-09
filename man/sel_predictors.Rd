@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_predictors.R
 \name{sel_predictors}
 \alias{sel_predictors}
+\alias{sel_predictors,BiodiversityDistribution,character-method}
 \title{Select specific predictors from a \link{distribution} object}
 \usage{
 sel_predictors(x, names)
@@ -25,4 +26,5 @@ distribution(background) |>
  add_predictors(my_covariates) |>
  sel_predictors(names = c("Forest", "Elevation"))
 }
+
 }

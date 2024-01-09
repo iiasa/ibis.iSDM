@@ -2,6 +2,8 @@
 % Please edit documentation in R/add_predictors.R
 \name{add_predictor_range}
 \alias{add_predictor_range}
+\alias{add_predictor_range,BiodiversityDistribution,SpatRaster-method}
+\alias{add_predictor_range,BiodiversityDistribution,sf-method}
 \title{Add a range of a species as predictor to a distribution object}
 \usage{
 add_predictor_range(
@@ -39,8 +41,7 @@ feature.}
 \item{method}{\code{\link{character}} describing how the range should be included
 (\code{"binary"} | \code{"distance"}).}
 
-\item{distance_max}{Numeric threshold on the maximum distance (Default:
-\code{NULL}).}
+\item{distance_max}{Numeric threshold on the maximum distance (Default: \code{NULL}).}
 
 \item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with
 digitized raster layer. Can be used to for example to remove or reduce the
@@ -75,6 +76,8 @@ distribution(background) |>
 }
 \references{
 \itemize{
-\item Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
+\item Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and
+expert maps for improved species range predictions. Global Ecology and Biogeography,
+26(2), 243–258. https://doi.org/10.1111/geb.12539
 }
 }

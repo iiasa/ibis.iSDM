@@ -2,8 +2,11 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_dispersal}
 \alias{add_constraint_dispersal}
-\title{Adds a dispersal constrain to a scenario object.}
+\alias{add_constraint_dispersal,BiodiversityScenario-method}
+\title{Add dispersal constraint to an existing \code{scenario}}
 \usage{
+add_constraint_dispersal(mod, method, value = NULL, type = NULL, ...)
+
 \S4method{add_constraint_dispersal}{BiodiversityScenario}(mod, method, value = NULL, type = NULL, ...)
 }
 \arguments{
@@ -26,7 +29,17 @@ instance \code{`kissmig`}.}
 constraints.}
 }
 \description{
-Adds a dispersal constrain to a scenario object.
+Add dispersal constraint to an existing \code{scenario}
+}
+\details{
+The following additional parameters can bet set:
+\itemize{
+\item \code{pext}: \code{\link{numeric}} indicator for \code{`kissmig`} of the probability a
+colonized cell becomes uncolonised, i.e., the species gets locally extinct
+(Default: \code{0.1}).
+\item \code{pcor}: \code{\link{numeric}} probability that corner cells are considered in the
+3x3 neighbourhood (Default: \code{0.2}).
+}
 }
 \seealso{
 Other constraint: 

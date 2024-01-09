@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_biodiversity.R
 \name{add_biodiversity_polpa}
 \alias{add_biodiversity_polpa}
+\alias{add_biodiversity_polpa,BiodiversityDistribution,sf-method}
 \title{Add biodiversity polygon dataset to a distribution object (presence-absence)}
 \usage{
 add_biodiversity_polpa(
@@ -49,17 +50,14 @@ add_biodiversity_polpa(
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
-\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
-biodiversity point records.}
+\item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of biodiversity point records.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default is
-to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed.
+Default (\code{NULL}) is to use all covariates .}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default:
-\code{binomial}).}
+\item{family}{A \code{\link{character}} stating the family to be used (Default: \code{binomial}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
-\code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
 weights used in the modelling. Larger weights indicate higher weighting
@@ -110,8 +108,8 @@ link between covariates and polygonal data is established by regular
 sampling of points within the polygon and is thus equivalent to simulating
 the points directly.
 
-For an integration of range data as predictor or offset, see
-\code{\link[=add_predictor_range]{add_predictor_range()}} and \code{\link[=add_offset_range]{add_offset_range()}} instead.
+For an integration of range data as predictor or offset, see \code{\link[=add_predictor_range]{add_predictor_range()}}
+and \code{\link[=add_offset_range]{add_offset_range()}} instead.
 }
 \examples{
 \dontrun{

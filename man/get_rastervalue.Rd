@@ -35,5 +35,6 @@ It is essentially a wrapper for \code{\link[terra:extract]{terra::extract}}.
 # Extract values
 vals <- get_rastervalue(coords, env)
 }
+
 }
 \keyword{utils}

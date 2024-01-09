@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_predictors_model.R
 \name{add_predictors_model}
 \alias{add_predictors_model}
+\alias{add_predictors_model,BiodiversityDistribution-method}
 \title{Add predictors from a fitted model to a Biodiversity distribution object}
 \usage{
 add_predictors_model(
@@ -29,19 +30,17 @@ add_predictors_model(
 
 \item{model}{A \code{\link{DistributionModel}} object.}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be
-preprocessed in any way (Options: \code{'none'},\code{'pca'},
-\code{'scale'}, \code{'norm'})}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed
+in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 
-\item{derivates}{A Boolean check whether derivate features should be
-considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-\code{'quad'}) )}
+\item{derivates}{A Boolean check whether derivate features should be considered
+(Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
 
 \item{threshold_only}{A \code{\link{logical}} flag indicating whether to add thresholded
 layers from the fitted model (if existing) instead (Default: \code{FALSE}).}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
-which uses default prior assumptions.}
+\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which
+uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
@@ -96,4 +95,5 @@ Available options for creating derivates are:
         add_predictors_model(fit)
  obj
 }
+
 }

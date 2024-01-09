@@ -2,8 +2,17 @@
 % Please edit documentation in R/write_output.R
 \name{write_summary}
 \alias{write_summary}
+\alias{write_summary,ANY,character-method}
 \title{Generic function to write summary outputs from created models.}
 \usage{
+write_summary(
+  mod,
+  fname,
+  partial = FALSE,
+  verbose = getOption("ibis.setupmessages"),
+  ...
+)
+
 \S4method{write_summary}{ANY,character}(
   mod,
   fname,
@@ -15,13 +24,12 @@
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
 
-\item{fname}{A \code{\link{character}} depicting an output filename. The suffix
-determines the file type of the output (Options: \code{'rds'},
-\code{'rdata'}).}
+\item{fname}{A \code{\link{character}} depicting an output filename. The suffix determines
+the file type of the output (Options: \code{'rds'}, \code{'rdata'}).}
 
 \item{partial}{A \code{\link{logical}} value determining whether partial variable
-contributions should be calculated and added to the model summary. \strong{Note
-that this can be rather slow} (Default: \code{FALSE}).}
+contributions should be calculated and added to the model summary. \strong{Note} that
+this can be rather slow (Default: \code{FALSE}).}
 
 \item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
 Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}

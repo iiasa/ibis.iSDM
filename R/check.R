@@ -10,6 +10,11 @@ NULL
 #' often ignored). This function simply checks the respective input object for
 #' common issues or mistakes.
 #'
+#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or
+#' [`BiodiversityScenario`] object.
+#' @param stoponwarning [`logical`] Should check return a stop if warning is raised?
+#' (Default: \code{FALSE}).
+#'
 #' @details Different checks are implemented depending on the supplied object
 #'
 #' * [`BiodiversityDistribution`]
@@ -29,23 +34,19 @@ NULL
 #' @note This function will likely be expanded with additional checks in the
 #' future. If you have ideas, please let them know per issue.
 #'
-#' @param obj A [`BiodiversityDistribution`], [`DistributionModel`] or
-#'   [`BiodiversityScenario`] object.
-#' @param stoponwarning [`logical`] Should check return a stop if warning is
-#'   raised? (Default: \code{FALSE}).
-#' @name check
 #' @returns Message outputs
+#'
 #' @keywords misc
-#' @aliases check
+#'
 #' @examples
 #' \dontrun{
 #'  # Where mod is an estimated DistributionModel
 #'  check(mod)
 #' }
-#' @export
+#'
+#' @name check
 NULL
 
-#' @name check
 #' @rdname check
 #' @export
 methods::setGeneric(
@@ -53,9 +54,7 @@ methods::setGeneric(
   signature = methods::signature("obj", "stoponwarning"),
   function(obj, stoponwarning = FALSE) standardGeneric("check"))
 
-#' @name check
 #' @rdname check
-
 methods::setMethod(
   "check",
   methods::signature(obj = "ANY"),

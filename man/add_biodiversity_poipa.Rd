@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_biodiversity.R
 \name{add_biodiversity_poipa}
 \alias{add_biodiversity_poipa}
+\alias{add_biodiversity_poipa,BiodiversityDistribution,sf-method}
 \title{Add biodiversity point dataset to a distribution object (presence-absence).}
 \usage{
 add_biodiversity_poipa(
@@ -45,14 +46,12 @@ biodiversity point records indicating presence/absence. By default set to
 \code{"observed"} and an error will be thrown if a \code{\link{numeric}} column with
 that name does not exist.}
 
-\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default
-(\code{NULL}) is to use all covariates (if specified).}
+\item{formula}{A \code{\link{character}} or \code{\link{formula}} object to be passed. Default (\code{NULL})
+is to use all covariates.}
 
-\item{family}{A \code{\link{character}} stating the family to be used (Default:
-\code{'binomial'}).}
+\item{family}{A \code{\link{character}} stating the family to be used  (Default: \code{'binomial'}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default:
-\code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
 weights used in the modelling. Larger weights indicate higher weighting
@@ -91,13 +90,15 @@ regressions (e.g. \link{engine_bart}).
 \dontrun{
 # Define model
 x <- distribution(background) |> add_biodiversity_poipa(virtual_species)
-x
 }
+
 }
 \references{
 \itemize{
-\item Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
-\item Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.
+\item Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G.
+Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.
+\item Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in
+ecology. Ecol. Model. 135: 147–186.
 }
 }
 \seealso{

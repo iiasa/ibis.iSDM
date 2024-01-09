@@ -2,9 +2,8 @@
 % Please edit documentation in R/project.R
 \name{project}
 \alias{project}
-\alias{project,}
-\alias{project-method}
 \alias{project.BiodiversityScenario}
+\alias{project,BiodiversityScenario-method}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
 \method{project}{BiodiversityScenario}(x, ...)

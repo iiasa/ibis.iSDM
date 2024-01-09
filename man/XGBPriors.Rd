@@ -2,6 +2,7 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPriors}
 \alias{XGBPriors}
+\alias{XGBPriors,character-method}
 \title{Helper function when multiple variables are supplied for XGBOOST}
 \usage{
 XGBPriors(variable, hyper = "increasing", ...)
@@ -12,9 +13,9 @@ XGBPriors(variable, hyper = "increasing", ...)
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent
 effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }

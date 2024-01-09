@@ -2,6 +2,8 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_range}
 \alias{add_offset_range}
+\alias{add_offset_range,BiodiversityDistribution,SpatRaster-method}
+\alias{add_offset_range,BiodiversityDistribution,sf-method}
 \title{Specify a expert-based species range as offset}
 \usage{
 add_offset_range(
@@ -112,11 +114,17 @@ to a very small constant (\code{1e-10}).
  engine_glm() |>
  train()
 }
+
 }
 \references{
 \itemize{
-\item Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert
+maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258.
+https://doi.org/10.1111/geb.12539
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+https://doi.org/10.1111/geb.12453
 }
 }
 \seealso{

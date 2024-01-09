@@ -13,8 +13,8 @@ stars_to_raster(obj, which = NULL, template = NULL)
 or a \code{\link{vector}} of numeric time entries corresponding to the time dimension
 (Default: \code{NULL}).}
 
-\item{template}{An optional \code{\link{SpatRaster}} template to which the output
-should be aligned too.}
+\item{template}{An optional \code{\link{SpatRaster}} template to which the output should
+be aligned too.}
 }
 \value{
 A \code{\link{list}} containing \code{\link{SpatRaster}} objects.

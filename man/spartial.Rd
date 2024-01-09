@@ -2,6 +2,7 @@
 % Please edit documentation in R/partial.R
 \name{spartial}
 \alias{spartial}
+\alias{spartial,ANY,character-method}
 \alias{spartial.DistributionModel}
 \title{Obtain spatial partial effects of trained model}
 \usage{
@@ -28,8 +29,7 @@ for example created from a raster file (Default: \code{NULL}).}
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \link{SpatRaster} containing the mapped partial response of the
-variable.
+A \link{SpatRaster} containing the mapped partial response of the variable.
 }
 \description{
 Similar as \link{partial} this function calculates a partial response
@@ -39,14 +39,15 @@ partial response.
 }
 \details{
 By default the \link{mean} is calculated across all parameters that are
-not \code{x.var}. Instead a \emph{constant} can be set (for instance \code{0})
-to be applied to the output.
+not \code{x.var}. Instead a \emph{constant} can be set (for instance \code{0}) to
+be applied to the output.
 }
 \examples{
 \dontrun{
  # Create and visualize the spartial effect
  spartial(fit, x.var = "Forest.cover", plot = TRUE)
 }
+
 }
 \seealso{
 \link{partial}
