@@ -9,15 +9,15 @@
 \alias{plot.BiodiversityScenario}
 \title{Plot wrappers}
 \usage{
-plot.DistributionModel(x, what = "mean", ...)
+\method{plot}{DistributionModel}(x, what = "mean", ...)
 
-plot.BiodiversityDatasetCollection(x, ...)
+\method{plot}{BiodiversityDatasetCollection}(x, ...)
 
-plot.PredictorDataset(x, ...)
+\method{plot}{PredictorDataset}(x, ...)
 
-plot.Engine(x, ...)
+\method{plot}{Engine}(x, ...)
 
-plot.BiodiversityScenario(x, ...)
+\method{plot}{BiodiversityScenario}(x, ...)
 }
 \arguments{
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},
