@@ -376,7 +376,7 @@ methods::setMethod(
     )
 
     # Check type and ensure that is a polygon
-    assertthat::assert_that(all( unique( st_geometry_type(polpo) ) %in% c("POLYGON","MULTIPOLYGON") ),
+    assertthat::assert_that(all( unique( sf::st_geometry_type(polpo) ) %in% c("POLYGON","MULTIPOLYGON") ),
                             msg = "This method works for spatial data of type polygon only.")
 
     assertthat::assert_that(length(unique(polpo[[field_occurrence]])) <= 2,
@@ -701,8 +701,6 @@ methods::setMethod(
 #' @param field_occurrence A [`numeric`] or [`character`] location of biodiversity records.
 #' @param field_space A [`vector`] on the column names (Default: \code{'x'}, \code{'y'}).
 #' @param ... Other parameters passed down.
-#'
-#' @import sf
 #'
 #' @noRd
 #' @keywords internal

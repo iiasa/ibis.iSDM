@@ -146,10 +146,10 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
       # Return result
       return(result)
     }
-    ov <- st_parallel(points, function(x) sf::st_join(x, poly, join = st_within), getOption("ibis.nthread"))
+    ov <- st_parallel(points, function(x) sf::st_join(x, poly, join = sf::st_within), getOption("ibis.nthread"))
   } else {
     # Within test
-    ov <- suppressMessages( sf::st_join(points, poly, join = st_within) )
+    ov <- suppressMessages( sf::st_join(points, poly, join = sf::st_within) )
   }
   return(ov)
 }
