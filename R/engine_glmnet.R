@@ -389,7 +389,7 @@ engine_glmnet <- function(x,
         if(settings$get('only_linear') == FALSE){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
                                                     'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
-          # linear_predictors <- attr(terms.formula(form), "term.labels")
+          # linear_predictors <- attr(stats::terms.formula(form), "term.labels")
           # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
           #
           # form <- stats::update.formula(form,
@@ -400,7 +400,7 @@ engine_glmnet <- function(x,
           #                          paste0(m[lower.tri(m)], collapse = " + ")
           #                        ))
           # # Update penalty factors and limits
-          # for(var in attr(terms.formula(form), "term.labels")){
+          # for(var in attr(stats::terms.formula(form), "term.labels")){
           #   if(!(var %in% p.fac)){
           #     v <- 1 # Take the maximum regularization penalty by default
           #     vlow <- -Inf; vupp <- Inf

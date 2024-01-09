@@ -548,7 +548,7 @@ summarise_change <- function(scenario){
   rm(ss)
 
   # Calculate the area and  units
-  ar <- st_area(scenario)
+  ar <- sf::st_area(scenario)
   ar_unit <- units::deparse_unit(ar$area)
   if(ar_unit == "m2"){
     ar_unit <- "ha"
@@ -595,8 +595,8 @@ summarise_change <- function(scenario){
   change$unit[12] <- dis_unit
 
   # Calculate direction between centroids
-  change$value[13] <- geosphere::finalBearing(as_Spatial(sf1 |> sf::st_transform(crs = sf::st_crs(4326))),
-                                              as_Spatial(sf2 |> sf::st_transform(crs = sf::st_crs(4326))))
+  change$value[13] <- geosphere::finalBearing(sf::as_Spatial(sf1 |> sf::st_transform(crs = sf::st_crs(4326))),
+                                              sf::as_Spatial(sf2 |> sf::st_transform(crs = sf::st_crs(4326))))
 
   change <- change |> tibble::as_tibble()
   return(change)

@@ -608,7 +608,7 @@ engine_bart <- function(x,
             obj <- self$get_data("fit_best")
             if(is.Waiver(obj)) return(obj)
             # Get residuals
-            rd <- residuals(obj)
+            rd <- stats::residuals(obj)
             if(length(rd)==0) rd <- new_waiver()
             return(rd)
           },

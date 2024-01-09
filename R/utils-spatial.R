@@ -187,8 +187,8 @@ create_mcp <- function(biod, limits){
 
   suppressMessages(
     suppressWarnings(
-      out <- obs %>%
-        dplyr::group_by( id ) %>%
+      out <- obs |>
+        dplyr::group_by( id ) |>
         dplyr::summarise( geometry = sf::st_combine( geometry ) ) |>
         sf::st_union()
     )
@@ -597,8 +597,8 @@ sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
     poi$id <- 1:nrow(poi)
     suppressMessages(
       suppressWarnings(
-        out <- poi %>%
-          dplyr::group_by( id ) %>%
+        out <- poi |>
+          dplyr::group_by( id ) |>
           dplyr::summarise( geometry = sf::st_combine( geometry ) ) |>
           sf::st_union()
       )

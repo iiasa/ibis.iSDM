@@ -500,7 +500,7 @@ DistributionModel <- bdproto(
     model <- self$model$offset
     if(!is.Waiver(model$offset)) return( TRUE )
     # Also check whether offset is somehow in the equation
-    ind <- attr(terms.formula(fit$get_equation()), "offset")
+    ind <- attr(stats::terms.formula(fit$get_equation()), "offset")
     if(!is.null(ind)) return( TRUE )
   },
   # Masking function

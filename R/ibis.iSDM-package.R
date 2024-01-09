@@ -18,17 +18,7 @@
 
 ## usethis namespace: start
 #' @importFrom foreach %do% %dopar%
-#' @importFrom methods as
-#' @importFrom terra mask
 #' @importFrom stats effects
-#' @importFrom stats residuals
-#' @importFrom stats complete.cases
-#' @importFrom stats mad
-#' @importFrom stats sd
-#' @importFrom stats terms.formula
-#' @importFrom stats update.formula
-#' @importFrom utils install.packages
-#' @importFrom graphics par
 ## usethis namespace: end
 NULL
 
@@ -40,13 +30,13 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   "id", "included", "i",
                   "km", "vt",
                   "limit", "lower", "layer",
-                  "median", "model",
+                  "median", "model", "mad",
                   "name",
                   "observed", "oversampled",
                   "partial_effect", "polpo", "predictor", "predictors",
                   "q05", "q50", "q95",
                   "ras", "region.poly", "rug",
-                  "s", "state", "suitability",
+                  "s", "state", "suitability", "sd",
                   "tothin", "type", "time",
                   "upper",
                   "var1", "var2", "value", "variable",

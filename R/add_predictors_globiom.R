@@ -449,7 +449,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
           # # And warp by projecting and resampling
           ff <- ff |> stars::st_warp(bg, crs = sf::st_crs(bg),
                                      cellsize = res, method = "near") |>
-            st_transform(crs = sf::st_crs(template))
+            sf::st_transform(crs = sf::st_crs(template))
         }
         # Overwrite full dimensions
         full_dis <- stars::st_dimensions(ff)

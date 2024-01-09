@@ -459,7 +459,7 @@ engine_inlabru <- function(x,
                              coords = c('x', 'y'),
                              # data = df[, names(df) %notin% c('x','y')],
                              crs = sf::st_crs(self$get_data('mesh')$crs)
-          ) |> as("Spatial")
+          ) |> methods::as("Spatial")
           assertthat::assert_that(inherits(df, "sf") || inherits(df, "Spatial"))
 
           # Options for specifying link function of likelihood

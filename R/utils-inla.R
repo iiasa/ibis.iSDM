@@ -1079,7 +1079,7 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
   #                           cbind(background.bdry[,1], background.bdry[,2]))
 
   # Get only those points from the projection grid that are on the background
-  projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = st_crs(background))
+  projpoints <- projgrid$lattice$loc  |> as.data.frame() |> sf::st_as_sf(coords = c(1,2),crs = sf::st_crs(background))
   assertthat::assert_that(inherits(projpoints, "sf"), nrow(projpoints)>0)
 
   suppressMessages(

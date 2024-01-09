@@ -30,7 +30,7 @@ formula_terms <- function(formula){
   if(formula == "<Default>") stop("Default formula found!")
   if(!inherits(formula, "formula")) formula <- stats::as.formula(formula)
   # Get the terms from the formula
-  te <- attr(terms.formula(formula), "term.labels")
+  te <- attr(stats::terms.formula(formula), "term.labels")
   return(te)
 }
 
