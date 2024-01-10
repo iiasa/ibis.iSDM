@@ -27,6 +27,8 @@
 #' @examples
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
 #'
+#' @noRd
+#'
 #' @keywords internal
 myLog <- function(title = "[Processing]", col = 'green', ...) {
   assertthat::assert_that(col %in% c('green','yellow','red'))
