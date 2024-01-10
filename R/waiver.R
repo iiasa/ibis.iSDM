@@ -20,13 +20,13 @@ NULL
 #' # create new waiver object
 #' w <- new_waiver()
 #'
+#' @keywords misc
+#'
 #' # print object
 #' print(w)
 #'
 #' # is it a waiver object?
 #' is.Waiver(w)
-#'
-#' @keywords misc
 #'
 #' @export
 new_waiver <- function() structure(list(), class = "Waiver")
