@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Create a new scenario based on trained model parameters

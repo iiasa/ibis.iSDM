@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 if (!methods::isClass("Waiver")) methods::setOldClass("Waiver")
 
 #' Waiver

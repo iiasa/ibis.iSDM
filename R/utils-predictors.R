@@ -1,6 +1,3 @@
-#' @include utils.R utils-spatial.R
-NULL
-
 #' Spatial adjustment of environmental predictors and raster stacks
 #'
 #' @description This function allows the transformation of provided environmental

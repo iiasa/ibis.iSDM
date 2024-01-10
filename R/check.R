@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Check objects in the package for common errors or issues
 #'
 #' @description Not always is there enough data or sufficient information to

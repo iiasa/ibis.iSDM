@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
+#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
 NULL
 
 #' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution

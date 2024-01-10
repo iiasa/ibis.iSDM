@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Plot wrappers
 #'
 #' @description Plots information from a given object where a plotting object is

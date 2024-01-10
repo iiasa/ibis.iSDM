@@ -1,6 +1,3 @@
-#' @include utils-spatial.R
-NULL
-
 #' Function to create an ensemble of multiple fitted models
 #'
 #' @description Ensemble models calculated on multiple models have often been

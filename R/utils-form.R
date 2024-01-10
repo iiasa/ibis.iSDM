@@ -5,6 +5,8 @@
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 to_formula <- function(formula){
   # Convert to formula object
   if(!is.null(formula)) {
@@ -44,6 +46,8 @@ formula_terms <- function(formula){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 logistic <- function(a){
   if(is.data.frame(a)){
     apply(a, 2, function(x) ilink(x, link = "logit") )
@@ -81,6 +85,8 @@ logistic <- function(a){
 #' @concept bossMaps
 #'
 #' @noRd
+#'
+#' @keywords internal
 logisticRichard <- function(x, lower = 1, upper = 1, rate = 1, skew = 1,
                             shift = 1) {
   # Check
@@ -103,6 +109,8 @@ logisticRichard <- function(x, lower = 1, upper = 1, rate = 1, skew = 1,
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 logit <- function(a){
   if(is.data.frame(a)){
     apply(a, 2, function(x) log(x/(1-x))  )
@@ -122,6 +130,8 @@ logit <- function(a){
 #' ilink(rpois(10,.7), link = "log")
 #'
 #' @noRd
+#'
+#' @keywords internal
 ilink <- function(x, link = "log"){
   assertthat::assert_that(is.numeric(x),
                           is.character(link)
@@ -164,6 +174,8 @@ ilink <- function(x, link = "log"){
 #' }
 #'
 #' @noRd
+#'
+#' @keywords internal
 formula_combinations <- function(form, response = NULL, type= 'forward'){
   assertthat::assert_that(is.formula(form),
                           is.character(response) || is.null(response),

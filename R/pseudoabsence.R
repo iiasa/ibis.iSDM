@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Settings for specifying pseudo-absence points within the model background
 #'
 #' @description This function defines the settings for pseudo-absence sampling

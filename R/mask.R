@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Mask data with an external layer
 #'
 #' @description This is a helper function that takes an existing object created

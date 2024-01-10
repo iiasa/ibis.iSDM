@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Plot effects of trained model
 #'
 #' @description This functions is handy wrapper that calls the default plotting

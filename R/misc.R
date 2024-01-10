@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Central colour repository
 #' @description This command contains all the colours specified for use in \pkg{ibis.iSDM}.
 #'

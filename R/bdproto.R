@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Create a new `bdproto` object
 #'
 #' @description

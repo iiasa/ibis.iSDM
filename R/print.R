@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Print
 #'
 #' Display information about any object created through the \pkg{ibis.iSDM}

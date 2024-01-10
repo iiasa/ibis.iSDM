@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversitydistribution.R utils-spatial.R
+#' @include bdproto-biodiversitydistribution.R
 NULL
 
 #' Train the model from a given engine

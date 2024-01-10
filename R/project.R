@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Project a fitted model to a new environment and covariates

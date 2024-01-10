@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 if (!methods::isClass("Id")) methods::setOldClass("Id")
 
 #' Identifier

@@ -89,7 +89,6 @@ Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
-    'utils.R'
     'bdproto.R'
     'waiver.R'
     'bdproto-biodiversitydataset.R'
@@ -108,7 +107,6 @@ Collate:
     'add_predictors.R'
     'add_predictors_globiom.R'
     'add_predictors_model.R'
-    'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-priorlist.R'
     'bdproto-prior.R'
@@ -116,8 +114,6 @@ Collate:
     'bdproto-engine.R'
     'bdproto-settings.R'
     'check.R'
-    'utils-spatial.R'
-    'data.R'
     'distribution.R'
     'effects.R'
     'engine_bart.R'
@@ -133,6 +129,7 @@ Collate:
     'ensemble.R'
     'get_data.R'
     'ibis.iSDM-package.R'
+    'identifier.R'
     'limiting.R'
     'mask.R'
     'misc.R'
@@ -162,8 +159,10 @@ Collate:
     'utils-glmnet.R'
     'utils-predictors.R'
     'utils-scenario.R'
+    'utils-spatial.R'
     'utils-stan.R'
     'utils-xgboost.R'
+    'utils.R'
     'validate.R'
     'write_output.R'
     'zzz.R'

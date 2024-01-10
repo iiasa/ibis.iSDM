@@ -137,6 +137,8 @@ built_formula_gdb <- function(model, id, x, settings){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 predict_gdbclass <- function(fit, nd, template){
   assertthat::assert_that(
     inherits(fit, 'mboost'),
@@ -294,6 +296,8 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWPR"){
   assertthat::assert_that(
     is.data.frame(df),

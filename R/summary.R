@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Summarises a trained model or predictor object
 #'
 #' @description This helper function summarizes a given object, including

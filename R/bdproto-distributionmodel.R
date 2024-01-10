@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R identifier.R
+#' @include bdproto.R
 NULL
 
 if (!methods::isClass("DistributionModel")) methods::setOldClass("DistributionModel")

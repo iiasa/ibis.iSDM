@@ -95,8 +95,6 @@ intersecting_extents <- function(x, y) {
 #'
 #' @return An object with the spatial intersection
 #'
-#' @keywords internal
-#'
 #' @noRd
 #'
 #' @keywords internal
@@ -1230,6 +1228,8 @@ polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coord
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 clean_rasterfile <- function(x, verbose = FALSE)
 {
   stopifnot(grepl("SpatRaster", class(x)))

@@ -1,4 +1,4 @@
-#' @include utils.R waiver.R bdproto.R
+#' @include waiver.R bdproto.R
 NULL
 
 if (!methods::isClass("PredictorDataset")) methods::setOldClass("PredictorDataset")

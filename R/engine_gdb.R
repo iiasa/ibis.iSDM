@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Use of Gradient Descent Boosting for model estimation

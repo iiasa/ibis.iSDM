@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversitydistribution.R
+#' @include bdproto-biodiversitydistribution.R
 NULL
 
 #' Create distribution modelling procedure

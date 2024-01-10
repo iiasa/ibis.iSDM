@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Add a constraint to an existing \code{scenario}

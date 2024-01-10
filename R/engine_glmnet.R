@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Engine for regularized regression models

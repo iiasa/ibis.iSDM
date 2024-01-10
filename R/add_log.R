@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-log.R
+#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-log.R
 NULL
 
 #' Adds a log file to distribution object

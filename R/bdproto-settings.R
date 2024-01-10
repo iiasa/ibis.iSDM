@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R
+#' @include bdproto.R
 NULL
 
 if (!methods::isClass("Settings")) methods::setOldClass("Settings")

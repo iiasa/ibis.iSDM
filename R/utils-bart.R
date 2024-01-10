@@ -122,6 +122,8 @@ varimp.bart <- function(model){
 #' }
 #'
 #' @noRd
+#'
+#' @keywords internal
 bart_partial_effect <- function(model, x.var, equal = FALSE,
                                 smooth = 1, transform = TRUE, values = NULL,
                                 variable_length = 100,plot = TRUE) {
@@ -235,6 +237,8 @@ bart_partial_effect <- function(model, x.var, equal = FALSE,
 #' @concept Taken and adapted from embarcadero package.
 #'
 #' @noRd
+#'
+#' @keywords internal
 bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(

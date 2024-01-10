@@ -67,6 +67,8 @@ text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
@@ -163,6 +165,8 @@ name_atomic <- function(x, description = "") {
 #' message(aligned_text)
 #'
 #' @noRd
+#'
+#' @keywords internal
 align_text <- function(x, n) {
   assertthat::assert_that(assertthat::is.string(x), assertthat::is.count(n))
   if (!grepl("\n", x))
@@ -182,6 +186,8 @@ align_text <- function(x, n) {
 #' capitalize_text('ducks are the best birds')
 #'
 #' @noRd
+#'
+#' @keywords internal
 capitalize_text <- function(x) {
   assertthat::assert_that(is.character(x))
   s <- strsplit(x, " ")[[1]]
@@ -199,6 +205,8 @@ capitalize_text <- function(x) {
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 to_POSIXct <- function(vec){
   # Check th
   # Parse differently depending on time
@@ -318,6 +326,8 @@ sanitize_names <- function(names){
 #' }
 #'
 #' @noRd
+#'
+#' @keywords internal
 run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
   assertthat::assert_that(
     is.list(X) || is.data.frame(X) || is.matrix(X),
@@ -478,15 +488,17 @@ clamp_predictions <- function(model, pred){
 #' \code{'missing'} (Default) and \code{'remove'}, with the former replacing the
 #' outliers with \code{NA} and the latter removing them.
 #'
-#' @keywords utils
-#'
 #' @references
 #' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species
 #' and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity
 #' Information Facility, Copenhagen.
 #' @source [`bioGeo`] package code served as inspiration
 #'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 rm_outlier_revjack <- function(vals, procedure = "missing"){
   assertthat::assert_that(
     is.numeric(vals),

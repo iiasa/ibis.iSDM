@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Identify local limiting factor
 #'
 #' @description Calculates a [`SpatRaster`] of locally limiting factors from a

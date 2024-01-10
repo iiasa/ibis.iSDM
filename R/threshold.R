@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Threshold a continuous prediction to a categorical layer
 #'
 #' @description It is common in many applications of species distribution

@@ -266,6 +266,8 @@ built_formula_inla <- function(model, id, x, settings){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE){
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           is.null(region.poly) || inherits(region.poly,'Spatial'),
@@ -382,6 +384,8 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 mesh_as_sf <- function(mesh) {
   assertthat::assert_that(inherits(mesh,'inla.mesh'),
                           mesh$manifold == 'R2' # Two-dimensional mesh
@@ -411,9 +415,14 @@ mesh_as_sf <- function(mesh) {
 }
 
 #' Extract boundary points from mesh
+#'
 #' @param mesh A [`inla.mesh`] object.
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 mesh_boundary <- function(mesh){
   assertthat::assert_that(inherits(mesh,'inla.mesh'))
   # Mesh coordinates
@@ -434,6 +443,8 @@ mesh_boundary <- function(mesh){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 mesh_barrier <- function(mesh, region.poly){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
@@ -471,13 +482,16 @@ mesh_barrier <- function(mesh, region.poly){
 #' Query if a point is inside the mesh boundary
 #'
 #' @param mesh A [`inla.mesh`] object.
-#' @param coords Either a two-column [`data.frame`] or [`matrix`] of
-#'   coordinates. Alternatively a [`Spatial`] or [`sf`] object from which
-#'   coordinates can be extracted.
+#' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates.
+#' Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
+#'
+#' @return A [`vector`] of Boolean values indicating if a point is inside the mesh.
+#'
 #' @keywords utils
-#' @return A [`vector`] of Boolean values indicating if a point is inside the
-#'   mesh.
+#'
 #' @noRd
+#'
+#' @keywords internal
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
@@ -522,7 +536,10 @@ coords_in_mesh <- function(mesh, coords) {
 #' coordinates are recreated from predictors.
 #'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 coef_prediction <- function(mesh, mod, type = 'mean',
                             backtransf = NULL,
                             coords = NULL){
@@ -628,6 +645,8 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 post_prediction <- function(mod, nsamples = 100,
                             backtransf = NULL,
                             seed = 0){
@@ -958,6 +977,7 @@ post_prediction <- function(mod, nsamples = 100,
 #' @param joint Whether a model with multiple likelihood functions is to be specified.
 #'
 #' @keywords utils
+#'
 #' @noRd
 #'
 #' @keywords internal
@@ -1222,6 +1242,8 @@ inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, b
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatial = TRUE){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
@@ -1302,7 +1324,7 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
 }
 
 #' Tidy up summary information from a INLA model
-#'
+#' TODO: Lot more to add here, including options on what to extract
 #' @param m A trained INLA model object.
 #' @param what A [`character`].
 #' @param ... Other options to based on.
@@ -1310,7 +1332,8 @@ inla_predpoints <- function( mesh, background, cov, proj_stepsize = NULL, spatia
 #' @keywords utils
 #'
 #' @noRd
-#TODO: Lot more to add here, including options on what to extract
+#'
+#' @keywords internal
 tidy_inla_summary <- function(m, what = 'fixed',...){
   assertthat::assert_that(
     inherits(m,'inla'),
@@ -1335,10 +1358,15 @@ tidy_inla_summary <- function(m, what = 'fixed',...){
 }
 
 #' Plot marginal distributions of effects or hyperparameters from INLA model
+#'
 #' @param A INLA model.
 #' @param what Either \code{'fixed'} or \code{'hyper'}.
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 plot_inla_marginals = function(inla.model, what = 'fixed'){
   assertthat::assert_that(inherits(inla.model,'inla'),
                           is.character(what),
@@ -1373,6 +1401,8 @@ plot_inla_marginals = function(inla.model, what = 'fixed'){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 manual_inla_priors <- function(prior){
 
   # Uniform prior on the standard deviation
@@ -1428,6 +1458,8 @@ manual_inla_priors <- function(prior){
 #' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 inla.backstep <- function(master_form,
                           stack_data_resp, stk_inference,fam, cf, li = 1,
                           response = NULL, keep = NULL

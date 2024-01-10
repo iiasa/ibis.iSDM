@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Simulate population dynamics following the steps approach

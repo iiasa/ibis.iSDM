@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R
+#' @include bdproto.R bdproto-prior.R
 NULL
 
 #' Monotonic constrained priors for boosted regressions

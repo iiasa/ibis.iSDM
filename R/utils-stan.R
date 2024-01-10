@@ -115,6 +115,8 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
 #' @keywords stan utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 wrap_stanmodel <- function(sm_code){
   assertthat::assert_that(is.list(sm_code),
                           length(sm_code)==7)
@@ -164,6 +166,8 @@ wrap_stanmodel <- function(sm_code){
 #' @keywords stan utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 write_stanmodel <- function( mod, dir = tempdir() ) {
   assertthat::assert_that(
     dir.exists(dir)

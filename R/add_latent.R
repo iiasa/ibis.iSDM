@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R waiver.R
+#' @include waiver.R bdproto.R
 NULL
 
 #' Add latent spatial effect to the model equation

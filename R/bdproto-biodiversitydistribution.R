@@ -1,4 +1,4 @@
-#' @include utils.R waiver.R bdproto.R bdproto-biodiversitydataset.R
+#' @include waiver.R bdproto.R bdproto-biodiversitydataset.R
 NULL
 
 if (!methods::isClass("BiodiversityDistribution")) methods::setOldClass("BiodiversityDistribution")
