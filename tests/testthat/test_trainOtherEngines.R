@@ -3,7 +3,7 @@ test_that('Train a distribution model with XGboost', {
 
   skip_if_not_installed('xgboost')
   skip_if_not_installed('pdp')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('xgboost', quietly = TRUE) )
@@ -100,7 +100,7 @@ test_that('Train a distribution model with XGboost', {
 test_that('Train a distribution model with Breg', {
 
   skip_if_not_installed('BoomSpikeSlab')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('BoomSpikeSlab', quietly = TRUE) )
@@ -181,7 +181,7 @@ test_that('Train a distribution model with Breg', {
 test_that('Train a distribution model with GDB', {
 
   skip_if_not_installed('mboost')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('mboost', quietly = TRUE) )
@@ -273,7 +273,7 @@ test_that('Train a distribution model with glmnet', {
 
   skip_if_not_installed('glmnet')
   skip_if_not_installed('pdp')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
@@ -388,7 +388,7 @@ test_that('Train a distribution model with glmnet', {
 test_that('Train a distribution model with bart', {
 
   skip_if_not_installed('dbarts')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('dbarts', quietly = TRUE) )
@@ -459,7 +459,7 @@ test_that('Train a distribution model with INLABRU', {
 
   skip_if_not_installed('inlabru')
   skip_if_not_installed('INLA')
-  skip_on_travis()
+
   skip_on_cran()
 
   suppressWarnings( requireNamespace('inlabru', quietly = TRUE) )

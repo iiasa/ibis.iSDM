@@ -1,8 +1,10 @@
 # Setting up a distribution model
 test_that('Setting up a distribution model',{
-  testthat::skip_on_cran()
+
   skip_if_not_installed('igraph')
   skip_if_not_installed('INLA')
+
+  skip_on_cran()
 
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   suppressWarnings( requireNamespace("sf", quietly = TRUE) )

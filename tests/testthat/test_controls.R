@@ -2,7 +2,6 @@
 # Train a full distribution model with glm base model
 test_that('Test controls and limits', {
 
-  skip_on_travis()
   skip_on_cran()
 
   # No messages

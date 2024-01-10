@@ -175,8 +175,8 @@ test_that('Create and add priors', {
 test_that('Add and modify priors to existing object', {
 
   skip_if_not_installed('INLA')
+
   skip_on_cran()
-  skip_on_ci()
 
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   options("ibis.setupmessages" = FALSE)

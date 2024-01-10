@@ -1,12 +1,8 @@
 # Test any other functions in ibis that do not fit into the other tests
 # These will be particular important as we switch to terra in the future
 test_that('Custom functions - Test gridded transformations and ensembles', {
-  # skip_on_travis()
-  # skip_on_cran()
 
-  suppressWarnings(
-    requireNamespace("terra", quietly = TRUE)
-  )
+  suppressWarnings(requireNamespace("terra", quietly = TRUE))
 
   # --- #
   # Manipulating raster files #
