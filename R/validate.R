@@ -290,6 +290,7 @@ methods::setMethod(
 )
 
 #' @noRd
+#'
 #' @keywords internal
 .validatethreshold <- function(df2, point_column, mod = NULL, name = NULL, method = 'fixed', id = NULL) {
 

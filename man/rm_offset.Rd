@@ -36,6 +36,5 @@ Other offset:
 \code{\link{add_offset}()}
 }
 \concept{offset}
-\keyword{internal}
-\keyword{offset,}
+\keyword{offset}
 \keyword{prior,}

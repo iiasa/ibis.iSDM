@@ -279,6 +279,7 @@ methods::setMethod(
 #' and Distributions 20:1147-1159.
 #'
 #' @noRd
+#'
 #' @keywords internal
 .nt12 <- function(prodat, refdat){
   check_package("matrixStats")
@@ -394,6 +395,7 @@ methods::setMethod(
 #' @returns Á [`SpatRaster`] object.
 #'
 #' @noRd
+#'
 #' @keywords internal
 .mess <- function(covs, ref, full=FALSE) {
   assertthat::assert_that(

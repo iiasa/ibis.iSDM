@@ -8,6 +8,7 @@ NULL
 #' ibis_colours[['viridis_plasma']]
 #'
 #' @noRd
+#'
 #' @keywords internal
 ibis_colours <- list(
   sdm_colour = colorRampPalette(c('grey85','steelblue4','steelblue1','gold','red1','red4'))(100),

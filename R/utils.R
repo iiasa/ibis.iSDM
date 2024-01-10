@@ -6,9 +6,11 @@
 #' @param a First [`vector`] object.
 #' @param b Second [`vector`] object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 `%notin%` = function(a, b){!(a %in% b)}
 
 #' Custom messaging function for scripts
@@ -20,12 +22,12 @@
 #' are \code{'green'} / \code{'yellow'} / \code{'red'}
 #' @param ... Any additional outputs or words for display
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @examples
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
 #'
-#' @export
+#' @keywords internal
 myLog <- function(title = "[Processing]", col = 'green', ...) {
   assertthat::assert_that(col %in% c('green','yellow','red'))
   textwrap <- switch (col,
@@ -43,9 +45,11 @@ myLog <- function(title = "[Processing]", col = 'green', ...) {
 #'
 #' @param text A [`character`].
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 text_red <- function(text) { paste0('\033[31m',text,'\033[39m') }
 
 #' @inheritParams text_red
@@ -70,9 +74,11 @@ mode <- function(x) {
 #'
 #' @param x The [character] name of a package from which a function is needed.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
   if (!requireNamespace(x, quietly = TRUE)) {
@@ -85,9 +91,11 @@ check_package <- function(x) {
 #'
 #' @param x A [`vector`] or [`character`] object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 to_camelcase <- function(x){
   assertthat::assert_that(is.character(x) || is.vector(x))
   substr(x, 1, 1) <- toupper(
@@ -104,7 +112,7 @@ to_camelcase <- function(x){
 #' @param x A [`vector`] object
 #' @return [`character`] object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #' @concept function taken from `prioritizr` package
 #'
 #' @examples
@@ -112,6 +120,8 @@ to_camelcase <- function(x){
 #' name_atomic(letters, "characters")
 #'
 #' @noRd
+#'
+#' @keywords internal
 name_atomic <- function(x, description = "") {
   n <- length(x)
   if (nchar(description) > 0)
@@ -220,9 +230,9 @@ to_POSIXct <- function(vec){
 #' @param min [`numeric`] minimum value for the hinge transformation.
 #' @param max [`numeric`] maximum value for the hinge transformation.
 #'
-#' @keywords internal
-#'
 #' @noRd
+#'
+#' @keywords internal
 hingeval <- function (x, min, max){
   ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
 }
@@ -232,6 +242,7 @@ hingeval <- function (x, min, max){
 #' @param knot [`numeric`] threshold value as cutoff.
 #'
 #' @noRd
+#'
 #' @keywords internal
 thresholdval <- function(x, knot) {
     ifelse(x >= knot, 1, 0)
@@ -402,7 +413,7 @@ run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packag
 #'
 #' @returns A [`data.frame`] with the clamped predictors.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @references
 #' Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017).
@@ -410,6 +421,8 @@ run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packag
 #' https://doi.org/10.1111/ecog.03049
 #'
 #' @noRd
+#'
+#' @keywords internal
 clamp_predictions <- function(model, pred){
   assertthat::assert_that(
     is.list(model),
@@ -533,6 +546,7 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 #' @returns A [`sf`] object with the newly aggregated points.
 #'
 #' @noRd
+#'
 #' @keywords internal
 aggregate_observations2grid <- function(df, template, field_occurrence = 'observed'){
   assertthat::assert_that(
@@ -610,6 +624,7 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 #' @returns A [`matrix`] or [`sf`] object with the newly aggregated points.
 #'
 #' @noRd
+#'
 #' @keywords internal
 collect_occurrencepoints <- function(model, include_absences = FALSE,
                                      point_column = "observed",

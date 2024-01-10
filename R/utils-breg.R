@@ -9,6 +9,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_breg <- function(obj){
   assertthat::assert_that(
@@ -61,9 +62,11 @@ built_formula_breg <- function(obj){
 #' @returns A [`SpikeSlabPriorBase`] object for use with a [`Boom`] engine
 #'   trained model
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
   assertthat::assert_that(
     is.formula(form),
@@ -158,8 +161,11 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 #'
 #' @returns A [`data.frame`] with the respective prediction.
 #'
-#' @keywords utils, internal
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 predict_boom <- function(obj, newdata, fam, params, w = NULL) {
   assertthat::assert_that(
     is.list(obj),

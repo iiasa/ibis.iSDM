@@ -13,6 +13,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_gdb <- function(model, id, x, settings){
   assertthat::assert_that(
@@ -170,6 +171,7 @@ predict_gdbclass <- function(fit, nd, template){
 #' @param obj A fitted [`mboost`] object.
 #'
 #' @noRd
+#'
 #' @keywords internal
 clean_mboost_summary <- function(obj){
   assertthat::assert_that(
@@ -224,6 +226,7 @@ clean_mboost_summary <- function(obj){
 #' @returns A [`vector`] with the variables that full fill the threshold.
 #'
 #' @noRd
+#'
 #' @keywords internal
 rm_insufficient_covs <- function(model, tr = 5){
   assertthat::assert_that(

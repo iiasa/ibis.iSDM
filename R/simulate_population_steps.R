@@ -162,6 +162,7 @@ methods::setMethod(
 #' @returns A [`SpatRaster`] object of the same length as proj.
 #'
 #' @noRd
+#'
 #' @keywords internal
 .simulate_steps <- function(proj, scenario_simulations){
   assertthat::assert_that(

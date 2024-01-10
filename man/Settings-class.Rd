@@ -25,7 +25,8 @@ Other bdproto:
 \code{\link{Log-class}},
 \code{\link{PredictorDataset-class}},
 \code{\link{Prior-class}},
-\code{\link{PriorList-class}}
+\code{\link{PriorList-class}},
+\code{\link{bdproto}()}
 }
 \concept{bdproto}
 \keyword{bdproto}

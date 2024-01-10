@@ -8,9 +8,11 @@
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have
 #' the same resolution, extent, dimensionality, and coordinate system.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 is_comparable_raster <- function(x, y) {
   if(inherits(y, "sf")){
     assertthat::assert_that(
@@ -34,9 +36,11 @@ is_comparable_raster <- function(x, y) {
 #'
 #' @param input A [`SpatRaster`] object to convert to raster.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 terra_to_raster <- function(input){
   assertthat::assert_that(
     is.Raster(input)
@@ -68,9 +72,11 @@ terra_to_raster <- function(input){
 #'
 #' @return [`logical`].
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
     inherits(x, c("SpatRaster", "Spatial", "sf")),
@@ -89,9 +95,11 @@ intersecting_extents <- function(x, y) {
 #'
 #' @return An object with the spatial intersection
 #'
-#' @keywords utils, internal
+#' @keywords internal
 #'
 #' @noRd
+#'
+#' @keywords internal
 point_in_polygon <- function(poly, points, coords = c('x','y')){
   assertthat::assert_that(
     inherits(poly,'sf'),
@@ -168,6 +176,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
 #' @returns A [`sf`] object.
 #'
 #' @noRd
+#'
 #' @keywords internal
 create_mcp <- function(biod, limits){
   assertthat::assert_that(
@@ -236,9 +245,11 @@ create_mcp <- function(biod, limits){
 #'
 #' @returns A [`sf`] or [`SpatRaster`] object.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, column = "limits", template = NULL){
   assertthat::assert_that(
     inherits(df, "sf"),
@@ -327,9 +338,11 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
 #'
 #' @returns A [`sf`] POINT object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 raster_centroid <- function(obj, patch = FALSE){
   assertthat::assert_that(is.Raster(obj),
                           is.logical(patch))
@@ -396,9 +409,11 @@ raster_centroid <- function(obj, patch = FALSE){
 #' @return An object of class [`character`], a Well Known Text (WKT) string of
 #' the form 'POLYGON((minx miny, maxx miny, maxx maxy, minx maxy, minx miny))'
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
   if(is.null(bbox)) bbox <- c(minx, miny, maxx, maxy)
   assertthat::assert_that(length(bbox)==4) #check for 4 digits
@@ -419,9 +434,11 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 #'
 #' @return Returns the unified total [`extent`] object.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 extent_expand <- function(e,f=0.1){
   assertthat::assert_that(inherits(e,'SpatExtent'),
                           is.numeric(f))
@@ -445,9 +462,11 @@ extent_expand <- function(e,f=0.1){
 #'
 #' @source https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 rename_geometry <- function(g, name){
   assertthat::assert_that(
     inherits(g, "sf"),
@@ -471,9 +490,11 @@ rename_geometry <- function(g, name){
 #'
 #' @returns A [`sf`] object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 guess_sf <- function(df, geom_name = 'geometry'){
   assertthat::assert_that(
     inherits(df,'data.frame') || inherits(df, 'sf') || inherits(df, 'tibble')
@@ -529,9 +550,11 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #'
 #' @returns A [`SpatRaster`] with the density of point observations.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 st_kde <- function(points, background, bandwidth = 3){
   assertthat::assert_that(
     inherits(points, "sf"),
@@ -580,10 +603,12 @@ st_kde <- function(points, background, bandwidth = 3){
 #'
 #' @return A numeric vector of weights.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @concept Inspired from https://github.com/adamlilith/enmSdmX/blob/master/R/weightByDist.r
 #'
 #' @noRd
+#'
+#' @keywords internal
 sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
   assertthat::assert_that(
     inherits(poi, "sf"),
@@ -649,9 +674,11 @@ sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
 #' @param field_occurrence A [`character`] specifying the occurrence field. Should
 #' contain information on the type.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 polygon_to_points <- function(poly, template, field_occurrence ) {
   assertthat::assert_that(
     inherits(poly, 'sf'),
@@ -685,9 +712,11 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
 #' @param output_unit [`character`] determining the units. Allowed is 'm' and km' (Default: \code{'km'}).
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = 'km') {
   assertthat::assert_that(inherits(ex, 'SpatExtent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'SpatRaster') || inherits(ex, 'Spatial'),
                           is.logical(lonlat),
@@ -1053,9 +1082,11 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
 #'
 #' @return A [`SpatRaster-class`] object
 #'
-#' @keywords utils, internal
+#' @keywords internal
 #'
 #' @noRd
+#'
+#' @keywords internal
 model_to_background <- function(model){
   assertthat::assert_that(
     is.list(model),
@@ -1090,9 +1121,11 @@ model_to_background <- function(model){
 #'
 #' @return A [`SpatRaster-class`] object with number of columns equal to \code{ncol(post)}.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 fill_rasters <- function(post, background){
   assertthat::assert_that(
     is.data.frame(post),
@@ -1155,9 +1188,11 @@ fill_rasters <- function(post, background){
 #' ecology in the age of multivariate multiscale spatial analysis. Ecological
 #' Monographs 82, 257–275.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 polynominal_transform <- function(coords, degree = 2, weights = rep(1/nrow(coords), nrow(coords)) ){
   assertthat::assert_that(
     inherits(coords, 'data.frame') || inherits(coords, 'matrix') || inherits(coords, 'sf'),
@@ -1233,9 +1268,11 @@ clean_rasterfile <- function(x, verbose = FALSE)
 #'
 #' @returns A [`SpatRaster`] object.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 explode_factorized_raster <- function(ras, name = NULL){
   assertthat::assert_that(is.Raster(ras),
                           is.null(name) || is.character(name))

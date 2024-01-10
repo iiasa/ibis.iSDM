@@ -10,6 +10,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_glmnet <- function(obj){
   assertthat::assert_that(
@@ -60,8 +61,11 @@ built_formula_glmnet <- function(obj){
 #'
 #' @source maxnet
 #'
-#' @keywords internal, utils
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 default.regularization <- function(p, m){
   isproduct <- function(x) grepl(":", x) & !grepl("\\(", x)
   isquadratic <- function(x) grepl("^I\\(.*\\^2\\)", x)
@@ -119,8 +123,11 @@ default.regularization <- function(p, m){
 #'
 #' @param obj A \code{"glmnet"} object.
 #'
-#' @keywords internal, utils
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 determine_lambda <- function(obj){
   assertthat::assert_that(
     inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
@@ -155,8 +162,11 @@ determine_lambda <- function(obj){
 #'
 #' @param obj An object created with \code{'cv.glmnet'}.
 #'
-#' @keywords internal, utils
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 tidy_glmnet_summary <- function(obj){
   assertthat::assert_that(
     inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
@@ -196,8 +206,11 @@ tidy_glmnet_summary <- function(obj){
 #'
 #' @param obj An object created with [stats::glm.fit()]
 #'
-#' @keywords internal, utils
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 tidy_glm_summary <- function(obj){
   assertthat::assert_that(
     inherits(obj, 'glm')

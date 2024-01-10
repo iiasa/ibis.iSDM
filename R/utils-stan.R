@@ -13,6 +13,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_stan <- function(model, id, x, settings){
   assertthat::assert_that(
@@ -76,9 +77,11 @@ built_formula_stan <- function(model, id, x, settings){
 #' @param ask [`logical`] whether the cmdstanr package is to be installed
 #' (Default: \code{FALSE}).
 #'
-#' @keywords stan, utils, internal
+#' @keywords stan utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 stan_check_cmd <- function(install = TRUE, ask = FALSE){
   assertthat::assert_that(
     is.logical(install), is.logical(ask)

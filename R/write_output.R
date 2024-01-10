@@ -180,9 +180,11 @@ methods::setMethod(
 #' @param varNA The nodata value to be used (Default: \code{-9999}).
 #' @param ... Other options.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   assertthat::assert_that(
     is.Raster(file) || inherits(file, 'stars'),
@@ -220,9 +222,11 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
 #' @param varNA The nodata value to be used. Default: \code{-9999}.
 #' @param ... Other options.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 writeNetCDF <- function(file, fname,
                         varName, varUnit = NULL,
                         varLong = NULL, dt = "FLT4S", varNA = -9999, ...) {

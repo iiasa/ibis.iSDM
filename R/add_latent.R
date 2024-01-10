@@ -117,7 +117,7 @@ methods::setMethod(
 #' @returns Removes a latent spatial effect from a [`distribution`] object.
 #'
 #' @seealso add_latent_spatial
-#' @keywords latent, internal
+#' @keywords latent
 #'
 #' @examples
 #' \dontrun{

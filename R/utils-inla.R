@@ -12,6 +12,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_inla <- function(model, id, x, settings){
   assertthat::assert_that(
@@ -956,8 +957,10 @@ post_prediction <- function(mod, nsamples = 100,
 #' @param id A id supplied to name this object.
 #' @param joint Whether a model with multiple likelihood functions is to be specified.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @noRd
+#'
+#' @keywords internal
 inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALSE){
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
@@ -1027,9 +1030,11 @@ inla_make_integration_stack <- function(mesh, mesh.area, model, id, joint = FALS
 #' @param settings A settings object.
 #' @param joint Whether more than 2 likelihoods are estimated.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 inla_make_projection_stack <- function(stk_resp, model, mesh, mesh.area, type, background,
                                        res = NULL, spde = NULL, settings = NULL,joint = FALSE){
   # Security checks

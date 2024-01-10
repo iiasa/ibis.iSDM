@@ -616,10 +616,12 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
 #'
 #' @returns A hinge transformed [`data.frame`].
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @concept Concept taken from the [maxnet] package.
 #'
 #' @noRd
+#'
+#' @keywords internal
 makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -668,10 +670,12 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
 #'
 #' @returns A threshold transformed [`data.frame`].
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @concept Concept taken from the [maxnet] package.
 #'
 #' @noRd
+#'
+#' @keywords internal
 makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -707,9 +711,11 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
 #'
 #' @returns A binned transformed [`data.frame`] with columns representing each bin.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 makeBin <- function(v, n, nknots, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -839,9 +845,12 @@ predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
 #'
 #' @returns [`vector`] of variable names to exclude
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @concept Code inspired from the [`caret`] package
 #'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption('ibis.corPred'), method = 'pearson', ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env),
@@ -915,8 +924,11 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
 #' Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences
 #' Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_abess <- function( env, observed, method, family, tune.type = "cv", lambda = 0,
                                        weight = NULL, keep = NULL, ...){
   # Security checks
@@ -1011,8 +1023,11 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta
 #' Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_boruta <- function( env, obs, method, keep = NULL,
                                       iter = 100, verbose = getOption('ibis.setupmessages'), ...){
   # Security checks

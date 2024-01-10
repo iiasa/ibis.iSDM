@@ -21,5 +21,5 @@ This functions prints a message with a custom header and colour.
 myLog("[Setup]", "red", "Some error occurred during data preparation.")
 
 }
-\keyword{internal,}
+\keyword{internal}
 \keyword{utils}

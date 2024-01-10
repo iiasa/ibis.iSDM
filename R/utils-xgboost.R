@@ -10,6 +10,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_xgboost <- function(obj){
   assertthat::assert_that(
@@ -50,9 +51,11 @@ built_formula_xgboost <- function(obj){
 #' @param df A [`vector`] object containing the factor variables
 #' @param name Name for the new object
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #'
 #' @noRd
+#'
+#' @keywords internal
 explode_factor <- function(df, name = "facvar"){
   assertthat::assert_that(
     is.data.frame(df) || is.factor(df),

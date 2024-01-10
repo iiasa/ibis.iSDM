@@ -10,6 +10,7 @@
 #' @author Martin Jung
 #'
 #' @noRd
+#'
 #' @keywords internal
 built_formula_bart <- function(obj){
   assertthat::assert_that(
@@ -55,10 +56,12 @@ built_formula_bart <- function(obj){
 #'
 #' @return A [`data.frame`] with the variable importance information.
 #'
-#' @keywords utils, internal
+#' @keywords utils
 #' @concept Taken from the \pkg{embarcadero} package.
 #'
 #' @noRd
+#'
+#' @keywords internal
 varimp.bart <- function(model){
   assertthat::assert_that(class(model) == 'bart',
                           ("fit" %in% names(model)),

@@ -45,7 +45,7 @@ NULL
 #' Abacus$add(10)
 #' Abacus$subtract(10)
 #'
-#' @noRd
+#' @export
 bdproto <- function(`_class` = NULL, `_inherit` = NULL, ...) {
   assertthat::assert_that(assertthat::is.string(`_class`) || is.null(`_class`),
                           inherits(`_inherit`, "bdproto") || is.null(`_inherit`))

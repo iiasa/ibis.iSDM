@@ -265,6 +265,7 @@ methods::setMethod(
 #' omitted during distance calculation (Default: \code{NULL}).
 #'
 #' @noRd
+#'
 #' @keywords internal
 .sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
   assertthat::assert_that(
@@ -314,6 +315,7 @@ methods::setMethod(
 #' during distance calculation (Default: \code{NULL}).
 #'
 #' @noRd
+#'
 #' @keywords internal
 .sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
   assertthat::assert_that(
@@ -367,8 +369,9 @@ methods::setMethod(
 #' omitted during distance calculation (Default: \code{NULL}).
 #'
 #' @noRd
+#'
 #' @keywords internal
-.kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
+kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
@@ -605,6 +608,7 @@ methods::setMethod(
 #' should be applied.
 #'
 #' @noRd
+#'
 #' @keywords internal
 .nichelimit <- function(newdata, model, names = NULL, value = 1, increment = 0, increment_step = 1){
   assertthat::assert_that(

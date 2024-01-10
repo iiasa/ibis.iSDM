@@ -20,8 +20,11 @@ to_formula <- function(formula){
 #'
 #' @param formula A [`formula`] or [`character`] object.
 #'
+#' @keywords utils
+#'
 #' @noRd
-#' @keywords internal, utils
+#'
+#' @keywords internal
 formula_terms <- function(formula){
   # Check
   assertthat::assert_that(

@@ -703,6 +703,7 @@ methods::setMethod(
 #' @param ... Other parameters passed down.
 #'
 #' @noRd
+#'
 #' @keywords internal
 format_biodiversity_data <- function(x, field_occurrence, field_space = c("x","y"), ... ){
   # Final checks

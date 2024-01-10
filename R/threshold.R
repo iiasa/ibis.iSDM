@@ -193,6 +193,7 @@ methods::setMethod(
 )
 
 #' @noRd
+#'
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
                             point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {

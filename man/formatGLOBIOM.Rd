@@ -50,5 +50,4 @@ covariates <- formatGLOBIOM(fname)
 }
 
 }
-\keyword{internal,}
 \keyword{utils}

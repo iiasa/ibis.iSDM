@@ -28,5 +28,4 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 \seealso{
 add_latent_spatial
 }
-\keyword{internal}
-\keyword{latent,}
+\keyword{latent}

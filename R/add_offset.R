@@ -157,7 +157,7 @@ methods::setMethod(
 #' @returns Removes an offset from a [`distribution`] object.
 #'
 #' @family offset
-#' @keywords prior, offset, internal
+#' @keywords prior, offset
 #'
 #' @examples
 #' \dontrun{
@@ -699,6 +699,7 @@ methods::setMethod(
 #' @returns A [`numeric`] vector with the coefficients of regression.
 #'
 #' @noRd
+#'
 #' @keywords internal
 .searchLogisticCurve <- function(y, x, family, search = TRUE,
                                  iniParam = c(upper = 1,

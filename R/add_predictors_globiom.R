@@ -299,7 +299,7 @@ methods::setMethod(
 #'
 #' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
 #'
-#' @keywords internal, utils
+#' @keywords utils
 #'
 #' @examples
 #' \dontrun{
