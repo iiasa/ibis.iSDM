@@ -163,7 +163,8 @@ reference:
       - has_keyword("bdproto")
 
   - title: Miscellaneous functions
-    desc: Other functions only relevant for development
+    desc: >
+     Other functions only relevant for development
     contents:
       - as.Id
       - is.Id

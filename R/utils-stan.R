@@ -114,8 +114,6 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
 #'
 #' @keywords stan utils
 #'
-#' @noRd
-#'
 #' @keywords internal
 wrap_stanmodel <- function(sm_code){
   assertthat::assert_that(is.list(sm_code),

@@ -25,9 +25,9 @@
 #' @keywords utils
 #'
 #' @examples
+#' \dontrun{
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
-#'
-#' @noRd
+#' }
 #'
 #' @keywords internal
 myLog <- function(title = "[Processing]", col = 'green', ...) {
