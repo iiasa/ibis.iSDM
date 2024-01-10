@@ -138,4 +138,4 @@ Other offset:
 }
 \concept{offset}
 \keyword{offset}
-\keyword{prior,}
+\keyword{prior}

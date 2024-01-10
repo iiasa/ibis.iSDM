@@ -112,7 +112,7 @@ stan_check_cmd <- function(install = TRUE, ask = FALSE){
 #'
 #' @returns A [character] object.
 #'
-#' @keywords stan, utils
+#' @keywords stan utils
 #'
 #' @noRd
 wrap_stanmodel <- function(sm_code){
@@ -161,7 +161,7 @@ wrap_stanmodel <- function(sm_code){
 #' @param dir The model directory where the model chould be written. Should be a
 #' character / existing dir.
 #'
-#' @keywords stan, utils
+#' @keywords stan utils
 #'
 #' @noRd
 write_stanmodel <- function( mod, dir = tempdir() ) {
@@ -208,7 +208,7 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
 #' @seealso rethinking R package
 #'
 #'
-#' @keywords misc, stan
+#' @keywords misc stan
 #'
 #' @export
 run_stan <- function( model_code, data = list(),

@@ -78,7 +78,7 @@
 #' from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 #'
 #' @seealso [add_control_extrapolation()]
-#' @keywords bias, offset, control
+#' @keywords bias offset control
 #' @concept The spatial bias weighting was inspired by code in the \code{enmSdmX} package.
 #'
 #' @examples

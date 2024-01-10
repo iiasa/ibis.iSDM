@@ -85,4 +85,4 @@ By default the response functions of each model are normalized.
 
 }
 \keyword{partial}
-\keyword{train,}
+\keyword{train}

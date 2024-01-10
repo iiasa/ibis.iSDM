@@ -109,6 +109,6 @@ https://doi.org/10.1111/ddi.12209
 dismo R-package.
 }
 \keyword{environment}
-\keyword{mahalanobis,}
-\keyword{mess,}
-\keyword{similarity,}
+\keyword{mahalanobis}
+\keyword{mess}
+\keyword{similarity}

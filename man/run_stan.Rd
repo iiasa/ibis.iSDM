@@ -67,5 +67,5 @@ provided by cmdstanr. The code was adapted from McElreath rethinking package.
 \seealso{
 rethinking R package
 }
-\keyword{misc,}
+\keyword{misc}
 \keyword{stan}

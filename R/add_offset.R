@@ -36,7 +36,7 @@
 #' information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #'
 #' @family offset
-#' @keywords prior, offset
+#' @keywords prior offset
 #'
 #' @examples
 #' \dontrun{
@@ -157,7 +157,7 @@ methods::setMethod(
 #' @returns Removes an offset from a [`distribution`] object.
 #'
 #' @family offset
-#' @keywords prior, offset
+#' @keywords prior offset
 #'
 #' @examples
 #' \dontrun{
@@ -236,7 +236,7 @@ methods::setMethod(
 #' spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 #'
 #' @family offset
-#' @keywords prior, offset
+#' @keywords prior offset
 #'
 #' @examples
 #' \dontrun{
@@ -385,7 +385,7 @@ methods::setMethod(
 #'
 #' @seealso \code{"bossMaps"}
 #' @family offset
-#' @keywords prior, offset
+#' @keywords prior offset
 #'
 #' @examples
 #' \dontrun{
@@ -863,7 +863,7 @@ methods::setMethod(
 #' spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
 #' https://doi.org/10.1111/geb.12453
 #'
-#' @keywords prior, offset
+#' @keywords prior offset
 #' @family offset
 #'
 #' @examples

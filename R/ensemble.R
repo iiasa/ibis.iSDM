@@ -515,7 +515,7 @@ methods::setMethod(
 #'
 #' @returns A [data.frame] with the combined partial effects of the supplied models.
 #'
-#' @keywords train, partial
+#' @keywords train partial
 #'
 #' @examples
 #' \dontrun{
@@ -672,7 +672,7 @@ methods::setMethod(
 #'
 #' @returns A [SpatRaster] object with the combined partial effects of the supplied models.
 #'
-#' @keywords train, partial
+#' @keywords train partial
 #'
 #' @examples
 #' \dontrun{

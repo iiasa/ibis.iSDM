@@ -47,7 +47,7 @@ NULL
 #' https://doi.org/10.1111/ddi.12209
 #'
 #' @seealso dismo R-package.
-#' @keywords mess, mahalanobis, similarity, environment
+#' @keywords mess mahalanobis similarity environment
 #'
 #' @examples
 #'  \dontrun{

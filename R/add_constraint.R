@@ -371,7 +371,7 @@ methods::setMethod(
 #' @noRd
 #'
 #' @keywords internal
-kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
+.kissmig_dispersal <- function(baseline_threshold, new_suit, params, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
