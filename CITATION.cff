@@ -74,7 +74,7 @@ references:
   - family-names: Wickham
     given-names: Hadley
     email: hadley@rstudio.com
-  year: '2023'
+  year: '2024'
   version: '>= 0.2.0'
 - type: software
   title: doFuture
@@ -86,31 +86,9 @@ references:
   - family-names: Bengtsson
     given-names: Henrik
     email: henrikb@braju.com
-  year: '2023'
+    orcid: https://orcid.org/0000-0002-7579-5165
+  year: '2024'
   version: '>= 0.12.2'
-- type: software
-  title: foreach
-  abstract: 'foreach: Provides Foreach Looping Construct'
-  notes: Imports
-  url: https://github.com/RevolutionAnalytics/foreach
-  repository: https://CRAN.R-project.org/package=foreach
-  authors:
-  - name: Microsoft
-  - family-names: Weston
-    given-names: Steve
-  year: '2023'
-- type: software
-  title: future
-  abstract: 'future: Unified Parallel and Distributed Processing in R for Everyone'
-  notes: Imports
-  url: https://future.futureverse.org
-  repository: https://CRAN.R-project.org/package=future
-  authors:
-  - family-names: Bengtsson
-    given-names: Henrik
-    email: henrikb@braju.com
-  year: '2023'
-  version: '>= 1.23.0'
 - type: software
   title: dplyr
   abstract: 'dplyr: A Grammar of Data Manipulation'
@@ -134,7 +112,31 @@ references:
     given-names: Davis
     email: davis@posit.co
     orcid: https://orcid.org/0000-0003-4777-038X
-  year: '2023'
+  year: '2024'
+- type: software
+  title: foreach
+  abstract: 'foreach: Provides Foreach Looping Construct'
+  notes: Imports
+  url: https://github.com/RevolutionAnalytics/foreach
+  repository: https://CRAN.R-project.org/package=foreach
+  authors:
+  - name: Microsoft
+  - family-names: Weston
+    given-names: Steve
+  year: '2024'
+- type: software
+  title: future
+  abstract: 'future: Unified Parallel and Distributed Processing in R for Everyone'
+  notes: Imports
+  url: https://future.futureverse.org
+  repository: https://CRAN.R-project.org/package=future
+  authors:
+  - family-names: Bengtsson
+    given-names: Henrik
+    email: henrikb@braju.com
+    orcid: https://orcid.org/0000-0002-7579-5165
+  year: '2024'
+  version: '>= 1.23.0'
 - type: software
   title: geodist
   abstract: 'geodist: Fast, Dependency-Free Geodesic Distance Calculations'
@@ -147,7 +149,7 @@ references:
     email: mark.padgham@email.com
   - family-names: Sumner
     given-names: Michael D.
-  year: '2023'
+  year: '2024'
 - type: software
   title: ggplot2
   abstract: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
@@ -182,7 +184,7 @@ references:
   - family-names: Dunnington
     given-names: Dewey
     orcid: https://orcid.org/0000-0002-9415-4582
-  year: '2023'
+  year: '2024'
 - type: software
   title: graphics
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -191,7 +193,7 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
 - type: software
@@ -202,32 +204,9 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
-- type: software
-  title: ncdf4
-  abstract: 'ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data
-    Files'
-  notes: Imports
-  url: https://cirrus.ucsd.edu/~pierce/ncdf/
-  repository: https://CRAN.R-project.org/package=ncdf4
-  authors:
-  - family-names: Pierce
-    given-names: David
-    email: dpierce@ucsd.edu
-  year: '2023'
-- type: software
-  title: ncmeta
-  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
-  notes: Imports
-  url: https://github.com/hypertidy/ncmeta
-  repository: https://CRAN.R-project.org/package=ncmeta
-  authors:
-  - family-names: Sumner
-    given-names: Michael
-    email: mdsumner@gmail.com
-  year: '2023'
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
@@ -245,7 +224,19 @@ references:
   - family-names: Jagan
     given-names: Mikael
     orcid: https://orcid.org/0000-0002-3542-2938
-  year: '2023'
+  year: '2024'
+- type: software
+  title: ncdf4
+  abstract: 'ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data
+    Files'
+  notes: Imports
+  url: https://cirrus.ucsd.edu/~pierce/ncdf/
+  repository: https://CRAN.R-project.org/package=ncdf4
+  authors:
+  - family-names: Pierce
+    given-names: David
+    email: dpierce@ucsd.edu
+  year: '2024'
 - type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -254,7 +245,7 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
 - type: software
@@ -276,7 +267,7 @@ references:
   - family-names: Vehtari
     given-names: Aki
     email: Aki.Vehtari@aalto.fi
-  year: '2023'
+  year: '2024'
 - type: software
   title: proto
   abstract: 'proto: Prototype Object-Based Programming'
@@ -291,33 +282,8 @@ references:
     given-names: Louis
   - family-names: Petzoldt
     given-names: Thomas
-  year: '2023'
+  year: '2024'
   version: '>= 1.0.0'
-- type: software
-  title: terra
-  abstract: 'terra: Spatial Data Analysis'
-  notes: Imports
-  url: https://rspatial.org/
-  repository: https://CRAN.R-project.org/package=terra
-  authors:
-  - family-names: Hijmans
-    given-names: Robert J.
-    email: r.hijmans@gmail.com
-    orcid: https://orcid.org/0000-0001-5872-2872
-  year: '2023'
-  version: '>= 1.7-10'
-- type: software
-  title: lwgeom
-  abstract: 'lwgeom: Bindings to Selected ''liblwgeom'' Functions for Simple Features'
-  notes: Imports
-  url: https://github.com/r-spatial/lwgeom/
-  repository: https://CRAN.R-project.org/package=lwgeom
-  authors:
-  - family-names: Pebesma
-    given-names: Edzer
-    email: edzer.pebesma@uni-muenster.de
-    orcid: https://orcid.org/0000-0001-8049-7069
-  year: '2023'
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
@@ -329,7 +295,7 @@ references:
     given-names: Edzer
     email: edzer.pebesma@uni-muenster.de
     orcid: https://orcid.org/0000-0001-8049-7069
-  year: '2023'
+  year: '2024'
   version: '>= 1.0'
 - type: software
   title: stars
@@ -342,27 +308,8 @@ references:
     given-names: Edzer
     email: edzer.pebesma@uni-muenster.de
     orcid: https://orcid.org/0000-0001-8049-7069
-  year: '2023'
+  year: '2024'
   version: '>= 0.5'
-- type: software
-  title: zoo
-  abstract: 'zoo: S3 Infrastructure for Regular and Irregular Time Series (Z''s Ordered
-    Observations)'
-  notes: Imports
-  url: https://zoo.R-Forge.R-project.org/
-  repository: https://CRAN.R-project.org/package=zoo
-  authors:
-  - family-names: Zeileis
-    given-names: Achim
-    email: Achim.Zeileis@R-project.org
-    orcid: https://orcid.org/0000-0003-0918-3766
-  - family-names: Grothendieck
-    given-names: Gabor
-    email: ggrothendieck@gmail.com
-  - family-names: Ryan
-    given-names: Jeffrey A.
-    email: jeff.a.ryan@gmail.com
-  year: '2023'
 - type: software
   title: stats
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -371,9 +318,22 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
+- type: software
+  title: terra
+  abstract: 'terra: Spatial Data Analysis'
+  notes: Imports
+  url: https://rspatial.org/
+  repository: https://CRAN.R-project.org/package=terra
+  authors:
+  - family-names: Hijmans
+    given-names: Robert J.
+    email: r.hijmans@gmail.com
+    orcid: https://orcid.org/0000-0001-5872-2872
+  year: '2024'
+  version: '>= 1.7-10'
 - type: software
   title: tibble
   abstract: 'tibble: Simple Data Frames'
@@ -388,7 +348,7 @@ references:
   - family-names: Wickham
     given-names: Hadley
     email: hadley@rstudio.com
-  year: '2023'
+  year: '2024'
   version: '>= 2.0.0'
 - type: software
   title: uuid
@@ -403,7 +363,7 @@ references:
   - family-names: Ts'o
     given-names: Theodore
     email: tytso@thunk.org
-  year: '2023'
+  year: '2024'
 - type: software
   title: utils
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -412,7 +372,7 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
 - type: software
@@ -423,7 +383,7 @@ references:
   - name: R Core Team
   location:
     name: Vienna, Austria
-  year: '2023'
+  year: '2024'
   institution:
     name: R Foundation for Statistical Computing
   version: '>= 4.1.0'
@@ -438,7 +398,7 @@ references:
     email: tplate@acm.org
   - family-names: Heiberger
     given-names: Richard
-  year: '2023'
+  year: '2024'
 - type: software
   title: BoomSpikeSlab
   abstract: 'BoomSpikeSlab: MCMC for Spike and Slab Regression'
@@ -448,8 +408,22 @@ references:
   - family-names: Scott
     given-names: Steven L.
     email: steve.the.bayesian@gmail.com
-  year: '2023'
+  year: '2024'
   version: '>= 1.2.4'
+- type: software
+  title: Boruta
+  abstract: 'Boruta: Wrapper Algorithm for All Relevant Feature Selection'
+  notes: Suggests
+  url: https://gitlab.com/mbq/Boruta/
+  repository: https://CRAN.R-project.org/package=Boruta
+  authors:
+  - family-names: Kursa
+    given-names: Miron Bartosz
+    email: M.Kursa@icm.edu.pl
+    orcid: https://orcid.org/0000-0001-7672-648X
+  - family-names: Rudnicki
+    given-names: Witold Remigiusz
+  year: '2024'
 - type: software
   title: covr
   abstract: 'covr: Test Coverage for Packages'
@@ -460,23 +434,69 @@ references:
   - family-names: Hester
     given-names: Jim
     email: james.f.hester@gmail.com
-  year: '2023'
+  year: '2024'
 - type: software
-  title: inlabru
-  abstract: 'inlabru: Bayesian Latent Gaussian Modelling using INLA and Extensions'
+  title: cubelyr
+  abstract: 'cubelyr: A Data Cube ''dplyr'' Backend'
   notes: Suggests
-  url: http://www.inlabru.org
-  repository: https://CRAN.R-project.org/package=inlabru
+  url: https://github.com/hadley/cubelyr
+  repository: https://CRAN.R-project.org/package=cubelyr
   authors:
-  - family-names: Lindgren
-    given-names: Finn
-    email: finn.lindgren@gmail.com
-    orcid: https://orcid.org/0000-0002-5833-2011
-  - family-names: Bachl
-    given-names: Fabian E.
-    email: bachlfab@gmail.com
-  year: '2023'
-  version: '>= 2.6.0'
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@rstudio.com
+  year: '2024'
+- type: software
+  title: dbarts
+  abstract: 'dbarts: Discrete Bayesian Additive Regression Trees Sampler'
+  notes: Suggests
+  url: https://github.com/vdorie/dbarts
+  repository: https://CRAN.R-project.org/package=dbarts
+  authors:
+  - family-names: Dorie
+    given-names: Vincent
+    email: vdorie@gmail.com
+    orcid: https://orcid.org/0000-0002-9576-3064
+  - family-names: Chipman
+    given-names: Hugh
+    email: hugh.chipman@gmail.com
+  - family-names: McCulloch
+    given-names: Robert
+    email: robert.mcculloch1@gmail.com
+  year: '2024'
+  version: '>= 0.9-22'
+- type: software
+  title: deldir
+  abstract: 'deldir: Delaunay Triangulation and Dirichlet (Voronoi) Tessellation'
+  notes: Suggests
+  repository: https://CRAN.R-project.org/package=deldir
+  authors:
+  - family-names: Turner
+    given-names: Rolf
+  year: '2024'
+- type: software
+  title: doParallel
+  abstract: 'doParallel: Foreach Parallel Adaptor for the ''parallel'' Package'
+  notes: Suggests
+  url: https://github.com/RevolutionAnalytics/doparallel
+  repository: https://CRAN.R-project.org/package=doParallel
+  authors:
+  - family-names: Corporation
+    given-names: Microsoft
+  - family-names: Weston
+    given-names: Steve
+  year: '2024'
+- type: software
+  title: ellipsis
+  abstract: 'ellipsis: Tools for Working with ...'
+  notes: Suggests
+  url: https://ellipsis.r-lib.org
+  repository: https://CRAN.R-project.org/package=ellipsis
+  authors:
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@rstudio.com
+  year: '2024'
 - type: software
   title: glmnet
   abstract: 'glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models'
@@ -499,7 +519,7 @@ references:
     given-names: Noah
   - family-names: Yang
     given-names: James
-  year: '2023'
+  year: '2024'
   version: '>= 4.1'
 - type: software
   title: glmnetUtils
@@ -511,58 +531,48 @@ references:
   - family-names: Ooi
     given-names: Hong
     email: hongooi73@gmail.com
-  year: '2023'
+  year: '2024'
 - type: software
-  title: dbarts
-  abstract: 'dbarts: Discrete Bayesian Additive Regression Trees Sampler'
+  title: gnlm
+  abstract: 'gnlm: Generalized Nonlinear Regression Models'
   notes: Suggests
-  url: https://github.com/vdorie/dbarts
-  repository: https://CRAN.R-project.org/package=dbarts
+  url: http://www.commanster.eu/rcode.html
+  repository: https://CRAN.R-project.org/package=gnlm
   authors:
-  - family-names: Dorie
-    given-names: Vincent
-    email: vdorie@gmail.com
-    orcid: https://orcid.org/0000-0002-9576-3064
-  - family-names: Chipman
-    given-names: Hugh
-    email: hugh.chipman@gmail.com
-  - family-names: McCulloch
-    given-names: Robert
-    email: robert.mcculloch1@gmail.com
-  year: '2023'
-  version: '>= 0.9-22'
+  - family-names: Swihart
+    given-names: Bruce
+    email: bruce.swihart@gmail.com
+  - family-names: Lindsey
+    given-names: Jim
+    email: jlindsey@gen.unimaas.nl
+  year: '2024'
 - type: software
-  title: deldir
-  abstract: 'deldir: Delaunay Triangulation and Dirichlet (Voronoi) Tessellation'
+  title: geosphere
+  abstract: 'geosphere: Spherical Trigonometry'
   notes: Suggests
-  repository: https://CRAN.R-project.org/package=deldir
+  url: https://github.com/rspatial/geosphere/issues/
+  repository: https://CRAN.R-project.org/package=geosphere
   authors:
-  - family-names: Turner
-    given-names: Rolf
-  year: '2023'
+  - family-names: Hijmans
+    given-names: Robert J.
+    email: r.hijmans@gmail.com
+  year: '2024'
 - type: software
-  title: doParallel
-  abstract: 'doParallel: Foreach Parallel Adaptor for the ''parallel'' Package'
+  title: inlabru
+  abstract: 'inlabru: Bayesian Latent Gaussian Modelling using INLA and Extensions'
   notes: Suggests
-  url: https://github.com/RevolutionAnalytics/doparallel
-  repository: https://CRAN.R-project.org/package=doParallel
+  url: http://www.inlabru.org
+  repository: https://CRAN.R-project.org/package=inlabru
   authors:
-  - family-names: Corporation
-    given-names: Microsoft
-  - family-names: Weston
-    given-names: Steve
-  year: '2023'
-- type: software
-  title: ellipsis
-  abstract: 'ellipsis: Tools for Working with ...'
-  notes: Suggests
-  url: https://ellipsis.r-lib.org
-  repository: https://CRAN.R-project.org/package=ellipsis
-  authors:
-  - family-names: Wickham
-    given-names: Hadley
-    email: hadley@rstudio.com
-  year: '2023'
+  - family-names: Lindgren
+    given-names: Finn
+    email: finn.lindgren@gmail.com
+    orcid: https://orcid.org/0000-0002-5833-2011
+  - family-names: Bachl
+    given-names: Fabian E.
+    email: bachlfab@gmail.com
+  year: '2024'
+  version: '>= 2.6.0'
 - type: software
   title: igraph
   abstract: 'igraph: Network Analysis and Visualization'
@@ -595,7 +605,7 @@ references:
     given-names: Kirill
     email: kirill@cynkra.com
     orcid: https://orcid.org/0000-0002-1416-3412
-  year: '2023'
+  year: '2024'
 - type: software
   title: knitr
   abstract: 'knitr: A General-Purpose Package for Dynamic Report Generation in R'
@@ -607,7 +617,7 @@ references:
     given-names: Yihui
     email: xie@yihui.name
     orcid: https://orcid.org/0000-0003-0645-5666
-  year: '2023'
+  year: '2024'
 - type: software
   title: mboost
   abstract: 'mboost: Model-Based Boosting'
@@ -631,7 +641,7 @@ references:
   - family-names: Hofner
     given-names: Benjamin
     orcid: https://orcid.org/0000-0003-2810-3186
-  year: '2023'
+  year: '2024'
 - type: software
   title: modEvA
   abstract: 'modEvA: Model Evaluation and Analysis'
@@ -647,7 +657,30 @@ references:
     given-names: Jimenez-Valverde
   - family-names: R.
     given-names: Real
-  year: '2023'
+  year: '2024'
+- type: software
+  title: matrixStats
+  abstract: 'matrixStats: Functions that Apply to Rows and Columns of Matrices (and
+    to Vectors)'
+  notes: Suggests
+  url: https://github.com/HenrikBengtsson/matrixStats
+  repository: https://CRAN.R-project.org/package=matrixStats
+  authors:
+  - family-names: Bengtsson
+    given-names: Henrik
+    email: henrikb@braju.com
+  year: '2024'
+- type: software
+  title: ncmeta
+  abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
+  notes: Suggests
+  url: https://github.com/hypertidy/ncmeta
+  repository: https://CRAN.R-project.org/package=ncmeta
+  authors:
+  - family-names: Sumner
+    given-names: Michael
+    email: mdsumner@gmail.com
+  year: '2024'
 - type: software
   title: progress
   abstract: 'progress: Terminal Progress Bars'
@@ -660,7 +693,19 @@ references:
     email: csardi.gabor@gmail.com
   - family-names: FitzJohn
     given-names: Rich
-  year: '2023'
+  year: '2024'
+- type: software
+  title: pdp
+  abstract: 'pdp: Partial Dependence Plots'
+  notes: Suggests
+  url: http://bgreenwell.github.io/pdp/
+  repository: https://CRAN.R-project.org/package=pdp
+  authors:
+  - family-names: Greenwell
+    given-names: Brandon M.
+    email: greenwell.brandon@gmail.com
+    orcid: https://orcid.org/0000-0002-8120-0084
+  year: '2024'
 - type: software
   title: rmarkdown
   abstract: 'rmarkdown: Dynamic Documents for R'
@@ -703,33 +748,7 @@ references:
     given-names: Richard
     email: rich@posit.co
     orcid: https://orcid.org/0000-0003-3925-190X
-  year: '2023'
-- type: software
-  title: Boruta
-  abstract: 'Boruta: Wrapper Algorithm for All Relevant Feature Selection'
-  notes: Suggests
-  url: https://gitlab.com/mbq/Boruta/
-  repository: https://CRAN.R-project.org/package=Boruta
-  authors:
-  - family-names: Kursa
-    given-names: Miron Bartosz
-    email: M.Kursa@icm.edu.pl
-    orcid: https://orcid.org/0000-0001-7672-648X
-  - family-names: Rudnicki
-    given-names: Witold Remigiusz
-  year: '2023'
-- type: software
-  title: matrixStats
-  abstract: 'matrixStats: Functions that Apply to Rows and Columns of Matrices (and
-    to Vectors)'
-  notes: Suggests
-  url: https://github.com/HenrikBengtsson/matrixStats
-  repository: https://CRAN.R-project.org/package=matrixStats
-  authors:
-  - family-names: Bengtsson
-    given-names: Henrik
-    email: henrikb@braju.com
-  year: '2023'
+  year: '2024'
 - type: software
   title: rstan
   abstract: 'rstan: R Interface to Stan'
@@ -756,7 +775,7 @@ references:
     given-names: Hamada S.
     email: badr@jhu.edu
     orcid: https://orcid.org/0000-0002-9808-2344
-  year: '2023'
+  year: '2024'
   version: '>= 2.21.0'
 - type: software
   title: rstantools
@@ -776,56 +795,8 @@ references:
     email: mlysy@uwaterloo.ca
   - family-names: Johnson
     given-names: Andrew
-  year: '2023'
+  year: '2024'
   version: '>= 2.1.1'
-- type: software
-  title: pdp
-  abstract: 'pdp: Partial Dependence Plots'
-  notes: Suggests
-  url: http://bgreenwell.github.io/pdp/
-  repository: https://CRAN.R-project.org/package=pdp
-  authors:
-  - family-names: Greenwell
-    given-names: Brandon M.
-    email: greenwell.brandon@gmail.com
-    orcid: https://orcid.org/0000-0002-8120-0084
-  year: '2023'
-- type: software
-  title: gnlm
-  abstract: 'gnlm: Generalized Nonlinear Regression Models'
-  notes: Suggests
-  url: http://www.commanster.eu/rcode.html
-  repository: https://CRAN.R-project.org/package=gnlm
-  authors:
-  - family-names: Swihart
-    given-names: Bruce
-    email: bruce.swihart@gmail.com
-  - family-names: Lindsey
-    given-names: Jim
-    email: jlindsey@gen.unimaas.nl
-  year: '2023'
-- type: software
-  title: geosphere
-  abstract: 'geosphere: Spherical Trigonometry'
-  notes: Suggests
-  url: https://github.com/rspatial/geosphere/issues/
-  repository: https://CRAN.R-project.org/package=geosphere
-  authors:
-  - family-names: Hijmans
-    given-names: Robert J.
-    email: r.hijmans@gmail.com
-  year: '2023'
-- type: software
-  title: cubelyr
-  abstract: 'cubelyr: A Data Cube ''dplyr'' Backend'
-  notes: Suggests
-  url: https://github.com/hadley/cubelyr
-  repository: https://CRAN.R-project.org/package=cubelyr
-  authors:
-  - family-names: Wickham
-    given-names: Hadley
-    email: hadley@rstudio.com
-  year: '2023'
 - type: software
   title: testthat
   abstract: 'testthat: Unit Testing for R'
@@ -836,7 +807,7 @@ references:
   - family-names: Wickham
     given-names: Hadley
     email: hadley@posit.co
-  year: '2023'
+  year: '2024'
   version: '>= 3.0.0'
 - type: software
   title: xgboost
@@ -885,4 +856,4 @@ references:
   - family-names: Yuan
     given-names: Jiaming
     email: jm.yuan@outlook.com
-  year: '2023'
+  year: '2024'
