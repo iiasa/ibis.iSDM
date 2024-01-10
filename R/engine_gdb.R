@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Use of Gradient Descent Boosting for model estimation
@@ -13,6 +13,16 @@ NULL
 #' [train] is set to \code{FALSE}, splines are added to the estimation, thus
 #' providing a non-linear additive inference.
 #'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param iter An [`integer`] giving the number of boosting iterations (Default: \code{2e3L}).
+#' @param learning_rate A bounded [`numeric`] value between \code{0} and \code{1}
+#' defining the shrinkage parameter.
+#' @param empirical_risk method for empirical risk calculation. Available options
+#' are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).
+#' @param type The mode used for creating posterior predictions. Either making
+#' \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).
+#' @param ... Other variables or control parameters
+#'
 #' @details: This package requires the \code{"mboost"} R-package to be
 #' installed. It is in philosophy somewhat related to the [engine_xgboost] and
 #' \code{"XGBoost"} R-package, however providing some additional desirable
@@ -20,32 +30,29 @@ NULL
 #' projections. Such as for instance the ability to specifically add spatial
 #' baselearners via [add_latent_spatial] or the specification of monotonically
 #' constrained priors via [GDBPrior].
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter An [`integer`] giving the number of boosting iterations (Default:
-#'   \code{2e3L}).
-#' @param learning_rate A bounded [`numeric`] value between \code{0} and
-#'   \code{1} defining the shrinkage parameter.
-#' @param empirical_risk method for empirical risk calculation. Available
-#'   options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default:
-#'   \code{'inbag'}).
-#' @param type The mode used for creating posterior predictions. Either making
-#'   \code{"link"}, \code{"response"} or \code{"class"} (Default:
-#'   \code{"response"}).
-#' @param ... Other variables or control parameters
-#' @references
-#' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
-#' * Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
-#' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
-#' @family engine
+#'
 #' @returns An engine.
-#' @aliases engine_gdb
+#'
+#' @references
+#' * Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting
+#' in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
+#' * Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species
+#' distribution models. Ecology 92, 1895–901.
+#' * Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when
+#' to stop - a sequential stopping rule for component-wise gradient boosting.
+#' Methods of Information in Medicine, 51, 178–186.
+#'
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add GDB as an engine
 #' x <- distribution(background) |> engine_gdb(iter = 1000)
 #' }
+#'
 #' @name engine_gdb
 NULL
+
 #' @rdname engine_gdb
 #' @export
 engine_gdb <- function(x,

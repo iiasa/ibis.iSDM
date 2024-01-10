@@ -20,11 +20,11 @@
 \method{plot}{BiodiversityScenario}(x, ...)
 }
 \arguments{
-\item{x}{Any object belonging to \link{DistributionModel},
-\link{BiodiversityDatasetCollection}, \link{PredictorDataset} or
-\link{BiodiversityScenario}.}
+\item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},
+\link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{what}{In case a \link{SpatRaster} is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).}
+\item{what}{In case a \link{SpatRaster} is supplied, this parameter specifies the layer
+to be shown (Default: \code{"mean"}).}
 
 \item{...}{Further arguments passed on to \code{x$plot}.}
 }
@@ -51,5 +51,6 @@ mod <- distribution(background) |>
 # Plot the resulting model
 plot(mod)
 }
+
 }
 \keyword{misc}

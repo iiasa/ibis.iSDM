@@ -1,18 +1,17 @@
-#' @include utils.R waiver.R bdproto.R
+#' @include waiver.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("PredictorDataset")) methods::setOldClass("PredictorDataset")
-NULL
 
 #' PredictorDataset prototype description
 #'
-#' @name PredictorDataset-class
-#' @aliases PredictorDataset
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name PredictorDataset-class
 NULL
 
+#' @rdname PredictorDataset-class
 #' @export
 PredictorDataset <- bdproto(
   "PredictorDataset",

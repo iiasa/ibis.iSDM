@@ -2,19 +2,20 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPrior}
 \alias{XGBPrior}
+\alias{XGBPrior,character,character-method}
 \title{Create a new monotonic prior for boosted regressions}
 \usage{
 XGBPrior(variable, hyper = "increasing", ...)
 
-\S4method{XGBPrior}{character,character}(variable,hyper,...)
+\S4method{XGBPrior}{character,character}(variable, hyper = "increasing", ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent
 effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -33,7 +34,8 @@ regularized out during model fitting.
 }
 \references{
 \itemize{
-\item Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
+\item Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015).
+Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
 }
 }
 \seealso{

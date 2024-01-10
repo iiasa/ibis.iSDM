@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Project a fitted model to a new environment and covariates
@@ -10,6 +10,19 @@ NULL
 #' (e.g. transformations and derivates) in the same way as they have been during
 #' the initial modelling with [`distribution()`]. Any constrains specified in
 #' the scenario object are applied during the projection.
+#'
+#' @param x A [`BiodiversityScenario`] object with set predictors. Note that some
+#' constrains such as \code{MigClim} can still simulate future change without projections.
+#' @param date_interpolation A [`character`] on whether dates should be interpolated.
+#' Options include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
+#' @param stabilize A [`logical`] value indicating whether the suitability projection
+#' should be stabilized (Default: \code{FALSE}).
+#' @param stabilize_method [`character`] stating the stabilization method to be
+#' applied. Currently supported is \code{`loess`}.
+#' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further
+#' information during the model fitting (Default: \code{FALSE}).
+#' @param ... passed on parameters.
 #'
 #' @details In the background the function \code{x$project()} for the respective
 #' model object is called, where \code{x} is fitted model object. For specifics
@@ -49,23 +62,11 @@ NULL
 #' time step. This is conducted at the very of the processing steps and any
 #' thresholds will be recalculated afterwards.
 #'
-#' @seealso [`scenario()`]
-#' @param x A [`BiodiversityScenario`] object with set predictors. Note that
-#'   some constrains such as \code{MigClim} can still simulate future change
-#'   without projections.
-#' @param date_interpolation A [`character`] on whether dates should be
-#'   interpolated. Options include \code{"none"} (Default), \code{"annual"},
-#'   \code{"monthly"}, \code{"daily"}.
-#' @param stabilize A [`logical`] value indicating whether the suitability
-#'   projection should be stabilized (Default: \code{FALSE}).
-#' @param stabilize_method [`character`] stating the stabilization method to be
-#'   applied. Currently supported is \code{`loess`}.
-#' @param layer A [`character`] specifying the layer to be projected (Default:
-#'   \code{"mean"}).
-#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out
-#'   further information during the model fitting (Default: \code{FALSE}).
-#' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
+#'
+#' @seealso [`scenario()`]
+#' @keywords scenarios
+#'
 #' @examples
 #' \dontrun{
 #' # Fit a model
@@ -81,24 +82,17 @@ NULL
 #'         project()
 #' }
 #'
-#' @keywords scenarios
 #' @import terra
+#'
 #' @name project
-#' @exportMethod project
-#' @aliases project, project-method
-#' @export
 NULL
 
 #' @rdname project
-#' @method project BiodiversityScenario
-#' @keywords scenarios
 #' @export
 project.BiodiversityScenario <- function(x,...) project(x,...)
 
-#' @name project
 #' @rdname project
-#' @usage
-#'   \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
+#' @export
 methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),
@@ -154,7 +148,7 @@ methods::setMethod(
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
-          zones <- st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
+          zones <- sf::st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
                                    mod$get_limits()$layer
           )
         )

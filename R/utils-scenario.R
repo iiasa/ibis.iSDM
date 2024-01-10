@@ -6,17 +6,18 @@
 #'
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events
-#'   should be interpolated. See [`project()`].
-#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have
-#'   the same.
+#' should be interpolated. See [`project()`].
+#'
+#' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
+#'
 #' @keywords scenario
-#' @aliases interpolate_gaps
-#' @importFrom zoo na.approx
+#'
 #' @examples
 #' \dontrun{
 #'   # Interpolate stars stack
 #'   sc <- interpolate_gaps( stack, "annual")
 #' }
+#'
 #' @export
 interpolate_gaps <- function(env, date_interpolation = "annual"){
   assertthat::assert_that(
@@ -90,20 +91,27 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
 #'
 #' @description Small helper function that acts a wrapper to combine 2 or more
 #' variables in a `stars` object together.
-#' @note Currently only works via matrix manipulation
+#'
 #' @param obj A [`stars`] object or a [`list`] that can be coerced to one.
-#' @param vars A [`vector`] describing the variables to be combined. Has to be
-#'   of length two or greater.
+#' @param vars A [`vector`] describing the variables to be combined. Has to be of
+#' length two or greater.
 #' @param newname A [`character`] with the new name for the variable.
 #' @param weights An optional variable layer to use for weighting.
 #' @param fun A function how the respective layers should be combined.
-#' @aliases st_reduce
+#'
+#' @note Currently only works via matrix manipulation
+#'
+#' @keywords scenario
+#'
 #' @examples
 #' \dontrun{
 #'  st_reduce(obj, vars = c('forestShare', 'forestShare.2'),
 #'   newname = "forest",fun = "sum")
 #' }
-#' @keywords scenario, internal
+#'
+#' @noRd
+#'
+#' @keywords internal
 st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
   assertthat::assert_that(
     is.list(obj) || inherits(obj, 'stars'),
@@ -182,15 +190,21 @@ st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
 #' a [`SpatRaster`] object. It is possible to select the time frame as well. If
 #' multiple \code{"which"} entries are specified, then a [`list`] will be
 #' returned.
+#'
 #' @param obj A [`stars`] object with a \code{"time"} dimension at least.
 #' @param which The time entry to use for subsetting. Can be single [`numeric`]
-#'   or a [`vector`] of numeric time entries corresponding to the time dimension
-#'   (Default: \code{NULL}).
-#' @param template An optional [`SpatRaster`] template to which the output
-#'   should be aligned too.
+#' or a [`vector`] of numeric time entries corresponding to the time dimension
+#' (Default: \code{NULL}).
+#' @param template An optional [`SpatRaster`] template to which the output should
+#' be aligned too.
+#'
 #' @returns A [`list`] containing [`SpatRaster`] objects.
-#' @aliases stars_to_raster
-#' @keywords scenario, internal
+#'
+#' @keywords scenario
+#'
+#' @noRd
+#'
+#' @keywords internal
 stars_to_raster <- function(obj, which = NULL, template = NULL){
   assertthat::assert_that(
     inherits(obj, 'stars'),
@@ -261,17 +275,24 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
 #'
 #' @description This is a small helper function to convert a to a [`SpatRaster`]
 #' object.
+#'
 #' @param obj A [`SpatRaster`] object with a \code{"time"} dimension at least
-#'   (checked via [`time`]).
+#' (checked via [`time`]).
+#'
 #' @returns A [`stars`] object with the formatted data.
+#'
+#' @seealso `stars_to_raster`
+#' @keywords scenario
+#'
 #' @examples
 #' \dontrun{
 #'  # Convert stars to SpatRaster
 #'  stars_to_raster(obj)
 #' }
-#' @seealso `stars_to_raster`
-#' @aliases raster_to_stars
-#' @keywords scenario, internal
+#'
+#' @noRd
+#'
+#' @keywords internal
 raster_to_stars <- function(obj){
   assertthat::assert_that(
     is.Raster(obj)
@@ -323,12 +344,17 @@ raster_to_stars <- function(obj){
 #' objects. These will be replicated across the time dimension. This function is
 #' a small helper function that allows the addition of said raster stacks to a
 #' stars object.
+#'
 #' @param obj A [`stars`] object with a time dimension (\code{"time"}).
 #' @param new A [`SpatRaster`] object with additional covariates to be added.
-#' @returns A [`stars`] object with the names of the [`SpatRaster`] object
-#'   added.
-#' @aliases st_add_raster
-#' @keywords scenario, internal
+#'
+#' @returns A [`stars`] object with the names of the [`SpatRaster`] object added.
+#'
+#' @keywords scenario
+#'
+#' @noRd
+#'
+#' @keywords internal
 st_add_raster <- function(obj, new){
   assertthat::assert_that(
     inherits(obj, "stars"),
@@ -368,12 +394,15 @@ st_add_raster <- function(obj, new){
 #' projection. The output will contain the average change in the layer per time
 #' step. A parameter called \code{"relative"} can be set to calculate relative
 #' change instead.
+#'
 #' @param scenario A [`stars`] object with a time dimension.
-#' @param relative A [`logical`] check whether to calculate relative changes
-#'   instead.
-#' @aliases summarise_projection
-#' @keywords internal, scenario
+#' @param relative A [`logical`] check whether to calculate relative changes instead.
+#'
+#' @keywords scenario
+#'
 #' @noRd
+#'
+#' @keywords internal
 summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   assertthat::assert_that(
     is.list(scenario) || inherits(scenario, "stars"),
@@ -453,17 +482,23 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
 #' given dimension (usually time). This can be useful for simply multiplication
 #' tasks, e.g. multiplying every attribute by another stars object that needs to
 #' have the same dimensions.
+#'
 #' @param obj A [`stars`] object that is to be duplicated.
 #' @param dim A dimensions file return from \code{st_dimensions(...)}.
 #' @param dimname A [`character`] of the dimension name to be used.
+#'
+#' @returns A [`stars`] object.
+#'
 #' @examples
 #' \dontrun{
 #' o <- st_rep(obj, dim)
 #' }
 #'
-#' @returns A [`stars`] object.
-#' @keywords internal, scenario
+#' @keywords scenario
+#'
 #' @noRd
+#'
+#' @keywords internal
 st_rep <- function(obj, dim, dimname = "time"){
   assertthat::assert_that(
     inherits(obj, "stars"),
@@ -495,14 +530,21 @@ st_rep <- function(obj, dim, dimname = "time"){
 #' @description This is a wrapper function to summarize the output of a scenario
 #' projection, but specifically calculates statistics of change for two time
 #' steps, a before and after step.
+#'
+#' @param scenario A [`stars`] object with a time dimension.
+#'
 #' @note This function currently requires the \code{"geosphere"} package
 #' installed.
-#' @param scenario A [`stars`] object with a time dimension.
+#'
 #' @references
-#' * Godsoe, W. (2014). Inferring the similarity of species distributions using Species’ Distribution Models. Ecography, 37(2), 130-136.
-#' @aliases summarise_change
-#' @keywords internal, scenario
+#' * Godsoe, W. (2014). Inferring the similarity of species distributions using
+#' Species’ Distribution Models. Ecography, 37(2), 130-136.
+#'
+#' @keywords scenario
+#'
 #' @noRd
+#'
+#' @keywords internal
 summarise_change <- function(scenario){
   assertthat::assert_that(
     inherits(scenario, "stars")
@@ -525,7 +567,7 @@ summarise_change <- function(scenario){
   rm(ss)
 
   # Calculate the area and  units
-  ar <- st_area(scenario)
+  ar <- sf::st_area(scenario)
   ar_unit <- units::deparse_unit(ar$area)
   if(ar_unit == "m2"){
     ar_unit <- "ha"
@@ -572,8 +614,8 @@ summarise_change <- function(scenario){
   change$unit[12] <- dis_unit
 
   # Calculate direction between centroids
-  change$value[13] <- geosphere::finalBearing(as_Spatial(sf1 |> sf::st_transform(crs = sf::st_crs(4326))),
-                                              as_Spatial(sf2 |> sf::st_transform(crs = sf::st_crs(4326))))
+  change$value[13] <- geosphere::finalBearing(sf::as_Spatial(sf1 |> sf::st_transform(crs = sf::st_crs(4326))),
+                                              sf::as_Spatial(sf2 |> sf::st_transform(crs = sf::st_crs(4326))))
 
   change <- change |> tibble::as_tibble()
   return(change)
@@ -582,9 +624,14 @@ summarise_change <- function(scenario){
 #' Label patches and apply a minimum size constraint
 #'
 #' @description This is a
+#'
 #' @param obj A ['stars'] object to be clipped and cropped.
-#' @keywords internal, scenario
+#'
+#' @keywords scenario
+#'
 #' @noRd
+#'
+#' @keywords internal
 st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
   assertthat::assert_that(
     inherits(obj, "stars") || is.Raster(obj),
@@ -693,13 +740,17 @@ st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
 #'
 #' @description The reprojection of WGS84 currently fails due to some unforeseen
 #' bug. This function is meant to reproject back the layer.
+#'
 #' @param obj A ['stars'] object to be clipped and cropped.
 #' @param template A ['SpatRaster'] or ['sf'] object to which the object should
-#'   be projected.
-#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack
-#'   around.
-#' @keywords internal, scenario
+#' be projected.
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack around.
+#'
+#' @keywords scenario
+#'
 #' @noRd
+#'
+#' @keywords internal
 hack_project_stars <- function(obj, template, use_gdalutils = TRUE){
   assertthat::assert_that(
     inherits(obj, "stars"),
@@ -779,13 +830,13 @@ hack_project_stars <- function(obj, template, use_gdalutils = TRUE){
 #' Quick handy function to calculate an area-weighted centre of a range
 #'
 #' @param layer A [`SpatRaster`] or [`sf`] object for which the centre of the
-#'   range is to be calculated. If the distribution is continuous, then the
-#'   centre is calculated as the value centre to all non-NA values.
-#' @param spatial A [`logical`] of whether outputs should be returned as
-#'   spatial.
-#' @aliases calculate_range_centre
-#' @keywords scenario, internal
+#' range is to be calculated. If the distribution is continuous, then the centre
+#' is calculated as the value centre to all non-NA values.
+#' @param spatial A [`logical`] of whether outputs should be returned as spatial.
+#'
 #' @noRd
+#'
+#' @keywords internal
 calculate_range_centre <- function(layer, spatial = TRUE) {
   assertthat::assert_that(
     is.Raster(layer) || inherits(layer, "sf")

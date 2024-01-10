@@ -8,27 +8,6 @@ NULL
 #' superceded by the [`engine_inlabru`] package and users are advised to us this
 #' one, unless specific options are required.
 #'
-#' @details All \code{INLA} engines require the specification of a mesh that
-#' needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
-#' mesh will be created based on best guesses of the data spread. A good mesh
-#' needs to have triangles as regular as possible in size and shape:
-#' equilateral.
-#'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
-#' the same scale units as the coordinates Lower bounds affect the density of
-#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
-#' If positive: same scale units. If negative, interpreted as a factor relative
-#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
-#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
-#' distance between points, it means that points at a closer distance than the
-#' supplied value are replaced by a single vertex. it is critical when there are
-#' some points very close to each other, either for point locations or in the
-#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
-#' predictions, which affects the spatial grain of any outputs created.
-#'
-#' Priors can be set via [INLAPrior].
-#' @note
-#' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default:
 #'   \code{NULL})
@@ -66,21 +45,58 @@ NULL
 #' @param nonconvex.res Computation resolution for nonconvex.hulls **Not yet
 #'   implemented**
 #' @param ... Other options.
-#' @references
-#' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
-#' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
-#' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
-#' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
-#' @family engine
+#'
+#' @details All \code{INLA} engines require the specification of a mesh that
+#' needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
+#' mesh will be created based on best guesses of the data spread. A good mesh
+#' needs to have triangles as regular as possible in size and shape:
+#' equilateral.
+#'
+#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates Lower bounds affect the density of
+#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' If positive: same scale units. If negative, interpreted as a factor relative
+#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' distance between points, it means that points at a closer distance than the
+#' supplied value are replaced by a single vertex. it is critical when there are
+#' some points very close to each other, either for point locations or in the
+#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' predictions, which affects the spatial grain of any outputs created.
+#'
+#' Priors can be set via [INLAPrior].
+#'
+#' @note
+#' **How INLA Meshes are generated, substantially influences prediction outcomes. See Dambly et al. (2023).**
+#'
 #' @returns An engine.
-#' @aliases engine_inla
+#'
+#' @references
+#' * Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian
+#' Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations
+#' (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
+#' * Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between
+#' Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential
+#'  Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4),
+#'   423-498.
+#' * Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going
+#'  Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.”
+#'  Biometrika 1 (103): 49–70.
+#' * Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023).
+#' Integrated species distribution models fitted in INLA are sensitive to mesh
+#' parameterisation. Ecography, e06391.
+#'
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add INLA as an engine (with a custom mesh)
 #' x <- distribution(background) |> engine_inla(mesh = my_mesh)
 #' }
+#'
 #' @name engine_inla
 NULL
+
 #' @rdname engine_inla
 #' @export
 engine_inla <- function(x,

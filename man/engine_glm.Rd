@@ -40,15 +40,17 @@ settings to support offsets and weights.
 }
 \examples{
 # Load background
-background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+package='ibis.iSDM',mustWork = TRUE))
 
 # Add GLM as an engine
 x <- distribution(background) |> engine_glm()
-x
+
 }
 \references{
 \itemize{
-\item Hastie, T. J. and Pregibon, D. (1992) Generalized linear models. Chapter 6 of Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+\item Hastie, T. J. and Pregibon, D. (1992) Generalized linear models. Chapter 6 of
+Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
 }
 }
 \seealso{

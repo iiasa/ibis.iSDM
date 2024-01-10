@@ -1,6 +1,3 @@
-#' @include utils-spatial.R
-NULL
-
 #' Function to create an ensemble of multiple fitted models
 #'
 #' @description Ensemble models calculated on multiple models have often been
@@ -20,6 +17,24 @@ NULL
 #' cannot capture parameter uncertainty of individual models; rather it reflects
 #' variation among predictions which can be due to many factors including simply
 #' differences in model complexity.
+#'
+#' @param ... Provided [`DistributionModel`] or [`SpatRaster`] objects.
+#' @param method Approach on how the ensemble is to be created. See details for
+#' available options (Default: \code{'mean'}).
+#' @param weights (*Optional*) weights provided to the ensemble function if
+#' weighted means are to be constructed (Default: \code{NULL}).
+#' @param min.value A optional [`numeric`] stating a minimum value that needs
+#' to be surpassed in each layer before calculating and ensemble (Default: \code{NULL}).
+#' @param layer A [`character`] of the layer to be taken from each prediction
+#' (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
+#' names in ensembles of `SpatRaster` objects.
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be
+#' normalized to a scale of 0-1 (Default: \code{FALSE}).
+#' @param uncertainty A [`character`] indicating how the uncertainty among
+#' models should be calculated. Available options include \code{"none"}, the
+#' standard deviation (\code{"sd"}), the average of all PCA axes except the
+#' first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
+#' the range between the lowest and highest value (\code{"range"}).
 #'
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
@@ -43,26 +58,18 @@ NULL
 #' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
 #' of models constructed with different link functions, e.g. logistic vs [log].
 #' In this case the \code{"normalize"} parameter has to be set.
-#' @param ... Provided [`DistributionModel`] or [`SpatRaster`] objects.
-#' @param method Approach on how the ensemble is to be created. See details for
-#'   available options (Default: \code{'mean'}).
-#' @param weights (*Optional*) weights provided to the ensemble function if
-#'   weighted means are to be constructed (Default: \code{NULL}).
-#' @param min.value A optional [`numeric`] stating a minimum value that needs
-#'   to be surpassed in each layer before calculating and ensemble
-#'   (Default: \code{NULL}).
-#' @param layer A [`character`] of the layer to be taken from each prediction
-#'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
-#'   names in ensembles of `SpatRaster` objects.
-#' @param normalize [`logical`] on whether the inputs of the ensemble should be
-#'   normalized to a scale of 0-1 (Default: \code{FALSE}).
-#' @param uncertainty A [`character`] indicating how the uncertainty among
-#'   models should be calculated. Available options include \code{"none"}, the
-#'   standard deviation (\code{"sd"}), the average of all PCA axes except the
-#'   first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
-#'   the range between the lowest and highest value (\code{"range"}).
+#'
+#' @returns A [`SpatRaster`] object containing the ensemble of the provided
+#'   predictions specified by \code{method} and a coefficient of variation
+#'   across all models.
+#'
 #' @references
-#' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
+#' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022).
+#' Predictive performance of presence‐only species distribution models: a benchmark
+#' study with reproducible code. Ecological Monographs, 92(1), e01486.
+#'
+#' @keywords train
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed predictions
@@ -72,25 +79,18 @@ NULL
 #'  # Make a bivariate plot (might require other packages)
 #'  bivplot(ex)
 #' }
-#' @returns A [`SpatRaster`] object containing the ensemble of the provided
-#'   predictions specified by \code{method} and a coefficient of variation
-#'   across all models.
-
+#'
 #' @name ensemble
-#' @aliases ensemble
-#' @keywords train
-#' @exportMethod ensemble
-#' @export
 NULL
+
+#' @rdname ensemble
+#' @export
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
                     function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
                              normalize = FALSE, uncertainty = "cv") standardGeneric("ensemble"))
 
-#' @name ensemble
 #' @rdname ensemble
-#' @usage
-#'   \S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
@@ -477,61 +477,59 @@ methods::setMethod(
 #' Function to create an ensemble of partial effects from multiple models
 #'
 #' @description Similar to the `ensemble()` function, this function creates an
-#'   ensemble of partial responses of provided distribution models fitted with
-#'   the [`ibis.iSDM-package`]. Through the `layer` parameter it can be
-#'   specified which part of the partial prediction should be averaged in an
-#'   ensemble (if given). This can be for instance the *mean* prediction and/or
-#'   the standard deviation *sd*. Ensemble partial is also being called if more
-#'   than one input [`DistributionModel`] object is provided to `partial`.
+#' ensemble of partial responses of provided distribution models fitted with
+#' the [`ibis.iSDM-package`]. Through the `layer` parameter it can be
+#' specified which part of the partial prediction should be averaged in an
+#' ensemble (if given). This can be for instance the *mean* prediction and/or
+#' the standard deviation *sd*. Ensemble partial is also being called if more
+#' than one input [`DistributionModel`] object is provided to `partial`.
 #'
-#'   By default the ensemble of partial responses is created as average across
-#'   all models with the uncertainty being the standard deviation of responses.
+#' By default the ensemble of partial responses is created as average across
+#' all models with the uncertainty being the standard deviation of responses.
+#'
+#' @param ... Provided [`DistributionModel`] objects from which partial responses
+#' can be called. In the future provided data.frames might be supported as well.
+#' @param x.var A [`character`] of the variable from which an ensemble is to be
+#' created.
+#' @param method Approach on how the ensemble is to be created. See details for
+#' options (Default: \code{'mean'}).
+#' @param layer A [`character`] of the layer to be taken from each prediction
+#' (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer names
+#' in ensembles of `SpatRaster` objects.
+#' @param newdata A optional [`data.frame`] or [`SpatRaster`] object supplied to
+#' the model (DefaultL \code{NULL}). This object needs to have identical names as the original predictors.
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be
+#' normalized to a scale of 0-1 (Default: \code{TRUE}).
 #'
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
 #' * \code{'median'} - Calculates the median of several predictions.
 #'
 #' @note If a list is supplied, then it is assumed that each entry in the list
-#'   is a fitted [`DistributionModel`] object. Take care not to create an
-#'   ensemble of models constructed with different link functions, e.g. logistic
-#'   vs [log]. By default the response functions of each model are normalized.
-#' @param ... Provided [`DistributionModel`] objects from which partial
-#'   responses can be called. In the future provided data.frames might be
-#'   supported as well.
-#' @param x.var A [`character`] of the variable from which an ensemble is to be
-#'   created.
-#' @param method Approach on how the ensemble is to be created. See details for
-#'   options (Default: \code{'mean'}).
-#' @param layer A [`character`] of the layer to be taken from each prediction
-#'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
-#'   names in ensembles of `SpatRaster` objects.
-#' @param newdata A optional [`data.frame`] or [`SpatRaster`] object supplied to
-#'   the model (DefaultL \code{NULL}). *Note: This object needs to have
-#'   identical names as the original predictors.*
-#' @param normalize [`logical`] on whether the inputs of the ensemble should be
-#'   normalized to a scale of 0-1 (Default: \code{TRUE}).
-#' @returns A [data.frame] with the combined partial effects of the supplied
-#'   models.
+#' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
+#' of models constructed with different link functions, e.g. logistic vs [log].
+#' By default the response functions of each model are normalized.
+#'
+#' @returns A [data.frame] with the combined partial effects of the supplied models.
+#'
+#' @keywords train partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed models
 #'  ex <- ensemble_partial(mod1, mod2, mod3, method = "mean")
 #' }
-
+#'
 #' @name ensemble_partial
-#' @aliases ensemble_partial
-#' @keywords train, partial
-#' @exportMethod ensemble_partial
-#' @export
 NULL
+
+#' @rdname ensemble_partial
+#' @export
 methods::setGeneric("ensemble_partial",
                     signature = methods::signature("..."),
                     function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE) standardGeneric("ensemble_partial"))
 
-#' @name ensemble_partial
 #' @rdname ensemble_partial
-#' @usage
-#'   \S4method{ensemble_partial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdata,normalize)
 methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),
@@ -660,35 +658,36 @@ methods::setMethod(
 #' Function to create an ensemble of spartial effects from multiple models
 #'
 #' @inherit ensemble_partial description
-#' @inherit ensemble_partial details
-#' @inherit ensemble_partial note
+#'
 #' @inheritParams ensemble_partial
 #' @param min.value A optional [`numeric`] stating a minimum value that needs
 #'   to be surpassed in each layer before calculating and ensemble
 #'   (Default: \code{NULL}).
-#' @returns A [SpatRaster] object with the combined partial effects of the
-#'   supplied models.
+#'
+#' @inherit ensemble_partial details
+#' @inherit ensemble_partial note
+#'
+#' @returns A [SpatRaster] object with the combined partial effects of the supplied models.
+#'
+#' @keywords train partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed models
 #'  ex <- ensemble_spartial(mod1, mod2, mod3, method = "mean")
 #' }
-
+#'
 #' @name ensemble_spartial
-#' @aliases ensemble_spartial
-#' @keywords train, partial
-#' @exportMethod ensemble_spartial
-#' @export
 NULL
+
+#' @rdname ensemble_spartial
+#' @export
 methods::setGeneric("ensemble_spartial",
                     signature = methods::signature("..."),
                     function(..., x.var, method = "mean", layer = "mean",
                              newdata = NULL, min.value = NULL, normalize = TRUE) standardGeneric("ensemble_spartial"))
 
-#' @name ensemble_spartial
 #' @rdname ensemble_spartial
-#' @usage
-#'   \S4method{ensemble_spartial}{ANY,character,character,character,ANY,numeric,logical}(...,x.var,method,layer,newdata,min.value,normalize)
 methods::setMethod(
   "ensemble_spartial",
   methods::signature("ANY"),

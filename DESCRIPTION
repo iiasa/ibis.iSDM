@@ -15,7 +15,15 @@ Authors@R:
            comment = c(ORCID = "0000-0003-1125-9918"))
       )
 Maintainer: Martin Jung <jung@iiasa.ac.at>
-Description: Integrated framework of modelling the distribution of species and ecosystems in a suitability framing. This package allows the estimation of integrated species distribution models (iSDM) based on several sources of evidence and provided presence-only and presence-absence datasets. It makes heavy use of point-process models for estimating habitat suitability and allows to include spatial latent effects and priors in the estimation. To do so 'ibis.iSDM' supports a number of engines for Bayesian and more non-parametric machine learning estimation. Further, the 'ibis.iSDM' is specifically customized to support spatial-temporal projections of habitat suitability into the future.
+Description: Integrated framework of modelling the distribution of species and 
+  ecosystems in a suitability framing. This package allows the estimation of integrated 
+  species distribution models (iSDM) based on several sources of evidence and provided
+  presence-only and presence-absence datasets. It makes heavy use of point-process models
+  for estimating habitat suitability and allows to include spatial latent effects and 
+  priors in the estimation. To do so 'ibis.iSDM' supports a number of engines for 
+  Bayesian and more non-parametric machine learning estimation. Further, the 'ibis.iSDM' 
+  is specifically customized to support spatial-temporal projections of habitat suitability 
+  into the future.
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
@@ -23,25 +31,22 @@ Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
+    dplyr,
     foreach,
     future (>= 1.23.0),
-    dplyr,
     geodist,
     ggplot2,
     graphics,
     methods,
-    ncdf4,
-    ncmeta,
     Matrix,
+    ncdf4,
     parallel,
     posterior,
     proto (>= 1.0.0),
-    terra (>= 1.7-10),
-    lwgeom,
     sf (>= 1.0),
     stars (>= 0.5),
-    zoo,
     stats,
+    terra (>= 1.7-10), 
     tibble (>= 2.0.0),
     uuid, 
     utils
@@ -50,28 +55,29 @@ Depends:
 Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
+    Boruta,
     covr,
-    inlabru (>= 2.6.0),
-    glmnet (>= 4.1),
-    glmnetUtils,
+    cubelyr,
     dbarts (>= 0.9-22),
     deldir,
     doParallel,
     ellipsis,
+    glmnet (>= 4.1),
+    glmnetUtils,
+    gnlm,
+    geosphere,
+    inlabru (>= 2.6.0),
     igraph,
     knitr,
     mboost,
     modEvA,
-    progress,
-    rmarkdown,
-    Boruta,
     matrixStats,
+    ncmeta,
+    progress,
+    pdp,
+    rmarkdown,
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
-    pdp,
-    gnlm,
-    geosphere,
-    cubelyr,
     testthat (>= 3.0.0),
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
@@ -83,7 +89,6 @@ Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
-    'utils.R'
     'bdproto.R'
     'waiver.R'
     'bdproto-biodiversitydataset.R'
@@ -102,7 +107,6 @@ Collate:
     'add_predictors.R'
     'add_predictors_globiom.R'
     'add_predictors_model.R'
-    'identifier.R'
     'bdproto-distributionmodel.R'
     'bdproto-priorlist.R'
     'bdproto-prior.R'
@@ -110,8 +114,6 @@ Collate:
     'bdproto-engine.R'
     'bdproto-settings.R'
     'check.R'
-    'utils-spatial.R'
-    'data.R'
     'distribution.R'
     'effects.R'
     'engine_bart.R'
@@ -127,6 +129,7 @@ Collate:
     'ensemble.R'
     'get_data.R'
     'ibis.iSDM-package.R'
+    'identifier.R'
     'limiting.R'
     'mask.R'
     'misc.R'
@@ -156,8 +159,10 @@ Collate:
     'utils-glmnet.R'
     'utils-predictors.R'
     'utils-scenario.R'
+    'utils-spatial.R'
     'utils-stan.R'
     'utils-xgboost.R'
+    'utils.R'
     'validate.R'
     'write_output.R'
     'zzz.R'

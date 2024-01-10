@@ -1,20 +1,20 @@
-#' @include utils.R bdproto.R
+#' @include bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("Engine")) methods::setOldClass("Engine")
-NULL
 
 #' Engine prototype.
 #'
+#' @description
 #' Basic object for engine, all other engines inherit from here.
 #'
-#' @name Engine-class
-#' @aliases Engine
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name Engine-class
 NULL
 
+#' @rdname Engine-class
 #' @export
 Engine <- bdproto(
   "Engine",

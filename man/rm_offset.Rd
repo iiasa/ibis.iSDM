@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_offset.R
 \name{rm_offset}
 \alias{rm_offset}
+\alias{rm_offset,BiodiversityDistribution-method}
 \title{Function to remove an offset}
 \usage{
 rm_offset(x, layer = NULL)
 
-\S4method{rm_offset}{BiodiversityDistribution,character}(x,layer)
+\S4method{rm_offset}{BiodiversityDistribution}(x, layer = NULL)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -25,6 +26,7 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 \dontrun{
  rm_offset(model) -> model
 }
+
 }
 \seealso{
 Other offset: 
@@ -34,6 +36,5 @@ Other offset:
 \code{\link{add_offset}()}
 }
 \concept{offset}
-\keyword{internal}
-\keyword{offset,}
-\keyword{prior,}
+\keyword{offset}
+\keyword{prior}

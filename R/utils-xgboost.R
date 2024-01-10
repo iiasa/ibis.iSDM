@@ -1,12 +1,17 @@
 #' Built formula for XGBOOST model
 #'
 #' @description This function built a formula for a `engine_xgboost()` model.
+#'
 #' @param obj A [`list()`] object containing the prepared model data for a given
-#'   biodiversity dataset.
-#' @author Martin Jung
+#' biodiversity dataset.
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#'
+#' @keywords internal
 built_formula_xgboost <- function(obj){
   assertthat::assert_that(
     is.list(obj),
@@ -45,8 +50,12 @@ built_formula_xgboost <- function(obj){
 #'
 #' @param df A [`vector`] object containing the factor variables
 #' @param name Name for the new object
-#' @keywords utils, internal
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 explode_factor <- function(df, name = "facvar"){
   assertthat::assert_that(
     is.data.frame(df) || is.factor(df),

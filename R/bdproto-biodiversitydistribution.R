@@ -1,9 +1,7 @@
-#' @include utils.R waiver.R bdproto.R bdproto-biodiversitydataset.R
+#' @include waiver.R bdproto.R bdproto-biodiversitydataset.R
 NULL
 
-#' @export
 if (!methods::isClass("BiodiversityDistribution")) methods::setOldClass("BiodiversityDistribution")
-NULL
 
 #' Biodiversity Distribution master class
 #'
@@ -14,12 +12,13 @@ NULL
 #' @details Run [names()] on a [`distribution`] object to show all available
 #' functions.
 #'
-#' @name BiodiversityDistribution-class
-#' @aliases BiodiversityDistribution
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name BiodiversityDistribution-class
 NULL
 
+#' @rdname BiodiversityDistribution-class
 #' @export
 BiodiversityDistribution <- bdproto(
   "BiodiversityDistribution",

@@ -34,26 +34,23 @@ Lower values generally being better but also computationally more costly.
 (Default: \code{1e-3})}
 
 \item{gamma}{\code{\link{numeric}} A regularization parameter in the model. Lower
-values for better estimates (Default: \code{3}). Also see
-\code{"reg_lambda"} parameter for the L2 regularization on the weights}
+values for better estimates (Default: \code{3}). Also see \code{"reg_lambda"}
+parameter for the L2 regularization on the weights}
 
-\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default:
-\code{0}).}
+\item{reg_lambda}{\code{\link{numeric}} L2 regularization term on weights (Default: \code{0}).}
 
-\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default:
-\code{0}).}
+\item{reg_alpha}{\code{\link{numeric}} L1 regularization term on weights (Default: \code{0}).}
 
 \item{max_depth}{\code{\link{numeric}} The Maximum depth of a tree (Default: \code{3}).}
 
-\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent
-overfitting. Also used for creating a random tresting dataset (Default:
-\code{0.75}).}
+\item{subsample}{\code{\link{numeric}} The ratio used for subsampling to prevent overfitting.
+Also used for creating a random tresting dataset (Default: \code{0.75}).}
 
-\item{colsample_bytree}{\code{\link{numeric}} Sub-sample ratio of columns when
-constructing each tree (Default: \code{0.4}).}
+\item{colsample_bytree}{\code{\link{numeric}} Sub-sample ratio of columns when constructing
+each tree (Default: \code{0.4}).}
 
-\item{min_child_weight}{\code{\link{numeric}} Broadly related to the number of
-instances necessary for each node (Default: \code{3}).}
+\item{min_child_weight}{\code{\link{numeric}} Broadly related to the number of instances
+necessary for each node (Default: \code{3}).}
 
 \item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use.}
 
@@ -87,10 +84,13 @@ are available only for the \code{"gbtree"} baselearners.
 # Add xgboost as an engine
 x <- distribution(background) |> engine_xgboost(iter = 4000)
 }
+
 }
 \references{
 \itemize{
-\item Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754
+\item Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System",
+22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016,
+https://arxiv.org/abs/1603.02754
 }
 }
 \seealso{

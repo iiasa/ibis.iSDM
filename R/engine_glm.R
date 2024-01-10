@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Engine for Generalized linear models (GLM)
@@ -17,33 +17,38 @@ NULL
 #' However basic GLMs can in some cases be useful for quick projections or
 #' for [ensemble()] of small models (a practice common for rare species).
 #'
-#' @details
-#' This engine is essentially a wrapper for [stats::glm.fit()], however with customized
-#' settings to support offsets and weights.
-#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param control A [`list`] containing parameters for controlling the fitting
 #' process (Default: \code{NULL}).
 #' @param type The mode used for creating posterior predictions. Either making
-#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other parameters passed on to [stats::glm()].
-#' @references
-#' * Hastie, T. J. and Pregibon, D. (1992) Generalized linear models. Chapter 6 of Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-#' @family engine
+#'
+#' @details
+#' This engine is essentially a wrapper for [stats::glm.fit()], however with customized
+#' settings to support offsets and weights.
+#'
 #' @returns An [Engine].
-#' @aliases engine_glm
+#'
+#' @references
+#' * Hastie, T. J. and Pregibon, D. (1992) Generalized linear models. Chapter 6 of
+#' Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+#'
+#' @family engine
+#'
 #' @examples
 #' # Load background
-#' background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+#' package='ibis.iSDM',mustWork = TRUE))
 #'
 #' # Add GLM as an engine
 #' x <- distribution(background) |> engine_glm()
-#' x
+#'
 #' @name engine_glm
 NULL
+
 #' @rdname engine_glm
 #' @export
-
 engine_glm <- function(x,
                        control = NULL,
                        type = "response",

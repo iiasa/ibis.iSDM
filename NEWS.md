@@ -5,6 +5,7 @@
 #### Minor improvements and bug fixes
 * Support of multi-band rasters in `ensemble()` for convenience.
 * Fix of bug in `threshold()` for supplied point data and improved error messages.
+* Cleaner docs and structure
 
 # ibis.iSDM 0.1.1
 

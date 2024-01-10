@@ -2,26 +2,27 @@
 % Please edit documentation in R/scenario.R
 \name{scenario}
 \alias{scenario}
+\alias{scenario,ANY-method}
 \title{Create a new scenario based on trained model parameters}
 \usage{
 scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 
-\S4method{scenario}{ANY,ANY,logical,logical}(fit,limits,reuse_limits,copy_model)
+\S4method{scenario}{ANY}(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 }
 \arguments{
 \item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}
 
 \item{limits}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the projection
 surface when intersected with the prediction data (Default: \code{NULL}).
-This can for instance be set as an expert-delineated constrain to limit
-spatial projections.}
+This can for instance be set as an expert-delineated constrain to limit spatial
+projections.}
 
 \item{reuse_limits}{A \code{\link{logical}} on whether to reuse limits if found in the
 trained \code{\link{BiodiversityDistribution}} object (Default: \code{FALSE}). See also notes!}
 
-\item{copy_model}{A \code{\link{logical}} of whether the model object is to be copied
-to the scenario object. Note that setting this option to \code{TRUE} can
-increase the required amount of memory (Default: \code{FALSE}).}
+\item{copy_model}{A \code{\link{logical}} of whether the model object is to be copied to
+the scenario object. Note that setting this option to \code{TRUE} can increase
+the required amount of memory (Default: \code{FALSE}).}
 }
 \description{
 This function creates a new \linkS4class{BiodiversityScenario} object
@@ -36,4 +37,5 @@ reused for the projections. \strong{Note: This effectively fixes the projections
 \dontrun{
   scenario(fit, limits = island_area)
 }
+
 }

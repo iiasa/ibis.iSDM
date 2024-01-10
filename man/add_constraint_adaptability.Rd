@@ -2,9 +2,26 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_adaptability}
 \alias{add_constraint_adaptability}
+\alias{add_constraint_adaptability,BiodiversityScenario-method}
 \title{Adds an adaptability constraint to a scenario object}
 \usage{
-\S4method{add_constraint_adaptability}{BiodiversityScenario,character,character,numeric,numeric}(mod,method,names,value,increment)
+add_constraint_adaptability(
+  mod,
+  method = "nichelimit",
+  names = NULL,
+  value = 1,
+  increment = 0,
+  ...
+)
+
+\S4method{add_constraint_adaptability}{BiodiversityScenario}(
+  mod,
+  method = "nichelimit",
+  names = NULL,
+  value = 1,
+  increment = 0,
+  ...
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -41,7 +58,6 @@ standard deviation from the range of covariates used for model training.
 scenario(fit) |>
  add_constraint_adaptability(value = 1)
 }
-
 }
 \seealso{
 Other constraint: 

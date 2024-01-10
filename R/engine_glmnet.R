@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Engine for regularized regression models
@@ -17,6 +17,18 @@ NULL
 #' Limited amount of prior information can be specified for this engine,
 #' specifically via offsets or as [`GLMNETPrior`], which allow to specify priors
 #' as regularization constants.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has
+#' to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
+#' and \code{alpha=0} the ridge penalty (Default: \code{0}).
+#' @param nlambda A [`numeric`] giving the number of lambda values to be used (Default: \code{100}).
+#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually
+#' best to let this parameter be determined deterministically (Default: \code{NULL}).
+#' @param type The mode used for creating posterior predictions. Either making
+#' \code{"link"} or \code{"response"} (Default: \code{"response"}).
+#' @param ... Other parameters passed on to glmnet.
+#'
 #' @details Regularized regressions are effectively GLMs that are fitted with
 #' ridge, lasso or elastic-net regularization. Which of them is chosen is
 #' critical dependent on the alpha value: [*] For \code{alpha} equal to \code{0}
@@ -29,35 +41,32 @@ NULL
 #' essentially a combination of the two. The optimal lambda parameter can be
 #' determined via cross-validation. For this option set \code{"varsel"} in
 #' `train()` to \code{"reg"}.
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param alpha A [`numeric`] giving the elasticnet mixing parameter, which has
-#'   to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
-#'   and \code{alpha=0} the ridge penalty (Default: \code{0}).
-#' @param nlambda A [`numeric`] giving the number of lambda values to be used
-#'   (Default: \code{100}).
-#' @param lambda A [`numeric`] with a user supplied estimate of lambda. Usually
-#'   best to let this parameter be determined deterministically (Default:
-#'   \code{NULL}).
-#' @param type The mode used for creating posterior predictions. Either making
-#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
-#' @param ... Other parameters passed on to glmnet.
-#' @references
-#' * Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
-#' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
-#' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
-#' @family engine
+#'
 #' @returns An [Engine].
-#' @aliases engine_glmnet
+#'
+#' @references
+#' * Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths
+#' for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software,
+#' 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
+#' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J.,
+#'  Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis.
+#'   Methods in Ecology and Evolution, 6(4), pp.366-379.
+#' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models
+#' for presence-only data. The Annals of Applied Statistics 7, 1917–1939
+#'
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add GLMNET as an engine
 #' x <- distribution(background) |> engine_glmnet(iter = 1000)
 #' }
+#'
 #' @name engine_glmnet
 NULL
+
 #' @rdname engine_glmnet
 #' @export
-
 engine_glmnet <- function(x,
                           alpha = 0,
                           nlambda = 100,
@@ -380,7 +389,7 @@ engine_glmnet <- function(x,
         if(settings$get('only_linear') == FALSE){
           if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
                                                     'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
-          # linear_predictors <- attr(terms.formula(form), "term.labels")
+          # linear_predictors <- attr(stats::terms.formula(form), "term.labels")
           # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
           #
           # form <- stats::update.formula(form,
@@ -391,7 +400,7 @@ engine_glmnet <- function(x,
           #                          paste0(m[lower.tri(m)], collapse = " + ")
           #                        ))
           # # Update penalty factors and limits
-          # for(var in attr(terms.formula(form), "term.labels")){
+          # for(var in attr(stats::terms.formula(form), "term.labels")){
           #   if(!(var %in% p.fac)){
           #     v <- 1 # Take the maximum regularization penalty by default
           #     vlow <- -Inf; vupp <- Inf

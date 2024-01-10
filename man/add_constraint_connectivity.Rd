@@ -2,9 +2,12 @@
 % Please edit documentation in R/add_constraint.R
 \name{add_constraint_connectivity}
 \alias{add_constraint_connectivity}
+\alias{add_constraint_connectivity,BiodiversityScenario-method}
 \title{Adds a connectivity constraint to a scenario object.}
 \usage{
-\S4method{add_constraint_connectivity}{BiodiversityScenario,character,numeric,ANY}(mod,method,value,resistance)
+add_constraint_connectivity(mod, method, value = NULL, resistance = NULL, ...)
+
+\S4method{add_constraint_connectivity}{BiodiversityScenario}(mod, method, value = NULL, resistance = NULL, ...)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}

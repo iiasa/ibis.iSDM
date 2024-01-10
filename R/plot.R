@@ -1,19 +1,22 @@
-#' @include utils.R
-NULL
-
 #' Plot wrappers
 #'
 #' @description Plots information from a given object where a plotting object is
 #' available.
 #'
-#' @param x Any object belonging to [DistributionModel],
-#'   [BiodiversityDatasetCollection], [PredictorDataset] or
-#'   [BiodiversityScenario].
+#' @param x Any object belonging to [DistributionModel], [BiodiversityDatasetCollection],
+#' [PredictorDataset] or [BiodiversityScenario].
+#' @param what In case a [SpatRaster] is supplied, this parameter specifies the layer
+#' to be shown (Default: \code{"mean"}).
 #' @param ... Further arguments passed on to \code{x$plot}.
 #'
 #' @details The plotted outputs vary depending on what object is being plotted.
 #' For example for a fitted [DistributionModel] the output is usually the fitted
 #' spatial prediction (Default: \code{'mean'}).
+#'
+#' @return Graphical output
+#'
+#' @keywords misc
+#'
 #' @examples
 #' \dontrun{
 #' # Build and train a model
@@ -25,39 +28,32 @@ NULL
 #' # Plot the resulting model
 #' plot(mod)
 #' }
-#' @return Graphical output
-#' @keywords misc
+#'
 #' @name plot
 NULL
 
 #' @rdname plot
 #' @method plot DistributionModel
-#' @param what In case a [SpatRaster] is supplied, this parameter specifies the layer to be shown (Default: \code{"mean"}).
-#' @keywords misc
 #' @export
 plot.DistributionModel <- function(x, what = "mean", ...) x$plot(what,...)
 
 #' @rdname plot
 #' @method plot BiodiversityDatasetCollection
-#' @keywords misc
 #' @export
 plot.BiodiversityDatasetCollection <- function(x, ...) x$plot(...)
 
 #' @rdname plot
 #' @method plot PredictorDataset
-#' @keywords misc
 #' @export
 plot.PredictorDataset <- function(x, ...) x$plot(...)
 
 #' @rdname plot
 #' @method plot Engine
-#' @keywords misc
 #' @export
 plot.Engine <- function(x,...) x$plot(...)
 
 #' @rdname plot
 #' @method plot BiodiversityScenario
-#' @keywords misc
 #' @export
 plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
@@ -84,41 +80,42 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' accordingly.
 #'
 #' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`]
-#'   object with \code{prediction} model within.
-#' @param xvar A [`character`] denoting the value on the x-axis (Default:
-#'   \code{'mean'}).
-#' @param yvar A [`character`] denoting the value on the y-axis (Default:
-#'   \code{'sd'}).
+#' object with \code{prediction} model within.
+#' @param xvar A [`character`] denoting the value on the x-axis (Default: \code{'mean'}).
+#' @param yvar A [`character`] denoting the value on the y-axis (Default: \code{'sd'}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted
-#'   (Default: \code{TRUE})?
+#' (Default: \code{TRUE})?
 #' @param fname A [`character`] specifying the output filename a created figure
-#'   should be written to.
-#' @param title Allows to respecify the title through a [`character`] (Default:
-#'   \code{NULL}).
-#' @param col A [`character`] stating the colour palette to use. Has to be
-#'   either a predefined value or a vector of colours. See
-#'   \code{"biscale::bi_pal_manual"}. Default: \code{"BlueGold"}.
+#' should be written to.
+#' @param title Allows to respecify the title through a [`character`] (Default:\code{NULL}).
+#' @param col A [`character`] stating the colour palette to use. Has to be either
+#' a predefined value or a vector of colours. See \code{"biscale::bi_pal_manual"}.
+#' Default: \code{"BlueGold"}.
 #' @param ... Other engine specific parameters.
-#' @seealso [partial], [plot.DistributionModel]
+#'
 #' @note
 #' **This function requires the biscale package to be installed.**
 #' Although a work around without the package could be developed, it was not
 #' deemed necessary at this point. See also this
 #' [gist](https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188).
+#'
 #' @return Saved bivariate plot in \code{'fname'} if specified, otherwise plot.
-#' @aliases bivplot
+#'
+#' @seealso [partial], [plot.DistributionModel]
 #' @keywords misc
+#'
 #' @export
 #' @name bivplot
+NULL
+
+#' @rdname bivplot
+#' @export
 methods::setGeneric(
   "bivplot",
   signature = methods::signature("mod"),
   function(mod, xvar = "mean", yvar = "sd", plot = TRUE, fname = NULL, title = NULL, col = "BlueGold",...) standardGeneric("bivplot"))
 
-#' @name bivplot
 #' @rdname bivplot
-#' @usage
-#'   \S4method{bivplot}{ANY,character,character,logical,ANY,ANY,character}(mod,xvar,yvar,plot,fname,title,col,...)
 methods::setMethod(
   "bivplot",
   methods::signature(mod = "ANY"),

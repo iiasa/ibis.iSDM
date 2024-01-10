@@ -1,50 +1,57 @@
-#' @include bdproto-engine.R utils-spatial.R bdproto-distributionmodel.R
+#' @include bdproto-engine.R bdproto-distributionmodel.R
 NULL
 
 #' Engine for use of Bayesian Additive Regression Trees (BART)
 #'
 #' @description The Bayesian regression approach to a sum of complementary trees
-#'   is to shrink the said fit of each tree through a regularization prior. BART
-#'   models provide non-linear highly flexible estimation and have been shown to
-#'   compare favourable among machine learning algorithms (Dorie et al. 2019).
-#'   Default prior preference is for trees to be small (few terminal nodes) and
-#'   shrinkage towards \code{0}.
+#' is to shrink the said fit of each tree through a regularization prior. BART
+#' models provide non-linear highly flexible estimation and have been shown to
+#' compare favourable among machine learning algorithms (Dorie et al. 2019).
+#' Default prior preference is for trees to be small (few terminal nodes) and
+#' shrinkage towards \code{0}.
 #'
-#'   This package requires the \code{"dbarts"} R-package to be installed. Many
-#'   of the functionalities of this engine have been inspired by the
-#'   \code{"embarcadero"} R-package. Users are therefore advised to cite if they
-#'   make heavy use of BART.
+#' This package requires the \code{"dbarts"} R-package to be installed. Many
+#' of the functionalities of this engine have been inspired by the
+#' \code{"embarcadero"} R-package. Users are therefore advised to cite if they
+#' make heavy use of BART.
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param iter A [`numeric`] estimate of the number of trees to be used in the
+#' sum-of-trees formulation (Default: \code{1000}).
+#' @param nburn A [`numeric`] estimate of the burn in samples (Default: \code{250}).
+#' @param chains A number of the number of chains to be used (Default: \code{4}).
+#' @param type The mode used for creating posterior predictions. Either \code{"link"}
+#' or \code{"response"} (Default: \code{"response"}).
+#' @param ... Other options.
+#'
 #' @details Prior distributions can furthermore be set for:
 #' * probability that a tree stops at a node of a given depth (Not yet implemented)
 #' * probability that a given variable is chosen for a splitting rule
 #' * probability of splitting that variable at a particular value (Not yet implemented)
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param iter A [`numeric`] estimate of the number of trees to be used in the
-#'   sum-of-trees formulation (Default: \code{1000}).
-#' @param nburn A [`numeric`] estimate of the burn in samples (Default:
-#'   \code{250}).
-#' @param chains A number of the number of chains to be used (Default:
-#'   \code{4}).
-#' @param type The mode used for creating posterior predictions. Either
-#'   \code{"link"} or \code{"response"} (Default: \code{"response"}).
-#' @param ... Other options.
-#' @references
-#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-#' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
-#' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
+#'
 #' @returns An [Engine].
+#'
+#' @references
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+#' regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' * Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated
+#' versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
+#' * Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler.
+#' R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
+#'
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add BART as an engine
 #' x <- distribution(background) |> engine_bart(iter = 100)
 #' }
-#' @family engine
-#' @aliases engine_bart
+#'
 #' @name engine_bart
 NULL
+
 #' @rdname engine_bart
 #' @export
-
 engine_bart <- function(x,
                         iter = 1000,
                         nburn = 250,
@@ -601,7 +608,7 @@ engine_bart <- function(x,
             obj <- self$get_data("fit_best")
             if(is.Waiver(obj)) return(obj)
             # Get residuals
-            rd <- residuals(obj)
+            rd <- stats::residuals(obj)
             if(length(rd)==0) rd <- new_waiver()
             return(rd)
           },

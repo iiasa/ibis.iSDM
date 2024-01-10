@@ -1,25 +1,28 @@
-#' @include utils.R
-NULL
-
 #' Create a new `bdproto` object
 #'
+#' @description
 #' Construct a new object with `bdproto`. This object system is inspired
 #' from the `ggproto` system used in the `ggplot2` and the custom `proto` system
 #' used in the `prioritizr` package.
 #'
 #' @param _class Class name to assign to the object. This is stored as the class
-#'   attribute of the object. This is optional: if `NULL` (the default),
-#'   no class name will be added to the object.
-#'
-#' @param _inherit `bdproto` object to inherit from. If `NULL`, don"t
-#'   inherit from any object.
-#'
+#' attribute of the object. This is optional: if `NULL` (the default), no class
+#' name will be added to the object.
+#' @param _inherit `bdproto` object to inherit from. If `NULL`, don't inherit from any object.
 #' @param ... A list of members to add to the new `bdproto` object.
-#' @source https://ggplot2.tidyverse.org/reference/ggproto.html#examples
+#'
 #' @note
 #' All [`bdproto`] objects have several functions that allow to access data and
 #' summarize information within them. Run \code{names(object)} to show the
 #' available functions.
+#'
+#' @return A bdproto object.
+#'
+#' @source https://ggplot2.tidyverse.org/reference/ggproto.html#examples
+#'
+#' @keywords bdproto
+#' @family bdproto
+#'
 #' @examples
 #' Adder <- bdproto("Adder",
 #'   x = 0,
@@ -30,20 +33,16 @@ NULL
 #' )
 #' Adder$add(10)
 #' Adder$add(10)
-# Abacus <- bdproto("Abacus", Adder,
-#   subtract = function(self, n) {
-#     self$x <- self$x - n
-#     self$x
-#   }
-# )
+#' Abacus <- bdproto("Abacus", Adder,
+#'   subtract = function(self, n) {
+#'     self$x <- self$x - n
+#'     self$x
+#'   }
+#' )
 #' Abacus$add(10)
 #' Abacus$subtract(10)
 #'
-#' @return A bdproto object.
-#' @aliases bdproto
-#' @keywords bdproto
-#' @family bdproto
-#' @noRd
+#' @export
 bdproto <- function(`_class` = NULL, `_inherit` = NULL, ...) {
   assertthat::assert_that(assertthat::is.string(`_class`) || is.null(`_class`),
                           inherits(`_inherit`, "bdproto") || is.null(`_inherit`))

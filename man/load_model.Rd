@@ -2,9 +2,12 @@
 % Please edit documentation in R/write_output.R
 \name{load_model}
 \alias{load_model}
+\alias{load_model,character-method}
 \title{Load a pre-computed model}
 \usage{
-\S4method{load_model}{character,logical}(fname,verbose)
+load_model(fname, verbose = getOption("ibis.setupmessages"))
+
+\S4method{load_model}{character}(fname, verbose = getOption("ibis.setupmessages"))
 }
 \arguments{
 \item{fname}{A \code{\link{character}} depicting an output filename.}
@@ -30,6 +33,7 @@ mod <- load_model("testmodel.rds")
 
 summary(mod)
 }
+
 }
 \seealso{
 write_model

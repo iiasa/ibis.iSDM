@@ -12,14 +12,12 @@ engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 \item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the
 sum-of-trees formulation (Default: \code{1000}).}
 
-\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples (Default:
-\code{250}).}
+\item{nburn}{A \code{\link{numeric}} estimate of the burn in samples (Default: \code{250}).}
 
-\item{chains}{A number of the number of chains to be used (Default:
-\code{4}).}
+\item{chains}{A number of the number of chains to be used (Default: \code{4}).}
 
-\item{type}{The mode used for creating posterior predictions. Either
-\code{"link"} or \code{"response"} (Default: \code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either \code{"link"}
+or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other options.}
 }
@@ -52,12 +50,16 @@ Prior distributions can furthermore be set for:
 # Add BART as an engine
 x <- distribution(background) |> engine_bart(iter = 100)
 }
+
 }
 \references{
 \itemize{
-\item Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
-\item Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
-\item Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler. R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
+\item Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+\item Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated
+versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. Statistical Science, 34(1), 43-68.
+\item Vincent Dorie (2020). dbarts: Discrete Bayesian Additive Regression Trees Sampler.
+R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
 }
 }
 \seealso{

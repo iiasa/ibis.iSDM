@@ -16,19 +16,16 @@ engine_gdb(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{iter}{An \code{\link{integer}} giving the number of boosting iterations (Default:
-\code{2e3L}).}
+\item{iter}{An \code{\link{integer}} giving the number of boosting iterations (Default: \code{2e3L}).}
 
-\item{learning_rate}{A bounded \code{\link{numeric}} value between \code{0} and
-\code{1} defining the shrinkage parameter.}
+\item{learning_rate}{A bounded \code{\link{numeric}} value between \code{0} and \code{1}
+defining the shrinkage parameter.}
 
-\item{empirical_risk}{method for empirical risk calculation. Available
-options are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default:
-\code{'inbag'}).}
+\item{empirical_risk}{method for empirical risk calculation. Available options
+are \code{'inbag'}, \code{'oobag'} and \code{'none'}. (Default: \code{'inbag'}).}
 
 \item{type}{The mode used for creating posterior predictions. Either making
-\code{"link"}, \code{"response"} or \code{"class"} (Default:
-\code{"response"}).}
+\code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).}
 
 \item{...}{Other variables or control parameters}
 }
@@ -60,12 +57,17 @@ constrained priors via \link{GDBPrior}.
 # Add GDB as an engine
 x <- distribution(background) |> engine_gdb(iter = 1000)
 }
+
 }
 \references{
 \itemize{
-\item Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
-\item Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.
-\item Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.
+\item Hofner, B., Mayr, A., Robinzonov, N., & Schmid, M. (2014). Model-based boosting
+in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.
+\item Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species
+distribution models. Ecology 92, 1895–901.
+\item Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when
+to stop - a sequential stopping rule for component-wise gradient boosting.
+Methods of Information in Medicine, 51, 178–186.
 }
 }
 \seealso{

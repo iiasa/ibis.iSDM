@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R bdproto-priorlist.R bdproto-distributionmodel.R
+#' @include bdproto.R bdproto-prior.R bdproto-priorlist.R bdproto-distributionmodel.R
 NULL
 
 #' Add priors to an existing distribution object
@@ -6,13 +6,16 @@ NULL
 #' @description This function simply allows to add priors to an existing
 #' [distribution] object. The supplied priors must be a [`PriorList-class`]
 #' object created through calling [priors].
-#' @note Alternatively priors to environmental predictors can also directly
-#' added as parameter via [add_predictors]
+#'
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param priors A [`PriorList-class`] object containing multiple priors.
 #' @param ... Other parameters passed down.
+#'
+#' @note Alternatively priors to environmental predictors can also directly
+#' added as parameter via [add_predictors]
+#'
 #' @family prior
-#' @aliases add_priors
+#'
 #' @examples
 #' \dontrun{
 #'  pp <-  GLMNETPrior("forest")
@@ -20,21 +23,18 @@ NULL
 #'   add_priors(pp)
 #'
 #' }
+#'
 #' @name add_priors
 NULL
 
-#' @name add_priors
 #' @rdname add_priors
-#' @exportMethod add_priors
 #' @export
 methods::setGeneric(
   "add_priors",
   signature = methods::signature("x"),
   function(x, priors = NULL, ...) standardGeneric("add_priors"))
 
-#' @name add_priors
 #' @rdname add_priors
-#' @usage \S4method{add_priors}{BiodiversityDistribution,ANY}(x,priors,...)
 methods::setMethod(
   "add_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -55,20 +55,19 @@ methods::setMethod(
   }
 )
 
-#' @name set_priors
 #' @inherit add_priors
 #' @inheritParams add_priors
+#'
 #' @keywords deprecated
 methods::setGeneric(
   "set_priors",
   signature = methods::signature("x"),
   function(x, priors = NULL, ...) standardGeneric("set_priors"))
 
-#' @name set_priors
 #' @inherit add_priors
 #' @inheritParams add_priors
+#'
 #' @keywords deprecated
-#' @usage \S4method{set_priors}{BiodiversityDistribution,ANY}(x,priors,...)
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -83,14 +82,15 @@ methods::setMethod(
 
 #' Remove existing priors from an existing distribution object
 #'
-#' @description This function allows to remove priors from an existing
-#'   [distribution] object. In order to remove a set prior, the name of the
-#'   prior has to be specified.
+#' @description This function allows to remove priors from an existing [distribution]
+#' object. In order to remove a set prior, the name of the prior has to be specified.
+#'
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names A [`vector`] or [`character`] object for priors to be removed.
 #' @param ... Other parameters passed down
-#' @aliases rm_priors
+#'
 #' @family prior
+#'
 #' @examples
 #' \dontrun{
 #'  # Add prior
@@ -100,21 +100,18 @@ methods::setMethod(
 #'  # Remove again
 #'  x <- x |> rm_priors("forest")
 #' }
+#'
 #' @name rm_priors
 NULL
 
-#' @name rm_priors
 #' @rdname rm_priors
-#' @exportMethod rm_priors
 #' @export
 methods::setGeneric(
   "rm_priors",
   signature = methods::signature("x"),
   function(x, names = NULL, ...) standardGeneric("rm_priors"))
 
-#' @name rm_priors
 #' @rdname rm_priors
-#' @usage \S4method{rm_priors}{BiodiversityDistribution,ANY}(x,names,...)
 methods::setMethod(
   "rm_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -137,15 +134,18 @@ methods::setMethod(
 #' takes an existing [`BiodiversityDistribution-class`] object and creates
 #' [`PriorList-class`] object from them. The resulting object can be used to add
 #' for instance [priors] to a new model.
-#' @note Not all engines support priors in similar ways. See the vignettes and
-#' help pages on that topic!
+#'
 #' @param mod A fitted [`DistributionModel-class`] object. If instead a
-#'   [`BiodiversityDistribution-class`] object is passed to this function, it
-#'   simply returns the contained priors used for estimation (if any).
+#' [`BiodiversityDistribution-class`] object is passed to this function, it simply
+#' returns the contained priors used for estimation (if any).
 #' @param target_engine A [`character`] for which the priors should be created.
 #' @param ... Other parameters passed down.
+#'
+#' @note Not all engines support priors in similar ways. See the vignettes and
+#' help pages on that topic!
+#'
 #' @family prior
-#' @aliases get_priors
+#'
 #' @examples
 #' \dontrun{
 #'  mod <- distribution(background) |>
@@ -155,21 +155,18 @@ methods::setMethod(
 #'     train()
 #'  get_priors(mod, target_engine = "BART")
 #' }
+#'
 #' @name get_priors
 NULL
 
-#' @name get_priors
 #' @rdname get_priors
-#' @exportMethod get_priors
 #' @export
 methods::setGeneric(
   "get_priors",
   signature = methods::signature("mod", "target_engine"),
   function(mod, target_engine, ...) standardGeneric("get_priors"))
 
-#' @name get_priors
 #' @rdname get_priors
-#' @usage \S4method{get_priors}{ANY,character}(mod,target_engine,...)
 methods::setMethod(
   "get_priors",
   methods::signature(mod = "ANY", target_engine = "character"),
@@ -317,4 +314,3 @@ methods::setMethod(
     return( op )
   }
 )
-

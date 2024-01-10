@@ -20,12 +20,10 @@ engine_glmnet(
 to be between \code{0} and \code{1}. \code{alpha=1} is the lasso penalty,
 and \code{alpha=0} the ridge penalty (Default: \code{0}).}
 
-\item{nlambda}{A \code{\link{numeric}} giving the number of lambda values to be used
-(Default: \code{100}).}
+\item{nlambda}{A \code{\link{numeric}} giving the number of lambda values to be used (Default: \code{100}).}
 
 \item{lambda}{A \code{\link{numeric}} with a user supplied estimate of lambda. Usually
-best to let this parameter be determined deterministically (Default:
-\code{NULL}).}
+best to let this parameter be determined deterministically (Default: \code{NULL}).}
 
 \item{type}{The mode used for creating posterior predictions. Either making
 \code{"link"} or \code{"response"} (Default: \code{"response"}).}
@@ -70,12 +68,18 @@ determined via cross-validation. For this option set \code{"varsel"} in
 # Add GLMNET as an engine
 x <- distribution(background) |> engine_glmnet(iter = 1000)
 }
+
 }
 \references{
 \itemize{
-\item Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
-\item Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
-\item Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
+\item Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths
+for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software,
+33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.
+\item Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J.,
+Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis.
+Methods in Ecology and Evolution, 6(4), pp.366-379.
+\item Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models
+for presence-only data. The Annals of Applied Statistics 7, 1917–1939
 }
 }
 \seealso{

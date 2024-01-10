@@ -1,15 +1,20 @@
 #' Built formula for GDB model
 #'
 #' @description This function built a formula for a `engine_gdb()` model.
-#' @param model A [`list()`] object containing the prepared model data for a
-#'   given biodiversity dataset.
+#'
+#' @param model A [`list()`] object containing the prepared model data for a given
+#' biodiversity dataset.
 #' @param x A [`BiodiversityDistribution`] object.
 #' @param id The id for the species formula.
 #' @param settings A [`Settings`] object.
-#' @author Martin Jung
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#'
+#' @keywords internal
 built_formula_gdb <- function(model, id, x, settings){
   assertthat::assert_that(
     is.list(model),
@@ -126,10 +131,14 @@ built_formula_gdb <- function(model, id, x, settings){
 #' @param fit A fitted [`mboost`] model with [`binomial`] distribution.
 #' @param nd A new data.frame with all predictiors used in fit.
 #' @param template A [`SpatRaster`] object that can be used as spatial template.
+#'
 #' @returns A [`RasterLayer`] containing a presence-absence prediction.
-#' @aliases predict_gdbclass
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 predict_gdbclass <- function(fit, nd, template){
   assertthat::assert_that(
     inherits(fit, 'mboost'),
@@ -160,8 +169,11 @@ predict_gdbclass <- function(fit, nd, template){
 #'
 #' @description
 #' Extracts the coefficients and selection frequencies from a [`mboost`] model.
+#'
 #' @param obj A fitted [`mboost`] object.
+#'
 #' @noRd
+#'
 #' @keywords internal
 clean_mboost_summary <- function(obj){
   assertthat::assert_that(
@@ -204,15 +216,20 @@ clean_mboost_summary <- function(obj){
 #' (usually the training data) on the number of unique values within. If fewer
 #' values than a given threshold (\code{'tr'}) is detected, then the predictor
 #' is removed, thus reducing complexity.
-#' @note Maybe in the future a more cleverer solution could be thought of, for
-#'   instance using a singular value decomposition?
-#' @param model A [`list`] of a model object containing the various predictors
-#'   and biodiversity occurrence information.
+#'
+#' @param model A [`list`] of a model object containing the various predictors and
+#' biodiversity occurrence information.
 #' @param tr A [`numeric`] value describing a threshold of minimum unique values
-#'   to be retained.
+#' to be retained.
+#'
+#' @note Maybe in the future a more cleverer solution could be thought of, for
+#' instance using a singular value decomposition?
+#'
 #' @returns A [`vector`] with the variables that full fill the threshold.
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 rm_insufficient_covs <- function(model, tr = 5){
   assertthat::assert_that(
     is.list(model),
@@ -259,21 +276,28 @@ rm_insufficient_covs <- function(model, tr = 5){
 #'
 #' @param df The [`data.frame`] for which weights are to be calculated.
 #' @param presence A [`vector`] with the observed species. Has to be in range
-#'   \code{0} to \code{Inf}.
+#' \code{0} to \code{Inf}.
 #' @param bg A background [`raster`] layer.
-#' @param use_area A [`logical`] on whether area is to be used instead of grid
-#'   counts.
+#' @param use_area A [`logical`] on whether area is to be used instead of grid counts.
 #' @param weight A [`numeric`] weight to be used in down-weighted regressions.
-#' @param type Accepting either “Infinitely weighted logistic regression”
-#'   \code{'IWLR'} for use with binomial logistic regressions or “Down-weighted
-#'   Poisson regression” \code{'DWPR'} (Default).
-#' @references
-#' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.
-#' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939
+#' @param type Accepting either “Infinitely weighted logistic regression” \code{'IWLR'}
+#' for use with binomial logistic regressions or “Down-weighted Poisson regression”
+#' \code{'DWPR'} (Default).
+#'
 #' @return A vector with the weights
-#' @aliases ppm_weights
+#'
+#' @references
+#' * Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J.,
+#' Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis.
+#'  Methods in Ecology and Evolution, 6(4), pp.366-379.
+#' * Fithian, W. & Hastie, T. (2013) Finite-sample equivalence in statistical models
+#' for presence-only data. The Annals of Applied Statistics 7, 1917–1939
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 ppm_weights <- function(df, pa, bg, use_area = FALSE, weight = 1e-6, type = "DWPR"){
   assertthat::assert_that(
     is.data.frame(df),

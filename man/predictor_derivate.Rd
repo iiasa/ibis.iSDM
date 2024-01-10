@@ -17,53 +17,50 @@ predictor_derivate(
 \arguments{
 \item{env}{A \code{\link{SpatRaster}} object.}
 
-\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed
-in any way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
-\code{'thresh'}, \code{'bin'}).}
+\item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any
+way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).}
 
-\item{nknots}{The number of knots to be used for the transformation (Default:
-\code{4}).}
+\item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
 
-\item{deriv}{A \code{\link{vector}} with \code{\link{character}} of specific derivates to create
-(Default: \code{NULL}).}
+\item{deriv}{A \code{\link{vector}} with \code{\link{character}} of specific derivates to create (Default: \code{NULL}).}
 
 \item{int_variables}{A \code{\link{vector}} with length greater or equal than \code{2}
 specifying the covariates  (Default: \code{NULL}).}
 
-\item{method}{As \code{'option'} for more intuitive method setting. Can be
-left empty (in this case option has to be set).}
+\item{method}{As \code{'option'} for more intuitive method setting. Can be left
+empty (in this case option has to be set).}
 
 \item{...}{other options (Non specified).}
 }
 \value{
-Returns the derived adjusted \code{\link{SpatRaster}} objects of identical
-resolution.
+Returns the derived adjusted \code{\link{SpatRaster}} objects of identical resolution.
 }
 \description{
 This function creates derivatives of existing covariates and
 returns them in Raster format. Derivative variables can in the machine
-learning literature commonly be understood as one aspect of feature
-engineering. They can be particularly powerful in introducing
-non-linearities in otherwise linear models, for example is often done in
-the popular Maxent framework.
+learning literature commonly be understood as one aspect of feature engineering.
+They can be particularly powerful in introducing non-linearities in otherwise
+linear models, for example is often done in the popular Maxent framework.
 }
 \details{
 Available options are:
 \itemize{
 \item \code{'none'} - The original layer(s) are returned.
-\item \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
-\item \code{'hinge'} - Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
-and all others to a range of \eqn{[0,1]}. The number of thresholds and thus
-new derivates is specified via the parameter \code{'nknots'} (Default:
-\code{4}).
-\item \code{'interaction'} - Creates interactions between variables. Target variables have to be specified via \code{"int_variables"}.
-\item \code{'thresh'} - A threshold transformation of covariates, which sets all values lower than a set threshold ot
-\code{0} and those larger to \code{1}. The number of thresholds and thus
-new derivates is specified via the parameter \code{'nknots'} (Default:
-\code{4}).
-\item \code{'bin'} - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
-The number of percentile cuts and thus new derivates is specified via the
-parameter \code{'nknots'} (Default: \code{4}).
+\item \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of
+the provided layers.
+\item \code{'hinge'} - Creates hinge transformation of covariates, which set all
+values lower than a set threshold to \code{0} and all others to a range of \eqn{[0,1]}.
+The number of thresholds and thus new derivates is specified via the parameter
+\code{'nknots'} (Default: \code{4}).
+\item \code{'interaction'} - Creates interactions between variables. Target variables
+have to be specified via \code{"int_variables"}.
+\item \code{'thresh'} - A threshold transformation of covariates, which sets all
+values lower than a set threshold at \code{0} and those larger to \code{1}.
+The number of thresholds and thus new derivates is specified via the parameter
+\code{'nknots'} (Default: \code{4}).
+\item \code{'bin'} - Creates a factor representation of a covariates by cutting the
+range of covariates by their percentiles. The number of percentile cuts and thus
+new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
 }
 }
 \examples{
@@ -71,6 +68,7 @@ parameter \code{'nknots'} (Default: \code{4}).
 # Create a hinge transformation of one or multiple SpatRaster.
 predictor_derivate(covs, option = "hinge", knots = 4)
 }
+
 }
 \seealso{
 predictor_transform

@@ -2,20 +2,19 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPrior}
 \alias{GDBPrior}
+\alias{GDBPrior,character-method}
 \title{Monotonic constrained priors for boosted regressions}
 \usage{
 GDBPrior(variable, hyper = "increasing", ...)
 
-\S4method{GDBPrior}{character,character}(variable,hyper,...)
+\S4method{GDBPrior}{character}(variable, hyper = "increasing", ...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors
-variables.}
+\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
-\code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'positive'}, \code{'negative'} or \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -36,7 +35,8 @@ Similar priors can also be defined for the \code{\link{engine_xgboost}} via
 }
 \references{
 \itemize{
-\item Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
+\item Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species
+distribution models. Ecology, 92(10), 1895-1901.
 }
 }
 \seealso{

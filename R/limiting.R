@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Identify local limiting factor
 #'
 #' @description Calculates a [`SpatRaster`] of locally limiting factors from a
@@ -14,31 +11,35 @@ NULL
 #' largest decrease in suitability is the most limiting factor.
 #'
 #' @param mod A fitted \code{'DistributionModel'} object from which limited
-#'   factors are to be identified.
+#' factors are to be identified.
 #' @param plot Should the result be plotted? (Default: \code{TRUE}).
+#'
+#' @return A `terra` object of the most important variable for a given grid cell.
+#'
 #' @concept Partly inspired by the rmaxent package.
-#' @return A `terra` object of the most important variable for a given grid
-#'   cell.
+#'
+#' @references
+#' * Elith, J., Kearney, M. and Phillips, S. (2010), The art of modelling range-shifting species.
+#' Methods in Ecology and Evolution, 1: 330-342. doi: 10.1111/j.2041-210X.2010.00036.x
+#'
+#' @keywords partial
+#'
 #' @examples
 #' \dontrun{
 #' o <- limiting(fit)
 #' plot(o)
 #' }
-#' @aliases limiting
-#' @references
-#' * Elith, J., Kearney, M. and Phillips, S. (2010), [The art of modelling range-shifting species](http://doi.org/10.1111/j.2041-210X.2010.00036.x). _Methods in Ecology and Evolution_, 1: 330-342. doi: 10.1111/j.2041-210X.2010.00036.x
-#' @keywords partial
 #'
 #' @name limiting
-#' @exportMethod limiting
+NULL
+
+#' @rdname limiting
 #' @export
 methods::setGeneric("limiting",
                     signature = methods::signature("mod"),
                     function(mod, plot = TRUE) standardGeneric("limiting"))
 
-#' @name limiting
 #' @rdname limiting
-#' @usage \S4method{limiting}{ANY,logical}(mod,plot)
 methods::setMethod(
   "limiting",
   methods::signature("ANY"),

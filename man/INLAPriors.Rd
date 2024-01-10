@@ -2,11 +2,12 @@
 % Please edit documentation in R/prior_inla.R
 \name{INLAPriors}
 \alias{INLAPriors}
+\alias{INLAPriors,vector,character-method}
 \title{Helper function when multiple variables and types are supplied for INLA}
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 
-\S4method{INLAPriors}{vector,character,ANY}(variables,type,hyper,...)
+\S4method{INLAPriors}{vector,character}(variables, type, hyper = c(0, 0.001), ...)
 }
 \arguments{
 \item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing
@@ -14,8 +15,7 @@ predictors or latent effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
-hyper-parameters.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.}
 
 \item{...}{Variables passed on to prior object.}
 }

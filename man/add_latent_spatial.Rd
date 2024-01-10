@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_latent.R
 \name{add_latent_spatial}
 \alias{add_latent_spatial}
+\alias{add_latent_spatial,BiodiversityDistribution-method}
 \title{Add latent spatial effect to the model equation}
 \usage{
 add_latent_spatial(
@@ -12,7 +13,13 @@ add_latent_spatial(
   ...
 )
 
-\S4method{add_latent_spatial}{BiodiversityDistribution,character,ANY,logical}(x,method,priors,separate_spde,...)
+\S4method{add_latent_spatial}{BiodiversityDistribution}(
+  x,
+  method = "spde",
+  priors = NULL,
+  separate_spde = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -21,8 +28,7 @@ add_latent_spatial(
 added to the model. See details.}
 
 \item{priors}{A \code{"Prior-List"} object supplied to the latent effect.
-Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of
-default priors.}
+Relevant only for \code{\link{engine_inla}} and \code{NULL} equates the use of default priors.}
 
 \item{separate_spde}{A \code{\link{logical}} parameter indicating whether, in the case
 of SPDE effects, separate effects for each likelihood are being fitted.
@@ -53,8 +59,8 @@ engine used. In case a unsupported method for an engine is chosen this is
 modified to the next similar method.
 
 \strong{Available are:}
-
-\link{*} \code{"spde"} - stochastic partial differential equation (SPDE) for
+\itemize{
+\item \code{"spde"} - stochastic partial differential equation (SPDE) for
 \code{\link{engine_inla}} and \code{\link{engine_inlabru}}. SPDE effects aim at capturing the
 variation of the response variable in space, once all of the covariates are
 accounted for. Examining the spatial distribution of the spatial error can
@@ -62,26 +68,33 @@ reveal which covariates might be missing. For example, if elevation is
 positively correlated with the response variable, but is not included in
 the model, we could see a higher posterior mean in areas with higher
 elevation. Note that calculations of SPDE's can be computationally costly.
-\itemize{
-\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}. Not yet implemented in full.
+\item \code{"car"} - conditional autocorrelative errors (CAR) for \code{\link{engine_inla}}.
+Not yet implemented in full.
 \item \code{"kde"} - additional covariate of the kernel density of input point observations.
-\item \code{"poly"} - spatial trend correction by adding coordinates as polynominal transformation.
-This method assumed that a transformation of spatial coordinates can if - included as additional predictor -
-explain some of the variance in the distribution. This method does not interact with species occurrences.
-\item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean distance from each point
-to the nearest other grid cell with known species occurrence. Originally proposed by Allouche et al. (2008)
-and can be applied across all datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.
+\item \code{"poly"} - spatial trend correction by adding coordinates as polynominal
+transformation. This method assumed that a transformation of spatial coordinates
+can if - included as additional predictor - explain some of the variance in the
+distribution. This method does not interact with species occurrences.
+\item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean
+distance from each point to the nearest other grid cell with known species occurrence.
+Originally proposed by Allouche et al. (2008) and can be applied across all
+datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.
 }
 }
 \examples{
 \dontrun{
  distribution(background) |> add_latent_spatial(method = "poly")
 }
+
 }
 \references{
 \itemize{
-\item Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating distance constraints into species distribution models. Journal of Applied Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x
-\item Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.
+\item Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating
+distance constraints into species distribution models. Journal of Applied
+Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x
+\item Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., & Júnior, P. D. M. (2020).
+Dealing with overprediction in species distribution models: How adding distance
+constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 }
 }
 \keyword{latent}

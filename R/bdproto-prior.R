@@ -1,9 +1,7 @@
-#' @include utils.R bdproto.R bdproto-priorlist.R
+#' @include bdproto.R bdproto-priorlist.R
 NULL
 
-#' @export
 if (!methods::isClass("Prior")) methods::setOldClass("Prior")
-NULL
 
 #' Base Prior class
 #'

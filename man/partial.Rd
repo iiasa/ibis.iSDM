@@ -2,6 +2,7 @@
 % Please edit documentation in R/partial.R
 \name{partial}
 \alias{partial}
+\alias{partial,ANY-method}
 \alias{partial.DistributionModel}
 \title{Obtain partial effects of trained model}
 \usage{
@@ -17,13 +18,22 @@ partial(
   ...
 )
 
-\S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
+\S4method{partial}{ANY}(
+  mod,
+  x.var = NULL,
+  constant = NULL,
+  variable_length = 100,
+  values = NULL,
+  newdata = NULL,
+  plot = FALSE,
+  type = "response",
+  ...
+)
 
-\method{partial}{DistributionModel}(mod, ...)
+partial.DistributionModel(mod, ...)
 }
 \arguments{
-\item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model
-within.}
+\item{mod}{A trained \code{DistributionModel} object with \code{fit_best} model within.}
 
 \item{x.var}{A \link{character} indicating the variable for which a partial effect
 is to be calculated.}
@@ -35,11 +45,11 @@ Default calculates a mean per variable.}
 be used (Default: \code{100}).}
 
 \item{values}{\link{numeric} Directly specified values to compute partial effects
-for. If this parameter is set to anything other than \code{NULL}, the
-parameter \code{"variable_length"} is ignored (Default: \code{NULL}).}
+for. If this parameter is set to anything other than \code{NULL}, the parameter
+\code{"variable_length"} is ignored (Default: \code{NULL}).}
 
-\item{newdata}{An optional \link{data.frame} with provided data for partial
-estimation (Default: \code{NULL}).}
+\item{newdata}{An optional \link{data.frame} with provided data for partial estimation
+(Default: \code{NULL}).}
 
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted?}
 
@@ -64,6 +74,7 @@ applied to the output.
  # Do a partial calculation of a trained model
  partial(fit, x.var = "Forest.cover", plot = TRUE)
 }
+
 }
 \seealso{
 \link{partial}

@@ -1,20 +1,20 @@
-#' @include utils.R bdproto.R identifier.R
+#' @include bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("DistributionModel")) methods::setOldClass("DistributionModel")
-NULL
 
 #' Prototype for the trained Model object
 #'
+#' @description
 #' All trained Models should inherit the options here
 #'
-#' @name DistributionModel-class
-#' @aliases DistributionModel
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name DistributionModel-class
 NULL
 
+#' @rdname DistributionModel-class
 #' @export
 DistributionModel <- bdproto(
   "DistributionModel",
@@ -498,7 +498,7 @@ DistributionModel <- bdproto(
     model <- self$model$offset
     if(!is.Waiver(model$offset)) return( TRUE )
     # Also check whether offset is somehow in the equation
-    ind <- attr(terms.formula(fit$get_equation()), "offset")
+    ind <- attr(stats::terms.formula(fit$get_equation()), "offset")
     if(!is.null(ind)) return( TRUE )
   },
   # Masking function

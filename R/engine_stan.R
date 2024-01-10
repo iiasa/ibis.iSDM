@@ -3,57 +3,65 @@ NULL
 #' Use Stan as engine
 #'
 #' @description Stan is probabilistic programming language that can be used to
-#'   specify most types of statistical linear and non-linear regression models.
-#'   Stan provides full Bayesian inference for continuous-variable models
-#'   through Markov chain Monte Carlo methods such as the No-U-Turn sampler, an
-#'   adaptive form of Hamiltonian Monte Carlo sampling. Stan code has to be
-#'   written separately and this function acts as compiler to build the
-#'   stan-model.
+#' specify most types of statistical linear and non-linear regression models.
+#' Stan provides full Bayesian inference for continuous-variable models
+#' through Markov chain Monte Carlo methods such as the No-U-Turn sampler, an
+#' adaptive form of Hamiltonian Monte Carlo sampling. Stan code has to be
+#' written separately and this function acts as compiler to build the
+#' stan-model.
 #' **Requires the \code{"cmdstanr"} package to be installed!**
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param chains A positive [`integer`] specifying the number of Markov chains
+#' (Default: \code{4} chains).
+#' @param iter A positive [`integer`] specifying the number of iterations for
+#' each chain (including warmup). (Default: \code{2000}).
+#' @param warmup A positive [`integer`] specifying the number of warmup (aka
+#' burnin) iterations per chain. If step-size adaptation is on (Default: \code{TRUE}),
+#' this also controls the number of iterations for which adaptation is run (and
+#' hence these warmup samples should not be used for inference). The number of
+#' warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.
+#' @param cores If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.
+#' @param init Initial values for parameters (Default: \code{'random'}). Can also
+#' be specified as [list] (see: \code{"rstan::stan"})
+#' @param algorithm Mode used to sample from the posterior. Available options are
+#' \code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See \code{"cmdstanr"}
+#' package for more details. (Default: \code{"sampling"}).
+#' @param control See \code{"rstan::stan"} for more details on specifying the controls.
+#' @param type The mode used for creating posterior predictions. Either summarizing
+#' the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).
+#' @param ... Other variables
+#'
 #' @details By default the posterior is obtained through sampling, however stan
 #' also supports approximate inference forms through penalized maximum
 #' likelihood estimation (see Carpenter et al. 2017).
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param chains A positive [`integer`] specifying the number of Markov chains
-#'   (Default: \code{4} chains).
-#' @param iter A positive [`integer`] specifying the number of iterations for
-#'   each chain (including warmup). (Default: \code{2000}).
-#' @param warmup A positive [`integer`] specifying the number of warmup (aka
-#'   burnin) iterations per chain. If step-size adaptation is on (Default:
-#'   \code{TRUE}), this also controls the number of iterations for which
-#'   adaptation is run (and hence these warmup samples should not be used for
-#'   inference). The number of warmup iterations should be smaller than
-#'   \code{iter} and the default is \code{iter/2}.
-#' @param cores If set to NULL take values from specified ibis option
-#'   \code{getOption('ibis.nthread')}.
-#' @param init Initial values for parameters (Default: \code{'random'}). Can
-#'   also be specified as [list] (see: \code{"rstan::stan"})
-#' @param algorithm Mode used to sample from the posterior. Available options
-#'   are \code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See
-#'   \code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).
-#' @param control See \code{"rstan::stan"} for more details on specifying the
-#'   controls.
-#' @param type The mode used for creating posterior predictions. Either
-#'   summarizing the linear \code{"predictor"} or \code{"response"} (Default:
-#'   \code{"response"}).
-#' @param ... Other variables
-#' @seealso rstan, cmdstanr
+#'
 #' @note The function \code{obj$stancode()} can be used to print out the
 #' stancode of the model.
-#' @references
-#' * Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'. https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
-#' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
-#' * Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
-#' @family engine
-#' @aliases engine_stan
+#'
 #' @returns An [Engine].
+#'
+#' @references
+#' * Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'.
+#' https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
+#' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M.,
+#' ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of
+#' statistical software, 76(1), 1-32.
+#' * Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization
+#' in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
+#'
+#' @seealso rstan, cmdstanr
+#' @family engine
+#'
 #' @examples
 #' \dontrun{
 #' # Add Stan as an engine
 #' x <- distribution(background) |> engine_stan(iter = 1000)
 #' }
+#'
 #' @name engine_stan
 NULL
+
 #' @rdname engine_stan
 #' @export
 engine_stan <- function(x,

@@ -2,9 +2,28 @@
 % Please edit documentation in R/ensemble.R
 \name{ensemble}
 \alias{ensemble}
+\alias{ensemble,ANY-method}
 \title{Function to create an ensemble of multiple fitted models}
 \usage{
-\S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
+ensemble(
+  ...,
+  method = "mean",
+  weights = NULL,
+  min.value = NULL,
+  layer = "mean",
+  normalize = FALSE,
+  uncertainty = "cv"
+)
+
+\S4method{ensemble}{ANY}(
+  ...,
+  method = "mean",
+  weights = NULL,
+  min.value = NULL,
+  layer = "mean",
+  normalize = FALSE,
+  uncertainty = "cv"
+)
 }
 \arguments{
 \item{...}{Provided \code{\link{DistributionModel}} or \code{\link{SpatRaster}} objects.}
@@ -16,8 +35,7 @@ available options (Default: \code{'mean'}).}
 weighted means are to be constructed (Default: \code{NULL}).}
 
 \item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
-to be surpassed in each layer before calculating and ensemble
-(Default: \code{NULL}).}
+to be surpassed in each layer before calculating and ensemble (Default: \code{NULL}).}
 
 \item{layer}{A \code{\link{character}} of the layer to be taken from each prediction
 (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
@@ -92,10 +110,13 @@ In this case the \code{"normalize"} parameter has to be set.
  # Make a bivariate plot (might require other packages)
  bivplot(ex)
 }
+
 }
 \references{
 \itemize{
-\item Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
+\item Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022).
+Predictive performance of presence‐only species distribution models: a benchmark
+study with reproducible code. Ecological Monographs, 92(1), e01486.
 }
 }
 \keyword{train}

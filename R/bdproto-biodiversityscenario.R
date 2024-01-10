@@ -1,21 +1,21 @@
-#' @include utils.R bdproto.R
+#' @include bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("BiodiversityScenario")) methods::setOldClass("BiodiversityScenario")
-NULL
 
 #' Prototype for a biodiversity scenario from a trained model
 #'
+#' @description
 #' Base [`proto`] class for any biodiversity scenario objects. Serves as
 #' container that supplies data and functions to other [`proto`] classes.
 #'
-#' @name BiodiversityScenario-class
-#' @aliases BiodiversityScenario
 #' @family bdproto
 #' @keywords bdproto
+#'
+#' @name BiodiversityScenario-class
 NULL
 
+#' @rdname BiodiversityScenario-class
 #' @export
 BiodiversityScenario <- bdproto(
   "BiodiversityScenario",

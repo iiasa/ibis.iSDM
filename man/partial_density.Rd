@@ -2,11 +2,12 @@
 % Please edit documentation in R/partial.R
 \name{partial_density}
 \alias{partial_density}
+\alias{partial_density,ANY,character-method}
 \title{Visualize the density of the data over the environmental data}
 \usage{
 partial_density(mod, x.var, df = FALSE, ...)
 
-\S4method{partial_density}{ANY,character,logical}(mod,x.var,df,...)
+\S4method{partial_density}{ANY,character}(mod, x.var, df = FALSE, ...)
 }
 \arguments{
 \item{mod}{A trained \code{DistributionModel} object. Requires a fitted model and
@@ -15,14 +16,12 @@ inferred prediction.}
 \item{x.var}{A \link{character} indicating the variable to be investigated. Can be
 a \code{\link{vector}} of length \code{1} or \code{2}.}
 
-\item{df}{\code{\link{logical}} if plotting data should be returned instead (Default:
-\code{FALSE}).}
+\item{df}{\code{\link{logical}} if plotting data should be returned instead (Default: \code{FALSE}).}
 
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \code{\link{ggplot2}} object showing the marginal response in light of the
-data.
+A \code{\link{ggplot2}} object showing the marginal response in light of the data.
 }
 \description{
 Based on a fitted model, plot the density of observations over
@@ -47,10 +46,14 @@ the mean.
  # Or with two variables
  partial_density(fit, x.var = c("Forest.cover", "bio01"))
 }
+
 }
 \references{
 \itemize{
-\item Warren, D.L., Matzke, N.J., Cardillo, M., Baumgartner, J.B., Beaumont, L.J., Turelli, M., Glor, R.E., Huron, N.A., Simões, M., Iglesias, T.L. Piquet, J.C., and Dinnage, R. 2021. ENMTools 1.0: an R package for comparative ecological biogeography. Ecography, 44(4), pp.504-511.
+\item Warren, D.L., Matzke, N.J., Cardillo, M., Baumgartner, J.B., Beaumont, L.J.,
+Turelli, M., Glor, R.E., Huron, N.A., Simões, M., Iglesias, T.L. Piquet, J.C.,
+and Dinnage, R. 2021. ENMTools 1.0: an R package for comparative ecological
+biogeography. Ecography, 44(4), pp.504-511.
 }
 }
 \seealso{

@@ -2,28 +2,52 @@
 % Please edit documentation in R/validate.R
 \name{validate}
 \alias{validate}
+\alias{validate,ANY-method}
+\alias{validate,SpatRaster-method}
 \title{Validation of a fitted distribution object}
 \usage{
-\S4method{validate}{ANY,character,sf,character,character}(mod,method,point,layer,point_column,...)
+validate(
+  mod,
+  method = "continuous",
+  layer = "mean",
+  point = NULL,
+  point_column = "observed",
+  ...
+)
 
-\S4method{validate}{SpatRaster,character,sf,character}(mod,method,point,point_column,...)
+\S4method{validate}{ANY}(
+  mod,
+  method = "continuous",
+  layer = "mean",
+  point = NULL,
+  point_column = "observed",
+  ...
+)
+
+\S4method{validate}{SpatRaster}(
+  mod,
+  method = "continuous",
+  layer = NULL,
+  point = NULL,
+  point_column = "observed",
+  ...
+)
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors.
-Alternatively one can also provide directly a \code{\link{SpatRaster}}, however in
-this case the \code{point} layer also needs to be provided.}
+Alternatively one can also provide directly a \code{\link{SpatRaster}}, however in this
+case the \code{point} layer also needs to be provided.}
 
 \item{method}{Should the validation be conducted on the continious prediction
 or a (previously calculated) thresholded layer in binary format? Note that
 depending on the method different metrics can be computed. See Details.}
 
-\item{layer}{In case multiple layers exist, which one to use? (Default:
-\code{'mean'}).}
+\item{layer}{In case multiple layers exist, which one to use? (Default: \code{'mean'}).}
 
 \item{point}{A \code{\link{sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
 
-\item{point_column}{A \code{\link{character}} vector with the name of the column
-containing the independent observations. (Default: \code{'observed'}).}
+\item{point_column}{A \code{\link{character}} vector with the name of the column containing
+the independent observations. (Default: \code{'observed'}).}
 
 \item{...}{Other parameters that are passed on. Currently unused.}
 }
@@ -32,8 +56,8 @@ Return a tidy \code{\link{tibble}} with validation results.
 }
 \description{
 This function conducts a model evaluation based on either on the
-fitted point data or any supplied independent.
-\strong{Currently only supporting point datasets. For validation of integrated models more work is needed.}
+fitted point data or any supplied independent. \strong{Currently only supporting point
+datasets. For validation of integrated models more work is needed.}
 }
 \details{
 The \code{'validate'} function calculates different validation
@@ -64,14 +88,13 @@ The output metrics for each type are defined as follows:
 \item \code{'logloss'} = Log loss, TBD
 \item \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
 \item \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
-\item \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} }, where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed.
-where TP is true positive, TN a true negative, FP the false positive and FN
-the false negative.
+\item \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} },
+where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed. where TP
+is true positive, TN a true negative, FP the false positive and FN the false negative.
 }
 }
 \note{
-If you use the Boyce Index, please cite the original Hirzel et al.
-(2006) paper.
+If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 }
 \examples{
 \dontrun{
@@ -79,11 +102,16 @@ If you use the Boyce Index, please cite the original Hirzel et al.
  mod <- threshold(mod, method = "TSS")
  validate(mod, method = "discrete")
  }
+
 }
 \references{
 \itemize{
-\item Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-\item Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006). Evaluating the ability of habitat suitability models to predict species presences. Ecological modelling, 199(2), 142-152.
+\item Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
+of species occurrence with presence-only data. J. Biogeogr. 40, 778–789.
+https://doi.org/10.1111/jbi.12058
+\item Hirzel, A. H., Le Lay, G., Helfer, V., Randin, C., & Guisan, A. (2006).
+Evaluating the ability of habitat suitability models to predict species presences.
+Ecological modelling, 199(2), 142-152.
 }
 }
 \keyword{train}

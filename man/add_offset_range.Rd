@@ -2,6 +2,8 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_range}
 \alias{add_offset_range}
+\alias{add_offset_range,BiodiversityDistribution,SpatRaster-method}
+\alias{add_offset_range,BiodiversityDistribution,sf-method}
 \title{Specify a expert-based species range as offset}
 \usage{
 add_offset_range(
@@ -18,9 +20,21 @@ add_offset_range(
   add = TRUE
 )
 
-\S4method{add_offset_range}{BiodiversityDistribution,SpatRaster,ANY,logical}(x,layer,fraction,add)
+\S4method{add_offset_range}{BiodiversityDistribution,SpatRaster}(x, layer, fraction = NULL, add = TRUE)
 
-\S4method{add_offset_range}{BiodiversityDistribution,sf,numeric,character,numeric,logical,character,character,ANY,ANY,logical}(x,layer,distance_max,family,presence_prop,distance_clip,distance_function,field_occurrence,fraction,point,add)
+\S4method{add_offset_range}{BiodiversityDistribution,sf}(
+  x,
+  layer,
+  distance_max = Inf,
+  family = "poisson",
+  presence_prop = 0.9,
+  distance_clip = FALSE,
+  distance_function = "negexp",
+  field_occurrence = "observed",
+  fraction = NULL,
+  point = FALSE,
+  add = TRUE
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -95,15 +109,22 @@ to a very small constant (\code{1e-10}).
  fit <- distribution(background) |>
  add_biodiversity_poipo(virtual_points, field_occurrence = "Observed") |>
  add_predictors(predictors) |>
- add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve", distance_clip = TRUE ) |>
+ add_offset_range(virtual_range, distance_max = 5,distance_function = "logcurve",
+ distance_clip = TRUE ) |>
  engine_glm() |>
  train()
 }
+
 }
 \references{
 \itemize{
-\item Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258. https://doi.org/10.1111/geb.12539
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Merow, C., Wilson, A.M., Jetz, W., 2017. Integrating occurrence data and expert
+maps for improved species range predictions. Glob. Ecol. Biogeogr. 26, 243–258.
+https://doi.org/10.1111/geb.12539
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+https://doi.org/10.1111/geb.12453
 }
 }
 \seealso{
@@ -117,4 +138,4 @@ Other offset:
 }
 \concept{offset}
 \keyword{offset}
-\keyword{prior,}
+\keyword{prior}

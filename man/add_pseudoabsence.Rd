@@ -12,11 +12,10 @@ add_pseudoabsence(
 )
 }
 \arguments{
-\item{df}{A \code{\link{sf}}, \code{\link{data.frame}} or \code{\link{tibble}} object containing point
-data.}
+\item{df}{A \code{\link{sf}}, \code{\link{data.frame}} or \code{\link{tibble}} object containing point data.}
 
-\item{field_occurrence}{A \code{\link{character}} name of the column containing the
-presence information (Default: \code{observed}).}
+\item{field_occurrence}{A \code{\link{character}} name of the column containing the presence
+information (Default: \code{observed}).}
 
 \item{template}{A \code{\link{SpatRaster}} object that is aligned with the predictors
 (Default: \code{NULL}). If set to \code{NULL}, then \code{background} in
@@ -61,8 +60,8 @@ will be created if not already present).
 \item Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in
 presence‐only species distribution modelling. Diversity and Distributions,
 21(5), 595-608.
-\item Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J., Stuart-Smith, R.D.,
-Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014.
+\item Bird, T.J., Bates, A.E., Lefcheck, J.S., Hill, N.A., Thomson, R.J., Edgar, G.J.,
+Stuart-Smith, R.D., Wotherspoon, S., Krkosek, M., Stuart-Smith, J.F. and Pecl, G.T., 2014.
 Statistical solutions for error and bias in global citizen science datasets.
 Biological Conservation, 173, pp.144-154.
 }

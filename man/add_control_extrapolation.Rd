@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_control_extrapolation.R
 \name{add_control_extrapolation}
 \alias{add_control_extrapolation}
+\alias{add_control_extrapolation,BiodiversityDistribution-method}
 \title{Add a control to a BiodiversityModel object to control extrapolation}
 \usage{
 add_control_extrapolation(
@@ -13,7 +14,14 @@ add_control_extrapolation(
   limits_clip = FALSE
 )
 
-\S4method{add_control_extrapolation}{BiodiversityDistribution,SpatRaster,character,numeric,character,logical}(x,layer,method,mcp_buffer,novel,limits_clip)
+\S4method{add_control_extrapolation}{BiodiversityDistribution}(
+  x,
+  layer,
+  method = "mcp",
+  mcp_buffer = 0,
+  novel = "within",
+  limits_clip = FALSE
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -25,8 +33,8 @@ surface when intersected with input data (Default: \code{NULL}).}
 extrapolation. Available options are \code{"zones"}, \code{"mcp"} (Default),
 or \code{"nt2"} or \code{"shape"}.}
 
-\item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default
-\code{0}). Only used if \code{"mcp"} is used.}
+\item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default \code{0}).
+Only used if \code{"mcp"} is used.}
 
 \item{novel}{Which conditions are to be masked out respectively, either the
 novel conditions within only \code{"within"} (Default) or also including outside
@@ -34,8 +42,7 @@ reference conditions \code{"outside"}. Only use for \code{method = "nt2"}, for
 \code{method = "mess"} this variable is always \code{"within"}.}
 
 \item{limits_clip}{\code{\link{logical}} Should the limits clip all predictors before
-fitting a model (\code{TRUE}) or just the prediction (\code{FALSE},
-default).}
+fitting a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).}
 }
 \value{
 Adds extrapolation control option to a \code{\link{distribution}} object.
@@ -97,13 +104,22 @@ The method \code{"zones"} is also possible directly within \code{\link[=distribu
    add_predictors(covariates) |>
    add_control_extrapolation(method = "zones", layer = zones)
 }
+
 }
 \references{
 \itemize{
-\item Randin, C. F., Dirnböck, T., Dullinger, S., Zimmermann, N. E., Zappa, M., & Guisan, A. (2006). Are niche‐based species distribution models transferable in space?. Journal of biogeography, 33(10), 1689-1703. https://doi.org/10.1111/j.1365-2699.2006.01466.x
-\item Chevalier, M., Broennimann, O., Cornuault, J., & Guisan, A. (2021). Data integration methods to account for spatial niche truncation effects in regional projections of species distribution. Ecological Applications, 31(7), e02427. https://doi.org/10.1002/eap.2427
-\item Velazco, S. J. E., Brooke, M. R., De Marco Jr., P., Regan, H. M., & Franklin, J. (2023). How far can I extrapolate my species distribution model? Exploring Shape, a novel method. Ecography, 11, e06992. https://doi.org/10.1111/ecog.06992
-\item Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin. (2014) Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models. Diversity and Distributions 20:1147-1159.
+\item Randin, C. F., Dirnböck, T., Dullinger, S., Zimmermann, N. E., Zappa, M., & Guisan, A. (2006).
+Are niche‐based species distribution models transferable in space?. Journal of
+biogeography, 33(10), 1689-1703. https://doi.org/10.1111/j.1365-2699.2006.01466.x
+\item Chevalier, M., Broennimann, O., Cornuault, J., & Guisan, A. (2021). Data integration
+methods to account for spatial niche truncation effects in regional projections
+of species distribution. Ecological Applications, 31(7), e02427. https://doi.org/10.1002/eap.2427
+\item Velazco, S. J. E., Brooke, M. R., De Marco Jr., P., Regan, H. M., &
+Franklin, J. (2023). How far can I extrapolate my species distribution model?
+Exploring Shape, a novel method. Ecography, 11, e06992. https://doi.org/10.1111/ecog.06992
+\item Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin. (2014) Here
+be dragons: a tool for quantifying novelty due to covariate range and correlation
+change when projecting species distribution models. Diversity and Distributions 20:1147-1159.
 }
 }
 \keyword{control}

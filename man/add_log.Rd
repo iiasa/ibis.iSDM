@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_log.R
 \name{add_log}
 \alias{add_log}
+\alias{add_log,BiodiversityDistribution,character-method}
 \title{Adds a log file to distribution object}
 \usage{
 add_log(x, filename)
 
-\S4method{add_log}{BiodiversityDistribution,character}(x,filename)
+\S4method{add_log}{BiodiversityDistribution,character}(x, filename)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -27,4 +28,5 @@ which is used to save all console outputs, prints and messages.
     add_log()
  x
 }
+
 }

@@ -19,28 +19,25 @@ thin_observations(
 )
 }
 \arguments{
-\item{data}{A \code{\link{sf}} object with observed occurrence points.
-All methods threat presence-only and presence-absence occurrence points
-equally.}
+\item{data}{A \code{\link{sf}} object with observed occurrence points. All methods threat
+presence-only and presence-absence occurrence points equally.}
 
 \item{background}{A \code{\link{SpatRaster}} object with the background of the study
 region. Use for assessing point density.}
 
 \item{env}{A \code{\link{SpatRaster}} object with environmental covariates. Needed when
-method is set to \code{"environmental"} or \code{"bias"} (Default:
-\code{NULL}).}
+method is set to \code{"environmental"} or \code{"bias"} (Default: \code{NULL}).}
 
-\item{method}{A \code{\link{character}} of the method to be applied (Default:
-\code{"random"}).}
+\item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
 
 \item{remainpoints}{A \code{\link{numeric}} giving the number of data points at minimum to
 remain (Default: \code{10}).}
 
-\item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring
-observations (Default: \code{NULL}).}
+\item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring observations
+(Default: \code{NULL}).}
 
-\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"zones"} is
-chosen (Default: \code{NULL}).}
+\item{zones}{A \code{\link{SpatRaster}} to be supplied when option \code{"zones"} is chosen
+(Default: \code{NULL}).}
 
 \item{probs}{A \code{\link{numeric}} used as quantile threshold in \code{"bias"} method.
 (Default: \code{0.75}).}
@@ -50,11 +47,11 @@ or local (extracted at point locations) bias values are used as for quantile thr
 (Default: \code{TRUE}).}
 
 \item{centers}{A \code{\link{numeric}} used as number of centers for \code{"environmental"} method.
-(Default: \code{NULL}). If not set, automatically set to three or nlayers - 1 (whatever
-is bigger).}
+(Default: \code{NULL}). If not set, automatically set to three or nlayers - 1
+(whatever is bigger).}
 
-\item{verbose}{\code{\link{logical}} of whether to print some statistics about the
-thinning outcome (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} of whether to print some statistics about the thinning
+outcome (Default: \code{TRUE}).}
 }
 \description{
 For most species distribution modelling approaches it is assumed
@@ -78,20 +75,20 @@ Currently implemented thinning methods:
 \item \code{"random"}: Samples at random across all over-sampled grid cells returning
 only \code{"remainpoints"} from over-sampled cells. Does not account for any
 spatial or environmental distance between observations.
-\item \code{"bias"}: This option removes explicitly points that are considered biased only
-(based on \code{"env"}). Points are only thinned from grid cells which are above the bias
-quantile (larger values equals greater bias). Thins the observations returning
-\code{"remainpoints"} from each over-sampled and biased cell.
+\item \code{"bias"}: This option removes explicitly points that are considered biased
+only (based on \code{"env"}). Points are only thinned from grid cells which are
+above the bias quantile (larger values equals greater bias). Thins the observations
+returning \code{"remainpoints"} from each over-sampled and biased cell.
 \item \code{"zones"}: Thins observations from each zone that is above the over-sampled
-threshold and returns  \code{"remainpoints"} for each zone. Careful: If the zones are
-relatively wide this can remove quite a few observations.
-\item \code{"environmental"}: This approach creates an observation-wide clustering (k-means) under the assumption
-that the full environmental niche has been comprehensively sampled and is
-covered by the provided covariates \code{env}. For each over-sampled cluster,
-we then obtain (\code{"remainpoints"}) by thinning points.
-\item \code{"spatial"}: Calculates the spatial distance between all observations. Then points are removed
-iteratively until the minimum distance between points is crossed.  The
-\code{"mindistance"} parameter has to be set for this function to work.
+threshold and returns  \code{"remainpoints"} for each zone. Careful: If the
+zones are relatively wide this can remove quite a few observations.
+\item \code{"environmental"}: This approach creates an observation-wide clustering
+(k-means) under the assumption that the full environmental niche has been comprehensively
+sampled and is covered by the provided covariates \code{env}. For each over-sampled
+cluster, we then obtain (\code{"remainpoints"}) by thinning points.
+\item \code{"spatial"}: Calculates the spatial distance between all observations.
+Then points are removed iteratively until the minimum distance between points
+is crossed. The \code{"mindistance"} parameter has to be set for this function to work.
 }
 }
 \examples{
@@ -102,11 +99,17 @@ iteratively until the minimum distance between points is crossed.  The
  # using a bias layer
  thin_points <- thin_observations(points, background, method = "bias", env = bias)
 }
+
 }
 \references{
 \itemize{
-\item Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., & Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
-\item Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.
+\item Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., &
+Anderson, R. P. (2015). spThin: an R package for spatial thinning of species
+occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.
+\item Steen, V. A., Tingley, M. W., Paton, P. W., & Elphick, C. S. (2021). Spatial
+thinning and class balancing: Key choices lead to variation in the performance
+of species distribution models with citizen science data. Methods in Ecology and
+Evolution, 12(2), 216-226.
 }
 }
 \keyword{utils}

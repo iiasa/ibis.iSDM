@@ -2,11 +2,12 @@
 % Please edit documentation in R/get_data.R
 \name{get_data}
 \alias{get_data}
+\alias{get_data,ANY-method}
 \title{Small helper function to obtain predictions from an object}
 \usage{
 get_data(obj, what = NULL)
 
-\S4method{get_data}{ANY,character}(obj,what)
+\S4method{get_data}{ANY}(obj, what = NULL)
 }
 \arguments{
 \item{obj}{Provided \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.}
@@ -33,5 +34,6 @@ lazy character matching if what is supplied.
  # Assumes previously computed model
  get_data(fit)
 }
+
 }
 \keyword{utils}

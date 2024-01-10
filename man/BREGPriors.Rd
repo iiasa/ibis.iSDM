@@ -2,11 +2,12 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPriors}
 \alias{BREGPriors}
+\alias{BREGPriors,character-method}
 \title{Helper function when multiple variables are supplied for a BREG prior}
 \usage{
 BREGPriors(variable, hyper = NULL, ip = NULL)
 
-\S4method{BREGPriors}{character,ANY,ANY}(variable,hyper,ip)
+\S4method{BREGPriors}{character}(variable, hyper = NULL, ip = NULL)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors.}

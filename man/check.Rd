@@ -2,18 +2,19 @@
 % Please edit documentation in R/check.R
 \name{check}
 \alias{check}
+\alias{check,ANY-method}
 \title{Check objects in the package for common errors or issues}
 \usage{
 check(obj, stoponwarning = FALSE)
 
-\S4method{check}{ANY,logical}(obj,stoponwarning)
+\S4method{check}{ANY}(obj, stoponwarning = FALSE)
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or
 \code{\link{BiodiversityScenario}} object.}
 
-\item{stoponwarning}{\code{\link{logical}} Should check return a stop if warning is
-raised? (Default: \code{FALSE}).}
+\item{stoponwarning}{\code{\link{logical}} Should check return a stop if warning is raised?
+(Default: \code{FALSE}).}
 }
 \value{
 Message outputs
@@ -61,5 +62,6 @@ future. If you have ideas, please let them know per issue.
  # Where mod is an estimated DistributionModel
  check(mod)
 }
+
 }
 \keyword{misc}

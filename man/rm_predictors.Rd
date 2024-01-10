@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_predictors.R
 \name{rm_predictors}
 \alias{rm_predictors}
+\alias{rm_predictors,BiodiversityDistribution,character-method}
 \title{Remove specific predictors from a \link{distribution} object}
 \usage{
 rm_predictors(x, names)
 
-\S4method{rm_predictors}{BiodiversityDistribution,ANY}(x,names)
+\S4method{rm_predictors}{BiodiversityDistribution,character}(x, names)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -24,4 +25,5 @@ distribution(background) |>
  add_predictors(my_covariates) |>
  rm_predictors(names = "Urban")
 }
+
 }

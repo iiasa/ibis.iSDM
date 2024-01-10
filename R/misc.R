@@ -1,15 +1,12 @@
-#' @include utils.R
-NULL
-
 #' Central colour repository
-#' @description This command contains all the colours
-#' specified for use in \pkg{ibis.iSDM}.
-#' @name ibis_colours
+#' @description This command contains all the colours specified for use in \pkg{ibis.iSDM}.
+#'
 #' @examples
 #' ibis_colours[['viridis_plasma']]
-#' @aliases ibis_colours
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 ibis_colours <- list(
   sdm_colour = colorRampPalette(c('grey85','steelblue4','steelblue1','gold','red1','red4'))(100),
   prob_colour = colorRampPalette(c("grey85","springgreen4","cornflowerblue","dodgerblue4","yellow","orange","mediumvioletred","red"))(100),
@@ -37,18 +34,21 @@ ibis_colours <- list(
 
 #' Print ibis options
 #'
-#' @description There are a number of hidden options that can be specified for
-#'   ibis.iSDM. Currently supported are:
-#'  * \code{'ibis.runparallel'} : [`logical`] value on whether processing should be run in parallel.
-#'  * \code{'ibis.nthread'} : [`numeric`] value on how many cores should be used by default.
-#'  * \code{'ibis.setupmessages'} : [`logical`] value indicating whether message during object creation should be shown.
-#'  * \code{'ibis.engines'} : Returns a [`vector`] with all valid engines.
-#'  * \code{'ibis.use_future'} : [`logical`] on whether the \pkg{future} package should be used for parallel computing.
+#' @description There are a number of hidden options that can be specified for ibis.iSDM.
+#' Currently supported are:
+#' * \code{'ibis.runparallel'} : [`logical`] value on whether processing should be run in parallel.
+#' * \code{'ibis.nthread'} : [`numeric`] value on how many cores should be used by default.
+#' * \code{'ibis.setupmessages'} : [`logical`] value indicating whether message during object creation should be shown.
+#' * \code{'ibis.engines'} : Returns a [`vector`] with all valid engines.
+#' * \code{'ibis.use_future'} : [`logical`] on whether the \pkg{future} package should be used for parallel computing.
+#'
 #' @return The output of \code{getOptions} for all ibis related variables.
+#'
 #' @keywords misc
-#' @aliases ibis_options
+#'
 #' @examples
-#'  ibis_options()
+#' ibis_options()
+#'
 #' @export
 ibis_options <- function(){
   what <- grep('ibis',names(options()),value = TRUE)
@@ -66,19 +66,24 @@ ibis_options <- function(){
 #' This function provides a convenience wrapper to install those missing
 #' dependencies as needed. It furthermore checks which packages require updating
 #' and updates them as needed.
-#' @note INLA is handled in a special way as it is not available via cran.
+#'
 #' @param deps A [`vector`] with the names of the packages to be installed
-#'   (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
+#' (Default: \code{"ibis.dependencies"} in [`ibis_options`]).
 #' @param update A [`logical`] flag of whether all (installed) packages should
-#'   also be checked for updates (Default: \code{TRUE}).
+#' also be checked for updates (Default: \code{TRUE}).
+#'
+#' @note INLA is handled in a special way as it is not available via cran.
+#'
 #' @returns Nothing. Packages will be installed.
-#' @aliases ibis_dependencies
+#'
+#' @keywords misc
+#'
 #' @examples
 #' \dontrun{
 #'   # Install and update all dependencies
 #'   ibis_dependencies()
 #' }
-#' @keywords misc
+#'
 #' @export
 ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TRUE){
   assertthat::assert_that(
@@ -140,16 +145,19 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
 #'
 #' @param cores A [`numeric`] number stating the number of cores to use.
 #' @param strategy A [`character`] denoting the strategy to be used for future.
-#'   See help of [`future`] for options. (Default: \code{"multisession"}).
-#' @seealso [future]
+#' See help of [`future`] for options. (Default: \code{"multisession"}).
+#'
 #' @return None
-#' @aliases ibis_future
+#'
+#' @seealso [future]
+#' @keywords misc
+#'
 #' @examples
 #' \dontrun{
 #' # Starts future job
 #' ibis_future(cores = 4)
 #' }
-#' @keywords misc
+#'
 #' @export
 ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy")) {
   assertthat::assert_that(

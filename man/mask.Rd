@@ -8,23 +8,24 @@
 \alias{mask.BiodiversityScenario}
 \title{Mask data with an external layer}
 \usage{
-\method{mask}{DistributionModel}(x, mask, inverse = FALSE, ...)
+mask.DistributionModel(x, mask, inverse = FALSE, ...)
 
-\method{mask}{BiodiversityDatasetCollection}(x, mask, inverse = FALSE, ...)
+mask.BiodiversityDatasetCollection(x, mask, inverse = FALSE, ...)
 
-\method{mask}{PredictorDataset}(x, mask, inverse = FALSE, ...)
+mask.PredictorDataset(x, mask, inverse = FALSE, ...)
 
-\method{mask}{BiodiversityScenario}(x, mask, inverse = FALSE, ...)
+mask.BiodiversityScenario(x, mask, inverse = FALSE, ...)
 }
 \arguments{
-\item{x}{Any object belonging to \link{DistributionModel},
-\link{BiodiversityDatasetCollection}, \link{PredictorDataset} or
-\link{BiodiversityScenario}.}
+\item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},
+\link{PredictorDataset} or \link{BiodiversityScenario}.}
 
 \item{mask}{A \code{\link{sf}} or \code{\link{SpatRaster}} object.}
 
 \item{inverse}{A \code{\link{logical}} flag whether to take inverse of the mask instead
 (Default: \code{FALSE}).}
+
+\item{...}{Passed on arguments}
 }
 \value{
 A respective object of the input type.
@@ -51,6 +52,7 @@ mod <- distribution(background) |>
 mod <- mask(mod, speciesrange)
 
 }
+
 }
 \seealso{
 \code{\link[terra:mask]{terra::mask()}}

@@ -1,18 +1,36 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include bdproto-biodiversityscenario.R
 NULL
 
 #' Simulate population dynamics following the steps approach
 #'
 #' @description This function adds a flag to a [`BiodiversityScenario-class`] object
-#'   to indicate that species abundances are to be simulated based on the expected
-#'   habitat suitability, as well as demography, density-dependence and dispersal
-#'   information. The simulation is done using the *steps* package (Visintin et
-#'   al. 2020) and conducted after a habitat suitability projection has been
-#'   created. *steps* is a spatially explicit population models coded mostly in R.
+#' to indicate that species abundances are to be simulated based on the expected
+#' habitat suitability, as well as demography, density-dependence and dispersal
+#' information. The simulation is done using the *steps* package (Visintin et
+#' al. 2020) and conducted after a habitat suitability projection has been
+#' created. *steps* is a spatially explicit population models coded mostly in R.
 #'
-#'   For a detailed description of *steps* parameters, please see
-#'   the respective reference and help files. Default assumptions underlying this
-#'   wrapper are presented in the details
+#' For a detailed description of *steps* parameters, please see the respective reference
+#' and help files. Default assumptions underlying this wrapper are presented in the details
+#'
+#' @param mod A [`BiodiversityScenario`] object with specified predictors.
+#' @param replicates A [`numeric`] vector of the number of replicates (Default: \code{1}).
+#' @param vital_rates A symmetrical demographic matrix. Should have column and row
+#' names equivalent to the vital stages that are to be estimated.
+#' @param carrying_capacity Either [`SpatRaster`] or a [`numeric`] estimate of the
+#' maximum carrying capacity, e.g. how many adult individual are likely to occur
+#' per grid cell. If set to [`numeric`], then carrying capacity is estimated up
+#' to a maximum set (*Note: a more clever way would be to use a species-area relationship
+#' for scaling. This is not yet implemented*).
+#' @param initial A [`SpatRaster`] giving the initial population size. If not
+#' provided, then initial populations are guessed (see details) from the projected
+#' suitability rasters (Default: \code{NULL}).
+#' @param dispersal A dispersal object defined by the \code{steps} package (Default: \code{NULL}).
+#' @param density_dependence Specification of density dependence defined by the
+#' \code{steps} package (Default: \code{NULL}).
+#' @param include_suitability A [`logical`] flag on whether the projected suitability
+#' estimates should be used (Default: \code{TRUE}) or only the initial conditions
+#' set to the first time step.
 #'
 #' @details
 #' In order for this function to work the *steps* package has to be installed
@@ -31,35 +49,21 @@ NULL
 #' of its internal data processing. Since *ibis.iSDM* switched to [terra] a while
 #' ago, there can be efficiency problems as layers need to be translated between
 #' packages.
-#' @param mod A [`BiodiversityScenario`] object with specified predictors.
-#' @param replicates A [`numeric`] vector of the number of replicates (Default: \code{1}).
-#' @param vital_rates A symmetrical demographic matrix. Should have column and row
-#'  names equivalent to the vital stages that are to be estimated.
-#' @param carrying_capacity Either [`SpatRaster`] or a [`numeric`] estimate of the
-#'  maximum carrying capacity, e.g. how many adult individual are likely to occur
-#'  per grid cell. If set to [`numeric`], then carrying capacity is estimated up
-#'  to a maximum set (*Note: a more clever way would be to use a species-area relationship
-#'  for scaling. This is not yet implemented*).
-#' @param initial A [`SpatRaster`] giving the initial population size. If not
-#' provided, then initial populations are guessed (see details) from the projected
-#' suitability rasters (Default: \code{NULL}).
-#' @param dispersal A dispersal object defined by the
-#'  \code{steps} package (Default: \code{NULL}).
-#' @param density_dependence Specification of density dependence defined by the
-#'  \code{steps} package (Default: \code{NULL}).
-#' @param include_suitability A [`logical`] flag on whether the projected
-#'  suitability estimates should be used (Default: \code{TRUE}) or only the initial
-#'  conditions set to the first time step.
+#'
+#' @returns Adds flag to a [`BiodiversityScenario`] object to indicate that
+#' further simulations are added during projection.
+#'
 #' @references
 #' * Visintin, C., Briscoe, N. J., Woolley, S. N., Lentini, P. E., Tingley, R.,
 #'  Wintle, B. A., & Golding, N. (2020). steps: Software for spatially and
 #'  temporally explicit population simulations. Methods in Ecology and Evolution,
-#'   11(4), 596-603. https://doi.org/10.1111/2041-210X.13354
-#' @returns Adds flag to a [`BiodiversityScenario`] object to indicate that
-#' further simulations are added during projection.
+#'  11(4), 596-603. https://doi.org/10.1111/2041-210X.13354
+#'
+#' @family constraint
+#' @keywords scenario
+#'
 #' @examples
 #' \dontrun{
-#'
 #' # Define vital rates
 #' vt <- matrix(c(0.0,0.5,0.75,
 #'                0.5,0.2,0.0,
@@ -77,12 +81,10 @@ NULL
 #' }
 #'
 #' @name simulate_population_steps
-#' @aliases simulate_population_steps
-#' @family constraint
-#' @keywords scenario
-#' @exportMethod simulate_population_steps
-#' @export
 NULL
+
+#' @rdname simulate_population_steps
+#' @export
 methods::setGeneric("simulate_population_steps",
                     signature = methods::signature("mod", "vital_rates"),
                     function(mod, vital_rates, replicates = 1,
@@ -91,10 +93,7 @@ methods::setGeneric("simulate_population_steps",
                              density_dependence = NULL,
                              include_suitability = TRUE) standardGeneric("simulate_population_steps"))
 
-#' @name simulate_population_steps
 #' @rdname simulate_population_steps
-#' @usage
-#'   \S4method{simulate_population_steps}{BiodiversityScenario,matrix,numeric,ANY,ANY,ANY,ANY,logical}(mod,vital_rates,replicates,carrying_capacity,dispersal,density_dependence,include_suitability)
 methods::setMethod(
   "simulate_population_steps",
   methods::signature(mod = "BiodiversityScenario", vital_rates = "matrix"),
@@ -153,6 +152,7 @@ methods::setMethod(
 # ------------------------ #
 
 #' Internal function for the steps simulations
+#'
 #' @description
 #' This function does the actual computation using the provided objects
 #' from the projection.
@@ -160,9 +160,10 @@ methods::setMethod(
 #' @param proj A [`SpatRaster`] object with multple timeslots
 #' @param scenario_simulations A [`list`] with provided settings
 #' @returns A [`SpatRaster`] object of the same length as proj.
-#' @keywords internal
+#'
 #' @noRd
-
+#'
+#' @keywords internal
 .simulate_steps <- function(proj, scenario_simulations){
   assertthat::assert_that(
     is.Raster(proj),

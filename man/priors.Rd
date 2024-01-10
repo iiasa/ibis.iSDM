@@ -2,21 +2,21 @@
 % Please edit documentation in R/priors.R
 \name{priors}
 \alias{priors}
+\alias{priors,ANY-method}
 \title{Creates a new PriorList object}
 \usage{
 priors(x, ...)
 
-\S4method{priors}{Prior}(x,...)
+\S4method{priors}{ANY}(x, ...)
 
 priors(x, ...)
 
-\S4method{priors}{Prior}(x,...)
+\S4method{priors}{ANY}(x, ...)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{Prior}} object added to the list.}
 
-\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the
-list.}
+\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list.}
 }
 \value{
 A \code{\link{PriorList}} object.
@@ -44,11 +44,13 @@ p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 priors(p1, p2)
 }
+
 \dontrun{
 p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 priors(p1, p2)
 }
+
 }
 \seealso{
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}

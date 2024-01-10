@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R
+#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R
 NULL
 
 #' Add predictors from a fitted model to a Biodiversity distribution object
@@ -9,8 +9,19 @@ NULL
 #' to instead add thresholds, or to transform / derivate the model outputs are
 #' also supported.
 #'
-#' @details
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param model A [`DistributionModel`] object.
+#' @param transform A [`vector`] stating whether predictors should be preprocessed
+#' in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be considered
+#' (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param threshold_only A [`logical`] flag indicating whether to add thresholded
+#' layers from the fitted model (if existing) instead (Default: \code{FALSE}).
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL} which
+#' uses default prior assumptions.
+#' @param ... Other parameters passed down
 #'
+#' @details
 #' A transformation takes the provided rasters and for instance rescales them or
 #' transforms them through a principal component analysis ([prcomp]). In
 #' contrast, derivates leave the original provided predictors alone, but instead
@@ -36,20 +47,6 @@ NULL
 #' * \code{'hinge'} - Add hinge transformed predictors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param model A [`DistributionModel`] object.
-#' @param transform A [`vector`] stating whether predictors should be
-#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
-#'   \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be
-#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-#'   \code{'quad'}) )
-#' @param threshold_only A [`logical`] flag indicating whether to add thresholded
-#' layers from the fitted model (if existing) instead (Default: \code{FALSE}).
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
-#'   which uses default prior assumptions.
-#' @param ... Other parameters passed down
-#' @aliases add_predictors_model
 #' @examples
 #' \dontrun{
 #'  # Fit first model
@@ -64,12 +61,11 @@ NULL
 #'         add_predictors_model(fit)
 #'  obj
 #' }
+#'
 #' @name add_predictors_model
 NULL
 
-#' @name add_predictors_model
 #' @rdname add_predictors_model
-#' @exportMethod add_predictors_model
 #' @export
 methods::setGeneric(
   "add_predictors_model",
@@ -77,10 +73,7 @@ methods::setGeneric(
   function(x, model, transform = 'scale', derivates = 'none',
            threshold_only = FALSE, priors = NULL, ...) standardGeneric("add_predictors_model"))
 
-#' @name add_predictors_model
 #' @rdname add_predictors_model
-#' @usage
-#'   \S4method{add_predictors_model}{BiodiversityDistribution,ANY,character,character,logical,ANY}(x,model,transform,derivates,threshold_only,priors,...)
 methods::setMethod(
   "add_predictors_model",
   methods::signature(x = "BiodiversityDistribution", model = "ANY"),
