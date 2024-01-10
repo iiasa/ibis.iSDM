@@ -67,8 +67,6 @@ NULL
 #' @seealso [`scenario()`]
 #' @keywords scenarios
 #'
-#' @import terra
-#'
 #' @examples
 #' \dontrun{
 #' # Fit a model
@@ -83,6 +81,8 @@ NULL
 #'         add_predictors(env = future_predictors) |>
 #'         project()
 #' }
+#'
+#' @import terra
 #'
 #' @name project
 NULL

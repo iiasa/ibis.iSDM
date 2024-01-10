@@ -62,6 +62,8 @@ NULL
 #' x <- distribution(background) |>
 #' add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
 #'
+#' @import sf
+#'
 #' @name add_biodiversity_poipo
 NULL
 

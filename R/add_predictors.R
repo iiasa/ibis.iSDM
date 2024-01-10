@@ -73,12 +73,15 @@ NULL
 #' Certain names such \code{"offset"} are forbidden as predictor variable names.
 #' The function will return an error message if these are used.
 #'
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
 #'         add_predictors(covariates, transform = 'scale')
 #'  obj
 #' }
+#'
+#' @import stars
 #'
 #' @name add_predictors
 NULL
