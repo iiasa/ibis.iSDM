@@ -36,12 +36,12 @@ NULL
 #' )
 #' Adder$add(10)
 #' Adder$add(10)
-#' Abacus <- bdproto("Abacus", Adder,
-#'   subtract = function(self, n) {
-#'     self$x <- self$x - n
-#'     self$x
-#'   }
-#' )
+# Abacus <- bdproto("Abacus", Adder,
+#   subtract = function(self, n) {
+#     self$x <- self$x - n
+#     self$x
+#   }
+# )
 #' Abacus$add(10)
 #' Abacus$subtract(10)
 #'
