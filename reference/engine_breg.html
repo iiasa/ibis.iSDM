@@ -91,13 +91,11 @@ of posterior probability for a subset of the coefficients.</p>
 
 
 <dt>iter</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of MCMC iterations to run (Default:
-<code>10000</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of MCMC iterations to run (Default: <code>10000</code>).</p></dd>
 
 
 <dt>nthread</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of CPU-threads to use for data
-augmentation.</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> on the number of CPU-threads to use for data augmentation.</p></dd>
 
 
 <dt>type</dt>
@@ -126,8 +124,10 @@ effects via the <code>"only_linear"</code> option specified in <a href="train.ht
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Nguyen, K., Le, T., Nguyen, V., Nguyen, T., &amp; Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.</p></li>
-<li><p>Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab</p></li>
+<ul><li><p>Nguyen, K., Le, T., Nguyen, V., Nguyen, T., &amp; Phung, D. (2016, November). Multiple
+kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.</p></li>
+<li><p>Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression.
+R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -148,6 +148,7 @@ effects via the <code>"only_linear"</code> option specified in <a href="train.ht
 <span class="r-in"><span><span class="co"># Add BREG as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_breg</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

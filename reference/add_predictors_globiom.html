@@ -116,18 +116,41 @@ for the use in the ibis.iSDM package.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY</span></span>
-<span><span class="fu">add_predictors_globiom</span><span class="op">(</span><span class="va">x</span>,<span class="va">fname</span>,<span class="va">names</span>,<span class="va">transform</span>,<span class="va">derivates</span>,<span class="va">derivate_knots</span>,<span class="va">int_variables</span>,<span class="va">bgmask</span>,<span class="va">harmonize_na</span>,<span class="va">priors</span>,<span class="va">...</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution,character</span></span>
+<span><span class="fu">add_predictors_globiom</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">fname</span>,</span>
+<span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivates <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivate_knots <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bgmask <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical</span></span>
-<span><span class="fu">add_predictors_globiom</span><span class="op">(</span><span class="va">x</span>,<span class="va">fname</span>,<span class="va">names</span>,<span class="va">transform</span>,<span class="va">derivates</span>,<span class="va">derivate_knots</span>,<span class="va">int_variables</span>,<span class="va">harmonize_na</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityScenario,character</span></span>
+<span><span class="fu">add_predictors_globiom</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">fname</span>,</span>
+<span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivates <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivate_knots <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bgmask <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> or
-<code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p></dd>
+<dd><p>A <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> or <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p></dd>
 
 
 <dt>fname</dt>
@@ -140,15 +163,13 @@ stack in case they should be renamed (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>transform</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be
-preprocessed in any way (Options: <code>'none'</code>,<code>'pca'</code>,
-<code>'scale'</code>, <code>'norm'</code>)</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> stating whether predictors should be preprocessed
+in any way (Options: <code>'none'</code>,<code>'pca'</code>, <code>'scale'</code>, <code>'norm'</code>)</p></dd>
 
 
 <dt>derivates</dt>
-<dd><p>A Boolean check whether derivate features should be
-considered (Options: <code>'none'</code>, <code>'thresh'</code>, <code>'hinge'</code>,
-<code>'quad'</code>) )</p></dd>
+<dd><p>A Boolean check whether derivate features should be considered
+(Options: <code>'none'</code>, <code>'thresh'</code>, <code>'hinge'</code>, <code>'quad'</code>) )</p></dd>
 
 
 <dt>derivate_knots</dt>
@@ -167,8 +188,8 @@ background layer (Default: <code>TRUE</code>)</p></dd>
 
 
 <dt>harmonize_na</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values
-should be harmonized among predictors (Default: <code>FALSE</code>)</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value indicating of whether NA values should
+be harmonized among predictors (Default: <code>FALSE</code>)</p></dd>
 
 
 <dt>priors</dt>
@@ -198,6 +219,7 @@ GLOBIOM data can also be called directly via <code><a href="formatGLOBIOM.html">
 <span class="r-in"><span>        <span class="fu">add_predictors_globiom</span><span class="op">(</span>fname <span class="op">=</span> <span class="st">""</span>, transform <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></span>
 <span class="r-in"><span> <span class="va">obj</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -147,8 +147,15 @@ defensible and informed by the training observations.</p>
 <span>  limits_clip <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster,character,numeric,character,logical</span></span>
-<span><span class="fu">add_control_extrapolation</span><span class="op">(</span><span class="va">x</span>,<span class="va">layer</span>,<span class="va">method</span>,<span class="va">mcp_buffer</span>,<span class="va">novel</span>,<span class="va">limits_clip</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution</span></span>
+<span><span class="fu">add_control_extrapolation</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">layer</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mcp"</span>,</span>
+<span>  mcp_buffer <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  novel <span class="op">=</span> <span class="st">"within"</span>,</span>
+<span>  limits_clip <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -169,8 +176,8 @@ or <code>"nt2"</code> or <code>"shape"</code>.</p></dd>
 
 
 <dt>mcp_buffer</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> distance to buffer the mcp (Default
-<code>0</code>). Only used if <code>"mcp"</code> is used.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> distance to buffer the mcp (Default <code>0</code>).
+Only used if <code>"mcp"</code> is used.</p></dd>
 
 
 <dt>novel</dt>
@@ -182,8 +189,7 @@ reference conditions <code>"outside"</code>. Only use for <code>method = "nt2"</
 
 <dt>limits_clip</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> Should the limits clip all predictors before
-fitting a model (<code>TRUE</code>) or just the prediction (<code>FALSE</code>,
-default).</p></dd>
+fitting a model (<code>TRUE</code>) or just the prediction (<code>FALSE</code>, default).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -214,10 +220,18 @@ outside (<code>novel = "outside"</code>) conditions.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Randin, C. F., Dirnböck, T., Dullinger, S., Zimmermann, N. E., Zappa, M., &amp; Guisan, A. (2006). Are niche‐based species distribution models transferable in space?. Journal of biogeography, 33(10), 1689-1703. https://doi.org/10.1111/j.1365-2699.2006.01466.x</p></li>
-<li><p>Chevalier, M., Broennimann, O., Cornuault, J., &amp; Guisan, A. (2021). Data integration methods to account for spatial niche truncation effects in regional projections of species distribution. Ecological Applications, 31(7), e02427. https://doi.org/10.1002/eap.2427</p></li>
-<li><p>Velazco, S. J. E., Brooke, M. R., De Marco Jr., P., Regan, H. M., &amp; Franklin, J. (2023). How far can I extrapolate my species distribution model? Exploring Shape, a novel method. Ecography, 11, e06992. https://doi.org/10.1111/ecog.06992</p></li>
-<li><p>Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin. (2014) Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models. Diversity and Distributions 20:1147-1159.</p></li>
+<ul><li><p>Randin, C. F., Dirnböck, T., Dullinger, S., Zimmermann, N. E., Zappa, M., &amp; Guisan, A. (2006).
+Are niche‐based species distribution models transferable in space?. Journal of
+biogeography, 33(10), 1689-1703. https://doi.org/10.1111/j.1365-2699.2006.01466.x</p></li>
+<li><p>Chevalier, M., Broennimann, O., Cornuault, J., &amp; Guisan, A. (2021). Data integration
+methods to account for spatial niche truncation effects in regional projections
+of species distribution. Ecological Applications, 31(7), e02427. https://doi.org/10.1002/eap.2427</p></li>
+<li><p>Velazco, S. J. E., Brooke, M. R., De Marco Jr., P., Regan, H. M., &amp;
+Franklin, J. (2023). How far can I extrapolate my species distribution model?
+Exploring Shape, a novel method. Ecography, 11, e06992. https://doi.org/10.1111/ecog.06992</p></li>
+<li><p>Mesgaran, M. B., R. D. Cousens, B. L. Webber, and J. Franklin. (2014) Here
+be dragons: a tool for quantifying novelty due to covariate range and correlation
+change when projecting species distribution models. Diversity and Distributions 20:1147-1159.</p></li>
 </ul></div>
 
     <div class="section level2">
@@ -228,6 +242,7 @@ outside (<code>novel = "outside"</code>) conditions.</p>
 <span class="r-in"><span>   <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>   <span class="fu">add_control_extrapolation</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"zones"</span>, layer <span class="op">=</span> <span class="va">zones</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -110,25 +110,22 @@ providing a non-linear additive inference.</p>
 
 
 <dt>iter</dt>
-<dd><p>An <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></code> giving the number of boosting iterations (Default:
-<code>2e3L</code>).</p></dd>
+<dd><p>An <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></code> giving the number of boosting iterations (Default: <code>2e3L</code>).</p></dd>
 
 
 <dt>learning_rate</dt>
-<dd><p>A bounded <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value between <code>0</code> and
-<code>1</code> defining the shrinkage parameter.</p></dd>
+<dd><p>A bounded <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value between <code>0</code> and <code>1</code>
+defining the shrinkage parameter.</p></dd>
 
 
 <dt>empirical_risk</dt>
-<dd><p>method for empirical risk calculation. Available
-options are <code>'inbag'</code>, <code>'oobag'</code> and <code>'none'</code>. (Default:
-<code>'inbag'</code>).</p></dd>
+<dd><p>method for empirical risk calculation. Available options
+are <code>'inbag'</code>, <code>'oobag'</code> and <code>'none'</code>. (Default: <code>'inbag'</code>).</p></dd>
 
 
 <dt>type</dt>
 <dd><p>The mode used for creating posterior predictions. Either making
-<code>"link"</code>, <code>"response"</code> or <code>"class"</code> (Default:
-<code>"response"</code>).</p></dd>
+<code>"link"</code>, <code>"response"</code> or <code>"class"</code> (Default: <code>"response"</code>).</p></dd>
 
 
 <dt>...</dt>
@@ -154,9 +151,13 @@ constrained priors via <a href="GDBPrior.html">GDBPrior</a>.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Hofner, B., Mayr, A., Robinzonov, N., &amp; Schmid, M. (2014). Model-based boosting in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.</p></li>
-<li><p>Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species distribution models. Ecology 92, 1895–901.</p></li>
-<li><p>Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when to stop - a sequential stopping rule for component-wise gradient boosting. Methods of Information in Medicine, 51, 178–186.</p></li>
+<ul><li><p>Hofner, B., Mayr, A., Robinzonov, N., &amp; Schmid, M. (2014). Model-based boosting
+in R: a hands-on tutorial using the R package mboost. Computational statistics, 29(1-2), 3-35.</p></li>
+<li><p>Hofner, B., Müller, J., Hothorn, T., (2011). Monotonicity-constrained species
+distribution models. Ecology 92, 1895–901.</p></li>
+<li><p>Mayr, A., Hofner, B. and Schmid, M. (2012). The importance of knowing when
+to stop - a sequential stopping rule for component-wise gradient boosting.
+Methods of Information in Medicine, 51, 178–186.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -177,6 +178,7 @@ constrained priors via <a href="GDBPrior.html">GDBPrior</a>.</p>
 <span class="r-in"><span><span class="co"># Add GDB as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_gdb</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

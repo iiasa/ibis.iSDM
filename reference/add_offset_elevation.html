@@ -77,8 +77,8 @@ Supporting materials script.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span>, rate <span class="op">=</span> <span class="fl">0.0089</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster,numeric,numeric,logical</span></span>
-<span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>,<span class="va">elev</span>,<span class="va">pref</span>,<span class="va">rate</span>,<span class="va">add</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster,numeric</span></span>
+<span><span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">x</span>, <span class="va">elev</span>, <span class="va">pref</span>, rate <span class="op">=</span> <span class="fl">0.0089</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -130,8 +130,13 @@ recommended by Ellis-Soto et al.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale 1 km hummingbird diversity derived from fusing point records with lateral and elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119</p></li>
-<li><p>Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453</p></li>
+<ul><li><p>Ellis‐Soto, D., Merow, C., Amatulli, G., Parra, J.L., Jetz, W., 2021. Continental‐scale
+1 km hummingbird diversity derived from fusing point records with lateral and
+elevational expert information. Ecography (Cop.). 44, 640–652. https://doi.org/10.1111/ecog.05119</p></li>
+<li><p>Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036.
+https://doi.org/10.1111/geb.12453</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -148,6 +153,7 @@ recommended by Ellis-Soto et al.</p>
 <span class="r-in"><span> <span class="co"># Adds the offset to a distribution object</span></span></span>
 <span class="r-in"><span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">add_offset_elevation</span><span class="op">(</span><span class="va">dem</span>, pref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">400</span>, <span class="fl">1200</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -122,38 +122,34 @@ each chain (including warmup). (Default: <code>2000</code>).</p></dd>
 
 <dt>warmup</dt>
 <dd><p>A positive <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></code> specifying the number of warmup (aka
-burnin) iterations per chain. If step-size adaptation is on (Default:
-<code>TRUE</code>), this also controls the number of iterations for which
-adaptation is run (and hence these warmup samples should not be used for
-inference). The number of warmup iterations should be smaller than
-<code>iter</code> and the default is <code>iter/2</code>.</p></dd>
+burnin) iterations per chain. If step-size adaptation is on (Default: <code>TRUE</code>),
+this also controls the number of iterations for which adaptation is run (and
+hence these warmup samples should not be used for inference). The number of
+warmup iterations should be smaller than <code>iter</code> and the default is <code>iter/2</code>.</p></dd>
 
 
 <dt>init</dt>
-<dd><p>Initial values for parameters (Default: <code>'random'</code>). Can
-also be specified as <a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> (see: <code>"rstan::stan"</code>)</p></dd>
+<dd><p>Initial values for parameters (Default: <code>'random'</code>). Can also
+be specified as <a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> (see: <code>"rstan::stan"</code>)</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>If set to NULL take values from specified ibis option
-<code>getOption('ibis.nthread')</code>.</p></dd>
+<dd><p>If set to NULL take values from specified ibis option <code>getOption('ibis.nthread')</code>.</p></dd>
 
 
 <dt>algorithm</dt>
-<dd><p>Mode used to sample from the posterior. Available options
-are <code>"sampling"</code>, <code>"optimize"</code>, or <code>"variational"</code>. See
-<code>"cmdstanr"</code> package for more details. (Default: <code>"sampling"</code>).</p></dd>
+<dd><p>Mode used to sample from the posterior. Available options are
+<code>"sampling"</code>, <code>"optimize"</code>, or <code>"variational"</code>. See <code>"cmdstanr"</code>
+package for more details. (Default: <code>"sampling"</code>).</p></dd>
 
 
 <dt>control</dt>
-<dd><p>See <code>"rstan::stan"</code> for more details on specifying the
-controls.</p></dd>
+<dd><p>See <code>"rstan::stan"</code> for more details on specifying the controls.</p></dd>
 
 
 <dt>type</dt>
-<dd><p>The mode used for creating posterior predictions. Either
-summarizing the linear <code>"predictor"</code> or <code>"response"</code> (Default:
-<code>"response"</code>).</p></dd>
+<dd><p>The mode used for creating posterior predictions. Either summarizing
+the linear <code>"predictor"</code> or <code>"response"</code> (Default: <code>"response"</code>).</p></dd>
 
 
 <dt>...</dt>
@@ -180,9 +176,13 @@ stancode of the model.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'. https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.</p></li>
-<li><p>Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... &amp; Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.</p></li>
-<li><p>Piironen, J., &amp; Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.</p></li>
+<ul><li><p>Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'.
+https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.</p></li>
+<li><p>Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M.,
+... &amp; Riddell, A. (2017). Stan: A probabilistic programming language. Journal of
+statistical software, 76(1), 1-32.</p></li>
+<li><p>Piironen, J., &amp; Vehtari, A. (2017). Sparsity information and regularization
+in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -204,6 +204,7 @@ stancode of the model.</p>
 <span class="r-in"><span><span class="co"># Add Stan as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_stan</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

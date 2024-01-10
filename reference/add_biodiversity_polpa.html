@@ -97,8 +97,25 @@ each area outside the polygon is where the species is absent.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,sf,ANY,character,ANY,character,ANY,numeric,logical,numeric,ANY,character,logical,logical,ANY</span></span>
-<span><span class="fu">add_biodiversity_polpa</span><span class="op">(</span><span class="va">x</span>,<span class="va">polpa</span>,<span class="va">name</span>,<span class="va">field_occurrence</span>,<span class="va">formula</span>,<span class="va">family</span>,<span class="va">link</span>,<span class="va">weight</span>,<span class="va">simulate</span>,<span class="va">simulate_points</span>,<span class="va">simulate_bias</span>,<span class="va">simulate_strategy</span>,<span class="va">separate_intercept</span>,<span class="va">docheck</span>,<span class="va">pseudoabsence_settings</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution,sf</span></span>
+<span><span class="fu">add_biodiversity_polpa</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">polpa</span>,</span>
+<span>  name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"binomial"</span>,</span>
+<span>  link <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  simulate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  simulate_points <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  simulate_bias <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simulate_strategy <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>  separate_intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  docheck <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pseudoabsence_settings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -116,23 +133,20 @@ each area outside the polygon is where the species is absent.</p>
 
 
 <dt>field_occurrence</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of
-biodiversity point records.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of biodiversity point records.</p></dd>
 
 
 <dt>formula</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default is
-to use all covariates (if specified).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed.
+Default (<code>NULL</code>) is to use all covariates .</p></dd>
 
 
 <dt>family</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default:
-<code>binomial</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default: <code>binomial</code>).</p></dd>
 
 
 <dt>link</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default:
-<code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>weight</dt>
@@ -199,8 +213,8 @@ by the model. Note if the polygon is used directly in the modelling the
 link between covariates and polygonal data is established by regular
 sampling of points within the polygon and is thus equivalent to simulating
 the points directly.</p>
-<p>For an integration of range data as predictor or offset, see
-<code><a href="add_predictor_range.html">add_predictor_range()</a></code> and <code><a href="add_offset_range.html">add_offset_range()</a></code> instead.</p>
+<p>For an integration of range data as predictor or offset, see <code><a href="add_predictor_range.html">add_predictor_range()</a></code>
+and <code><a href="add_offset_range.html">add_offset_range()</a></code> instead.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

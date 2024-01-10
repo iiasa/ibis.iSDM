@@ -101,8 +101,20 @@ through <code><a href="add_pseudoabsence.html">add_pseudoabsence</a></code>. See
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,sf,character,character,ANY,character,character,numeric,logical,logical</span></span>
-<span><span class="fu">add_biodiversity_poipa</span><span class="op">(</span><span class="va">x</span>,<span class="va">poipa</span>,<span class="va">name</span>,<span class="va">field_occurrence</span>,<span class="va">formula</span>,<span class="va">family</span>,<span class="va">link</span>,<span class="va">weight</span>,<span class="va">separate_intercept</span>,<span class="va">docheck</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution,sf</span></span>
+<span><span class="fu">add_biodiversity_poipa</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">poipa</span>,</span>
+<span>  name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"binomial"</span>,</span>
+<span>  link <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  separate_intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  docheck <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -128,18 +140,16 @@ that name does not exist.</p></dd>
 
 
 <dt>formula</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default
-(<code>NULL</code>) is to use all covariates (if specified).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object to be passed. Default (<code>NULL</code>)
+is to use all covariates.</p></dd>
 
 
 <dt>family</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used (Default:
-<code>'binomial'</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the family to be used  (Default: <code>'binomial'</code>).</p></dd>
 
 
 <dt>link</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default:
-<code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> to overwrite the default link function (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>weight</dt>
@@ -180,8 +190,10 @@ regressions (e.g. <a href="engine_bart.html">engine_bart</a>).</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G. Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.</p></li>
-<li><p>Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in ecology. Ecol. Model. 135: 147–186.</p></li>
+<ul><li><p>Renner, I. W., J. Elith, A. Baddeley, W. Fithian, T. Hastie, S. J. Phillips, G.
+Popovic, and D. I. Warton. 2015. Point process models for presence-only analysis. Methods in Ecology and Evolution 6:366–379.</p></li>
+<li><p>Guisan A. and Zimmerman N. 2000. Predictive habitat distribution models in
+ecology. Ecol. Model. 135: 147–186.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -196,8 +208,8 @@ regressions (e.g. <a href="engine_bart.html">engine_bart</a>).</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># Define model</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">add_biodiversity_poipa</span><span class="op">(</span><span class="va">virtual_species</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

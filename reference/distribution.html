@@ -137,11 +137,23 @@ as well as a specified engine.</strong></p>
 <span>  limits_clip <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for SpatRaster,ANY,character,numeric,logical</span></span>
-<span><span class="fu">distribution</span><span class="op">(</span><span class="va">background</span>,<span class="va">limits</span>,<span class="va">limits_method</span>,<span class="va">mcp_buffer</span>,<span class="va">limits_clip</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for SpatRaster</span></span>
+<span><span class="fu">distribution</span><span class="op">(</span></span>
+<span>  <span class="va">background</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  limits_method <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  mcp_buffer <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  limits_clip <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for sf,ANY,character,numeric,logical</span></span>
-<span><span class="fu">distribution</span><span class="op">(</span><span class="va">background</span>,<span class="va">limits</span>,<span class="va">limits_method</span>,<span class="va">mcp_buffer</span>,<span class="va">limits_clip</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for sf</span></span>
+<span><span class="fu">distribution</span><span class="op">(</span></span>
+<span>  <span class="va">background</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  limits_method <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  mcp_buffer <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  limits_clip <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -163,22 +175,21 @@ or <code>"mcp"</code>.</p></dd>
 
 
 <dt>mcp_buffer</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> distance to buffer the mcp (Default
-<code>0</code>). Only used if <code>"mcp"</code> is used.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> distance to buffer the mcp (Default <code>0</code>).
+Only used if <code>"mcp"</code> is used.</p></dd>
 
 
 <dt>limits_clip</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> Should the limits clip all predictors before
-fitting a model (<code>TRUE</code>) or just the prediction (<code>FALSE</code>,
-default).</p></dd>
+fitting a model (<code>TRUE</code>) or just the prediction (<code>FALSE</code>, default).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p><code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object containing data for
-building a biodiversity distribution modelling problem.</p>
+<p><code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object containing data for building
+a biodiversity distribution modelling problem.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -192,18 +203,26 @@ manipulated directly, but rather through convenience functions (e.g.
 well and can be queried (e.g. <code>"names(object)"</code>). For a list of
 functions see the reference documentation. By default, if some datasets are
 not set, then a <code>"Waiver"</code> object is returned instead.</p>
-<p>The following objects can be stored:</p><ul><li><p><code>object$biodiversity</code> A <code><a href="BiodiversityDatasetCollection-class.html">BiodiversityDatasetCollection</a></code> object with the added biodiversity data.</p></li>
-<li><p><code>object$engine</code> An <code>"engine"</code> object (e.g. <code><a href="engine_inlabru.html">engine_inlabru()</a></code>) with function depended on the added engine.</p></li>
+<p>The following objects can be stored:</p><ul><li><p><code>object$biodiversity</code> A <code><a href="BiodiversityDatasetCollection-class.html">BiodiversityDatasetCollection</a></code> object with
+the added biodiversity data.</p></li>
+<li><p><code>object$engine</code> An <code>"engine"</code> object (e.g. <code><a href="engine_inlabru.html">engine_inlabru()</a></code>)
+with function depended on the added engine.</p></li>
 <li><p><code>object$predictors</code> A <code><a href="PredictorDataset-class.html">PredictorDataset</a></code> object with all set predictions.</p></li>
 <li><p><code>object$priors</code> A <code><a href="PriorList-class.html">PriorList</a></code> object with all specified priors.</p></li>
 <li><p><code>object$log</code> A <code><a href="Log-class.html">Log</a></code> object that captures.</p></li>
-</ul><p>Useful high-level functions to address those objects are for instance:</p><ul><li><p><code>object$show()</code> A generic summary of the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object contents. Can also be called via <a href="print.html">print</a>.</p></li>
-<li><p><code>object$get_biodiversity_equations()</code> Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.</p></li>
-<li><p><code>object$get_biodiversity_types()</code> Lists the type of each specified biodiversity dataset with given id.</p></li>
+</ul><p>Useful high-level functions to address those objects are for instance:</p><ul><li><p><code>object$show()</code> A generic summary of the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>
+object contents. Can also be called via <a href="print.html">print</a>.</p></li>
+<li><p><code>object$get_biodiversity_equations()</code> Lists the equations used for each
+biodiversity dataset with given id. Defaults to all predictors.</p></li>
+<li><p><code>object$get_biodiversity_types()</code> Lists the type of each specified
+biodiversity dataset with given id.</p></li>
 <li><p><code>object$get_extent()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> of the modelling region.</p></li>
-<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> and the <a href="https://rdrr.io/pkg/terra/man/crs.html" class="external-link">terra::crs</a>.</p></li>
-<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> dimension by calling the <code>"extent_dimensions()"</code> function.</p></li>
-<li><p><code>object$get_predictor_names()</code> Returns a <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> vector with the names of all added predictors.</p></li>
+<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a>
+and the <a href="https://rdrr.io/pkg/terra/man/crs.html" class="external-link">terra::crs</a>.</p></li>
+<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> dimension by
+calling the <code>"extent_dimensions()"</code> function.</p></li>
+<li><p><code>object$get_predictor_names()</code> Returns a <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> vector with the
+names of all added predictors.</p></li>
 <li><p><code>object$get_prior_variables()</code> Returns a description of <code><a href="priors.html">priors</a></code> added.</p></li>
 </ul><p>There are other functions as well but those are better accessed through their
 respective wrapper functions.</p>
@@ -211,8 +230,12 @@ respective wrapper functions.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710</p></li>
-<li><p>Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.</p></li>
+<ul><li><p>Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A.,
+Dorazio, R.M., (2019) A practical guide for combining data to model species
+distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710</p></li>
+<li><p>Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area
+hypotheses improves stacked species distribution model performance." Global
+Ecology and Biogeography 27, no. 1 (2018): 156-165.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -232,6 +255,7 @@ in particular <code><a href="BiodiversityDistribution-class.html">BiodiversityDi
 <span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

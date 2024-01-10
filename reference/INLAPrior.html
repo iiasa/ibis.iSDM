@@ -134,8 +134,8 @@ might also work, but have not been tested!</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">INLAPrior</span><span class="op">(</span><span class="va">variable</span>, type <span class="op">=</span> <span class="st">"normal"</span>, hyper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.001</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for character,character,ANY</span></span>
-<span><span class="fu">INLAPrior</span><span class="op">(</span><span class="va">variable</span>,<span class="va">type</span>,<span class="va">hyper</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for character,character</span></span>
+<span><span class="fu">INLAPrior</span><span class="op">(</span><span class="va">variable</span>, type <span class="op">=</span> <span class="st">"normal"</span>, hyper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.001</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -150,9 +150,8 @@ effects.</p></dd>
 
 
 <dt>hyper</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> values to be used as
-hyper-parameters. See description. The default values are set to a mean of
-<code>0</code> and a precision of <code>0.001</code>.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> values to be used as hyper-parameters.
+See description. The default values are set to a mean of <code>0</code> and a precision of <code>0.001</code>.</p></dd>
 
 
 <dt>...</dt>
@@ -170,8 +169,11 @@ already regularize the coefficients to some degree.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., &amp; Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.</p></li>
-<li><p>Simpson, D., Rue, H., Riebler, A., Martins, T. G., &amp; Sørbye, S. H. (2017). Penalising model component complexity: A principled, practical approach to constructing priors. Statistical science, 32(1), 1-28.</p></li>
+<ul><li><p>Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., &amp; Lindgren, F. K. (2017).
+Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.</p></li>
+<li><p>Simpson, D., Rue, H., Riebler, A., Martins, T. G., &amp; Sørbye, S. H. (2017).
+Penalising model component complexity: A principled, practical approach to constructing
+priors. Statistical science, 32(1), 1-28.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

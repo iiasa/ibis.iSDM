@@ -96,8 +96,30 @@ presence-(pseudo-)absence.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY,numeric,numeric,character,numeric,logical,logical,ANY</span></span>
-<span><span class="fu">pseudoabs_settings</span><span class="op">(</span><span class="va">background</span>,<span class="va">nrpoints</span>,<span class="va">min_ratio</span>,<span class="va">method</span>,<span class="va">buffer_distance</span>,<span class="va">inside</span>,<span class="va">layer</span>,<span class="va">bias</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pseudoabs_settings</span><span class="op">(</span></span>
+<span>  background <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nrpoints <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  min_ratio <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>  buffer_distance <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  inside <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  layer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bias <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for ANY</span></span>
+<span><span class="fu">pseudoabs_settings</span><span class="op">(</span></span>
+<span>  background <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nrpoints <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  min_ratio <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>  buffer_distance <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  inside <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  layer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bias <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -111,16 +133,14 @@ is then added when the sampling is first called.</p></dd>
 <dt>nrpoints</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> given the number of absence points to be
 created. Has to be larger than <code>0</code> and normally points are not created
-in excess of the number of cells of the background (Default: <code>10
-  000</code>).</p></dd>
+in excess of the number of cells of the background (Default: <code>10000</code>).</p></dd>
 
 
 <dt>min_ratio</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the minimum ratio of background points
 relative to the presence points. Setting this value to <code>1</code> generates
 an equal amount of absence points relative to the presence points. Usually
-ignored unless the ratio exceeds the <code>nrpoints</code> parameters (Default:
-<code>0.25</code>).</p></dd>
+ignored unless the ratio exceeds the <code>nrpoints</code> parameters (Default: <code>0.25</code>).</p></dd>
 
 
 <dt>method</dt>
@@ -131,27 +151,24 @@ details for options (Default: <code>"random"</code>).</p></dd>
 <dt>buffer_distance</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A distance from the observations in which
 pseudo-absence points are not to be generated. Note that units follow the
-units of the projection (e.g. <code>m</code> or <code>°</code>). Only used when
-<code>method = "buffer"</code>.</p></dd>
+units of the projection (e.g. <code>m</code> or <code>°</code>). Only used when <code>method = "buffer"</code>.</p></dd>
 
 
 <dt>inside</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> value of whether absence points should be sampled
 outside (Default) or inside a minimum convex polygon or range provided the
-respective method is chosen (parameter <code>method = "mcp"</code> or
-<code>method = "range"</code>).</p></dd>
+respective method is chosen (parameter <code>method = "mcp"</code> or <code>method = "range"</code>).</p></dd>
 
 
 <dt>layer</dt>
-<dd><p>A <code>sf</code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> (in the case of method
-<code>'zones'</code>) object indicating the range of a species. Only used with
-<code>method = "range"</code> or <code>method = "zones"</code> (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code>sf</code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> (in the case of method <code>'zones'</code>)
+object indicating the range of a species. Only used with <code>method = "range"</code>
+or <code>method = "zones"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>bias</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> with the same extent and projection and
-background. Absence points will be preferentially sampled in areas with
-higher (!) bias. (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> with the same extent and projection and background.
+Absence points will be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>...</dt>
@@ -185,9 +202,9 @@ cells with non-zero values.</p></li>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process
-models for presence-only analysis. Methods in Ecology and Evolution
-6:366–379. DOI: 10.1111/2041-210X.12352.</p></li>
+<ul><li><p>Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G,
+Warton DI. 2015. Point process models for presence-only analysis. Methods in
+Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.</p></li>
 <li><p>Renner, I. W., &amp; Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
 process models for species distribution modeling in ecology. Biometrics,
 69(1), 274-281.</p></li>
@@ -212,6 +229,7 @@ process models for species distribution modeling in ecology. Biometrics,
 <span class="r-in"><span>                      template <span class="op">=</span> <span class="va">background</span>,</span></span>
 <span class="r-in"><span>                      settings <span class="op">=</span> <span class="va">ass1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

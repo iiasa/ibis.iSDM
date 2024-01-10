@@ -128,14 +128,12 @@ and <code>alpha=0</code> the ridge penalty (Default: <code>0</code>).</p></dd>
 
 
 <dt>nlambda</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> giving the number of lambda values to be used
-(Default: <code>100</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> giving the number of lambda values to be used (Default: <code>100</code>).</p></dd>
 
 
 <dt>lambda</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with a user supplied estimate of lambda. Usually
-best to let this parameter be determined deterministically (Default:
-<code>NULL</code>).</p></dd>
+best to let this parameter be determined deterministically (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>type</dt>
@@ -171,9 +169,14 @@ determined via cross-validation. For this option set <code>"varsel"</code> in
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software, 33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.</p></li>
-<li><p>Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J., Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis. Methods in Ecology and Evolution, 6(4), pp.366-379.</p></li>
-<li><p>Fithian, W. &amp; Hastie, T. (2013) Finite-sample equivalence in statistical models for presence-only data. The Annals of Applied Statistics 7, 1917–1939</p></li>
+<ul><li><p>Jerome Friedman, Trevor Hastie, Robert Tibshirani (2010). Regularization Paths
+for Generalized Linear Models via Coordinate Descent. Journal of Statistical Software,
+33(1), 1-22. URL https://www.jstatsoft.org/v33/i01/.</p></li>
+<li><p>Renner, I.W., Elith, J., Baddeley, A., Fithian, W., Hastie, T., Phillips, S.J.,
+Popovic, G. and Warton, D.I., 2015. Point process models for presence‐only analysis.
+Methods in Ecology and Evolution, 6(4), pp.366-379.</p></li>
+<li><p>Fithian, W. &amp; Hastie, T. (2013) Finite-sample equivalence in statistical models
+for presence-only data. The Annals of Applied Statistics 7, 1917–1939</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -194,6 +197,7 @@ determined via cross-validation. For this option set <code>"varsel"</code> in
 <span class="r-in"><span><span class="co"># Add GLMNET as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_glmnet</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

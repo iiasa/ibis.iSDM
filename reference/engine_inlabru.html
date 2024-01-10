@@ -123,24 +123,22 @@ likelihoods, therefore allowing full integrated inference.</p>
 
 
 <dt>optional_mesh</dt>
-<dd><p>A directly supplied <code>"INLA"</code> mesh (Default:
-<code>NULL</code>)</p></dd>
+<dd><p>A directly supplied <code>"INLA"</code> mesh (Default: <code>NULL</code>)</p></dd>
 
 
 <dt>max.edge</dt>
 <dd><p>The largest allowed triangle edge length, must be in the same
-scale units as the coordinates. Default is an educated guess (Default:
-<code>NULL</code>).</p></dd>
+scale units as the coordinates. Default is an educated guess (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>offset</dt>
-<dd><p>interpreted as a numeric factor relative to the approximate
-data diameter. Default is an educated guess (Default: <code>NULL</code>).</p></dd>
+<dd><p>interpreted as a numeric factor relative to the approximate data
+diameter. Default is an educated guess (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>cutoff</dt>
-<dd><p>The minimum allowed distance between points on the mesh.
-Default is an educated guess (Default: <code>NULL</code>).</p></dd>
+<dd><p>The minimum allowed distance between points on the mesh. Default
+is an educated guess (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>proj_stepsize</dt>
@@ -155,8 +153,8 @@ are <code>"auto"</code> ("default"), <code>"adaptative"</code>, <code>"gaussian"
 
 
 <dt>int.strategy</dt>
-<dd><p>Integration strategy. Options are
-<code>"auto"</code>,<code>"grid"</code>, <code>"eb"</code> ("default") &amp; <code>"ccd"</code>.</p></dd>
+<dd><p>Integration strategy. Options are <code>"auto"</code>, <code>"grid"</code>,
+<code>"eb"</code> ("default") &amp; <code>"ccd"</code>.</p></dd>
 
 
 <dt>area</dt>
@@ -165,14 +163,12 @@ be done on the mesh (Default: <code>'gpc2'</code>).</p></dd>
 
 
 <dt>timeout</dt>
-<dd><p>Specify a timeout for INLA models in sec. Afterwards it
-passed.</p></dd>
+<dd><p>Specify a timeout for INLA models in sec. Afterwards it passed.</p></dd>
 
 
 <dt>type</dt>
-<dd><p>The mode used for creating posterior predictions. Either
-summarizing the linear <code>"predictor"</code> or <code>"response"</code> (Default:
-<code>"response"</code>).</p></dd>
+<dd><p>The mode used for creating posterior predictions. Either summarizing
+the linear <code>"predictor"</code> or <code>"response"</code> (Default:<code>"response"</code>).</p></dd>
 
 
 <dt>...</dt>
@@ -212,9 +208,15 @@ predictions, which affects the spatial grain of any outputs created.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Bachl, F. E., Lindgren, F., Borchers, D. L., &amp; Illian, J. B. (2019). inlabru: an R package for Bayesian spatial modelling from ecological survey data. Methods in Ecology and Evolution, 10(6), 760-766.</p></li>
-<li><p>Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.</p></li>
-<li><p>Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., &amp; O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.</p></li>
+<ul><li><p>Bachl, F. E., Lindgren, F., Borchers, D. L., &amp; Illian, J. B. (2019). inlabru:
+an R package for Bayesian spatial modelling from ecological survey data.
+Methods in Ecology and Evolution, 10(6), 760-766.</p></li>
+<li><p>Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going
+Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.”
+Biometrika 1 (103): 49–70.</p></li>
+<li><p>Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., &amp; O'Hara, R. B. (2023).
+Integrated species distribution models fitted in INLA are sensitive to mesh
+parameterisation. Ecography, e06391.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -235,6 +237,7 @@ predictions, which affects the spatial grain of any outputs created.</p>
 <span class="r-in"><span><span class="co"># Add inlabru as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_inlabru</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

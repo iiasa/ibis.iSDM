@@ -82,7 +82,7 @@ all models with the uncertainty being the standard deviation of responses."><met
     <div class="ref-description section level2">
     <p>Similar to the <code><a href="ensemble.html">ensemble()</a></code> function, this function creates an
 ensemble of partial responses of provided distribution models fitted with
-the <code><a href="ibis.iSDM-package.html">ibis.iSDM-package</a></code>. Through the <code>layer</code> parameter it can be
+the <code><a href="ibis.iSDM.html">ibis.iSDM-package</a></code>. Through the <code>layer</code> parameter it can be
 specified which part of the partial prediction should be averaged in an
 ensemble (if given). This can be for instance the <em>mean</em> prediction and/or
 the standard deviation <em>sd</em>. Ensemble partial is also being called if more
@@ -93,16 +93,31 @@ all models with the uncertainty being the standard deviation of responses.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for ANY,character,character,character,ANY,logical</span></span>
-<span><span class="fu">ensemble_partial</span><span class="op">(</span><span class="va">...</span>,<span class="va">x.var</span>,<span class="va">method</span>,<span class="va">layer</span>,<span class="va">newdata</span>,<span class="va">normalize</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ensemble_partial</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  <span class="va">x.var</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  normalize <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for ANY</span></span>
+<span><span class="fu">ensemble_partial</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  <span class="va">x.var</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  normalize <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>...</dt>
-<dd><p>Provided <code><a href="DistributionModel-class.html">DistributionModel</a></code> objects from which partial
-responses can be called. In the future provided data.frames might be
-supported as well.</p></dd>
+<dd><p>Provided <code><a href="DistributionModel-class.html">DistributionModel</a></code> objects from which partial responses
+can be called. In the future provided data.frames might be supported as well.</p></dd>
 
 
 <dt>x.var</dt>
@@ -117,14 +132,13 @@ options (Default: <code>'mean'</code>).</p></dd>
 
 <dt>layer</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the layer to be taken from each prediction
-(Default: <code>'mean'</code>). If set to <code>NULL</code> ignore any of the layer
-names in ensembles of <code>SpatRaster</code> objects.</p></dd>
+(Default: <code>'mean'</code>). If set to <code>NULL</code> ignore any of the layer names
+in ensembles of <code>SpatRaster</code> objects.</p></dd>
 
 
 <dt>newdata</dt>
 <dd><p>A optional <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object supplied to
-the model (DefaultL <code>NULL</code>). <em>Note: This object needs to have
-identical names as the original predictors.</em></p></dd>
+the model (DefaultL <code>NULL</code>). This object needs to have identical names as the original predictors.</p></dd>
 
 
 <dt>normalize</dt>
@@ -136,8 +150,7 @@ normalized to a scale of 0-1 (Default: <code>TRUE</code>).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> with the combined partial effects of the supplied
-models.</p>
+<p>A <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> with the combined partial effects of the supplied models.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -147,9 +160,9 @@ models.</p>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>If a list is supplied, then it is assumed that each entry in the list
-is a fitted <code><a href="DistributionModel-class.html">DistributionModel</a></code> object. Take care not to create an
-ensemble of models constructed with different link functions, e.g. logistic
-vs <a href="https://rdrr.io/pkg/terra/man/math-generics.html" class="external-link">log</a>. By default the response functions of each model are normalized.</p>
+is a fitted <code><a href="DistributionModel-class.html">DistributionModel</a></code> object. Take care not to create an ensemble
+of models constructed with different link functions, e.g. logistic vs <a href="https://rdrr.io/pkg/terra/man/math-generics.html" class="external-link">log</a>.
+By default the response functions of each model are normalized.</p>
     </div>
 
     <div class="section level2">
@@ -158,6 +171,7 @@ vs <a href="https://rdrr.io/pkg/terra/man/math-generics.html" class="external-li
 <span class="r-in"><span> <span class="co"># Assumes previously computed models</span></span></span>
 <span class="r-in"><span> <span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu">ensemble_partial</span><span class="op">(</span><span class="va">mod1</span>, <span class="va">mod2</span>, <span class="va">mod3</span>, method <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

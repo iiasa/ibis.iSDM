@@ -128,18 +128,16 @@ Lower values generally being better but also computationally more costly.
 
 <dt>gamma</dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> A regularization parameter in the model. Lower
-values for better estimates (Default: <code>3</code>). Also see
-<code>"reg_lambda"</code> parameter for the L2 regularization on the weights</p></dd>
+values for better estimates (Default: <code>3</code>). Also see <code>"reg_lambda"</code>
+parameter for the L2 regularization on the weights</p></dd>
 
 
 <dt>reg_lambda</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L2 regularization term on weights (Default:
-<code>0</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L2 regularization term on weights (Default: <code>0</code>).</p></dd>
 
 
 <dt>reg_alpha</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L1 regularization term on weights (Default:
-<code>0</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> L1 regularization term on weights (Default: <code>0</code>).</p></dd>
 
 
 <dt>max_depth</dt>
@@ -147,19 +145,18 @@ values for better estimates (Default: <code>3</code>). Also see
 
 
 <dt>subsample</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> The ratio used for subsampling to prevent
-overfitting. Also used for creating a random tresting dataset (Default:
-<code>0.75</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> The ratio used for subsampling to prevent overfitting.
+Also used for creating a random tresting dataset (Default: <code>0.75</code>).</p></dd>
 
 
 <dt>colsample_bytree</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Sub-sample ratio of columns when
-constructing each tree (Default: <code>0.4</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Sub-sample ratio of columns when constructing
+each tree (Default: <code>0.4</code>).</p></dd>
 
 
 <dt>min_child_weight</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Broadly related to the number of
-instances necessary for each node (Default: <code>3</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Broadly related to the number of instances
+necessary for each node (Default: <code>3</code>).</p></dd>
 
 
 <dt>nthread</dt>
@@ -191,7 +188,9 @@ are available only for the <code>"gbtree"</code> baselearners.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System", 22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016, https://arxiv.org/abs/1603.02754</p></li>
+<ul><li><p>Tianqi Chen and Carlos Guestrin, "XGBoost: A Scalable Tree Boosting System",
+22nd SIGKDD Conference on Knowledge Discovery and Data Mining, 2016,
+https://arxiv.org/abs/1603.02754</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -213,6 +212,7 @@ are available only for the <code>"gbtree"</code> baselearners.</p>
 <span class="r-in"><span><span class="co"># Add xgboost as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_xgboost</span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">4000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

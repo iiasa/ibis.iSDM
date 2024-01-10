@@ -96,8 +96,8 @@ described in the details.</p>
 <p>In case a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> is provided as input in this function for
 <code>obj</code>, it is furthermore necessary to provide a <code>sf</code> object for
 validation as there is no <code><a href="DistributionModel-class.html">DistributionModel</a></code> to read this information
-from.
-<strong>Note:</strong> This of course also allows to estimate the threshold based on withheld data, for instance
+from.</p>
+<p><strong>Note:</strong> This of course also allows to estimate the threshold based on withheld data, for instance
 those created from an a-priori cross-validation procedure.</p>
 <p>For <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> objects, adding this function to the processing
 pipeline stores a threshold attribute in the created <a href="scenario.html">scenario</a> object.</p>
@@ -116,14 +116,40 @@ pipeline stores a threshold attribute in the created <a href="scenario.html">sce
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for ANY,character,numeric,ANY,character,logical</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span>,<span class="va">...</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for ANY</span></span>
+<span><span class="fu">threshold</span><span class="op">(</span></span>
+<span>  <span class="va">obj</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mtp"</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  return_threshold <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for SpatRaster,character,ANY,ANY,character,logical</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">method</span>,<span class="va">value</span>,<span class="va">point</span>,<span class="va">format</span>,<span class="va">return_threshold</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for SpatRaster</span></span>
+<span><span class="fu">threshold</span><span class="op">(</span></span>
+<span>  <span class="va">obj</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"fixed"</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  return_threshold <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityScenario,ANY</span></span>
-<span><span class="fu">threshold</span><span class="op">(</span><span class="va">obj</span>,<span class="va">value</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityScenario</span></span>
+<span><span class="fu">threshold</span><span class="op">(</span></span>
+<span>  <span class="va">obj</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mtp"</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  return_threshold <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -134,8 +160,7 @@ to be added.</p></dd>
 
 
 <dt>method</dt>
-<dd><p>A specifc method for thresholding. See details for available
-options.</p></dd>
+<dd><p>A specifc method for thresholding. See details for available options.</p></dd>
 
 
 <dt>value</dt>
@@ -144,24 +169,21 @@ options.</p></dd>
 
 
 <dt>point</dt>
-<dd><p>A <code>sf</code> object containing observational data used for model
-training.</p></dd>
+<dd><p>A <code>sf</code> object containing observational data used for model training.</p></dd>
 
 
 <dt>field_occurrence</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of
-biodiversity point records.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of biodiversity point records.</p></dd>
 
 
 <dt>format</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indication of whether <code>"binary"</code>,
-<code>"normalize"</code> or <code>"percentile"</code> formatted thresholds are to be
-created (Default: <code>"binary"</code>). Also see Muscatello et al. (2021).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> indication of whether <code>"binary"</code>, <code>"normalize"</code>
+or <code>"percentile"</code> formatted thresholds are to be created (Default: <code>"binary"</code>).
+Also see Muscatello et al. (2021).</p></dd>
 
 
 <dt>return_threshold</dt>
-<dd><p>Should threshold value be returned instead (Default:
-<code>FALSE</code>)</p></dd>
+<dd><p>Should threshold value be returned instead (Default: <code>FALSE</code>)</p></dd>
 
 
 <dt>...</dt>
@@ -172,30 +194,46 @@ created (Default: <code>"binary"</code>). Also see Muscatello et al. (2021).</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> if a <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> object as input. Otherwise the
-threshold is added to the respective <code><a href="DistributionModel-class.html">DistributionModel</a></code> or
-<code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p>
+<p>A <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> if a <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> object as input. Otherwise the threshold
+is added to the respective <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The following options are currently implemented:</p><ul><li><p><code>'fixed'</code> = applies a single pre-determined threshold. Requires <code>value</code> to be set.</p></li>
-<li><p><code>'mtp'</code> = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.</p></li>
-<li><p><code>'percentile'</code> = For a percentile threshold. A <code>value</code> as parameter has to be set here.</p></li>
-<li><p><code>'min.cv'</code> = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.</p></li>
-<li><p><code>'TSS'</code> = Determines the optimal TSS (True Skill Statistic). Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'kappa'</code> = Determines the optimal kappa value (Kappa). Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'F1score'</code> = Determines the optimal F1score (also known as Sorensen similarity). Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'F1score'</code> = Determines the optimal sensitivity of presence records. Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'Sensitivity'</code> = Determines the optimal sensitivity of presence records. Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'Specificity'</code> = Determines the optimal sensitivity of presence records. Requires the <code>"modEvA"</code> package to be installed.</p></li>
-<li><p><code>'AUC'</code> = Determines the optimal AUC of presence records. Requires the <code>"modEvA"</code> package to be installed.</p></li>
+    <p>The following options are currently implemented:</p><ul><li><p><code>'fixed'</code> = applies a single pre-determined threshold. Requires <code>value</code>
+to be set.</p></li>
+<li><p><code>'mtp'</code> = minimum training presence is used to find and set the lowest
+predicted suitability for any occurrence point.</p></li>
+<li><p><code>'percentile'</code> = For a percentile threshold. A <code>value</code> as parameter
+has to be set here.</p></li>
+<li><p><code>'min.cv'</code> = Threshold the raster so to minimize the coefficient of
+variation (cv) of the posterior. Uses the lowest tercile of the cv in space.
+Only feasible with Bayesian engines.</p></li>
+<li><p><code>'TSS'</code> = Determines the optimal TSS (True Skill Statistic). Requires
+the <code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'kappa'</code> = Determines the optimal kappa value (Kappa). Requires the
+<code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'F1score'</code> = Determines the optimal F1score (also known as Sorensen
+similarity). Requires the <code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'F1score'</code> = Determines the optimal sensitivity of presence records.
+Requires the <code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'Sensitivity'</code> = Determines the optimal sensitivity of presence records.
+Requires the <code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'Specificity'</code> = Determines the optimal sensitivity of presence records.
+Requires the <code>"modEvA"</code> package to be installed.</p></li>
+<li><p><code>'AUC'</code> = Determines the optimal AUC of presence records. Requires the
+<code>"modEvA"</code> package to be installed.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123</p></li>
-<li><p>Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058</p></li>
-<li><p>Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669</p></li>
+<ul><li><p>Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence,
+thresholds and the performance of presence-absence models. Methods Ecol. Evol.
+5, 54–64. https://doi.org/10.1111/2041-210X.12123</p></li>
+<li><p>Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
+of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058</p></li>
+<li><p>Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting
+species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320.
+https://doi.org/10.1111/cobi.13669</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -209,6 +247,7 @@ threshold is added to the respective <code><a href="DistributionModel-class.html
 <span class="r-in"><span> <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">threshold</span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></span>
 <span class="r-in"><span> <span class="va">tr</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

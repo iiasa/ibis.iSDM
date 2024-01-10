@@ -87,8 +87,8 @@ environmental predictors and observations, others only predictors.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>env</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code> with extracted environmental
-covariates for a given species.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code> with extracted environmental covariates
+for a given species.</p></dd>
 
 
 <dt>keep</dt>
@@ -118,18 +118,18 @@ function fails due to some reason return <code>NULL</code>.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Available options are:</p><ul><li><p><code>"none"</code> No prior variable removal is performed (Default).</p></li>
-<li><p><code>"pearson"</code>, <code>"spearman"</code> or <code>"kendall"</code> Makes use of pairwise comparisons to identify and
-remove highly collinear predictors (Pearson's <code>r &gt;= 0.7</code>).</p></li>
-<li><p><code>"abess"</code> A-priori adaptive best subset selection of covariates via the <code>abess</code> package (see References). Note that this
-effectively fits a separate generalized linear model to reduce the number
-of covariates.</p></li>
+<li><p><code>"pearson"</code>, <code>"spearman"</code> or <code>"kendall"</code> Makes use of pairwise
+comparisons to identify and remove highly collinear predictors (Pearson's <code>r &gt;= 0.7</code>).</p></li>
+<li><p><code>"abess"</code> A-priori adaptive best subset selection of covariates via the
+<code>abess</code> package (see References). Note that this effectively fits a separate
+generalized linear model to reduce the number of covariates.</p></li>
 <li><p><code>"boruta"</code> Uses the <code>Boruta</code> package to identify non-informative features.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Using this function on predictors effectively means that a separate
-model is fitted on the data with all the assumptions that come with in
-(e.g. linearity, appropriateness of response, normality, etc).</p>
+model is fitted on the data with all the assumptions that come with in (e.g.
+linearity, appropriateness of response, normality, etc).</p>
     </div>
 
     <div class="section level2">
@@ -138,6 +138,7 @@ model is fitted on the data with all the assumptions that come with in
 <span class="r-in"><span> <span class="co"># Remove highly correlated predictors</span></span></span>
 <span class="r-in"><span> <span class="va">env</span> <span class="op">&lt;-</span> <span class="fu">predictor_filter</span><span class="op">(</span> <span class="va">env</span>, option <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

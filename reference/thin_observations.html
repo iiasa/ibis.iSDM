@@ -114,9 +114,8 @@ considered with care (see also Steen et al. 2021).</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p>A <code>sf</code> object with observed occurrence points.
-All methods threat presence-only and presence-absence occurrence points
-equally.</p></dd>
+<dd><p>A <code>sf</code> object with observed occurrence points. All methods threat
+presence-only and presence-absence occurrence points equally.</p></dd>
 
 
 <dt>background</dt>
@@ -126,13 +125,11 @@ region. Use for assessing point density.</p></dd>
 
 <dt>env</dt>
 <dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object with environmental covariates. Needed when
-method is set to <code>"environmental"</code> or <code>"bias"</code> (Default:
-<code>NULL</code>).</p></dd>
+method is set to <code>"environmental"</code> or <code>"bias"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>method</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the method to be applied (Default:
-<code>"random"</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the method to be applied (Default: <code>"random"</code>).</p></dd>
 
 
 <dt>remainpoints</dt>
@@ -141,13 +138,13 @@ remain (Default: <code>10</code>).</p></dd>
 
 
 <dt>mindistance</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> for the minimum distance of neighbouring
-observations (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> for the minimum distance of neighbouring observations
+(Default: <code>NULL</code>).</p></dd>
 
 
 <dt>zones</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> to be supplied when option <code>"zones"</code> is
-chosen (Default: <code>NULL</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> to be supplied when option <code>"zones"</code> is chosen
+(Default: <code>NULL</code>).</p></dd>
 
 
 <dt>probs</dt>
@@ -163,13 +160,13 @@ or local (extracted at point locations) bias values are used as for quantile thr
 
 <dt>centers</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> used as number of centers for <code>"environmental"</code> method.
-(Default: <code>NULL</code>). If not set, automatically set to three or nlayers - 1 (whatever
-is bigger).</p></dd>
+(Default: <code>NULL</code>). If not set, automatically set to three or nlayers - 1
+(whatever is bigger).</p></dd>
 
 
 <dt>verbose</dt>
-<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether to print some statistics about the
-thinning outcome (Default: <code>TRUE</code>).</p></dd>
+<dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether to print some statistics about the thinning
+outcome (Default: <code>TRUE</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -180,26 +177,31 @@ more points than the global minimum point count per cell/area (whichever is larg
 <p>Currently implemented thinning methods:</p><ul><li><p><code>"random"</code>: Samples at random across all over-sampled grid cells returning
 only <code>"remainpoints"</code> from over-sampled cells. Does not account for any
 spatial or environmental distance between observations.</p></li>
-<li><p><code>"bias"</code>: This option removes explicitly points that are considered biased only
-(based on <code>"env"</code>). Points are only thinned from grid cells which are above the bias
-quantile (larger values equals greater bias). Thins the observations returning
-<code>"remainpoints"</code> from each over-sampled and biased cell.</p></li>
+<li><p><code>"bias"</code>: This option removes explicitly points that are considered biased
+only (based on <code>"env"</code>). Points are only thinned from grid cells which are
+above the bias quantile (larger values equals greater bias). Thins the observations
+returning <code>"remainpoints"</code> from each over-sampled and biased cell.</p></li>
 <li><p><code>"zones"</code>: Thins observations from each zone that is above the over-sampled
-threshold and returns  <code>"remainpoints"</code> for each zone. Careful: If the zones are
-relatively wide this can remove quite a few observations.</p></li>
-<li><p><code>"environmental"</code>: This approach creates an observation-wide clustering (k-means) under the assumption
-that the full environmental niche has been comprehensively sampled and is
-covered by the provided covariates <code>env</code>. For each over-sampled cluster,
-we then obtain (<code>"remainpoints"</code>) by thinning points.</p></li>
-<li><p><code>"spatial"</code>: Calculates the spatial distance between all observations. Then points are removed
-iteratively until the minimum distance between points is crossed.  The
-<code>"mindistance"</code> parameter has to be set for this function to work.</p></li>
+threshold and returns  <code>"remainpoints"</code> for each zone. Careful: If the
+zones are relatively wide this can remove quite a few observations.</p></li>
+<li><p><code>"environmental"</code>: This approach creates an observation-wide clustering
+(k-means) under the assumption that the full environmental niche has been comprehensively
+sampled and is covered by the provided covariates <code>env</code>. For each over-sampled
+cluster, we then obtain (<code>"remainpoints"</code>) by thinning points.</p></li>
+<li><p><code>"spatial"</code>: Calculates the spatial distance between all observations.
+Then points are removed iteratively until the minimum distance between points
+is crossed. The <code>"mindistance"</code> parameter has to be set for this function to work.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., &amp; Anderson, R. P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.</p></li>
-<li><p>Steen, V. A., Tingley, M. W., Paton, P. W., &amp; Elphick, C. S. (2021). Spatial thinning and class balancing: Key choices lead to variation in the performance of species distribution models with citizen science data. Methods in Ecology and Evolution, 12(2), 216-226.</p></li>
+<ul><li><p>Aiello‐Lammens, M. E., Boria, R. A., Radosavljevic, A., Vilela, B., &amp;
+Anderson, R. P. (2015). spThin: an R package for spatial thinning of species
+occurrence records for use in ecological niche models. Ecography, 38(5), 541-545.</p></li>
+<li><p>Steen, V. A., Tingley, M. W., Paton, P. W., &amp; Elphick, C. S. (2021). Spatial
+thinning and class balancing: Key choices lead to variation in the performance
+of species distribution models with citizen science data. Methods in Ecology and
+Evolution, 12(2), 216-226.</p></li>
 </ul></div>
 
     <div class="section level2">
@@ -211,6 +213,7 @@ iteratively until the minimum distance between points is crossed.  The
 <span class="r-in"><span> <span class="co"># using a bias layer</span></span></span>
 <span class="r-in"><span> <span class="va">thin_points</span> <span class="op">&lt;-</span> <span class="fu">thin_observations</span><span class="op">(</span><span class="va">points</span>, <span class="va">background</span>, method <span class="op">=</span> <span class="st">"bias"</span>, env <span class="op">=</span> <span class="va">bias</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

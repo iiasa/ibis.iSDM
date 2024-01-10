@@ -87,13 +87,11 @@ the BIOCLIMA project. Likely of little use for anyone outside IIASA.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>fname</dt>
-<dd><p>A filename in <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> pointing to a GLOBIOM output in
-netCDF format.</p></dd>
+<dd><p>A filename in <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> pointing to a GLOBIOM output in netCDF format.</p></dd>
 
 
 <dt>oftype</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the output type (Default:
-<code>'raster'</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the output type (Default: <code>'raster'</code>).</p></dd>
 
 
 <dt>ignore</dt>
@@ -102,9 +100,8 @@ netCDF format.</p></dd>
 
 <dt>period</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> limiting the period to be returned from the
-formatted data. Options include <code>"reference"</code> for the first entry,
-<code>"projection"</code> for all entries but the first, and <code>"all"</code> for all
-entries (Default: <code>"reference"</code>).</p></dd>
+formatted data. Options include <code>"reference"</code> for the first entry, <code>"projection"</code>
+for all entries but the first, and <code>"all"</code> for all entries (Default: <code>"reference"</code>).</p></dd>
 
 
 <dt>template</dt>
@@ -118,8 +115,7 @@ areas (if identified).</p></dd>
 
 
 <dt>use_gdalutils</dt>
-<dd><p>(Deprecated) <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on to use gdalutils hack
-around.</p></dd>
+<dd><p>(Deprecated) <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on to use gdalutils hack-around.</p></dd>
 
 
 <dt>verbose</dt>
@@ -139,6 +135,7 @@ around.</p></dd>
 <span class="r-in"><span><span class="co"># Expects a filename pointing to a netCDF file.</span></span></span>
 <span class="r-in"><span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">formatGLOBIOM</span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

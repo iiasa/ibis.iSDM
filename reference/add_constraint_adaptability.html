@@ -90,8 +90,24 @@ standard deviation from the range of covariates used for model training.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario,character,character,numeric,numeric</span></span>
-<span><span class="fu">add_constraint_adaptability</span><span class="op">(</span><span class="va">mod</span>,<span class="va">method</span>,<span class="va">names</span>,<span class="va">value</span>,<span class="va">increment</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_constraint_adaptability</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"nichelimit"</span>,</span>
+<span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  value <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  increment <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityScenario</span></span>
+<span><span class="fu">add_constraint_adaptability</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"nichelimit"</span>,</span>
+<span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  value <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  increment <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -144,7 +160,6 @@ constraints.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="scenario.html">scenario</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span> <span class="fu">add_constraint_adaptability</span><span class="op">(</span>value <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

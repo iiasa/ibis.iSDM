@@ -86,11 +86,11 @@ spatial-explicit layers.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster,logical</span></span>
-<span><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>,<span class="va">layer</span>,<span class="va">add</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster</span></span>
+<span><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,sf,logical</span></span>
-<span><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>,<span class="va">layer</span>,<span class="va">add</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution,sf</span></span>
+<span><span class="fu">add_offset</span><span class="op">(</span><span class="va">x</span>, <span class="va">layer</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -136,7 +136,9 @@ during the estimation</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453</p></li>
+<ul><li><p>Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and
+range estimates with Maxent and point process models by integrating spatially explicit
+information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -154,6 +156,7 @@ during the estimation</p>
 <span class="r-in"><span>   <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>   <span class="fu">add_offset</span><span class="op">(</span><span class="va">nicheEstimate</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

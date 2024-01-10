@@ -107,8 +107,14 @@ options.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,character,ANY,logical</span></span>
-<span><span class="fu">add_latent_spatial</span><span class="op">(</span><span class="va">x</span>,<span class="va">method</span>,<span class="va">priors</span>,<span class="va">separate_spde</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution</span></span>
+<span><span class="fu">add_latent_spatial</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"spde"</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  separate_spde <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -124,8 +130,7 @@ added to the model. See details.</p></dd>
 
 <dt>priors</dt>
 <dd><p>A <code>"Prior-List"</code> object supplied to the latent effect.
-Relevant only for <code><a href="engine_inla.html">engine_inla</a></code> and <code>NULL</code> equates the use of
-default priors.</p></dd>
+Relevant only for <code><a href="engine_inla.html">engine_inla</a></code> and <code>NULL</code> equates the use of default priors.</p></dd>
 
 
 <dt>separate_spde</dt>
@@ -149,28 +154,35 @@ Default (<code>FALSE</code>) uses a copy of the first added likelihood.</p></dd>
     <p>There are several different options some of which depend on the
 engine used. In case a unsupported method for an engine is chosen this is
 modified to the next similar method.</p>
-<p><strong>Available are:</strong></p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"spde"</code> - stochastic partial differential equation (SPDE) for
+<p><strong>Available are:</strong></p><ul><li><p><code>"spde"</code> - stochastic partial differential equation (SPDE) for
 <code><a href="engine_inla.html">engine_inla</a></code> and <code><a href="engine_inlabru.html">engine_inlabru</a></code>. SPDE effects aim at capturing the
 variation of the response variable in space, once all of the covariates are
 accounted for. Examining the spatial distribution of the spatial error can
 reveal which covariates might be missing. For example, if elevation is
 positively correlated with the response variable, but is not included in
 the model, we could see a higher posterior mean in areas with higher
-elevation. Note that calculations of SPDE's can be computationally costly.</p><ul><li><p><code>"car"</code> - conditional autocorrelative errors (CAR) for <code><a href="engine_inla.html">engine_inla</a></code>. Not yet implemented in full.</p></li>
+elevation. Note that calculations of SPDE's can be computationally costly.</p></li>
+<li><p><code>"car"</code> - conditional autocorrelative errors (CAR) for <code><a href="engine_inla.html">engine_inla</a></code>.
+Not yet implemented in full.</p></li>
 <li><p><code>"kde"</code> - additional covariate of the kernel density of input point observations.</p></li>
-<li><p><code>"poly"</code> - spatial trend correction by adding coordinates as polynominal transformation.
-This method assumed that a transformation of spatial coordinates can if - included as additional predictor -
-explain some of the variance in the distribution. This method does not interact with species occurrences.</p></li>
-<li><p><code>"nnd"</code> - nearest neighbour distance. This function calculates the euclidean distance from each point
-to the nearest other grid cell with known species occurrence. Originally proposed by Allouche et al. (2008)
-and can be applied across all datasets in the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></li>
+<li><p><code>"poly"</code> - spatial trend correction by adding coordinates as polynominal
+transformation. This method assumed that a transformation of spatial coordinates
+can if - included as additional predictor - explain some of the variance in the
+distribution. This method does not interact with species occurrences.</p></li>
+<li><p><code>"nnd"</code> - nearest neighbour distance. This function calculates the euclidean
+distance from each point to the nearest other grid cell with known species occurrence.
+Originally proposed by Allouche et al. (2008) and can be applied across all
+datasets in the <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code>) object.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating distance constraints into species distribution models. Journal of Applied Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x</p></li>
-<li><p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020). Dealing with overprediction in species distribution models: How adding distance constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p></li>
+<ul><li><p>Allouche, O.; Steinitz, O.; Rotem, D.; Rosenfeld, A.; Kadmon, R. (2008). Incorporating
+distance constraints into species distribution models. Journal of Applied
+Ecology, 45(2), 599-609. doi:10.1111/j.1365-2664.2007.01445.x</p></li>
+<li><p>Mendes, P., Velazco, S. J. E., de Andrade, A. F. A., &amp; Júnior, P. D. M. (2020).
+Dealing with overprediction in species distribution models: How adding distance
+constraints can improve model accuracy. Ecological Modelling, 431, 109180.</p></li>
 </ul></div>
 
     <div class="section level2">
@@ -178,6 +190,7 @@ and can be applied across all datasets in the <code><a href="BiodiversityDistrib
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">add_latent_spatial</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"poly"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

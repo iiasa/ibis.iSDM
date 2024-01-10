@@ -74,8 +74,8 @@ currently can be set on specific environmental predictors.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">STANPrior</span><span class="op">(</span><span class="va">variable</span>, <span class="va">type</span>, hyper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for character,character,ANY</span></span>
-<span><span class="fu">STANPrior</span><span class="op">(</span><span class="va">variable</span>,<span class="va">type</span>,<span class="va">hyper</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for character,character</span></span>
+<span><span class="fu">STANPrior</span><span class="op">(</span><span class="va">variable</span>, <span class="va">type</span>, hyper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -90,10 +90,9 @@ effects.</p></dd>
 
 
 <dt>hyper</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> values to be used as hyper
-parameters. First entry is treated as mean (Default: <code>0</code>), the second
-as the standard variation (Default: <code>2</code>) of a Gaussian distribution on
-the respective coefficient.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> values to be used as hyper parameters.
+First entry is treated as mean (Default: <code>0</code>), the second as the standard
+variation (Default: <code>2</code>) of a Gaussian distribution on the respective coefficient.</p></dd>
 
 
 <dt>...</dt>
@@ -103,8 +102,11 @@ the respective coefficient.</p></dd>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.</p></li>
-<li><p>Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... &amp; Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.</p></li>
+<ul><li><p>Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to
+choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.</p></li>
+<li><p>Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M.,
+... &amp; Riddell, A. (2017). Stan: A probabilistic programming language. Journal
+of statistical software, 76(1), 1-32.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

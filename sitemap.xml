@@ -205,16 +205,16 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/alignRasters.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/as.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/as.Id.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/bdproto.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/bivplot.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/check.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/clamp_predictions.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/coef.html</loc>
@@ -280,7 +280,7 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/get_rastervalue.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis.iSDM-package.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis.iSDM.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_dependencies.html</loc>
@@ -298,7 +298,19 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/interpolate_gaps.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.html</loc>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.Id.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.Raster.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.Waiver.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.formula.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/is.stars.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/limiting.html</loc>
@@ -343,15 +355,6 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_abess.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_boruta.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/predictors_filter_collinearity.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/print.html</loc>
   </url>
   <url>
@@ -362,9 +365,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/raster_to_stars.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_latent.html</loc>
@@ -391,6 +391,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/sel_predictors.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/set_priors-BiodiversityDistribution-method.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/set_priors.html</loc>
   </url>
   <url>
@@ -403,19 +406,7 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/spartial.html</loc>
   </url>
   <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/st_add_raster.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/st_reduce.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/stan_check_cmd.html</loc>
-  </url>
-  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/stancode.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/stars_to_raster.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/summary.html</loc>
@@ -440,9 +431,6 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/write_output.html</loc>
-  </url>
-  <url>
-    <loc>https://iiasa.github.io/ibis.iSDM/reference/write_stanmodel.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/write_summary.html</loc>

@@ -114,11 +114,24 @@ a linear distance transform from the range boundary. The parameter
 <span>  priors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster,character,ANY,ANY</span></span>
-<span><span class="fu">add_predictor_range</span><span class="op">(</span><span class="va">x</span>,<span class="va">layer</span>,<span class="va">method</span>,<span class="va">fraction</span>,<span class="va">priors</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for BiodiversityDistribution,SpatRaster</span></span>
+<span><span class="fu">add_predictor_range</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">layer</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"precomputed_range"</span>,</span>
+<span>  fraction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for BiodiversityDistribution,sf,character,numeric,ANY,ANY</span></span>
-<span><span class="fu">add_predictor_range</span><span class="op">(</span><span class="va">x</span>,<span class="va">layer</span>,<span class="va">method</span>,<span class="va">distance_max</span>,<span class="va">fraction</span>,<span class="va">priors</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for BiodiversityDistribution,sf</span></span>
+<span><span class="fu">add_predictor_range</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">layer</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"distance"</span>,</span>
+<span>  distance_max <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  fraction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -138,8 +151,7 @@ feature.</p></dd>
 
 
 <dt>distance_max</dt>
-<dd><p>Numeric threshold on the maximum distance (Default:
-<code>NULL</code>).</p></dd>
+<dd><p>Numeric threshold on the maximum distance (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>fraction</dt>
@@ -156,7 +168,9 @@ default prior assumptions.</p></dd>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     
-<ul><li><p>Merow, C., Wilson, A. M., &amp; Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539</p></li>
+<ul><li><p>Merow, C., Wilson, A. M., &amp; Jetz, W. (2017). Integrating occurrence data and
+expert maps for improved species range predictions. Global Ecology and Biogeography,
+26(2), 243–258. https://doi.org/10.1111/geb.12539</p></li>
 </ul></div>
 
     <div class="section level2">

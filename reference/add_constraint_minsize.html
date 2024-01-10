@@ -90,13 +90,31 @@ patches.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for BiodiversityScenario,numeric,character,logical</span></span>
-<span><span class="fu">add_constraint_minsize</span><span class="op">(</span><span class="va">mod</span>,<span class="va">value</span>,<span class="va">unit</span>,<span class="va">establishment_step</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_constraint_minsize</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  <span class="va">value</span>,</span>
+<span>  unit <span class="op">=</span> <span class="st">"km2"</span>,</span>
+<span>  establishment_step <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for BiodiversityScenario,numeric</span></span>
+<span><span class="fu">add_constraint_minsize</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  <span class="va">value</span>,</span>
+<span>  unit <span class="op">=</span> <span class="st">"km2"</span>,</span>
+<span>  establishment_step <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>value</dt>
+    <dl><dt>mod</dt>
+<dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with specified predictors.</p></dd>
+
+
+<dt>value</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> value describing the minimum amount of area of a
 given patch</p></dd>
 
@@ -110,6 +128,11 @@ given patch</p></dd>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag indicating whether a given patch
 is only to be removed if wasn't small in a previous time step (not yet
 implemented!)</p></dd>
+
+
+<dt>...</dt>
+<dd><p>passed on parameters. See also the specific methods for adding
+constraints.</p></dd>
 
 </dl></div>
     <div class="section level2">

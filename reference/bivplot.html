@@ -125,8 +125,17 @@ accordingly.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for ANY,character,character,logical,ANY,ANY,character</span></span>
-<span><span class="fu">bivplot</span><span class="op">(</span><span class="va">mod</span>,<span class="va">xvar</span>,<span class="va">yvar</span>,<span class="va">plot</span>,<span class="va">fname</span>,<span class="va">title</span>,<span class="va">col</span>,<span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for ANY</span></span>
+<span><span class="fu">bivplot</span><span class="op">(</span></span>
+<span>  <span class="va">mod</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span>  yvar <span class="op">=</span> <span class="st">"sd"</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fname <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  col <span class="op">=</span> <span class="st">"BlueGold"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -137,13 +146,11 @@ object with <code>prediction</code> model within.</p></dd>
 
 
 <dt>xvar</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the value on the x-axis (Default:
-<code>'mean'</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the value on the x-axis (Default: <code>'mean'</code>).</p></dd>
 
 
 <dt>yvar</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the value on the y-axis (Default:
-<code>'sd'</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the value on the y-axis (Default: <code>'sd'</code>).</p></dd>
 
 
 <dt>plot</dt>
@@ -157,14 +164,13 @@ should be written to.</p></dd>
 
 
 <dt>title</dt>
-<dd><p>Allows to respecify the title through a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> (Default:
-<code>NULL</code>).</p></dd>
+<dd><p>Allows to respecify the title through a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> (Default:<code>NULL</code>).</p></dd>
 
 
 <dt>col</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the colour palette to use. Has to be
-either a predefined value or a vector of colours. See
-<code>"biscale::bi_pal_manual"</code>. Default: <code>"BlueGold"</code>.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating the colour palette to use. Has to be either
+a predefined value or a vector of colours. See <code>"biscale::bi_pal_manual"</code>.
+Default: <code>"BlueGold"</code>.</p></dd>
 
 
 <dt>...</dt>

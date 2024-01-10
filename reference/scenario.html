@@ -74,8 +74,8 @@ that contains the projections of a model.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">scenario</span><span class="op">(</span><span class="va">fit</span>, limits <span class="op">=</span> <span class="cn">NULL</span>, reuse_limits <span class="op">=</span> <span class="cn">FALSE</span>, copy_model <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for ANY,ANY,logical,logical</span></span>
-<span><span class="fu">scenario</span><span class="op">(</span><span class="va">fit</span>,<span class="va">limits</span>,<span class="va">reuse_limits</span>,<span class="va">copy_model</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for ANY</span></span>
+<span><span class="fu">scenario</span><span class="op">(</span><span class="va">fit</span>, limits <span class="op">=</span> <span class="cn">NULL</span>, reuse_limits <span class="op">=</span> <span class="cn">FALSE</span>, copy_model <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,8 +87,8 @@ that contains the projections of a model.</p>
 <dt>limits</dt>
 <dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code>sf</code> object that limits the projection
 surface when intersected with the prediction data (Default: <code>NULL</code>).
-This can for instance be set as an expert-delineated constrain to limit
-spatial projections.</p></dd>
+This can for instance be set as an expert-delineated constrain to limit spatial
+projections.</p></dd>
 
 
 <dt>reuse_limits</dt>
@@ -97,9 +97,9 @@ trained <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribu
 
 
 <dt>copy_model</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether the model object is to be copied
-to the scenario object. Note that setting this option to <code>TRUE</code> can
-increase the required amount of memory (Default: <code>FALSE</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> of whether the model object is to be copied to
+the scenario object. Note that setting this option to <code>TRUE</code> can increase
+the required amount of memory (Default: <code>FALSE</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -114,6 +114,7 @@ reused for the projections. <strong>Note: This effectively fixes the projections
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">scenario</span><span class="op">(</span><span class="va">fit</span>, limits <span class="op">=</span> <span class="va">island_area</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
