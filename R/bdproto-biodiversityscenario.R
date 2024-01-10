@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("BiodiversityScenario")) methods::setOldClass("BiodiversityScenario")
-NULL
 
 #' Prototype for a biodiversity scenario from a trained model
 #'

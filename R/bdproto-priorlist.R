@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("PriorList")) methods::setOldClass("PriorList")
-NULL
 
 #' List of Priors supplied to an class
 #'

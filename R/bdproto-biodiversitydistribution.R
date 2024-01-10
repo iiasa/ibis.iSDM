@@ -1,9 +1,7 @@
 #' @include utils.R waiver.R bdproto.R bdproto-biodiversitydataset.R
 NULL
 
-#' @export
 if (!methods::isClass("BiodiversityDistribution")) methods::setOldClass("BiodiversityDistribution")
-NULL
 
 #' Biodiversity Distribution master class
 #'

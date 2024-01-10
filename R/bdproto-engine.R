@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("Engine")) methods::setOldClass("Engine")
-NULL
 
 #' Engine prototype.
 #'

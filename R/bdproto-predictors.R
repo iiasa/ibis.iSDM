@@ -1,9 +1,7 @@
 #' @include utils.R waiver.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("PredictorDataset")) methods::setOldClass("PredictorDataset")
-NULL
 
 #' PredictorDataset prototype description
 #'

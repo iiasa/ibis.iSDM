@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R identifier.R
 NULL
 
-#' @export
 if (!methods::isClass("DistributionModel")) methods::setOldClass("DistributionModel")
-NULL
 
 #' Prototype for the trained Model object
 #'

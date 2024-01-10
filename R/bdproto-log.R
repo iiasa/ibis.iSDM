@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("Log")) methods::setOldClass("Log")
-NULL
 
 #' Log prototype.
 #'

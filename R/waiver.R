@@ -1,9 +1,7 @@
 #' @include utils.R
 NULL
 
-#' @export
 if (!methods::isClass("Waiver")) methods::setOldClass("Waiver")
-NULL
 
 #' Waiver
 #'

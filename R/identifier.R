@@ -1,9 +1,7 @@
 #' @include utils.R
 NULL
 
-#' @export
 if (!methods::isClass("Id")) methods::setOldClass("Id")
-NULL
 
 #' Identifier
 #'

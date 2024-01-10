@@ -1,9 +1,7 @@
 #' @include utils.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("Settings")) methods::setOldClass("Settings")
-NULL
 
 #' Prototype for model settings object
 #'

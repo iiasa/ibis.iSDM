@@ -1,10 +1,8 @@
 #' @include utils.R waiver.R bdproto.R
 NULL
 
-#' @export
 if (!methods::isClass("BiodiversityDatasetCollection")) methods::setOldClass("BiodiversityDatasetCollection")
 if (!methods::isClass("BiodiversityDataset")) methods::setOldClass("BiodiversityDataset")
-NULL
 
 #' BiodiversityDatasetCollection super prototype description
 #'
