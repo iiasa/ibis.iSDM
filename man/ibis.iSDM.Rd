@@ -2,8 +2,8 @@
 % Please edit documentation in R/ibis.iSDM-package.R
 \docType{package}
 \name{ibis.iSDM}
-\alias{ibis.iSDM}
 \alias{ibis.iSDM-package}
+\alias{ibis.iSDM}
 \title{ibis.iSDM}
 \description{
 Integrated framework of modelling the distribution of species and ecosystems in

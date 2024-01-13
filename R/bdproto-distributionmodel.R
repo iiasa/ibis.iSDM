@@ -401,6 +401,21 @@ DistributionModel <- bdproto(
       attr(obj, "threshold")
     )
   },
+  # Get threshold type and format if calculated
+  get_thresholdtype = function(self){
+    # Determines whether a threshold exists and plots it
+    rl <- self$show_rasters()
+    if(length(grep('threshold',rl))==0) return( new_waiver() )
+
+    # Get the thresholded layer and return the respective attribute
+    obj <- self$get_data( grep('threshold',rl,value = TRUE) )
+    assertthat::assert_that(
+      assertthat::has_attr(obj, "format"),
+      assertthat::has_attr(obj, "method"))
+    return(
+      c("method" = attr(obj, "method"), "format" = attr(obj, "format"))
+    )
+  },
   # List all rasters in object
   show_rasters = function(self){
     rn <- names(self$fits)

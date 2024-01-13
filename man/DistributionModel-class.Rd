@@ -6,7 +6,7 @@
 \alias{DistributionModel}
 \title{Prototype for the trained Model object}
 \format{
-An object of class \code{DistributionModel} (inherits from \code{bdproto}, \code{proto}, \code{environment}) of length 31.
+An object of class \code{DistributionModel} (inherits from \code{bdproto}, \code{proto}, \code{environment}) of length 32.
 }
 \usage{
 DistributionModel

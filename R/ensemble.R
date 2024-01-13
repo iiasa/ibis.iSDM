@@ -35,6 +35,9 @@
 #' standard deviation (\code{"sd"}), the average of all PCA axes except the
 #' first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
 #' the range between the lowest and highest value (\code{"range"}).
+#' @param apply_threshold A [`logical`] flag (Default: \code{TRUE}) specifying
+#' whether threshold values should also be created via \code{"method"}. Only
+#' applies and works for [`DistributionModel`] and thresholds found.
 #'
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
@@ -71,14 +74,17 @@
 #' @keywords train
 #'
 #' @examples
-#' \dontrun{
-#'  # Assumes previously computed predictions
-#'  ex <- ensemble(mod1, mod2, mod3, method = "mean")
-#'  names(ex)
+#' # Method works for fitted models as well as as rasters
+#' r1 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5,
+#'  xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+#' r2 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5,
+#'  xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .5))
+#' names(r1) <- names(r2) <- "mean"
 #'
-#'  # Make a bivariate plot (might require other packages)
-#'  bivplot(ex)
-#' }
+#' # Assumes previously computed predictions
+#' ex <- ensemble(r1, r2, method = "mean")
+#'
+#' terra::plot(ex)
 #'
 #' @name ensemble
 NULL
@@ -88,14 +94,14 @@ NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
                     function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-                             normalize = FALSE, uncertainty = "cv") standardGeneric("ensemble"))
+                             normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE) standardGeneric("ensemble"))
 
 #' @rdname ensemble
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
   function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-           normalize = FALSE, uncertainty = "cv"){
+           normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE){
     if(length(list(...))>1) {
       mc <- list(...)
     } else {
@@ -124,7 +130,8 @@ methods::setMethod(
       is.null(layer) || ( is.character(layer) && length(layer) == 1 ),
       is.null(weights) || is.vector(weights),
       is.logical(normalize),
-      is.character(uncertainty)
+      is.character(uncertainty),
+      is.logical(apply_threshold)
     )
 
     # Check the method
@@ -156,6 +163,7 @@ methods::setMethod(
         if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
         ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
       }
+
       # Now ensemble per layer entry
       out <- terra::rast()
       for(lyr in layer){
@@ -248,6 +256,35 @@ methods::setMethod(
         }
       }
 
+      # Check for threshold values and collate
+      if(apply_threshold){
+        ll_val <- sapply(mods, function(x) x$get_thresholdvalue())
+        # Incase no thresholds are found, ignore entirely
+        if(!all(any(sapply(ll_val, is.Waiver)))){
+          # Respecify weights as otherwise call below fails
+          if(any(sapply(ll_val, is.Waiver))){
+            if(getOption('ibis.setupmessages')) myLog('[Ensemble]','yellow','Threshold values not found for all objects')
+            ll_val <- ll_val[-which(sapply(ll_val, is.Waiver))]
+            ll_val <- ll_val |> as.numeric()
+          }
+          if(is.null(weights)) weights <- rep(1, length(ll_val))
+
+          # Composite threshold
+          tr <- dplyr::case_when(
+            method == "mean" ~ mean(ll_val, na.rm = TRUE),
+            method == "median" ~ median(ll_val, na.rm = TRUE),
+            method == "max" ~ max(ll_val, na.rm = TRUE),
+            method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
+            .default = mean(ll_val, na.rm = TRUE)
+          )
+
+          # Ensemble the first layer
+          out <- c(out,
+                   threshold(out[[1]], method = "fixed", value = tr)
+          )
+        }
+      }
       assertthat::assert_that(is.Raster(out))
 
       return(out)

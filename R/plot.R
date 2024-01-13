@@ -131,7 +131,7 @@ methods::setMethod(
     )
     # Check whether object is a raster, otherwise extract object
     if(is.Raster(mod)){
-      assertthat::assert_that(terra::nlyr(mod)>1)
+      assertthat::assert_that(terra::nlyr(mod)>1,msg = "SpatRaster object has less than 2 layers. Use plot().")
       obj <- mod
       # If number of layers equal to 2 (output from ensemble?), change xvar and yvar
       if(terra::nlyr(mod)==2 && !(xvar %in% names(obj))){
@@ -170,7 +170,8 @@ methods::setMethod(
 
     # Define default title
     if(is.null(title)){
-      title <- paste("Bivariate plot of prediction\n (",mod$model$runname,')')
+      if(is.Raster(mod)) tt <- "" else tt <- paste0("\n (",mod$model$runname,")")
+      title <- paste("Bivariate plot of prediction",tt)
     }
 
     # Create dimensions

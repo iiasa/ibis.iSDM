@@ -3,6 +3,7 @@
 #### New features
 
 #### Minor improvements and bug fixes
+* Added a logical parameter to `ensemble()` enabling compositing of thresholds if set #84
 * Support of multi-band rasters in `ensemble()` for convenience.
 * Fix of bug in `threshold()` for supplied point data and improved error messages.
 * Cleaner docs and structure

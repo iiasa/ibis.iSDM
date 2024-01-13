@@ -128,7 +128,6 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
     pp <- ensemble(ras, method = "weighted.mean", weights = runif(3, 0.5,1))
   )
 
-
   # Check centroid calculation
   expect_s3_class(raster_centroid(r1), "sf")
   expect_s3_class(raster_centroid(r1,patch = TRUE), "sf")
@@ -154,6 +153,11 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
 
   expect_no_error(tr <- threshold(o,method = "perc",point = pp,return_threshold = TRUE))
   expect_type(tr, "double")
+
+  # Check attributes
+  expect_no_error(tr1 <- threshold(r1, method = "perc",point = pp) )
+  expect_match(attr(tr1, "method"), "percentile")
+  expect_match(attr(tr1, "format"), "binary")
 
   # --- #
 })
