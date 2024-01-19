@@ -121,7 +121,7 @@ methods::setMethod(
     )
     method <- match.arg(method, c("random", "buffer", "mcp", "range", "zones", "target"), several.ok = FALSE)
     # Create the settings object
-    settings <- bdproto(NULL, Settings)
+    settings <- Settings$new()
     settings$name <- "Background"
     settings$set('background', background)
     # Set all options
