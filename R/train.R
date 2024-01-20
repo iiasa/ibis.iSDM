@@ -1,4 +1,4 @@
-#' @include bdproto-biodiversitydistribution.R
+#' @include class-biodiversitydistribution.R
 NULL
 
 #' Train the model from a given engine

@@ -13,6 +13,11 @@ classes. Generally stores all objects and parameters added to a model.
 Run \code{\link[=names]{names()}} on a \code{\link{distribution}} object to show all available
 functions.
 }
+\note{
+Not implemented yet.
+
+Not implemented yet.
+}
 \examples{
 # Query available functions and entries
 background <- terra::rast(system.file('extdata/europegrid_50km.tif',
@@ -22,25 +27,42 @@ x <- distribution(background)
 names(x)
 
 }
+\seealso{
+\code{\link[=add_control_extrapolation]{add_control_extrapolation()}}
+
+\code{\link[=add_latent_spatial]{add_latent_spatial()}}
+
+\code{\link[=add_priors]{add_priors()}}
+
+\code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}}, \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}}, \code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}}, \code{\link[=add_biodiversity_polpo]{add_biodiversity_polpo()}}
+
+\code{\link[=add_predictors]{add_predictors()}}
+
+\code{\link[=add_offset]{add_offset()}}
+}
 \keyword{classes}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{biodiversity}}{description}
+\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
 
-\item{\code{predictors}}{description}
+\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
 
-\item{\code{priors}}{description}
+\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDataCollection}} object.}
 
-\item{\code{control}}{description}
+\item{\code{predictors}}{A \code{\linkS4class{PredictorDataset}} object.}
 
-\item{\code{latentfactors}}{description}
+\item{\code{priors}}{An optional \code{\link{PriorList}} object.}
 
-\item{\code{offset}}{description}
+\item{\code{control}}{An optional Control object.}
 
-\item{\code{log}}{description}
+\item{\code{latentfactors}}{A \code{\link{character}} on whether latentfactors are used.}
 
-\item{\code{engine}}{description}
+\item{\code{offset}}{A \code{\link{character}} on whether methods are used.}
+
+\item{\code{log}}{An optional \code{\link{Log-Class}} object.}
+
+\item{\code{engine}}{A \code{\linkS4class{Engine}} object.}
 }
 \if{html}{\out{</div>}}
 }
@@ -97,393 +119,663 @@ names(x)
 \if{html}{\out{<a id="method-BiodiversityDistribution-new"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-new}{}}}
 \subsection{Method \code{new()}}{
+Initializes the object and creates an BiodiversityDataset by default.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$new()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+NULL
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-print"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-print}{}}}
 \subsection{Method \code{print()}}{
+Looks for and returns the properties of all contained objects.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$print(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$print()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A message on screen
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-show"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-show}{}}}
 \subsection{Method \code{show()}}{
+An alias for print
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A message on screen
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-name"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-name}{}}}
 \subsection{Method \code{name()}}{
+Returns self-describing name
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$name(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$name()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with the name
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-show_background_info"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-show_background_info}{}}}
 \subsection{Method \code{show_background_info()}}{
+Summarizes extent and projection from set background
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_background_info(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_background_info()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with the name
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_limits"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_limits}{}}}
 \subsection{Method \code{set_limits()}}{
+Specify new limits to the background
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_limits(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_limits(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\link{list}} object with method and limit type.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_limits"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_limits}{}}}
 \subsection{Method \code{get_limits()}}{
+Get provided limits if set or a waiver
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_limits(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_limits()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{list}} or waiver.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_limits"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_limits}{}}}
 \subsection{Method \code{rm_limits()}}{
+Remove limits if set.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_limits(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_limits()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_predictor_names"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_predictor_names}{}}}
 \subsection{Method \code{get_predictor_names()}}{
+Function for querying predictor names if existing
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_predictor_names(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_predictor_names()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} vector.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_latent"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_latent}{}}}
 \subsection{Method \code{set_latent()}}{
+Adding latent factors to the object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_latent(
-  self,
-  type,
-  method = NULL,
-  separate_spde = FALSE
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_latent(type, method = NULL, separate_spde = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{A \code{\link{character}} with the given type.}
+
+\item{\code{method}}{A \code{\link{character}} with a method.}
+
+\item{\code{separate_spde}}{A \code{\link{logical}} flag whether duplicate of SPDE effects are to be created.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_latent"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_latent}{}}}
 \subsection{Method \code{get_latent()}}{
+Get latent factors if found in object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_latent(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_latent()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with those objects.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_latent"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_latent}{}}}
 \subsection{Method \code{rm_latent()}}{
+Remove latent factors if found in object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_latent(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_latent()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_priors"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_priors}{}}}
 \subsection{Method \code{get_priors()}}{
+Get prior object if found in object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_priors(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_priors()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_priors"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_priors}{}}}
 \subsection{Method \code{set_priors()}}{
+Specify new prior object. Overwrites existing ones
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_priors(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_priors(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\linkS4class{PriorList}} object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_biodiversity"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_biodiversity}{}}}
 \subsection{Method \code{set_biodiversity()}}{
+Adds a new biodiversity object to the existing empty collection.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_biodiversity(self, id, p)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_biodiversity(id, p)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{A \code{\link{character}} or id defining this object.}
+
+\item{\code{p}}{A \code{\linkS4class{BiodiversityDataset}} object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_predictors"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_predictors}{}}}
 \subsection{Method \code{set_predictors()}}{
+Set a new Predictor object to this object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_predictors(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_predictors(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\linkS4class{PredictorDataset}} with predictors for this object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_engine"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_engine}{}}}
 \subsection{Method \code{set_engine()}}{
+Set a new Engine object to this object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_engine(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_engine(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\linkS4class{Engine}} for this object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_engine"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_engine}{}}}
 \subsection{Method \code{get_engine()}}{
+Gets the name of the current engine if set.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_engine(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_engine()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with the engine name
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_engine"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_engine}{}}}
 \subsection{Method \code{rm_engine()}}{
+Removes the current engine if set.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_engine(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_engine()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+This object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_prior_variables"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_prior_variables}{}}}
 \subsection{Method \code{get_prior_variables()}}{
+Get prior variables
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_prior_variables(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_prior_variables()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with the variable names for which priors have been added.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_offset"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_offset}{}}}
 \subsection{Method \code{set_offset()}}{
+Specify new offsets.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_offset(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_offset(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A new \code{\link{SpatRaster}} object to be used as offset.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_offset"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_offset}{}}}
 \subsection{Method \code{get_offset()}}{
+Get offset (print name)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_offset(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_offset()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} with all the offsets in here.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_offset"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_offset}{}}}
 \subsection{Method \code{rm_offset()}}{
+Remove offsets if found.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_offset(self, what = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_offset(what = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{what}}{Optional \code{\link{character}} of specific offsets to remove.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-plot_offsets"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-plot_offsets}{}}}
 \subsection{Method \code{plot_offsets()}}{
+Plot offset if found.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot_offsets(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot_offsets()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A graphical element.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_offset_type"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_offset_type}{}}}
 \subsection{Method \code{get_offset_type()}}{
+Get offset parameters if found
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_offset_type(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_offset_type()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{list}} with the offset parameters if found.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_control"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_control}{}}}
 \subsection{Method \code{set_control()}}{
+Set new bias control
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_control(self, type = "bias", x, method, value)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_control(type = "bias", x, method, value)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{A \code{\link{character}} with the type of control object.}
+
+\item{\code{x}}{A new bias control object. Expecting a \code{\link{SpatRaster}} object.}
+
+\item{\code{method}}{The method used to create the object.}
+
+\item{\code{value}}{A bias value as \code{\link{numeric}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_control"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_control}{}}}
 \subsection{Method \code{get_control()}}{
+Get bias control (print name)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_control(self, type = "bias")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_control(type = "bias")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{A \code{\link{character}} with the type of control object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A \code{\link{character}} with the bias object if found.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_control"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_control}{}}}
 \subsection{Method \code{rm_control()}}{
+Remove bias controls if found.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-plot_bias"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-plot_bias}{}}}
 \subsection{Method \code{plot_bias()}}{
+Plot bias variable if set.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot_bias(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot_bias()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A graphical element.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_log"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_log}{}}}
 \subsection{Method \code{get_log()}}{
+Returns the output filename of the current log object if set.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_log(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_log()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} where the output is returned.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-set_log"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-set_log}{}}}
 \subsection{Method \code{set_log()}}{
+Set a new log object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_log(self, x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$set_log(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\linkS4class{Log}} object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_extent"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_extent}{}}}
 \subsection{Method \code{get_extent()}}{
+Get extent
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+Background extent or NULL.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_extent_dimensions"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_extent_dimensions}{}}}
 \subsection{Method \code{get_extent_dimensions()}}{
+Get dimensions of extent from background
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent_dimensions(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent_dimensions()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+Background extent or NULL.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_projection"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_projection}{}}}
 \subsection{Method \code{get_projection()}}{
+Get projection from the background in crs format.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_projection(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_projection()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} of the projection
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_resolution"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_resolution}{}}}
 \subsection{Method \code{get_resolution()}}{
+Return resolution of the background object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_resolution(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_resolution()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{vector}} with the resolution.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_predictors"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_predictors}{}}}
 \subsection{Method \code{rm_predictors()}}{
+Remove predictiors. Either all of them or specific ones.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_predictors(self, names)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_predictors(names)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{names}}{A \code{\link{character}} with the predictors to be removed.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-rm_priors"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-rm_priors}{}}}
 \subsection{Method \code{rm_priors()}}{
+Remove priors. Either all of them or specific ones.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_priors(self, names = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_priors(names = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{names}}{A \code{\link{character}} with the priors to be removed.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-show_biodiversity_length"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-show_biodiversity_length}{}}}
 \subsection{Method \code{show_biodiversity_length()}}{
+Show number of biodiversity records
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_biodiversity_length(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_biodiversity_length()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{numeric}} with sum of biodiversity records
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-show_biodiversity_equations"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-show_biodiversity_equations}{}}}
 \subsection{Method \code{show_biodiversity_equations()}}{
+Show Equations of biodiversity records
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_biodiversity_equations(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$show_biodiversity_equations()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A message on screen.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_biodiversity_equations"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_biodiversity_equations}{}}}
 \subsection{Method \code{get_biodiversity_equations()}}{
+Get equations of biodiversity records
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_equations(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_equations()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{list}} vector.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-get_biodiversity_types"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_biodiversity_types}{}}}
 \subsection{Method \code{get_biodiversity_types()}}{
+Query all biodiversity types in this object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_types(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_types()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A \code{\link{character}} vector.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-plot}{}}}
 \subsection{Method \code{plot()}}{
+Plots the content of this class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$plot()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A message.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-summary"></a>}}
 \if{latex}{\out{\hypertarget{method-BiodiversityDistribution-summary}{}}}
 \subsection{Method \code{summary()}}{
+Summary function for this object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$summary(self)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$summary()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A message.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BiodiversityDistribution-clone"></a>}}

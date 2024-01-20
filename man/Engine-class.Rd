@@ -18,9 +18,6 @@ Basic object for engine, all other engines inherit from here.
 Other bdproto: 
 \code{\link{BiodiversityScenario-class}},
 \code{\link{DistributionModel-class}},
-\code{\link{PredictorDataset-class}},
-\code{\link{Prior-class}},
-\code{\link{PriorList-class}},
 \code{\link{bdproto}()}
 }
 \concept{bdproto}

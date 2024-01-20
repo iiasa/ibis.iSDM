@@ -19,9 +19,6 @@ container that supplies data and functions to other \code{\link{proto}} classes.
 Other bdproto: 
 \code{\link{DistributionModel-class}},
 \code{\link{Engine-class}},
-\code{\link{PredictorDataset-class}},
-\code{\link{Prior-class}},
-\code{\link{PriorList-class}},
 \code{\link{bdproto}()}
 }
 \concept{bdproto}

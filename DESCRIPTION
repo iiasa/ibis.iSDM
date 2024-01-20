@@ -51,7 +51,8 @@ Imports:
     uuid, 
     utils
 Depends:
-    R(>= 4.1.0)
+    R (>= 4.1.0),
+    R6 (>= 2.5.0)
 Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
@@ -89,10 +90,10 @@ Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
-    'bdproto.R'
     'waiver.R'
-    'bdproto-biodiversitydataset.R'
-    'bdproto-biodiversitydistribution.R'
+    'class-biodiversitydataset.R'
+    'class-biodiversitydistribution.R'
+    'bdproto.R'
     'add_biodiversity.R'
     'bdproto-biodiversityscenario.R'
     'add_constraint.R'
@@ -100,20 +101,20 @@ Collate:
     'add_control_bias.R'
     'add_control_extrapolation.R'
     'add_latent.R'
-    'bdproto-log.R'
+    'class-log.R'
     'add_log.R'
     'add_offset.R'
-    'bdproto-predictors.R'
+    'class-predictors.R'
     'add_predictors.R'
     'add_predictors_globiom.R'
     'add_predictors_model.R'
     'bdproto-distributionmodel.R'
-    'bdproto-priorlist.R'
-    'bdproto-prior.R'
+    'class-priorlist.R'
+    'class-prior.R'
     'add_priors.R'
     'bdproto-engine.R'
-    'bdproto-settings.R'
     'check.R'
+    'class-settings.R'
     'distribution.R'
     'effects.R'
     'engine_bart.R'

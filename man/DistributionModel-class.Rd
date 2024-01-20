@@ -18,9 +18,6 @@ All trained Models should inherit the options here
 Other bdproto: 
 \code{\link{BiodiversityScenario-class}},
 \code{\link{Engine-class}},
-\code{\link{PredictorDataset-class}},
-\code{\link{Prior-class}},
-\code{\link{PriorList-class}},
 \code{\link{bdproto}()}
 }
 \concept{bdproto}

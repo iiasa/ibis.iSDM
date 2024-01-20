@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-priorlist.R bdproto-prior.R
+#' @include bdproto.R class-priorlist.R class-prior.R
 NULL
 
 #' Creates a new PriorList object

@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-prior.R
+#' @include bdproto.R class-prior.R
 NULL
 
 #' Create a tree-based split probability prior for BART

@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-prior.R bdproto-priorlist.R bdproto-distributionmodel.R
+#' @include bdproto.R class-prior.R class-priorlist.R bdproto-distributionmodel.R
 NULL
 
 #' Add priors to an existing distribution object
