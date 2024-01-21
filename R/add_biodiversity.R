@@ -1,4 +1,4 @@
-#' @include bdproto.R class-biodiversitydataset.R class-biodiversitydistribution.R
+#' @include class-biodiversitydataset.R class-biodiversitydistribution.R
 NULL
 
 #' Add biodiversity point dataset to a distribution object (presence-only)

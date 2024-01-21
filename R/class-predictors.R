@@ -69,6 +69,13 @@ PredictorDataset <- R6::R6Class(
     },
 
     #' @description
+    #' Alias for get_names
+    #' @return [`character`] names of the data value.
+    get_predictor_names = function(){
+      names(self$get_data())
+    },
+
+    #' @description
     #' Get a specific dataset
     #' @param df [`logical`] on whether data is to be returned as [`data.frame`].
     #' @param na.rm [`logical`] if \code{NA} is to be removed from data.frame.

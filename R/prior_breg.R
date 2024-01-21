@@ -1,4 +1,4 @@
-#' @include bdproto.R class-prior.R
+#' @include class-prior.R
 NULL
 
 #' Create a new spike and slab prior for Bayesian generalized linear models

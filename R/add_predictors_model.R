@@ -1,4 +1,4 @@
-#' @include bdproto.R class-biodiversitydistribution.R class-predictors.R
+#' @include class-biodiversitydistribution.R class-predictors.R
 NULL
 
 #' Add predictors from a fitted model to a Biodiversity distribution object

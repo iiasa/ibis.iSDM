@@ -1,6 +1,5 @@
-#' @include bdproto.R
+#' @include class-prior.R
 NULL
-
 if (!methods::isClass("PriorList")) methods::setOldClass("PriorList")
 
 #' List of Priors supplied to an class

@@ -1,6 +1,3 @@
-#' @include bdproto.R class-priorlist.R
-NULL
-
 if (!methods::isClass("Prior")) methods::setOldClass("Prior")
 
 #' Base Prior class

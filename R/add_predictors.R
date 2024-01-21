@@ -1,4 +1,4 @@
-#' @include bdproto.R class-biodiversitydistribution.R class-predictors.R bdproto-biodiversityscenario.R
+#' @include class-biodiversitydistribution.R class-predictors.R class-biodiversityscenario.R
 NULL
 
 #' Add predictors to a Biodiversity distribution object

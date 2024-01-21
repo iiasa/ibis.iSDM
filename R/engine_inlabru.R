@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-inla.R bdproto-distributionmodel.R
+#' @include class-engine.R utils-inla.R class-distributionmodel.R
 NULL
 
 #' Use inlabru as engine

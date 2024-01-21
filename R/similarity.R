@@ -1,4 +1,4 @@
-#' @include class-biodiversitydistribution.R bdproto-distributionmodel.R
+#' @include class-biodiversitydistribution.R class-distributionmodel.R
 NULL
 
 #' Calculate environmental similarity of reference datasets to predictors.

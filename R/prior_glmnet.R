@@ -1,4 +1,4 @@
-#' @include bdproto.R class-prior.R
+#' @include class-prior.R
 NULL
 
 #' Regression penalty priors for GLMNET

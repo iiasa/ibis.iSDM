@@ -28,6 +28,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-name}{\code{PredictorDataset$name()}}
 \item \href{#method-PredictorDataset-get_id}{\code{PredictorDataset$get_id()}}
 \item \href{#method-PredictorDataset-get_names}{\code{PredictorDataset$get_names()}}
+\item \href{#method-PredictorDataset-get_predictor_names}{\code{PredictorDataset$get_predictor_names()}}
 \item \href{#method-PredictorDataset-get_data}{\code{PredictorDataset$get_data()}}
 \item \href{#method-PredictorDataset-get_time}{\code{PredictorDataset$get_time()}}
 \item \href{#method-PredictorDataset-get_projection}{\code{PredictorDataset$get_projection()}}
@@ -103,6 +104,19 @@ Default \code{\link{character}} name.
 Get names of data
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$get_names()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+\code{\link{character}} names of the data value.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-get_predictor_names"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-get_predictor_names}{}}}
+\subsection{Method \code{get_predictor_names()}}{
+Alias for get_names
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$get_predictor_names()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
