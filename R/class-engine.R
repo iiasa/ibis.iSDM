@@ -15,16 +15,28 @@ NULL
 Engine <- R6::R6Class(
   "Engine",
   public = list(
+    #' @field engine The class name of the engine.
     #' @field name The name of the engine
     #' @field data Any data or parameters necessary to make this engine work.
+    engine = character(0),
     name = character(0),
     data = list(),
 
     #' @description
     #' Initializes the object and creates an empty list
+    #' @param engine The class name of the engine.
+    #' @param name The name of the engine
     #' @return NULL
-    initialize = function(){
-      self$name <- text_red("<Unspecified>")
+    initialize = function(engine, name){
+      assertthat::assert_that(
+        is.character(engine),
+        is.character(name)
+      )
+      if(missing(name)){
+        self$name <- text_red("<Unspecified>")
+      } else {
+        self$name <- name
+      }
     },
 
     #' @description
@@ -35,22 +47,17 @@ Engine <- R6::R6Class(
     },
 
     #' @description
-    #' Functions to be overwritten when engine is specified
-    #' @param ... Parameter defined by the engine.
-    #' @return Invisible
-    setup = function(...) stop("Engine is missing functions to setup settings."),
-
-    #' @description
-    #' Functions to be overwritten when engine is specified
-    #' @param ... Parameter defined by the engine.
-    #' @return Invisible
-    train = function(...) stop("Engine is missing a fitting method."),
-
-    #' @description
     #' Aliases that calls print.
     #' @return A message on screen
     show = function() {
       self$name
+    },
+
+    #' @description
+    #' Get class description
+    #' @return A [`character`] with the class as saved in engine
+    get_class = function(){
+      return( self$engine )
     },
 
     #' @description
@@ -85,5 +92,8 @@ Engine <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # Don't lock class this will be altered in engine specific calls
+  lock_objects = FALSE,
+  lock_class = FALSE
 )

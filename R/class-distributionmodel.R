@@ -17,18 +17,25 @@ DistributionModel <- R6::R6Class(
   "DistributionModel",
   public = list(
     #' @field id A character id for any trained model
+    #' @field name A description of the model as [`character`].
     #' @field model A [`list`] containing all input datasets and parameters to the model.
     #' @field settings A [`Settings-class`] object with information on inference.
     #' @field fits A [`list`] containing the prediction and fitted model.
     id = character(),
+    name = character(),
     model = list(),
     settings = new_waiver(),
     fits = list(),
 
     #' @description
     #' Initializes the object and creates an empty list
+    #' @param name A description of the model as [`character`].
     #' @return NULL
-    initialize = function(){
+    initialize = function(name){
+      assertthat::assert_that(
+        is.character(name)
+      )
+      self$name <- name
     },
 
     #' @description
@@ -51,7 +58,7 @@ DistributionModel <- R6::R6Class(
           ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
 
           message(paste0(
-            'Trained ',class(self)[1],' (',self$show(),')',
+            'Trained ',self$name,' (',self$show(),')',
             '\n  \033[2mStrongest summary effects:\033[22m',
             '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
             '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
@@ -72,7 +79,7 @@ DistributionModel <- R6::R6Class(
         vi <- sort( vi[which(vi>0)],decreasing = TRUE )
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
           '\n     ', name_atomic(names(vi)),
           ifelse(has_prediction,
@@ -87,7 +94,7 @@ DistributionModel <- R6::R6Class(
         vi <- varimp.bart(self$get_data('fit_best'))
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
           '\n     ', name_atomic(vi$names),
           ifelse(has_prediction,
@@ -113,7 +120,7 @@ DistributionModel <- R6::R6Class(
 
         vi <- vi[order(abs(vi$mean),decreasing = TRUE),]
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(vi$parameter[vi$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(vi$parameter[vi$mean<0])
@@ -122,7 +129,7 @@ DistributionModel <- R6::R6Class(
         vi <- xgboost::xgb.importance(model = self$get_data('fit_best'),)
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[2mStrongest effects:\033[22m',
           '\n     ', name_atomic(vi$Feature),
           ifelse(has_prediction,
@@ -141,7 +148,7 @@ DistributionModel <- R6::R6Class(
         ms <- ms[order(ms$mean,decreasing = TRUE),] # Sort
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[2mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
@@ -159,7 +166,7 @@ DistributionModel <- R6::R6Class(
         ms <- tidy_glmnet_summary(obj)
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[1mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
@@ -178,7 +185,7 @@ DistributionModel <- R6::R6Class(
         ms <- tidy_glm_summary(obj)
 
         message(paste0(
-          'Trained ',class(self)[1],' (',self$show(),')',
+          'Trained ',self$name,' (',self$show(),')',
           '\n  \033[1mStrongest summary effects:\033[22m',
           '\n     \033[34mPositive:\033[39m ', name_atomic(ms$variable[ms$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(ms$variable[ms$mean<0]),
@@ -322,34 +329,6 @@ DistributionModel <- R6::R6Class(
       } else if(inherits(self, 'GLM-Model')){
         tidy_glm_summary(self$get_data(obj))
       }
-    },
-
-    #' @description
-    #' Model convergence check.
-    #' @return [`logical`]
-    has_converged = function(){
-      new_waiver()
-    },
-
-    #' @description
-    #' Dummy residual function
-    #' @return A [`data.frame`] with the residuals.
-    get_residuals = function(){
-      new_waiver()
-    },
-
-    #' @description
-    #' Dummy partial response calculation. To be overwritten per engine
-    #' @return A [`data.frame`] with the partial estimates.
-    partial = function(){
-      new_waiver()
-    },
-
-    #' @description
-    #' Dummy spartial response calculation. To be overwritten per engine
-    #' @return A [`SpatRaster`] object.
-    spartial = function(){
-      new_waiver()
     },
 
     #' @description
@@ -698,5 +677,8 @@ DistributionModel <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # Don't lock objects so that engine-specific functions can be added
+  lock_objects = FALSE,
+  lock_class = FALSE
 )

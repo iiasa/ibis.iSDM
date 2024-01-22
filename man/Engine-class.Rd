@@ -11,6 +11,8 @@ Basic object for engine, all other engines inherit from here.
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{engine}}{The class name of the engine.}
+
 \item{\code{name}}{The name of the engine}
 
 \item{\code{data}}{Any data or parameters necessary to make this engine work.}
@@ -22,9 +24,8 @@ Basic object for engine, all other engines inherit from here.
 \itemize{
 \item \href{#method-Engine-new}{\code{Engine$new()}}
 \item \href{#method-Engine-print}{\code{Engine$print()}}
-\item \href{#method-Engine-setup}{\code{Engine$setup()}}
-\item \href{#method-Engine-train}{\code{Engine$train()}}
 \item \href{#method-Engine-show}{\code{Engine$show()}}
+\item \href{#method-Engine-get_class}{\code{Engine$get_class()}}
 \item \href{#method-Engine-get_data}{\code{Engine$get_data()}}
 \item \href{#method-Engine-list_data}{\code{Engine$list_data()}}
 \item \href{#method-Engine-set_data}{\code{Engine$set_data()}}
@@ -37,9 +38,18 @@ Basic object for engine, all other engines inherit from here.
 \subsection{Method \code{new()}}{
 Initializes the object and creates an empty list
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Engine$new(engine, name)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{engine}}{The class name of the engine.}
+
+\item{\code{name}}{The name of the engine}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }
@@ -58,46 +68,6 @@ A message on screen
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Engine-setup"></a>}}
-\if{latex}{\out{\hypertarget{method-Engine-setup}{}}}
-\subsection{Method \code{setup()}}{
-Functions to be overwritten when engine is specified
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$setup(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Parameter defined by the engine.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Engine-train"></a>}}
-\if{latex}{\out{\hypertarget{method-Engine-train}{}}}
-\subsection{Method \code{train()}}{
-Functions to be overwritten when engine is specified
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$train(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Parameter defined by the engine.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-show"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-show}{}}}
 \subsection{Method \code{show()}}{
@@ -108,6 +78,19 @@ Aliases that calls print.
 
 \subsection{Returns}{
 A message on screen
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Engine-get_class"></a>}}
+\if{latex}{\out{\hypertarget{method-Engine-get_class}{}}}
+\subsection{Method \code{get_class()}}{
+Get class description
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Engine$get_class()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{character}} with the class as saved in engine
 }
 }
 \if{html}{\out{<hr>}}

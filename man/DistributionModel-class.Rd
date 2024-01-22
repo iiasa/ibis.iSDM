@@ -17,6 +17,8 @@ Could be further pretified and commands outsourced.
 \describe{
 \item{\code{id}}{A character id for any trained model}
 
+\item{\code{name}}{A description of the model as \code{\link{character}}.}
+
 \item{\code{model}}{A \code{\link{list}} containing all input datasets and parameters to the model.}
 
 \item{\code{settings}}{A \code{\linkS4class{Settings}} object with information on inference.}
@@ -35,10 +37,6 @@ Could be further pretified and commands outsourced.
 \item \href{#method-DistributionModel-plot_threshold}{\code{DistributionModel$plot_threshold()}}
 \item \href{#method-DistributionModel-show_duration}{\code{DistributionModel$show_duration()}}
 \item \href{#method-DistributionModel-summary}{\code{DistributionModel$summary()}}
-\item \href{#method-DistributionModel-has_converged}{\code{DistributionModel$has_converged()}}
-\item \href{#method-DistributionModel-get_residuals}{\code{DistributionModel$get_residuals()}}
-\item \href{#method-DistributionModel-partial}{\code{DistributionModel$partial()}}
-\item \href{#method-DistributionModel-spartial}{\code{DistributionModel$spartial()}}
 \item \href{#method-DistributionModel-effects}{\code{DistributionModel$effects()}}
 \item \href{#method-DistributionModel-get_equation}{\code{DistributionModel$get_equation()}}
 \item \href{#method-DistributionModel-get_data}{\code{DistributionModel$get_data()}}
@@ -64,9 +62,16 @@ Could be further pretified and commands outsourced.
 \subsection{Method \code{new()}}{
 Initializes the object and creates an empty list
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$new(name)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{A description of the model as \code{\link{character}}.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }
@@ -168,58 +173,6 @@ Get effects or importance tables from model
 }
 \subsection{Returns}{
 A \code{\link{data.frame}} summarizing the model, usually its coefficient.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DistributionModel-has_converged"></a>}}
-\if{latex}{\out{\hypertarget{method-DistributionModel-has_converged}{}}}
-\subsection{Method \code{has_converged()}}{
-Model convergence check.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$has_converged()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-\code{\link{logical}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DistributionModel-get_residuals"></a>}}
-\if{latex}{\out{\hypertarget{method-DistributionModel-get_residuals}{}}}
-\subsection{Method \code{get_residuals()}}{
-Dummy residual function
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$get_residuals()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A \code{\link{data.frame}} with the residuals.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DistributionModel-partial"></a>}}
-\if{latex}{\out{\hypertarget{method-DistributionModel-partial}{}}}
-\subsection{Method \code{partial()}}{
-Dummy partial response calculation. To be overwritten per engine
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$partial()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A \code{\link{data.frame}} with the partial estimates.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DistributionModel-spartial"></a>}}
-\if{latex}{\out{\hypertarget{method-DistributionModel-spartial}{}}}
-\subsection{Method \code{spartial()}}{
-Dummy spartial response calculation. To be overwritten per engine
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$spartial()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A \code{\link{SpatRaster}} object.
 }
 }
 \if{html}{\out{<hr>}}
