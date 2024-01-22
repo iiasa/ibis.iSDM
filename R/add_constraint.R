@@ -242,15 +242,11 @@ methods::setMethod(
       # Using the MigClim package for calculating any transitions and
       # This requires prior calculated Thresholds!
       out <- add_constraint_MigClim(mod = mod, ...)
-      return(out)
     } else {
       # --- #
-      new <- mod$set_constraints(cr)
-      return(
-        bdproto(NULL, new)
-      )
+      out <- mod$set_constraints(cr)
     }
-
+    return(out)
   }
 )
 
@@ -506,9 +502,7 @@ methods::setMethod(
     }
     # --- #
     new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    return(new)
   }
 )
 
@@ -588,9 +582,7 @@ methods::setMethod(
     }
     # --- #
     new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    return(new)
   }
 )
 
@@ -737,9 +729,7 @@ methods::setMethod(
                                         "establishment_step" = establishment_step))
     # --- #
     new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    return(new)
   }
 )
 
@@ -851,8 +841,6 @@ methods::setMethod(
     }
     # --- #
     new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    return( new )
   }
 )

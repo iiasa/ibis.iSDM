@@ -69,9 +69,16 @@ NULL
 \subsection{Method \code{print()}}{
 Print the names and properties of all Biodiversity datasets contained within
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDatasetCollection$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDatasetCollection$print(format = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{format}}{A \code{\link{logical}} flag on whether a message should be printed.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 A message on screen
 }

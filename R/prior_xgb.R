@@ -58,13 +58,13 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'XGBPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'XGBPrior',
       id = new_id(),
       variable = variable,
       value = hyper
     )
+    return(pp)
   }
 )
 

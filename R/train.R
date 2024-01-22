@@ -187,7 +187,7 @@ methods::setMethod(
     filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
     # Define settings object for any other information
-    settings <- bdproto(NULL, Settings)
+    settings <- Settings$new()
     settings$set('filter_predictors', filter_predictors)
     settings$set('optim_hyperparam', optim_hyperparam)
     settings$set('only_linear',only_linear)
@@ -239,7 +239,7 @@ methods::setMethod(
       model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
-      model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
+      model[['predictors_object']] <- PredictorDataset$new(id = new_id(), data = dummy)
     } else {
       # Convert Predictors to data.frame
       model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)

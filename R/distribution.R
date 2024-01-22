@@ -82,8 +82,7 @@ NULL
 #' @returns [`BiodiversityDistribution-class`] object containing data for building
 #' a biodiversity distribution modelling problem.
 #'
-#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and
-#' in particular [`BiodiversityDistribution`].
+#' @seealso [`BiodiversityDistribution`] and other classes.
 #'
 #' @references
 #' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A.,
@@ -94,16 +93,11 @@ NULL
 #' Ecology and Biogeography 27, no. 1 (2018): 156-165.
 #'
 #' @examples
-#' \dontrun{
-#'  # Load background raster
-#'  background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
-#'  # Define model
-#'  x <- distribution(background)
-#'  x
-#'  # Show names of the functions within the object
-#'  names(x)
-#'
-#' }
+#' # Load background raster
+#' background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+#' # Define model
+#' x <- distribution(background)
+#' x
 #'
 #' @name distribution
 NULL
@@ -143,7 +137,6 @@ methods::setMethod(
       assertthat::assert_that(length(vals)==1,
                               msg = "Values in background layer can only be unique!")
     }
-
 
     # Convert raster to dissolved polygons to get a study boundary
     newbg <- sf::st_as_sf(
@@ -224,9 +217,14 @@ methods::setMethod(
       if(is.null(limits)) limits <- new_waiver()
     }
 
+    # Create a dummy biodiversity dataset at initalization
+    bio <- BiodiversityDatasetCollection$new()
+
     # Create BiodiversityDistribution object
-    bdproto(NULL, BiodiversityDistribution,
-            background = background,
-            limits = limits
+    bd <- BiodiversityDistribution$new(
+      background = background,
+      limits = limits,
+      biodiversity = bio
     )
+    return(bd)
   })

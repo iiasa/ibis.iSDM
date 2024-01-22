@@ -31,8 +31,14 @@ PriorList <- R6::R6Class(
 
     #' @description
     #' Initializes the object
+    #' @param priors A list of [`Prior-class`] object.
     #' @return NULL
-    initialize = function(){
+    initialize = function(priors){
+      assertthat::assert_that(
+        all( sapply(priors, function(z) inherits(z, "Prior")) ) || missing(priors)
+      )
+      if(missing(priors)) priors <- new_waiver()
+      self$priors <- priors
     },
 
     #' @description
@@ -42,7 +48,7 @@ PriorList <- R6::R6Class(
       if(is.Waiver(self$priors)) { message('No priors found.') }
         else{
           # Get priors for variables
-          message('Set priors: ', text_green( length(self)) )
+          message('Set priors: ', text_green( self$length() ) )
         }
     },
 

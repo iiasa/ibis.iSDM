@@ -39,11 +39,9 @@ objects can then be added to a \link{distribution} object with the \link{add_pri
 function.
 }
 \examples{
-\dontrun{
-p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
-p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
+p1 <- GDBPrior(variable = "Forest", hyper = "positive")
+p2 <- GDBPrior(variable = "Urban", hyper = "decreasing")
 priors(p1, p2)
-}
 
 \dontrun{
 p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))

@@ -20,37 +20,54 @@ PredictorDataset <- R6::R6Class(
   public = list(
     #' @field id The id for this collection as [`character`].
     #' @field data A predictor dataset usually as [`SpatRaster`].
+    #' @field name A name for this object.
+    #' @field timeperiod A timeperiod field
     id           = character(0),
     data         = new_waiver(),
+    name         = character(0),
+    timeperiod   = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list
+    #' @param id The id for this collection as [`character`].
+    #' @param data A predictor dataset usually as [`SpatRaster`].
+    #' @param ... Any other parameters found.
     #' @return NULL
-    initialize = function(){
-      self$data <- list()
+    initialize = function(id, data, ...){
+      assertthat::assert_that(
+        is.Id(id) || is.character(id)
+      )
       self$name <- 'Biodiversity data'
+      self$id <- id
+      self$data <- data
+      # Get Dots and save too
+      dots <- list(...)
+      for(el in names(dots)){
+        self[[el]] <- dots[[el]]
+      }
     },
 
     #' @description
     #' Print the names and properties of all Biodiversity datasets contained within
+    #' @param format A [`logical`] flag on whether a message should be printed.
     #' @return A message on screen
-    print = function(){
+    print = function(format = TRUE){
       # Getting names and time periods if set
       nn <- name_atomic(self$get_names(), "predictors")
       # Get Time dimension if existing
       tt <- self$get_time()
       if(!(is.Waiver(tt) || is.null(tt))) tt <- paste0(range(tt),collapse = " <> ") else tt <- NULL
-      message(paste0(self$name(),':',
-                     '\n Name(s):  ',nn,
-                     ifelse(!is.null(tt), paste0("\n Timeperiod:  ", tt), "")
+      m <- paste0(self$get_name(),':',
+                  '\n Name(s):  ',nn,
+                  ifelse(!is.null(tt), paste0("\n Timeperiod:  ", tt), "")
       )
-      )
+      if(format) message(m) else return( m )
     },
 
     #' @description
     #' Return name of this object
     #' @return Default [`character`] name.
-    name = function(){
+    get_name = function(){
       'Predictor dataset'
     },
 
@@ -235,7 +252,7 @@ PredictorDataset <- R6::R6Class(
     #' Alias for print method
     #' @return Invisible
     show = function() {
-      self$print()
+      self$print(format = FALSE)
     },
 
     #' @description

@@ -17,6 +17,10 @@ This class describes the PredictorDataset and is used to store covariates within
 \item{\code{id}}{The id for this collection as \code{\link{character}}.}
 
 \item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
+
+\item{\code{name}}{A name for this object.}
+
+\item{\code{timeperiod}}{A timeperiod field}
 }
 \if{html}{\out{</div>}}
 }
@@ -25,7 +29,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \itemize{
 \item \href{#method-PredictorDataset-new}{\code{PredictorDataset$new()}}
 \item \href{#method-PredictorDataset-print}{\code{PredictorDataset$print()}}
-\item \href{#method-PredictorDataset-name}{\code{PredictorDataset$name()}}
+\item \href{#method-PredictorDataset-get_name}{\code{PredictorDataset$get_name()}}
 \item \href{#method-PredictorDataset-get_id}{\code{PredictorDataset$get_id()}}
 \item \href{#method-PredictorDataset-get_names}{\code{PredictorDataset$get_names()}}
 \item \href{#method-PredictorDataset-get_predictor_names}{\code{PredictorDataset$get_predictor_names()}}
@@ -51,9 +55,20 @@ This class describes the PredictorDataset and is used to store covariates within
 \subsection{Method \code{new()}}{
 Initializes the object and creates an empty list
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$new(id, data, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{The id for this collection as \code{\link{character}}.}
+
+\item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
+
+\item{\code{...}}{Any other parameters found.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }
@@ -64,20 +79,27 @@ NULL
 \subsection{Method \code{print()}}{
 Print the names and properties of all Biodiversity datasets contained within
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$print(format = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{format}}{A \code{\link{logical}} flag on whether a message should be printed.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 A message on screen
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-PredictorDataset-name"></a>}}
-\if{latex}{\out{\hypertarget{method-PredictorDataset-name}{}}}
-\subsection{Method \code{name()}}{
+\if{html}{\out{<a id="method-PredictorDataset-get_name"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-get_name}{}}}
+\subsection{Method \code{get_name()}}{
 Return name of this object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$name()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$get_name()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

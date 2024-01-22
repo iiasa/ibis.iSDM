@@ -879,5 +879,7 @@ BiodiversityScenario <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # Don't lock object, but support adding new member
+  lock_objects = FALSE
 )

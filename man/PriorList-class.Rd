@@ -54,9 +54,16 @@ priors(
 \subsection{Method \code{new()}}{
 Initializes the object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PriorList$new(priors)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{priors}}{A list of \code{\linkS4class{Prior}} object.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }

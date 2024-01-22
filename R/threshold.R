@@ -455,6 +455,8 @@ methods::setMethod(
         invisible()
       }
     }
-    bdproto(NULL, obj, threshold = value)
+    new <- obj$clone()
+    new$threshold <- value
+    return(new)
   }
 )

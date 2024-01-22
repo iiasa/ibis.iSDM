@@ -79,14 +79,14 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'GLMNETPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'GLMNETPrior',
       id = new_id(),
       variable = variable,
       value = hyper,
       lims = lims
     )
+    return(pp)
   }
 )
 

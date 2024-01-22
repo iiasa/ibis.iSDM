@@ -60,18 +60,14 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'STANPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'STANPrior',
       id = new_id(),
       type = type,
       variable = variable,
-      value = hyper,
-      # plot
-      plot = function(self){
-        return(NULL) # TODO: Could implement some QoL plotting here
-      }
+      value = hyper
     )
+    return(pp)
   }
 )
 

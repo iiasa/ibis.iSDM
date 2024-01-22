@@ -22,17 +22,49 @@ Prior <- R6::R6Class(
     #' @field variable A [`character`] with the variable name for the prior.
     #' @field distribution A [`character`] with the distribution of the prior if relevant.
     #' @field value A [`numeric`] or [`character`] with the prior value, e.g. the hyper-parameters.
+    #' @field prob Another [`numeric`] entry on the prior field. The inclusion probability.
+    #' @field lims A limitation on the lower and upper bounds of a numeric value.
     id = new_waiver(),
     name = character(0),
-    type = new_waiver(),
+    type = character(0),
     variable = character(0),
     distribution = new_waiver(),
     value = vector(),
+    prob = numeric(0L),
+    lims = vector(),
 
     #' @description
-    #' Initializes the object
+    #' Initializes the object and prepared the various prior variables
+    #' @param id A [`character`] with the id of the prior.
+    #' @param name A [`character`] with the name of the prior.
+    #' @param type A [`character`] with the type of the prior.
+    #' @param variable A [`character`] with the variable name for the prior.
+    #' @param distribution A [`character`] with the distribution of the prior if relevant.
+    #' @param value A [`numeric`] or [`character`] with the prior value, e.g. the hyper-parameters.
+    #' @param prob Another [`numeric`] entry on the prior field. The inclusion probability.
+    #' @param lims A limitation on the lower and upper bounds of a numeric value.
     #' @return NULL
-    initialize = function(){
+    initialize = function(id, name, variable, value, type = NULL,
+                          distribution = NULL, prob = NULL, lims = NULL){
+      assertthat::assert_that(
+        missing(id) || (is.Id(id) || is.character(id)),
+        is.character(name),
+        is.character(type) || is.null(type),
+        is.character(variable),
+        is.numeric(prob) || is.null(prob),
+        is.null(lims) || is.numeric(lims)
+      )
+      # Assign a new id for the object
+      if(missing(id)) id <- new_id()
+
+      self$id <- id
+      self$name <- name
+      self$type <- type
+      self$variable <- variable
+      self$value <- value
+      self$distribution <- distribution
+      self$prob <- prob
+      self$lims <- lims
     },
 
     #' @description
@@ -40,7 +72,7 @@ Prior <- R6::R6Class(
     #' @return A message on screen
     print = function() {
       message(paste0(
-        class(self)[1], ': ', self$type, ' prior for \'', self$variable,'\''
+        self$name, ': ', self$type, ' prior for \'', self$variable,'\''
       ))
     },
 
@@ -88,5 +120,7 @@ Prior <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # Allow custom bindings
+  lock_objects = FALSE
 )

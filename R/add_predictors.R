@@ -104,7 +104,9 @@ methods::setMethod(
                             !missing(env))
     # Convert env to stack if it is a single layer only
     if(!is.Raster(env)) env <- terra::rast(env)
-    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    add_predictors(x, env, names, transform, derivates, derivate_knots,
+                   int_variables, bgmask, harmonize_na, explode_factors,
+                   priors, ...)
   }
 )
 
@@ -241,13 +243,10 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-        bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-        )
-      )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    x$set_predictors(pd)
   }
 )
 
@@ -264,7 +263,9 @@ methods::setMethod(
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
     if(is.list(env)) env <- env[[1]]
-    x <- add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    x <- add_predictors(x, env, names, transform, derivates, derivate_knots,
+                        int_variables, bgmask, harmonize_na, explode_factors,
+                        priors, ...)
     return( x )
   }
 )
@@ -693,7 +694,8 @@ methods::setMethod(
     env <- raster_to_stars(env) # Convert to stars
 
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
-                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+                   derivate_knots = derivate_knots, int_variables = int_variables,
+                   harmonize_na = harmonize_na, ...)
   }
 )
 
@@ -751,7 +753,8 @@ methods::setMethod(
           if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
           for(dd in derivates){
             if(any(grep(dd, varn))){
-              env <- predictor_derivate(env, option = dd, nknots = derivate_knots, deriv = varn, int_variables = int_variables)
+              env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
+                                        deriv = varn, int_variables = int_variables)
             } else {
               if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
             }
@@ -775,13 +778,10 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod
+                               )
+    x$set_predictors(pd)
   }
 )

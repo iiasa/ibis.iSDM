@@ -29,6 +29,7 @@ License: CC BY 4.0
 Encoding: UTF-8
 Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
+    R6 (>= 2.5.0),
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
     dplyr,
@@ -51,8 +52,7 @@ Imports:
     uuid, 
     utils
 Depends:
-    R (>= 4.1.0),
-    R6 (>= 2.5.0)
+    R (>= 4.1.0)
 Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),

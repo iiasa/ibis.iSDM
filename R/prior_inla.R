@@ -79,35 +79,31 @@ methods::setMethod(
     )
 
     # Match supplied type in case someone has been lazy
-    type <- match.arg(type, c('clinear','prior.range','prior.sigma',names(INLA::inla.models()$prior) ), several.ok = FALSE)
+    type <- match.arg(type, c('clinear','prior.range','prior.sigma', names(INLA::inla.models()$prior) ), several.ok = FALSE)
 
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
-    # Other supplied arguments
-    #args <- as.list(match.call())
-
     # Create new prior object
-    bdproto(
-      'INLAPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'INLAPrior',
       id = new_id(),
       type = type,
       variable = variable,
       value = hyper,
-      # FIXME:
-      # https://stats.stackexchange.com/questions/350235/how-to-convert-estimated-precision-to-variance
-      # distribution = function(mean, prec) stats::rnorm(n = 1000, mean = mean,
-      # sd = prec),
-
+    )
+    # FIXME:
+    # https://stats.stackexchange.com/questions/350235/how-to-convert-estimated-precision-to-variance
+    # distribution = function(mean, prec) stats::rnorm(n = 1000, mean = mean,
+    # sd = prec),
       # Custom function to format INLA priors to be used in hyper
-      format = function(self,type){
+    pp$format = function(self,type){
         assertthat::assert_that(type %in% c('mean','prec','theta'))
         ol <- list()
         ol[[type]] <-  list(prior = self$type, param = self$value)
         return(ol)
-      }
-    )
+    }
+    return(pp)
   }
 )
 

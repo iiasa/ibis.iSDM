@@ -553,9 +553,9 @@ methods::setMethod(
     # --------------------------------- #
 
     # Return output by adding it to the scenario object
-    bdproto(NULL, mod,
-            scenarios = proj,
-            scenarios_migclim = mc
-            )
+    out <- mod$clone()
+    out$scenarios <- proj
+    out$scenarios_migclim <- mc
+    return(out)
   }
 )

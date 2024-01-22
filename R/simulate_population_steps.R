@@ -143,9 +143,7 @@ methods::setMethod(
                                 )
 
     new <- mod$set_simulation(sim)
-    return(
-      bdproto(NULL, new)
-    )
+    return(new)
   }
 )
 

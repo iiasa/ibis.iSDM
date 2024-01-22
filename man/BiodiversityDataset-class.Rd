@@ -28,6 +28,10 @@ BiodiversityDataset prototype description
 \item{\code{field_occurrence}}{A \code{\link{character}} with the name of the column name containing observations.}
 
 \item{\code{data}}{Contains the observational data in \code{\link{sf}} format.}
+
+\item{\code{use_intercept}}{A \code{\link{logical}} flag on whether intercepts are included for this dataset.}
+
+\item{\code{pseudoabsence_settings}}{Optionally provided pseudoabsence settings.}
 }
 \if{html}{\out{</div>}}
 }
@@ -58,9 +62,48 @@ BiodiversityDataset prototype description
 \subsection{Method \code{new()}}{
 Initializes the object and creates an empty list
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDataset$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDataset$new(
+  name,
+  id,
+  equation,
+  family,
+  link,
+  type,
+  weight,
+  field_occurrence,
+  data,
+  use_intercept,
+  pseudoabsence_settings
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{The default name of this dataset as \code{\link{character}}.}
+
+\item{\code{id}}{A \code{\link{character}} with the unique id for this dataset.}
+
+\item{\code{equation}}{A \code{\link{formula}} object containing the equation of how this dataset is modelled.}
+
+\item{\code{family}}{The family used for this dataset as \code{\link{character}}.}
+
+\item{\code{link}}{The link function used for this data as \code{\link{character}}.}
+
+\item{\code{type}}{A \code{\link{character}} with the type as \code{\link{character}}.}
+
+\item{\code{weight}}{A \code{\link{numeric}} containing custom weights per observation for this dataset.}
+
+\item{\code{field_occurrence}}{A \code{\link{character}} with the name of the column name containing observations.}
+
+\item{\code{data}}{Contains the observational data in \code{\link{sf}} format.}
+
+\item{\code{use_intercept}}{A \code{\link{logical}} flag on whether intercepts are included for this dataset.}
+
+\item{\code{pseudoabsence_settings}}{Optionally provided pseudoabsence settings.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }

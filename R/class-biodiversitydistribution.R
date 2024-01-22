@@ -52,9 +52,24 @@ BiodiversityDistribution <- R6::R6Class(
 
     #' @description
     #' Initializes the object and creates an BiodiversityDataset by default.
+    #' @param background A [`SpatRaster`] or [`sf`] object delineating the modelling extent.
+    #' @param limits An optional [`sf`] object on potential extrapolation limits
+    #' @param biodiversity A [`BiodiversityDataCollection-class`] object.
+    #' @param ... Any other objects
     #' @return NULL
-    initialize = function(){
-      self$biodiversity <- BiodiversityDatasetCollection$new()
+    initialize = function(background, limits, biodiversity, ...){
+      assertthat::assert_that(
+        is.Raster(background) ||inherits(background, "sf"),
+        is.null(limits) || is.list(limits)
+      )
+      self$background <- background
+      self$limits <- limits
+      self$biodiversity <- biodiversity
+      # Get Dots and save too
+      dots <- list(...)
+      for(el in names(dots)){
+        self[[el]] <- dots[[el]]
+      }
     },
 
     #' @description
@@ -565,5 +580,7 @@ BiodiversityDistribution <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # Don't lock objects
+  lock_objects = FALSE
 )

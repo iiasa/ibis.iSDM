@@ -170,8 +170,6 @@ methods::setMethod(
                               params = params)
 
     new <- mod$set_constraints(cr)
-    return(
-      bdproto(NULL, new)
-    )
+    return( new )
   }
 )

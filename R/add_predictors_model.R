@@ -154,12 +154,9 @@ methods::setMethod(
     }
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    x$set_predictors(pd)
   }
 )

@@ -45,11 +45,8 @@ methods::setMethod(
     if(!is.Waiver(x$log)) myLog('[Setup]','yellow','Overwriting previous set log file.')
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_log(
-      bdproto(NULL, Log,
-              filename = filename,
-              output = new_waiver()
-      )
-    )
+    l <- Log$new(filename = filename,
+                 output = new_waiver())
+    x$set_log(l)
   }
 )

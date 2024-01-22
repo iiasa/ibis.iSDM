@@ -36,24 +36,22 @@ BiodiversityDatasetCollection <- R6::R6Class(
 
     #' @description
     #' Print the names and properties of all Biodiversity datasets contained within
+    #' @param format A [`logical`] flag on whether a message should be printed.
     #' @return A message on screen
-    print = function() {
+    print = function(format = TRUE) {
       ty = if(is.Waiver(self$get_types())){
         ty = '\n   \033[31mNone\033[39m'} else { ty = paste0("\n   ",self$get_types()) }
       if(self$length()>0){ obs = paste0(" <",self$get_observations()," records>") } else obs = ''
       # FIXME: Prettify
-      message(
-        paste0(self$name,':',
-               paste0(ty,obs,collapse = '')
-        )
-      )
+      m <- paste0(self$name,':', paste0(ty,obs,collapse = ''))
+      if(format) message(m) else return(m)
     },
 
     #' @description
     #' Aliases that calls print.
     #' @return A message on screen
     show = function(){
-      self$print()
+      self$print(format = FALSE)
     },
 
     #' @description
@@ -84,7 +82,6 @@ BiodiversityDatasetCollection <- R6::R6Class(
     #' @return Invisible
     set_data = function(x, value){
       assertthat::assert_that(assertthat::is.string(x),
-                              R6::is.R6Class(value),
                               inherits(value, "BiodiversityDataset"))
       self$data[[x]] <- value
       invisible()
@@ -318,7 +315,9 @@ BiodiversityDatasetCollection <- R6::R6Class(
     finalize = function() {
 
     }
-  )
+  ),
+  # No lock, thus allow members to be added.
+  lock_objects = FALSE
 )
 
 #---- BiodiversityDataset ----
@@ -343,6 +342,8 @@ BiodiversityDataset <- R6::R6Class(
     #' @field weight A [`numeric`] containing custom weights per observation for this dataset.
     #' @field field_occurrence A [`character`] with the name of the column name containing observations.
     #' @field data Contains the observational data in [`sf`] format.
+    #' @field use_intercept A [`logical`] flag on whether intercepts are included for this dataset.
+    #' @field pseudoabsence_settings Optionally provided pseudoabsence settings.
     name             = character(0),
     id               = character(0),
     equation         = new_waiver(),
@@ -352,11 +353,59 @@ BiodiversityDataset <- R6::R6Class(
     weight           = new_waiver(),
     field_occurrence = character(0),
     data             = new_waiver(),
+    use_intercept    = logical(0),
+    pseudoabsence_settings = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list
+    #' @param name The default name of this dataset as [`character`].
+    #' @param id A [`character`] with the unique id for this dataset.
+    #' @param equation A [`formula`] object containing the equation of how this dataset is modelled.
+    #' @param family The family used for this dataset as [`character`].
+    #' @param link The link function used for this data as [`character`].
+    #' @param type A [`character`] with the type as [`character`].
+    #' @param weight A [`numeric`] containing custom weights per observation for this dataset.
+    #' @param field_occurrence A [`character`] with the name of the column name containing observations.
+    #' @param data Contains the observational data in [`sf`] format.
+    #' @param use_intercept A [`logical`] flag on whether intercepts are included for this dataset.
+    #' @param pseudoabsence_settings Optionally provided pseudoabsence settings.
     #' @return NULL
-    initialize = function(){},
+    initialize = function(name, id, equation, family, link, type, weight,
+                          field_occurrence, data, use_intercept,
+                          pseudoabsence_settings){
+      assertthat::assert_that(
+        is.character(name) || is.null(name),
+        is.character(id) || is.Id(id),
+        (is.character(equation) || is.formula(equation)) || is.Waiver(equation),
+        is.character(family) || is.function(family),
+        is.character(link) || is.null(link),
+        is.character(type),
+        is.numeric(weight) || is.null(weight),
+        is.character(field_occurrence),
+        is.logical(use_intercept)
+      )
+      # Match type
+      type <- match.arg(type, c("poipo", "poipa", "polpo", "polpa"), several.ok = FALSE)
+
+      # If pseudo-absence missing, set default options
+      if(missing(pseudoabsence_settings)){
+        pseudoabsence_settings <- pseudoabs_settings()
+      } else if(is.null(pseudoabsence_settings)) {
+        pseudoabsence_settings <- pseudoabs_settings()
+      }
+
+      self$name <- name
+      self$id <- id
+      self$equation <- formula
+      self$family <- family
+      self$link <- link
+      self$type <- type
+      self$weight <- weight
+      self$field_occurrence <- field_occurrence
+      self$data <- data
+      self$use_intercept <- separate_intercept
+      self$pseudoabsence_settings <- pseudoabsence_settings
+    },
 
     #' @description
     #' Print the names and properties of all Biodiversity datasets contained within
@@ -499,5 +548,7 @@ BiodiversityDataset <- R6::R6Class(
   private = list(
     finalize = function() {
     }
-  )
+  ),
+  # No lock, thus allow members to be added.
+  lock_objects = FALSE
 )

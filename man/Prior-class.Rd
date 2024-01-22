@@ -28,6 +28,10 @@ This functionality likely is deprecated or checks have been superseeded.
 \item{\code{distribution}}{A \code{\link{character}} with the distribution of the prior if relevant.}
 
 \item{\code{value}}{A \code{\link{numeric}} or \code{\link{character}} with the prior value, e.g. the hyper-parameters.}
+
+\item{\code{prob}}{Another \code{\link{numeric}} entry on the prior field. The inclusion probability.}
+
+\item{\code{lims}}{A limitation on the lower and upper bounds of a numeric value.}
 }
 \if{html}{\out{</div>}}
 }
@@ -47,11 +51,41 @@ This functionality likely is deprecated or checks have been superseeded.
 \if{html}{\out{<a id="method-Prior-new"></a>}}
 \if{latex}{\out{\hypertarget{method-Prior-new}{}}}
 \subsection{Method \code{new()}}{
-Initializes the object
+Initializes the object and prepared the various prior variables
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Prior$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Prior$new(
+  id,
+  name,
+  variable,
+  value,
+  type = NULL,
+  distribution = NULL,
+  prob = NULL,
+  lims = NULL
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{A \code{\link{character}} with the id of the prior.}
+
+\item{\code{name}}{A \code{\link{character}} with the name of the prior.}
+
+\item{\code{variable}}{A \code{\link{character}} with the variable name for the prior.}
+
+\item{\code{value}}{A \code{\link{numeric}} or \code{\link{character}} with the prior value, e.g. the hyper-parameters.}
+
+\item{\code{type}}{A \code{\link{character}} with the type of the prior.}
+
+\item{\code{distribution}}{A \code{\link{character}} with the distribution of the prior if relevant.}
+
+\item{\code{prob}}{Another \code{\link{numeric}} entry on the prior field. The inclusion probability.}
+
+\item{\code{lims}}{A limitation on the lower and upper bounds of a numeric value.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }

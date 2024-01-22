@@ -166,13 +166,10 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    x$set_predictors(pd)
   }
 )
 
@@ -268,14 +265,11 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod,
+                               ...)
+    x$set_predictors(pd)
   }
 )
 

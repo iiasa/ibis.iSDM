@@ -83,15 +83,16 @@ methods::setMethod(
 
     # Check that ip is between 0 and 1
     if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)
+
     # Create new prior object
-    bdproto(
-      'BREGPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'BREGPrior',
       id = new_id(),
       variable = variable,
       value = hyper,
       prob = ip
     )
+    return(pp)
   }
 )
 

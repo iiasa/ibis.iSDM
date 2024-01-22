@@ -90,9 +90,12 @@ methods::setMethod(
       limits <- new_waiver()
     }
     # Create BiodiversityScenario object
-    bdproto(NULL, BiodiversityScenario,
-            modelobject = modelobject,
-            modelid = modelid,
-            limits = limits
-    )
+    sc <- BiodiversityScenario$new()
+    sc$t <- modelobject
+    sc$modelobject <- modelobject
+    sc$modelid <- modelid
+    sc$limits <- limits
+
+    return(sc)
+
   })

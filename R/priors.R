@@ -19,11 +19,9 @@ NULL
 #' @family prior
 #'
 #' @examples
-#' \dontrun{
-#' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
-#' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
+#' p1 <- GDBPrior(variable = "Forest", hyper = "positive")
+#' p2 <- GDBPrior(variable = "Urban", hyper = "decreasing")
 #' priors(p1, p2)
-#' }
 #'
 #' @name priors
 NULL
@@ -96,12 +94,8 @@ methods::setMethod(
     }
 
     # Create new priorlist object and supply all objects here
-    bdproto(
-      NULL,
-      PriorList,
-      priors = ll
-      )
-
+    pl <- PriorList$new(priors = ll)
+    return(pl)
   }
 )
 
@@ -200,11 +194,7 @@ methods::setMethod(
     }
 
     # Create new priorlist object and supply all objects here
-    bdproto(
-      NULL,
-      PriorList,
-      priors = ll
-      )
-
+    pl <- PriorList$new(priors = ll)
+    return(pl)
   }
 )

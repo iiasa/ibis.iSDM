@@ -21,6 +21,19 @@ Log <- R6::R6Class(
     output = new_waiver(),
 
     #' @description
+    #' Initializes the object and specifies some default parameters.
+    #' @param filename A [`character`] of where the log is to be stored.
+    #' @param output The log content.
+    #' @return NULL
+    initialize = function(filename, output){
+      assertthat::assert_that(
+        is.character(filename)
+      )
+      self$filename <- filename
+      self$output <- output
+    },
+
+    #' @description
     #' Print message with filename
     #' @return A message on screen
     print = function() {

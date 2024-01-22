@@ -128,23 +128,23 @@ methods::setMethod(
       weight <- rep(weight, nrow(poipo))
     }
 
-    # Finally set the data to the BiodiversityDistribution object
-    x$set_biodiversity(
-      id,
-      bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), "Species projection",name),
-              id = id,
-              equation = formula,
-              family = family,
-              link = link,
-              type = "poipo",
-              weight = weight,
-              field_occurrence = field_occurrence,
-              data = format_biodiversity_data(poipo, field_occurrence),
-              use_intercept = separate_intercept,
-              pseudoabsence_settings = pseudoabsence_settings
-      )
+    # Create a new biodiversity dataset
+    bd <- BiodiversityDataset$new(
+      name = ifelse(is.null(name), "Species: ",name),
+      id = id,
+      equation = formula,
+      family = family,
+      link = link,
+      type = "poipo",
+      weight = weight,
+      field_occurrence = field_occurrence,
+      data = format_biodiversity_data(poipo, field_occurrence),
+      use_intercept = separate_intercept,
+      pseudoabsence_settings = pseudoabsence_settings
     )
+
+    # Finally set the data to the BiodiversityDistribution object
+    x$set_biodiversity(id, bd)
   }
 )
 
@@ -265,22 +265,22 @@ methods::setMethod(
       weight <- rep(weight, nrow(poipa))
     }
 
-    # Finally set the data to the BiodiversityDistribution object
-    x$set_biodiversity(
-      id,
-      bdproto(NULL, BiodiversityDataset,
-              name = ifelse(is.null(name), "Species projection",name),
-              id = id,
-              equation = formula,
-              family = family,
-              link = link,
-              type = "poipa",
-              weight = weight,
-              field_occurrence = field_occurrence,
-              data = format_biodiversity_data(poipa, field_occurrence),
-              use_intercept = separate_intercept
-      )
+    # Define the biodiversity object
+    bd <- BiodiversityDataset$new(
+      name = ifelse(is.null(name), "Species: ",name),
+      id = id,
+      equation = formula,
+      family = family,
+      link = link,
+      type = "poipa",
+      weight = weight,
+      field_occurrence = field_occurrence,
+      data = format_biodiversity_data(poipa, field_occurrence),
+      use_intercept = separate_intercept
     )
+
+    # Finally set the data to the BiodiversityDistribution object
+    x$set_biodiversity(id, bd)
   }
 )
 
@@ -456,23 +456,23 @@ methods::setMethod(
         weight <- rep(weight, nrow(polpo))
       }
 
-      # Finally set the data to the BiodiversityDistribution object
-      x$set_biodiversity(
-        id,
-        bdproto(NULL, BiodiversityDataset,
-                name = ifelse(is.null(name), "Species: ", name),
-                id = id,
-                equation = formula,
-                family = family,
-                link = link,
-                type = "polpo",
-                weight = weight,
-                field_occurrence = field_occurrence,
-                data = format_biodiversity_data(polpo,field_occurrence),
-                use_intercept = separate_intercept,
-                pseudoabsence_settings =  pseudoabsence_settings
-        )
+      # Define the biodiversity object
+      bd <- BiodiversityDataset$new(
+        name = ifelse(is.null(name), "Species: ",name),
+        id = id,
+        equation = formula,
+        family = family,
+        link = link,
+        type = "polpo",
+        weight = weight,
+        field_occurrence = field_occurrence,
+        data = format_biodiversity_data(polpo,field_occurrence),
+        use_intercept = separate_intercept,
+        pseudoabsence_settings = pseudoabsence_settings
       )
+
+      # Finally set the data to the BiodiversityDistribution object
+      x$set_biodiversity(id, bd)
     }
   }
 )
@@ -676,23 +676,23 @@ methods::setMethod(
         weight <- rep(weight, nrow(polpa))
       }
 
-      # Finally set the data to the BiodiversityDistribution object
-      x$set_biodiversity(
-        id,
-        bdproto(NULL, BiodiversityDataset,
-                name = ifelse(is.null(name), "Species: ", name),
-                id = id,
-                equation = formula,
-                family = family,
-                link = link,
-                type = "polpa",
-                weight = weight,
-                field_occurrence = field_occurrence,
-                data = format_biodiversity_data(polpo, field_occurrence),
-                use_intercept = separate_intercept,
-                pseudoabsence_settings = pseudoabsence_settings
-        )
+      # Define the biodiversity object
+      bd <- BiodiversityDataset$new(
+        name = ifelse(is.null(name), "Species: ",name),
+        id = id,
+        equation = formula,
+        family = family,
+        link = link,
+        type = "polpa",
+        weight = weight,
+        field_occurrence = field_occurrence,
+        data = format_biodiversity_data(polpa, field_occurrence),
+        use_intercept = separate_intercept,
+        pseudoabsence_settings = pseudoabsence_settings
       )
+
+      # Finally set the data to the BiodiversityDistribution object
+      x$set_biodiversity(id, bd)
     }
   }
 )

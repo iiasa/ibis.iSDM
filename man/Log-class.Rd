@@ -20,6 +20,7 @@ Basic \code{\link{R6}} object for Log, any Log inherit from here
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-Log-new}{\code{Log$new()}}
 \item \href{#method-Log-print}{\code{Log$print()}}
 \item \href{#method-Log-open}{\code{Log$open()}}
 \item \href{#method-Log-close}{\code{Log$close()}}
@@ -28,6 +29,28 @@ Basic \code{\link{R6}} object for Log, any Log inherit from here
 \item \href{#method-Log-delete}{\code{Log$delete()}}
 \item \href{#method-Log-open_system}{\code{Log$open_system()}}
 \item \href{#method-Log-clone}{\code{Log$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Log-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Log-new}{}}}
+\subsection{Method \code{new()}}{
+Initializes the object and specifies some default parameters.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Log$new(filename, output)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{filename}}{A \code{\link{character}} of where the log is to be stored.}
+
+\item{\code{output}}{The log content.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
 }
 }
 \if{html}{\out{<hr>}}

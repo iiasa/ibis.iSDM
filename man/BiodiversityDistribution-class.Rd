@@ -121,9 +121,22 @@ names(x)
 \subsection{Method \code{new()}}{
 Initializes the object and creates an BiodiversityDataset by default.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$new(background, limits, biodiversity, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
+
+\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
+
+\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDataCollection}} object.}
+
+\item{\code{...}}{Any other objects}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }
