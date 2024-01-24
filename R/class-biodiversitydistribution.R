@@ -9,7 +9,7 @@ if (!methods::isClass("BiodiversityDistribution")) methods::setOldClass("Biodive
 #' Serves as container that supplies data and functions to other [`R6`]
 #' classes. Generally stores all objects and parameters added to a model.
 #'
-#' @details Run [names()] on a [`distribution`] object to show all available
+#' @details Run [`names()`] on a [`distribution`] object to show all available
 #' functions.
 #' @examples
 #' # Query available functions and entries
@@ -31,13 +31,13 @@ BiodiversityDistribution <- R6::R6Class(
   public = list(
     #' @field background A [`SpatRaster`] or [`sf`] object delineating the modelling extent.
     #' @field limits An optional [`sf`] object on potential extrapolation limits
-    #' @field biodiversity A [`BiodiversityDataCollection-class`] object.
+    #' @field biodiversity A [`BiodiversityDatasetCollection-class`] object.
     #' @field predictors A [`PredictorDataset-class`] object.
     #' @field priors An optional [`PriorList`] object.
     #' @field control An optional Control object.
     #' @field latentfactors A [`character`] on whether latentfactors are used.
     #' @field offset A [`character`] on whether methods are used.
-    #' @field log An optional [`Log-Class`] object.
+    #' @field log An optional [`Log-class`] object.
     #' @field engine A [`Engine-class`] object.
     background    = new_waiver(),
     limits        = new_waiver(),
@@ -54,7 +54,7 @@ BiodiversityDistribution <- R6::R6Class(
     #' Initializes the object and creates an BiodiversityDataset by default.
     #' @param background A [`SpatRaster`] or [`sf`] object delineating the modelling extent.
     #' @param limits An optional [`sf`] object on potential extrapolation limits
-    #' @param biodiversity A [`BiodiversityDataCollection-class`] object.
+    #' @param biodiversity A [`BiodiversityDatasetCollection-class`] object.
     #' @param ... Any other objects
     #' @return NULL
     initialize = function(background, limits, biodiversity, ...){

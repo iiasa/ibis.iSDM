@@ -48,7 +48,7 @@ names(x)
 
 \item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
 
-\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDataCollection}} object.}
+\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
 \item{\code{predictors}}{A \code{\linkS4class{PredictorDataset}} object.}
 
@@ -60,7 +60,7 @@ names(x)
 
 \item{\code{offset}}{A \code{\link{character}} on whether methods are used.}
 
-\item{\code{log}}{An optional \code{\link{Log-Class}} object.}
+\item{\code{log}}{An optional \code{\linkS4class{Log}} object.}
 
 \item{\code{engine}}{A \code{\linkS4class{Engine}} object.}
 }
@@ -131,7 +131,7 @@ Initializes the object and creates an BiodiversityDataset by default.
 
 \item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
 
-\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDataCollection}} object.}
+\item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
 \item{\code{...}}{Any other objects}
 }

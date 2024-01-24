@@ -44,6 +44,7 @@ This functionality likely is deprecated or checks have been superseeded.
 \item \href{#method-Prior-get}{\code{Prior$get()}}
 \item \href{#method-Prior-set}{\code{Prior$set()}}
 \item \href{#method-Prior-get_id}{\code{Prior$get_id()}}
+\item \href{#method-Prior-get_name}{\code{Prior$get_name()}}
 \item \href{#method-Prior-clone}{\code{Prior$clone()}}
 }
 }
@@ -174,6 +175,19 @@ Get a specific ID from a prior.
 
 \subsection{Returns}{
 A \code{\link{character}} id.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Prior-get_name"></a>}}
+\if{latex}{\out{\hypertarget{method-Prior-get_name}{}}}
+\subsection{Method \code{get_name()}}{
+Get Name of object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Prior$get_name()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Returns a \code{\link{character}} with the class name.
 }
 }
 \if{html}{\out{<hr>}}

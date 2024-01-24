@@ -43,7 +43,6 @@ Imports:
     ncdf4,
     parallel,
     posterior,
-    proto (>= 1.0.0),
     sf (>= 1.0),
     stars (>= 0.5),
     stats,
