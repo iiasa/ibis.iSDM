@@ -242,7 +242,7 @@ test_that('Train a distribution model with GDB', {
   # Do spartials work
   expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km"))
 
-  ex <- ensemble(mod, mod)
+  ex <- ensemble(mod, mod,uncertainty = "range")
   expect_s4_class(ex, "SpatRaster")
 
   # Do ensemble partials work?

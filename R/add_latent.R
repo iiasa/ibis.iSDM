@@ -1,4 +1,4 @@
-#' @include waiver.R bdproto.R
+#' @include waiver.R
 NULL
 
 #' Add latent spatial effect to the model equation
@@ -95,15 +95,18 @@ methods::setMethod(
     # Messager
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding latent spatial terms...')
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in distribution object
     if(!is.null(priors) & method == 'spde') {
       assertthat::assert_that(any(priors$varnames() == 'spde') && (!is.null(priors$exists('spde','prior.range')) || !is.null(priors$exists('spde','prior.sigma')) ),
                               msg = 'Priors for spatial latent effect misspeficied (required for spde | prior.range/prior.sigma)'  )
       # Add priors
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Add to data to the BiodiversityDistribution object
-    x$set_latent(type = '<Spatial>', method, separate_spde)
+    y$set_latent(type = '<Spatial>', method, separate_spde)
   }
 )
 
@@ -146,7 +149,10 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Removing latent effects.')
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Now remove the offset
-    x$rm_latent()
+    y$rm_latent()
   }
 )

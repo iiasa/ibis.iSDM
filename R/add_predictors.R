@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
+#' @include class-biodiversitydistribution.R class-predictors.R class-biodiversityscenario.R
 NULL
 
 #' Add predictors to a Biodiversity distribution object
@@ -104,7 +104,9 @@ methods::setMethod(
                             !missing(env))
     # Convert env to stack if it is a single layer only
     if(!is.Raster(env)) env <- terra::rast(env)
-    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    add_predictors(x, env, names, transform, derivates, derivate_knots,
+                   int_variables, bgmask, harmonize_na, explode_factors,
+                   priors, ...)
   }
 )
 
@@ -151,10 +153,13 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
@@ -241,13 +246,10 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-        bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-        )
-      )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 
@@ -264,7 +266,9 @@ methods::setMethod(
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
     if(is.list(env)) env <- env[[1]]
-    x <- add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    x <- add_predictors(x, env, names, transform, derivates, derivate_knots,
+                        int_variables, bgmask, harmonize_na, explode_factors,
+                        priors, ...)
     return( x )
   }
 )
@@ -362,19 +366,22 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(o) <- sanitize_names(names(o))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = o, transform = transform, derivates = 'none')
+      y <- add_predictors(y, env = o, transform = transform, derivates = 'none')
     } else {
       for(n in names(o)){
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        x$predictors <- x$predictors$set_data(n, r)
+        y$predictors <- y$predictors$set_data(n, r)
         rm(r)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -472,18 +479,21 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
+      y <- add_predictors(y, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', layer)
+      y$predictors <- y$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
-        x <- x$set_priors(priors)
+        y <- y$set_priors(priors)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -563,11 +573,14 @@ methods::setMethod(
       layer <- layer * fraction
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
       assertthat::assert_that( all( priors$varnames() %in% names(dis) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
 
     # Sanitize names if specified
@@ -575,11 +588,11 @@ methods::setMethod(
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = dis, transform = 'none',derivates = 'none')
+      y <- add_predictors(y, env = dis, transform = 'none',derivates = 'none')
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', dis)
+      y$predictors <- y$predictors$set_data('range_distance', dis)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -624,8 +637,11 @@ methods::setMethod(
                             all( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Finally set the data to the BiodiversityDistribution object
-    x$rm_predictors(names)
+    y$rm_predictors(names)
   }
 )
 
@@ -671,12 +687,17 @@ methods::setMethod(
                             any( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Get current predictors
-    varnames <- x$get_predictor_names()
+    varnames <- y$get_predictor_names()
     varnames <- varnames[which(varnames %notin% names)]
 
     # Remove all predictors listed
-    if(length(varnames)>=1) x$rm_predictors(varnames)
+    if(length(varnames)>=1) {
+      y$rm_predictors(varnames)
+    } else { y }
   }
 )
 
@@ -693,7 +714,8 @@ methods::setMethod(
     env <- raster_to_stars(env) # Convert to stars
 
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
-                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+                   derivate_knots = derivate_knots, int_variables = int_variables,
+                   harmonize_na = harmonize_na, ...)
   }
 )
 
@@ -751,7 +773,8 @@ methods::setMethod(
           if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
           for(dd in derivates){
             if(any(grep(dd, varn))){
-              env <- predictor_derivate(env, option = dd, nknots = derivate_knots, deriv = varn, int_variables = int_variables)
+              env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
+                                        deriv = varn, int_variables = int_variables)
             } else {
               if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
             }
@@ -775,13 +798,12 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod
+                               )
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+    y$set_predictors(pd)
   }
 )

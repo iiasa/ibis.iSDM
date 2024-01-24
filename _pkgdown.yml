@@ -160,7 +160,7 @@ reference:
       - Settings
       - PredictorDataset
       - Log
-      - has_keyword("bdproto")
+      - has_keyword("classes")
 
   - title: Miscellaneous functions
     desc: >

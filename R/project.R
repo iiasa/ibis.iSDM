@@ -1,4 +1,4 @@
-#' @include bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Project a fitted model to a new environment and covariates
@@ -553,9 +553,9 @@ methods::setMethod(
     # --------------------------------- #
 
     # Return output by adding it to the scenario object
-    bdproto(NULL, mod,
-            scenarios = proj,
-            scenarios_migclim = mc
-            )
+    out <- mod$clone(deep = TRUE)
+    out$scenarios <- proj
+    out$scenarios_migclim <- mc
+    return(out)
   }
 )

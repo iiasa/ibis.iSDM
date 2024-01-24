@@ -43,10 +43,10 @@ test_that('Load ranges and add them to distribution object', {
 
   # --------- #
   # Add offsets
-  y <- x |> add_offset_bias(layer = predictors$hmi_mean_50km)
+  suppressMessages( y <- x |> add_offset_bias(layer = predictors$hmi_mean_50km) )
   expect_equal(y$get_offset(), "hmi_mean_50km")
 
-  y <- x |> add_offset(layer = virtual_range)
+  suppressMessages( y <- x |> add_offset(layer = virtual_range) )
   expect_s4_class(y$offset, "SpatRaster")
 
   suppressWarnings(

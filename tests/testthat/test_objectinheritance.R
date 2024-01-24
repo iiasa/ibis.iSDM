@@ -61,7 +61,8 @@ test_that('Check that distribution objects are properly inherited', {
     add_predictor_range(virtual_range, method = "binary")
   expect_length(y$get_predictor_names(), 15)
   z <- y |> add_predictor_range(virtual_range, method = "distance")
-  expect_length(y$get_predictor_names(), 16)
+  expect_length(y$get_predictor_names(), 15)
+  expect_length(z$get_predictor_names(), 16)
 
   # -- #
   # Latent effect check
@@ -89,17 +90,18 @@ test_that('Check that distribution objects are properly inherited', {
 
   # Check variable removal
   xx <- x |> add_predictors(predictors)
+  expect_length(x$get_predictor_names(), 0)
   xx |> rm_predictors(names = "hmi_mean_50km")
   expect_length(xx$get_predictor_names(), 14)
 
   # --- #
   # Create a settings object
   # Define settings object for any other information
-  settings <- bdproto(NULL, Settings)
+  settings <- Settings$new()
   settings$set('test', 1)
   expect_equal(settings$length(), 1)
-  settings2 <- settings
-  settings2 <- settings2$set('test2', 1, copy =TRUE) # This returns a settings object
+  settings2 <- settings$clone()
+  settings2 <- settings2$set('test2', 1) # This returns a settings object
   expect_equal(settings$length(), 1)
 
   # --- #

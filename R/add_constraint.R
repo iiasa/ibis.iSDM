@@ -1,4 +1,4 @@
-#' @include bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Add a constraint to an existing \code{scenario}
@@ -238,19 +238,16 @@ methods::setMethod(
                                            ))
 
     }
+    out <- mod$clone(deep = TRUE)
     if(method == "migclim"){
       # Using the MigClim package for calculating any transitions and
       # This requires prior calculated Thresholds!
-      out <- add_constraint_MigClim(mod = mod, ...)
-      return(out)
+      out <- add_constraint_MigClim(mod = out, ...)
     } else {
       # --- #
-      new <- mod$set_constraints(cr)
-      return(
-        bdproto(NULL, new)
-      )
+      out <- out$set_constraints(cr)
     }
-
+    return(out)
   }
 )
 
@@ -505,10 +502,9 @@ methods::setMethod(
                                    params = c("resistance" = resistance))
     }
     # --- #
-    new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new$set_constraints(co)
+    return(new)
   }
 )
 
@@ -587,10 +583,9 @@ methods::setMethod(
                                               "increment" = increment))
     }
     # --- #
-    new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(co)
+    return(new)
   }
 )
 
@@ -736,10 +731,9 @@ methods::setMethod(
                                         "unit" = unit,
                                         "establishment_step" = establishment_step))
     # --- #
-    new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(co)
+    return(new)
   }
 )
 
@@ -809,9 +803,9 @@ methods::setMethod(
     if(inherits(bb, "try-error")) stop("Provide a rasterized layer of the boundary constraint!")
 
     # Call again
-    o <- add_constraint_boundary(mod, layer = bb, method = method, ...)
-
-    return( o )
+    new <- mod$clone(deep = TRUE)
+    new <- add_constraint_boundary(new, layer = bb, method = method, ...)
+    return( new )
   }
 )
 
@@ -850,9 +844,8 @@ methods::setMethod(
                                    params = c("layer" = layer))
     }
     # --- #
-    new <- mod$set_constraints(co)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(co)
+    return( new )
   }
 )

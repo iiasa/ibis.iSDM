@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-log.R
+#' @include class-biodiversitydistribution.R class-log.R
 NULL
 
 #' Adds a log file to distribution object
@@ -45,11 +45,12 @@ methods::setMethod(
     if(!is.Waiver(x$log)) myLog('[Setup]','yellow','Overwriting previous set log file.')
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_log(
-      bdproto(NULL, Log,
-              filename = filename,
-              output = new_waiver()
-      )
-    )
+    l <- Log$new(filename = filename,
+                 output = new_waiver())
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
+    x$set_log(l)
   }
 )

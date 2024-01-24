@@ -1,6 +1,7 @@
 # ibis.iSDM 0.1.2 (current dev branch)
 
 #### New features
+* Switched object structure to `R6` throughout for improved data and memory handling #44
 
 #### Minor improvements and bug fixes
 * Added a logical parameter to `ensemble()` enabling compositing of thresholds if set #84

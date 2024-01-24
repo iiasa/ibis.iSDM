@@ -117,6 +117,9 @@ methods::setMethod(
     method <- match.arg(method, c("zones", "mess", "nt2", "mcp", "shape"), several.ok = FALSE)
     novel <- match.arg(novel, c("within", "outside"), several.ok = FALSE)
 
+    # Make a clone
+    y <- x$clone(deep = TRUE)
+
     # Apply method specific settings
     if(method == "zones"){
       assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf")),
@@ -149,32 +152,32 @@ methods::setMethod(
       layer <- layer[,1]; names(layer) <- c('limit','geometry')
       limits <- list(layer = layer, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
-      x <- x$set_limits(x = limits)
+      y <- y$set_limits(x = limits)
     } else if(method == "mcp"){
       # Specify the option to calculate a mcp based on the added data.
       # This is done directly in train.
       limits <- list("layer" = NULL, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
-      x <- x$set_limits(x = limits)
+      y <- y$set_limits(x = limits)
     } else if(method == "nt2"){
       # Specify that the multivariate combination novelty index (NT2) is
       # to be applied
       limits <- list("layer" = NULL, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "novel" = novel,
                      "limits_clip" = limits_clip)
-      x <- x$set_limits(x = limits)
+      y <- y$set_limits(x = limits)
     } else if(method == "mess"){
       # Specify that the multivariate combination novelty index (NT2) is
       # to be applied
       limits <- list("layer" = NULL, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "novel" = novel,
                      "limits_clip" = limits_clip)
-      x <- x$set_limits(x = limits)
+      y <- y$set_limits(x = limits)
     } else if(method == "shape"){
       stop("Method not yet implemented")
     }
 
     # Return the altered object
-    return(x)
+    return(y)
   }
 )

@@ -114,6 +114,9 @@ methods::setMethod(
     # Match method
     method <- match.arg(method, c("partial", "offset", "proximity"), several.ok = FALSE)
 
+    # Make a clone
+    y <- x$clone(deep = TRUE)
+
     if(method %in% c("partial", "offset")){
       # Check that background and range align, otherwise raise error
       if(is_comparable_raster(layer, x$background)) {
@@ -141,18 +144,18 @@ methods::setMethod(
           if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Overwriting existing bias variable...')
         }
         # Add to bias control
-        x <- x$set_control(type = "bias", layer, method, bias_value)
+        y <- y$set_control(type = "bias", layer, method, bias_value)
 
       } else if(method == "offset") {
-        x <- x |> add_offset_bias(layer = layer, add = add)
+        y <- y |> add_offset_bias(layer = layer, add = add)
       }
 
     } else if (method == "proximity"){
       # Here we use proximity as a weight to any points. Those will be applied
       # during the model training, thus we simply define the bias control here
       if(is.null(maxdist)) maxdist <- 0
-      x <- x$set_control(type = "bias", method = method, value = c(maxdist, alpha))
+      y <- y$set_control(type = "bias", method = method, value = c(maxdist, alpha))
     }
-    return(x)
+    return(y)
   }
 )

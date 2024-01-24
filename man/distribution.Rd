@@ -122,16 +122,11 @@ There are other functions as well but those are better accessed through their
 respective wrapper functions.
 }
 \examples{
-\dontrun{
- # Load background raster
- background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
- # Define model
- x <- distribution(background)
- x
- # Show names of the functions within the object
- names(x)
-
-}
+# Load background raster
+background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+# Define model
+x <- distribution(background)
+x
 
 }
 \references{
@@ -145,6 +140,5 @@ Ecology and Biogeography 27, no. 1 (2018): 156-165.
 }
 }
 \seealso{
-\code{"bdproto"} on the general definition of \code{\link{proto}} objects and
-in particular \code{\link{BiodiversityDistribution}}.
+\code{\link{BiodiversityDistribution}} and other classes.
 }

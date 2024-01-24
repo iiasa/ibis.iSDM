@@ -29,6 +29,7 @@ License: CC BY 4.0
 Encoding: UTF-8
 Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
+    R6 (>= 2.5.0),
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
     dplyr,
@@ -42,7 +43,6 @@ Imports:
     ncdf4,
     parallel,
     posterior,
-    proto (>= 1.0.0),
     sf (>= 1.0),
     stars (>= 0.5),
     stats,
@@ -51,7 +51,7 @@ Imports:
     uuid, 
     utils
 Depends:
-    R(>= 4.1.0)
+    R (>= 4.1.0)
 Suggests:
     abind,
     BoomSpikeSlab (>= 1.2.4),
@@ -89,31 +89,30 @@ Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
-    'bdproto.R'
     'waiver.R'
-    'bdproto-biodiversitydataset.R'
-    'bdproto-biodiversitydistribution.R'
+    'class-biodiversitydataset.R'
+    'class-biodiversitydistribution.R'
     'add_biodiversity.R'
-    'bdproto-biodiversityscenario.R'
+    'class-biodiversityscenario.R'
     'add_constraint.R'
     'add_constraint_MigClim.R'
     'add_control_bias.R'
     'add_control_extrapolation.R'
     'add_latent.R'
-    'bdproto-log.R'
+    'class-log.R'
     'add_log.R'
     'add_offset.R'
-    'bdproto-predictors.R'
+    'class-predictors.R'
     'add_predictors.R'
     'add_predictors_globiom.R'
     'add_predictors_model.R'
-    'bdproto-distributionmodel.R'
-    'bdproto-priorlist.R'
-    'bdproto-prior.R'
+    'class-distributionmodel.R'
+    'class-prior.R'
+    'class-priorlist.R'
     'add_priors.R'
-    'bdproto-engine.R'
-    'bdproto-settings.R'
     'check.R'
+    'class-engine.R'
+    'class-settings.R'
     'distribution.R'
     'effects.R'
     'engine_bart.R'

@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
+#' @include class-biodiversitydistribution.R class-predictors.R class-biodiversityscenario.R
 NULL
 
 #' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution
@@ -117,10 +117,13 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
@@ -166,13 +169,10 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 
@@ -267,15 +267,15 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 

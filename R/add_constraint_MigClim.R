@@ -1,4 +1,4 @@
-#' @include bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Add constrains to the modelled distribution projection using the MigClim
@@ -169,9 +169,8 @@ methods::setMethod(
     cr[['dispersal']] <- list(method = "MigClim",
                               params = params)
 
-    new <- mod$set_constraints(cr)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(cr)
+    return( new )
   }
 )

@@ -1,4 +1,4 @@
-#' @include bdproto-engine.R utils-inla.R bdproto-distributionmodel.R
+#' @include class-engine.R utils-inla.R class-distributionmodel.R
 NULL
 
 #' Use inlabru as engine
@@ -170,1177 +170,1194 @@ engine_inlabru <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Set engine in distribution object
-  x$set_engine(
-    bdproto(
-      "INLABRU-Engine",
-      Engine,
-      name = "<INLABRU>",
-      data = list(
-        'mesh' = mesh,
-        'mesh.area' = ar,
-        'proj_stepsize' = proj_stepsize,
-        'params' = params
-      ),
-      # Function to create a mesh
-      create_mesh = function(self, model){
-        assertthat::assert_that(is.list(model),
-                                "background" %in% names(model))
-        # Check if mesh is already present, if so use it
-        if(!is.Waiver(self$get_data("mesh"))) return()
-        # Create a new mesh based on the available data
+  # Define new engine object of class
+  eg <- Engine
 
-        # Get parameters
-        params <- self$get_data("params")
+  # Function to create a mesh
+  eg$set("public", "create_mesh", function(model){
+    assertthat::assert_that(is.list(model),
+                            "background" %in% names(model))
+    # Check if mesh is already present, if so use it
+    if(!is.Waiver(self$get_data("mesh"))) return()
+    # Create a new mesh based on the available data
 
-        # Convert the study region
-        region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
+    # Get parameters
+    params <- self$get_data("params")
 
-        # Convert to boundary object for later
-        suppressWarnings(
-          bdry <- INLA::inla.sp2segment(
-            sp = region.poly,
-            join = TRUE,
-            crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
-          )
+    # Convert the study region
+    region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
+
+    # Convert to boundary object for later
+    suppressWarnings(
+      bdry <- INLA::inla.sp2segment(
+        sp = region.poly,
+        join = TRUE,
+        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
+      )
+    )
+    bdry$loc <- INLA::inla.mesh.map(bdry$loc)
+
+    # Get all coordinates of observations
+    locs <- collect_occurrencepoints(model, include_absences = FALSE,
+                                     tosf = FALSE)
+    locs <- locs[,c("x","y")] # Take only the coordinates
+
+    # Try and infer mesh parameters if not set
+    if(is.null(params$max.edge)){
+      # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
+      max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
+      params$max.edge <- max.edge
+    }
+    if(is.null(params$offset)){
+      # Check whether the coordinate system is longlat
+      if( sf::st_is_longlat(bdry$crs) ){
+        # Specify offset as 1/100 of the boundary distance
+        offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                     diff(range(bdry$loc[,1]))*0.01)
+      } else {
+        offset <- c( diff(range(bdry$loc[,1]))*0.01,
+                     diff(range(bdry$loc[,1]))*0.01)
+      }
+      params$offset <- offset
+    }
+
+    if(is.null(params$cutoff)){
+      # Specify as minimum distance between y coordinates
+      # Thus capturing most points on this level
+      # otherwise set to default
+      val <- min(abs(diff(locs[,2])))
+      cutoff <- ifelse(val == 0, 1e-12, val)
+      params$cutoff <- cutoff
+    }
+
+    suppressWarnings(
+      mesh <- INLA::inla.mesh.2d(
+        # Point localities
+        loc = locs,
+        # Boundary object
+        boundary = bdry,
+        # Mesh Parameters
+        max.edge = params$max.edge,
+        offset = params$offset,
+        cutoff = params$cutoff,
+        # Define the CRS
+        crs = bdry$crs
+      )
+    )
+    # Calculate area
+    # ar <- suppressMessages(
+    #         suppressWarnings(
+    #           mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
+    #         )
+    #       )
+    # 06/01/2023: This should work and is identical to inlabru::ipoints
+    ar <- suppressWarnings(
+      inlabru::ipoints(samplers = mesh)$weight |> as.vector()
+    )
+    assertthat::assert_that(length(ar) == mesh$n)
+
+    # Now set the output
+    self$set_data("mesh", mesh)
+    self$set_data("mesh.area", ar)
+
+    invisible()
+  },overwrite = TRUE)
+
+  # Generic plotting function for the mesh
+  eg$set("public", "plot", function(assess = FALSE){
+    if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
+    if(assess){
+      # For an INLA mesh assessment
+      out <- INLA::inla.mesh.assessment(
+        mesh = self$get_data('mesh'),
+        spatial.range = 3,
+        alpha = 2,
+        dims = c(300, 300)
+      )
+      # Convert to raster stack
+      out <- terra::rast(
+        sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
+                                    proj4string = terra::crs(self$get_data('mesh')$crs) )
+      )
+
+      terra::plot(out[[c('sd','sd.dev','edge.len')]],
+                  col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
+      )
+    } else {
+      INLA:::plot.inla.mesh( self$get_data('mesh') )
+    }
+  },overwrite = TRUE)
+
+  # Spatial latent function
+  # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
+  # Default SPDE prior
+  # It computes the approximate diameter of the mesh, multiplies by 0.2 to get a value for the prior median range, and then transforms it to log-kappa scale by the formula
+  # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
+  eg$set("public", "calc_latent_spatial", function(type = 'spde', alpha = 2,
+                                    priors = NULL,
+                                    polynames = NULL,
+                                    varname = "spatial.field1",
+                                    ...){
+    # Catch prior objects
+    if(is.null(priors) || is.Waiver(priors)) priors <- NULL
+
+    # For calculating iCAR process
+    if(type == 'car'){
+      # convert mesh to sf object
+      ns <- mesh_as_sf(self$data$mesh)
+      # Create adjacency matrix with queen's case
+      nc.nb <- spdep::poly2nb(ns, queen = TRUE)
+      #Convert the adjacency matrix into a file in the INLA format
+      adjmat <- spdep::nb2mat(nc.nb,style = "B")
+      adjmat <- methods::as(adjmat, "dgTMatrix")
+      # adjmat <- INLA::inla.graph2matrix(nc.nb)
+      # Save the adjaceny matrix as output
+      self$data$latentspatial <- adjmat
+      self$data$s.index <- as.numeric(attr(nc.nb,varname))
+    } else if(type=='spde'){
+      # Check that everything is correctly specified
+      if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
+
+      # Use default spde
+      if(is.null(priors) || is.Waiver(priors)){
+        # Define PC Matern SPDE model and save
+        self$data$latentspatial <- INLA::inla.spde2.matern(
+          mesh = self$data$mesh,
+          alpha = alpha
         )
-        bdry$loc <- INLA::inla.mesh.map(bdry$loc)
-
-        # Get all coordinates of observations
-        locs <- collect_occurrencepoints(model, include_absences = FALSE,
-                                         tosf = FALSE)
-        locs <- locs[,c("x","y")] # Take only the coordinates
-
-        # Try and infer mesh parameters if not set
-        if(is.null(params$max.edge)){
-          # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
-          max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
-          params$max.edge <- max.edge
-        }
-        if(is.null(params$offset)){
-          # Check whether the coordinate system is longlat
-          if( sf::st_is_longlat(bdry$crs) ){
-            # Specify offset as 1/100 of the boundary distance
-            offset <- c( diff(range(bdry$loc[,1]))*0.01,
-                         diff(range(bdry$loc[,1]))*0.01)
-          } else {
-            offset <- c( diff(range(bdry$loc[,1]))*0.01,
-                         diff(range(bdry$loc[,1]))*0.01)
-          }
-          params$offset <- offset
-        }
-
-        if(is.null(params$cutoff)){
-          # Specify as minimum distance between y coordinates
-          # Thus capturing most points on this level
-          # otherwise set to default
-          val <- min(abs(diff(locs[,2])))
-          cutoff <- ifelse(val == 0, 1e-12, val)
-          params$cutoff <- cutoff
-        }
-
-        suppressWarnings(
-          mesh <- INLA::inla.mesh.2d(
-            # Point localities
-            loc = locs,
-            # Boundary object
-            boundary = bdry,
-            # Mesh Parameters
-            max.edge = params$max.edge,
-            offset = params$offset,
-            cutoff = params$cutoff,
-            # Define the CRS
-            crs = bdry$crs
-          )
-        )
-        # Calculate area
-        # ar <- suppressMessages(
-        #         suppressWarnings(
-        #           mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
-        #         )
-        #       )
-        # 06/01/2023: This should work and is identical to inlabru::ipoints
-        ar <- suppressWarnings(
-          inlabru::ipoints(samplers = mesh)$weight |> as.vector()
-        )
-        assertthat::assert_that(length(ar) == mesh$n)
-
-        # Now set the output
-        self$set_data("mesh", mesh)
-        self$set_data("mesh.area", ar)
-
-        invisible()
-      },
-      # Generic plotting function for the mesh
-      plot = function(self, assess = FALSE){
-        if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
-        if(assess){
-          # For an INLA mesh assessment
-          out <- INLA::inla.mesh.assessment(
-            mesh = self$get_data('mesh'),
-            spatial.range = 3,
-            alpha = 2,
-            dims = c(300, 300)
-          )
-          # Convert to raster stack
-          out <- terra::rast(
-            sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                        proj4string = terra::crs(self$get_data('mesh')$crs) )
-          )
-
-          terra::plot(out[[c('sd','sd.dev','edge.len')]],
-                       col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
-          )
-        } else {
-          INLA:::plot.inla.mesh( self$get_data('mesh') )
-        }
-      },
-      # Spatial latent function
-      # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
-      # Default SPDE prior
-      # It computes the approximate diameter of the mesh, multiplies by 0.2 to get a value for the prior median range, and then transforms it to log-kappa scale by the formula
-      # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
-      calc_latent_spatial = function(self,type = 'spde', alpha = 2,
-                                     priors = NULL,
-                                     polynames = NULL,
-                                     varname = "spatial.field1",
-                                     ...){
-        # Catch prior objects
-        if(is.null(priors) || is.Waiver(priors)) priors <- NULL
-
-        # For calculating iCAR process
-        if(type == 'car'){
-          # convert mesh to sf object
-          ns <- mesh_as_sf(self$data$mesh)
-          # Create adjacency matrix with queen's case
-          nc.nb <- spdep::poly2nb(ns, queen = TRUE)
-          #Convert the adjacency matrix into a file in the INLA format
-          adjmat <- spdep::nb2mat(nc.nb,style = "B")
-          adjmat <- methods::as(adjmat, "dgTMatrix")
-          # adjmat <- INLA::inla.graph2matrix(nc.nb)
-          # Save the adjaceny matrix as output
-          self$data$latentspatial <- adjmat
-          self$data$s.index <- as.numeric(attr(nc.nb,varname))
-        } else if(type=='spde'){
-          # Check that everything is correctly specified
-          if(!is.null(priors)) if('spde' %notin% priors$varnames() ) priors <- NULL
-
-          # Use default spde
-          if(is.null(priors) || is.Waiver(priors)){
-            # Define PC Matern SPDE model and save
-            self$data$latentspatial <- INLA::inla.spde2.matern(
-              mesh = self$data$mesh,
-              alpha = alpha
-            )
-          } else {
-            # Get priors
-            pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
-            ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
-
-            # Define PC Matern SPDE model and save
-            self$data$latentspatial <- INLA::inla.spde2.pcmatern(
-              mesh = self$data$mesh,
-              alpha = alpha,
-              # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
-              prior.range = pr, prior.sigma = ps
-            )
-          }
-          # Make index for spatial field
-          self$data$s.index <- INLA::inla.spde.make.index(name = varname,
-                                                          n.spde = self$data$latentspatial$n.spde,
-                                                          n.group = 1,
-                                                          n.repl = 1)
-          # Security checks
-          assertthat::assert_that(
-            inherits(self$data$latentspatial,'inla.spde'),
-            length(self$data$s.index[[1]]) == self$data$mesh$n
-          )
-        } else if(type == 'poly'){
-          # Save column names of polynomial transformed coordinates
-          assertthat::assert_that(!is.null(polynames))
-          self$data$latentspatial <- polynames
-        }
-        invisible()
-      },
-      # Get latent spatial equation bit
-      # Set vars to 2 or larger to get copied spde's
-      get_equation_latent_spatial = function(self, method, vars = 1, separate_spde = FALSE){
-        assertthat::assert_that(is.numeric(vars))
-        if(method == 'spde'){
-          assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
-                                  msg = 'Latent spatial has not been calculated.')
-          # SPDE string
-          if(separate_spde){
-            ss <- paste0("f(spatial.field",vars,", model = ",method,")")
-          } else {
-            if(vars >1){
-              ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field1\', model = ",method,", fixed = TRUE)")
-            } else {
-              ss <- paste0("f(spatial.field",vars,", model = ",method,")")
-            }
-          }
-          return(ss)
-
-        } else if(method == 'car'){
-          assertthat::assert_that(inherits(self$data$latentspatial,'dgTMatrix'),
-                                  msg = 'Neighborhood matrix has not been calculated.')
-          return(
-            # BESAG model or BYM model to specify
-            # BYM found to be largely similar to SPDE https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.3081
-            paste0('f(','spatial.field1',', model = "bym", graph = ','adjmat',')')
-          )
-        }
-      },
-      calc_integration_points = function(self, model, mode = 'stack'){
-        # Mode cox process integration
-        if(mode == 'cp'){
-          # Create integration points by using the mesh as sampler
-          suppressWarnings(
-            ips <- inlabru::ipoints(
-              samplers = self$get_data('mesh')
-            )
-          )
-          # Extract predictors add to integration point data
-          d <- get_rastervalue(coords = ips@coords,
-                               env = model$predictors_object$get_data(df = FALSE),
-                               rm.na = FALSE)
-          for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
-          ips@data$Intercept <- 1
-          ips <- subset(ips, stats::complete.cases(ips@data)) # Necessary as some integration points can fall outside land area
-          # Return results
-          return(ips)
-        } else if(mode == 'stack'){
-          # Use INLA make stack function instead. Useful for poisson created data so that
-          # integration points are created as absence. Numerically inefficient though compared to cp
-          # FIXME: Ideally sample from a provided pseudo-background
-          istk <- inla_make_integration_stack(mesh = self$get_data('mesh'),
-                                              mesh.area = self$get_data("mesh.area"),
-                                              model = model,
-                                              id = "istack",
-                                              joint = FALSE)
-          ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
-          ips <- subset(ips, stats::complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
-          # Convert to sp
-          ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
-                                            data = ips[, names(ips) %notin% c('x','y')],
-                                            proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-          )
-          # Select only the predictor names
-          ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
-          ips <- subset(ips, stats::complete.cases(ips@data))
-          abs_E <- ips$e; ips$e <- NULL
-          # Return list of result
-          return(list(ips = ips, E = abs_E))
-        }
-      },
-      # Main inlabru setup ----
-      # Setup computation function
-      setup = function(self, model, settings, ...){
-        assertthat::assert_that(
-          'background' %in% names(model),
-          'biodiversity' %in% names(model),
-          all( sapply(model$biodiversity, function(x) is.formula(x$equation)) ),
-          length(model$biodiversity)>=1,
-          msg = 'Some internal checks failed while setting up the model.'
-        )
-        # Messenger
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
-
-        # Construct likelihoods for each entry in the dataset
-        lhl <- list()
-        for(j in 1:length(model$biodiversity)){
-          # Combine observed and predictors for the
-          df <- cbind(
-            data.frame(observed = model$biodiversity[[j]]$observations[['observed']]),
-            model$biodiversity[[j]]$predictors
-          )
-          # Convert to Spatial points
-          df <- sf::st_as_sf(df,
-                             coords = c('x', 'y'),
-                             # data = df[, names(df) %notin% c('x','y')],
-                             crs = sf::st_crs(self$get_data('mesh')$crs)
-          ) |> methods::as("Spatial")
-          assertthat::assert_that(inherits(df, "sf") || inherits(df, "Spatial"))
-
-          # Options for specifying link function of likelihood
-          o <- inlabru::bru_options_get()
-          # Data type specific. Currently only binomial and poisson supported
-          # FIXME: Code below does not work as intended. Worked in earlier versions. To be debugged later!
-          # FIXME: Apparently the code works when an SPDE is added, thus cp seems to rely on the matter covs
-          # if(model$biodiversity[[j]]$type == 'poipo'){
-          #   ips <- self$calc_integration_points(model, mode = 'cp')
-          #
-          #   # Log gaussian cox process
-          #   lh <- inlabru::like(formula = stats::update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
-          #                       # include = model$biodiversity[[j]]$predictors_names,
-          #                       family = "cp",
-          #                       data = df,
-          #                       # samplers = methods::as(model$background,"Spatial"),
-          #                       # domain = list(coordinates = self$get_data("mesh")),
-          #                       ips = ips,
-          #                       options = o
-          #   )
-          #   assertthat::assert_that(sum(lh$response_data$BRU_response_cp>0)>2,
-          #                           msg = "Found issues with aligning coordinates within the domain most likely.")
-          # # If not poipo but still poisson, prepare data as follows
-          # }
-          if(model$biodiversity[[j]]$family == "poisson"){
-            # Calculate integration points for PPMs and to estimation data.frame
-            ips <- self$calc_integration_points(model, mode = 'stack')
-            abs_E = ips$E; ips <- ips$ips
-            assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
-            new <- sp::rbind.SpatialPointsDataFrame(
-              df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
-              ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
-            # Formulate the likelihood
-            lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
-                                family = model$biodiversity[[j]]$family,
-                                data = new, # Combine presence and absence information
-                                mesh = self$get_data('mesh'),
-                                E = c(model$biodiversity[[j]]$expect, abs_E), # Combine Exposure variants
-                                # include = include[[i]], # Don't need this as all variables included in equation
-                                options = o
-            )
-          } else if(model$biodiversity[[j]]$family == "binomial"){
-            # Set likelihood to cloglog for binomial following Simpson 2016 if multiple likelihoods
-            if(length(model$biodiversity)>1){
-              o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
-            }
-
-            # Formulate the likelihood
-            lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
-                                family = model$biodiversity[[j]]$family,
-                                data = df, # Combine presence and absence information
-                                mesh = self$get_data('mesh'),
-                                Ntrials = model$biodiversity[[j]]$expect,
-                                # include = include[[i]], # Don't need this as all variables in equation are included
-                                options = o
-            )
-          }
-          # Add to list
-          lhl[[j]] <- lh
-        }
-
-        # List of likelihoods
-        self$set_data("likelihoods", inlabru::like_list(lhl) )
-
-        # --- #
-        # Defining the component function
-        if(length(model$biodiversity)>1){
-          comp <- stats::as.formula(
-            paste(' ~ 0 + Intercept(1) ',
-                  ifelse(model$biodiversity[[1]]$use_intercept,
-                         paste("+",paste0('Intercept_',
-                                make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                sapply( model$biodiversity, function(x) x$type ),"(1)",collapse = ' + ')
-                               ),
-                         ""
-                          )
-                  )
-          )
-        } else {
-          comp <- stats::as.formula(
-            paste0( "~ Intercept(1)")
-          )
-        }
-
-        # Add Offset if set
-        if(!is.Waiver(model$offset)){
-          ovn <- "spatial_offset"
-          comp <- stats::update.formula(comp,
-                                 paste(c(' ~ . +', paste0(ovn,'(main = ', ovn, ', model = "offset")')), collapse = " ")
-          )
-        }
-
-        # --- #
-        # Get unified predictors from likelihoods
-        pn <- lapply(lhl, function(x) all.vars(x$formula) ) |> (\(.) do.call(c,.))()  |>  unique()
-        # pn <- lapply(model$biodiversity, function(x) x$predictors_names ) |> do.call(c,.) |> unique()
-        pn <- pn[grep("Intercept|coordinates", pn, invert = TRUE)]
-        assertthat::assert_that(length(pn)>0)
-        model$predictors_types <- model$predictors_types[which(model$predictors_types$predictors %in% pn),]
-
-        # Add Predictors to component
-        for(i in 1:nrow(model$predictors_types)){
-          # For numeric
-          if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
-            # Built component
-            if(settings$get('only_linear') == FALSE){
-              # if there are less than 50 unique values, create linear variable instead
-              if(length(unique(model$predictors[,i])) > 50){
-                m <- paste0("rw1","__",model$predictors_types$predictors[i])
-              } else m <- "linear"
-            } else { m <- 'linear' }
-
-            # Specify priors if set
-            if(!is.Waiver(model$priors)){
-              # If a prior has been specified
-              if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
-                vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
-                ty <- model$priors$types()[names(vn)]
-                if(ty %in% c("gaussian", "normal")){
-                  pp <- paste0(c(
-                    ', mean.linear = ', model$priors$get(vn)[1],', ',
-                    'prec.linear = ', model$priors$get(vn)[2],''
-                  ),collapse = "" )
-                } else if(ty == "clinear"){
-                  pp <- paste0("hyper = list(theta = c(prior = \'clinear\', param = c(",
-                               model$priors$get(vn)[1],", ",model$priors$get(vn)[2],")))")
-                  m <- "clinear"
-                }
-              } else {pp <- "" }
-            } else { pp <- "" }
-            if( m!= "linear" ){
-                # Could add RW effects with pc priors. PC priors are on the KL distance (difference between probability distributions), P(sigma >2)=0.05
-                # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015, so we define it like this here
-                pp <- ', hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
-            }
-            comp <- stats::update.formula(comp,
-                                   paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
-                                                          pp,', model = "',m,'")'), collapse = " ")
-            )
-          } else if( model$predictors_types$type[i] == "factor"){
-            # factor_full uses the full factor. fact_contrast uses the first level as reference
-            # Built component
-            comp <- update(comp,
-                           paste(c(' ~ . + ', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
-            )
-          }
-        }
-
-        # Add spatial effect if set
-        if("latentspatial" %in% self$list_data() ){
-          spde <- self$get_data("latentspatial")
-          assertthat::assert_that(inherits(spde, "inla.spde2"))
-          if(inherits(spde, "inla.spde") ){
-            for(i in 1:length(model$biodiversity)){
-              # Add spatial component term
-              comp <- stats::update.formula(comp,
-                             paste0(c("~ . + "),
-                                    paste0("spatial.field", i,
-                                           "(main = geometry,",
-                                           ifelse( grep('copy', self$get_equation_latent_spatial('spde', vars = i))==1,
-                                                     " copy = \'spatial.field1\', fixed = TRUE,",
-                                                     ""),
-                                           "model = spde)"
-                                    )
-                             )
-              )
-            }
-          } else {
-            # FIXME: Make this more generic so that other latent effects are supported
-            stop("Non-SPDE effects not yet implemented")
-          }
-        }
-        # Set component
-        self$set_data("components", comp)
-
-        # Set number of threads via set.Options
-        inlabru::bru_safe_inla(quietly = TRUE)
-
-
-        # Set number of threads via set.Options
-        INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
-
-        # Set any other bru options via verbosity of fitting
-        inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
-        # Newer inlabru versions support quantiles
-        if(utils::packageVersion("inlabru") > '2.5.2'){
-          inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95))
-        }
-        invisible()
-      },
-      train = function(self, model, settings) {
-        # Check that all inputs are there
-        assertthat::assert_that(
-          inherits(settings,'Settings'),
-          is.list(model),length(model)>1,
-          # Check that model id and setting id are identical
-          settings$modelid == model$id,
-          inherits(self$get_data("likelihoods"), 'list')
-        )
-
-        # Get likelihood
-        likelihoods <- self$get_data("likelihoods")
-
-        # Get model components
-        comp <- self$get_data("components")
-
-        # Get params
-        params <- self$get_data("params")
-
-        # Recreate non-linear variables in case they are set
-        if(settings$get('only_linear') == FALSE){
-          # TODO: Bypass grouping for now until this has been figured out
-          m = INLA::inla.models()
-          m$latent$rw1$min.diff = NULL
-          assign("inla.models", m, INLA::inla.get.inlaEnv())
-
-          for(i in 1:nrow(model$predictors_types)){
-            # if there are less than 50 unique values, create linear variable instead
-            if(length(unique(model$predictors[,i])) > 50){
-              # Create a one-dimensional array
-              m <- INLA::inla.mesh.1d(
-                seq(min(model$predictors[,i],na.rm = TRUE),
-                    max(model$predictors[,i],na.rm = TRUE), length.out = 100),
-                degree = 1)
-              m <- INLA::inla.spde2.matern(m)
-              # Internally assign
-              assign(x = paste0("rw1","__",model$predictors_types$predictors[i]),
-                     value = m )
-              rm(m)
-            }
-          }
-        }
-
-        # Get spatial effect if existent
-        if("latentspatial" %in% self$list_data() ){
-          spde <- self$get_data("latentspatial")
-          assertthat::assert_that(exists("spde"),
-                                  inherits(spde, "inla.spde2")
-          )
-        }
-        # Get options
-        options <- inlabru::bru_options_get()
-        assertthat::assert_that(inlabru::bru_options_check(options))
-        # -------- #
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
-
-        if( settings$get(what='optim_hyperparam')){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing incremental variable selection...')
-
-          # Catch all variables with set priors and keep them!
-          if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
-
-          te <- attr(stats::terms.formula(comp), 'term.label')
-          test_form <- comp
-          # Remove variables that are never removed
-          if(!is.null(keep)){
-            test_form <- stats::update.formula(test_form, paste0(". ~ . - ",
-                                                          paste0(
-                                                            grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
-                                                            collapse = "-"
-                                                          ))
-                                        )
-            te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
-          }
-          te <- te[grep('Intercept',te,ignore.case = T,invert = T)]
-          # --- #
-          # Iterate through unique combinations of variables backwards
-          pb <- progress::progress_bar$new(total = length(te),format = "Backwards eliminating variables... :spin [:elapsedfull]")
-          o <- options; o$bru_verbose <- FALSE
-          o$bru_max_iter <- 2 # Use only two iteration max for the variable selection
-          not_found <- TRUE
-          while(not_found) {
-            pb$tick()
-            # --- #
-            # Base Model #
-            fit <- try({
-              inlabru::bru(components = test_form,
-                                      likelihoods,
-                                      options = o)
-            },silent = TRUE)
-            if("error" %in% names(fit)) {not_found <- FALSE;next()}
-
-            results_base <- data.frame(form = deparse1(test_form),
-                            converged = fit$ok,
-                            waic = fit$waic$waic,
-                            dic = fit$dic$dic,
-                            mean.deviance = fit$dic$mean.deviance )
-            results <- data.frame()
-
-            # Formula terms
-            te <- attr(stats::terms.formula(test_form), 'term.label')
-            te_int <- te[grep('Intercept',te,ignore.case = T, invert = F)] # capture intercept(s)
-            te <- te[grep('Intercept',te,ignore.case = T, invert = T)]
-            assertthat::assert_that(length(te) > 0, length(te_int) > 0)
-
-            # Now for each term in variable list
-            for(vars in te){
-              # New formula
-              new_form <- update(test_form, paste0('~ . - ',vars ))
-              ll <- likelihoods
-
-              try({fit <- inlabru::bru(components = new_form,
-                             ll,
-                             options = o)
-              },silent = TRUE)
-              if("error" %in% names(fit)){
-                results <- rbind(results,
-                                 data.frame( form = deparse1(new_form),
-                                             converged = FALSE,
-                                             waic = NA, dic = NA, mean.deviance = NA )
-                )
-              } else {
-                results <- rbind(results, data.frame(form = deparse1(new_form),
-                                                     converged = fit$ok,
-                                                     waic = fit$waic$waic,
-                                                     dic = fit$dic$dic,
-                                                     mean.deviance = fit$dic$mean.deviance )
-                )
-              }
-              rm(fit)
-            } # End of loop
-
-            if(!is.na(results_base$dic) || nrow(results) > 0) {
-              # Now check whether any of the new models are 'better' than the full model
-              if(results_base$dic <= min(results$dic, na.rm = TRUE)){
-                not_found <- FALSE
-                best_found <- results_base$form
-              } else {
-                # Otherwise continue get best model
-                test_form <- stats::as.formula(results$form[which.min(results$dic)])
-              }
-              rm(results_base, results)
-            } else {
-              # Check whether formula is empty, if yes, set to not_found to FALSE
-              te <- attr(stats::terms.formula(test_form),'term.label')
-              if(length(te)<=4){
-                not_found <- FALSE
-                best_found <- test_form
-              }
-            }
-
-          } # End of While loop
-          # Make sure to add kept variables back
-          if(!is.null(keep)){
-            te <- attr(stats::terms.formula(comp),'term.label')
-            best_found <- stats::update.formula(best_found, paste0(". ~ . + ",
-                                                          paste0(
-                                                            grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
-                                                            collapse = "+"
-                                                          ))
-            )
-          }
-          # Replace component to be tested with best found
-          comp <- stats::as.formula(best_found)
-        }
-
-        # --- #
-        # Fitting bru model
-        try({
-          fit_bru <- inlabru::bru(components = comp,
-                                  likelihoods,
-                                  options = options)
-        }, silent = FALSE)
-        # --- #
-
-        # Security checks
-        if(!exists("fit_bru")){
-          stop('Model did not converge. Try to simplify structure and check priors!')
-        }
-        if(is.null(fit_bru$names.fixed)) stop('Model did not converge. Try to simplify structure and check priors!')
-
-        if(!settings$get('inference_only')){
-          # Messenger
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
-
-          covs <- model$predictors_object$get_data(df = FALSE)
-          covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
-
-          # Build coordinates
-          suppressWarnings(
-            preds <- inla_predpoints(mesh = self$get_data('mesh'),
-                                     background = model$background,
-                                     cov = covs,
-                                     proj_stepsize = self$get_data('proj_stepsize'),
-                                     spatial = TRUE
-            )
-          )
-          # Clamp?
-          if( settings$get("clamp") ) preds@data <- clamp_predictions(model, preds@data)
-
-          # Set target variables to bias_value for prediction if specified
-          if(!is.Waiver(settings$get('bias_variable'))){
-            for(i in 1:length(settings$get('bias_variable'))){
-              if(settings$get('bias_variable')[i] %notin% names(preds)){
-                if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
-                next()
-              }
-              preds[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
-            }
-          }
-          # --- #
-          # Define formula
-          if(params$type == "response"){
-            # Transformation to use for prediction scale
-            # FIXME: This assumes no custom link function has been set!
-            fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-          } else {
-            fun <- "" # Linear predictor
-          }
-
-          # Get variables for inlabru
-          if(length(model$biodiversity)>1){
-            vn <- lapply(model$biodiversity, function(x) x$predictors_names) |> (\(.) do.call(c, .))() |> unique()
-            ii <- paste("Intercept",
-                        # # If multiple datasets, remove intercept
-                        ifelse(length(model$biodiversity)>1,"+ 0", ""),
-                        ifelse(model$biodiversity[[1]]$use_intercept,
-                               paste("+",paste0('Intercept_',
-                                                make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                               ),
-                               ""
-                               )
-            )
-            # Assert that variables are used in the likelihoods
-            assertthat::assert_that(
-              all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
-            )
-          } else {
-            # vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
-            vn <- fit_bru$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
-            ii <- "Intercept"
-          }
-          assertthat::assert_that(all( vn %in% names(preds) ))
-          preds <- subset(preds, select = vn )
-          # Add offset if set
-          if(!is.Waiver(model$offset)){
-            ovn <- "spatial_offset"
-            ofs <- paste0("", ovn," + ")
-          } else { ofs <- ""}
-
-          pfo <- stats::as.formula(
-            paste0("~",fun,"( ",ii, " + ", ofs, paste0(vn, collapse = " + "),
-                   # Add spatial latent effects
-                   ifelse("latentspatial" %in% self$list_data(),
-                          paste("+",paste0("spatial.field",1:length(model$biodiversity),collapse = " + ")),
-                          ""),
-                   ")")
-          )
-          # --- #
-          cores <- if(getOption("ibis.runparallel")) getOption("ibis.nthread") else NULL
-          # Make a prediction
-          suppressWarnings(
-            pred_bru <- inlabru:::predict.bru(
-              object = fit_bru,
-              num.threads = cores,
-              newdata = preds,
-              probs = c(0.05, 0.5, 0.95),
-              formula = pfo,
-              n.samples = 1000 # Pass as parameter?
-            )
-          )
-          pred_bru$cv <- pred_bru$sd / pred_bru$mean
-          # Convert to raster if not set already
-          if(!is.Raster(pred_bru)) pred_bru <- terra::rast(pred_bru)
-
-          # Get only the predicted variables of interest
-          if(utils::packageVersion("inlabru") <= '2.5.2'){
-            # Older version where probs are ignored
-            prediction <- subset(pred_bru, c("mean","sd","q0.025", "median", "q0.975", "cv"))
-            names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
-          } else {
-            prediction <- subset(pred_bru, c("mean","sd","q0.05", "q0.5", "q0.95", "cv") )
-            names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
-          }
-
-        } else {
-          prediction <- NULL
-        }
-
-        # Compute end of computation time
-        settings$set('end.time', Sys.time())
-        # Save the parameters in settings
-        for(entry in names(params)) settings$set(entry, params[[entry]])
-
-        # Definition of INLA Model object ----
-        out <- bdproto(
-          "INLABRU-Model",
-          DistributionModel,
-          id = model$id,
-          model = model,
-          settings = settings,
-          fits = list(
-            "fit_best" = fit_bru,
-            "fit_best_equation" = self$get_data("components"),
-            "mesh"     = self$get_data('mesh'),
-            "spde"     = self$get_data('latentspatial'),
-            "prediction" = prediction
-          ),
-          # Projection function
-          project = function(self, newdata, form = NULL, n.samples = 1000, layer = "mean"){
-            assertthat::assert_that('fit_best' %in% names(self$fits),
-                                    is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
-                                    is.null(form) || is.character(form) || is.formula(form)
-            )
-            # Get model
-            mod <- self$get_data('fit_best')
-            model <- self$model
-            # Also get settings for bias values
-            settings <- self$settings
-
-            # Clamp?
-            if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
-
-            # Set target variables to bias_value for prediction if specified
-            if(!is.Waiver(settings$get('bias_variable'))){
-              for(i in 1:length(settings$get('bias_variable'))){
-                if(settings$get('bias_variable')[i] %notin% names(newdata)){
-                  if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
-                  next()
-                }
-                newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
-              }
-            }
-
-            # If newdata is not yet a SpatialPixel object, transform
-            if(!inherits(newdata,'SpatialPixelsDataFrame')){
-              assertthat::assert_that(
-                assertthat::has_name(newdata,c('x','y'))
-              )
-              # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-              newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
-                                                  data = newdata[, names(newdata) %notin% c('x','y')],
-                                                  proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-              )
-              newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
-              newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
-            }
-            # Check that model variables are in prediction dataset
-            assertthat::assert_that(
-              all(mod$names.fixed[grep('Intercept', mod$names.fixed,invert = TRUE)] %in% names(newdata))
-                  )
-
-            if(is.null(form)){
-              # Try and guess backtransformation
-              backtransf <- ifelse(mod$bru_info$lhoods[[1]]$family == 'poisson','exp','logistic')
-
-              # Build the formula
-              if(length(model$biodiversity)>1){
-                vn <- lapply(model$biodiversity, function(x) x$predictors_names) |>  (\(.) do.call(c, .))() |> unique()
-                ii <- paste("Intercept + ",paste0('Intercept_',
-                                                  make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
-                                                  sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
-                )
-                # Assert that variables are used in the likelihoods
-                assertthat::assert_that(
-                  all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
-                )
-              } else {
-                vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
-                # vn <- mod$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
-                assertthat::assert_that(all(vn %in% mod$names.fixed))
-                ii <- "Intercept"
-              }
-
-              form <- stats::as.formula(
-                paste0("~",backtransf,"( ",ii, " + ", paste0(vn, collapse = " + "),
-                       ifelse(length(mod$summary.spde2.blc)>0, "+ spatial.field", ""),
-                       ")")
-              )
-            }
-
-            # Perform the projection
-            suppressWarnings(
-              out <- inlabru:::predict.bru(
-                object = mod,
-                data = newdata,
-                formula = form,
-                probs = c(0.05,0.5,0.95),
-                n.samples = n.samples
-              )
-            )
-            out$cv <- out$sd / out$mean
-            # Get only the predicted variables of interest
-            if(utils::packageVersion("inlabru") <= '2.5.2'){
-              # Older version where probs are ignored
-              out <- terra::rast(
-                out[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
-              )
-              names(out) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
-            } else {
-              out <- terra::rast(
-                out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
-              )
-              names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
-            }
-            # Return result
-            return(out)
-          },
-          # Partial response
-          partial = function(self, x.var = NULL, constant = NULL, variable_length = 100,
-                             values = NULL, newdata = NULL, plot = TRUE, type = "response"){
-            # We use inlabru's functionalities to sample from the posterior
-            # a given variable. A prediction is made over a generated fitted data.frame
-            # Check that provided model exists and variable exist in model
-            mod <- self$get_data('fit_best')
-            model <- self$model
-            df <- model$biodiversity[[1]]$predictors
-            df <- subset(df, select = mod$names.fixed[mod$names.fixed != "Intercept"])
-
-            assertthat::assert_that(inherits(mod,'bru'),
-                                    'model' %in% names(self),
-                                    is.character(x.var) || is.null(x.var),
-                                    is.numeric(variable_length), variable_length >=1,
-                                    is.null(constant) || is.numeric(constant),
-                                    is.null(newdata) || is.data.frame(newdata),
-                                    is.null(values) || is.numeric(values)
-            )
-
-            # Match variable name
-            # MH: mod$summary.random was empty list which is !is.null, thus changed condition
-            if(length(mod$summary.random) > 0) vn <- names(mod$summary.random) else vn <- ""
-
-            if(is.null(x.var)) {
-              x.var <- colnames(df)
-            } else {
-              x.var <- match.arg(x.var, c(mod$names.fixed, vn), several.ok = TRUE)
-            }
-
-            if(is.null(newdata)){
-              # Calculate range of predictors
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-
-              assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
-
-              df_partial <- list()
-              # Set length out to value length to have equal coverage
-              if(!is.null(values)){  variable_length <- length(values) }
-              # Add all others as constant
-              if(is.null(constant)){
-                for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
-              } else {
-                for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
-              }
-
-              # MH: Make sure same class as if !is.null(newdata)
-              df_partial <- as.data.frame(do.call(cbind, df_partial))
-
-            } else {
-              df_partial <- dplyr::select(newdata, dplyr::any_of(names(df)))
-            }
-
-            # create list to store results
-            o <- vector(mode = "list", length = length(x.var))
-            names(o) <- x.var
-
-             # loop through x.var
-            for(v in x.var) {
-
-              df2 <- df_partial
-
-              if(!is.null(values)){
-                df2[, v] <- values
-              } else {
-                df2[, v] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
-              }
-
-              # MH: What is this? Why is it done inside the loop?
-              if(any(model$predictors_types$type=="factor")){
-                lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-                df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
-              }
-
-              ## plot the unique effect of the covariate
-              fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-              pred_cov <- predict(object = mod,
-                                  newdata = df2,
-                                  formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
-                                  n.samples = 100,
-                                  probs = c(0.05,0.5,0.95)
-              )
-
-              pred_cov$cv <- pred_cov$sd / pred_cov$mean
-              names(pred_cov)[grep(v, names(pred_cov))] <- "partial_effect"
-
-              if(utils::packageVersion("inlabru") <= '2.5.2'){
-                # Older version where probs are ignored
-                pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
-                names(pred_cov) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
-              } else {
-                pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "q0.05", "q0.5", "q0.95", "cv"))
-                names(pred_cov) <- c("partial_effect", "mean", "sd", "lower", "median", "upper", "cv")
-              }
-
-              pred_cov <- cbind(variable = v, pred_cov)
-
-              o[[v]] <- pred_cov
-
-            }
-
-            o <- do.call(what = rbind, args = c(o, make.row.names = FALSE))
-
-            # Do plot and return result
-            if(plot){
-              g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
-                ggplot2::theme_classic() +
-                ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "grey85") +
-                ggplot2::geom_line(ggplot2::aes(y = mean)) +
-                ggplot2::facet_wrap(. ~ variable, scales = "free") +
-                ggplot2::labs(x = "Variable", y = "Partial effect")
-              print(g)
-            }
-            return(o)
-          },
-          # (S)partial effect
-          spartial = function(self, x.var, constant = NULL, newdata = NULL,
-                              plot = TRUE, type = NULL){
-            # We use inlabru's functionalities to sample from the posterior
-            # a given variable. A prediction is made over a generated fitted data.frame
-            # Check that provided model exists and variable exist in model
-            mod <- self$get_data('fit_best')
-            model <- self$model
-            assertthat::assert_that(inherits(mod,'bru'),
-                                    'model' %in% names(self),
-                                    is.character(x.var),
-                                    is.null(constant) || is.numeric(constant),
-                                    is.null(newdata) || is.data.frame(newdata),
-                                    is.null(type) || is.character(type)
-            )
-            # Settings
-            settings <- self$settings
-            # Set type
-            if(is.null(type)) type <- self$settings$get("type")
-            type <- match.arg(type, c("link", "response"), several.ok = FALSE)
-            settings$set("type", type)
-
-            # Match variable name
-            x.var <- match.arg(x.var, mod$names.fixed, several.ok = FALSE)
-
-            # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-            df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                                data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                                proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-            )
-            df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
-            suppressWarnings(
-              df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
-            )
-
-            # Add all others as constant
-            if(is.null(constant)){
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
-            } else {
-              for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
-            }
-            if(any(model$predictors_types$type=="factor")){
-              lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
-              df_partial[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
-                factor(lvl[1], levels = lvl)
-              # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
-            }
-
-            fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-            pred_cov <- inlabru:::predict.bru(mod,
-                                              df_partial,
-                                              stats::as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
-                                              n.samples = 100,
-                                              probs = c(0.05,0.5,0.95)
-            )
-            pred_cov$cv <- pred_cov$sd / pred_cov$mean
-
-            # Do plot and return result
-            if(plot){
-              o <- pred_cov
-              ggplot2::ggplot() +
-                ggplot2::theme_classic() +
-                inlabru::gg(o, ggplot2::aes(fill = mean)) +
-                ggplot2::scale_fill_gradientn(colours = ibis_colours$ohsu_palette) +
-                ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
-            }
-
-            # Depending on the package version return out
-            if(utils::packageVersion("inlabru") <= '2.5.2'){
-              # Older version where probs are ignored
-              return(
-                terra::rast(
-                  pred_cov[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
-                )
-              )
-            } else {
-              return(
-                terra::rast(
-                  pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
-                )
-              )
-            }
-          },
-          # Model convergence check
-          has_converged = function(self){
-            fit <- self$get_data("fit_best")
-            if(is.Waiver(fit)) return(FALSE)
-            return(TRUE)
-          },
-          # Residual function
-          get_residuals = function(self){
-            # Get best object
-            obj <- self$get_data("fit_best")
-            if(is.Waiver(obj)) return(obj)
-            # Get residuals
-            rd <- obj$residuals$deviance.residuals
-            assertthat::assert_that(length(rd)>0)
-            return(rd)
-          },
-          # Get coefficients
-          get_coefficients = function(self){
-            # Returns a vector of the coefficients with direction/importance
-            cofs <- self$summary()
-            cofs <- subset(cofs, select = c("variable", "mean", "sd"))
-            names(cofs) <- c("Feature", "Beta", "Sigma")
-            # Remove intercept(s)
-            int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
-            if(length(int)>0) cofs <- cofs[-int,]
-            return(cofs)
-          },
-          # Function to plot SPDE if existing
-          plot_spatial = function(self, spat = NULL, type = "response", what = "spatial.field1", ...){
-            # Get mesh, domain and model
-            mesh <- self$get_data("mesh")
-            domain <- methods::as(self$model$background, "Spatial")
-            mod <- self$get_data('fit_best')
-            type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
-
-            assertthat::assert_that(!is.null(mod$model.random),
-                                    msg = "No spatial latent was estimated in the model!")
-
-            if(mod$model.random == "SPDE2 model") {
-              assertthat::assert_that(inherits(mod,'bru'),
-                                      inherits(mesh, 'inla.mesh'),
-                                      is.null(spat) || inherits("SpatialPixelsDataFrame"),
-                                      'model' %in% names(self),
-                                      is.character(what)
-              )
-              # Check whether random variable exists, otherwise raise warning
-              if(!(what %in% names(mod$summary.random))){
-                stop(paste0(
-                  "Spatial random effect not found. Set 'what' to one of these: ",
-                  paste0(names(mod$summary.random),collapse = " | ")
-                ))
-              }
-
-              # Predict the spatial intensity surface
-              if(is.null(spat)){
-                spat <- inlabru::pixels(mesh, mask = domain)
-              }
-              # FIXME: Does not work for other link functions
-              if(type == "response") fun <- 'exp' else fun <- ''
-
-              suppressWarnings(
-                lambda <- inlabru:::predict.bru(mod,
-                                                spat,
-                                                stats::as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
-                                                )
-              )
-
-              # Convert to raster stack
-              lambda <- terra::rast(lambda)
-
-              # Also get SPDE posteriors of the matern correlation and coveriance function
-              corplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +
-                ggplot2::ggtitle("Matern correlation")
-              covplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.covariance")) +
-                ggplot2::ggtitle("Matern covariance")
-              inlabru::multiplot(covplot, corplot)
-
-              return(lambda)
-            } else {
-              message("No SPDE effect found.")
-            }
-          }
+      } else {
+        # Get priors
+        pr <- if(is.null(priors)) c(0.01, 0.05) else priors$get('spde','prior.range')
+        ps <- if(is.null(priors)) c(10, 0.05) else priors$get('spde','prior.sigma')
+
+        # Define PC Matern SPDE model and save
+        self$data$latentspatial <- INLA::inla.spde2.pcmatern(
+          mesh = self$data$mesh,
+          alpha = alpha,
+          # P(Range < 1°) = 0.001 and P(sigma > 0.5) = 0.05
+          prior.range = pr, prior.sigma = ps
         )
       }
-    ))
+      # Make index for spatial field
+      self$data$s.index <- INLA::inla.spde.make.index(name = varname,
+                                                      n.spde = self$data$latentspatial$n.spde,
+                                                      n.group = 1,
+                                                      n.repl = 1)
+      # Security checks
+      assertthat::assert_that(
+        inherits(self$data$latentspatial,'inla.spde'),
+        length(self$data$s.index[[1]]) == self$data$mesh$n
+      )
+    } else if(type == 'poly'){
+      # Save column names of polynomial transformed coordinates
+      assertthat::assert_that(!is.null(polynames))
+      self$data$latentspatial <- polynames
+    }
+    invisible()
+  }, overwrite=TRUE)
+
+  # Get latent spatial equation bit
+  # Set vars to 2 or larger to get copied spde's
+  eg$set("public", "get_equation_latent_spatial", function(method, vars = 1, separate_spde = FALSE){
+    assertthat::assert_that(is.numeric(vars))
+    if(method == 'spde'){
+      assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
+                              msg = 'Latent spatial has not been calculated.')
+      # SPDE string
+      if(separate_spde){
+        ss <- paste0("f(spatial.field",vars,", model = ",method,")")
+      } else {
+        if(vars >1){
+          ss <- paste0("f(spatial.field",vars,", copy = \'spatial.field1\', model = ",method,", fixed = TRUE)")
+        } else {
+          ss <- paste0("f(spatial.field",vars,", model = ",method,")")
+        }
+      }
+      return(ss)
+
+    } else if(method == 'car'){
+      assertthat::assert_that(inherits(self$data$latentspatial,'dgTMatrix'),
+                              msg = 'Neighborhood matrix has not been calculated.')
+      return(
+        # BESAG model or BYM model to specify
+        # BYM found to be largely similar to SPDE https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.3081
+        paste0('f(','spatial.field1',', model = "bym", graph = ','adjmat',')')
+      )
+    }
+  },overwrite = TRUE)
+
+  eg$set("public", "calc_integration_points", function(model, mode = 'stack'){
+    # Mode cox process integration
+    if(mode == 'cp'){
+      # Create integration points by using the mesh as sampler
+      suppressWarnings(
+        ips <- inlabru::ipoints(
+          samplers = self$get_data('mesh')
+        )
+      )
+      # Extract predictors add to integration point data
+      d <- get_rastervalue(coords = ips@coords,
+                           env = model$predictors_object$get_data(df = FALSE),
+                           rm.na = FALSE)
+      for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
+      ips@data$Intercept <- 1
+      ips <- subset(ips, stats::complete.cases(ips@data)) # Necessary as some integration points can fall outside land area
+      # Return results
+      return(ips)
+    } else if(mode == 'stack'){
+      # Use INLA make stack function instead. Useful for poisson created data so that
+      # integration points are created as absence. Numerically inefficient though compared to cp
+      # FIXME: Ideally sample from a provided pseudo-background
+      istk <- inla_make_integration_stack(mesh = self$get_data('mesh'),
+                                          mesh.area = self$get_data("mesh.area"),
+                                          model = model,
+                                          id = "istack",
+                                          joint = FALSE)
+      ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
+      ips <- subset(ips, stats::complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
+      # Convert to sp
+      ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
+                                        data = ips[, names(ips) %notin% c('x','y')],
+                                        proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
+      )
+      # Select only the predictor names
+      ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
+      ips <- subset(ips, stats::complete.cases(ips@data))
+      abs_E <- ips$e; ips$e <- NULL
+      # Return list of result
+      return(list(ips = ips, E = abs_E))
+    }
+  },overwrite = TRUE)
+  # Main inlabru setup ----
+  # Setup computation function
+  eg$set("public", "setup", function(model, settings, ...){
+    assertthat::assert_that(
+      'background' %in% names(model),
+      'biodiversity' %in% names(model),
+      all( sapply(model$biodiversity, function(x) is.formula(x$equation)) ),
+      length(model$biodiversity)>=1,
+      msg = 'Some internal checks failed while setting up the model.'
+    )
+    # Messenger
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+
+    # Construct likelihoods for each entry in the dataset
+    lhl <- list()
+    for(j in 1:length(model$biodiversity)){
+      # Combine observed and predictors for the
+      df <- cbind(
+        data.frame(observed = model$biodiversity[[j]]$observations[['observed']]),
+        model$biodiversity[[j]]$predictors
+      )
+      # Convert to Spatial points
+      df <- sf::st_as_sf(df,
+                         coords = c('x', 'y'),
+                         # data = df[, names(df) %notin% c('x','y')],
+                         crs = sf::st_crs(self$get_data('mesh')$crs)
+      ) |> methods::as("Spatial")
+      assertthat::assert_that(inherits(df, "sf") || inherits(df, "Spatial"))
+
+      # Options for specifying link function of likelihood
+      o <- inlabru::bru_options_get()
+      # Data type specific. Currently only binomial and poisson supported
+      # FIXME: Code below does not work as intended. Worked in earlier versions. To be debugged later!
+      # FIXME: Apparently the code works when an SPDE is added, thus cp seems to rely on the matter covs
+      # if(model$biodiversity[[j]]$type == 'poipo'){
+      #   ips <- self$calc_integration_points(model, mode = 'cp')
+      #
+      #   # Log gaussian cox process
+      #   lh <- inlabru::like(formula = stats::update.formula(model$biodiversity[[j]]$equation, "coordinates ~ ."),
+      #                       # include = model$biodiversity[[j]]$predictors_names,
+      #                       family = "cp",
+      #                       data = df,
+      #                       # samplers = methods::as(model$background,"Spatial"),
+      #                       # domain = list(coordinates = self$get_data("mesh")),
+      #                       ips = ips,
+      #                       options = o
+      #   )
+      #   assertthat::assert_that(sum(lh$response_data$BRU_response_cp>0)>2,
+      #                           msg = "Found issues with aligning coordinates within the domain most likely.")
+      # # If not poipo but still poisson, prepare data as follows
+      # }
+      if(model$biodiversity[[j]]$family == "poisson"){
+        # Calculate integration points for PPMs and to estimation data.frame
+        ips <- self$calc_integration_points(model, mode = 'stack')
+        abs_E = ips$E; ips <- ips$ips
+        assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
+        new <- sp::rbind.SpatialPointsDataFrame(
+          df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
+          ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
+        # Formulate the likelihood
+        lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
+                            family = model$biodiversity[[j]]$family,
+                            data = new, # Combine presence and absence information
+                            mesh = self$get_data('mesh'),
+                            E = c(model$biodiversity[[j]]$expect, abs_E), # Combine Exposure variants
+                            # include = include[[i]], # Don't need this as all variables included in equation
+                            options = o
+        )
+      } else if(model$biodiversity[[j]]$family == "binomial"){
+        # Set likelihood to cloglog for binomial following Simpson 2016 if multiple likelihoods
+        if(length(model$biodiversity)>1){
+          o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
+        }
+
+        # Formulate the likelihood
+        lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
+                            family = model$biodiversity[[j]]$family,
+                            data = df, # Combine presence and absence information
+                            mesh = self$get_data('mesh'),
+                            Ntrials = model$biodiversity[[j]]$expect,
+                            # include = include[[i]], # Don't need this as all variables in equation are included
+                            options = o
+        )
+      }
+      # Add to list
+      lhl[[j]] <- lh
+    }
+
+    # List of likelihoods
+    self$set_data("likelihoods", inlabru::like_list(lhl) )
+
+    # --- #
+    # Defining the component function
+    if(length(model$biodiversity)>1){
+      comp <- stats::as.formula(
+        paste(' ~ 0 + Intercept(1) ',
+              ifelse(model$biodiversity[[1]]$use_intercept,
+                     paste("+",paste0('Intercept_',
+                                      make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                      sapply( model$biodiversity, function(x) x$type ),"(1)",collapse = ' + ')
+                     ),
+                     ""
+              )
+        )
+      )
+    } else {
+      comp <- stats::as.formula(
+        paste0( "~ Intercept(1)")
+      )
+    }
+
+    # Add Offset if set
+    if(!is.Waiver(model$offset)){
+      ovn <- "spatial_offset"
+      comp <- stats::update.formula(comp,
+                                    paste(c(' ~ . +', paste0(ovn,'(main = ', ovn, ', model = "offset")')), collapse = " ")
+      )
+    }
+
+    # --- #
+    # Get unified predictors from likelihoods
+    pn <- lapply(lhl, function(x) all.vars(x$formula) ) |> (\(.) do.call(c,.))()  |>  unique()
+    # pn <- lapply(model$biodiversity, function(x) x$predictors_names ) |> do.call(c,.) |> unique()
+    pn <- pn[grep("Intercept|coordinates", pn, invert = TRUE)]
+    assertthat::assert_that(length(pn)>0)
+    model$predictors_types <- model$predictors_types[which(model$predictors_types$predictors %in% pn),]
+
+    # Add Predictors to component
+    for(i in 1:nrow(model$predictors_types)){
+      # For numeric
+      if(model$predictors_types$type[i] == 'numeric' | model$predictors_types$type[i] == 'integer') {
+        # Built component
+        if(settings$get('only_linear') == FALSE){
+          # if there are less than 50 unique values, create linear variable instead
+          if(length(unique(model$predictors[,i])) > 50){
+            m <- paste0("rw1","__",model$predictors_types$predictors[i])
+          } else m <- "linear"
+        } else { m <- 'linear' }
+
+        # Specify priors if set
+        if(!is.Waiver(model$priors)){
+          # If a prior has been specified
+          if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
+            vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
+            ty <- model$priors$types()[names(vn)]
+            if(ty %in% c("gaussian", "normal")){
+              pp <- paste0(c(
+                ', mean.linear = ', model$priors$get(vn)[1],', ',
+                'prec.linear = ', model$priors$get(vn)[2],''
+              ),collapse = "" )
+            } else if(ty == "clinear"){
+              pp <- paste0("hyper = list(theta = c(prior = \'clinear\', param = c(",
+                           model$priors$get(vn)[1],", ",model$priors$get(vn)[2],")))")
+              m <- "clinear"
+            }
+          } else {pp <- "" }
+        } else { pp <- "" }
+        if( m!= "linear" ){
+          # Could add RW effects with pc priors. PC priors are on the KL distance (difference between probability distributions), P(sigma >2)=0.05
+          # Default is a loggamma prior with mu 1, 5e-05. Better would be 1, 0.5 following Caroll 2015, so we define it like this here
+          pp <- ', hyper = list(theta = list(prior = \'loggamma\', param = c(1, 0.5)))'
+        }
+        comp <- stats::update.formula(comp,
+                                      paste(' ~ . +', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i],
+                                                             pp,', model = "',m,'")'), collapse = " ")
+        )
+      } else if( model$predictors_types$type[i] == "factor"){
+        # factor_full uses the full factor. fact_contrast uses the first level as reference
+        # Built component
+        comp <- update(comp,
+                       paste(c(' ~ . + ', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
+        )
+      }
+    }
+
+    # Add spatial effect if set
+    if("latentspatial" %in% self$list_data() ){
+      spde <- self$get_data("latentspatial")
+      assertthat::assert_that(inherits(spde, "inla.spde2"))
+      if(inherits(spde, "inla.spde") ){
+        for(i in 1:length(model$biodiversity)){
+          # Add spatial component term
+          comp <- stats::update.formula(comp,
+                                        paste0(c("~ . + "),
+                                               paste0("spatial.field", i,
+                                                      "(main = geometry,",
+                                                      ifelse( grep('copy', self$get_equation_latent_spatial('spde', vars = i))==1,
+                                                              " copy = \'spatial.field1\', fixed = TRUE,",
+                                                              ""),
+                                                      "model = spde)"
+                                               )
+                                        )
+          )
+        }
+      } else {
+        # FIXME: Make this more generic so that other latent effects are supported
+        stop("Non-SPDE effects not yet implemented")
+      }
+    }
+    # Set component
+    self$set_data("components", comp)
+
+    # Set number of threads via set.Options
+    inlabru::bru_safe_inla(quietly = TRUE)
+
+
+    # Set number of threads via set.Options
+    INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
+
+    # Set any other bru options via verbosity of fitting
+    inlabru::bru_options_set(bru_verbose = settings$get('verbose'))
+    # Newer inlabru versions support quantiles
+    if(utils::packageVersion("inlabru") > '2.5.2'){
+      inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95))
+    }
+    invisible()
+  },overwrite = TRUE)
+
+  eg$set("public", "train", function(model, settings){
+    # Check that all inputs are there
+    assertthat::assert_that(
+      inherits(settings,'Settings'),
+      is.list(model),length(model)>1,
+      # Check that model id and setting id are identical
+      settings$modelid == model$id,
+      inherits(self$get_data("likelihoods"), 'list')
+    )
+
+    # Get likelihood
+    likelihoods <- self$get_data("likelihoods")
+
+    # Get model components
+    comp <- self$get_data("components")
+
+    # Get params
+    params <- self$get_data("params")
+
+    # Recreate non-linear variables in case they are set
+    if(settings$get('only_linear') == FALSE){
+      # TODO: Bypass grouping for now until this has been figured out
+      m = INLA::inla.models()
+      m$latent$rw1$min.diff = NULL
+      assign("inla.models", m, INLA::inla.get.inlaEnv())
+
+      for(i in 1:nrow(model$predictors_types)){
+        # if there are less than 50 unique values, create linear variable instead
+        if(length(unique(model$predictors[,i])) > 50){
+          # Create a one-dimensional array
+          m <- INLA::inla.mesh.1d(
+            seq(min(model$predictors[,i],na.rm = TRUE),
+                max(model$predictors[,i],na.rm = TRUE), length.out = 100),
+            degree = 1)
+          m <- INLA::inla.spde2.matern(m)
+          # Internally assign
+          assign(x = paste0("rw1","__",model$predictors_types$predictors[i]),
+                 value = m )
+          rm(m)
+        }
+      }
+    }
+
+    # Get spatial effect if existent
+    if("latentspatial" %in% self$list_data() ){
+      spde <- self$get_data("latentspatial")
+      assertthat::assert_that(exists("spde"),
+                              inherits(spde, "inla.spde2")
+      )
+    }
+    # Get options
+    options <- inlabru::bru_options_get()
+    assertthat::assert_that(inlabru::bru_options_check(options))
+    # -------- #
+    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
+
+    if( settings$get(what='optim_hyperparam')){
+      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing incremental variable selection...')
+
+      # Catch all variables with set priors and keep them!
+      if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
+
+      te <- attr(stats::terms.formula(comp), 'term.label')
+      test_form <- comp
+      # Remove variables that are never removed
+      if(!is.null(keep)){
+        test_form <- stats::update.formula(test_form, paste0(". ~ . - ",
+                                                             paste0(
+                                                               grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
+                                                               collapse = "-"
+                                                             ))
+        )
+        te <- te[grep(pattern = paste0(keep,collapse = '|'),x = te, invert = TRUE, fixed = TRUE )]
+      }
+      te <- te[grep('Intercept',te,ignore.case = T,invert = T)]
+      # --- #
+      # Iterate through unique combinations of variables backwards
+      pb <- progress::progress_bar$new(total = length(te),format = "Backwards eliminating variables... :spin [:elapsedfull]")
+      o <- options; o$bru_verbose <- FALSE
+      o$bru_max_iter <- 2 # Use only two iteration max for the variable selection
+      not_found <- TRUE
+      while(not_found) {
+        pb$tick()
+        # --- #
+        # Base Model #
+        fit <- try({
+          inlabru::bru(components = test_form,
+                       likelihoods,
+                       options = o)
+        },silent = TRUE)
+        if("error" %in% names(fit)) {not_found <- FALSE;next()}
+
+        results_base <- data.frame(form = deparse1(test_form),
+                                   converged = fit$ok,
+                                   waic = fit$waic$waic,
+                                   dic = fit$dic$dic,
+                                   mean.deviance = fit$dic$mean.deviance )
+        results <- data.frame()
+
+        # Formula terms
+        te <- attr(stats::terms.formula(test_form), 'term.label')
+        te_int <- te[grep('Intercept',te,ignore.case = T, invert = F)] # capture intercept(s)
+        te <- te[grep('Intercept',te,ignore.case = T, invert = T)]
+        assertthat::assert_that(length(te) > 0, length(te_int) > 0)
+
+        # Now for each term in variable list
+        for(vars in te){
+          # New formula
+          new_form <- update(test_form, paste0('~ . - ',vars ))
+          ll <- likelihoods
+
+          try({fit <- inlabru::bru(components = new_form,
+                                   ll,
+                                   options = o)
+          },silent = TRUE)
+          if("error" %in% names(fit)){
+            results <- rbind(results,
+                             data.frame( form = deparse1(new_form),
+                                         converged = FALSE,
+                                         waic = NA, dic = NA, mean.deviance = NA )
+            )
+          } else {
+            results <- rbind(results, data.frame(form = deparse1(new_form),
+                                                 converged = fit$ok,
+                                                 waic = fit$waic$waic,
+                                                 dic = fit$dic$dic,
+                                                 mean.deviance = fit$dic$mean.deviance )
+            )
+          }
+          rm(fit)
+        } # End of loop
+
+        if(!is.na(results_base$dic) || nrow(results) > 0) {
+          # Now check whether any of the new models are 'better' than the full model
+          if(results_base$dic <= min(results$dic, na.rm = TRUE)){
+            not_found <- FALSE
+            best_found <- results_base$form
+          } else {
+            # Otherwise continue get best model
+            test_form <- stats::as.formula(results$form[which.min(results$dic)])
+          }
+          rm(results_base, results)
+        } else {
+          # Check whether formula is empty, if yes, set to not_found to FALSE
+          te <- attr(stats::terms.formula(test_form),'term.label')
+          if(length(te)<=4){
+            not_found <- FALSE
+            best_found <- test_form
+          }
+        }
+
+      } # End of While loop
+      # Make sure to add kept variables back
+      if(!is.null(keep)){
+        te <- attr(stats::terms.formula(comp),'term.label')
+        best_found <- stats::update.formula(best_found, paste0(". ~ . + ",
+                                                               paste0(
+                                                                 grep(pattern = paste0(keep, collapse = '|'),x = te, value = TRUE ),
+                                                                 collapse = "+"
+                                                               ))
+        )
+      }
+      # Replace component to be tested with best found
+      comp <- stats::as.formula(best_found)
+    }
+
+    # --- #
+    # Fitting bru model
+    try({
+      fit_bru <- inlabru::bru(components = comp,
+                              likelihoods,
+                              options = options)
+    }, silent = FALSE)
+    # --- #
+
+    # Security checks
+    if(!exists("fit_bru")){
+      stop('Model did not converge. Try to simplify structure and check priors!')
+    }
+    if(is.null(fit_bru$names.fixed)) stop('Model did not converge. Try to simplify structure and check priors!')
+
+    if(!settings$get('inference_only')){
+      # Messenger
+      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
+
+      covs <- model$predictors_object$get_data(df = FALSE)
+      covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
+
+      # Build coordinates
+      suppressWarnings(
+        preds <- inla_predpoints(mesh = self$get_data('mesh'),
+                                 background = model$background,
+                                 cov = covs,
+                                 proj_stepsize = self$get_data('proj_stepsize'),
+                                 spatial = TRUE
+        )
+      )
+      # Clamp?
+      if( settings$get("clamp") ) preds@data <- clamp_predictions(model, preds@data)
+
+      # Set target variables to bias_value for prediction if specified
+      if(!is.Waiver(settings$get('bias_variable'))){
+        for(i in 1:length(settings$get('bias_variable'))){
+          if(settings$get('bias_variable')[i] %notin% names(preds)){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            next()
+          }
+          preds[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+        }
+      }
+      # --- #
+      # Define formula
+      if(params$type == "response"){
+        # Transformation to use for prediction scale
+        # FIXME: This assumes no custom link function has been set!
+        fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+      } else {
+        fun <- "" # Linear predictor
+      }
+
+      # Get variables for inlabru
+      if(length(model$biodiversity)>1){
+        vn <- lapply(model$biodiversity, function(x) x$predictors_names) |> (\(.) do.call(c, .))() |> unique()
+        ii <- paste("Intercept",
+                    # # If multiple datasets, remove intercept
+                    ifelse(length(model$biodiversity)>1,"+ 0", ""),
+                    ifelse(model$biodiversity[[1]]$use_intercept,
+                           paste("+",paste0('Intercept_',
+                                            make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                            sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+                           ),
+                           ""
+                    )
+        )
+        # Assert that variables are used in the likelihoods
+        assertthat::assert_that(
+          all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
+        )
+      } else {
+        # vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
+        vn <- fit_bru$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
+        ii <- "Intercept"
+      }
+      assertthat::assert_that(all( vn %in% names(preds) ))
+      preds <- subset(preds, select = vn )
+      # Add offset if set
+      if(!is.Waiver(model$offset)){
+        ovn <- "spatial_offset"
+        ofs <- paste0("", ovn," + ")
+      } else { ofs <- ""}
+
+      pfo <- stats::as.formula(
+        paste0("~",fun,"( ",ii, " + ", ofs, paste0(vn, collapse = " + "),
+               # Add spatial latent effects
+               ifelse("latentspatial" %in% self$list_data(),
+                      paste("+",paste0("spatial.field",1:length(model$biodiversity),collapse = " + ")),
+                      ""),
+               ")")
+      )
+      # --- #
+      cores <- if(getOption("ibis.runparallel")) getOption("ibis.nthread") else NULL
+      # Make a prediction
+      suppressWarnings(
+        pred_bru <- inlabru:::predict.bru(
+          object = fit_bru,
+          num.threads = cores,
+          newdata = preds,
+          probs = c(0.05, 0.5, 0.95),
+          formula = pfo,
+          n.samples = 1000 # Pass as parameter?
+        )
+      )
+      pred_bru$cv <- pred_bru$sd / pred_bru$mean
+      # Convert to raster if not set already
+      if(!is.Raster(pred_bru)) pred_bru <- terra::rast(pred_bru)
+
+      # Get only the predicted variables of interest
+      if(utils::packageVersion("inlabru") <= '2.5.2'){
+        # Older version where probs are ignored
+        prediction <- subset(pred_bru, c("mean","sd","q0.025", "median", "q0.975", "cv"))
+        names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
+      } else {
+        prediction <- subset(pred_bru, c("mean","sd","q0.05", "q0.5", "q0.95", "cv") )
+        names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+      }
+
+    } else {
+      prediction <- NULL
+    }
+
+    # Compute end of computation time
+    settings$set('end.time', Sys.time())
+    # Save the parameters in settings
+    for(entry in names(params)) settings$set(entry, params[[entry]])
+
+    # Definition of INLA Model object ----
+    obj <- DistributionModel # Make a copy to set new functions
+
+    # Projection function
+    obj$set("public", "project", function(newdata, form = NULL,
+                                          n.samples = 1000, layer = "mean"){
+      assertthat::assert_that('fit_best' %in% names(self$fits),
+                              is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
+                              is.null(form) || is.character(form) || is.formula(form)
+      )
+      # Get model
+      mod <- self$get_data('fit_best')
+      model <- self$model
+      # Also get settings for bias values
+      settings <- self$settings
+
+      # Clamp?
+      if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
+
+      # Set target variables to bias_value for prediction if specified
+      if(!is.Waiver(settings$get('bias_variable'))){
+        for(i in 1:length(settings$get('bias_variable'))){
+          if(settings$get('bias_variable')[i] %notin% names(newdata)){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            next()
+          }
+          newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+        }
+      }
+
+      # If newdata is not yet a SpatialPixel object, transform
+      if(!inherits(newdata,'SpatialPixelsDataFrame')){
+        assertthat::assert_that(
+          assertthat::has_name(newdata,c('x','y'))
+        )
+        # Convert predictors to SpatialPixelsDataFrame as required for inlabru
+        newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
+                                              data = newdata[, names(newdata) %notin% c('x','y')],
+                                              proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
+        )
+        newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
+        newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
+      }
+      # Check that model variables are in prediction dataset
+      assertthat::assert_that(
+        all(mod$names.fixed[grep('Intercept', mod$names.fixed,invert = TRUE)] %in% names(newdata))
+      )
+
+      if(is.null(form)){
+        # Try and guess backtransformation
+        backtransf <- ifelse(mod$bru_info$lhoods[[1]]$family == 'poisson','exp','logistic')
+
+        # Build the formula
+        if(length(model$biodiversity)>1){
+          vn <- lapply(model$biodiversity, function(x) x$predictors_names) |>  (\(.) do.call(c, .))() |> unique()
+          ii <- paste("Intercept + ",paste0('Intercept_',
+                                            make.names(tolower(sapply( model$biodiversity, function(x) x$name ))),'_', # Make intercept from name
+                                            sapply( model$biodiversity, function(x) x$type ),collapse = ' + ')
+          )
+          # Assert that variables are used in the likelihoods
+          assertthat::assert_that(
+            all( vn %in% (lapply(likelihoods, function(x) all.vars(x$formula) ) |>  (\(.) do.call(c, .))() |> unique() ) )
+          )
+        } else {
+          vn <- sapply(model$biodiversity, function(x) x$predictors_names) |> unique()
+          # vn <- mod$names.fixed[grep('Intercept', fit_bru$names.fixed,invert = TRUE)]
+          assertthat::assert_that(all(vn %in% mod$names.fixed))
+          ii <- "Intercept"
+        }
+
+        form <- stats::as.formula(
+          paste0("~",backtransf,"( ",ii, " + ", paste0(vn, collapse = " + "),
+                 ifelse(length(mod$summary.spde2.blc)>0, "+ spatial.field", ""),
+                 ")")
+        )
+      }
+
+      # Perform the projection
+      suppressWarnings(
+        out <- inlabru:::predict.bru(
+          object = mod,
+          data = newdata,
+          formula = form,
+          probs = c(0.05,0.5,0.95),
+          n.samples = n.samples
+        )
+      )
+      out$cv <- out$sd / out$mean
+      # Get only the predicted variables of interest
+      if(utils::packageVersion("inlabru") <= '2.5.2'){
+        # Older version where probs are ignored
+        out <- terra::rast(
+          out[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+        )
+        names(out) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
+      } else {
+        out <- terra::rast(
+          out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
+        )
+        names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+      }
+      # Return result
+      return(out)
+    },overwrite = TRUE)
+
+    # Partial response
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = TRUE, type = "response"){
+      # We use inlabru's functionalities to sample from the posterior
+      # a given variable. A prediction is made over a generated fitted data.frame
+      # Check that provided model exists and variable exist in model
+      mod <- self$get_data('fit_best')
+      model <- self$model
+      df <- model$biodiversity[[1]]$predictors
+      df <- subset(df, select = mod$names.fixed[mod$names.fixed != "Intercept"])
+
+      assertthat::assert_that(inherits(mod,'bru'),
+                              'model' %in% names(self),
+                              is.character(x.var) || is.null(x.var),
+                              is.numeric(variable_length), variable_length >=1,
+                              is.null(constant) || is.numeric(constant),
+                              is.null(newdata) || is.data.frame(newdata),
+                              is.null(values) || is.numeric(values)
+      )
+
+      # Match variable name
+      # MH: mod$summary.random was empty list which is !is.null, thus changed condition
+      if(length(mod$summary.random) > 0) vn <- names(mod$summary.random) else vn <- ""
+
+      if(is.null(x.var)) {
+        x.var <- colnames(df)
+      } else {
+        x.var <- match.arg(x.var, c(mod$names.fixed, vn), several.ok = TRUE)
+      }
+
+      if(is.null(newdata)){
+        # Calculate range of predictors
+        rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                     function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+
+        assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
+
+        df_partial <- list()
+        # Set length out to value length to have equal coverage
+        if(!is.null(values)){  variable_length <- length(values) }
+        # Add all others as constant
+        if(is.null(constant)){
+          for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
+        } else {
+          for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+        }
+
+        # MH: Make sure same class as if !is.null(newdata)
+        df_partial <- as.data.frame(do.call(cbind, df_partial))
+
+      } else {
+        df_partial <- dplyr::select(newdata, dplyr::any_of(names(df)))
+      }
+
+      # create list to store results
+      o <- vector(mode = "list", length = length(x.var))
+      names(o) <- x.var
+
+      # loop through x.var
+      for(v in x.var) {
+
+        df2 <- df_partial
+
+        if(!is.null(values)){
+          df2[, v] <- values
+        } else {
+          df2[, v] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+        }
+
+        # MH: What is this? Why is it done inside the loop?
+        if(any(model$predictors_types$type=="factor")){
+          lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+          df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
+        }
+
+        ## plot the unique effect of the covariate
+        fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+        pred_cov <- predict(object = mod,
+                            newdata = df2,
+                            formula = stats::as.formula( paste("~ ",fun,"(", paste(mod$names.fixed,collapse = " + ") ,")") ),
+                            n.samples = 100,
+                            probs = c(0.05,0.5,0.95)
+        )
+
+        pred_cov$cv <- pred_cov$sd / pred_cov$mean
+        names(pred_cov)[grep(v, names(pred_cov))] <- "partial_effect"
+
+        if(utils::packageVersion("inlabru") <= '2.5.2'){
+          # Older version where probs are ignored
+          pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "median", "q0.025", "q0.975", "cv"))
+          names(pred_cov) <- c("partial_effect", "mean", "sd", "median", "lower", "upper", "cv")
+        } else {
+          pred_cov <- subset(pred_cov, select = c("partial_effect", "mean", "sd", "q0.05", "q0.5", "q0.95", "cv"))
+          names(pred_cov) <- c("partial_effect", "mean", "sd", "lower", "median", "upper", "cv")
+        }
+
+        pred_cov <- cbind(variable = v, pred_cov)
+
+        o[[v]] <- pred_cov
+
+      }
+
+      o <- do.call(what = rbind, args = c(o, make.row.names = FALSE))
+
+      # Do plot and return result
+      if(plot){
+        g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
+          ggplot2::theme_classic() +
+          ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "grey85") +
+          ggplot2::geom_line(ggplot2::aes(y = mean)) +
+          ggplot2::facet_wrap(. ~ variable, scales = "free") +
+          ggplot2::labs(x = "Variable", y = "Partial effect")
+        print(g)
+      }
+      return(o)
+    },overwrite=TRUE)
+
+    # (S)partial effect
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                            plot = TRUE, type = NULL){
+      # We use inlabru's functionalities to sample from the posterior
+      # a given variable. A prediction is made over a generated fitted data.frame
+      # Check that provided model exists and variable exist in model
+      mod <- self$get_data('fit_best')
+      model <- self$model
+      assertthat::assert_that(inherits(mod,'bru'),
+                              'model' %in% names(self),
+                              is.character(x.var),
+                              is.null(constant) || is.numeric(constant),
+                              is.null(newdata) || is.data.frame(newdata),
+                              is.null(type) || is.character(type)
+      )
+      # Settings
+      settings <- self$settings
+      # Set type
+      if(is.null(type)) type <- self$settings$get("type")
+      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+      settings$set("type", type)
+
+      # Match variable name
+      x.var <- match.arg(x.var, mod$names.fixed, several.ok = FALSE)
+
+      # Convert predictors to SpatialPixelsDataFrame as required for inlabru
+      df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
+                                               data = model$predictors[, names(model$predictors) %notin% c('x','y')],
+                                               proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
+      )
+      df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
+      suppressWarnings(
+        df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
+      )
+
+      # Add all others as constant
+      if(is.null(constant)){
+        for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
+      } else {
+        for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+      }
+      if(any(model$predictors_types$type=="factor")){
+        lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+        df_partial[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
+          factor(lvl[1], levels = lvl)
+        # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
+      }
+
+      fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
+      pred_cov <- inlabru:::predict.bru(mod,
+                                        df_partial,
+                                        stats::as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
+                                        n.samples = 100,
+                                        probs = c(0.05,0.5,0.95)
+      )
+      pred_cov$cv <- pred_cov$sd / pred_cov$mean
+
+      # Do plot and return result
+      if(plot){
+        o <- pred_cov
+        ggplot2::ggplot() +
+          ggplot2::theme_classic() +
+          inlabru::gg(o, ggplot2::aes(fill = mean)) +
+          ggplot2::scale_fill_gradientn(colours = ibis_colours$ohsu_palette) +
+          ggplot2::labs(x = "", y = "", title = paste0("Spartial of ", x.var))
+      }
+
+      # Depending on the package version return out
+      if(utils::packageVersion("inlabru") <= '2.5.2'){
+        # Older version where probs are ignored
+        return(
+          terra::rast(
+            pred_cov[,c("mean","sd","q0.025", "median", "q0.975", "cv")] # Columns need to be adapted if quantiles are changed
+          )
+        )
+      } else {
+        return(
+          terra::rast(
+            pred_cov[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")] # Columns need to be adapted if quantiles are changed
+          )
+        )
+      }
+    },overwrite = TRUE)
+
+    # Model convergence check
+    obj$set("public", "has_converged",function(){
+      fit <- self$get_data("fit_best")
+      if(is.Waiver(fit)) return(FALSE)
+      return(TRUE)
+    },overwrite = TRUE)
+
+    # Residual function
+    obj$set("public", "get_residuals",function(){
+      # Get best object
+      obj <- self$get_data("fit_best")
+      if(is.Waiver(obj)) return(obj)
+      # Get residuals
+      rd <- obj$residuals$deviance.residuals
+      assertthat::assert_that(length(rd)>0)
+      return(rd)
+    },overwrite = TRUE)
+
+    # Get coefficients
+    obj$set("public", "get_coefficients", function(){
+      # Returns a vector of the coefficients with direction/importance
+      cofs <- self$summary()
+      cofs <- subset(cofs, select = c("variable", "mean", "sd"))
+      names(cofs) <- c("Feature", "Beta", "Sigma")
+      # Remove intercept(s)
+      int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+      if(length(int)>0) cofs <- cofs[-int,]
+      return(cofs)
+    },overwrite = TRUE)
+
+    # Function to plot SPDE if existing
+    obj$set("public", "plot_spatial", function(spat = NULL, type = "response",
+                                               what = "spatial.field1", ...){
+      # Get mesh, domain and model
+      mesh <- self$get_data("mesh")
+      domain <- methods::as(self$model$background, "Spatial")
+      mod <- self$get_data('fit_best')
+      type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
+
+      assertthat::assert_that(!is.null(mod$model.random),
+                              msg = "No spatial latent was estimated in the model!")
+
+      if(mod$model.random == "SPDE2 model") {
+        assertthat::assert_that(inherits(mod,'bru'),
+                                inherits(mesh, 'inla.mesh'),
+                                is.null(spat) || inherits("SpatialPixelsDataFrame"),
+                                'model' %in% names(self),
+                                is.character(what)
+        )
+        # Check whether random variable exists, otherwise raise warning
+        if(!(what %in% names(mod$summary.random))){
+          stop(paste0(
+            "Spatial random effect not found. Set 'what' to one of these: ",
+            paste0(names(mod$summary.random),collapse = " | ")
+          ))
+        }
+
+        # Predict the spatial intensity surface
+        if(is.null(spat)){
+          spat <- inlabru::pixels(mesh, mask = domain)
+        }
+        # FIXME: Does not work for other link functions
+        if(type == "response") fun <- 'exp' else fun <- ''
+
+        suppressWarnings(
+          lambda <- inlabru:::predict.bru(mod,
+                                          spat,
+                                          stats::as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
+          )
+        )
+
+        # Convert to raster stack
+        lambda <- terra::rast(lambda)
+
+        # Also get SPDE posteriors of the matern correlation and coveriance function
+        corplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +
+          ggplot2::ggtitle("Matern correlation")
+        covplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.covariance")) +
+          ggplot2::ggtitle("Matern covariance")
+        inlabru::multiplot(covplot, corplot)
+
+        return(lambda)
+      } else {
+        message("No SPDE effect found.")
+      }
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "INLABRU-Model")
+    out$id = model$id
+    out$model = model
+    out$settings = settings
+    out$fits = list(
+      "fit_best" = fit_bru,
+      "fit_best_equation" = self$get_data("components"),
+      "mesh"     = self$get_data('mesh'),
+      "spde"     = self$get_data('latentspatial'),
+      "prediction" = prediction
+    )
+    return(out)
+  },overwrite = TRUE)
+
+  # Define engine object
+  eg <- eg$new(engine = "INLABRU-Engine", name = "<INLABRU>")
+  eg$data <- list(
+    'mesh' = mesh,
+    'mesh.area' = ar,
+    'proj_stepsize' = proj_stepsize,
+    'params' = params
+  )
+
+  # Set engine in distribution object
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 }

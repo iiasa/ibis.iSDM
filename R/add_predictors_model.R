@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R
+#' @include class-biodiversitydistribution.R class-predictors.R
 NULL
 
 #' Add predictors from a fitted model to a Biodiversity distribution object
@@ -93,9 +93,12 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors from fitted model...')
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
 
     # Get prediction from model object
@@ -149,17 +152,14 @@ methods::setMethod(
 
     # Get existing predictors
     if(!is.Waiver(x$predictors)){
-      env <- x$predictors$get_data()
+      env <- y$predictors$get_data()
       env <- c(env, prediction)
     }
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    y$set_predictors(pd)
   }
 )

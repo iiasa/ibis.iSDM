@@ -1,4 +1,4 @@
-#' @include bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Simulate population dynamics following the steps approach
@@ -142,10 +142,10 @@ methods::setMethod(
                                   )
                                 )
 
-    new <- mod$set_simulation(sim)
-    return(
-      bdproto(NULL, new)
-    )
+    # Make a clone copy of the object
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_simulation(sim)
+    return(new)
   }
 )
 

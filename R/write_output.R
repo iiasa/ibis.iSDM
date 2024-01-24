@@ -605,9 +605,9 @@ methods::setMethod(
       attr(ras,'transform') <- ats[['transform']]
 
       # Make a new predictors object
-      o <- bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = ras
+      o <- PredictorDataset$new(
+        id = new_id(),
+        data = ras
       )
       assertthat::assert_that(all( o$get_names() %in% model$predictors_names ))
       if(is.Raster(ras)) mod$model$predictors_object <- o

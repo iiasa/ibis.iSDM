@@ -1,4 +1,4 @@
-#' @include bdproto.R bdproto-prior.R
+#' @include class-prior.R
 NULL
 
 #' Monotonic constrained priors for boosted regressions
@@ -59,13 +59,13 @@ methods::setMethod(
     if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'GDBPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'GDBPrior',
       id = new_id(),
       variable = variable,
       value = hyper
     )
+    return(pp)
   }
 )
 
