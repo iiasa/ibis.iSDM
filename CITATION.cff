@@ -66,6 +66,18 @@ references:
   year: '2023'
   version: 0.0.9
 - type: software
+  title: R6
+  abstract: 'R6: Encapsulated Classes with Reference Semantics'
+  notes: Imports
+  url: https://r6.r-lib.org
+  repository: https://CRAN.R-project.org/package=R6
+  authors:
+  - family-names: Chang
+    given-names: Winston
+    email: winston@stdout.org
+  year: '2024'
+  version: '>= 2.5.0'
+- type: software
   title: assertthat
   abstract: 'assertthat: Easy Pre and Post Assertions'
   notes: Imports
@@ -268,22 +280,6 @@ references:
     given-names: Aki
     email: Aki.Vehtari@aalto.fi
   year: '2024'
-- type: software
-  title: proto
-  abstract: 'proto: Prototype Object-Based Programming'
-  notes: Imports
-  url: https://github.com/hadley/proto
-  repository: https://CRAN.R-project.org/package=proto
-  authors:
-  - family-names: Grothendieck
-    given-names: Gabor
-    email: ggrothendieck@gmail.com
-  - family-names: Kates
-    given-names: Louis
-  - family-names: Petzoldt
-    given-names: Thomas
-  year: '2024'
-  version: '>= 1.0.0'
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
