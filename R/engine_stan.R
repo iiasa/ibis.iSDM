@@ -116,27 +116,16 @@ engine_stan <- function(x,
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
 
-  # Define engine object
-  eg <- Engine$new(engine = "STAN-Engine", name = "<STAN>")
-  eg$data <- list(
-    'template' = template
-  )
-  # Stan options
-  eg$stan_param = list(
-    chains = chains, iter = iter,
-    warmup = warmup, init = init,
-    cores = cores, algorithm = algorithm,
-    control = control,
-    type = type
-  )
+  # Define new engine object of class
+  eg <- Engine
 
   # Function to respecify the control parameters
-  eg$set_control = function(chains = 4,
-                         iter = 2000,
-                         warmup = 500,
-                         init = "random",
-                         cores = NULL,
-                         control = NULL){
+  eg$set("public", "set_control", function(chains = 4,
+                            iter = 2000,
+                            warmup = 500,
+                            init = "random",
+                            cores = NULL,
+                            control = NULL){
 
     # Overwrite existing
     self$stan_param <- list(
@@ -146,13 +135,12 @@ engine_stan <- function(x,
       control = control
     )
 
-  }
+  },overwrite = TRUE)
   # Spatial latent effect
-  eg$get_equation_latent_spatial = function(){
-    return( NULL )
-  }
+  eg$set("public", "get_equation_latent_spatial", function(){ return( NULL )},overwrite = TRUE)
+
   # Setup a model
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -478,8 +466,9 @@ engine_stan <- function(x,
 
     # Return modified model object
     return(model)
-  }
-  eg$train = function(model, settings, ...){
+  },overwrite = TRUE)
+
+  eg$set("public", "train", function(model, settings, ...){
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
 
@@ -610,17 +599,11 @@ engine_stan <- function(x,
     settings$set('end.time', Sys.time())
 
     # Definition of STAN Model object ----
-    out <- DistributionModel$new(name = "STAN-Model")
-    out$id = model$id
-    out$model = model
-    out$settings = settings
-    out$fits = list(
-        "fit_best" = fit_stan,
-        "prediction" = prediction,
-        "sm_code" = self$get_data("stancode")
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Project function
-    out$project = function(newdata, offset = NULL, type = NULL, layer = "mean"){
+    obj$set("public", "project", function(newdata, offset = NULL,
+                                          type = NULL, layer = "mean"){
       assertthat::assert_that(
         nrow(newdata) > 0,
         all( c("x", "y") %in% names(newdata) ),
@@ -690,10 +673,10 @@ engine_stan <- function(x,
 
       return(prediction)
 
-    }
+    },overwrite = TRUE)
     # Partial effect
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                       values = NULL, newdata = NULL, plot = FALSE, type = "predictor"){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = FALSE, type = "predictor"){
       # Get model and intercept if present
       mod <- self$get_data('fit_best')
       model <- self$model
@@ -801,10 +784,11 @@ engine_stan <- function(x,
         print(pm)
       }
       return(o) # Return the partial data
-    }
+    },overwrite = TRUE)
+
     # Spatial partial effect plots
-    out$spartial = function(x.var, constant = NULL, newdata = NULL,
-                        plot = TRUE,type = "predictor", ...){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                            plot = TRUE,type = "predictor", ...){
       # Get model object and check that everything is in order
       mod <- self$get_data('fit_best')
       model <- self$model
@@ -871,21 +855,24 @@ engine_stan <- function(x,
                     col = ibis_colours$ohsu_palette)
       }
       return(template)
-    }
+    },overwrite = TRUE)
+
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(){
+    obj$set("public", "get_residuals", function(){
       # Get best object
       message("Not yet implemented.. :-( ")
       new_waiver()
-    }
+    },overwrite = TRUE)
+
     # Get coefficients
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       cofs <- self$summary()
       if(nrow(cofs)==0) return(NULL)
@@ -895,21 +882,46 @@ engine_stan <- function(x,
       int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
       if(length(int)>0) cofs <- cofs[-int,]
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Spatial latent effect
-    out$plot_spatial = function(out, plot = TRUE){
-      return(NULL)
-    }
+    obj$set("public", "plot_spatial", function(out, plot = TRUE){return(NULL)},overwrite = TRUE)
+
     # Custom function to show stan code
-    out$stancode = function(){
-        message(
-          self$get_data("sm_code")
-        )
-      }
+    obj$set("public", "stancode", function(){
+      message(
+        self$get_data("sm_code")
+      )
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "STAN-Model")
+    out$id = model$id
+    out$model = model
+    out$settings = settings
+    out$fits = list(
+      "fit_best" = fit_stan,
+      "prediction" = prediction,
+      "sm_code" = self$get_data("stancode")
+    )
     # Return
     return(out)
-  } # End of Train
+  },overwrite = TRUE) # End of Train
+
+  # Define engine object
+  eg <- eg$new(engine = "STAN-Engine", name = "<STAN>")
+  eg$data <- list(
+    'template' = template
+  )
+  # Stan options
+  eg$stan_param = list(
+    chains = chains, iter = iter,
+    warmup = warmup, init = init,
+    cores = cores, algorithm = algorithm,
+    control = control,
+    type = type
+  )
 
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 }

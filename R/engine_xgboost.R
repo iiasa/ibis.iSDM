@@ -134,29 +134,25 @@ engine_xgboost <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Define engine object
-  eg <- Engine$new(engine = "XGBOOST-Engine", name = "<XGBOOST>")
-  eg$data <- list(
-    'template' = template,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Dummy function for spatial latent effects
-  eg$calc_latent_spatial = function(type = NULL, priors = NULL){
-    new_waiver()
-  }
+  eg$set("public", "calc_latent_spatial", function(type = NULL, priors = NULL){new_waiver()},overwrite = TRUE)
+
   # Dummy function for getting the equation of latent effects
-  eg$get_equation_latent_spatial = function(method){
-    new_waiver()
-  }
+  eg$set("public", "get_equation_latent_spatial", function(method){new_waiver()},overwrite = TRUE)
+
   # Function to respecify the control parameters
-  eg$set_control = function(params){
+  eg$set("public", "set_control", function(params){
     assertthat::assert_that(is.list(params))
     # Overwrite existing
     self$data$params <- params
     invisible()
-  }
+  },overwrite = TRUE)
+
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -463,9 +459,10 @@ engine_xgboost <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  },overwrite = TRUE)
+
   # Training function
-  eg$train = function(model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model)>1,
@@ -641,17 +638,11 @@ engine_xgboost <- function(x,
     for(entry in names(params)) settings$set(entry, params[entry])
 
     # Definition of XGBOOST Model object ----
-    out <- DistributionModel$new(name = "XGBOOST-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings <- settings
-    out$fits <- list(
-        "fit_best" = fit_xgb,
-        "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Partial effects
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
-                       newdata = NULL, plot = TRUE, type = "response"){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
+                           newdata = NULL, plot = TRUE, type = "response"){
       assertthat::assert_that(is.character(x.var) || is.null(x.var))
       if(!is.null(constant)) message("Constant is ignored for xgboost!")
       check_package("pdp")
@@ -754,9 +745,10 @@ engine_xgboost <- function(x,
       }
       # Return the data
       return(pp)
-    }
+    },overwrite = TRUE)
+
     # Spatial partial dependence plot
-    out$spartial = function(x.var, constant = NULL, newdata = NULL, plot = TRUE, ...){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL, plot = TRUE, ...){
       assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               "model" %in% names(self),
                               is.null(newdata) || is.data.frame(newdata))
@@ -815,9 +807,10 @@ engine_xgboost <- function(x,
       }
       # Also return spatial
       return(template)
-    }
+    },overwrite = TRUE)
+
     # Engine-specific projection function
-    out$project = function(newdata, layer = "mean"){
+    obj$set("public", "project", function(newdata, layer = "mean"){
       assertthat::assert_that(!missing(newdata),
                               is.data.frame(newdata) || inherits(newdata, "xgb.DMatrix") )
 
@@ -866,18 +859,20 @@ engine_xgboost <- function(x,
       prediction[] <- pred_xgb
       prediction <- terra::mask(prediction, model$background)
       return(prediction)
-    }
+    },overwrite = TRUE)
+
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       # Get evaluation log
       evl <- fit$evaluation_log
       if(fit$best_iteration >= (nrow(evl)-(nrow(evl)*.01))) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(){
+    obj$set("public", "get_residuals", function(){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -891,9 +886,10 @@ engine_xgboost <- function(x,
 
       fn <- predict(obj, newdata,type = "class")
       return(fn)
-    }
+    },overwrite = TRUE)
+
     # Get coefficients
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data('fit_best')
       # Simply use the weights from the importance estimates
@@ -905,16 +901,34 @@ engine_xgboost <- function(x,
       }
       names(cofs) <- c("Feature", "Beta", "Sigma")
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Save the model object
-    out$save = function(fname, what = "fit_best"){
+    obj$set("public", "save", function(fname, what = "fit_best"){
       assertthat::assert_that(is.character(fname))
       xgboost::xgb.save( self$get_data(what), fname)
-    }
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "XGBOOST-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings <- settings
+    out$fits <- list(
+      "fit_best" = fit_xgb,
+      "prediction" = prediction
+    )
 
     return(out)
-  }
+  },overwrite = TRUE)
+
+  # Define engine object
+  eg <- eg$new(engine = "XGBOOST-Engine", name = "<XGBOOST>")
+  eg$data <- list(
+    'template' = template,
+    'params' = params
+  )
 
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 } # End of function

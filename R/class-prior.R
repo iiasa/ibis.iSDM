@@ -87,7 +87,7 @@ Prior <- R6::R6Class(
         all( !is.nan(x) ),
         all( !is.infinite(x) )
       )
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -105,7 +105,7 @@ Prior <- R6::R6Class(
     #' @return Invisible TRUE
     set = function(x){
       self$value <- x
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -113,7 +113,15 @@ Prior <- R6::R6Class(
     #' @return A [`character`] id.
     get_id = function(){
       return( self$id )
+    },
+
+    #' @description
+    #' Get Name of object
+    #' @return Returns a [`character`] with the class name.
+    get_name = function(){
+      return( self$name )
     }
+
   ),
 
   # Any private entries

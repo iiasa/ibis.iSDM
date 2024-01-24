@@ -62,7 +62,7 @@ Log <- R6::R6Class(
       }
 
       self$output <- output
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -74,7 +74,7 @@ Log <- R6::R6Class(
       base::closeAllConnections()
       # Save waiver again
       self$output <- new_waiver()
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -93,7 +93,7 @@ Log <- R6::R6Class(
                               assertthat::has_extension(value,'txt')
       )
       self$filename <- value
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -101,7 +101,7 @@ Log <- R6::R6Class(
     #' @return Invisible TRUE
     delete = function(){
       if(file.exists(self$filename)) file.remove(self$filename)
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -110,7 +110,7 @@ Log <- R6::R6Class(
     open_system = function(){
       assertthat::assert_that(file.exists(self$filename))
       shell.exec(self$get_filename())
-      invisible()
+      invisible(self)
     }
   ),
 

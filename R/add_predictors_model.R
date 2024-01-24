@@ -93,9 +93,12 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors from fitted model...')
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
 
     # Get prediction from model object
@@ -149,7 +152,7 @@ methods::setMethod(
 
     # Get existing predictors
     if(!is.Waiver(x$predictors)){
-      env <- x$predictors$get_data()
+      env <- y$predictors$get_data()
       env <- c(env, prediction)
     }
 
@@ -157,6 +160,6 @@ methods::setMethod(
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
                                ...)
-    x$set_predictors(pd)
+    y$set_predictors(pd)
   }
 )

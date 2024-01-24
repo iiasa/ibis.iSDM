@@ -117,10 +117,13 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
@@ -169,7 +172,7 @@ methods::setMethod(
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
                                ...)
-    x$set_predictors(pd)
+    y$set_predictors(pd)
   }
 )
 
@@ -264,12 +267,15 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Finally set the data to the BiodiversityScenario object
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
                                timeperiod = timeperiod,
                                ...)
-    x$set_predictors(pd)
+    y$set_predictors(pd)
   }
 )
 

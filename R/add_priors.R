@@ -43,15 +43,18 @@ methods::setMethod(
                             is.null(priors) || inherits(priors, "PriorList") || class(x)[1] %in% getOption("ibis.priors")
     )
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Convert to prior list object
     if( class(x)[1] %in% getOption("ibis.priors") ){
       priors <- priors(priors)
     }
     if(!is.null(priors)){
-      x <- x$set_priors( priors )
+      y <- y$set_priors( priors )
     }
     # Return x with newly added priors
-    x
+    y
   }
 )
 
@@ -119,9 +122,12 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.null(names) || is.vector(names) || is.character(names)
     )
-    x <- x$rm_priors(names)
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
+    y <- y$rm_priors(names)
     # Return x with newly added priors
-    return(x)
+    return(y)
   }
 )
 

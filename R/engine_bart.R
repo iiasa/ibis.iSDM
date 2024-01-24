@@ -112,28 +112,26 @@ engine_bart <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Set engine in distribution object
-  eg <- Engine$new(engine = "BART-Engine", name = "<BART>")
-  eg$data <- list(
-    'template' = template,
-    'dc' = dc,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Dummy function for spatial latent effects
-  eg$calc_latent_spatial = function(type = NULL, priors = NULL){
+  eg$set("public", "calc_latent_spatial", function(type = NULL, priors = NULL){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Dummy function for getting the equation of latent effects
-  eg$get_equation_latent_spatial = function(method){
+  eg$set("public", "get_equation_latent_spatial", function(method){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Function to respecify the control parameters
-  eg$set_control = function(iter = 1000,
-                         nburn = 250,
-                         chains = 4,
-                         cores = dbarts::guessNumCores(),
-                         verbose = TRUE,
-                         ...
+  eg$set("public", "set_control", function(iter = 1000,
+                            nburn = 250,
+                            chains = 4,
+                            cores = dbarts::guessNumCores(),
+                            verbose = TRUE,
+                            ...
   ){
     # Set up boosting control
     dc <- dbarts::dbartsControl(verbose = verbose,
@@ -145,9 +143,10 @@ engine_bart <- function(x,
     )
     # Overwrite existing
     self$data$dc <- dc
-  }
+  }, overwrite = TRUE)
+
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -301,9 +300,9 @@ engine_bart <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  }, overwrite = TRUE)
   # Training function
-  eg$train = function(model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model) > 1,
@@ -522,161 +521,180 @@ engine_bart <- function(x,
     # Also append boosting control option to settings
     for(entry in methods::slotNames(dc)) settings$set(entry, methods::slot(dc,entry))
     for(entry in names(params)) settings$set(entry, params[[entry]])
+
+    # Definition of BART Model object ----
+    obj <- DistributionModel # Make a copy to set new functions
+
+    # Partial effects
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+
+      model <- self$get_data('fit_best')
+
+      assertthat::assert_that(all(x.var %in% attr(model$fit$data@x,'term.labels')) || is.null(x.var),
+                              msg = 'Variable not in predicted model' )
+
+      # Match x.var to argument
+      if(is.null(x.var)){
+        x.var <- attr(model$fit$data@x,'term.labels')
+      } else {
+        x.var <- match.arg(x.var, attr(model$fit$data@x,'term.labels'), several.ok = TRUE)
+      }
+
+      if(is.null(newdata)){
+        bart_partial_effect(model, x.var = x.var,
+                            transform = self$settings$data$binary,
+                            variable_length = variable_length,
+                            values = values,
+                            equal = TRUE,
+                            plot = plot )
+      } else {
+        # Set the values to newdata
+        bart_partial_effect(model, x.var = x.var,
+                            transform = self$settings$data$binary,
+                            values = newdata[[x.var]],
+                            plot = plot)
+      }
+    },
+    overwrite = TRUE)
+
+    # Spatial partial dependence plot option from embercardo
+    obj$set("public", "spartial", function(x.var = NULL, newdata = NULL, equal = FALSE,
+                            smooth = 1, transform = TRUE, type = NULL){
+      fit <- self$get_data('fit_best')
+      model <- self$model
+      if(is.null(newdata)){
+        predictors <- model$predictors_object$get_data()
+      } else {
+        predictors <- newdata
+        assertthat::assert_that(all(x.var %in% colnames(predictors)),
+                                msg = 'Variable not in provided data!')
+      }
+      assertthat::assert_that(all(x.var %in% attr(fit$fit$data@x,'term.labels')),
+                              msg = 'Variable not in predicted model' )
+
+      if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+
+      # Calculate
+      p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)
+
+      terra::plot(p, col = ibis_colours$ohsu_palette,
+                  main = paste0(x.var, collapse ='|'))
+      # Also return spatial
+      return(p)
+    },overwrite = TRUE)
+
+    # Model convergence check
+    obj$set("public", "has_converged", function(){
+      fit <- self$get_data("fit_best")
+      if(is.Waiver(fit)) return(FALSE)
+      return(TRUE)
+    },overwrite = TRUE)
+
+    # Residual function
+    obj$set("public", "get_residuals", function(){
+      # Get best object
+      obj <- self$get_data("fit_best")
+      if(is.Waiver(obj)) return(obj)
+      # Get residuals
+      rd <- stats::residuals(obj)
+      if(length(rd)==0) rd <- new_waiver()
+      return(rd)
+    },overwrite = TRUE)
+
+    # Coefficient function
+    obj$set("public", "get_coefficients", function(){
+      # Returns a vector of the coefficients with direction/importance
+      cofs <- self$summary()
+      cofs$Sigma <- NA
+      names(cofs) <- c("Feature", "Weights")
+      return(cofs)
+    },overwrite = TRUE)
+
+    # Engine-specific projection function
+    obj$set("public", "project", function(newdata, type = "response", layer = 'mean'){
+      assertthat::assert_that(!missing(newdata),
+                              is.data.frame(newdata))
+
+      # get model data
+      model <- self$model
+
+      # Define rowids as those with no missing data
+      rownames(newdata) <- 1:nrow(newdata)
+      newdata$rowid <- as.numeric( rownames(newdata) )
+      newdata <- subset(newdata, stats::complete.cases(newdata))
+
+      # Also get settings for bias values
+      settings <- self$settings
+
+      # Clamp?
+      if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
+
+      if(!is.Waiver(settings$get('bias_variable'))){
+        for(i in 1:length(settings$get('bias_variable'))){
+          if(settings$get('bias_variable')[i] %notin% names(newdata)){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            next()
+          }
+          newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+        }
+      }
+
+      # Make a prediction
+      suppressWarnings(
+        pred_bart <- predict(object = self$get_data('fit_best'),
+                             newdata = newdata,
+                             type = type) |> t()
+      )
+      assertthat::assert_that(nrow(pred_bart) == nrow(newdata))
+      # Fill output with summaries of the posterior
+      prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
+      if(inherits(prediction, "try-error")){
+        prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
+          emptyraster()
+      }
+
+      if(layer == "mean"){
+        prediction[newdata$rowid] <- matrixStats::rowMeans2(pred_bart)
+      } else if(layer == "sd"){
+        prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart)
+      } else if(layer == "q05"){
+        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.05))
+      } else if(layer == "q50" || layer == "median"){
+        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.5))
+      } else if(layer == "q95"){
+        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.95))
+      } else if(layer == "mode"){
+        prediction[newdata$rowid] <- apply(pred_bart, 1, mode)
+      } else if(layer == "cv"){
+        prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
+      } else { message("Custom posterior summary not yet implemented.")}
+      return(prediction)
+    },overwrite = TRUE)
+
     # Create output
-    out <- DistributionModel$new(name = "BART-Model")
+    out <- obj$new(name = "BART-Model")
     out$id <- model$id
     out$model <- model
     out$settings = settings
     out$fits <- list(
-        "fit_best" = fit_bart,
-        "params" = params,
-        "fit_best_equation" = equation,
-        "prediction" = prediction
-      )
-    # Partial effects
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                         values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+      "fit_best" = fit_bart,
+      "params" = params,
+      "fit_best_equation" = equation,
+      "prediction" = prediction
+    )
 
-        model <- self$get_data('fit_best')
-
-        assertthat::assert_that(all(x.var %in% attr(model$fit$data@x,'term.labels')) || is.null(x.var),
-                                msg = 'Variable not in predicted model' )
-
-        # Match x.var to argument
-        if(is.null(x.var)){
-          x.var <- attr(model$fit$data@x,'term.labels')
-        } else {
-          x.var <- match.arg(x.var, attr(model$fit$data@x,'term.labels'), several.ok = TRUE)
-        }
-
-        if(is.null(newdata)){
-          bart_partial_effect(model, x.var = x.var,
-                              transform = self$settings$data$binary,
-                              variable_length = variable_length,
-                              values = values,
-                              equal = TRUE,
-                              plot = plot )
-        } else {
-          # Set the values to newdata
-          bart_partial_effect(model, x.var = x.var,
-                              transform = self$settings$data$binary,
-                              values = newdata[[x.var]],
-                              plot = plot)
-        }
-    }
-
-    # Spatial partial dependence plot option from embercardo
-    out$spartial = function(x.var = NULL, newdata = NULL, equal = FALSE,
-                          smooth = 1, transform = TRUE, type = NULL){
-        fit <- self$get_data('fit_best')
-        model <- self$model
-        if(is.null(newdata)){
-          predictors <- model$predictors_object$get_data()
-        } else {
-          predictors <- newdata
-          assertthat::assert_that(all(x.var %in% colnames(predictors)),
-                                  msg = 'Variable not in provided data!')
-        }
-        assertthat::assert_that(all(x.var %in% attr(fit$fit$data@x,'term.labels')),
-                                msg = 'Variable not in predicted model' )
-
-        if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
-
-        # Calculate
-        p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)
-
-        terra::plot(p, col = ibis_colours$ohsu_palette,
-                    main = paste0(x.var, collapse ='|'))
-        # Also return spatial
-        return(p)
-    }
-
-    # Model convergence check
-    out$has_converged = function(){
-        fit <- self$get_data("fit_best")
-        if(is.Waiver(fit)) return(FALSE)
-        return(TRUE)
-      }
-    # Residual function
-    out$get_residuals = function(){
-        # Get best object
-        obj <- self$get_data("fit_best")
-        if(is.Waiver(obj)) return(obj)
-        # Get residuals
-        rd <- stats::residuals(obj)
-        if(length(rd)==0) rd <- new_waiver()
-        return(rd)
-      }
-    # Coefficient function
-    out$get_coefficients = function(){
-        # Returns a vector of the coefficients with direction/importance
-        cofs <- self$summary()
-        cofs$Sigma <- NA
-        names(cofs) <- c("Feature", "Weights")
-        return(cofs)
-      }
-    # Engine-specific projection function
-    out$project = function(newdata, type = "response", layer = 'mean'){
-        assertthat::assert_that(!missing(newdata),
-                                is.data.frame(newdata))
-
-        # get model data
-        model <- self$model
-
-        # Define rowids as those with no missing data
-        rownames(newdata) <- 1:nrow(newdata)
-        newdata$rowid <- as.numeric( rownames(newdata) )
-        newdata <- subset(newdata, stats::complete.cases(newdata))
-
-        # Also get settings for bias values
-        settings <- self$settings
-
-        # Clamp?
-        if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
-
-        if(!is.Waiver(settings$get('bias_variable'))){
-          for(i in 1:length(settings$get('bias_variable'))){
-            if(settings$get('bias_variable')[i] %notin% names(newdata)){
-              if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
-              next()
-            }
-            newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
-          }
-        }
-
-        # Make a prediction
-        suppressWarnings(
-          pred_bart <- predict(object = self$get_data('fit_best'),
-                               newdata = newdata,
-                               type = type) |> t()
-        )
-        assertthat::assert_that(nrow(pred_bart) == nrow(newdata))
-        # Fill output with summaries of the posterior
-        prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-        if(inherits(prediction, "try-error")){
-          prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-            emptyraster()
-        }
-
-        if(layer == "mean"){
-          prediction[newdata$rowid] <- matrixStats::rowMeans2(pred_bart)
-        } else if(layer == "sd"){
-          prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart)
-        } else if(layer == "q05"){
-          prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.05))
-        } else if(layer == "q50" || layer == "median"){
-          prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.5))
-        } else if(layer == "q95"){
-          prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.95))
-        } else if(layer == "mode"){
-          prediction[newdata$rowid] <- apply(pred_bart, 1, mode)
-        } else if(layer == "cv"){
-          prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
-        } else { message("Custom posterior summary not yet implemented.")}
-        return(prediction)
-      }
     return(out)
-  }
+  }, overwrite = TRUE)
 
-  x$set_engine(eg)
+  # Set engine in distribution object
+  eg <- eg$new(engine = "BART-Engine", name = "<BART>")
+  eg$data <- list(
+    'template' = template,
+    'dc' = dc,
+    'params' = params
+  )
+
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 } # End of function

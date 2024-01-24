@@ -39,6 +39,13 @@ DistributionModel <- R6::R6Class(
     },
 
     #' @description
+    #' Return the name of the model
+    #' @return A [`character`] with the model name used.
+    get_name = function(){
+      return( self$name )
+    },
+
+    #' @description
     #' Print the names and summarizes the model within
     #' @note
     #' Could be further pretified and commands outsourced.
@@ -50,7 +57,7 @@ DistributionModel <- R6::R6Class(
       has_threshold <- grep('threshold',self$show_rasters(),value = TRUE)[1]
 
       # FIXME: Have engine-specific code moved to engine
-      if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model') ){
+      if( self$get_name() == 'INLA-Model' || self$get_name() == 'INLABRU-Model'){
         if( length( self$fits ) != 0 ){
           # Get strongest effects
           ms <- subset(tidy_inla_summary(self$get_data('fit_best')),
@@ -70,7 +77,7 @@ DistributionModel <- R6::R6Class(
                    "")
           ))
         }
-      } else if( inherits(self, 'GDB-Model') ) {
+      } else if( self$get_name() == 'GDB-Model' ) {
 
         # Get Variable importance
         vi <- mboost::varimp(
@@ -89,7 +96,7 @@ DistributionModel <- R6::R6Class(
                  paste0("\n  Threshold created: ",text_green("yes")),
                  "")
         ))
-      } else if( inherits(self, 'BART-Model') ) {
+      } else if( self$get_name() == 'BART-Model' ) {
         # Calculate variable importance from the posterior trees
         vi <- varimp.bart(self$get_data('fit_best'))
 
@@ -104,7 +111,7 @@ DistributionModel <- R6::R6Class(
                  paste0("\n  Threshold created: ",text_green("yes")),
                  "")
         ))
-      } else if( inherits(self, 'STAN-Model') ) {
+      } else if( self$get_name() == 'STAN-Model' ) {
         # Calculate variable importance from the posterior
         vi <- rstan::summary(self$get_data('fit_best'))$summary |> as.data.frame() |>
           tibble::rownames_to_column(var = "parameter") |> as.data.frame()
@@ -125,7 +132,7 @@ DistributionModel <- R6::R6Class(
           '\n     \033[34mPositive:\033[39m ', name_atomic(vi$parameter[vi$mean>0]),
           '\n     \033[31mNegative:\033[39m ', name_atomic(vi$parameter[vi$mean<0])
         ))
-      } else if( inherits(self, 'XGBOOST-Model') ) {
+      } else if( self$get_name() == 'XGBOOST-Model' ) {
         vi <- xgboost::xgb.importance(model = self$get_data('fit_best'),)
 
         message(paste0(
@@ -139,7 +146,7 @@ DistributionModel <- R6::R6Class(
                  paste0("\n  Threshold created: ",text_green("yes")),
                  "")
         ))
-      } else if( inherits(self, 'BREG-Model') ) {
+      } else if( self$get_name() == 'BREG-Model' ) {
         obj <- self$get_data('fit_best')
         # Summarize the beta coefficients from the posterior
         ms <- posterior::summarise_draws(obj$beta) |>
@@ -159,7 +166,7 @@ DistributionModel <- R6::R6Class(
                  paste0("\n  Threshold created: ",text_green("yes")),
                  "")
         ))
-      } else if(inherits(self, 'GLMNET-Model')) {
+      } else if( self$get_name() == 'GLMNET-Model') {
         obj <- self$get_data('fit_best')
 
         # Summarise coefficients within 1 standard deviation
@@ -178,7 +185,7 @@ DistributionModel <- R6::R6Class(
                  "")
         ))
 
-      } else if(inherits(self, 'GLM-Model')) {
+      } else if( self$get_name() == 'GLM-Model' ) {
         obj <- self$get_data('fit_best')
 
         # Summarise coefficients within 1 standard deviation
@@ -280,7 +287,7 @@ DistributionModel <- R6::R6Class(
         )
       } else {
         message("No computed threshold was found!")
-        invisible()
+        invisible(self)
       }
     },
 
@@ -300,15 +307,15 @@ DistributionModel <- R6::R6Class(
         is.character(obj)
       )
       # Distinguishing between model types
-      if(inherits(self, 'GDB-Model')){
+      if(self$get_name() ==  'GDB-Model'){
         clean_mboost_summary( self$get_data(obj) )
-      } else if(inherits(self, 'INLA-Model') || inherits(self, 'INLABRU-Model')){
+      } else if( self$get_name() == 'INLA-Model' || self$get_name() == 'INLABRU-Model'){
         tidy_inla_summary(self$get_data(obj))
-      } else if(inherits(self, 'BART-Model')){
+      } else if( self$get_name() == 'BART-Model'){
         # Number of times each variable is used by a tree split
         # Tends to become less informative with higher numbers of splits
         varimp.bart(self$get_data(obj)) |> tibble::remove_rownames()
-      } else if(inherits(self, 'STAN-Model')){
+      } else if( self$get_name() == 'STAN-Model'){
         vi <- rstan::summary(self$get_data(obj))$summary |> as.data.frame() |>
           tibble::rownames_to_column(var = "parameter") |> as.data.frame()
         # Get beta coefficients only
@@ -320,13 +327,13 @@ DistributionModel <- R6::R6Class(
         vi$parameter <- model$predictors_names
         names(vi) <- make.names(names(vi))
         return( tibble::as_tibble( vi ) )
-      } else if(inherits(self, 'BREG-Model')){
+      } else if( self$get_name() == 'BREG-Model'){
         posterior::summarise_draws(self$get_data(obj)$beta)
-      } else if(inherits(self, "XGBOOST-Model")){
+      } else if( self$get_name() == "XGBOOST-Model"){
         xgboost::xgb.importance(model = self$get_data(obj))
-      } else if(inherits(self, 'GLMNET-Model')){
+      } else if( self$get_name() == 'GLMNET-Model'){
         tidy_glmnet_summary(self$get_data(obj))
-      } else if(inherits(self, 'GLM-Model')){
+      } else if( self$get_name() == 'GLM-Model'){
         tidy_glm_summary(self$get_data(obj))
       }
     },
@@ -339,7 +346,7 @@ DistributionModel <- R6::R6Class(
     #' @return A graphical representation of the coefficents.
     effects = function(x = 'fit_best', what = 'fixed', ...){
       assertthat::assert_that(is.character(what))
-      if(inherits(self, 'GDB-Model')){
+      if( self$get_name() == 'GDB-Model'){
         # How many effects
         n <- length( stats::coef( self$get_data(x) ))
         # Use the base plotting
@@ -350,9 +357,9 @@ DistributionModel <- R6::R6Class(
                              type = 'b',cex.axis=1.5, cex.lab=1.5)
 
         graphics::par(par.ori)#dev.off()
-      } else if(inherits(self, 'INLA-Model')) {
+      } else if( self$get_name() == 'INLA-Model') {
         plot_inla_marginals(self$get_data(x),what = what)
-      } else if(inherits(self, 'GLMNET-Model')) {
+      } else if( self$get_name() == 'GLMNET-Model') {
         if(what == "fixed"){
           ms <- tidy_glm_summary(mod)
           graphics::dotchart(ms$mean,
@@ -360,22 +367,22 @@ DistributionModel <- R6::R6Class(
                              frame.plot = FALSE,
                              color = "grey20")
         } else{ plot(self$get_data(x)) }
-      } else if(inherits(self, 'GLM-Model')) {
+      } else if( self$get_name() == 'GLM-Model') {
         if(what == "fixed"){
           glmnet:::plot.glmnet(self$get_data(x)$glmnet.fit, xvar = "lambda") # Deviance explained
         } else{ plot(self$get_data(x)) }
-      } else if(inherits(self, 'STAN-Model')) {
+      } else if( self$get_name() == 'STAN-Model') {
         # Get true beta parameters
         ra <- grep("beta", names(self$get_data(x)),value = TRUE) # Get range
         rstan::stan_plot(self$get_data(x), pars = ra)
-      } else if(inherits(self, 'INLABRU-Model')) {
+      } else if( self$get_name() == 'INLABRU-Model') {
         # Use inlabru effect plot
         ggplot2::ggplot() +
           inlabru::gg(self$get_data(x)$summary.fixed, bar = TRUE)
-      } else if(inherits(self, 'BART-Model')){
+      } else if( self$get_name() == 'BART-Model'){
         message('Calculating partial dependence plots')
         self$partial(self$get_data(x), x.var = what, ...)
-      } else if(inherits(self, 'BREG-Model')){
+      } else if( self$get_name() == 'BREG-Model'){
         obj <- self$get_data(x)
         if(what == "fixed") what <- "coefficients"
         what <- match.arg(what, choices = c("coefficients", "scaled.coefficients","residuals",
@@ -387,7 +394,7 @@ DistributionModel <- R6::R6Class(
         } else {
           BoomSpikeSlab::plot.lm.spike(obj, y = what)
         }
-      } else if(inherits(self, "XGBOOST-Model")){
+      } else if( self$get_name() == "XGBOOST-Model"){
         # Check whether linear model was fitted, otherwise plot tree
         if( self$settings$get("only_linear") ){
           vi <- self$summary(x)
@@ -504,7 +511,7 @@ DistributionModel <- R6::R6Class(
           self$fits[[val]] <- NULL
         }
       }
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -627,7 +634,7 @@ DistributionModel <- R6::R6Class(
           m <- terra::mask(m, mask, inverse = inverse, ...)
           self$fits[[tr]] <- m
         }
-        invisible()
+        invisible(self)
       }
     },
 
@@ -668,7 +675,7 @@ DistributionModel <- R6::R6Class(
         writeNetCDF(ras, fname = fname, varName = 'ibis.iSDM prediction',
                     varUnit = "Suitability",varLong = "Relative suitable habitat")
       }
-      invisible()
+      invisible(self)
     }
 
   ),

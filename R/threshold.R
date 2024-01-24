@@ -90,7 +90,7 @@ methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
   function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
-    assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
+    assertthat::assert_that(any( obj$get_name() %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
                             is.character(format)
@@ -181,7 +181,7 @@ methods::setMethod(
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj and clean up old thresholds before
     tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
-    new_obj <- obj
+    new_obj <- obj$clone(deep = TRUE)
     if(length(tr_lyr)>0) for(v in tr_lyr) new_obj$rm_threshold()
     new_obj <- new_obj$set_data(paste0("threshold_", method), out)
     # Return altered object
@@ -428,34 +428,36 @@ methods::setMethod(
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
 
+    # Make a clone copy of the object
+    new <- obj$clone(deep = TRUE)
+
     # Unless set, check
     if(is.null(value)){
       # Check that a threshold layer is available and get the methods and data from it
       assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
                                msg = 'Call \' threshold \' for prediction first!')
       # Get threshold layer
-      tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
+      tr_lyr <- grep('threshold', new$get_model()$show_rasters(), value = TRUE)
       if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
-      ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
+      ras_tr <- new$get_model()$get_data( tr_lyr[1] )
       value <- attr(ras_tr[[1]], 'threshold')
       names(value) <- attr(ras_tr[[1]], 'method')
     } else {
       assertthat::assert_that(is.numeric(value))
       names(value) <- "fixed"
       # Check if scenario is already fitted
-      proj <- obj$get_data()
+      proj <- new$get_data()
+
       if(!is.Waiver(proj)){
         # Existing projection ?
         if(getOption('ibis.setupmessages')) myLog('[Threshold]',
                                                   'green',
                                                   'Projection found. Applying threshold!')
-        new <- proj |> dplyr::select(suitability)
-        obj <- obj$apply_threshold(tr = value)
-        return( obj )
-        invisible()
+        new <- new$apply_threshold(tr = value)
+        return( new )
       }
+      rm(proj)
     }
-    new <- obj$clone()
     new$threshold <- value
     return(new)
   }

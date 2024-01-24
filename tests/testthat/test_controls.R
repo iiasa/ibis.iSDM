@@ -31,6 +31,7 @@ test_that('Test controls and limits', {
   y <- x |> add_control_extrapolation(layer = zones, method = "zones")
   expect_false(y$get_limits() |> is.Waiver())
   expect_length(y$get_limits(), 4) # Those are saved in limits in the object
+  expect_true(x$get_limits() |> is.Waiver()) # Check that original object remains correct
 
   # Add mcp limits
   y <- x |> add_control_extrapolation(method = "mcp")

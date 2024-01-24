@@ -83,6 +83,9 @@ methods::setMethod(
       names(layer) <- ori.name
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -90,12 +93,12 @@ methods::setMethod(
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
       of <- c(of, layer)
-      x <- x$set_offset(of)
+      y <- y$set_offset(of)
     } else {
       # Add as a new offset
-      x <- x$set_offset(layer)
+      y <- y$set_offset(layer)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -139,9 +142,12 @@ methods::setMethod(
     ras_range <- terra::mask(ras_range, x$background)
     names(ras_range) <-  "spatial_offset"
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Call with new SpatRaster object
-    x <- add_offset(x, ras_range, add)
-    return(x)
+    y <- add_offset(y, ras_range, add)
+    return(y)
   }
 )
 
@@ -194,8 +200,11 @@ methods::setMethod(
                               msg = paste0("Specified offset ", layer, "not found in the offset list."))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Now remove the offset
-    x$rm_offset()
+    y$rm_offset()
   }
 )
 
@@ -306,6 +315,9 @@ methods::setMethod(
       msg = "Infinite values found in the layer (maybe log of 0?)."
     )
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -313,12 +325,12 @@ methods::setMethod(
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
       suppressWarnings( of <- c( of, layer ) )
-      x <- x$set_offset(of)
+      y <- y$set_offset(of)
     } else {
       # Add as a new offset
-      x <- x$set_offset(layer)
+      y <- y$set_offset(layer)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -451,6 +463,9 @@ methods::setMethod(
       layer <- layer * fraction
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -458,12 +473,12 @@ methods::setMethod(
       layer <- terra::resample(layer, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(layer) <- ori.name # In case the layer name got lost
       suppressWarnings( of <- c( of, layer ) )
-      x <- x$set_offset(of)
+      y <- y$set_offset(of)
     } else {
       # Add as a new offset
-      x <- x$set_offset(layer)
+      y <- y$set_offset(layer)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -670,6 +685,9 @@ methods::setMethod(
 
     ras_range <- terra::mask(ras_range, x$background)
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -678,12 +696,12 @@ methods::setMethod(
       ras_range <- terra::resample(ras_range, of, method = 'bilinear', threads = getOption("ibis.nthread") )
       names(ras_range) <- ori.name # In case the layer name got lost
       suppressWarnings( of <- c(of, ras_range) )
-      x <- x$set_offset(of)
+      y <- y$set_offset(of)
     } else {
       # Add as a new offset
-      x <- x$set_offset(ras_range)
+      y <- y$set_offset(ras_range)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -935,6 +953,9 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(elev.prior) <- sanitize_names(names(elev.prior))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Check whether an offset exists already
     if(!is.Waiver(x$offset) && add){
       # Add to current object
@@ -942,11 +963,11 @@ methods::setMethod(
       elev.prior <- terra::resample(elev.prior, of, method = 'bilinear', threads = getOption("ibis.nthread"))
       names(elev.prior) <- 'elev.prior' # In case the layer name got lost
       suppressWarnings( of <- c( of, elev.prior ) )
-      x <- x$set_offset(of)
+      y <- y$set_offset(of)
     } else {
       # Add as a new offset
-      x <- x$set_offset(elev.prior)
+      y <- y$set_offset(elev.prior)
     }
-    return(x)
+    return(y)
   }
 )

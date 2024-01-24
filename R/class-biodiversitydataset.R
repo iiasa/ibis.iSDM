@@ -84,7 +84,7 @@ BiodiversityDatasetCollection <- R6::R6Class(
       assertthat::assert_that(assertthat::is.string(x),
                               inherits(value, "BiodiversityDataset"))
       self$data[[x]] <- value
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -142,7 +142,7 @@ BiodiversityDatasetCollection <- R6::R6Class(
         for(id in names(biob)){
           biob[[id]]$mask(mask, inverse = inverse)
         }
-        invisible()
+        invisible(self)
       }
     },
 
@@ -154,7 +154,7 @@ BiodiversityDatasetCollection <- R6::R6Class(
       assertthat::assert_that(is.Id(id) || is.character(id),
                               id %in% names(self$data) )
       self$data[[id]] <- NULL
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -396,14 +396,14 @@ BiodiversityDataset <- R6::R6Class(
 
       self$name <- name
       self$id <- id
-      self$equation <- formula
+      self$equation <- equation
       self$family <- family
       self$link <- link
       self$type <- type
       self$weight <- weight
       self$field_occurrence <- field_occurrence
       self$data <- data
-      self$use_intercept <- separate_intercept
+      self$use_intercept <- use_intercept
       self$pseudoabsence_settings <- pseudoabsence_settings
     },
 
@@ -424,6 +424,7 @@ BiodiversityDataset <- R6::R6Class(
     set_equation = function(x){
       assertthat::assert_that(inherits(x, "formula"))
       self$formula <- x
+      invisible(self)
     },
 
     #' @description
@@ -539,7 +540,7 @@ BiodiversityDataset <- R6::R6Class(
             )
           )
         self$data <- biob
-        invisible()
+        invisible(self)
       }
     }
   ),

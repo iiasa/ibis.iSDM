@@ -31,6 +31,7 @@ Could be further pretified and commands outsourced.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-DistributionModel-new}{\code{DistributionModel$new()}}
+\item \href{#method-DistributionModel-get_name}{\code{DistributionModel$get_name()}}
 \item \href{#method-DistributionModel-print}{\code{DistributionModel$print()}}
 \item \href{#method-DistributionModel-show}{\code{DistributionModel$show()}}
 \item \href{#method-DistributionModel-plot}{\code{DistributionModel$plot()}}
@@ -74,6 +75,19 @@ Initializes the object and creates an empty list
 }
 \subsection{Returns}{
 NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DistributionModel-get_name"></a>}}
+\if{latex}{\out{\hypertarget{method-DistributionModel-get_name}{}}}
+\subsection{Method \code{get_name()}}{
+Return the name of the model
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$get_name()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{character}} with the model name used.
 }
 }
 \if{html}{\out{<hr>}}

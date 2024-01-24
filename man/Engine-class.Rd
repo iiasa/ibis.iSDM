@@ -29,6 +29,7 @@ Basic object for engine, all other engines inherit from here.
 \item \href{#method-Engine-get_data}{\code{Engine$get_data()}}
 \item \href{#method-Engine-list_data}{\code{Engine$list_data()}}
 \item \href{#method-Engine-set_data}{\code{Engine$set_data()}}
+\item \href{#method-Engine-get_self}{\code{Engine$get_self()}}
 \item \href{#method-Engine-clone}{\code{Engine$clone()}}
 }
 }
@@ -146,6 +147,19 @@ Set data for this engine
 }
 \subsection{Returns}{
 Invisible
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Engine-get_self"></a>}}
+\if{latex}{\out{\hypertarget{method-Engine-get_self}{}}}
+\subsection{Method \code{get_self()}}{
+Dummy function to get self object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Engine$get_self()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+This object
 }
 }
 \if{html}{\out{<hr>}}

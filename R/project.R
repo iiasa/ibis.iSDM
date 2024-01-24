@@ -553,7 +553,7 @@ methods::setMethod(
     # --------------------------------- #
 
     # Return output by adding it to the scenario object
-    out <- mod$clone()
+    out <- mod$clone(deep = TRUE)
     out$scenarios <- proj
     out$scenarios_migclim <- mc
     return(out)

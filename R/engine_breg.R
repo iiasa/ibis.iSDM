@@ -92,29 +92,29 @@ engine_breg <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Set engine in distribution object
-  eg <- Engine$new(engine =  "BREG-Engine", name = "<BREG>")
-  eg$data <- data = list(
-    'template' = template,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Dummy function for spatial latent effects
-  eg$calc_latent_spatial = function(type = NULL, priors = NULL){
+  eg$set("public", "calc_latent_spatial", function(type = NULL, priors = NULL){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Dummy function for getting the equation of latent effects
-  eg$get_equation_latent_spatial = function(method){
+  eg$set("public", "get_equation_latent_spatial", function(method){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Function to respecify the control parameters
-  eg$set_control = function(params){
+  eg$set("public", "set_control", function(params){
     assertthat::assert_that(is.list(params))
     # Overwrite existing
     self$data$params <- params
     invisible()
-  }
+  },overwrite = TRUE)
+
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -288,9 +288,10 @@ engine_breg <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  },overwrite = TRUE)
+
   # Training function
-  eg$train = function(model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model)>1,
@@ -326,7 +327,7 @@ engine_breg <- function(x,
     form <- model$biodiversity[[1]]$equation
     df <- cbind(model$biodiversity[[1]]$predictors,
                 data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE])
-                )
+    )
     df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed"))
     w <- model$biodiversity[[1]]$expect # The expected exposure
     # Get full prediction container
@@ -341,7 +342,7 @@ engine_breg <- function(x,
                              priors = model$priors,
                              family = fam,
                              exposure = w
-                             )
+      )
     } else { pp <- NULL }
 
     # Get offset and add it to exposure
@@ -436,7 +437,7 @@ engine_breg <- function(x,
       if(getOption("ibis.runparallel")){
         # Check that future is registered
         if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
-                                                        strategy = getOption("ibis.futurestrategy"))
+                                                       strategy = getOption("ibis.futurestrategy"))
 
         # Run the outgoing command
         # out <- foreach::foreach(s = unique(splits),
@@ -459,7 +460,7 @@ engine_breg <- function(x,
           )
           # Summarize the posterior
           preds <- as.data.frame(
-              cbind(
+            cbind(
               matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
               matrixStats::rowSds(pred_breg, na.rm = TRUE),
               matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
@@ -469,7 +470,7 @@ engine_breg <- function(x,
           names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
           preds$cv <- preds$sd / preds$mean
           return(preds)
-          })
+        })
         out <- do.call(rbind, out)
       } else {
         out <- data.frame()
@@ -520,19 +521,11 @@ engine_breg <- function(x,
     settings$set('end.time', Sys.time())
 
     # Definition of BREG Model object ----
-    out <- DistributionModel$new(name = "BREG-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings <- settings
-    out$fits <- list(
-        "fit_best" = fit_breg,
-        "fit_best_equation" = form,
-        "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
 
     # Partial effects
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                       values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
       assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               is.null(constant) || is.numeric(constant),
                               is.null(type) || is.character(type),
@@ -644,16 +637,17 @@ engine_breg <- function(x,
       }
       # Return the data
       return(o)
-    }
+    },overwrite = TRUE)
+
     # Spatial partial dependence plot
-    out$spartial = function(x.var, constant = NULL, newdata = NULL,
-                        plot = TRUE, type = NULL){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                            plot = TRUE, type = NULL){
       assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               "model" %in% names(self),
                               is.null(constant) || is.numeric(constant),
                               is.logical(plot),
                               is.character(type) || is.null(type)
-                              )
+      )
 
       # Settings
       settings <- self$settings
@@ -727,12 +721,13 @@ engine_breg <- function(x,
       # Do plot and return result
       if(plot){
         terra::plot(template, col = ibis_colours$ohsu_palette,
-             main = paste0("Spartial effect of ", x.var, collapse = ","))
+                    main = paste0("Spartial effect of ", x.var, collapse = ","))
       }
       return(template)
-    }
+    },overwrite = TRUE)
+
     # Get coefficients from breg
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
       cofs <- posterior::summarise_draws(obj$beta)
@@ -742,16 +737,17 @@ engine_breg <- function(x,
       int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
       if(length(int)>0) cofs <- cofs[-int,]
       return(cofs)
-    }
+    },overwrite = TRUE)
 
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(self){
+    obj$set("public", "get_residuals", function(){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -759,9 +755,10 @@ engine_breg <- function(x,
       rd <- obj$deviance.residuals
       assertthat::assert_that(length(rd)>0)
       return(rd)
-    }
+    },overwrite = TRUE)
+
     # Engine-specific projection function
-    project = function(self, newdata, type = NULL, layer = "mean"){
+    obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that("model" %in% names(self),
                               nrow(newdata) > 0,
                               all( c("x", "y") %in% names(newdata) ),
@@ -842,10 +839,28 @@ engine_breg <- function(x,
       names(prediction) <- layer
 
       return(prediction)
-    }
-    return(out)
-  }
+    },overwrite = TRUE)
 
-  x$set_engine(eg)
+    out <- obj$new(name = "BREG-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings <- settings
+    out$fits <- list(
+      "fit_best" = fit_breg,
+      "fit_best_equation" = form,
+      "prediction" = prediction
+    )
+    return(out)
+  },overwrite = TRUE)
+
+  # Set engine in distribution object
+  eg <- eg$new(engine =  "BREG-Engine", name = "<BREG>")
+  eg$data <- list(
+    'template' = template,
+    'params' = params
+  )
+
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 
 } # End of function

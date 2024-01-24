@@ -37,6 +37,7 @@ Engine <- R6::R6Class(
       } else {
         self$name <- name
       }
+      self$engine <- engine
     },
 
     #' @description
@@ -84,7 +85,14 @@ Engine <- R6::R6Class(
     #' @return Invisible
     set_data = function(x, value) {
       self$data[[x]] <- value
-      invisible()
+      invisible(self)
+    },
+
+    #' @description
+    #' Dummy function to get self object
+    #' @return This object
+    get_self = function(){
+      return( self )
     }
   ),
 

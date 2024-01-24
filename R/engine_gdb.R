@@ -114,19 +114,15 @@ engine_gdb <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) message('Replacing currently selected engine.')
 
-  # Set engine in distribution object
-  eg <- Engine$new(engine =  "GDB-Engine", name = "<GDB>")
-  eg$data <- data = list(
-    'template' = template,
-    'bc' = bc,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Function to respecify the control parameters
-  eg$set_control = function(
-                         iter = 20,
-                         learning_rate = 0.1, # Set relatively low to not regularize too much
-                         empirical_risk = 'inbag',
-                         verbose = TRUE
+  eg$set("public", "set_control", function(
+    iter = 20,
+    learning_rate = 0.1, # Set relatively low to not regularize too much
+    empirical_risk = 'inbag',
+    verbose = TRUE
   ){
     # Set up boosting control
     bc <- mboost::boost_control(mstop = iter,
@@ -137,14 +133,14 @@ engine_gdb <- function(x,
     # Overwrite existing
     self$data$bc <- bc
 
-  }
+  },overwrite = TRUE)
+
   # Dummy function for latent factors
-  eg$calc_latent_spatial = function(...){
-    invisible()
-  }
+  eg$set("public", "calc_latent_spatial", function(...){ invisible()},overwrite = TRUE)
+
   # Get equation for spatial effect
-  eg$get_equation_latent_spatial = function(spatial_field = c('x','y'),
-                                         df = 6, knots = 4,...){
+  eg$set("public", "get_equation_latent_spatial", function(spatial_field = c('x','y'),
+                                            df = 6, knots = 4,...){
     return(
       paste0(
         'bspatial(',spatial_field[1],',',spatial_field[2],', center = TRUE, df = ',df,', knots = ',knots,')',
@@ -152,9 +148,10 @@ engine_gdb <- function(x,
         'bols(',spatial_field[1],')', '+', 'bols(',spatial_field[2],')', '+', 'bols(',spatial_field[1],',',spatial_field[2],')'
       )
     )
-  }
+  },overwrite = TRUE)
+
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -305,9 +302,10 @@ engine_gdb <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  },overwrite = TRUE)
+
   # Training function
-  eg$train = function(model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model)>1,
@@ -499,18 +497,10 @@ engine_gdb <- function(x,
     for(entry in names(bc)) settings$set(entry, bc[[entry]])
 
     # Definition of GDB Model object ----
-    out <- DistributionModel$new(name = "GDB-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings <- settings
-    out$fits = list(
-        "fit_best" = fit_gdb,
-        "fit_cv" = cvm,
-        "fit_best_equation" = equation,
-        "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Project function
-    out$project = function(newdata, type = NULL, layer = "mean"){
+    obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that('fit_best' %in% names(self$fits),
                               is.data.frame(newdata) || is.matrix(newdata),
                               assertthat::has_name(newdata,c('x','y'))
@@ -556,10 +546,11 @@ engine_gdb <- function(x,
       temp[as.numeric(newdata$rowid)] <- y[,1]
       names(temp) <- "mean" # Rename to mean, layer parameter gets ignored
       return(temp)
-    }
+    },overwrite = TRUE)
+
     # Partial effect
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
-                       newdata = NULL, plot = FALSE, type = NULL){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100, values = NULL,
+                           newdata = NULL, plot = FALSE, type = NULL){
       # Assert that variable(s) are in fitted model
       assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               inherits(self$get_data('fit_best'), 'mboost'),
@@ -654,14 +645,17 @@ engine_gdb <- function(x,
         print(g)
       }
       return(out)
-    }
+    },overwrite = TRUE)
+
     # Spatial partial effect plots
-    out$spartial = function(x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL, ...){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                                           plot = TRUE, type = NULL, ...){
       assertthat::assert_that('fit_best' %in% names(self$fits),
                               is.character(x.var), length(x.var) == 1)
       # Get model and make empty template
       mod <- self$get_data('fit_best')
       model <- self$model
+      settings <- self$settings
       # Also check that what is present in coefficients of model
       variables <- as.character( mboost::extract(mod,'variable.names') )
       assertthat::assert_that(x.var %in% variables,
@@ -718,18 +712,20 @@ engine_gdb <- function(x,
         graphics::par(par.ori)
       }
       return(template)
-    }
+    },overwrite = TRUE)
+
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       # Get risks
       evl <- fit$risk()
       if(fit$mstop() == length(evl)) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(){
+    obj$set("public", "get_residuals", function(){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -737,9 +733,10 @@ engine_gdb <- function(x,
       rd <- obj$resid()
       assertthat::assert_that(length(rd)>0)
       return(rd)
-    }
+    },overwrite = TRUE)
+
     # Get coefficients
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       cofs <- self$summary()
       if(nrow(cofs)==0) return(NULL)
@@ -750,9 +747,10 @@ engine_gdb <- function(x,
       cofs <- cofs |> dplyr::select(variable, beta)
       names(cofs) <- c("Feature", "Beta")
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Spatial latent effect
-    out$plot_spatial = function(plot = TRUE){
+    obj$set("public", "plot_spatial", function(plot = TRUE){
       assertthat::assert_that('fit_best' %in% names(self$fits) )
       # Get model and make empty template
       mod <- self$get_data('fit_best')
@@ -784,9 +782,30 @@ engine_gdb <- function(x,
       }
       return(template)
 
-    }
-    return(out)
-  }
+    },overwrite = TRUE)
 
-  x$set_engine(eg)
+    out <- obj$new(name = "GDB-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings <- settings
+    out$fits = list(
+      "fit_best" = fit_gdb,
+      "fit_cv" = cvm,
+      "fit_best_equation" = equation,
+      "prediction" = prediction
+    )
+
+    return(out)
+  },overwrite = TRUE)
+
+  # Set engine in distribution object
+  eg <- eg$new(engine =  "GDB-Engine", name = "<GDB>")
+  eg$data <- list(
+    'template' = template,
+    'bc' = bc,
+    'params' = params
+  )
+
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 } # End of function

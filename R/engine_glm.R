@@ -99,31 +99,29 @@ engine_glm <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Define engine object
-  eg <- Engine$new(engine = "GLM-Engine", name = "<GLM>")
-  eg$data <- list(
-    'template' = template,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Dummy function for spatial latent effects
-  eg$calc_latent_spatial = function(type = NULL, priors = NULL){
+  eg$set("public", "calc_latent_spatial", function(type = NULL, priors = NULL){
     new_waiver()
-  }
+  }, overwrite = TRUE)
+
   # Dummy function for getting the equation of latent effects
-  eg$get_equation_latent_spatial = function(method){
+  eg$set("public", "get_equation_latent_spatial", function(method){
     new_waiver()
-  }
+  }, overwrite = TRUE)
+
   # Function to respecify the control parameters
-  eg$set_control = function(params
-  ){
+  eg$set("public", "set_control", function(params){
     assertthat::assert_that(is.list(params))
     # Overwrite existing
     self$data$params <- params
     invisible()
-  }
+  },overwrite = TRUE)
 
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -242,10 +240,10 @@ engine_glm <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  },overwrite = TRUE)
 
   # Training function
-  eg$train = function(model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model)>1,
@@ -404,126 +402,121 @@ engine_glm <- function(x,
     settings$set('end.time', Sys.time())
 
     # Definition of GLMNET Model object ----
-    out <- DistributionModel$new(name = "GLM-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings <- settings
-    out$fits <- list(
-        "fit_best" = fit_glm,
-        "fit_best_equation" = form,
-        "prediction" = prediction
-    )
-    # Partial effects
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                       values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
-      assertthat::assert_that(is.character(x.var) || is.null(x.var),
-                              is.null(constant) || is.numeric(constant),
-                              is.null(type) || is.character(type),
-                              is.null(newdata) || is.data.frame(newdata),
-                              is.numeric(variable_length)
-      )
-      # Settings
-      settings <- self$settings
+    obj <- DistributionModel # Make a copy to set new functions
 
-      mod <- self$get_data('fit_best')
-      model <- self$model
-      co <- stats::coefficients(mod) |> names() # Get model coefficient names
-      # Set type
-      if(is.null(type)) type <- self$settings$get("type")
-      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
-      settings$set("type", type)
+    # Partial effect functions
+    obj$set("public", "partial",
+            function(x.var = NULL, constant = NULL, variable_length = 100,
+                     values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+              assertthat::assert_that(is.character(x.var) || is.null(x.var),
+                                      is.null(constant) || is.numeric(constant),
+                                      is.null(type) || is.character(type),
+                                      is.null(newdata) || is.data.frame(newdata),
+                                      is.numeric(variable_length)
+              )
+              # Settings
+              settings <- self$settings
 
-      # Get data
-      df <- model$biodiversity[[length(model$biodiversity)]]$predictors
-      df <- subset(df, select = attr(mod$terms, "term.labels"))
-      variables <- names(df)
+              mod <- self$get_data('fit_best')
+              model <- self$model
+              co <- stats::coefficients(mod) |> names() # Get model coefficient names
+              # Set type
+              if(is.null(type)) type <- self$settings$get("type")
+              type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+              settings$set("type", type)
 
-      # Match x.var to argument
-      if(is.null(x.var)){
-        x.var <- variables
-      } else {
-        x.var <- match.arg(x.var, variables, several.ok = TRUE)
-      }
+              # Get data
+              df <- model$biodiversity[[length(model$biodiversity)]]$predictors
+              df <- subset(df, select = attr(mod$terms, "term.labels"))
+              variables <- names(df)
 
-      # Calculate range of predictors
-      rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                   function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+              # Match x.var to argument
+              if(is.null(x.var)){
+                x.var <- variables
+              } else {
+                x.var <- match.arg(x.var, variables, several.ok = TRUE)
+              }
 
-      if(is.null(newdata)){
-        # if values are set, make sure that they cover the data.frame
-        if(!is.null(values)){
-          assertthat::assert_that(length(x.var) == 1)
-          df2 <- list()
-          df2[[x.var]] <- values
-          # Then add the others
-          for(var in colnames(df)){
-            if(var == x.var) next()
-            df2[[var]] <- mean(df[[var]], na.rm = TRUE)
-          }
-          df2 <- df2 |> as.data.frame()
-        } else {
-          df2 <- list()
-          for(i in x.var) {
-            df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
-          }
-          df2 <- do.call(cbind, df2); names(df2) <- x.var
-        }
-      } else {
-        # Assume all variables are present
-        df2 <- dplyr::select(newdata, dplyr::any_of(variables))
-        assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
-      }
+              # Calculate range of predictors
+              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
-      # Get offset if set
-      if(!is.Waiver(model$offset)){
-        of <- model$offset$spatial_offset
-      } else of <- new_waiver()
+              if(is.null(newdata)){
+                # if values are set, make sure that they cover the data.frame
+                if(!is.null(values)){
+                  assertthat::assert_that(length(x.var) == 1)
+                  df2 <- list()
+                  df2[[x.var]] <- values
+                  # Then add the others
+                  for(var in colnames(df)){
+                    if(var == x.var) next()
+                    df2[[var]] <- mean(df[[var]], na.rm = TRUE)
+                  }
+                  df2 <- df2 |> as.data.frame()
+                } else {
+                  df2 <- list()
+                  for(i in x.var) {
+                    df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
+                  }
+                  df2 <- do.call(cbind, df2); names(df2) <- x.var
+                }
+              } else {
+                # Assume all variables are present
+                df2 <- dplyr::select(newdata, dplyr::any_of(variables))
+                assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
+              }
 
-      # Inverse link function
-      ilf <- switch (settings$get('type'),
-                     "link" = NULL,
-                     "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                         exp, logistic)
-      )
+              # Get offset if set
+              if(!is.Waiver(model$offset)){
+                of <- model$offset$spatial_offset
+              } else of <- new_waiver()
 
-      pp <- data.frame()
-      pb <- progress::progress_bar$new(total = length(x.var))
-      for(v in x.var){
-        if(!is.Waiver(of)){
-          # Predict with offset
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", newoffset = of,
-                             inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df)
-        } else {
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df
-          )
-        }
-        p1 <- p1[, c(v, "yhat")]
-        names(p1) <- c("partial_effect", "mean")
-        p1 <- cbind(variable = v, p1)
-        pp <- rbind(pp, p1)
-        rm(p1)
-        if(length(x.var) > 1) pb$tick()
-      }
+              # Inverse link function
+              ilf <- switch (settings$get('type'),
+                             "link" = NULL,
+                             "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
+                                                 exp, logistic)
+              )
 
-      if(plot){
-        # Make a plot
-        g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
-          ggplot2::theme_classic() +
-          ggplot2::geom_line(ggplot2::aes(y = mean)) +
-          ggplot2::facet_wrap(. ~ variable, scales = "free") +
-          ggplot2::labs(x = "Variable", y = "Partial effect")
-        print(g)
-      }
-      return(pp)
-    }
+              pp <- data.frame()
+              pb <- progress::progress_bar$new(total = length(x.var))
+              for(v in x.var){
+                if(!is.Waiver(of)){
+                  # Predict with offset
+                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
+                                     ice = FALSE, center = FALSE,
+                                     type = "regression", newoffset = of,
+                                     inv.link = ilf,
+                                     plot = FALSE, rug = TRUE, train = df)
+                } else {
+                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
+                                     ice = FALSE, center = FALSE,
+                                     type = "regression", inv.link = ilf,
+                                     plot = FALSE, rug = TRUE, train = df
+                  )
+                }
+                p1 <- p1[, c(v, "yhat")]
+                names(p1) <- c("partial_effect", "mean")
+                p1 <- cbind(variable = v, p1)
+                pp <- rbind(pp, p1)
+                rm(p1)
+                if(length(x.var) > 1) pb$tick()
+              }
+
+              if(plot){
+                # Make a plot
+                g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
+                  ggplot2::theme_classic() +
+                  ggplot2::geom_line(ggplot2::aes(y = mean)) +
+                  ggplot2::facet_wrap(. ~ variable, scales = "free") +
+                  ggplot2::labs(x = "Variable", y = "Partial effect")
+                print(g)
+              }
+              return(pp)
+            }, overwrite = TRUE)
+
     # Spatial partial dependence plot
-    out$spartial = function(x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
       assertthat::assert_that(is.character(x.var),
                               "model" %in% names(self),
                               is.null(constant) || is.numeric(constant),
@@ -587,14 +580,17 @@ engine_glm <- function(x,
       # Do plot and return result
       if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
       return(prediction)
-    }
+    },
+    overwrite = TRUE)
+
     # Convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       obj <- self$get_data("fit_best")
       return( obj$converged )
-    }
+    }, overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(type = NULL){
+    obj$set("public", "get_residuals", function(type = NULL){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -603,17 +599,19 @@ engine_glm <- function(x,
       # Calculate residuals
       rd <- stats::residuals.glm(obj, type = type)
       return(rd)
-    }
+    }, overwrite = TRUE)
+
     # Get coefficients from glmnet
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
       cofs <- tidy_glm_summary(obj)
       names(cofs)[1:2] <- c("Feature", "Beta")
       return(cofs)
-    }
+    }, overwrite = TRUE)
+
     # Engine-specific projection function
-    out$project = function(newdata, type = NULL, layer = "mean"){
+    obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that("model" %in% names(self),
                               nrow(newdata) > 0,
                               all( c("x", "y") %in% names(newdata) ),
@@ -684,11 +682,30 @@ engine_glm <- function(x,
       )
 
       return(prediction)
-    }
+    }, overwrite = TRUE)
+
+    # Now generate output
+    out <- obj$new(name = "GLM-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings <- settings
+    out$fits <- list(
+      "fit_best" = fit_glm,
+      "fit_best_equation" = form,
+      "prediction" = prediction
+    )
 
     return(out)
-  }
+  },overwrite = TRUE)
+
+  # Define engine object and save
+  eg <- eg$new(engine = "GLM-Engine", name = "<GLM>")
+  eg$data <- list(
+    'template' = template,
+    'params' = params
+  )
 
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 } # End of function

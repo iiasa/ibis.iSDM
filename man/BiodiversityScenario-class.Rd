@@ -128,7 +128,7 @@ Show the name of the Model
 }
 
 \subsection{Returns}{
-Invisible
+Model objectname
 }
 }
 \if{html}{\out{<hr>}}

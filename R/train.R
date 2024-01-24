@@ -175,6 +175,7 @@ methods::setMethod(
     )
     # Now make checks on completeness of the object
     assertthat::assert_that(!is.Waiver(x$engine),
+                            !is.null(x$engine),
                             msg = 'No engine set for training the distribution model.')
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
@@ -262,7 +263,7 @@ methods::setMethod(
       model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric'),
                                                 row.names = NULL)
       # Assign attribute to predictors to store the name of object
-      model[['predictors_object']] <- x$predictors
+      model[['predictors_object']] <- x$predictors$clone(deep = TRUE)
       rm(lu)
     }
 
@@ -812,7 +813,10 @@ methods::setMethod(
     if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # Basic consistency checks
-    assertthat::assert_that(nrow(model$biodiversity[[1]]$observations)>0,
+    assertthat::assert_that(is.list(model$biodiversity),
+                            is.data.frame(model$predictors) && nrow(model$predictors)>0,
+                            length(model$predictors_names)>0,
+                            nrow(model$biodiversity[[1]]$observations)>0,
                             length(model[['biodiversity']][[1]][['expect']])>1,
                             all(c("predictors","background","biodiversity") %in% names(model) ),
                             length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
@@ -826,7 +830,7 @@ methods::setMethod(
     ids <- names(model$biodiversity)
     # Engine specific preparations
     #### INLA Engine ####
-    if( inherits(x$engine,'INLA-Engine') ){
+    if( x$engine$get_class() == 'INLA-Engine' ){
 
       # Create the mesh if not already present
       x$engine$create_mesh(model = model)
@@ -862,7 +866,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### INLABRU Engine ####
-    } else if( inherits(x$engine,'INLABRU-Engine') ){
+    } else if( x$engine$get_class() == 'INLABRU-Engine' ){
 
       # Create the mesh if not already present
       x$engine$create_mesh(model = model)
@@ -898,7 +902,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### GDB Engine ####
-    } else if( inherits(x$engine,"GDB-Engine") ){
+    } else if( x$engine$get_class() == "GDB-Engine" ){
 
       # For each formula, process in sequence
       for(id in ids){
@@ -1005,7 +1009,7 @@ methods::setMethod(
       }
       # ----------------------------------------------------------- #
       #### XGBoost Engine ####
-    } else if( inherits(x$engine,"XGBOOST-Engine") ){
+    } else if( x$engine$get_class() == "XGBOOST-Engine" ){
       # Create XGBboost regression and classification
 
       # TODO: Combine biodiversity datasets and add factor variable
@@ -1116,7 +1120,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### BART Engine ####
-    } else if( inherits(x$engine,"BART-Engine") ){
+    } else if( x$engine$get_class() == "BART-Engine" ){
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
@@ -1228,7 +1232,7 @@ methods::setMethod(
         } # End of multiple likelihood function
 
       } # End of id loop
-    } else if( inherits(x$engine,"STAN-Engine") ){
+    } else if( x$engine$get_class() == "STAN-Engine" ){
       # ----------------------------------------------------------- #
       #### STAN Engine ####
       # Process per supplied dataset
@@ -1250,7 +1254,7 @@ methods::setMethod(
       out <- x$engine$train(model, settings)
 
 
-    } else if (inherits(x$engine,"BREG-Engine") ){
+    } else if ( x$engine$get_class() == "BREG-Engine" ){
       # ----------------------------------------------------------- #
       #### BREG Engine ####
       assertthat::assert_that(
@@ -1357,7 +1361,7 @@ methods::setMethod(
 
         } # End of multiple ides
       }
-    } else if (inherits(x$engine,"GLMNET-Engine") ){
+    } else if (x$engine$get_class() == "GLMNET-Engine" ){
       # ----------------------------------------------------------- #
       #### GLMNET Engine ####
       # For each formula, process in sequence
@@ -1458,7 +1462,7 @@ methods::setMethod(
           }
         } # End of multiple ides
       } # End of GLMNET engine
-    } else if (inherits(x$engine,"GLM-Engine") ){
+    } else if (x$engine$get_class() == "GLM-Engine" ){
       # ----------------------------------------------------------- #
       if(method_integration == "prior") warning("Priors not supported for GLM!")
       #### GLM Engine ####

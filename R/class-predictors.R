@@ -176,7 +176,7 @@ PredictorDataset <- R6::R6Class(
         # Scenario
         sf::st_crop(self$data, pol)
       }
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -202,7 +202,7 @@ PredictorDataset <- R6::R6Class(
 
         # Save data
         self$fits[["data"]] <- prediction
-        invisible()
+        invisible(self)
       }
     },
 
@@ -245,7 +245,7 @@ PredictorDataset <- R6::R6Class(
           )
         }
       }
-      invisible()
+      invisible(self)
     },
 
     #' @description

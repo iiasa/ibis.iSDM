@@ -126,30 +126,29 @@ engine_glmnet <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Define engine object
-  eg <- Engine$new(engine = "GLMNET-Engine", name = "<GLMNET>")
-  eg$data <- list(
-    'template' = template,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Dummy function for spatial latent effects
-  eg$calc_latent_spatial = function(type = NULL, priors = NULL){
+  eg$set("public", "calc_latent_spatial", function(type = NULL, priors = NULL){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Dummy function for getting the equation of latent effects
-  eg$get_equation_latent_spatial = function(method){
+  eg$set("public", "get_equation_latent_spatial", function(method){
     new_waiver()
-  }
+  },overwrite = TRUE)
+
   # Function to respecify the control parameters
-  eg$set_control = function(params
-  ){
+  eg$set("public", "set_control", function(params){
     assertthat::assert_that(is.list(params))
     # Overwrite existing
     self$data$params <- params
     invisible()
-  }
+  },overwrite = TRUE)
+
   # Setup function
-  eg$setup = function(model, settings = NULL, ...){
+  eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
       assertthat::has_name(model, 'background'),
@@ -279,9 +278,10 @@ engine_glmnet <- function(x,
 
     # Instead of invisible return the model object
     return( model )
-  }
+  },overwrite = TRUE)
+
   # Training function
-  eg$train = function(self, model, settings, ...){
+  eg$set("public", "train", function(model, settings, ...){
     assertthat::assert_that(
       inherits(settings,'Settings'),
       is.list(model),length(model)>1,
@@ -526,18 +526,11 @@ engine_glmnet <- function(x,
     settings$set('end.time', Sys.time())
 
     # Definition of GLMNET Model object ----
-    out <- DistributionModel$new(name = "GLMNET-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings <- settings
-    out$fits = list(
-      "fit_best" = cv_gn,
-      "fit_best_equation" = form,
-      "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Partial effects
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                       values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
       assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               is.null(constant) || is.numeric(constant),
                               is.null(type) || is.character(type),
@@ -645,9 +638,11 @@ engine_glmnet <- function(x,
         print(g)
       }
       return(pp)
-    }
+    },overwrite = TRUE)
+
     # Spatial partial dependence plot
-    out$spartial = function(x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                                           plot = TRUE, type = NULL){
       assertthat::assert_that(is.character(x.var),
                               "model" %in% names(self),
                               is.null(constant) || is.numeric(constant),
@@ -713,18 +708,20 @@ engine_glmnet <- function(x,
       # Do plot and return result
       if(plot) terra::plot(template, col = ibis_colours$ohsu_palette)
       return(template)
-    }
+    },overwrite = TRUE)
+
     # Convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       # Get lambdas
       lmd <- fit$lambda
       if(determine_lambda(fit) == min(lmd)) return(FALSE)
       return(TRUE)
-    }
+    }, overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(){
+    obj$set("public", "get_residuals", function(){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -746,9 +743,10 @@ engine_glmnet <- function(x,
       rd <- fitted_min[,1] - fitted_values[,1]
       assertthat::assert_that(length(rd)>0)
       return(rd)
-    }
+    }, overwrite = TRUE)
+
     # Get coefficients from glmnet
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
       cofs <- tidy_glmnet_summary(obj)
@@ -757,84 +755,104 @@ engine_glmnet <- function(x,
       int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
       if(length(int)>0) cofs <- cofs[-int,]
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Engine-specific projection function
-    out$project = function(self, newdata, type = NULL, layer = "mean"){
-        assertthat::assert_that("model" %in% names(self),
-                                nrow(newdata) > 0,
-                                all( c("x", "y") %in% names(newdata) ),
-                                is.character(type) || is.null(type)
-        )
+    obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
+      assertthat::assert_that("model" %in% names(self),
+                              nrow(newdata) > 0,
+                              all( c("x", "y") %in% names(newdata) ),
+                              is.character(type) || is.null(type)
+      )
 
-        # Settings
-        settings <- self$settings
-        # Set type
-        if(is.null(type)) type <- self$settings$get("type")
-        type <- match.arg(type, c("link", "response"), several.ok = FALSE)
-        settings$set("type", type)
+      # Settings
+      settings <- self$settings
+      # Set type
+      if(is.null(type)) type <- self$settings$get("type")
+      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+      settings$set("type", type)
 
-        mod <- self$get_data('fit_best')
-        model <- self$model
-        # For Integrated model, take the last one
-        fam <- model$biodiversity[[length(model$biodiversity)]]$family
+      mod <- self$get_data('fit_best')
+      model <- self$model
+      # For Integrated model, take the last one
+      fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
-        # Clamp?
-        if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
+      # Clamp?
+      if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
 
-        # Set target variables to bias_value for prediction if specified
-        if(!is.Waiver(settings$get('bias_variable'))){
-          for(i in 1:length(settings$get('bias_variable'))){
-            if(settings$get('bias_variable')[i] %notin% names(newdata)){
-              if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
-              next()
-            }
-            newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
+      # Set target variables to bias_value for prediction if specified
+      if(!is.Waiver(settings$get('bias_variable'))){
+        for(i in 1:length(settings$get('bias_variable'))){
+          if(settings$get('bias_variable')[i] %notin% names(newdata)){
+            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            next()
           }
+          newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
         }
-
-        df <- newdata
-        df$w <- model$exposure # Also get exposure variable
-        # Make a subset of non-na values
-        df$rowid <- 1:nrow(df)
-        df_sub <- base::subset(df, stats::complete.cases(df))
-        if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
-        assertthat::assert_that(nrow(df_sub)>0)
-
-        if(inherits(mod, "cv.glmnet")){
-          pred_gn <- predict(
-            object = mod,
-            newdata = df_sub,
-            weights = df_sub$w, # The second entry of unique contains the non-observed variables
-            newoffset = ofs,
-            na.action = "na.pass",
-            s = determine_lambda(mod), # Determine best available lambda
-            fam = fam,
-            type = type
-          ) |> as.data.frame()
-        } else {
-          pred_gn <- predict(
-            object = mod,
-            newdata = df_sub,
-            alpha = mod$alpha,
-            weights = df_sub$w, # The second entry of unique contains the non-observed variables
-            newoffset = ofs,
-            na.action = "na.pass",
-            s = determine_lambda(mod), # Determine the best lambda value
-            fam = fam,
-            type = type
-          )
-        }
-        names(pred_gn) <- layer
-        assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
-
-        # Now create spatial prediction
-        prediction <- model_to_background(model)
-        prediction[df_sub$rowid] <- pred_gn[, layer]
-
-        return(prediction)
       }
+
+      df <- newdata
+      df$w <- model$exposure # Also get exposure variable
+      # Make a subset of non-na values
+      df$rowid <- 1:nrow(df)
+      df_sub <- base::subset(df, stats::complete.cases(df))
+      if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
+      assertthat::assert_that(nrow(df_sub)>0)
+
+      if(inherits(mod, "cv.glmnet")){
+        pred_gn <- predict(
+          object = mod,
+          newdata = df_sub,
+          weights = df_sub$w, # The second entry of unique contains the non-observed variables
+          newoffset = ofs,
+          na.action = "na.pass",
+          s = determine_lambda(mod), # Determine best available lambda
+          fam = fam,
+          type = type
+        ) |> as.data.frame()
+      } else {
+        pred_gn <- predict(
+          object = mod,
+          newdata = df_sub,
+          alpha = mod$alpha,
+          weights = df_sub$w, # The second entry of unique contains the non-observed variables
+          newoffset = ofs,
+          na.action = "na.pass",
+          s = determine_lambda(mod), # Determine the best lambda value
+          fam = fam,
+          type = type
+        )
+      }
+      names(pred_gn) <- layer
+      assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
+
+      # Now create spatial prediction
+      prediction <- model_to_background(model)
+      prediction[df_sub$rowid] <- pred_gn[, layer]
+
+      return(prediction)
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "GLMNET-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings <- settings
+    out$fits = list(
+      "fit_best" = cv_gn,
+      "fit_best_equation" = form,
+      "prediction" = prediction
+    )
+
     return(out)
-  }
+  },overwrite = TRUE)
+
+  # Define engine object
+  eg <- eg$new(engine = "GLMNET-Engine", name = "<GLMNET>")
+  eg$data <- list(
+    'template' = template,
+    'params' = params
+  )
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 } # End of function

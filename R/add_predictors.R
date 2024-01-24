@@ -153,10 +153,13 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
@@ -246,7 +249,7 @@ methods::setMethod(
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
                                ...)
-    x$set_predictors(pd)
+    y$set_predictors(pd)
   }
 )
 
@@ -363,19 +366,22 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(o) <- sanitize_names(names(o))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = o, transform = transform, derivates = 'none')
+      y <- add_predictors(y, env = o, transform = transform, derivates = 'none')
     } else {
       for(n in names(o)){
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        x$predictors <- x$predictors$set_data(n, r)
+        y$predictors <- y$predictors$set_data(n, r)
         rm(r)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -473,18 +479,21 @@ methods::setMethod(
     # Sanitize names if specified
     if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
+      y <- add_predictors(y, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', layer)
+      y$predictors <- y$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
-        x <- x$set_priors(priors)
+        y <- y$set_priors(priors)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -564,11 +573,14 @@ methods::setMethod(
       layer <- layer * fraction
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
       assertthat::assert_that( all( priors$varnames() %in% names(dis) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
 
     # Sanitize names if specified
@@ -576,11 +588,11 @@ methods::setMethod(
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = dis, transform = 'none',derivates = 'none')
+      y <- add_predictors(y, env = dis, transform = 'none',derivates = 'none')
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', dis)
+      y$predictors <- y$predictors$set_data('range_distance', dis)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -625,8 +637,11 @@ methods::setMethod(
                             all( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Finally set the data to the BiodiversityDistribution object
-    x$rm_predictors(names)
+    y$rm_predictors(names)
   }
 )
 
@@ -672,12 +687,17 @@ methods::setMethod(
                             any( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Get current predictors
-    varnames <- x$get_predictor_names()
+    varnames <- y$get_predictor_names()
     varnames <- varnames[which(varnames %notin% names)]
 
     # Remove all predictors listed
-    if(length(varnames)>=1) x$rm_predictors(varnames)
+    if(length(varnames)>=1) {
+      y$rm_predictors(varnames)
+    } else { y }
   }
 )
 
@@ -782,6 +802,8 @@ methods::setMethod(
                                data = env,
                                timeperiod = timeperiod
                                )
-    x$set_predictors(pd)
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+    y$set_predictors(pd)
   }
 )

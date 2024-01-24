@@ -97,12 +97,12 @@ BiodiversityScenario <- R6::R6Class(
       assertthat::assert_that(is.Waiver(self$get_predictors()) || inherits(self$get_predictors(), "PredictorDataset"))
       assertthat::assert_that(is.Waiver(self$get_data()) || (inherits(self$get_data(), "stars") || is.Raster(self$get_data())) )
       assertthat::assert_that(is.Waiver(self$get_constraints()) || is.list(self$get_constraints()))
-      invisible()
+      invisible(self)
     },
 
     #' @description
     #' Show the name of the Model
-    #' @return Invisible
+    #' @return Model objectname
     show = function() {
       if(is.character(self$modelobject)){
         return( self$modelobject )
@@ -225,18 +225,19 @@ BiodiversityScenario <- R6::R6Class(
         # Reassign name as method
         names(tr) <- "fixed"
       }
-      if(!is.Waiver(tr))
+      if(!is.Waiver(tr)){
         # Select only suitability layer
         if("threshold" %in% names(sc)) sc <- sc |> dplyr::select(suitability)
-      # reclassify to binary
-      new <- sc
-      new[new < tr[[1]]] <- 0; new[new >= tr[[1]]] <- 1
-      names(new) <- 'threshold'
-      # Add to scenario object
-      sc <- c(sc, new)
-      # Format new threshold object
-      self$scenarios <- sc
-      self$threshold <- tr
+        # reclassify to binary
+        new <- sc
+        new[new < tr[[1]]] <- 0; new[new >= tr[[1]]] <- 1
+        names(new) <- 'threshold'
+        # Add to scenario object
+        sc <- c(sc, new)
+        # Format new threshold object
+        self$scenarios <- sc
+        self$threshold <- tr
+      }
       return(self)
     },
 
@@ -303,12 +304,12 @@ BiodiversityScenario <- R6::R6Class(
         is.character(names) || assertthat::is.scalar(names) || is.vector(names)
       )
       # Get predictor collection
-      prcol <- self$predictors
+      prcol <- self$predictors$clone(deep = TRUE)
       # Set the object
       prcol$rm_data(names)
       if(base::length(prcol$get_predictor_names())==0) prcol <- new_waiver()
       self$predictors <- prcol
-      return(self)
+      invisible(self)
     },
 
     #' @description
@@ -343,7 +344,7 @@ BiodiversityScenario <- R6::R6Class(
 
       if(is.Waiver(self$get_data())){
         if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
-        invisible()
+        invisible(self)
       } else {
         assertthat::assert_that(what %in% names( self$get_data() ),
                                 msg = paste(what, "not found in scenario projections?"))
@@ -725,7 +726,7 @@ BiodiversityScenario <- R6::R6Class(
         # Save data
         self[["scenarios"]] <- projection
 
-        invisible()
+        invisible(self)
       }
     },
 
@@ -871,7 +872,7 @@ BiodiversityScenario <- R6::R6Class(
           feather::write_feather(ras, path = fname)
         }
       }
-      invisible()
+      invisible(self)
     }
   ),
 

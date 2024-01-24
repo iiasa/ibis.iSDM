@@ -169,7 +169,8 @@ methods::setMethod(
     cr[['dispersal']] <- list(method = "MigClim",
                               params = params)
 
-    new <- mod$set_constraints(cr)
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(cr)
     return( new )
   }
 )

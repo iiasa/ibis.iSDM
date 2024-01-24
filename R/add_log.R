@@ -47,6 +47,10 @@ methods::setMethod(
     # Finally set the data to the BiodiversityDistribution object
     l <- Log$new(filename = filename,
                  output = new_waiver())
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     x$set_log(l)
   }
 )

@@ -119,7 +119,7 @@ Settings <- R6::R6Class(
       } else {
         self$data <- ff
       }
-      invisible()
+      invisible(self)
     }
   ),
 

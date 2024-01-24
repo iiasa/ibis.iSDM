@@ -142,7 +142,9 @@ methods::setMethod(
                                   )
                                 )
 
-    new <- mod$set_simulation(sim)
+    # Make a clone copy of the object
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_simulation(sim)
     return(new)
   }
 )

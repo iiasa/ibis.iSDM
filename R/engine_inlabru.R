@@ -170,16 +170,11 @@ engine_inlabru <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Define engine object
-  eg <- Engine$new(engine = "INLABRU-Engine", name = "<INLABRU>")
-  eg$data <- list(
-    'mesh' = mesh,
-    'mesh.area' = ar,
-    'proj_stepsize' = proj_stepsize,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Function to create a mesh
-  out$create_mesh = function(model){
+  eg$set("public", "create_mesh", function(model){
     assertthat::assert_that(is.list(model),
                             "background" %in% names(model))
     # Check if mesh is already present, if so use it
@@ -266,9 +261,10 @@ engine_inlabru <- function(x,
     self$set_data("mesh.area", ar)
 
     invisible()
-  }
+  },overwrite = TRUE)
+
   # Generic plotting function for the mesh
-  out$plot = function(assess = FALSE){
+  eg$set("public", "plot", function(assess = FALSE){
     if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
     if(assess){
       # For an INLA mesh assessment
@@ -290,17 +286,18 @@ engine_inlabru <- function(x,
     } else {
       INLA:::plot.inla.mesh( self$get_data('mesh') )
     }
-  }
+  },overwrite = TRUE)
+
   # Spatial latent function
   # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
   # Default SPDE prior
   # It computes the approximate diameter of the mesh, multiplies by 0.2 to get a value for the prior median range, and then transforms it to log-kappa scale by the formula
   # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
-  out$calc_latent_spatial = function(type = 'spde', alpha = 2,
-                                 priors = NULL,
-                                 polynames = NULL,
-                                 varname = "spatial.field1",
-                                 ...){
+  eg$set("public", "calc_latent_spatial", function(type = 'spde', alpha = 2,
+                                    priors = NULL,
+                                    polynames = NULL,
+                                    varname = "spatial.field1",
+                                    ...){
     # Catch prior objects
     if(is.null(priors) || is.Waiver(priors)) priors <- NULL
 
@@ -357,10 +354,11 @@ engine_inlabru <- function(x,
       self$data$latentspatial <- polynames
     }
     invisible()
-  }
+  }, overwrite=TRUE)
+
   # Get latent spatial equation bit
   # Set vars to 2 or larger to get copied spde's
-  out$get_equation_latent_spatial = function(method, vars = 1, separate_spde = FALSE){
+  eg$set("public", "get_equation_latent_spatial", function(method, vars = 1, separate_spde = FALSE){
     assertthat::assert_that(is.numeric(vars))
     if(method == 'spde'){
       assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
@@ -386,8 +384,9 @@ engine_inlabru <- function(x,
         paste0('f(','spatial.field1',', model = "bym", graph = ','adjmat',')')
       )
     }
-  }
-  out$calc_integration_points = function(model, mode = 'stack'){
+  },overwrite = TRUE)
+
+  eg$set("public", "calc_integration_points", function(model, mode = 'stack'){
     # Mode cox process integration
     if(mode == 'cp'){
       # Create integration points by using the mesh as sampler
@@ -428,10 +427,10 @@ engine_inlabru <- function(x,
       # Return list of result
       return(list(ips = ips, E = abs_E))
     }
-  }
+  },overwrite = TRUE)
   # Main inlabru setup ----
   # Setup computation function
-  out$setup = function(model, settings, ...){
+  eg$set("public", "setup", function(model, settings, ...){
     assertthat::assert_that(
       'background' %in% names(model),
       'biodiversity' %in% names(model),
@@ -645,8 +644,9 @@ engine_inlabru <- function(x,
       inlabru::bru_options_set(quantiles = c(0.05, 0.5, 0.95))
     }
     invisible()
-  }
-  out$train = function(model, settings) {
+  },overwrite = TRUE)
+
+  eg$set("public", "train", function(model, settings){
     # Check that all inputs are there
     assertthat::assert_that(
       inherits(settings,'Settings'),
@@ -942,19 +942,11 @@ engine_inlabru <- function(x,
     for(entry in names(params)) settings$set(entry, params[[entry]])
 
     # Definition of INLA Model object ----
-    out <- DistributionModel$new(name = "INLABRU-Model")
-    out$id = model$id
-    out$model = model
-    out$settings = settings
-    out$fits = list(
-        "fit_best" = fit_bru,
-        "fit_best_equation" = self$get_data("components"),
-        "mesh"     = self$get_data('mesh'),
-        "spde"     = self$get_data('latentspatial'),
-        "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Projection function
-    out$project = function(newdata, form = NULL, n.samples = 1000, layer = "mean"){
+    obj$set("public", "project", function(newdata, form = NULL,
+                                          n.samples = 1000, layer = "mean"){
       assertthat::assert_that('fit_best' %in% names(self$fits),
                               is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
                               is.null(form) || is.character(form) || is.formula(form)
@@ -1052,10 +1044,11 @@ engine_inlabru <- function(x,
       }
       # Return result
       return(out)
-    }
+    },overwrite = TRUE)
+
     # Partial response
-    out$partial = function(x.var = NULL, constant = NULL, variable_length = 100,
-                       values = NULL, newdata = NULL, plot = TRUE, type = "response"){
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                           values = NULL, newdata = NULL, plot = TRUE, type = "response"){
       # We use inlabru's functionalities to sample from the posterior
       # a given variable. A prediction is made over a generated fitted data.frame
       # Check that provided model exists and variable exist in model
@@ -1168,10 +1161,11 @@ engine_inlabru <- function(x,
         print(g)
       }
       return(o)
-    }
+    },overwrite=TRUE)
+
     # (S)partial effect
-    out$spartial = function(x.var, constant = NULL, newdata = NULL,
-                        plot = TRUE, type = NULL){
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                            plot = TRUE, type = NULL){
       # We use inlabru's functionalities to sample from the posterior
       # a given variable. A prediction is made over a generated fitted data.frame
       # Check that provided model exists and variable exist in model
@@ -1251,15 +1245,17 @@ engine_inlabru <- function(x,
           )
         )
       }
-    }
+    },overwrite = TRUE)
+
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged",function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Residual function
-    out$get_residuals = function(){
+    obj$set("public", "get_residuals",function(){
       # Get best object
       obj <- self$get_data("fit_best")
       if(is.Waiver(obj)) return(obj)
@@ -1267,9 +1263,10 @@ engine_inlabru <- function(x,
       rd <- obj$residuals$deviance.residuals
       assertthat::assert_that(length(rd)>0)
       return(rd)
-    }
+    },overwrite = TRUE)
+
     # Get coefficients
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       cofs <- self$summary()
       cofs <- subset(cofs, select = c("variable", "mean", "sd"))
@@ -1278,9 +1275,11 @@ engine_inlabru <- function(x,
       int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
       if(length(int)>0) cofs <- cofs[-int,]
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Function to plot SPDE if existing
-    out$plot_spatial = function(spat = NULL, type = "response", what = "spatial.field1", ...){
+    obj$set("public", "plot_spatial", function(spat = NULL, type = "response",
+                                               what = "spatial.field1", ...){
       # Get mesh, domain and model
       mesh <- self$get_data("mesh")
       domain <- methods::as(self$model$background, "Spatial")
@@ -1333,9 +1332,32 @@ engine_inlabru <- function(x,
       } else {
         message("No SPDE effect found.")
       }
-    }
-  }
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "INLABRU-Model")
+    out$id = model$id
+    out$model = model
+    out$settings = settings
+    out$fits = list(
+      "fit_best" = fit_bru,
+      "fit_best_equation" = self$get_data("components"),
+      "mesh"     = self$get_data('mesh'),
+      "spde"     = self$get_data('latentspatial'),
+      "prediction" = prediction
+    )
+    return(out)
+  },overwrite = TRUE)
+
+  # Define engine object
+  eg <- eg$new(engine = "INLABRU-Engine", name = "<INLABRU>")
+  eg$data <- list(
+    'mesh' = mesh,
+    'mesh.area' = ar,
+    'proj_stepsize' = proj_stepsize,
+    'params' = params
+  )
 
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 }

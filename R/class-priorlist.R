@@ -87,7 +87,7 @@ PriorList <- R6::R6Class(
     #' @return A [`character`] list with the class names of the priors.
     classes = function(){
       if(is.Waiver(self$priors)) return( character(0) )
-      vapply(self$priors, function(x) class(x)[1], character(1) )
+      vapply(self$priors, function(x) x$get_name(), character(1) )
     },
 
     #' @description
@@ -159,7 +159,7 @@ PriorList <- R6::R6Class(
         if(nchar(ex2)>1){ self$rm(ex2)} else {self$rm(ex)}
         self$priors[[as.character(p$id)]] <- p
       }
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -204,7 +204,7 @@ PriorList <- R6::R6Class(
                               id %in% self$ids()
                               )
       self$priors[[id]] <- NULL
-      invisible()
+      invisible(self)
     },
 
     #' @description
@@ -249,7 +249,7 @@ PriorList <- R6::R6Class(
         # Check whether priors on variable and type already exist. If yes, replace
         for(p in x$priors) self$add(p)
       }
-      invisible()
+      invisible(self)
     }
 
     # TODO: Plotting function. Plots the distribution of all priors

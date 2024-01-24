@@ -191,17 +191,11 @@ engine_inla <- function(x,
   # Print a message in case there is already an engine object
   if(!is.Waiver(x$engine)) myLog('[Setup]','yellow','Replacing currently selected engine.')
 
-  # Define engine object
-  eg <- Engine$new(engine = "INLA-Engine", name = "<INLA>")
-  eg$data <- list(
-    'mesh' = mesh,
-    'mesh.area' = ar,
-    'mesh.bar' = mesh_bar,
-    'stk_pred' = optional_projstk,
-    'params' = params
-  )
+  # Define new engine object of class
+  eg <- Engine
+
   # Function to create a mesh
-  eg$create_mesh = function(model){
+  eg$set("public", "create_mesh", function(model){
     assertthat::assert_that(is.list(model),
                             "background" %in% names(model))
     # Check if mesh is already present, if so use it
@@ -292,9 +286,9 @@ engine_inla <- function(x,
     self$set_data("mesh.area", ar)
 
     invisible()
-  }
+  },overwrite = TRUE)
   # Generic plotting function for the mesh
-  eg$plot = function(assess = FALSE){
+  eg$set("public", "plot", function(assess = FALSE){
     if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
 
     if(assess){
@@ -317,17 +311,18 @@ engine_inla <- function(x,
     } else {
       INLA:::plot.inla.mesh( self$get_data('mesh') )
     }
-  }
+  },overwrite = TRUE)
+
   # Spatial latent function
   # https://groups.google.com/g/r-inla-discussion-group/c/eqMhlbwChkQ/m/m0b0PuzL-PsJ
   # Default SPDE prior
   # It computes the approximate diameter of the mesh, multiplies by 0.2 to get a value for the prior median range, and then transforms it to log-kappa scale by the formula
   # log(sqrt(8*nu)/range) where nu is alpha-dim/2.
-  eg$calc_latent_spatial = function(type = 'spde', alpha = 2,
-                                 priors = NULL,
-                                 polynames = NULL,
-                                 varname = "spatial.field1",
-                                 ...){
+  eg$set("public", "calc_latent_spatial", function(type = 'spde', alpha = 2,
+                                    priors = NULL,
+                                    polynames = NULL,
+                                    varname = "spatial.field1",
+                                    ...){
     # Catch prior objects
     if(is.null(priors) || is.Waiver(priors)) priors <- NULL
 
@@ -384,10 +379,11 @@ engine_inla <- function(x,
       self$data$latentspatial <- polynames
     }
     invisible()
-  }
+  },overwrite = TRUE)
   # Get latent spatial equation bit
   # Set vars to 2 or larger to get copied spde's
-  eg$get_equation_latent_spatial = function(method, vars = 1, separate_spde = FALSE){
+  eg$set("public", "get_equation_latent_spatial", function(method, vars = 1,
+                                                           separate_spde = FALSE){
     assertthat::assert_that(is.numeric(vars))
     if(method == 'spde'){
       assertthat::assert_that(inherits(self$data$latentspatial, 'inla.spde'),
@@ -413,9 +409,9 @@ engine_inla <- function(x,
         paste0('f(','spatial.field',', model = "bym", graph = ','adjmat',')')
       )
     }
-  }
+  },overwrite = TRUE)
   # Configure stack
-  eg$make_stack = function(model, id, intercept = TRUE, joint = FALSE) {
+  eg$set("public", "make_stack", function(model, id, intercept = TRUE, joint = FALSE) {
     assertthat::assert_that(
       is.list(model),
       is.character(id)
@@ -497,10 +493,11 @@ engine_inla <- function(x,
     # Set the stack
     self$set_data(paste0('stk_',as.character(model$type),'_',id), stk)
     invisible()
-  }
+  },overwrite = TRUE)
+
   # Main INLA training function ----
   # Setup computation function
-  eg$setup = function(model, settings,...){
+  eg$set("public", "setup", function(model, settings,...){
     assertthat::assert_that(
       'background' %in% names(model),
       'biodiversity' %in% names(model),
@@ -654,8 +651,9 @@ engine_inla <- function(x,
     )
     if(!is.Waiver(ras_back)) model$predictors_object$data # Overwrite model object back to avoid issues with other engines. Hacky!
     return(model)
-  }
-  eg$train = function(model, settings) {
+  },overwrite = TRUE)
+
+  eg$set("public", "train", function(model, settings){
     # Check that all inputs are there
     assertthat::assert_that(
       inherits(settings,'Settings'),
@@ -846,20 +844,11 @@ engine_inla <- function(x,
     settings$set('end.time', Sys.time())
 
     # Definition of INLA Model object ----
-    out <- DistributionModel$new(name = "INLA-Model")
-    out$id <- model$id
-    out$model <- model
-    out$settings = settings
-    out$fits = list(
-        "fit_best" = fit_resp,
-        "fit_pred" = fit_pred,
-        "fit_best_equation" = master_form,
-        "mesh"     = self$get_data('mesh'),
-        "spde"     = self$get_data('latentspatial'),
-        "prediction" = prediction
-    )
+    obj <- DistributionModel # Make a copy to set new functions
+
     # Projection function
-    out$project = function(newdata, mode = 'coef', backtransf = NULL, layer = "mean"){
+    obj$set("public", "project", function(newdata, mode = 'coef',
+                                          backtransf = NULL, layer = "mean"){
       assertthat::assert_that('fit_best' %in% names(self$fits),
                               is.data.frame(newdata) || is.matrix(newdata),
                               mode %in% c('coef','sim','full'),
@@ -888,11 +877,11 @@ engine_inla <- function(x,
       }
       # Return result
       return(out)
-    }
+    },overwrite = TRUE)
     # Partial response
     # FIXME: Create external function
-    out$partial = function(x, x.var, constant = NULL, variable_length = 100,
-                       values = NULL, plot = FALSE, type = "response"){
+    obj$set("public", "partial", function(x, x.var, constant = NULL, variable_length = 100,
+                           values = NULL, plot = FALSE, type = "response"){
       # Goal is to create a sequence of value and constant and append to existing stack
       # Alternative is to create a model-matrix through INLA::inla.make.lincomb() and
       # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
@@ -956,24 +945,26 @@ engine_inla <- function(x,
       control.predictor = list(A = INLA::inla.stack.A(stk_inference))
 
       # Plot and return result
-    }
+    },overwrite = TRUE)
+
     # Spartial dummy function
-    out$spartial = function(){
+    obj$set("public", "spartial", function(){
       message("Spartial function not developed for INLA-engine.")
       return(NULL)
-    }
+    },overwrite = TRUE)
+
     # Model convergence check
-    out$has_converged = function(){
+    obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
       return(TRUE)
-    }
+    },overwrite = TRUE)
+
     # Get residuals
-    out$get_residuals = function(){
-      new_waiver()
-    }
+    obj$set("public", "get_residuals", function(){new_waiver()},overwrite = TRUE)
+
     # Get coefficients
-    out$get_coefficients = function(){
+    obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       cofs <- self$summary()
       cofs <- subset(cofs, select = c("variable", "mean", "sd"))
@@ -982,97 +973,124 @@ engine_inla <- function(x,
       int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
       if(length(int)>0) cofs <- cofs[-int,]
       return(cofs)
-    }
+    },overwrite = TRUE)
+
     # Function to plot SPDE if existing
-    out$plot_spatial = function(dim = c(300,300), kappa_cor = FALSE, what = "spatial.field1", ...){
-        assertthat::assert_that(is.vector(dim),
-                                is.character(what))
+    obj$set("public", "plot_spatial", function(dim = c(300,300),
+                                               kappa_cor = FALSE, what = "spatial.field1", ...){
+      assertthat::assert_that(is.vector(dim),
+                              is.character(what))
 
-        if( length( self$fits$fit_best$size.spde2.blc ) == 1)
-        {
-          # Get spatial projections from model
-          # FIXME: Potentially make the plotting of this more flexible
-          gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
-          g.mean <- INLA::inla.mesh.project(gproj,
-                                            self$get_data('fit_best')$summary.random[[what]]$mean)
-          g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random[[what]]$sd)
+      if( length( self$fits$fit_best$size.spde2.blc ) == 1)
+      {
+        # Get spatial projections from model
+        # FIXME: Potentially make the plotting of this more flexible
+        gproj <- INLA::inla.mesh.projector(self$get_data('mesh'),  dims = dim)
+        g.mean <- INLA::inla.mesh.project(gproj,
+                                          self$get_data('fit_best')$summary.random[[what]]$mean)
+        g.sd <- INLA::inla.mesh.project(gproj, self$get_data('fit_best')$summary.random[[what]]$sd)
 
-          # Convert to rasters
-          g.mean <- t(g.mean)
-          g.mean <- g.mean[rev(1:length(g.mean[,1])),]
-          r.m <- terra::rast(g.mean,
-                             xmin = range(gproj$x)[1], xmax = range(gproj$x)[2],
-                             ymin = range(gproj$y)[1], ymax = range(gproj$y)[2],
-                             crs = terra::crs(self$get_data('mesh')$crs)
-          )
-          g.sd  <- t(g.sd)
-          g.sd <- g.sd[rev(1:length(g.sd[,1])),]
-          r.sd <- terra::rast(g.sd,
-                              xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
-                              ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
-                              crs = terra::crs( self$get_data('mesh')$crs)
-          )
+        # Convert to rasters
+        g.mean <- t(g.mean)
+        g.mean <- g.mean[rev(1:length(g.mean[,1])),]
+        r.m <- terra::rast(g.mean,
+                           xmin = range(gproj$x)[1], xmax = range(gproj$x)[2],
+                           ymin = range(gproj$y)[1], ymax = range(gproj$y)[2],
+                           crs = terra::crs(self$get_data('mesh')$crs)
+        )
+        g.sd  <- t(g.sd)
+        g.sd <- g.sd[rev(1:length(g.sd[,1])),]
+        r.sd <- terra::rast(g.sd,
+                            xmn = range(gproj$x)[1], xmx = range(gproj$x)[2],
+                            ymn = range(gproj$y)[1], ymx = range(gproj$y)[2],
+                            crs = terra::crs( self$get_data('mesh')$crs)
+        )
 
-          spatial_field <- c(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
-          # Mask with prediction if exists
-          if(!is.null(self$get_data('prediction'))){
-            spatial_field <- terra::resample(spatial_field, self$get_data('prediction')[[1]])
-            spatial_field <- terra::mask(spatial_field, self$get_data('prediction')[[1]])
-          }
-
-          # -- #
-          if(kappa_cor){
-            # Also build correlation fun
-            # Get SPDE results
-            spde_results <- INLA::inla.spde2.result(
-              inla = self$get_data('fit_best'),
-              name = what,
-              spde = self$get_data('spde'),
-              do.transfer = TRUE)
-
-            # Large kappa (inverse range) equals a quick parameter change in space.
-            # Small kappa parameter have much longer, slower gradients.
-            Kappa <- INLA::inla.emarginal(function(x) x, spde_results$marginals.kappa[[1]])
-            sigmau <- INLA::inla.emarginal(function(x) sqrt(x), spde_results$marginals.variance.nominal[[1]])
-            r <- INLA::inla.emarginal(function(x) x, spde_results$marginals.range.nominal[[1]])
-
-            # Get Mesh and distance between points
-            mesh <- self$get_data('mesh')
-            D <- as.matrix( stats::dist(mesh$loc[, 1:2]) )
-
-            # Distance vector.
-            dis.cor <- data.frame(distance = seq(0, max(D), length = 100))
-            # Maximum distance by quarter of extent
-            dis.max <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 2)  # Take a quarter of the max distance
-
-            # Modified Bessel function to get correlation strength
-            dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * base::besselK(Kappa * dis.cor$distance, 1))
-            dis.cor$cor[1] <- 1
-            # ---
-            # Build plot
-            graphics::layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
-            plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
-                 xlab = 'Distance (proj. unit)', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
-            graphics::abline(v = dis.max,lty = 'dotted')
-            plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
-            plot(spatial_field[[2]], main = 'sd spatial effect')
-          } else {
-            # Just plot the SPDE
-            graphics::par(mfrow=c(1,2))
-            plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
-            plot(spatial_field[[2]], main = 'sd spatial effect')
-            # And return
-            return(spatial_field)
-          }
-
-
-        } else {
-          message(text_red('No spatial covariance in model specified.'))
+        spatial_field <- c(r.m, r.sd);names(spatial_field) <- c('SPDE_mean','SPDE_sd')
+        # Mask with prediction if exists
+        if(!is.null(self$get_data('prediction'))){
+          spatial_field <- terra::resample(spatial_field, self$get_data('prediction')[[1]])
+          spatial_field <- terra::mask(spatial_field, self$get_data('prediction')[[1]])
         }
+
+        # -- #
+        if(kappa_cor){
+          # Also build correlation fun
+          # Get SPDE results
+          spde_results <- INLA::inla.spde2.result(
+            inla = self$get_data('fit_best'),
+            name = what,
+            spde = self$get_data('spde'),
+            do.transfer = TRUE)
+
+          # Large kappa (inverse range) equals a quick parameter change in space.
+          # Small kappa parameter have much longer, slower gradients.
+          Kappa <- INLA::inla.emarginal(function(x) x, spde_results$marginals.kappa[[1]])
+          sigmau <- INLA::inla.emarginal(function(x) sqrt(x), spde_results$marginals.variance.nominal[[1]])
+          r <- INLA::inla.emarginal(function(x) x, spde_results$marginals.range.nominal[[1]])
+
+          # Get Mesh and distance between points
+          mesh <- self$get_data('mesh')
+          D <- as.matrix( stats::dist(mesh$loc[, 1:2]) )
+
+          # Distance vector.
+          dis.cor <- data.frame(distance = seq(0, max(D), length = 100))
+          # Maximum distance by quarter of extent
+          dis.max <- abs((xmin(self$get_data('prediction')) - xmax(self$get_data('prediction')) ) / 2)  # Take a quarter of the max distance
+
+          # Modified Bessel function to get correlation strength
+          dis.cor$cor <- as.numeric((Kappa * dis.cor$distance) * base::besselK(Kappa * dis.cor$distance, 1))
+          dis.cor$cor[1] <- 1
+          # ---
+          # Build plot
+          graphics::layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+          plot(dis.cor$cor ~ dis.cor$distance, type = 'l', lwd = 3,
+               xlab = 'Distance (proj. unit)', ylab = 'Correlation', main = paste0('Kappa: ', round(Kappa,2) ) )
+          graphics::abline(v = dis.max,lty = 'dotted')
+          plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
+          plot(spatial_field[[2]], main = 'sd spatial effect')
+        } else {
+          # Just plot the SPDE
+          graphics::par(mfrow=c(1,2))
+          plot(spatial_field[[1]],col = ibis_colours[['viridis_cividis']], main = 'mean spatial effect')
+          plot(spatial_field[[2]], main = 'sd spatial effect')
+          # And return
+          return(spatial_field)
+        }
+
+
+      } else {
+        message(text_red('No spatial covariance in model specified.'))
       }
+    },overwrite = TRUE)
+
+    out <- obj$new(name = "INLA-Model")
+    out$id <- model$id
+    out$model <- model
+    out$settings = settings
+    out$fits = list(
+      "fit_best" = fit_resp,
+      "fit_pred" = fit_pred,
+      "fit_best_equation" = master_form,
+      "mesh"     = self$get_data('mesh'),
+      "spde"     = self$get_data('latentspatial'),
+      "prediction" = prediction
+    )
+
     return(out)
-  }
+  },overwrite = TRUE)
+
+  # Define engine object
+  eg <- eg$new(engine = "INLA-Engine", name = "<INLA>")
+  eg$data <- list(
+    'mesh' = mesh,
+    'mesh.area' = ar,
+    'mesh.bar' = mesh_bar,
+    'stk_pred' = optional_projstk,
+    'params' = params
+  )
 
   # Set engine in distribution object
-  x$set_engine(eg)
+  y <- x$clone(deep = TRUE)
+  return( y$set_engine(eg) )
 }

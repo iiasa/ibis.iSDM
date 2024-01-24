@@ -181,9 +181,8 @@ test_that('Scenarios and constraints', {
   expect_s3_class(x$get_predictors()$get_data(), "stars")
   expect_s3_class(x$get_predictors()$get_data(df = TRUE), "data.frame")
 
+  expect_length(x$get_predictor_names(), 9)
   invisible( x$rm_predictors() )
-  expect_length(x$get_predictor_names(), 9) # Properly inherited?
-  x <- x$rm_predictors()
   expect_length(x$get_predictor_names(), 0) # Properly inherited?
 
   # Try and add current raster Layers for the projection

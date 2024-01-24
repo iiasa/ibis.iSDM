@@ -2,7 +2,6 @@
 test_that('Setting up a distribution model',{
 
   skip_if_not_installed('igraph')
-  skip_if_not_installed('INLA')
 
   skip_on_cran()
 
@@ -51,6 +50,7 @@ test_that('Setting up a distribution model',{
   expect_equal(x$biodiversity$get_equations()[[1]],'<Default>')
   expect_true(is.Waiver(x$engine))
   expect_error(train(x)) # Try to solve without solver
+  expect_s3_class(x$biodiversity, "BiodiversityDatasetCollection")
 
   # Apply a mask
   expect_no_error( x$biodiversity$mask(virtual_range) )
@@ -117,14 +117,14 @@ test_that('Setting up a distribution model',{
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
-  suppressWarnings( x <- x |> engine_inla() )
+  suppressWarnings( x <- x |> engine_glm() )
 
   # Do a check
-  expect_no_error(check(x))
+  suppressMessages( expect_no_error(check(x)) )
 
   # Mesh is not created yet
   expect_s3_class(x$engine$get_data("mesh"),'Waiver')
-  expect_equal(x$engine$name,'<INLA>')
+  expect_equal(x$engine$name,'<GLM>')
   expect_error(x$engine$calc_stack_poipo()) # Nothing to train on
 
   expect_s3_class(x$get_priors(),'Waiver')
@@ -146,6 +146,7 @@ test_that('Setting up a distribution model',{
   x <- distribution(background, limits_method = "mcp", mcp_buffer = 1000)
   expect_type(x$get_limits(), "list")
   expect_equal(x$get_limits()$limits_method, "mcp")
+  expect_null( x$get_engine() )
 
   y <- x |> engine_bart()
   expect_equal( y$get_engine(), "<BART>")

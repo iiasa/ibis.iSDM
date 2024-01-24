@@ -53,7 +53,7 @@ install <- function(packages){
 if(!("INLA" %in% installed.packages()[, "Package"])){
   install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 }
-install(c("inlabru", "xgboost", "rgeos", "igraph"))
+install(c("inlabru", "xgboost", "igraph"))
 ```
 
 
@@ -291,11 +291,15 @@ This approach can be particular suitable for current and future projections at l
 ```{r Prediction limits, fig.width = w, fig.height = h}
 # Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)
 # The zones layer must be a factor layer (e.g. is.factor(layer) )
-x <- distribution(background, limits = predictors$koeppen_50km) |> 
+
+# Zone layers can be supplied directly to distribution(background, limits = zones)
+# or through an extrapolation control as shown below.
+x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") |> 
+  add_control_extrapolation(layer = predictors$koeppen_50km, method = "zones") |> 
   engine_xgboost(iter = 3000, learning_rate = 0.01)
 
 # Spatially limited prediction
