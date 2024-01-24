@@ -61,7 +61,7 @@ methods for accessing, adding and removing priors from the list"><meta name="twi
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>List of Priors supplied to an class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/bdproto-priorlist.R" class="external-link"><code>R/bdproto-priorlist.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/class-priorlist.R" class="external-link"><code>R/class-priorlist.R</code></a></small>
       <div class="d-none name"><code>PriorList-class.Rd</code></div>
     </div>
 
@@ -78,18 +78,301 @@ methods for accessing, adding and removing priors from the list</p>
 <p>A PriorList object.</p>
     </div>
     <div class="section level2">
-    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other bdproto: 
-<code><a href="BiodiversityDatasetCollection-class.html">BiodiversityDatasetCollection-class</a></code>,
-<code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution-class</a></code>,
-<code><a href="BiodiversityScenario-class.html">BiodiversityScenario-class</a></code>,
-<code><a href="DistributionModel-class.html">DistributionModel-class</a></code>,
-<code><a href="Engine-class.html">Engine-class</a></code>,
-<code><a href="Log-class.html">Log-class</a></code>,
-<code><a href="PredictorDataset-class.html">PredictorDataset-class</a></code>,
-<code><a href="Prior-class.html">Prior-class</a></code>,
-<code><a href="Settings-class.html">Settings-class</a></code>,
-<code><a href="bdproto.html">bdproto</a>()</code></p></div>
+    <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
+    <p></p><div class="r6-fields"><dl><dt><code>priors</code></dt>
+<dd><p>A list of <code><a href="Prior-class.html">Prior</a></code> object.</p></dd>
+
+
+</dl><p></p></div>
+    </div>
+    <div class="section level2">
+    <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a></h2>
+    
+<div class="section">
+<h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
+
+<ul><li><p><a href="#method-PriorList-new"><code>PriorList$new()</code></a></p></li>
+<li><p><a href="#method-PriorList-print"><code>PriorList$print()</code></a></p></li>
+<li><p><a href="#method-PriorList-show"><code>PriorList$show()</code></a></p></li>
+<li><p><a href="#method-PriorList-length"><code>PriorList$length()</code></a></p></li>
+<li><p><a href="#method-PriorList-ids"><code>PriorList$ids()</code></a></p></li>
+<li><p><a href="#method-PriorList-varnames"><code>PriorList$varnames()</code></a></p></li>
+<li><p><a href="#method-PriorList-classes"><code>PriorList$classes()</code></a></p></li>
+<li><p><a href="#method-PriorList-types"><code>PriorList$types()</code></a></p></li>
+<li><p><a href="#method-PriorList-exists"><code>PriorList$exists()</code></a></p></li>
+<li><p><a href="#method-PriorList-add"><code>PriorList$add()</code></a></p></li>
+<li><p><a href="#method-PriorList-get"><code>PriorList$get()</code></a></p></li>
+<li><p><a href="#method-PriorList-collect"><code>PriorList$collect()</code></a></p></li>
+<li><p><a href="#method-PriorList-rm"><code>PriorList$rm()</code></a></p></li>
+<li><p><a href="#method-PriorList-summary"><code>PriorList$summary()</code></a></p></li>
+<li><p><a href="#method-PriorList-combine"><code>PriorList$combine()</code></a></p></li>
+<li><p><a href="#method-PriorList-clone"><code>PriorList$clone()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-PriorList-new"></a><div class="section">
+<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+<p>Initializes the object</p><div class="section">
+<h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/PriorList-class.html">PriorList</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">priors</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>priors</code></dt>
+<dd><p>A list of <code><a href="Prior-class.html">Prior</a></code> object.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>NULL</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-print"></a><div class="section">
+<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+<p>Print out summary statistics</p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>A message on screen</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-show"></a><div class="section">
+<h3 id="method-show-">Method <code>show()</code><a class="anchor" aria-label="anchor" href="#method-show-"></a></h3>
+<p>Aliases that calls print.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>A message on screen</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-length"></a><div class="section">
+<h3 id="method-length-">Method <code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code><a class="anchor" aria-label="anchor" href="#method-length-"></a></h3>
+<p>Number of priors in object</p><div class="section">
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">length</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the number of priors set</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-ids"></a><div class="section">
+<h3 id="method-ids-">Method <code>ids()</code><a class="anchor" aria-label="anchor" href="#method-ids-"></a></h3>
+<p>Ids of prior objects</p><div class="section">
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">ids</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<p>A list with ids of the priors objects for query</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-varnames"></a><div class="section">
+<h3 id="method-varnames-">Method <code>varnames()</code><a class="anchor" aria-label="anchor" href="#method-varnames-"></a></h3>
+<p>Variable names of priors in object</p><div class="section">
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> list with the variable names of the priors.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-classes"></a><div class="section">
+<h3 id="method-classes-">Method <code>classes()</code><a class="anchor" aria-label="anchor" href="#method-classes-"></a></h3>
+<p>Function to return the classes of all contained priors</p><div class="section">
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">classes</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> list with the class names of the priors.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-types"></a><div class="section">
+<h3 id="method-types-">Method <code>types()</code><a class="anchor" aria-label="anchor" href="#method-types-"></a></h3>
+<p>Get types of all contained priors</p><div class="section">
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">types</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> list with the type names of the priors.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-exists"></a><div class="section">
+<h3 id="method-exists-">Method <code><a href="https://rdrr.io/r/base/exists.html" class="external-link">exists()</a></code><a class="anchor" aria-label="anchor" href="#method-exists-"></a></h3>
+<p>Does a certain variable or type combination exist as prior ?</p><div class="section">
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">exists</span><span class="op">(</span><span class="va">variable</span>, type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>variable</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the variable name.</p></dd>
+
+
+<dt><code>type</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> id.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-add"></a><div class="section">
+<h3 id="method-add-">Method <code>add()</code><a class="anchor" aria-label="anchor" href="#method-add-"></a></h3>
+<p>Add a new prior to the object.</p><div class="section">
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">add</span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>p</code></dt>
+<dd><p>A <code><a href="Prior-class.html">Prior</a></code> object.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
+<p>Invisible TRUE</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-get"></a><div class="section">
+<h3 id="method-get-">Method <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code><a class="anchor" aria-label="anchor" href="#method-get-"></a></h3>
+<p>Get specific prior values from the list if set</p><div class="section">
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">variable</span>, type <span class="op">=</span> <span class="cn">NULL</span>, what <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>variable</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the variable name.</p></dd>
+
+
+<dt><code>type</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type name</p></dd>
+
+
+<dt><code>what</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> on the specific entry to return (Default: <code>prior value</code>).</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
+<p>The prior object.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-collect"></a><div class="section">
+<h3 id="method-collect-">Method <code>collect()</code><a class="anchor" aria-label="anchor" href="#method-collect-"></a></h3>
+<p>Collect priors for a given id or multiple.</p><div class="section">
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">collect</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>id</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the prior id.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
+<p>A <code>PriorList</code> object.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-rm"></a><div class="section">
+<h3 id="method-rm-">Method <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-"></a></h3>
+<p>Remove a set prior by id</p><div class="section">
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">rm</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>id</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the prior id.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
+<p>Invisible TRUE</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-summary"></a><div class="section">
+<h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
+<p>Summary function that lists all priors</p><div class="section">
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-13">Returns<a class="anchor" aria-label="anchor" href="#returns-13"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> with the summarized priors.</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-combine"></a><div class="section">
+<h3 id="method-combine-">Method <code>combine()</code><a class="anchor" aria-label="anchor" href="#method-combine-"></a></h3>
+<p>Combining function to combine this PriorList with another new one</p><div class="section">
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">combine</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>x</code></dt>
+<dd><p>A new <code>PriorList</code> object.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
+<p>Invisible TRUE</p>
+</div>
+
+</div><p></p><hr><a id="method-PriorList-clone"></a><div class="section">
+<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+<p>The objects of this class are cloneable with this method.</p><div class="section">
+<h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PriorList</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>deep</code></dt>
+<dd><p>Whether to make a deep clone.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div>
+
     </div>
 
     <div class="section level2">

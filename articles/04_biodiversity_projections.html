@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-01-13</h4>
+            <h4 data-toc-skip class="date">2024-01-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>04_biodiversity_projections.Rmd</code></div>
@@ -214,7 +214,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co"># This creates a scenario object</span></span>
 <span><span class="va">sc</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
-<span><span class="co">#&gt;   Used model: GLMNET-Model</span></span>
+<span><span class="co">#&gt;   Used model: DistributionModel</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
@@ -225,20 +225,21 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
 <span><span class="co"># what is possible with them</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sc</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "constraints"          "get_simulation"       "get_resolution"      </span></span>
-<span><span class="co">#&gt;  [4] "get_centroid"         "verify"               "get_threshold"       </span></span>
-<span><span class="co">#&gt;  [7] "set_data"             ".super"               "save"                </span></span>
-<span><span class="co">#&gt; [10] "summary"              "modelobject"          "set_constraints"     </span></span>
-<span><span class="co">#&gt; [13] "get_timeperiod"       "plot_relative_change" "rm_predictors"       </span></span>
-<span><span class="co">#&gt; [16] "get_predictors"       "print"                "limits"              </span></span>
-<span><span class="co">#&gt; [19] "apply_threshold"      "predictors"           "get_projection"      </span></span>
-<span><span class="co">#&gt; [22] "set_simulation"       "get_limits"           "calc_scenarios_slope"</span></span>
-<span><span class="co">#&gt; [25] "scenarios"            "plot"                 "get_data"            </span></span>
-<span><span class="co">#&gt; [28] "mask"                 "show"                 "modelid"             </span></span>
-<span><span class="co">#&gt; [31] "summary_beforeafter"  "get_predictor_names"  "get_constraints"     </span></span>
-<span><span class="co">#&gt; [34] "get_model"            "set_predictors"       "plot_threshold"      </span></span>
-<span><span class="co">#&gt; [37] "plot_migclim"         ".that"                "plot_animation"      </span></span>
-<span><span class="co">#&gt; [40] "threshold"            "get_thresholdvalue"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "threshold"            "verify"               "t"                   </span></span>
+<span><span class="co">#&gt;  [4] "summary_beforeafter"  "summary"              "show"                </span></span>
+<span><span class="co">#&gt;  [7] "set_simulation"       "set_predictors"       "set_data"            </span></span>
+<span><span class="co">#&gt; [10] "set_constraints"      "scenarios"            "save"                </span></span>
+<span><span class="co">#&gt; [13] "rm_predictors"        "print"                "predictors"          </span></span>
+<span><span class="co">#&gt; [16] "plot_threshold"       "plot_relative_change" "plot_migclim"        </span></span>
+<span><span class="co">#&gt; [19] "plot_animation"       "plot"                 "modelobject"         </span></span>
+<span><span class="co">#&gt; [22] "modelid"              "mask"                 "limits"              </span></span>
+<span><span class="co">#&gt; [25] "initialize"           "get_timeperiod"       "get_thresholdvalue"  </span></span>
+<span><span class="co">#&gt; [28] "get_threshold"        "get_simulation"       "get_resolution"      </span></span>
+<span><span class="co">#&gt; [31] "get_projection"       "get_predictors"       "get_predictor_names" </span></span>
+<span><span class="co">#&gt; [34] "get_model"            "get_limits"           "get_data"            </span></span>
+<span><span class="co">#&gt; [37] "get_constraints"      "get_centroid"         "constraints"         </span></span>
+<span><span class="co">#&gt; [40] "clone"                "calc_scenarios_slope" "apply_threshold"     </span></span>
+<span><span class="co">#&gt; [43] ".__enclos_env__"</span></span></code></pre></div>
 <p>The scenario object can finally be trained via
 <code><a href="../reference/project.html">project()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -246,7 +247,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co"># Note that an indication of fitted scenarios has been added to the object</span></span>
 <span><span class="va">sc.fit1</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
-<span><span class="co">#&gt;   Used model: GLMNET-Model</span></span>
+<span><span class="co">#&gt;   Used model: DistributionModel</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
@@ -387,7 +388,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co"># Note how constrains are indicated in the scenario object.</span></span>
 <span><span class="va">sc.fit3</span></span>
 <span><span class="co">#&gt; Spatial-temporal scenario:</span></span>
-<span><span class="co">#&gt;   Used model: GLMNET-Model</span></span>
+<span><span class="co">#&gt;   Used model: DistributionModel</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
@@ -438,18 +439,18 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt;    runname    category                  period       value unit      </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Simple PPM Current range             2016-01-01 433.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Simple PPM Future range              2100-01-01 418.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Simple PPM Unsuitable                84 years   189.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Simple PPM Loss                      84 years    14.8   ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Simple PPM Future range              2100-01-01 419.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Simple PPM Unsuitable                84 years   188.    ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Simple PPM Loss                      84 years    15.0   ha        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Simple PPM Gain                      84 years     0.693 ha        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Simple PPM Stable                    84 years   418.    ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Simple PPM Percent loss              84 years     3.43  %         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Simple PPM Percent loss              84 years     3.45  %         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Simple PPM Percent gain              84 years     0.160 %         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Simple PPM Range change              84 years   -<span style="color: #BB0000;">14.2</span>   ha        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Simple PPM Percent change            84 years    -<span style="color: #BB0000;">6.94</span>  %         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Simple PPM Range change              84 years   -<span style="color: #BB0000;">14.3</span>   ha        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Simple PPM Percent change            84 years    -<span style="color: #BB0000;">7.01</span>  %         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Simple PPM Sorensen index            84 years     0.984 similarity</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Simple PPM Centroid distance         84 years    19.8   km        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Simple PPM Centroid change direction 84 years    21.1   deg</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Simple PPM Centroid distance         84 years    20.3   km        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Simple PPM Centroid change direction 84 years    13.7   deg</span></span></code></pre></div>
 <p>Another option for constraining prediction is also by imposing a
 zonal limit (for instance climatically defined) on the projections (see
 alternatively <code><a href="../reference/add_constraint_boundary.html">add_constraint_boundary()</a></code> above). This has to

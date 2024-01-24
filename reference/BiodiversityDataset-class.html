@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>BiodiversityDataset prototype description</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/bdproto-biodiversitydataset.R" class="external-link"><code>R/bdproto-biodiversitydataset.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/R/class-biodiversitydataset.R" class="external-link"><code>R/class-biodiversitydataset.R</code></a></small>
       <div class="d-none name"><code>BiodiversityDataset-class.Rd</code></div>
     </div>
 
@@ -67,14 +67,367 @@
     <p>BiodiversityDataset prototype description</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">BiodiversityDataset</span></span></code></pre></div>
-    </div>
 
     <div class="section level2">
-    <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>An object of class <code>BiodiversityDataset</code> (inherits from <code>bdproto</code>, <code>proto</code>, <code>environment</code>) of length 24.</p>
+    <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
+    <p></p><div class="r6-fields"><dl><dt><code>name</code></dt>
+<dd><p>The default name of this dataset as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>id</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the unique id for this dataset.</p></dd>
+
+
+<dt><code>equation</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object containing the equation of how this dataset is modelled.</p></dd>
+
+
+<dt><code>family</code></dt>
+<dd><p>The family used for this dataset as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>link</code></dt>
+<dd><p>The link function used for this data as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>type</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>weight</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> containing custom weights per observation for this dataset.</p></dd>
+
+
+<dt><code>field_occurrence</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the name of the column name containing observations.</p></dd>
+
+
+<dt><code>data</code></dt>
+<dd><p>Contains the observational data in <code>sf</code> format.</p></dd>
+
+
+<dt><code>use_intercept</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag on whether intercepts are included for this dataset.</p></dd>
+
+
+<dt><code>pseudoabsence_settings</code></dt>
+<dd><p>Optionally provided pseudoabsence settings.</p></dd>
+
+
+</dl><p></p></div>
+    </div>
+    <div class="section level2">
+    <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a></h2>
+    
+<div class="section">
+<h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
+
+<ul><li><p><a href="#method-BiodiversityDataset-new"><code>BiodiversityDataset$new()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-print"><code>BiodiversityDataset$print()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-set_equation"><code>BiodiversityDataset$set_equation()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_equation"><code>BiodiversityDataset$get_equation()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-show_equation"><code>BiodiversityDataset$show_equation()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_id"><code>BiodiversityDataset$get_id()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_type"><code>BiodiversityDataset$get_type()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_column_occ"><code>BiodiversityDataset$get_column_occ()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_family"><code>BiodiversityDataset$get_family()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_link"><code>BiodiversityDataset$get_link()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_data"><code>BiodiversityDataset$get_data()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_weight"><code>BiodiversityDataset$get_weight()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-show"><code>BiodiversityDataset$show()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-get_observations"><code>BiodiversityDataset$get_observations()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-mask"><code>BiodiversityDataset$mask()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDataset-clone"><code>BiodiversityDataset$clone()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-BiodiversityDataset-new"></a><div class="section">
+<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+<p>Initializes the object and creates an empty list</p><div class="section">
+<h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/BiodiversityDataset-class.html">BiodiversityDataset</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  <span class="va">name</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">equation</span>,</span>
+<span>  <span class="va">family</span>,</span>
+<span>  <span class="va">link</span>,</span>
+<span>  <span class="va">type</span>,</span>
+<span>  <span class="va">weight</span>,</span>
+<span>  <span class="va">field_occurrence</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">use_intercept</span>,</span>
+<span>  <span class="va">pseudoabsence_settings</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>name</code></dt>
+<dd><p>The default name of this dataset as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>id</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the unique id for this dataset.</p></dd>
+
+
+<dt><code>equation</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object containing the equation of how this dataset is modelled.</p></dd>
+
+
+<dt><code>family</code></dt>
+<dd><p>The family used for this dataset as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>link</code></dt>
+<dd><p>The link function used for this data as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>type</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
+
+
+<dt><code>weight</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> containing custom weights per observation for this dataset.</p></dd>
+
+
+<dt><code>field_occurrence</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the name of the column name containing observations.</p></dd>
+
+
+<dt><code>data</code></dt>
+<dd><p>Contains the observational data in <code>sf</code> format.</p></dd>
+
+
+<dt><code>use_intercept</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag on whether intercepts are included for this dataset.</p></dd>
+
+
+<dt><code>pseudoabsence_settings</code></dt>
+<dd><p>Optionally provided pseudoabsence settings.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>NULL</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-print"></a><div class="section">
+<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+<p>Print the names and properties of all Biodiversity datasets contained within</p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>A message on screen</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-set_equation"></a><div class="section">
+<h3 id="method-set-equation-">Method <code>set_equation()</code><a class="anchor" aria-label="anchor" href="#method-set-equation-"></a></h3>
+<p>Set new equation and writes it into <code>formula</code></p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">set_equation</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>x</code></dt>
+<dd><p>A new <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>Invisible</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_equation"></a><div class="section">
+<h3 id="method-get-equation-">Method <code>get_equation()</code><a class="anchor" aria-label="anchor" href="#method-get-equation-"></a></h3>
+<p>Get equation</p><div class="section">
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_equation</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<p>A placeholder or <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> object.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-show_equation"></a><div class="section">
+<h3 id="method-show-equation-">Method <code>show_equation()</code><a class="anchor" aria-label="anchor" href="#method-show-equation-"></a></h3>
+<p>Function to print the equation</p><div class="section">
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">show_equation</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<p>A message on screen.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_id"></a><div class="section">
+<h3 id="method-get-id-">Method <code>get_id()</code><a class="anchor" aria-label="anchor" href="#method-get-id-"></a></h3>
+<p>Get Id within the dataset</p><div class="section">
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_id</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the id.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_type"></a><div class="section">
+<h3 id="method-get-type-">Method <code>get_type()</code><a class="anchor" aria-label="anchor" href="#method-get-type-"></a></h3>
+<p>Get type of the dataset.</p><div class="section">
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_type</span><span class="op">(</span>short <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>short</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag if this should be formatted in shortform.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_column_occ"></a><div class="section">
+<h3 id="method-get-column-occ-">Method <code>get_column_occ()</code><a class="anchor" aria-label="anchor" href="#method-get-column-occ-"></a></h3>
+<p>Get field with occurrence information</p><div class="section">
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_column_occ</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the occurence field</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_family"></a><div class="section">
+<h3 id="method-get-family-">Method <code>get_family()</code><a class="anchor" aria-label="anchor" href="#method-get-family-"></a></h3>
+<p>Get family</p><div class="section">
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_family</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the family for the dataset</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_link"></a><div class="section">
+<h3 id="method-get-link-">Method <code>get_link()</code><a class="anchor" aria-label="anchor" href="#method-get-link-"></a></h3>
+<p>Get custom link function</p><div class="section">
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_link</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the family for the dataset</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_data"></a><div class="section">
+<h3 id="method-get-data-">Method <code><a href="get_data.html">get_data()</a></code><a class="anchor" aria-label="anchor" href="#method-get-data-"></a></h3>
+<p>Get data from the object</p><div class="section">
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
+<p>A <code>sf</code> object with the data</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_weight"></a><div class="section">
+<h3 id="method-get-weight-">Method <code>get_weight()</code><a class="anchor" aria-label="anchor" href="#method-get-weight-"></a></h3>
+<p>Get weight</p><div class="section">
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_weight</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the weights within the dataset.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-show"></a><div class="section">
+<h3 id="method-show-">Method <code>show()</code><a class="anchor" aria-label="anchor" href="#method-show-"></a></h3>
+<p>Print input messages</p><div class="section">
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
+<p>A message on screen.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-get_observations"></a><div class="section">
+<h3 id="method-get-observations-">Method <code>get_observations()</code><a class="anchor" aria-label="anchor" href="#method-get-observations-"></a></h3>
+<p>Collect info statistics about number of observations</p><div class="section">
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">get_observations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-13">Returns<a class="anchor" aria-label="anchor" href="#returns-13"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with the number of observations.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-mask"></a><div class="section">
+<h3 id="method-mask-">Method <code><a href="mask.html">mask()</a></code><a class="anchor" aria-label="anchor" href="#method-mask-"></a></h3>
+<p>Convenience function to mask all input datasets.</p><div class="section">
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">mask</span><span class="op">(</span><span class="va">mask</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>mask</code></dt>
+<dd><p>A <code>SpatRaster</code> or <code>sf</code> object.</p></dd>
+
+
+<dt><code>inverse</code></dt>
+<dd><p>A <code>logical</code> flag if the inverse should be masked instead.</p></dd>
+
+
+<dt><code>...</code></dt>
+<dd><p>Any other parameters passed on to mask</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
+<p>Invisible</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDataset-clone"></a><div class="section">
+<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+<p>The objects of this class are cloneable with this method.</p><div class="section">
+<h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDataset</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>deep</code></dt>
+<dd><p>Whether to make a deep clone.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div>
+
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
