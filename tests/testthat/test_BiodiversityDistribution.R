@@ -154,8 +154,6 @@ test_that('Setting up a distribution model',{
   expect_equal( y$get_engine(), "<BREG>")
   y <- x |> engine_gdb()
   expect_equal( y$get_engine(), "<GDB>")
-  y <- x |> engine_inlabru()
-  expect_equal( y$get_engine(), "<INLABRU>")
   y <- x |> engine_xgboost()
   expect_equal( y$get_engine(), "<XGBOOST>")
 
@@ -166,6 +164,8 @@ test_that('Setting up a distribution model',{
   skip_if_not_installed('INLA')
   y <- x |> engine_inla()
   expect_equal( y$get_engine(), "<INLA>")
+  y <- x |> engine_inlabru()
+  expect_equal( y$get_engine(), "<INLABRU>")
 
   # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
   skip_if_not_installed("cmdstanr")

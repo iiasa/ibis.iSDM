@@ -53,7 +53,7 @@ install <- function(packages){
 if(!("INLA" %in% installed.packages()[, "Package"])){
   install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 }
-install(c("inlabru", "xgboost", "igraph"))
+invisible( install(c("inlabru", "lwgeom", "xgboost", "igraph")) )
 ```
 
 
