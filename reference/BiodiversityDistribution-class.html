@@ -184,6 +184,8 @@ functions.</p>
 <li><p><a href="#method-BiodiversityDistribution-show_biodiversity_equations"><code>BiodiversityDistribution$show_biodiversity_equations()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-get_biodiversity_equations"><code>BiodiversityDistribution$get_biodiversity_equations()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-get_biodiversity_types"><code>BiodiversityDistribution$get_biodiversity_types()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDistribution-get_biodiversity_ids"><code>BiodiversityDistribution$get_biodiversity_ids()</code></a></p></li>
+<li><p><a href="#method-BiodiversityDistribution-get_biodiversity_names"><code>BiodiversityDistribution$get_biodiversity_names()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-plot"><code>BiodiversityDistribution$plot()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-summary"><code>BiodiversityDistribution$summary()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-clone"><code>BiodiversityDistribution$clone()</code></a></p></li>
@@ -827,34 +829,58 @@ functions.</p>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector.</p>
 </div>
 
-</div><p></p><hr><a id="method-BiodiversityDistribution-plot"></a><div class="section">
-<h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
-<p>Plots the content of this class.</p><div class="section">
+</div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_ids"></a><div class="section">
+<h3 id="method-get-biodiversity-ids-">Method <code>get_biodiversity_ids()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-ids-"></a></h3>
+<p>Return all biodiversity dataset ids in the object</p><div class="section">
 <h4 id="usage-41">Usage<a class="anchor" aria-label="anchor" href="#usage-41"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_ids</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="returns-41">Returns<a class="anchor" aria-label="anchor" href="#returns-41"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> for the ids in the biodiversity datasets</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_names"></a><div class="section">
+<h3 id="method-get-biodiversity-names-">Method <code>get_biodiversity_names()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-names-"></a></h3>
+<p>Return all the <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> names of all biodiversity datasets</p><div class="section">
+<h4 id="usage-42">Usage<a class="anchor" aria-label="anchor" href="#usage-42"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-42">Returns<a class="anchor" aria-label="anchor" href="#returns-42"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the names in the biodiversity datasets</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDistribution-plot"></a><div class="section">
+<h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
+<p>Plots the content of this class.</p><div class="section">
+<h4 id="usage-43">Usage<a class="anchor" aria-label="anchor" href="#usage-43"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-43">Returns<a class="anchor" aria-label="anchor" href="#returns-43"></a></h4>
 <p>A message.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-summary"></a><div class="section">
 <h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
 <p>Summary function for this object.</p><div class="section">
-<h4 id="usage-42">Usage<a class="anchor" aria-label="anchor" href="#usage-42"></a></h4>
+<h4 id="usage-44">Usage<a class="anchor" aria-label="anchor" href="#usage-44"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-42">Returns<a class="anchor" aria-label="anchor" href="#returns-42"></a></h4>
+<h4 id="returns-44">Returns<a class="anchor" aria-label="anchor" href="#returns-44"></a></h4>
 <p>A message.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-43">Usage<a class="anchor" aria-label="anchor" href="#usage-43"></a></h4>
+<h4 id="usage-45">Usage<a class="anchor" aria-label="anchor" href="#usage-45"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -878,8 +904,8 @@ functions.</p>
 <span class="r-in"><span>package<span class="op">=</span><span class="st">'ibis.iSDM'</span>,mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Define model</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">[Setup] 2024-01-24 23:50:58.155398 | Provide a background with a valid projection!</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-01-24 23:50:58.172457 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">[Setup] 2024-01-25 21:59:49.457332 | Provide a background with a valid projection!</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-01-25 21:59:49.476683 | Creating distribution object...</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] ".__enclos_env__"             "engine"                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "log"                         "offset"                     </span>
@@ -888,27 +914,28 @@ functions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "biodiversity"                "limits"                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "background"                  "clone"                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "summary"                     "plot"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "get_biodiversity_types"      "get_biodiversity_equations" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "show_biodiversity_equations" "show_biodiversity_length"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "rm_priors"                   "rm_predictors"              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21] "get_resolution"              "get_projection"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23] "get_extent_dimensions"       "get_extent"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "set_log"                     "get_log"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [27] "plot_bias"                   "rm_control"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] "get_control"                 "set_control"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "get_offset_type"             "plot_offsets"               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [33] "rm_offset"                   "get_offset"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [35] "set_offset"                  "get_prior_variables"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "rm_engine"                   "get_engine"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [39] "set_engine"                  "set_predictors"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [41] "set_biodiversity"            "set_priors"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] "get_priors"                  "rm_latent"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [45] "get_latent"                  "set_latent"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [47] "get_predictor_names"         "rm_limits"                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] "get_limits"                  "set_limits"                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [51] "show_background_info"        "name"                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [53] "show"                        "print"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [55] "initialize"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "get_biodiversity_names"      "get_biodiversity_ids"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "get_biodiversity_types"      "get_biodiversity_equations" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "show_biodiversity_equations" "show_biodiversity_length"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21] "rm_priors"                   "rm_predictors"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [23] "get_resolution"              "get_projection"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "get_extent_dimensions"       "get_extent"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [27] "set_log"                     "get_log"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] "plot_bias"                   "rm_control"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "get_control"                 "set_control"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [33] "get_offset_type"             "plot_offsets"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [35] "rm_offset"                   "get_offset"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "set_offset"                  "get_prior_variables"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [39] "rm_engine"                   "get_engine"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [41] "set_engine"                  "set_predictors"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [43] "set_biodiversity"            "set_priors"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [45] "get_priors"                  "rm_latent"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [47] "get_latent"                  "set_latent"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [49] "get_predictor_names"         "rm_limits"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [51] "get_limits"                  "set_limits"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [53] "show_background_info"        "name"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [55] "show"                        "print"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [57] "initialize"                 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
