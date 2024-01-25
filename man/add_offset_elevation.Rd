@@ -66,9 +66,9 @@ https://doi.org/10.1111/geb.12453
 }
 \seealso{
 Other offset: 
+\code{\link{add_offset}()},
 \code{\link{add_offset_bias}()},
 \code{\link{add_offset_range}()},
-\code{\link{add_offset}()},
 \code{\link{rm_offset}()}
 }
 \concept{offset}

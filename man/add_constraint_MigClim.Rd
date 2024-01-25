@@ -109,12 +109,12 @@ into species distribution models. R package version 1.6.
 }
 \seealso{
 Other constraint: 
+\code{\link{add_constraint}()},
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

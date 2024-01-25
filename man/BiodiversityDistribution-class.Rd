@@ -110,6 +110,8 @@ names(x)
 \item \href{#method-BiodiversityDistribution-show_biodiversity_equations}{\code{BiodiversityDistribution$show_biodiversity_equations()}}
 \item \href{#method-BiodiversityDistribution-get_biodiversity_equations}{\code{BiodiversityDistribution$get_biodiversity_equations()}}
 \item \href{#method-BiodiversityDistribution-get_biodiversity_types}{\code{BiodiversityDistribution$get_biodiversity_types()}}
+\item \href{#method-BiodiversityDistribution-get_biodiversity_ids}{\code{BiodiversityDistribution$get_biodiversity_ids()}}
+\item \href{#method-BiodiversityDistribution-get_biodiversity_names}{\code{BiodiversityDistribution$get_biodiversity_names()}}
 \item \href{#method-BiodiversityDistribution-plot}{\code{BiodiversityDistribution$plot()}}
 \item \href{#method-BiodiversityDistribution-summary}{\code{BiodiversityDistribution$summary()}}
 \item \href{#method-BiodiversityDistribution-clone}{\code{BiodiversityDistribution$clone()}}
@@ -762,6 +764,32 @@ Query all biodiversity types in this object
 
 \subsection{Returns}{
 A \code{\link{character}} vector.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityDistribution-get_biodiversity_ids"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_biodiversity_ids}{}}}
+\subsection{Method \code{get_biodiversity_ids()}}{
+Return all biodiversity dataset ids in the object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_ids()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{list}} for the ids in the biodiversity datasets
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityDistribution-get_biodiversity_names"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_biodiversity_names}{}}}
+\subsection{Method \code{get_biodiversity_names()}}{
+Return all the \code{\link{character}} names of all biodiversity datasets
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_biodiversity_names()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{list}} with the names in the biodiversity datasets
 }
 }
 \if{html}{\out{<hr>}}

@@ -558,6 +558,20 @@ BiodiversityDistribution <- R6::R6Class(
     },
 
     #' @description
+    #' Return all biodiversity dataset ids in the object
+    #' @return A [`list`] for the ids in the biodiversity datasets
+    get_biodiversity_ids = function(){
+      self$biodiversity$get_ids()
+    },
+
+    #' @description
+    #' Return all the [`character`] names of all biodiversity datasets
+    #' @return A [`list`] with the names in the biodiversity datasets
+    get_biodiversity_names = function(){
+      self$biodiversity$get_names()
+    },
+
+    #' @description
     #' Plots the content of this class.
     #' @note
     #' Not implemented yet.

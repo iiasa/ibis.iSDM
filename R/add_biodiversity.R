@@ -700,6 +700,70 @@ methods::setMethod(
     }
   }
 )
+# Removal function ----
+
+#' Remove specific BiodiversityDataset from a [distribution] object
+#'
+#' @description Remove a particular dataset (or all) from an [distribution] object with
+#' a [`BiodiversityDatasetCollection-class`].
+#'
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param name A [`character`] with the name of the biodiversity dataset.
+#' @param id A [`character`] with the id of the biodiversity dataset.
+#'
+#' @examples
+#' \dontrun{
+#' distribution(background) |>
+#'  add_biodiversity_poipa(species, "Duckus communus")
+#'  rm_biodiversity(names = "Duckus communus")
+#' }
+#'
+#' @name rm_biodiversity
+NULL
+
+#' @rdname rm_biodiversity
+#' @export
+methods::setGeneric(
+  "rm_biodiversity",
+  signature = methods::signature("x"),
+  function(x, name, id) standardGeneric("rm_biodiversity"))
+
+#' @rdname rm_biodiversity
+methods::setMethod(
+  "rm_biodiversity",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x, name, id) {
+    assertthat::assert_that(
+      inherits(x, "BiodiversityDistribution")
+    )
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
+    # If both are missing, get all ids
+    if(missing(name) && missing(id)){
+      y$biodiversity <- BiodiversityDatasetCollection$new()
+      return(y)
+    } else {
+      # Get id of name
+      if(!missing(name)){
+        n <- x$get_biodiversity_names()
+        if((name %in% n)) id <- names(n)[which(name %in% n)]
+      }
+      # If id is set
+      if(!missing(id)){
+        n <- x$get_biodiversity_ids()
+        if(!(id %in% n)) id <- NULL
+      }
+      # Is there anything to remove?
+      assertthat::assert_that(is.character(id) || is.Id(id),
+                              msg = "Provided biodiversity dataset not found in object!")
+
+      # Remove dataset
+      y$biodiversity <- y$biodiversity$rm_data(id)
+      return(y)
+    }
+  }
+)
 
 #' Format biodiversity dataset to standardized format
 #'

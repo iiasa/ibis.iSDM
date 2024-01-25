@@ -27,6 +27,8 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   "data",
                   "form2",
                   "geometry",
+                  #MJ: Added self here hoping that does not crash all methods.
+                  "self",
                   "id", "included", "i",
                   "km", "vt",
                   "limit", "lower", "layer",

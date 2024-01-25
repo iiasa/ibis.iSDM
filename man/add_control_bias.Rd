@@ -62,20 +62,21 @@ location of biodiversity datasets. While the integration of other, presumably
 less biased data can be one way of controlling for sampling biases, another
 way is to control directly for the bias in the model. Currently supported
 methods are:
-
-\link{*} \code{"partial"} - An approach described by Warton et al. (2013) to
+\itemize{
+\item \code{"partial"} - An approach described by Warton et al. (2013) to
 control the biases in a model, by including a specified variable ("layer") in
 the model, but "partialling" it out during the projection phase. Specifically
 the variable is set to a specified value ("bias_value"), which is by default
 the minimum value observed across the background.
-\link{*} \code{"offset"} - Dummy
+\item \code{"offset"} - Dummy
 method that points to the \code{\link[=add_offset_bias]{add_offset_bias()}} functionality (see note).
 Makes use of offsets to factor out a specified bias variable.
-\link{*} \code{"proximity"} - Use the proximity or distance between points as a weight
+\item \code{"proximity"} - Use the proximity or distance between points as a weight
 in the model. This option effectively places greater weight on points farther
 away. \emph{Note:} In the best case this can control for spatial bias and
 aggregation, in the worst case it can place a lot of emphasis on points that
 likely outliers or misidentification (in terms of species).
+}
 
 See also details for some explanations.
 }

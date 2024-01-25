@@ -116,13 +116,13 @@ temporally explicit population simulations. Methods in Ecology and Evolution,
 }
 \seealso{
 Other constraint: 
+\code{\link{add_constraint}()},
 \code{\link{add_constraint_MigClim}()},
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint}()}
+\code{\link{add_constraint_minsize}()}
 }
 \concept{constraint}
 \keyword{scenario}

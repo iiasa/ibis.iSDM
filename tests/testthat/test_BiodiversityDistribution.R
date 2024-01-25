@@ -56,7 +56,7 @@ test_that('Setting up a distribution model',{
   expect_no_error( x$biodiversity$mask(virtual_range) )
   x <- distribution(background) |> add_biodiversity_poipo(virtual_points,
                                                          field_occurrence = 'Observed',
-                                                         name = 'Virtual points')
+                                                         name = 'Virtual points',docheck = FALSE)
 
   # And a range off
   invisible( suppressWarnings( suppressMessages(y <- x |> add_offset_range(virtual_range))) )
@@ -66,6 +66,11 @@ test_that('Setting up a distribution model',{
   # remove again
   x <- y$rm_offset()
   expect_true(is.Waiver( x$get_offset() ) )
+
+  # Add biodiversity data and remove again
+  y <- x$clone(deep = TRUE)
+  y <- rm_biodiversity(y, id = y$get_biodiversity_ids()[[1]])
+  expect_equal(y$show_biodiversity_length(), 0)
 
   # Try also different bias controls
   expect_no_error(x |> add_control_bias(predictors$hmi_mean_50km,method = "partial"))

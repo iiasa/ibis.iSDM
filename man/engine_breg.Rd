@@ -58,10 +58,10 @@ R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 Other engine: 
 \code{\link{engine_bart}()},
 \code{\link{engine_gdb}()},
-\code{\link{engine_glmnet}()},
 \code{\link{engine_glm}()},
-\code{\link{engine_inlabru}()},
+\code{\link{engine_glmnet}()},
 \code{\link{engine_inla}()},
+\code{\link{engine_inlabru}()},
 \code{\link{engine_stan}()},
 \code{\link{engine_xgboost}()}
 }

@@ -30,10 +30,10 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 }
 \seealso{
 Other offset: 
+\code{\link{add_offset}()},
 \code{\link{add_offset_bias}()},
 \code{\link{add_offset_elevation}()},
-\code{\link{add_offset_range}()},
-\code{\link{add_offset}()}
+\code{\link{add_offset_range}()}
 }
 \concept{offset}
 \keyword{offset}

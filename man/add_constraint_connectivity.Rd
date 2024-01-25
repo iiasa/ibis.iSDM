@@ -33,12 +33,12 @@ Adds a connectivity constraint to a scenario object.
 }
 \seealso{
 Other constraint: 
+\code{\link{add_constraint}()},
 \code{\link{add_constraint_MigClim}()},
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

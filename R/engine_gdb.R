@@ -574,7 +574,7 @@ engine_gdb <- function(x,
 
       # create dummy data
       if(is.null(newdata)) {
-        dummy <- as.data.frame(matrix(nrow = variable_length, ncol = length(variables)))
+        dummy <- base::as.data.frame(matrix(nrow = variable_length, ncol = length(variables)))
         names(dummy) <- variables
 
         if(is.null(constant)){

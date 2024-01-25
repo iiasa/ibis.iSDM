@@ -65,9 +65,9 @@ spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://d
 }
 \seealso{
 Other offset: 
+\code{\link{add_offset}()},
 \code{\link{add_offset_elevation}()},
 \code{\link{add_offset_range}()},
-\code{\link{add_offset}()},
 \code{\link{rm_offset}()}
 }
 \concept{offset}
