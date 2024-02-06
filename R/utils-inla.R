@@ -1529,7 +1529,7 @@ inla.backstep <- function(master_form,
     # Now for each term in variable list
     for(vars in te){
       # New formula
-      new_form <- update(test_form, paste0('. ~ . - ',vars ))
+      new_form <- stats::update.formula(test_form, paste0('. ~ . - ',vars ))
 
       fit <- try({INLA::inla(formula = new_form, # The specified formula
                              data = stack_data_resp,  # The data stack

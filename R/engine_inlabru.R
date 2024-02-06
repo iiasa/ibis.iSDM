@@ -597,8 +597,11 @@ engine_inlabru <- function(x,
       } else if( model$predictors_types$type[i] == "factor"){
         # factor_full uses the full factor. fact_contrast uses the first level as reference
         # Built component
-        comp <- update(comp,
-                       paste(c(' ~ . + ', paste0(model$predictors_types$predictors[i],'(main = ', model$predictors_types$predictors[i], ', model = "factor_contrast")')), collapse = " ")
+        comp <- stats::update.formula(comp, paste(c(' ~ . + ', paste0(model$predictors_types$predictors[i],
+                                                                      '(main = ',
+                                                                      model$predictors_types$predictors[i],
+                                                                      ', model = "factor_contrast")')),
+                                                  collapse = " ")
         )
       }
     }
@@ -754,7 +757,7 @@ engine_inlabru <- function(x,
         # Now for each term in variable list
         for(vars in te){
           # New formula
-          new_form <- update(test_form, paste0('~ . - ',vars ))
+          new_form <- stats::update.formula(test_form, paste0('~ . - ',vars ))
           ll <- likelihoods
 
           try({fit <- inlabru::bru(components = new_form,
