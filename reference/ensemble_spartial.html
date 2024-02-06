@@ -139,7 +139,7 @@ in ensembles of <code>SpatRaster</code> objects.</p></dd>
 
 
 <dt>newdata</dt>
-<dd><p>A optional <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object supplied to
+<dd><p>A optional <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object supplied to
 the model (DefaultL <code>NULL</code>). This object needs to have identical names as the original predictors.</p></dd>
 
 
@@ -158,7 +158,7 @@ normalized to a scale of 0-1 (Default: <code>TRUE</code>).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> object with the combined partial effects of the supplied models.</p>
+<p>A <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a> object with the combined partial effects of the supplied models.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -169,7 +169,7 @@ normalized to a scale of 0-1 (Default: <code>TRUE</code>).</p></dd>
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>If a list is supplied, then it is assumed that each entry in the list
 is a fitted <code><a href="DistributionModel-class.html">DistributionModel</a></code> object. Take care not to create an ensemble
-of models constructed with different link functions, e.g. logistic vs <a href="https://rdrr.io/pkg/terra/man/math-generics.html" class="external-link">log</a>.
+of models constructed with different link functions, e.g. logistic vs <a href="https://rspatial.github.io/terra/reference/math-generics.html" class="external-link">log</a>.
 By default the response functions of each model are normalized.</p>
     </div>
 

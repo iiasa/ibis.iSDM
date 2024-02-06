@@ -130,7 +130,7 @@ names equivalent to the vital stages that are to be estimated.</p></dd>
 
 
 <dt>carrying_capacity</dt>
-<dd><p>Either <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or a <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the
+<dd><p>Either <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or a <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the
 maximum carrying capacity, e.g. how many adult individual are likely to occur
 per grid cell. If set to <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code>, then carrying capacity is estimated up
 to a maximum set (<em>Note: a more clever way would be to use a species-area relationship
@@ -138,7 +138,7 @@ for scaling. This is not yet implemented</em>).</p></dd>
 
 
 <dt>initial</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> giving the initial population size. If not
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> giving the initial population size. If not
 provided, then initial populations are guessed (see details) from the projected
 suitability rasters (Default: <code>NULL</code>).</p></dd>
 
@@ -179,7 +179,7 @@ different parameters is highly encouraged!</p>
     <p>The <em>steps</em> package has multiple options for simulating species population and
 not all possible options are represented in this wrapper.</p>
 <p>Furthermore, the package still makes use of the <code>raster</code> package for much
-of its internal data processing. Since <em>ibis.iSDM</em> switched to <a href="https://rdrr.io/pkg/terra/man/terra-package.html" class="external-link">terra</a> a while
+of its internal data processing. Since <em>ibis.iSDM</em> switched to <a href="https://rspatial.github.io/terra/reference/terra-package.html" class="external-link">terra</a> a while
 ago, there can be efficiency problems as layers need to be translated between
 packages.</p>
     </div>

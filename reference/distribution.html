@@ -216,10 +216,10 @@ object contents. Can also be called via <a href="print.html">print</a>.</p></li>
 biodiversity dataset with given id. Defaults to all predictors.</p></li>
 <li><p><code>object$get_biodiversity_types()</code> Lists the type of each specified
 biodiversity dataset with given id.</p></li>
-<li><p><code>object$get_extent()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> of the modelling region.</p></li>
-<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a>
-and the <a href="https://rdrr.io/pkg/terra/man/crs.html" class="external-link">terra::crs</a>.</p></li>
-<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rdrr.io/pkg/terra/man/ext.html" class="external-link">terra::ext</a> dimension by
+<li><p><code>object$get_extent()</code> Outputs the <a href="https://rspatial.github.io/terra/reference/ext.html" class="external-link">terra::ext</a> of the modelling region.</p></li>
+<li><p><code>object$show_background_info()</code> Returns a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the <a href="https://rspatial.github.io/terra/reference/ext.html" class="external-link">terra::ext</a>
+and the <a href="https://rspatial.github.io/terra/reference/crs.html" class="external-link">terra::crs</a>.</p></li>
+<li><p><code>object$get_extent_dimensions()</code> Outputs the <a href="https://rspatial.github.io/terra/reference/ext.html" class="external-link">terra::ext</a> dimension by
 calling the <code>"extent_dimensions()"</code> function.</p></li>
 <li><p><code>object$get_predictor_names()</code> Returns a <a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> vector with the
 names of all added predictors.</p></li>
@@ -245,11 +245,10 @@ Ecology and Biogeography 27, no. 1 (2018): 156-165.</p></li>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load background raster</span></span></span>
-<span class="r-in"><span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Define model</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">distribution</span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">[Setup] 2024-01-25 21:59:59.645498 | Provide a background with a valid projection!</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-01-25 21:59:59.656606 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-02-06 14:28:51.72418 | Creating distribution object...</span></span>
 <span class="r-in"><span><span class="va">x</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB; font-weight: bold;">&lt;Biodiversity distribution model&gt;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Background extent: </span>

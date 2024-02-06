@@ -125,7 +125,7 @@ presence-(pseudo-)absence.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>background</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code>sf</code> object over which background
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code>sf</code> object over which background
 points can be sampled. Default is <code>NULL</code> (Default) and the background
 is then added when the sampling is first called.</p></dd>
 
@@ -161,13 +161,13 @@ respective method is chosen (parameter <code>method = "mcp"</code> or <code>meth
 
 
 <dt>layer</dt>
-<dd><p>A <code>sf</code> or <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> (in the case of method <code>'zones'</code>)
+<dd><p>A <code>sf</code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> (in the case of method <code>'zones'</code>)
 object indicating the range of a species. Only used with <code>method = "range"</code>
 or <code>method = "zones"</code> (Default: <code>NULL</code>).</p></dd>
 
 
 <dt>bias</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> with the same extent and projection and background.
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> with the same extent and projection and background.
 Absence points will be preferentially sampled in areas with higher (!) bias. (Default: <code>NULL</code>).</p></dd>
 
 
@@ -189,13 +189,13 @@ minimum convex polygon.</p></li>
 <li><p><code>'range'</code> Absence points are created either inside or outside a provided additional
 layer that indicates for example a range of species (controlled through
 parameter <code>inside</code>).</p></li>
-<li><p><code>'zones'</code> A ratified (e.g. of type <a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a>) <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> layer depicting zones from which absence
+<li><p><code>'zones'</code> A ratified (e.g. of type <a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a>) <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> layer depicting zones from which absence
 points are to be sampled. This method checks which points fall within which
 zones and then samples absence points either within or outside these zones
 exclusively. Both <code>'layer'</code> and <code>'inside'</code> have to be set for this
 option.</p></li>
 <li><p><code>'target'</code> Make use of a target background for sampling absence points.
-Here a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object has to be provided through the parameter <code>'layer'</code>.
+Here a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object has to be provided through the parameter <code>'layer'</code>.
 Absence points are then sampled exclusively within the target areas for grid
 cells with non-zero values.</p></li>
 </ul></div>

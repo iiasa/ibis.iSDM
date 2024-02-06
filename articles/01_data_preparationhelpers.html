@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-01-25</h4>
+            <h4 data-toc-skip class="date">2024-02-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -159,7 +159,7 @@ scale from 0 to 1) and also faster to fit as model.</p>
 <code class="sourceCode R"><span><span class="co">## Lets load some testing data from the package</span></span>
 <span></span>
 <span><span class="co"># Background layer</span></span>
-<span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Load virtual species points</span></span>
 <span><span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/input_data.gpkg"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"points"</span>,quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
 <span><span class="co"># Add a range </span></span>
@@ -199,7 +199,7 @@ added to any point dataset via <code><a href="../reference/add_pseudoabsence.htm
 <code class="sourceCode R"><span></span>
 <span><span class="co"># --- #</span></span>
 <span><span class="co"># Another option sampling inside the range, but biased by a bias layer</span></span>
-<span><span class="va">bias</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/hmi_mean_50km.tif"</span>,</span>
+<span><span class="va">bias</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/hmi_mean_50km.tif"</span>,</span>
 <span>                                package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">abs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pseudoabs_settings.html">pseudoabs_settings</a></span><span class="op">(</span>background <span class="op">=</span> <span class="va">background</span>,</span>
@@ -264,7 +264,7 @@ discards data!</strong></p>
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another way: Use environmental thinning to retain enough points</span></span>
 <span><span class="co"># across the niche defined by a set of covariates</span></span>
-<span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">point2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/thin_observations.html">thin_observations</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">virtual_species</span>,</span>
 <span>                  background <span class="op">=</span> <span class="va">background</span>,</span>
@@ -274,7 +274,7 @@ discards data!</strong></p>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (environmental) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 33</span></span>
+<span><span class="co">#&gt; Number of retained records: 28</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Environmentally stratified data"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" width="700" style="display: block; margin: auto;"></p>
@@ -298,7 +298,7 @@ the input data (which needs to be undertaken using the
 <code>terra</code> package).</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load some test covariates</span></span>
-<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="transforming-predictors">Transforming predictors<a class="anchor" aria-label="anchor" href="#transforming-predictors"></a>
 </h3>
@@ -317,8 +317,8 @@ be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <span><span class="va">new2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_transform.html">predictor_transform</a></span><span class="op">(</span><span class="va">layer</span>, option <span class="op">=</span> <span class="st">"scale"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new1</span>, <span class="va">new2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"normalized"</span>, <span class="st">"scaled"</span><span class="op">)</span></span>
-<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"normalized"</span>, <span class="st">"scaled"</span><span class="op">)</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -330,8 +330,8 @@ be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <span>                            windsor_props <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.9</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"windsorized"</span><span class="op">)</span></span>
-<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"windsorized"</span><span class="op">)</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-2.png" width="700" style="display: block; margin: auto;"></p>
 <p>Other options for transformation are also available and are listed in
 the methods file.</p>
@@ -361,8 +361,8 @@ predictors.</p>
 <span><span class="va">new1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_derivate.html">predictor_derivate</a></span><span class="op">(</span><span class="va">layer</span>, option <span class="op">=</span> <span class="st">"quadratic"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"quadratic"</span><span class="op">)</span></span>
-<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"quadratic"</span><span class="op">)</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -371,14 +371,14 @@ predictors.</p>
 <span>                           <span class="co"># The number is controlled by the number of knots</span></span>
 <span>                            nknots <span class="op">=</span> <span class="fl">4</span> </span>
 <span>                           <span class="op">)</span></span>
-<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new2</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new2</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-2.png" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># What does this do precisely?</span></span>
 <span><span class="co"># Lets check</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> ndvi <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/values.html" class="external-link">values</a></span><span class="op">(</span><span class="va">layer</span><span class="op">)</span>,</span>
-<span>                  <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/values.html" class="external-link">values</a></span><span class="op">(</span><span class="va">new2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> ndvi <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/values.html" class="external-link">values</a></span><span class="op">(</span><span class="va">layer</span><span class="op">)</span>,</span>
+<span>                  <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/values.html" class="external-link">values</a></span><span class="op">(</span><span class="va">new2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"First hinge of ndvi"</span>, xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-3.png" width="700" style="display: block; margin: auto;"></p>
@@ -417,23 +417,23 @@ which can be convenient for assessing errors during data
 preparation.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make a subset of all predictors to show the concept</span></span>
-<span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>,  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aspect_mean_50km"</span>,</span>
+<span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>,  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aspect_mean_50km"</span>,</span>
 <span>                                        <span class="st">"CLC3_312_mean_50km"</span>,</span>
 <span>                                        <span class="st">"elevation_mean_50km"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># All these layers have identical data coverage.</span></span>
 <span><span class="co"># Now add missing data in one of the layers for testing</span></span>
-<span><span class="va">layers</span><span class="op">$</span><span class="va">CLC3_312_mean_50km</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html" class="external-link">ncell</a></span><span class="op">(</span><span class="va">layers</span><span class="op">)</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span> </span>
+<span><span class="va">layers</span><span class="op">$</span><span class="va">CLC3_312_mean_50km</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html" class="external-link">ncell</a></span><span class="op">(</span><span class="va">layers</span><span class="op">)</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span> </span>
 <span></span>
 <span><span class="co"># Harmonize the predictors</span></span>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_homogenize_na.html">predictor_homogenize_na</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">layers</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Now all the predictors have identical coverage of NA values</span></span>
-<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-1.png" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Or assess like this</span></span>
-<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="op">!</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html" class="external-link">noNA</a></span><span class="op">(</span><span class="va">new</span><span class="op">$</span><span class="va">aspect_mean_50km</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Missing observations"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="op">!</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">noNA</a></span><span class="op">(</span><span class="va">new</span><span class="op">$</span><span class="va">aspect_mean_50km</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Missing observations"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-2.png" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>

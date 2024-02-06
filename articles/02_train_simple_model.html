@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-01-25</h4>
+            <h4 data-toc-skip class="date">2024-02-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -152,7 +152,7 @@ forest-associated species for northern Europe. There are also some test
 predictors available for modelling. So first lets load the data:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Background layer</span></span>
-<span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/europegrid_50km.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Load virtual species points</span></span>
 <span><span class="va">virtual_species</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/input_data.gpkg"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"points"</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Reading layer `points' from data source </span></span>
@@ -164,9 +164,9 @@ predictors available for modelling. So first lets load the data:</p>
 <span><span class="co">#&gt; Bounding box:  xmin: 4.109162 ymin: 48.7885 xmax: 24.47594 ymax: 64.69323</span></span>
 <span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span>
 <span><span class="co"># Predictors</span></span>
-<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Make use only of a few of them</span></span>
-<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
+<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
 <span>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
 <span>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
 <span>                                            <span class="st">"elevation_mean_50km"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -265,7 +265,7 @@ the data added to this object.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Other options to explore</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "summary"                     "show_biodiversity_length"   </span></span>
 <span><span class="co">#&gt;  [3] "show_biodiversity_equations" "show_background_info"       </span></span>
 <span><span class="co">#&gt;  [5] "show"                        "set_priors"                 </span></span>
@@ -417,51 +417,51 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species continuous</span></span>
-<span><span class="co">#&gt;       metric        value</span></span>
-<span><span class="co">#&gt; 1          n 175.00000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.87856015</span></span>
-<span><span class="co">#&gt; 3        mae   0.67314153</span></span>
-<span><span class="co">#&gt; 4    logloss   1.77608616</span></span>
-<span><span class="co">#&gt; 5   normgini  -0.07569721</span></span>
-<span><span class="co">#&gt; 6 cont.boyce   0.26208641</span></span>
+<span><span class="co">#&gt; 1 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species continuous</span></span>
+<span><span class="co">#&gt;       metric       value</span></span>
+<span><span class="co">#&gt; 1          n 175.0000000</span></span>
+<span><span class="co">#&gt; 2       rmse   0.8779555</span></span>
+<span><span class="co">#&gt; 3        mae   0.6723207</span></span>
+<span><span class="co">#&gt; 4    logloss   1.7755858</span></span>
+<span><span class="co">#&gt; 5   normgini  -0.0749004</span></span>
+<span><span class="co">#&gt; 6 cont.boyce   0.2521260</span></span>
 <span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 8e18b74f-932d-4856-9d8b-cbbf30b86506 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 1fe29d02-2d76-40f9-950b-362492c129bd Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
-<span><span class="co">#&gt; 1                    n 506.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6804316</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7351779</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.3963964</span></span>
-<span><span class="co">#&gt; 5            precision   0.6518519</span></span>
+<span><span class="co">#&gt; 1                    n 513.0000000</span></span>
+<span><span class="co">#&gt; 2                  auc   0.6878191</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7465887</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.4036697</span></span>
+<span><span class="co">#&gt; 5            precision   0.6717557</span></span>
 <span><span class="co">#&gt; 6          sensitivity   0.5028571</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8580060</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3608632</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5677419</span></span>
-<span><span class="co">#&gt; 10             logloss   6.2052837</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5718961</span></span>
-<span><span class="co">#&gt; 12               kappa   0.3814068</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2648221</span></span></code></pre></div>
+<span><span class="co">#&gt; 7          specificity   0.8727811</span></span>
+<span><span class="co">#&gt; 8                  tss   0.3756382</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5751634</span></span>
+<span><span class="co">#&gt; 10             logloss   6.1128139</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5777314</span></span>
+<span><span class="co">#&gt; 12               kappa   0.3998812</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2534113</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can

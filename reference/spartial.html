@@ -72,7 +72,7 @@ partial response."><meta name="twitter:card" content="summary"><meta name="twitt
     <div class="ref-description section level2">
     <p>Similar as <a href="partial.html">partial</a> this function calculates a partial response
 of a trained model for a given variable. Differently from <a href="partial.html">partial</a> in space.
-However the result is a <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> showing the spatial magnitude of the
+However the result is a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> showing the spatial magnitude of the
 partial response.</p>
     </div>
 
@@ -99,7 +99,7 @@ is to be calculated.</p></dd>
 
 <dt>constant</dt>
 <dd><p>A <a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> constant to be inserted for all other variables.
-Default calculates the <a href="https://rdrr.io/pkg/terra/man/summarize-generics.html" class="external-link">mean</a> per variable.</p></dd>
+Default calculates the <a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">mean</a> per variable.</p></dd>
 
 
 <dt>newdata</dt>
@@ -119,11 +119,11 @@ for example created from a raster file (Default: <code>NULL</code>).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a> containing the mapped partial response of the variable.</p>
+<p>A <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a> containing the mapped partial response of the variable.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default the <a href="https://rdrr.io/pkg/terra/man/summarize-generics.html" class="external-link">mean</a> is calculated across all parameters that are
+    <p>By default the <a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">mean</a> is calculated across all parameters that are
 not <code>x.var</code>. Instead a <em>constant</em> can be set (for instance <code>0</code>) to
 be applied to the output.</p>
     </div>

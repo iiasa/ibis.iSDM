@@ -71,9 +71,9 @@ function works both with SpatRaster as well as with stars objects."><meta name="
 
     <div class="ref-description section level2">
     <p>This function allows the transformation of provided environmental
-predictors (in <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> format). A common use case is for instance the
+predictors (in <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> format). A common use case is for instance the
 standardization (or scaling) of all predictors prior to model fitting. This
-function works both with <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> as well as with <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> objects.</p>
+function works both with <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> as well as with <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> objects.</p>
     </div>
 
     <div class="section level2">
@@ -91,7 +91,7 @@ function works both with <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>env</dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object.</p></dd>
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object.</p></dd>
 
 
 <dt>option</dt>
@@ -123,12 +123,12 @@ empty (in this case option has to be set).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>Returns a adjusted <code><a href="https://rdrr.io/pkg/terra/man/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object of identical resolution.</p>
+<p>Returns a adjusted <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object of identical resolution.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Available options are:</p><ul><li><p><code>'none'</code> The original layer(s) are returned.</p></li>
-<li><p><code>'scale'</code> This run the <code><a href="https://rdrr.io/pkg/terra/man/scale.html" class="external-link">scale()</a></code> function with default settings
+<li><p><code>'scale'</code> This run the <code><a href="https://rspatial.github.io/terra/reference/scale.html" class="external-link">scale()</a></code> function with default settings
 (1 Standard deviation) across all predictors. A sensible default to for most model fitting.</p></li>
 <li><p><code>'norm'</code> This normalizes all predictors to a range from <code>0-1</code>.</p></li>
 <li><p><code>'windsor'</code> This applies a 'windsorization' to an existing raster layer
@@ -139,7 +139,7 @@ are clamped to a thresholds rather than certain percentages calculated on the da
 <li><p><code>'percentile'</code> This converts and bins all values into percentiles, e.g.
 the top 10% or lowest 10% of values and so on.</p></li>
 <li><p><code>'pca'</code> This option runs a principal component decomposition of all
-predictors (via <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code>). It returns new predictors resembling all components
+predictors (via <code><a href="https://rspatial.github.io/terra/reference/prcomp.html" class="external-link">prcomp()</a></code>). It returns new predictors resembling all components
 in order of the most important ones. Can be useful to reduce collinearity, however
 note that this changes all predictor names to 'PCX', where X is the number of
 the component. The parameter <code>'pca.var'</code> can be modified to specify the
