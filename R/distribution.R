@@ -124,7 +124,7 @@ methods::setMethod(
     assertthat::assert_that( inherits(background,'SpatRaster')  )
 
     # Check that provided background has a valid crs
-    if(!is.na(terra::crs(background,describe=TRUE)[['code']])){
+    if(is.na(terra::crs(background,describe=TRUE)[['code']])){
       if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provide a background with a valid projection!')
     }
 
