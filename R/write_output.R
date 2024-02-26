@@ -512,25 +512,27 @@ methods::setMethod(
     # And model format
     assertthat::assert_that( assertthat::has_extension(fname, "rds"))
 
+    x <- mod$clone()
+
     # Don't save the predictors object as it has distinct memory points
-    if(inherits(mod$model$predictors_object, "PredictorDataset")){
-      ats <- attributes( mod$model$predictors_object$get_data() )
-      mod$model$predictors_object <- ats
+    if(inherits(x$model$predictors_object, "PredictorDataset")){
+      ats <- attributes( x$model$predictors_object$get_data() )
+      x$model$predictors_object <- ats
     }
 
     # If slim, remove some ballast
     if(slim){
-      if(!is.Waiver(mod$get_data("prediction"))) mod$fits$prediction <- NULL
+      if(!is.Waiver(x$get_data("prediction"))) x$fits$prediction <- NULL
     } else {
       # Save the prediction as data.frame if set
-      if(!is.Waiver(mod$get_data("prediction"))){
-        mod$fits$prediction <- terra::as.data.frame(mod$get_data(), xy = TRUE, na.rm = NA)
+      if(!is.Waiver(x$get_data("prediction"))){
+        x$fits$prediction <- terra::as.data.frame(x$get_data(), xy = TRUE, na.rm = NA)
       }
     }
 
     # Save output
     if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Writing model to file...'))
-    saveRDS(mod, fname)
+    saveRDS(x, fname)
     invisible()
   }
 )
@@ -634,28 +636,32 @@ methods::setMethod(
       utils::hasName(mod, "model"),
       !is.Waiver(mod$get_data("fit_best"))
     )
-    # Check that model type is known
-    assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
-    # Depending on engine, check package and load them
 
-    if(inherits(mod, "GDB-Model")){
-      check_package("mboost")
-    } else if(inherits(mod, "BART-Model")){
-      check_package("dbarts")
-    } else if(inherits(mod, "INLABRU-Model")){
-      check_package("INLA")
-      check_package("inlabru")
-    } else if(inherits(mod, "BREG-Model")){
-      check_package("BoomSpikeSlab")
-    } else if(inherits(mod, "GLMNET-Model")){
-      check_package("glmnet")
-      check_package("glmnetUtils")
-    } else if(inherits(mod, "STAN-Model")){
-      check_package("rstan")
-      check_package("cmdstanr")
-    } else if(inherits(mod, "XGBOOST-Model")){
-      check_package("xgboost")
-    }
+    # FIXME MH: Class of mod is only R6 and DistributionModel currently but no engine
+    warning("Due to a bug, there is no check if the object has a valid engine.",
+            call. = FALSE)
+    # # Check that model type is known
+    # assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
+    # # Depending on engine, check package and load them
+    #
+    # if(inherits(mod, "GDB-Model")){
+    #   check_package("mboost")
+    # } else if(inherits(mod, "BART-Model")){
+    #   check_package("dbarts")
+    # } else if(inherits(mod, "INLABRU-Model")){
+    #   check_package("INLA")
+    #   check_package("inlabru")
+    # } else if(inherits(mod, "BREG-Model")){
+    #   check_package("BoomSpikeSlab")
+    # } else if(inherits(mod, "GLMNET-Model")){
+    #   check_package("glmnet")
+    #   check_package("glmnetUtils")
+    # } else if(inherits(mod, "STAN-Model")){
+    #   check_package("rstan")
+    #   check_package("cmdstanr")
+    # } else if(inherits(mod, "XGBOOST-Model")){
+    #   check_package("xgboost")
+    # }
 
     # --- #
     # Return the model
