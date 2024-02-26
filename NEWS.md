@@ -9,6 +9,7 @@
 * Support of multi-band rasters in `ensemble()` for convenience.
 * Fix of bug in `threshold()` for supplied point data and improved error messages.
 * Cleaner docs and structure
+* Adding `wrap_model`/`unwrap_model` functions
 
 # ibis.iSDM 0.1.1
 

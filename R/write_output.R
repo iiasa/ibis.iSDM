@@ -537,6 +537,84 @@ methods::setMethod(
   }
 )
 
+#' Wrap a model for later use
+#'
+#' @description The `wrap_model` function uses `terra::wrap()` to easier ship a
+#' `DistributionModel` object.
+#'
+#' @param mod Provided [`DistributionModel`] object.
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites
+#' `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#'
+#' @returns DistributionModel with wrapped raster layers
+#'
+#' @seealso unwrap_model
+#' @keywords utils
+#'
+#' @examples \dontrun{
+#' x <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |>
+#'  train(varsel = FALSE, only_linear = TRUE)
+#' wrap_model(x, "testmodel.rds")
+#' }
+#' @name wrap_model
+NULL
+
+#' @rdname wrap_model
+#' @export
+methods::setGeneric("wrap_model",
+                    signature = methods::signature("mod"),
+                    function(mod, verbose = getOption("ibis.setupmessages")) standardGeneric("wrap_model"))
+
+#' @rdname wrap_model
+methods::setMethod(
+  "wrap_model",
+  methods::signature(mod = "ANY"),
+  function(mod, verbose = getOption("ibis.setupmessages")) {
+
+    # check function inputs
+    assertthat::assert_that(
+      !missing(mod),
+      is.logical(verbose)
+    )
+
+    # Check that provided model is correct
+    assertthat::assert_that(inherits(mod, "DistributionModel"),
+                            !is.Waiver(mod$get_data("fit_best")))
+
+    # clone due to R6 behavior
+    x <- mod$clone()
+
+    # wrap predictors
+    if(inherits(x$model$predictors_object, "PredictorDataset")){
+
+      # get raster
+      pred_ras <- x$model$predictors_object$get_data()
+
+      # get attributes
+      ats <- attributes(pred_ras)
+
+      # wrap raster to ship
+      ats$ras <- terra::wrap(pred_ras)
+
+      # replace object
+      x$model$predictors_object <- ats
+    }
+
+    # wrap prediction
+    if(!is.Waiver(x$get_data("prediction"))){
+      x$fits$prediction <- terra::wrap(x$get_data("prediction"))
+    }
+    # Save output
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Wrapping raster layers...'))
+
+    return(x)
+
+  }
+)
+
 #' Load a pre-computed model
 #'
 #' @description The `load_model` function (opposed to the `write_model`) loads
@@ -666,5 +744,97 @@ methods::setMethod(
     # --- #
     # Return the model
     return(mod)
+  }
+)
+
+#' Unwrap a model for later use
+#'
+#' @description The `unwrap_model` function uses `terra::unwrap()` to easier ship a
+#' `DistributionModel` object.
+#'
+#' @param mod Provided [`DistributionModel`] object.
+#' @param verbose [`logical`] indicating whether messages should be shown. Overwrites
+#' `getOption("ibis.setupmessages")` (Default: \code{TRUE}).
+#'
+#' @returns DistributionModel with unwrapped raster layers
+#'
+#' @seealso wrap_model
+#' @keywords utils
+#'
+#' @examples \dontrun{
+#' x <- distribution(background) |>
+#'  add_biodiversity_poipo(virtual_points, field_occurrence = 'observed', name = 'Virtual points') |>
+#'  add_predictors(pred_current, transform = 'scale',derivates = 'none') |>
+#'  engine_xgboost(nrounds = 2000) |>
+#'  train(varsel = FALSE, only_linear = TRUE) |>
+#'  wrap_model()
+#' unwrap_model(x, "testmodel.rds")
+#' }
+#' @name unwrap_model
+NULL
+
+#' @rdname unwrap_model
+#' @export
+methods::setGeneric("unwrap_model",
+                    signature = methods::signature("mod"),
+                    function(mod, verbose = getOption("ibis.setupmessages")) standardGeneric("unwrap_model"))
+
+#' @rdname unwrap_model
+methods::setMethod(
+  "unwrap_model",
+  methods::signature(mod = "ANY"),
+  function(mod, verbose = getOption("ibis.setupmessages")) {
+
+    # check function inputs
+    assertthat::assert_that(
+      !missing(mod),
+      is.logical(verbose)
+    )
+
+    # Check that provided model is correct
+    assertthat::assert_that(inherits(mod, "DistributionModel"),
+                            !is.Waiver(mod$get_data("fit_best")))
+
+    # clone due to R6 behavior
+    x <- mod$clone()
+
+    # unwrap predictors
+    if (is.list(x$model$predictors_object)) {
+
+      # Get any previously set attributes
+      ats <- x$model$predictors_object
+
+      # unwrap raster
+      ras <- terra::unwrap(ats[['ras']])
+
+      assertthat::assert_that(all(names(ras) %in% x$model$predictors_names))
+
+      attr(ras, "int_variables") <- ats[['int_variables']]
+      attr(ras, 'has_factors') <- ats[['has_factors']]
+      attr(ras,'transform') <- ats[['transform']]
+
+      # Make a new predictors object
+      o <- PredictorDataset$new(
+        id = new_id(),
+        data = ras
+      )
+      assertthat::assert_that(all(o$get_names() %in% x$model$predictors_names))
+
+      if (is.Raster(ras)) x$model$predictors_object <- o
+    }
+
+    # unwrap prediction if data.frame found
+    if (inherits(x = x$fits$prediction, what = "PackedSpatRaster")) {
+      ras <- terra::unwrap(x$fits$prediction)
+      x$fits$prediction <- ras
+    } else {
+      x$fits$prediction <- NULL
+    }
+
+    # Save output
+    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Unwrapping raster layers...'))
+
+    return(x)
+
   }
 )
