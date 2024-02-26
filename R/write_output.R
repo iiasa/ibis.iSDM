@@ -57,7 +57,7 @@ methods::setMethod(
 
     # This function will only capture the distribution model object and will
     # save them separately
-    if(any(class(mod) %in% getOption("ibis.engines")) ){
+    if(any(mod$get_name() %in% getOption("ibis.engines")) ){
       # FIXME: If errors occur, check harmonization of saving among engines.
       mod$save(fname = fname)
     } else if(is.Raster(mod)){
@@ -374,7 +374,7 @@ methods::setMethod(
       # Model parameters in a tibble
       output[["params"]][["id"]] <- as.character(model$id)
       output[["params"]][["runname"]] <- as.character(model$runname)
-      output[["params"]][["algorithm"]] <- class(mod)[1]
+      output[["params"]][["algorithm"]] <- mod$get_name()
       output[["params"]][["equation"]] <- mod$get_equation()
       # Collect settings and parameters if existing
       if( !is.Waiver(mod$get_data("params")) ){
@@ -420,7 +420,7 @@ methods::setMethod(
       # Model parameters in a tibble
       output[["params"]][["id"]] <- as.character(mod$modelid)
       output[["params"]][["runname"]] <- as.character(model$model$runname)
-      output[["params"]][["algorithm"]] <- class(model)[1]
+      output[["params"]][["algorithm"]] <- mod$get_name()
       if( "settings" %in% names(mod) ){
         output[["params"]][["settings"]] <- model$settings$data
       }
@@ -715,31 +715,28 @@ methods::setMethod(
       !is.Waiver(mod$get_data("fit_best"))
     )
 
-    # FIXME MH: Class of mod is only R6 and DistributionModel currently but no engine
-    warning("Due to a bug, there is no check if the object has a valid engine.",
-            call. = FALSE)
-    # # Check that model type is known
-    # assertthat::assert_that( any(sapply(class(mod), function(z) z %in% getOption("ibis.engines"))) )
-    # # Depending on engine, check package and load them
-    #
-    # if(inherits(mod, "GDB-Model")){
-    #   check_package("mboost")
-    # } else if(inherits(mod, "BART-Model")){
-    #   check_package("dbarts")
-    # } else if(inherits(mod, "INLABRU-Model")){
-    #   check_package("INLA")
-    #   check_package("inlabru")
-    # } else if(inherits(mod, "BREG-Model")){
-    #   check_package("BoomSpikeSlab")
-    # } else if(inherits(mod, "GLMNET-Model")){
-    #   check_package("glmnet")
-    #   check_package("glmnetUtils")
-    # } else if(inherits(mod, "STAN-Model")){
-    #   check_package("rstan")
-    #   check_package("cmdstanr")
-    # } else if(inherits(mod, "XGBOOST-Model")){
-    #   check_package("xgboost")
-    # }
+    # Check that model type is known
+    assertthat::assert_that( any(sapply(mod$get_name(), function(z) z %in% getOption("ibis.engines"))) )
+
+    # Depending on engine, check package and load them
+    if(mod$get_name() == "GDB-Model"){
+      check_package("mboost")
+    } else if(mod$get_name() == "BART-Model"){
+      check_package("dbarts")
+    } else if(mod$get_name() == "INLABRU-Model"){
+      check_package("INLA")
+      check_package("inlabru")
+    } else if(mod$get_name() == "BREG-Model"){
+      check_package("BoomSpikeSlab")
+    } else if(mod$get_name() == "GLMNET-Model"){
+      check_package("glmnet")
+      check_package("glmnetUtils")
+    } else if(mod$get_name() == "STAN-Model"){
+      check_package("rstan")
+      check_package("cmdstanr")
+    } else if(mod$get_name() == "XGBOOST-Model"){
+      check_package("xgboost")
+    }
 
     # --- #
     # Return the model

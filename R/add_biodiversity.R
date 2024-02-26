@@ -282,7 +282,7 @@ methods::setMethod(
 
     # Finally set the data to the BiodiversityDistribution object
     y <- x$clone(deep = TRUE)
-    x$set_biodiversity(id, bd)
+    y$set_biodiversity(id, bd)
   }
 )
 
@@ -475,7 +475,7 @@ methods::setMethod(
 
       # Finally set the data to the BiodiversityDistribution object
       y <- x$clone(deep = TRUE)
-      x$set_biodiversity(id, bd)
+      y$set_biodiversity(id, bd)
     }
   }
 )
@@ -696,7 +696,7 @@ methods::setMethod(
 
       # Finally set the data to the BiodiversityDistribution object
       y <- x$clone(deep = TRUE)
-      x$set_biodiversity(id, bd)
+      y$set_biodiversity(id, bd)
     }
   }
 )

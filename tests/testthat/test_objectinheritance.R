@@ -36,6 +36,11 @@ test_that('Check that distribution objects are properly inherited', {
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
 
+  # For Poipa
+  pa <- virtual_points |> add_pseudoabsence(field_occurrence = "Observed",template = background)
+  x |> add_biodiversity_poipa(pa, field_occurrence = "Observed",docheck = FALSE)
+  expect_equal(x$biodiversity$length(),0)
+
   # Offsets
   suppressMessages( suppressWarnings( x |> add_offset_range(virtual_range) ) )
   expect_s3_class(x$offset, "Waiver")
@@ -48,6 +53,13 @@ test_that('Check that distribution objects are properly inherited', {
   y <- x |> add_predictors(predictors)
   expect_length(x$get_predictor_names(), 0)
   expect_length(y$get_predictor_names(), 14)
+
+  # Remove a predictor
+  y |> rm_predictors("ndvi_mean_50km")
+  expect_length(y$get_predictor_names(), 14)
+  y <- y |> rm_predictors("ndvi_mean_50km")
+  expect_length(y$get_predictor_names(), 13)
+  expect_error(y |> rm_predictors("ndvi_mean_50km")) # Trying to remove it again should lead to an error
 
   # Add elevation
   y <- x |> add_predictor_elevationpref(predictors$elevation_mean_50km, 500, 1000)
