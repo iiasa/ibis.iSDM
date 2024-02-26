@@ -192,7 +192,7 @@ methods::setMethod(
     if(!is.Waiver(mod$get_constraints())){
       # If there are any dispersal constrains in there, raise warning
       if(any("dispersal" %in% names(mod$get_constraints()))){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]', 'yellow', 'Overwriting existing dispersal constraint.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]', 'yellow', 'Overwriting existing dispersal constraint.')
       }
     }
 
@@ -227,7 +227,7 @@ methods::setMethod(
       # probability [0,1] corner cells are considered in the 3x3 cell neighborhood. Following Nobis & Nomand 2014, 0.2 is recommended for circular spread
       if("pcor" %in% argnames) pcor <- dots[["pcor"]] else pcor <- 0.2
 
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]', 'green', 'KISSMIG options: iterations=',value,'| pext=', pext,'| pcor=', pcor)
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]', 'green', 'KISSMIG options: iterations=',value,'| pext=', pext,'| pcor=', pcor)
 
       cr[['dispersal']] <- list(method = method,
                                 params = c("iteration" = value,
@@ -456,7 +456,7 @@ methods::setMethod(
     if(!is.Waiver(mod$get_constraints())){
       # If there are any dispersal constrains in there, raise warning
       if(any( "connectivity" %in% names(mod$get_constraints()) )){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Overwriting existing connectivity constraint')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Overwriting existing connectivity constraint')
       }
     }
 
@@ -492,7 +492,7 @@ methods::setMethod(
       times <- terra::time(resistance)
       # If resistance layer is bigger than 1, normalize
       if(any(terra::global(resistance, 'max', na.rm = TRUE)>1)){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Resistance values larger than 1. Normalizing...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Resistance values larger than 1. Normalizing...')
         resistance <- predictor_transform(resistance, option = "norm")
       }
       resistance <- abs( resistance - 1 ) # Invert

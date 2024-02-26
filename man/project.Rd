@@ -14,7 +14,7 @@ project.BiodiversityScenario(x, ...)
   stabilize = FALSE,
   stabilize_method = "loess",
   layer = "mean",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 }

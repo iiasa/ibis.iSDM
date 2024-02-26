@@ -55,7 +55,7 @@ methods::setMethod(
     hyper <- match.arg(hyper, c('increasing', 'decreasing','positive', 'negative', 'none'), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
     pp <- Prior$new(

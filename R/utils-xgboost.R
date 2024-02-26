@@ -32,7 +32,7 @@ built_formula_xgboost <- function(obj){
   } else{
     # If custom supplied formula, check that variable names match the supplied
     # predictors
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
 
     # Get all variables and check

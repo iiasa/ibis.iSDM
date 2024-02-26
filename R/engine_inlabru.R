@@ -439,7 +439,7 @@ engine_inlabru <- function(x,
       msg = 'Some internal checks failed while setting up the model.'
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Construct likelihoods for each entry in the dataset
     lhl <- list()
@@ -703,10 +703,10 @@ engine_inlabru <- function(x,
     options <- inlabru::bru_options_get()
     assertthat::assert_that(inlabru::bru_options_check(options))
     # -------- #
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting fitting.')
 
     if( settings$get(what='optim_hyperparam')){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing incremental variable selection...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Performing incremental variable selection...')
 
       # Catch all variables with set priors and keep them!
       if(!is.Waiver(model$priors)) keep <- as.character(model$priors$varnames()) else keep <- NULL
@@ -832,7 +832,7 @@ engine_inlabru <- function(x,
 
     if(!settings$get('inference_only')){
       # Messenger
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction.')
 
       covs <- model$predictors_object$get_data(df = FALSE)
       covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
@@ -853,7 +853,7 @@ engine_inlabru <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(preds)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           preds[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
@@ -967,7 +967,7 @@ engine_inlabru <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(newdata)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]

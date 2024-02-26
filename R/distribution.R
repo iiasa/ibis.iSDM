@@ -125,7 +125,7 @@ methods::setMethod(
 
     # Check that provided background has a valid crs
     if(is.na(terra::crs(background,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provide a background with a valid projection!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provide a background with a valid projection!')
     }
 
     # Make an error check that units have a single units
@@ -178,7 +178,7 @@ methods::setMethod(
     assertthat::assert_that(mcp_buffer>=0, msg = "Buffered mcp distance has to be positive!")
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating distribution object...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating distribution object...')
 
     # Convert limits if provided
     if(!is.null(limits)){

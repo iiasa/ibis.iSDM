@@ -31,7 +31,7 @@ built_formula_glmnet <- function(obj){
     # Convert to formula
     form <- to_formula(form)
   } else{
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")

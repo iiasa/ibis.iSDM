@@ -160,7 +160,7 @@ methods::setMethod(
       ll_ras <- sapply(mods, function(x) x$get_data('prediction')[[layer]])
       # Ensure that the layers have the same resolution, otherwise align
       if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
         ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
       }
 
@@ -263,7 +263,7 @@ methods::setMethod(
         if(!all(any(sapply(ll_val, is.Waiver)))){
           # Respecify weights as otherwise call below fails
           if(any(sapply(ll_val, is.Waiver))){
-            if(getOption('ibis.setupmessages')) myLog('[Ensemble]','yellow','Threshold values not found for all objects')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','yellow','Threshold values not found for all objects')
             ll_val <- ll_val[-which(sapply(ll_val, is.Waiver))]
             ll_val <- ll_val |> as.numeric()
           }
@@ -291,7 +291,7 @@ methods::setMethod(
     } else if(is.Raster(mods[[1]])) {
       # Check that layer is present in supplied mods
       if(terra::nlyr(mods[[1]])>1 && length(mods) == 1){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Single multiband raster found. Ignoring parameter layer and ensemble.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Single multiband raster found. Ignoring parameter layer and ensemble.')
         layer <- 1
         ras <- mods[[1]]
       } else {
@@ -305,7 +305,7 @@ methods::setMethod(
         ll_ras <- sapply(mods, function(x) x[[layer]])
         # Ensure that the layers have the same resolution, otherwise align
         if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-          if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
           ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
         }
         ras <- terra::rast(ll_ras)
@@ -394,7 +394,7 @@ methods::setMethod(
       if(all(sapply(mods, function(z) inherits(z, "stars")))){
         # Check that layer is in stars
         if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
-          if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
           layer <- names(mods[[1]])[1]
         }
         # Format to table
@@ -605,7 +605,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'median'), several.ok = FALSE)
 
-    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a partial ensemble...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","green","Creating a partial ensemble...")
 
     # Get variable range from the first object assuming they have similar variables
     # FIXME: Ideally make a consensus, otherwise assumes that same predictor been used
@@ -644,7 +644,7 @@ methods::setMethod(
 
     # Catch error in case none of them computed
     if(nrow(out)==0){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
       stop("No estimates found!")
     }
 
@@ -761,7 +761,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'median', 'max', 'min'), several.ok = FALSE)
 
-    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a spartial ensemble...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","green","Creating a spartial ensemble...")
 
     # If new data is provided
     if(!is.null(newdata)){
@@ -801,7 +801,7 @@ methods::setMethod(
         o <- try({obj$project(newdata = nd, layer = layer)},silent = TRUE)
       }
       if(inherits(o, "try-error")){
-        if(getOption('ibis.setupmessages')) myLog('[Inference]','red',paste0('Spartial calculation failed for ',class(obj)[1]))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Inference]','red',paste0('Spartial calculation failed for ',class(obj)[1]))
         next()
       }
       assertthat::assert_that(is.Raster(o))
@@ -813,12 +813,12 @@ methods::setMethod(
     }
     # Catch error in case none of them computed
     if(length(out)==0){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
       stop("No estimates found!")
     }
 
     if(length(out)==1){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
       new <- out[[1]]
     } else {
       # Now construct an ensemble by calling ensemble directly

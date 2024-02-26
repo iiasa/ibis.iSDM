@@ -92,7 +92,7 @@ methods::setMethod(
                             )
 
     # Messenger
-    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipo dataset...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Setup]","green","Adding poipo dataset...")
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(poipo)){
@@ -111,7 +111,7 @@ methods::setMethod(
 
     # Check whether there are any absence point, if so stop with error
     if(any(poipo[[field_occurrence]] == 0)){
-      if(getOption("ibis.setupmessages")) myLog("[Setup]","yellow",
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Setup]","yellow",
                                                 "Absence points found. Potentially this data needs to be added as presence-absence instead?")
     }
 
@@ -236,7 +236,7 @@ methods::setMethod(
                             msg = "Presence-Absence requires at exactly 2 unique values.")
 
     # Messenger
-    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding poipa dataset...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Setup]","green","Adding poipa dataset...")
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(poipa)){
@@ -387,7 +387,7 @@ methods::setMethod(
                             msg = "More 2 unique values. Specify a column ")
 
     # Messenger
-    if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpo dataset...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Setup]","green","Adding polpo dataset...")
 
     # Transform to background for analysis
     if(sf::st_crs(x$background) != sf::st_crs(polpo)){
@@ -659,7 +659,7 @@ methods::setMethod(
     } else {
 
       # Messenger
-      if(getOption("ibis.setupmessages")) myLog("[Setup]","green","Adding polpa dataset...")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Setup]","green","Adding polpa dataset...")
 
       # If no points are simulated, ensure that the polygon has objects with at
       # least 2 factor levels

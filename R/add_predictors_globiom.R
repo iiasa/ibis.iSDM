@@ -90,7 +90,7 @@ methods::setMethod(
     )
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting GLOBIOM inputs for species distribution modelling.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Formatting GLOBIOM inputs for species distribution modelling.')
 
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
@@ -127,19 +127,19 @@ methods::setMethod(
     }
     # Harmonize NA values
     if(harmonize_na){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
     # Calculate derivates if set
     if('none' %notin% derivates){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
       new_env <- terra::rast()
       for(dd in derivates) {
         suppressWarnings(
@@ -166,7 +166,7 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
     pd <- PredictorDataset$new(id = new_id(),
@@ -204,7 +204,7 @@ methods::setMethod(
     obj <- x$get_model()
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding GLOBIOM predictors to scenario object...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding GLOBIOM predictors to scenario object...')
 
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
@@ -223,13 +223,13 @@ methods::setMethod(
     # Harmonize NA values
     if(harmonize_na){
       stop('Missing data harmonization for stars not yet implemented!') #TODO
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
@@ -239,16 +239,16 @@ methods::setMethod(
       varn <- obj$get_coefficients()[['Feature']]
       # Are there any derivates present in the coefficients?
       if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
         for(dd in derivates){
           if(any(grep(dd, varn))){
             env <- predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables, deriv = varn)
           } else {
-            if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
           }
         }
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
       }
     }
 
@@ -265,7 +265,7 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
@@ -311,7 +311,7 @@ methods::setMethod(
 formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
                           period = "all", template = NULL, shares_to_area = FALSE,
                           use_gdalutils = FALSE,
-                          verbose = getOption("ibis.setupmessages")){
+                          verbose = getOption("ibis.setupmessages", default = TRUE)){
   assertthat::assert_that(
     file.exists(fname),
     assertthat::has_extension(fname, "nc"),

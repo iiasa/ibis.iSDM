@@ -285,7 +285,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     # Get units of projection and print for
     un <- sf:::crs_parameters(sf::st_crs(df))$ud_unit
     if(is.null(un)) un <- " map units" else un <- units::deparse_unit(un)
-    if(getOption('ibis.setupmessages')) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance , un,' buffer'))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance , un,' buffer'))
     # Calculate buffer
     suppressMessages(
       suppressWarnings( buf <- sf::st_buffer(x = df, dist = buffer_distance) )

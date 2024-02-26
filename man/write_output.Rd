@@ -13,7 +13,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -21,7 +21,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -29,7 +29,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -37,7 +37,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -45,7 +45,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -53,7 +53,7 @@ write_output(
   mod,
   fname,
   dt = "FLT4S",
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 }

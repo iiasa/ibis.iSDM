@@ -163,7 +163,7 @@ engine_gdb <- function(x,
     )
     # Add in case anything needs to be further prepared here
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Add pseudo-absence points if necessary
     # Include nearest predictor values for each
@@ -317,7 +317,7 @@ engine_gdb <- function(x,
     name <- model$biodiversity[[1]]$name
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
 
     # Get output raster
     prediction <- self$get_data('template')
@@ -405,7 +405,7 @@ engine_gdb <- function(x,
     },silent = FALSE)
     # If error, decrease step size by a factor of 10 and try again.
     if(inherits(fit_gdb, "try-error") || length(names(stats::coef(fit_gdb)))< 2){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Reducing learning rate by 1/100.')
       bc$nu <- bc$nu * 0.01
       fit_gdb <- try({
         mboost::gamboost(
@@ -425,7 +425,7 @@ engine_gdb <- function(x,
 
     if(settings$get('optim_hyperparam')){
 
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting parameter search for optimal stopping.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting parameter search for optimal stopping.')
       # 5 fold Cross validation to prevent overfitting
       if(getOption("ibis.runparallel")){
         grs <- seq(from = 10, to = max( bc$mstop *5), by = 10)
@@ -462,13 +462,13 @@ engine_gdb <- function(x,
     # Predict spatially
     if(!settings$get('inference_only')){
       # Messager
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
 
       # Set target variables to bias_value for prediction if specified
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(full)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
@@ -521,7 +521,7 @@ engine_gdb <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(newdata)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]

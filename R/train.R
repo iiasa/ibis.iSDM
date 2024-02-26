@@ -150,7 +150,7 @@ methods::setGeneric(
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) standardGeneric("train"))
 
 #' @rdname train
 methods::setMethod(
@@ -158,7 +158,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -181,7 +181,7 @@ methods::setMethod(
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
     #filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
@@ -194,9 +194,9 @@ methods::setMethod(
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
-    settings$set('ibis.cleannames', getOption("ibis.cleannames"))
+    settings$set('ibis.cleannames', getOption("ibis.cleannames", default = TRUE))
     settings$set('verbose', verbose)
-    settings$set('seed', getOption("ibis.seed"))
+    settings$set('seed', getOption("ibis.seed", default = 1000))
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -226,7 +226,7 @@ methods::setMethod(
 
     # Get overall Predictor data
     if(is.Waiver(x$get_predictor_names())) {
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
       # Dummy covariate of background raster
       # Check if the engine has a template and if so use that one
       if(is.Raster(x$engine$get_data("template"))){
@@ -248,7 +248,7 @@ methods::setMethod(
       # Check whether any of the variables are fully NA, if so exclude
       if( any( apply(model[['predictors']], 2, function(z) all(is.na(z))) )){
         chk <- which( apply(model[['predictors']], 2, function(z) all(is.na(z))) )
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   paste0('The following variables are fully missing and are removed:\n',
                                                          paste(names(chk),collapse = " | "))
         )
@@ -273,14 +273,14 @@ methods::setMethod(
       # Get the method and check whether it is supported by the engine
       m <- attr(x$get_latent(),'method')
       if(x$get_engine() %notin% c("<INLA>", "<INLABRU>") & m == 'spde'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
       if(x$get_engine()=="<GDB>" & m == 'poly'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
       }
       if(x$get_engine()=="<BART>" & m == 'car'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
       # Calculate latent spatial terms (saved in engine data)
@@ -393,7 +393,7 @@ methods::setMethod(
       if(control$type == "bias"){
         bias <- control
         if(bias$method == "partial"){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding bias variable using partial control.')
           settings$set("bias_variable", names(bias$layer) )
           settings$set("bias_value", bias$bias_value )
           # Check that variable is already in the predictors object
@@ -498,7 +498,7 @@ methods::setMethod(
 
       # Remove missing values as several engines can't deal with those easily
       miss <- stats::complete.cases(env)
-      if(sum( !miss )>0 && getOption('ibis.setupmessages')) {
+      if(sum( !miss )>0 && getOption('ibis.setupmessages', default = TRUE)) {
         myLog('[Setup]','yellow', 'Excluded ', sum( !miss ), ' observations owing to missing values in covariates!' )
       }
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
@@ -533,7 +533,7 @@ methods::setMethod(
 
       # Biodiversity dataset specific predictor refinement if the option is set
       if(settings$get("filter_predictors")!= "none"){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
                                                                                   settings$get("filter_predictors"),'...'))
         # Make backups
         test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
@@ -558,7 +558,7 @@ methods::setMethod(
                                family = model[['biodiversity']][[id]]$family,
                                tune.type = "gic",
                                weight = NULL,
-                               verbose = getOption('ibis.setupmessages')
+                               verbose = getOption('ibis.setupmessages', default = TRUE)
                                )
 
         # For all factor variables, remove those with only the minimal value (e.g. 0)
@@ -580,7 +580,7 @@ methods::setMethod(
 
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
       # Check that all types and families can be combined
       types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
       fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
@@ -617,7 +617,7 @@ methods::setMethod(
       if(control$type == "bias"){
         bias <- control
         if(bias$method == "proximity"){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding proximity bias weights to points.')
           assertthat::assert_that(length(model$biodiversity)==1,
                                   msg = "This method is not yet implemented for multiple datasets.")
 
@@ -639,7 +639,7 @@ methods::setMethod(
     # Warning if Np is larger than Nb
     if(settings$get("filter_predictors") == "none"){
       if( sum(x$biodiversity$get_observations() )-1 <= length(model$predictors_names)){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
       }
     }
 
@@ -663,7 +663,7 @@ methods::setMethod(
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         spec_priors$rm( spec_priors$exists(vv) )
       }
     } else { spec_priors <- new_waiver() }
@@ -707,7 +707,7 @@ methods::setMethod(
       } else if(x$limits$limits_method %in% c("nt2", "mess")){
           # If there are more than one data source, raise warning
           if(length(model$biodiversity)>1){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
                                                       'MESS and Novelty index work only for a single datasource. Combining all presence points...')
             coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
                                                tosf = TRUE)
@@ -751,7 +751,7 @@ methods::setMethod(
       }
 
       if(nrow(zones)==0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   'Occurrence points do not fall into any zones!')
         zones <- x$limits$layer  # Reset
       }
@@ -810,7 +810,7 @@ methods::setMethod(
     }
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # Basic consistency checks
     assertthat::assert_that(is.list(model$biodiversity),
@@ -1562,7 +1562,7 @@ methods::setMethod(
 
     if(is.null(out)) return(NULL)
 
-    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
     # Clip to limits again to be sure
     if(!is.Waiver(x$get_limits())) {

@@ -123,7 +123,7 @@ engine_inla <- function(x,
   check_package('INLA')
   if(!isNamespaceLoaded("INLA")) { attachNamespace("INLA");requireNamespace('INLA') }
 
-  if(getOption('ibis.setupmessages')) myLog('[Deprecation]','yellow','Consider using engine_inlabru as engine with better prediction support.')
+  if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Deprecation]','yellow','Consider using engine_inlabru as engine with better prediction support.')
 
   # assert that arguments are valid
   assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
@@ -507,7 +507,7 @@ engine_inla <- function(x,
       msg = 'Some internal checks failed while setting up the model.'
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Set number of threads via set.Options
     INLA::inla.setOption(num.threads = getOption('ibis.nthread'))
@@ -664,7 +664,7 @@ engine_inla <- function(x,
       inherits(self$get_data('stk_full'),'inla.data.stack')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting fitting...')
 
     # Get all datasets with id. This includes the data stacks and integration stacks
     stk_inference <- lapply(
@@ -713,7 +713,7 @@ engine_inla <- function(x,
 
     # Perform variable selection
     if( settings$get(what='optim_hyperparam')){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Performing backstep variable selection (hacky)...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Performing backstep variable selection (hacky)...')
 
       k <- NULL
       # Specify offsets and spde to be retained
@@ -755,7 +755,7 @@ engine_inla <- function(x,
     # Predict spatially
     if(!settings$get(what='inference_only')){
       # Messenger
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
 
       # Predict on full
       fit_pred <- try({INLA::inla(formula = master_form, # The specified formula

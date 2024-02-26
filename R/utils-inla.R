@@ -169,7 +169,7 @@ built_formula_inla <- function(model, id, x, settings){
       # MH: Add intercept stuff as well
 
       # If custom supplied formula, check that variable names match supplied predictors
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
       form <- to_formula( obj$equation )
       # If response is missing, add manually
       if(attr(stats::terms(form), "response")==0){

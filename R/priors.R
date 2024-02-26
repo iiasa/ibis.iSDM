@@ -88,7 +88,7 @@ methods::setMethod(
     } else {
       # Remove duplicated variables, taking only the one added
       if(anyDuplicated(vars)>0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
+        if(getOption('ibis.setupmessages',default = TRUE)) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
         ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
       }
     }
@@ -188,7 +188,7 @@ methods::setMethod(
     } else {
       # Remove duplicated variables, taking only the one added
       if(anyDuplicated(vars)>0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
         ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
       }
     }

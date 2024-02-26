@@ -5,9 +5,9 @@
 \alias{wrap_model,ANY-method}
 \title{Wrap a model for later use}
 \usage{
-wrap_model(mod, verbose = getOption("ibis.setupmessages"))
+wrap_model(mod, verbose = getOption("ibis.setupmessages", default = TRUE))
 
-\S4method{wrap_model}{ANY}(mod, verbose = getOption("ibis.setupmessages"))
+\S4method{wrap_model}{ANY}(mod, verbose = getOption("ibis.setupmessages", default = TRUE))
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} object.}

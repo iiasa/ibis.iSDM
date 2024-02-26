@@ -343,7 +343,7 @@ BiodiversityScenario <- R6::R6Class(
       assertthat::assert_that(is.character(what))
 
       if(is.Waiver(self$get_data())){
-        if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','No scenarios found')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','No scenarios found')
         invisible(self)
       } else {
         assertthat::assert_that(what %in% names( self$get_data() ),

@@ -127,7 +127,7 @@ methods::setMethod(
       if(method %in% c('TSS','kappa','F1score','Sensitivity','Specificity',
                        'Misclass','Omission','Commission','Precision',
                        'PPI','PAI','OddsRatio')){
-        if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
       }
       point <- collect_occurrencepoints(model = model,
                                         include_absences = TRUE,
@@ -143,7 +143,7 @@ methods::setMethod(
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
     if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity'))){
-      if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       ass <- model$biodiversity[[1]]$pseudoabsence_settings
       if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
@@ -450,7 +450,7 @@ methods::setMethod(
 
       if(!is.Waiver(proj)){
         # Existing projection ?
-        if(getOption('ibis.setupmessages')) myLog('[Threshold]',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]',
                                                   'green',
                                                   'Projection found. Applying threshold!')
         new <- new$apply_threshold(tr = value)

@@ -97,7 +97,7 @@ built_formula_gdb <- function(model, id, x, settings){
       )
     }
   } else{
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0){

@@ -125,7 +125,7 @@ engine_breg <- function(x,
       length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Get parameters
     params <- self$data$params
@@ -137,18 +137,18 @@ engine_breg <- function(x,
 
     # Check whether regularization parameter is set to none, if yes, raise message
     if(settings$get('optim_hyperparam')){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Note: Engine_breg always applies regularization.')
     }
 
     # -- #
     # Expand predictors if specified in settings
     if(settings$get('only_linear') == FALSE){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Non-linear estimation not added to engine. Suggest to create variable derivatives externally.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Non-linear estimation not added to engine. Suggest to create variable derivatives externally.')
     }
 
     # Check if offset present and fam binomial, Raise warning
     if(fam == "binomial" && !is.Waiver(model$offset)){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Binomial models fitted with BREG do not support offsets. Offsets were ignored!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Binomial models fitted with BREG do not support offsets. Offsets were ignored!')
     }
     # -- #
 
@@ -302,7 +302,7 @@ engine_breg <- function(x,
     name <- model$biodiversity[[1]]$name
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
 
     # Verbosity
     verbose <- settings$get("verbose")
@@ -323,7 +323,7 @@ engine_breg <- function(x,
     # All other needed data for model fitting
     fam <- model$biodiversity[[1]]$family
     li <- model$biodiversity[[1]]$link
-    if(!is.null(li)) if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
+    if(!is.null(li)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
     form <- model$biodiversity[[1]]$equation
     df <- cbind(model$biodiversity[[1]]$predictors,
                 data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE])
@@ -394,7 +394,7 @@ engine_breg <- function(x,
         seed = seed
       )
     } else {
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Non supported family: ', fam)
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Non supported family: ', fam)
       fit_breg <- BoomSpikeSlab::lm.spike(
         formula = form,
         niter = params$iter,
@@ -412,12 +412,12 @@ engine_breg <- function(x,
     # Predict spatially
     if(!settings$get('inference_only')){
       # Messenger
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
       # Set target variables to bias_value for prediction if specified
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(full)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
@@ -783,7 +783,7 @@ engine_breg <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% colnames(df)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           df[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]

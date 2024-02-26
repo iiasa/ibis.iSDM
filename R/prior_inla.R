@@ -82,7 +82,7 @@ methods::setMethod(
     type <- match.arg(type, c('clinear','prior.range','prior.sigma', names(INLA::inla.models()$prior) ), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
     pp <- Prior$new(

@@ -9,14 +9,14 @@ write_model(
   mod,
   fname,
   slim = FALSE,
-  verbose = getOption("ibis.setupmessages")
+  verbose = getOption("ibis.setupmessages", default = TRUE)
 )
 
 \S4method{write_model}{ANY}(
   mod,
   fname,
   slim = FALSE,
-  verbose = getOption("ibis.setupmessages")
+  verbose = getOption("ibis.setupmessages", default = TRUE)
 )
 }
 \arguments{

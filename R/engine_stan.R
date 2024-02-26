@@ -283,7 +283,7 @@ engine_stan <- function(x,
     }
     # --- #
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Building stan code.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Building stan code.')
     sm_code <- vector("list", 7)
     names(sm_code) <- c("functions","data","transformed_data","parameters","transformed_parameters",
                         "model","generated_quantities")
@@ -381,7 +381,7 @@ engine_stan <- function(x,
       }
     } else
       if( settings$get(what='optim_hyperparam') == TRUE ){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Adding regularized Bayesian priors.')
         # Add regularized horseshoe prior
         # See brms::horseshoe
         ir <- readLines( system.file("stanfiles/prior_functions.stan",package = "ibis.iSDM",mustWork = TRUE) )
@@ -462,7 +462,7 @@ engine_stan <- function(x,
 
     # --- #
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Return modified model object
     return(model)
@@ -470,7 +470,7 @@ engine_stan <- function(x,
 
   eg$set("public", "train", function(model, settings, ...){
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting fitting...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting fitting...')
 
     # Define an algorithm for MCMC sampling
     # an be "sampling" for MCMC (the default), "optimize" for optimization,
@@ -531,7 +531,7 @@ engine_stan <- function(x,
     # Prediction
     if(!settings$get('inference_only')){
       # Messager
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
 
       # Prepare prediction dataset
       prediction <- self$get_data('template') # Get output raster and new data

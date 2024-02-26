@@ -159,7 +159,7 @@ engine_glmnet <- function(x,
       length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Get parameters
     params <- self$data$params
@@ -292,7 +292,7 @@ engine_glmnet <- function(x,
     name <- model$biodiversity[[1]]$name
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',paste0('Starting fitting: ', name))
 
     # Verbosity
     verbose <- settings$get("verbose")
@@ -302,7 +302,7 @@ engine_glmnet <- function(x,
 
     # seed
     seed <- settings$get("seed")
-    if(is.Waiver(seed)) { settings$set('seed', getOption("ibis.seed")) }
+    if(is.Waiver(seed)) { settings$set('seed', getOption("ibis.seed", default = 1000)) }
 
     # Get output raster
     prediction <- self$get_data('template')
@@ -319,7 +319,7 @@ engine_glmnet <- function(x,
       if(li %in% c("cloglog", "logit", "probit")){
         fam <- stats::binomial(link = li)
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Custom link functions not supported!"))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0("Custom link functions not supported!"))
       }
     }
 
@@ -382,7 +382,7 @@ engine_glmnet <- function(x,
     # -- #
     # Expand predictors if non-linear is specified in settings
     if(settings$get('only_linear') == FALSE){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
                                                 'Non-linearity to glmnet is best introduced by adding derivates. Ignored!')
       # linear_predictors <- attr(stats::terms.formula(form), "term.labels")
       # m <- outer(linear_predictors, linear_predictors, function(x, y) paste(x, y, sep = ":"))
@@ -422,7 +422,7 @@ engine_glmnet <- function(x,
     }
     # Depending if regularized should be set, specify this separately
     if( (settings$get('optim_hyperparam')) ){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',
                                                 'Finding optimal hyper parameters alpha and lambda.')
       cv_gn <- try({
         glmnetUtils::cva.glmnet(formula = form,
@@ -470,12 +470,12 @@ engine_glmnet <- function(x,
     # Predict spatially
     if(!settings$get('inference_only')){
       # Messenger
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
       # Set target variables to bias_value for prediction if specified
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(full)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
@@ -784,7 +784,7 @@ engine_glmnet <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(newdata)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]

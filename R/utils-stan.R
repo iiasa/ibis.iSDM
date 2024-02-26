@@ -59,7 +59,7 @@ built_formula_stan <- function(model, id, x, settings){
     if(!is.Waiver(x$offset)){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
     # if( length( grep('Spatial',x$get_latent() ) ) > 0 ) {} # Possible to be implemented for CAR models
   } else {
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation.')
     form <- to_formula(model$biodiversity[[1]]$equation)
     # Update formula to weights if forgotten
     if(model$biodiversity[[1]]$family=='poisson') form <- stats::update.formula(form, 'observed ~ .')

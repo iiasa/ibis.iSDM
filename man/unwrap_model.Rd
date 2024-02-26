@@ -5,9 +5,9 @@
 \alias{unwrap_model,ANY-method}
 \title{Unwrap a model for later use}
 \usage{
-unwrap_model(mod, verbose = getOption("ibis.setupmessages"))
+unwrap_model(mod, verbose = getOption("ibis.setupmessages", default = TRUE))
 
-\S4method{unwrap_model}{ANY}(mod, verbose = getOption("ibis.setupmessages"))
+\S4method{unwrap_model}{ANY}(mod, verbose = getOption("ibis.setupmessages", default = TRUE))
 }
 \arguments{
 \item{mod}{Provided \code{\link{DistributionModel}} object.}

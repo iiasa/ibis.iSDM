@@ -57,7 +57,7 @@ methods::setMethod(
     type <- match.arg(type, c('gaussian', 'normal'), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
     pp <- Prior$new(

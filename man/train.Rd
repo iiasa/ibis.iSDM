@@ -15,7 +15,7 @@ train(
   method_integration = "predictor",
   aggregate_observations = TRUE,
   clamp = FALSE,
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -29,7 +29,7 @@ train(
   method_integration = "predictor",
   aggregate_observations = TRUE,
   clamp = FALSE,
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 }

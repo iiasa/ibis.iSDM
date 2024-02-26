@@ -135,7 +135,7 @@ methods::setMethod(
       obj <- mod
       # If number of layers equal to 2 (output from ensemble?), change xvar and yvar
       if(terra::nlyr(mod)==2 && !(xvar %in% names(obj))){
-        if(getOption('ibis.setupmessages')) myLog('[Parameter]','yellow','Variable not found. Changing to layer names...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Parameter]','yellow','Variable not found. Changing to layer names...')
         xvar <- names(obj)[1]; yvar <- names(obj)[2]
       }
     } else {

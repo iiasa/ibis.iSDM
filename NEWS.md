@@ -10,6 +10,7 @@
 * Fix of bug in `threshold()` for supplied point data and improved error messages.
 * Cleaner docs and structure
 * Adding `wrap_model`/`unwrap_model` functions
+* Added default parameters for all ibis specific options #90
 
 # ibis.iSDM 0.1.1
 

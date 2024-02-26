@@ -202,7 +202,7 @@ methods::setMethod(
     has_sigma <- length( grep("sigma", names(cofs),ignore.case = TRUE) ) > 0
 
     # Now depending on the target engine, and formulate priors for the target engine
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Create prior object from coefficients.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Create prior object from coefficients.')
 
     pl <- list()
     for(i in 1:nrow(cofs)){

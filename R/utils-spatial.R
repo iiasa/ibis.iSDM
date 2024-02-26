@@ -45,7 +45,7 @@ terra_to_raster <- function(input){
   assertthat::assert_that(
     is.Raster(input)
   )
-  if(getOption('ibis.setupmessages')) message("Converting a SpatRaster to raster, which should not be necessary!")
+  if(getOption('ibis.setupmessages', default = TRUE)) warning("Converting a SpatRaster to raster, which should not be necessary!")
   # Check that package is available
   check_package("raster")
   if(!isNamespaceLoaded("raster")) { attachNamespace("raster");requireNamespace("raster") }

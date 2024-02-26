@@ -91,7 +91,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors from fitted model...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors from fitted model...')
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
@@ -111,7 +111,7 @@ methods::setMethod(
       if(length(tr)==1){
         prediction <- model$get_data(tr)
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','No threshold found in fitted model. Using prediction...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','No threshold found in fitted model. Using prediction...')
         prediction <- model$get_data()
       }
     } else {
@@ -123,14 +123,14 @@ methods::setMethod(
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming prediction...')
       for(tt in transform) prediction <- predictor_transform(prediction, option = tt)
     }
     assertthat::assert_that(is.Raster(prediction))
 
     # Calculate derivates if set
     if('none' %notin% derivates){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating prediction derivates...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating prediction derivates...')
       # Specific condition for interaction
       new_prediction <- terra::rast()
       for(dd in derivates){
@@ -148,7 +148,7 @@ methods::setMethod(
     attr(prediction,'transform') <- transform
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(prediction) <- sanitize_names(names(prediction))
+    if(getOption('ibis.cleannames', default = TRUE)) names(prediction) <- sanitize_names(names(prediction))
 
     # Get existing predictors
     if(!is.Waiver(x$predictors)){

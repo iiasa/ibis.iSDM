@@ -332,7 +332,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Decompose derivate variable names if set
     deriv <- grep(paste0(option, "__"), deriv, value = TRUE)
     if(length(deriv)==0){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Predictors with derivates not found!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Predictors with derivates not found!')
       return(NULL)
     }
     cutoffs <- do.call(rbind,strsplit(deriv, "__")) |> as.data.frame()
@@ -816,7 +816,7 @@ predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
       env, keep = keep, method = method, ...
     )
   } else if(method == "abess"){
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
     co <- predictors_filter_abess(
       env = env, keep = keep, method = method, ...
     )
@@ -1026,7 +1026,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #'
 #' @keywords internal
 predictors_filter_boruta <- function( env, obs, method, keep = NULL,
-                                      iter = 100, verbose = getOption('ibis.setupmessages'), ...){
+                                      iter = 100, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env) || is.matrix(env),
                           is.null(observed) || is.vector(observed),

@@ -9,7 +9,7 @@ write_summary(
   mod,
   fname,
   partial = FALSE,
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 
@@ -17,7 +17,7 @@ write_summary(
   mod,
   fname,
   partial = FALSE,
-  verbose = getOption("ibis.setupmessages"),
+  verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 }

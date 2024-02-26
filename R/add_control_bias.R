@@ -138,10 +138,10 @@ methods::setMethod(
 
       # Now precede depending on method
       if(method == "partial"){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias controlled variable...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding bias controlled variable...')
 
         if(!is.Waiver(x$get_control())){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Overwriting existing bias variable...')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Overwriting existing bias variable...')
         }
         # Add to bias control
         y <- y$set_control(type = "bias", layer, method, bias_value)

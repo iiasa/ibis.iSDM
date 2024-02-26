@@ -93,7 +93,7 @@ methods::setMethod(
     method <- match.arg(method, c('spde', 'car', 'poly', 'nnd', 'kde'), several.ok = FALSE)
 
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding latent spatial terms...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding latent spatial terms...')
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
@@ -147,7 +147,7 @@ methods::setMethod(
     if(is.Waiver(x$latentfactors)){ return(x) }
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Removing latent effects.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Removing latent effects.')
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)

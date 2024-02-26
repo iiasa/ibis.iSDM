@@ -130,7 +130,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors...')
 
     if(!is.null(names)) {
       assertthat::assert_that(terra::nlyr(env) == length(names),
@@ -143,7 +143,7 @@ methods::setMethod(
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(env,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided predictors miss projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided predictors miss projection. Attempting to set it to that of the provided background...')
       terra::crs(env) <- terra::crs(x$background)
     }
 
@@ -163,7 +163,7 @@ methods::setMethod(
     }
     # Harmonize NA values
     if(harmonize_na){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
@@ -197,14 +197,14 @@ methods::setMethod(
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
     assertthat::assert_that(is.Raster(env), terra::nlyr(env)>=1)
 
     # Calculate derivates if set
     if('none' %notin% derivates){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
       # Specific condition for interaction
       if(any(derivates == "interaction")){
         assertthat::assert_that(is.vector(int_variables), length(int_variables)>=2)
@@ -243,7 +243,7 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
     pd <- PredictorDataset$new(id = new_id(),
@@ -261,7 +261,7 @@ methods::setMethod(
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Taking first time entry from object.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Taking first time entry from object.')
 
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
@@ -314,12 +314,12 @@ methods::setMethod(
                             is.character(transform)
     )
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting elevational preference predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Formatting elevational preference predictors...')
 
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided elevation raster misses projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided elevation raster misses projection. Attempting to set it to that of the provided background...')
       terra::crs(layer) <- terra::crs(x$background)
     }
 
@@ -364,7 +364,7 @@ methods::setMethod(
     rm(ras1,ras2)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(o) <- sanitize_names(names(o))
+    if(getOption('ibis.cleannames', default = TRUE)) names(o) <- sanitize_names(names(o))
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
@@ -450,12 +450,12 @@ methods::setMethod(
                             is.character(method)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]', 'green', 'Adding range predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]', 'green', 'Adding range predictors...')
 
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided range layer misses projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided range layer misses projection. Attempting to set it to that of the provided background...')
       terra::crs(layer) <- terra::crs(x$background)
     }
 
@@ -477,7 +477,7 @@ methods::setMethod(
     }
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
@@ -511,7 +511,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
     if(sf::st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
@@ -584,7 +584,7 @@ methods::setMethod(
     }
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(dis) <- sanitize_names(names(dis))
+    if(getOption('ibis.cleannames', default = TRUE)) names(dis) <- sanitize_names(names(dis))
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
@@ -743,7 +743,7 @@ methods::setMethod(
     obj <- x$get_model()
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding scenario predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding scenario predictors...')
 
     # Rename attributes if names is specified
     if(!is.null(names)){
@@ -754,13 +754,13 @@ methods::setMethod(
     # Harmonize NA values
     if(harmonize_na){
       stop('Missing data harmonization for stars not yet implemented!') #TODO
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
@@ -770,17 +770,17 @@ methods::setMethod(
       varn <- obj$get_coefficients()[['Feature']]
       # Are there any derivates present in the coefficients?
       if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
           for(dd in derivates){
             if(any(grep(dd, varn))){
               env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
                                         deriv = varn, int_variables = int_variables)
             } else {
-              if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+              if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
             }
           }
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
       }
     }
 
@@ -795,7 +795,7 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
     pd <- PredictorDataset$new(id = new_id(),

@@ -52,7 +52,7 @@ methods::setMethod(
     if(!copy_model){
       modelobject <- deparse(substitute(fit))
     } else {
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
       modelobject <- fit
     }
     modelid <- fit$id
@@ -79,7 +79,7 @@ methods::setMethod(
     if(reuse_limits){
       # Check if limits have been found.
       if(fit$has_limits()){
-        if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Found existing extrapolation limits and will reuse them!")
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow', "Found existing extrapolation limits and will reuse them!")
         settings <- fit$settings
         limits <- settings$get('limits')[['layer']]
       }

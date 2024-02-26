@@ -12,7 +12,7 @@ formatGLOBIOM(
   template = NULL,
   shares_to_area = FALSE,
   use_gdalutils = FALSE,
-  verbose = getOption("ibis.setupmessages")
+  verbose = getOption("ibis.setupmessages", default = TRUE)
 )
 }
 \arguments{

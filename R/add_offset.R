@@ -65,10 +65,10 @@ methods::setMethod(
                             is.logical(add)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit offset...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding spatial explicit offset...')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check for infinite values
@@ -192,7 +192,7 @@ methods::setMethod(
     if(is.Waiver(x$offset)){ return(x) }
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Removing offsets.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Removing offsets.')
 
     offs <- x$get_offset()
     if(!is.null(layer)){
@@ -275,10 +275,10 @@ methods::setMethod(
                             is.null(points) || inherits(points, 'sf')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding spatial explicit bias offset...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding spatial explicit bias offset...')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check that background and range align, otherwise raise error
@@ -436,10 +436,10 @@ methods::setMethod(
                             is.logical(add)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding range offset...')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
     ori.name <- names(layer)
 
     # Check for infinite values
@@ -517,7 +517,7 @@ methods::setMethod(
     }
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range offset...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding range offset...')
 
     # Reproject if necessary
     if(sf::st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
@@ -677,7 +677,7 @@ methods::setMethod(
     )
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
 
     # Set some attributes
     attr(ras_range, "distance_function") <- distance_function
@@ -760,9 +760,9 @@ methods::setMethod(
   result$aic <- NA
 
   # Progress
-  if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = nrow(pp))
+  if(getOption('ibis.setupmessages', default = TRUE)) pb <- progress::progress_bar$new(total = nrow(pp))
   for(i in 1:nrow(pp)){
-    if(getOption('ibis.setupmessages')) pb$tick()
+    if(getOption('ibis.setupmessages', default = TRUE)) pb$tick()
     # Default starting
     # holdEnv <- list(y = y,
     #                 x = x,
@@ -912,7 +912,7 @@ methods::setMethod(
                             is.logical(add)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding elevation offset...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding elevation offset...')
 
     # Check for infinite values
     assertthat::assert_that(
@@ -951,7 +951,7 @@ methods::setMethod(
     # ---- #
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(elev.prior) <- sanitize_names(names(elev.prior))
+    if(getOption('ibis.cleannames', default = TRUE)) names(elev.prior) <- sanitize_names(names(elev.prior))
 
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)

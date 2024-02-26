@@ -116,13 +116,13 @@ methods::setMethod(
 
     # Check that threshold and method match
     if(is.null(threshold) && method == 'discrete'){
-      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','No threshold data found. Switching to continuous validation metrics.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','red','No threshold data found. Switching to continuous validation metrics.')
       method <- 'continuous'
     }
     # If mode truncate was used, also switch to continuous data
     if(method == "discrete"){
       if((attr(threshold,'format')!="binary")){
-        if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
         method <- 'continuous'
       }
     }
@@ -164,7 +164,7 @@ methods::setMethod(
       point <- subset(point, select = c(point_column, "name", "type", attr(point, "sf_column") ))
     } else {
       # TODO: Think about how to do validation with non-point data
-      if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','red','Validating model with non-independent training data. Results can be misleading!')
       # Get all point datasets and combine them
       point <- collect_occurrencepoints(mod$model,
                                         include_absences = TRUE,
@@ -191,7 +191,7 @@ methods::setMethod(
                              msg = "Validation was not possible owing to missing data.")
     # --- #
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Validation]','green','Calculating validation statistics')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','green','Calculating validation statistics')
 
     # Output container
     results <- data.frame()
@@ -202,7 +202,7 @@ methods::setMethod(
       # Check that absence points are present, otherwise add some.
       # Reason is that some engine such as inlabru don't save their integration points
       if( !any(df2[[point_column]]==0) && method == "discrete"){
-        if(getOption('ibis.setupmessages')) myLog('[Validation]','yellow','No absence data found for threshold. Generating random points.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','yellow','No absence data found for threshold. Generating random points.')
 
         # Use the pseudo-absence generation
         o <- add_pseudoabsence(df = point,
@@ -247,11 +247,11 @@ methods::setMethod(
       # Get parameter if there
       fm <- attr(mod,'format')!="binary"
       if(isTRUE(fm)){
-        if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','red','Only truncated threshold found. Switching to continuous validation metrics.')
         method <- 'continuous'
       } else {
         if(length( unique(mod)[,1] )>2){
-          if(getOption('ibis.setupmessages')) myLog('[Validation]','red','Non-discrete layer found. Switching to continuous validation metrics.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','red','Non-discrete layer found. Switching to continuous validation metrics.')
           method <- 'continuous'
         }
       }
@@ -278,7 +278,7 @@ methods::setMethod(
     if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
     # --- #
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Validation]','green','Calculating validation statistics')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','green','Calculating validation statistics')
 
     if(!is.null(layer)) dataset <- layer else dataset <- "External"
 

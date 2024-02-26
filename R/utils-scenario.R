@@ -53,9 +53,9 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
 
   # Now for each variable, interpolate
   out <- list()
-  if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = length(env))
+  if(getOption('ibis.setupmessages', default = TRUE)) pb <- progress::progress_bar$new(total = length(env))
   for(v in names(env)){
-    if(getOption('ibis.setupmessages')) pb$tick()
+    if(getOption('ibis.setupmessages', default = TRUE)) pb$tick()
 
     # Get the variable
     o <- Reduce(c, stars_to_raster(env[v]) )
@@ -554,7 +554,7 @@ summarise_change <- function(scenario){
   if(!("geosphere" %in% loadedNamespaces()) || ('geosphere' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('geosphere');attachNamespace("geosphere")},silent = TRUE)
   } else {
-    if(getOption("ibis.setupmessages")) myLog("[Summary]","red","This summary function requires the geosphere package.")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Summary]","red","This summary function requires the geosphere package.")
   }
 
   # Get the current and future
@@ -693,7 +693,7 @@ st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
     }
 
     if(terra::global(new, "max", na.rm = TRUE)[,1] == 0){
-      if(getOption('ibis.setupmessages')) myLog('[Done]','yellow',
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','yellow',
                                                 paste0('Min size constraint removed all areas!'))
     }
   } else {

@@ -163,7 +163,7 @@ engine_xgboost <- function(x,
       length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Get parameters
     params <- self$data$params
@@ -357,7 +357,7 @@ engine_xgboost <- function(x,
     if(!is.Waiver(settings$get('bias_variable'))){
       for(i in 1:length(settings$get('bias_variable'))){
         if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)){
-          if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
           next()
         }
         pred_cov[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
@@ -473,7 +473,7 @@ engine_xgboost <- function(x,
     name <- model$biodiversity[[1]]$name
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green', paste0('Starting fitting: ', name))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green', paste0('Starting fitting: ', name))
 
     # Verbosity
     verbose <- settings$get("verbose")
@@ -492,7 +492,7 @@ engine_xgboost <- function(x,
         li <- match.arg(li, c("logit", "cloglog"),several.ok = FALSE)
         if(li=="cloglog") params$objective <- "binary:logitraw"
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0("Package does not support custom link functions. Ignored!"))
       }
     }
 
@@ -515,7 +515,7 @@ engine_xgboost <- function(x,
     # This implements a simple grid search for optimal parameter values
     # Using the training data only (!)
     if(settings$get('optim_hyperparam')){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting hyperparameters search...')
 
       # Create combinations of random hyper parameters
       set.seed(20)
@@ -573,7 +573,7 @@ engine_xgboost <- function(x,
       for(i in names(p)){ params[[i]] <- as.numeric(p[i]) }
 
       # Find the optimal number of rounds using 5-fold cross validation
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Crossvalidation for determining early stopping rule.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Crossvalidation for determining early stopping rule.')
 
       fit_cv <- xgboost::xgb.cv(
         params = params,
@@ -595,7 +595,7 @@ engine_xgboost <- function(x,
       params[c("colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample")] <- NULL
     }
     if(settings$get('only_linear') && !is.Waiver(model$priors)){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Monotonic constraints not supported for linear regressor.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Monotonic constraints not supported for linear regressor.')
     }
     # Fit the model.
     # watchlist <- list(train = df_train,test = df_test)
@@ -613,7 +613,7 @@ engine_xgboost <- function(x,
     # Predict spatially
     if(!settings$get('inference_only')){
       # Messager
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
 
       # Make a prediction
       suppressWarnings(
@@ -833,7 +833,7 @@ engine_xgboost <- function(x,
         if(!is.Waiver(settings$get('bias_variable'))){
           for(i in 1:length(settings$get('bias_variable'))){
             if(settings$get('bias_variable')[i] %notin% colnames(newdata)){
-              if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+              if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
               next()
             }
             newdata[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]

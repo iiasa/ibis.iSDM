@@ -5,9 +5,9 @@
 \alias{load_model,character-method}
 \title{Load a pre-computed model}
 \usage{
-load_model(fname, verbose = getOption("ibis.setupmessages"))
+load_model(fname, verbose = getOption("ibis.setupmessages", default = TRUE))
 
-\S4method{load_model}{character}(fname, verbose = getOption("ibis.setupmessages"))
+\S4method{load_model}{character}(fname, verbose = getOption("ibis.setupmessages", default = TRUE))
 }
 \arguments{
 \item{fname}{A \code{\link{character}} depicting an output filename.}

@@ -39,13 +39,13 @@ NULL
 #' @export
 methods::setGeneric("write_output",
                     signature = methods::signature("mod", "fname"),
-                    function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) standardGeneric("write_output"))
+                    function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE), ...) standardGeneric("write_output"))
 
 #' @rdname write_output
 methods::setMethod(
   "write_output",
   methods::signature("ANY", fname = "character"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...){
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE), ...){
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
@@ -53,7 +53,7 @@ methods::setMethod(
       is.logical(verbose)
     )
 
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Output]','green','Saving output(s)...')
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Output]','green','Saving output(s)...')
 
     # This function will only capture the distribution model object and will
     # save them separately
@@ -85,7 +85,7 @@ methods::setMethod(
 methods::setMethod(
   "write_output",
   methods::signature(mod = "BiodiversityScenario",fname = "character"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
@@ -102,7 +102,7 @@ methods::setMethod(
 methods::setMethod(
   "write_output",
   methods::signature(mod = "SpatRaster",fname = "character"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"), ...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.Raster(mod),
@@ -127,7 +127,7 @@ methods::setMethod(
 methods::setMethod(
   "write_output",
   methods::signature(mod = "data.frame",fname = "character"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE),...) {
     assertthat::assert_that(
       !missing(mod),
       is.data.frame(mod),
@@ -146,7 +146,7 @@ methods::setMethod(
 methods::setMethod(
   "write_output",
   methods::signature(mod = "stars",fname = "character"),
-  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages"),...) {
+  function(mod, fname, dt = "FLT4S", verbose = getOption("ibis.setupmessages", default = TRUE),...) {
     assertthat::assert_that(
       !missing(mod),
       # is.list(mod),
@@ -313,13 +313,13 @@ NULL
 methods::setGeneric("write_summary",
                     signature = methods::signature("mod","fname"),
                     function(mod, fname, partial = FALSE,
-                             verbose = getOption("ibis.setupmessages"),...) standardGeneric("write_summary"))
+                             verbose = getOption("ibis.setupmessages", default = TRUE),...) standardGeneric("write_summary"))
 
 #' @rdname write_summary
 methods::setMethod(
   "write_summary",
   methods::signature(mod = "ANY", fname = "character"),
-  function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages"), ...) {
+  function(mod, fname, partial = FALSE, verbose = getOption("ibis.setupmessages", default = TRUE), ...) {
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
@@ -336,7 +336,7 @@ methods::setMethod(
     if(ext == "") ext <- "rds" # Assign rds as default
     ext <- match.arg(ext, choices = c("rds", "rdata"), several.ok = FALSE)
     fname <- paste0(tools::file_path_sans_ext(fname), ".", ext)
-    if(file.exists(fname) && (verbose && getOption('ibis.setupmessages'))) myLog('[Output]','yellow','Overwriting existing file...')
+    if(file.exists(fname) && (verbose && getOption('ibis.setupmessages', default = TRUE))) myLog('[Output]','yellow','Overwriting existing file...')
     assertthat::assert_that(dir.exists(dirname(fname)))
     # --- #
     # Gather the statistics and parameters from the provided file
@@ -396,7 +396,7 @@ methods::setMethod(
       }
       # Calculate partial estimates if set
       if(partial){
-        if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Calculating partial variable contributions...'))
+        if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Calculating partial variable contributions...'))
         message("Not yet added") # TODO:
         output[["output"]][["partial"]] <- NA
       } else {
@@ -493,13 +493,13 @@ NULL
 #' @export
 methods::setGeneric("write_model",
                     signature = methods::signature("mod"),
-                    function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) standardGeneric("write_model"))
+                    function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages", default = TRUE)) standardGeneric("write_model"))
 
 #' @rdname write_model
 methods::setMethod(
   "write_model",
   methods::signature(mod = "ANY"),
-  function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages")) {
+  function(mod, fname, slim = FALSE, verbose = getOption("ibis.setupmessages", default = TRUE)) {
     assertthat::assert_that(
       !missing(mod),
       is.character(fname),
@@ -531,7 +531,7 @@ methods::setMethod(
     }
 
     # Save output
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Writing model to file...'))
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Writing model to file...'))
     saveRDS(x, fname)
     invisible()
   }
@@ -566,13 +566,13 @@ NULL
 #' @export
 methods::setGeneric("wrap_model",
                     signature = methods::signature("mod"),
-                    function(mod, verbose = getOption("ibis.setupmessages")) standardGeneric("wrap_model"))
+                    function(mod, verbose = getOption("ibis.setupmessages", default = TRUE)) standardGeneric("wrap_model"))
 
 #' @rdname wrap_model
 methods::setMethod(
   "wrap_model",
   methods::signature(mod = "ANY"),
-  function(mod, verbose = getOption("ibis.setupmessages")) {
+  function(mod, verbose = getOption("ibis.setupmessages", default = TRUE)) {
 
     # check function inputs
     assertthat::assert_that(
@@ -608,7 +608,7 @@ methods::setMethod(
       x$fits$prediction <- terra::wrap(x$get_data("prediction"))
     }
     # Save output
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Wrapping raster layers...'))
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Wrapping raster layers...'))
 
     return(x)
 
@@ -647,13 +647,13 @@ NULL
 #' @export
 methods::setGeneric("load_model",
                     signature = methods::signature("fname"),
-                    function(fname, verbose = getOption("ibis.setupmessages")) standardGeneric("load_model"))
+                    function(fname, verbose = getOption("ibis.setupmessages", default = TRUE)) standardGeneric("load_model"))
 
 #' @rdname load_model
 methods::setMethod(
   "load_model",
   methods::signature(fname = "character"),
-  function(fname, verbose = getOption("ibis.setupmessages")) {
+  function(fname, verbose = getOption("ibis.setupmessages", default = TRUE)) {
     assertthat::assert_that(
       is.character(fname),
       is.logical(verbose)
@@ -668,7 +668,7 @@ methods::setMethod(
     fz <- file.size(fname) |> structure(class="object_size") |>
       format(units = "auto")
 
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,')'))
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Loading previously serialized model (size: ',fz,')'))
     # Load file
     mod <- readRDS(fname)
 
@@ -774,13 +774,13 @@ NULL
 #' @export
 methods::setGeneric("unwrap_model",
                     signature = methods::signature("mod"),
-                    function(mod, verbose = getOption("ibis.setupmessages")) standardGeneric("unwrap_model"))
+                    function(mod, verbose = getOption("ibis.setupmessages", default = TRUE)) standardGeneric("unwrap_model"))
 
 #' @rdname unwrap_model
 methods::setMethod(
   "unwrap_model",
   methods::signature(mod = "ANY"),
-  function(mod, verbose = getOption("ibis.setupmessages")) {
+  function(mod, verbose = getOption("ibis.setupmessages", default = TRUE)) {
 
     # check function inputs
     assertthat::assert_that(
@@ -829,7 +829,7 @@ methods::setMethod(
     }
 
     # Save output
-    if(verbose && getOption('ibis.setupmessages')) myLog('[Export]','green',paste0('Unwrapping raster layers...'))
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Unwrapping raster layers...'))
 
     return(x)
 

@@ -156,12 +156,12 @@ engine_bart <- function(x,
       length(model$biodiversity) == 1 # Only works with single likelihood. To be processed separately
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Engine setup.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Engine setup.')
 
     # Add pseudo-absence points if necessary
     if('poipo' == model$biodiversity[[1]]$type && model$biodiversity[[1]]$family == 'poisson') {
       # Warning since PPMs are not really performing / correctly set up in bart
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Engine BART prone to overfit Poisson-distributed occurrence data.\nConsider non-linear xgboost as alternative!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Engine BART prone to overfit Poisson-distributed occurrence data.\nConsider non-linear xgboost as alternative!')
 
       # Get background layer
       bg <- self$get_data('template')
@@ -313,7 +313,7 @@ engine_bart <- function(x,
     name <- model$biodiversity[[1]]$name
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green',paste0( 'Starting fitting: ', name))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',paste0( 'Starting fitting: ', name))
 
     # Get output raster
     prediction <- self$get_data('template')
@@ -350,7 +350,7 @@ engine_bart <- function(x,
       # Add offset to full prediction and load vector
       if(model$biodiversity[[1]]$family == "poisson"){
         # Offsets are only supported for binary dbarts models, but maybe there is an option
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Offsets are not supported for poisson models. Trying to modify weights.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Offsets are not supported for poisson models. Trying to modify weights.')
         w <- w + model$biodiversity[[1]]$offset[,"spatial_offset"]
         # Check and correct for issues
         if(any(w < 0, na.rm = TRUE)) {
@@ -373,7 +373,7 @@ engine_bart <- function(x,
     # --- #
     # Parameter tuning #
     if(settings$get('optim_hyperparam')){
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting hyperparameters search.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting hyperparameters search.')
 
       cv_bart <- dbarts::xbart(
         formula = equation, data = data,
@@ -448,13 +448,13 @@ engine_bart <- function(x,
     # Predict spatially
     if(!settings$get('inference_only')){
       # Messenger
-      if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Starting prediction...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction...')
 
       # Set target variables to bias_value for prediction if specified
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(full)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
@@ -633,7 +633,7 @@ engine_bart <- function(x,
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
           if(settings$get('bias_variable')[i] %notin% names(newdata)){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
             next()
           }
           newdata[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]

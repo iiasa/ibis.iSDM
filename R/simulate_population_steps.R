@@ -261,10 +261,10 @@ methods::setMethod(
                       population_dynamics = pd,
                       timesteps = length(terra::time(proj)),
                       replicates = params[['replicates']],
-                      verbose = getOption('ibis.setupmessages'))
+                      verbose = getOption('ibis.setupmessages', default = TRUE))
   },silent = F)
   if(inherits(sims,"try-error")){
-    if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Simulation failed...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Simulation failed...')
     return(NULL)
   }
 

@@ -79,7 +79,7 @@ methods::setMethod(
     if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Check that ip is between 0 and 1
     if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)
