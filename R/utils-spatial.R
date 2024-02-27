@@ -1494,7 +1494,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
     }
 
     if(anyDuplicated(sel)) sel <- unique(sel)
-    try({rm(o, ex)}, silent = TRUE)
+    suppressWarnings(try({rm(o, ex)}))
 
   } else if(method == "bias"){
     assertthat::assert_that(terra::nlyr(env)==1,
