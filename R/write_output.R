@@ -57,9 +57,13 @@ methods::setMethod(
 
     # This function will only capture the distribution model object and will
     # save them separately
-    if(any(mod$get_name() %in% getOption("ibis.engines")) ){
-      # FIXME: If errors occur, check harmonization of saving among engines.
-      mod$save(fname = fname)
+    if(inherits(mod, "BiodiversityScenario")){
+      if(any(mod$get_name() %in% getOption("ibis.engines")) ){
+        # FIXME: If errors occur, check harmonization of saving among engines.
+        mod$save(fname = fname)
+      } else {
+        stop("Model engine not recognized? Older version?")
+      }
     } else if(is.Raster(mod)){
         if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
           writeGeoTiff(file = mod, fname = fname, dt = dt)

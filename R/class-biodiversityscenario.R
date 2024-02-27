@@ -65,7 +65,7 @@ BiodiversityScenario <- R6::R6Class(
 
       message(paste0(
         ifelse(is.Waiver(self$limits),"Spatial-temporal scenario:","Spatial-temporal scenario (limited):"),
-        '\n  Used model: ',ifelse(is.Waiver(fit) || isFALSE(fit), text_red('None'), class(fit)[1] ),
+        '\n  Used model: ',ifelse(is.Waiver(fit) || isFALSE(fit), text_red('None'), fit$get_name() ),
         "\n --------- ",
         "\n  Predictors:     ", pn,
         "\n  Time period:    ", tp,
