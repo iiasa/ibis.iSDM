@@ -2,9 +2,6 @@
 % Please edit documentation in R/print.R
 \name{print}
 \alias{print}
-\alias{print,}
-\alias{Id-method}
-\alias{tbl_df-method}
 \alias{print.distribution}
 \alias{print.BiodiversityDistribution}
 \alias{print.BiodiversityDatasetCollection}
@@ -18,6 +15,8 @@
 \alias{print.Settings}
 \alias{print.Log}
 \alias{print.Id}
+\alias{print,Id-method}
+\alias{print,tbl_df-method}
 \title{Print}
 \usage{
 \method{print}{distribution}(x, ...)
@@ -46,9 +45,9 @@
 
 \method{print}{Id}(x, ...)
 
-\S4method{print}{Id}(x)
+\S4method{print}{Id}(x, ...)
 
-\S4method{print}{tbl_df}(x)
+\S4method{print}{tbl_df}(x, ...)
 }
 \arguments{
 \item{x}{Any object created through the package.}
@@ -68,6 +67,7 @@ R-package.
 mod
 print(mod)
 }
+
 }
 \seealso{
 \code{\link[base:print]{base::print()}}.

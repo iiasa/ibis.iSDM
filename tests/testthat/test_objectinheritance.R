@@ -36,6 +36,11 @@ test_that('Check that distribution objects are properly inherited', {
     add_biodiversity_polpo(virtual_range, field_occurrence = 'Observed', name = 'Virtual points')
   expect_equal(x$biodiversity$length(),0)
 
+  # For Poipa
+  pa <- virtual_points |> add_pseudoabsence(field_occurrence = "Observed",template = background)
+  x |> add_biodiversity_poipa(pa, field_occurrence = "Observed",docheck = FALSE)
+  expect_equal(x$biodiversity$length(),0)
+
   # Offsets
   suppressMessages( suppressWarnings( x |> add_offset_range(virtual_range) ) )
   expect_s3_class(x$offset, "Waiver")
@@ -49,6 +54,13 @@ test_that('Check that distribution objects are properly inherited', {
   expect_length(x$get_predictor_names(), 0)
   expect_length(y$get_predictor_names(), 14)
 
+  # Remove a predictor
+  y |> rm_predictors("ndvi_mean_50km")
+  expect_length(y$get_predictor_names(), 14)
+  y <- y |> rm_predictors("ndvi_mean_50km")
+  expect_length(y$get_predictor_names(), 13)
+  expect_error(y |> rm_predictors("ndvi_mean_50km")) # Trying to remove it again should lead to an error
+
   # Add elevation
   y <- x |> add_predictor_elevationpref(predictors$elevation_mean_50km, 500, 1000)
   expect_length(y$get_predictor_names(), 2)
@@ -61,7 +73,8 @@ test_that('Check that distribution objects are properly inherited', {
     add_predictor_range(virtual_range, method = "binary")
   expect_length(y$get_predictor_names(), 15)
   z <- y |> add_predictor_range(virtual_range, method = "distance")
-  expect_length(y$get_predictor_names(), 16)
+  expect_length(y$get_predictor_names(), 15)
+  expect_length(z$get_predictor_names(), 16)
 
   # -- #
   # Latent effect check
@@ -89,17 +102,18 @@ test_that('Check that distribution objects are properly inherited', {
 
   # Check variable removal
   xx <- x |> add_predictors(predictors)
+  expect_length(x$get_predictor_names(), 0)
   xx |> rm_predictors(names = "hmi_mean_50km")
   expect_length(xx$get_predictor_names(), 14)
 
   # --- #
   # Create a settings object
   # Define settings object for any other information
-  settings <- bdproto(NULL, Settings)
+  settings <- Settings$new()
   settings$set('test', 1)
   expect_equal(settings$length(), 1)
-  settings2 <- settings
-  settings2 <- settings2$set('test2', 1, copy =TRUE) # This returns a settings object
+  settings2 <- settings$clone()
+  settings2 <- settings2$set('test2', 1) # This returns a settings object
   expect_equal(settings$length(), 1)
 
   # --- #

@@ -2,24 +2,23 @@
 % Please edit documentation in R/add_predictors.R
 \name{add_predictor_elevationpref}
 \alias{add_predictor_elevationpref}
+\alias{add_predictor_elevationpref,BiodiversityDistribution,ANY,numeric,numeric-method}
 \title{Create lower and upper limits for an elevational range and add them as
 separate predictors}
 \usage{
 add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 
-\S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
+\S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric}(x, layer, lower, upper, transform = "none")
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{character}} stating the elevational layer in the
-Distribution object or \code{\link{SpatRaster}} object.}
+\item{layer}{A \code{\link{character}} stating the elevational layer in the Distribution
+object or \code{\link{SpatRaster}} object.}
 
-\item{lower}{\code{\link{numeric}} value for a lower elevational preference of a
-species.}
+\item{lower}{\code{\link{numeric}} value for a lower elevational preference of a species.}
 
-\item{upper}{\code{\link{numeric}} value for a upper elevational preference of a
-species.}
+\item{upper}{\code{\link{numeric}} value for a upper elevational preference of a species.}
 
 \item{transform}{\code{\link{character}} Any optional transformation to be applied.
 Usually not needed (Default: \code{"none"}).}

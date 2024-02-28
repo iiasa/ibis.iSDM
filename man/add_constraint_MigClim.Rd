@@ -2,10 +2,37 @@
 % Please edit documentation in R/add_constraint_MigClim.R
 \name{add_constraint_MigClim}
 \alias{add_constraint_MigClim}
+\alias{add_constraint_MigClim,BiodiversityScenario-method}
 \title{Add constrains to the modelled distribution projection using the MigClim
 approach}
 \usage{
-\S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
+add_constraint_MigClim(
+  mod,
+  rcThresholdMode = "continuous",
+  dispSteps = 1,
+  dispKernel = c(1, 0.4, 0.16, 0.06, 0.03),
+  barrierType = "strong",
+  lddFreq = 0,
+  lddRange = c(1000, 10000),
+  iniMatAge = 1,
+  propaguleProdProb = c(0.2, 0.6, 0.8, 0.95),
+  replicateNb = 10,
+  dtmp = terra::terraOptions(print = F)$tempdir
+)
+
+\S4method{add_constraint_MigClim}{BiodiversityScenario}(
+  mod,
+  rcThresholdMode = "continuous",
+  dispSteps = 1,
+  dispKernel = c(1, 0.4, 0.16, 0.06, 0.03),
+  barrierType = "strong",
+  lddFreq = 0,
+  lddRange = c(1000, 10000),
+  iniMatAge = 1,
+  propaguleProdProb = c(0.2, 0.6, 0.8, 0.95),
+  replicateNb = 10,
+  dtmp = terra::terraOptions(print = F)$tempdir
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -27,30 +54,25 @@ applied. Can be set either to a uniform numeric \link{vector}, e.g.
 \item{barrierType}{A \link{character} indicating whether any set barrier should be
 set as \code{'strong'} or \code{'weak'} barriers. Strong barriers prevent
 any dispersal across the barrier and weak barriers only do so if the whole
-\code{"dispKernel"} length is covered by the barrier (Default:
-\code{'strong'}).}
+\code{"dispKernel"} length is covered by the barrier (Default: \code{'strong'}).}
 
 \item{lddFreq}{\code{\link{numeric}} parameter indicating the frequency of
-long-distance dispersal (LDD) events. Default is \code{0}, so no
-long-distance dispersal.}
+long-distance dispersal (LDD) events. Default is \code{0}, so no long-distance dispersal.}
 
-\item{lddRange}{A \code{\link{numeric}} value highlighting the minimum and maximum
-distance of LDD events.
+\item{lddRange}{A \code{\link{numeric}} value highlighting the minimum and maximum distance of LDD events.
 \strong{Note: The units for those distance are in cells, thus the projection units in the raster.}}
 
 \item{iniMatAge}{Initial maturity age. Used together with \code{propaguleProd} as
 a proxy of population growth. Must be set to the cell age in time units
 which are dispersal steps (Default: \code{1}).}
 
-\item{replicateNb}{Number of replicates to be used for the analysis (Default:
-\code{10}).}
-
-\item{dtmp}{A \code{\link{character}} to a folder where temporary files are to be
-created.}
-
-\item{propaguleProd}{Probability of a source cell to produce propagules as a
+\item{propaguleProdProb}{Probability of a source cell to produce propagules as a
 function of time since colonization. Set as probability vector that defines
 the probability of a cell producing propagules.}
+
+\item{replicateNb}{Number of replicates to be used for the analysis (Default: \code{10}).}
+
+\item{dtmp}{A \code{\link{character}} to a folder where temporary files are to be created.}
 }
 \value{
 Adds a MigClim onstrain to a \code{\link{BiodiversityScenario}} object.
@@ -86,15 +108,13 @@ into species distribution models. R package version 1.6.
 }
 }
 \seealso{
-\code{"MigClim::MigClim.userGuide()"}
-
 Other constraint: 
+\code{\link{add_constraint}()},
 \code{\link{add_constraint_adaptability}()},
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

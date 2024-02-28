@@ -2,20 +2,19 @@
 % Please edit documentation in R/prior_gdb.R
 \name{GDBPriors}
 \alias{GDBPriors}
+\alias{GDBPriors,character-method}
 \title{Helper function when multiple variables are supplied for a GDB prior}
 \usage{
 GDBPriors(variable, hyper = "increasing", ...)
 
-\S4method{GDBPriors}{character,character}(variable,hyper,...)
+\S4method{GDBPriors}{character}(variable, hyper = "increasing", ...)
 }
 \arguments{
-\item{variable}{A \code{\link{character}} matched against existing predictors
-variables.}
+\item{variable}{A \code{\link{character}} matched against existing predictors variables.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
-\code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'positive'}, \code{'negative'} or \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -25,19 +24,19 @@ the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()},

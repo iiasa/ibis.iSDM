@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_predictors.R
 \name{sel_predictors}
 \alias{sel_predictors}
+\alias{sel_predictors,BiodiversityDistribution,character-method}
 \title{Select specific predictors from a \link{distribution} object}
 \usage{
 sel_predictors(x, names)
 
-\S4method{sel_predictors}{BiodiversityDistribution,ANY}(x,names)
+\S4method{sel_predictors}{BiodiversityDistribution,character}(x, names)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -25,4 +26,5 @@ distribution(background) |>
  add_predictors(my_covariates) |>
  sel_predictors(names = c("Forest", "Elevation"))
 }
+
 }

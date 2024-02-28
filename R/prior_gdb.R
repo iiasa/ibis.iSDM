@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R
+#' @include class-prior.R
 NULL
 
 #' Monotonic constrained priors for boosted regressions
@@ -12,37 +12,35 @@ NULL
 #' __Important:__ Specifying a monotonic constrain for the [engine_gdb] does not
 #' guarantee that the variable is retained in the model as it can still be
 #' regularized out.
+#'
+#' @param variable A [`character`] matched against existing predictors variables.
+#' @param hyper A [`character`] object describing the type of constrain. Available
+#' options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+#' \code{'positive'}, \code{'negative'} or \code{'none'}.
+#' @param ... Variables passed on to prior object.
+#'
 #' @note Similar priors can also be defined for the [`engine_xgboost`] via
 #' [`XGBPrior()`].
 #'
-#' @param variable A [`character`] matched against existing predictors
-#'   variables.
-#' @param hyper A [`character`] object describing the type of constrain.
-#'   Available options are \code{'increasing'}, \code{'decreasing'},
-#'   \code{'convex'}, \code{'concave'}, \code{'positive'}, \code{'negative'} or
-#'   \code{'none'}.
-#' @param ... Variables passed on to prior object.
 #' @references
-#' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species distribution models. Ecology, 92(10), 1895-1901.
+#' * Hofner, B., Müller, J., & Hothorn, T. (2011). Monotonicity‐constrained species
+#'  distribution models. Ecology, 92(10), 1895-1901.
+#'
 #' @seealso [`Prior-class`], [`XGBPrior`]
 #' @keywords priors
 #' @family prior
-#' @aliases GDBPrior
+#'
 #' @name GDBPrior
 NULL
 
-#' @name GDBPrior
 #' @rdname GDBPrior
-#' @exportMethod GDBPrior
 #' @export
 methods::setGeneric(
   "GDBPrior",
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("GDBPrior"))
 
-#' @name GDBPrior
 #' @rdname GDBPrior
-#' @usage \S4method{GDBPrior}{character,character}(variable,hyper,...)
 methods::setMethod(
   "GDBPrior",
   methods::signature(variable = "character"),
@@ -58,16 +56,16 @@ methods::setMethod(
     hyper <- match.arg(hyper, c('increasing', 'decreasing','convex', 'concave','positive', 'negative', 'none'), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'GDBPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'GDBPrior',
       id = new_id(),
       variable = variable,
       value = hyper
     )
+    return(pp)
   }
 )
 
@@ -75,22 +73,23 @@ methods::setMethod(
 #'
 #' @description This is a helper function to specify several [GLMNETPrior] with
 #' the same hyper-parameters, but different variables.
-#' @name GDBPriors
-#' @rdname GDBPriors
-#' @exportMethod GDBPriors
+#'
 #' @inheritParams GDBPrior
-#' @aliases GDBPriors
+#'
 #' @keywords priors
 #' @family prior
+#'
+#' @name GDBPriors
+NULL
+
+#' @rdname GDBPriors
 #' @export
 methods::setGeneric(
   "GDBPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("GDBPriors"))
 
-#' @name GDBPriors
 #' @rdname GDBPriors
-#' @usage \S4method{GDBPriors}{character,character}(variable,hyper,...)
 methods::setMethod(
   "GDBPriors",
   methods::signature(variable = "character"),

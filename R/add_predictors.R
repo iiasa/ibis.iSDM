@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
+#' @include class-biodiversitydistribution.R class-predictors.R class-biodiversityscenario.R
 NULL
 
 #' Add predictors to a Biodiversity distribution object
@@ -9,8 +9,29 @@ NULL
 #' the [distribution] object. This function furthermore allows to transform or
 #' create derivates of provided predictors.
 #'
-#' @details
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param env A [`SpatRaster`] or [`stars`] object.
+#' @param names A [`vector`] of character names describing the environmental
+#' stack in case they should be renamed.
+#' @param transform A [`vector`] stating whether predictors should be preprocessed
+#' in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be
+#' considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
+#' knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#' specifying the covariates (Default: \code{NULL}).
+#' @param bgmask Check whether the environmental data should be masked with the
+#' background layer (Default: \code{TRUE}).
+#' @param harmonize_na A [`logical`] value indicating of whether NA values
+#' should be harmonized among predictors (Default: \code{FALSE}).
+#' @param explode_factors [`logical`] of whether any factor variables should be
+#' split up into binary variables (one per class). (Default: \code{FALSE}).
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
+#' which uses default prior assumptions.
+#' @param ... Other parameters passed down
 #'
+#' @details
 #' A transformation takes the provided rasters and for instance rescales them or
 #' transforms them through a principal component analysis ([prcomp]). In
 #' contrast, derivates leave the original provided predictors alone, but instead
@@ -36,29 +57,6 @@ NULL
 #' * \code{'hinge'} - Add hinge transformed predictors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param env A [`SpatRaster`] or [`stars`] object.
-#' @param names A [`vector`] of character names describing the environmental
-#'   stack in case they should be renamed.
-#' @param transform A [`vector`] stating whether predictors should be
-#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
-#'   \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be
-#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-#'   \code{'quad'}) )
-#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
-#'   knots for derivate creation if relevant (Default: \code{4}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2}
-#'   specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the
-#'   background layer (Default: \code{TRUE}).
-#' @param harmonize_na A [`logical`] value indicating of whether NA values
-#'   should be harmonized among predictors (Default: \code{FALSE}).
-#' @param explode_factors [`logical`] of whether any factor variables should be
-#'   split up into binary variables (one per class). (Default: \code{FALSE}).
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
-#'   which uses default prior assumptions.
-#' @param ... Other parameters passed down
 #' @note
 #' **Important:**
 #' Not every [`Engine`] supported by the \pkg{ibis.iSDM} R-package allows
@@ -74,19 +72,21 @@ NULL
 #'
 #' Certain names such \code{"offset"} are forbidden as predictor variable names.
 #' The function will return an error message if these are used.
-#' @aliases add_predictors
+#'
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
 #'         add_predictors(covariates, transform = 'scale')
 #'  obj
 #' }
+#'
+#' @import stars
+#'
 #' @name add_predictors
 NULL
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @exportMethod add_predictors
 #' @export
 methods::setGeneric(
   "add_predictors",
@@ -94,10 +94,7 @@ methods::setGeneric(
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL, bgmask = TRUE,
            harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
@@ -107,14 +104,13 @@ methods::setMethod(
                             !missing(env))
     # Convert env to stack if it is a single layer only
     if(!is.Raster(env)) env <- terra::rast(env)
-    add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    add_predictors(x, env, names, transform, derivates, derivate_knots,
+                   int_variables, bgmask, harmonize_na, explode_factors,
+                   priors, ...)
   }
 )
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
@@ -134,7 +130,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors...')
 
     if(!is.null(names)) {
       assertthat::assert_that(terra::nlyr(env) == length(names),
@@ -147,7 +143,7 @@ methods::setMethod(
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(env,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided predictors miss projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided predictors miss projection. Attempting to set it to that of the provided background...')
       terra::crs(env) <- terra::crs(x$background)
     }
 
@@ -157,14 +153,17 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
@@ -198,14 +197,14 @@ methods::setMethod(
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
     assertthat::assert_that(is.Raster(env), terra::nlyr(env)>=1)
 
     # Calculate derivates if set
     if('none' %notin% derivates){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
       # Specific condition for interaction
       if(any(derivates == "interaction")){
         assertthat::assert_that(is.vector(int_variables), length(int_variables)>=2)
@@ -244,23 +243,17 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-        bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-        )
-      )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
@@ -268,12 +261,14 @@ methods::setMethod(
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Taking first time entry from object.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Taking first time entry from object.')
 
     # Convert to raster
     env <- stars_to_raster(env, which = 1)
     if(is.list(env)) env <- env[[1]]
-    x <- add_predictors(x, env, names, transform, derivates, derivate_knots, int_variables, bgmask, harmonize_na, explode_factors, priors, ...)
+    x <- add_predictors(x, env, names, transform, derivates, derivate_knots,
+                        int_variables, bgmask, harmonize_na, explode_factors,
+                        priors, ...)
     return( x )
   }
 )
@@ -284,15 +279,13 @@ methods::setMethod(
 #' separate predictors
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param layer A [`character`] stating the elevational layer in the
-#'   Distribution object or [`SpatRaster`] object.
-#' @param lower [`numeric`] value for a lower elevational preference of a
-#'   species.
-#' @param upper [`numeric`] value for a upper elevational preference of a
-#'   species.
+#' @param layer A [`character`] stating the elevational layer in the Distribution
+#' object or [`SpatRaster`] object.
+#' @param lower [`numeric`] value for a lower elevational preference of a species.
+#' @param upper [`numeric`] value for a upper elevational preference of a species.
 #' @param transform [`character`] Any optional transformation to be applied.
-#'   Usually not needed (Default: \code{"none"}).
-#' @aliases add_predictor_elevationpref
+#' Usually not needed (Default: \code{"none"}).
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
@@ -302,19 +295,14 @@ methods::setMethod(
 #' @name add_predictor_elevationpref
 NULL
 
-#' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @exportMethod add_predictor_elevationpref
 #' @export
 methods::setGeneric(
   "add_predictor_elevationpref",
   signature = methods::signature("x", "layer", "lower", "upper", "transform"),
   function(x, layer, lower, upper, transform = "none") standardGeneric("add_predictor_elevationpref"))
 
-#' @name add_predictor_elevationpref
 #' @rdname add_predictor_elevationpref
-#' @usage
-#'   \S4method{add_predictor_elevationpref}{BiodiversityDistribution,ANY,numeric,numeric,character}(x,layer,lower,upper,transform)
 methods::setMethod(
   "add_predictor_elevationpref",
   methods::signature(x = "BiodiversityDistribution", layer = "ANY", lower = "numeric", upper = "numeric"),
@@ -326,12 +314,12 @@ methods::setMethod(
                             is.character(transform)
     )
     # Messager
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting elevational preference predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Formatting elevational preference predictors...')
 
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided elevation raster misses projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided elevation raster misses projection. Attempting to set it to that of the provided background...')
       terra::crs(layer) <- terra::crs(x$background)
     }
 
@@ -376,21 +364,24 @@ methods::setMethod(
     rm(ras1,ras2)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(o) <- sanitize_names(names(o))
+    if(getOption('ibis.cleannames', default = TRUE)) names(o) <- sanitize_names(names(o))
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = o, transform = transform, derivates = 'none')
+      y <- add_predictors(y, env = o, transform = transform, derivates = 'none')
     } else {
       for(n in names(o)){
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        x$predictors <- x$predictors$set_data(n, r)
+        y$predictors <- y$predictors$set_data(n, r)
         rm(r)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -416,31 +407,31 @@ methods::setMethod(
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param layer A [`sf`] or [`SpatRaster`] object with the range for the target
-#'   feature.
+#' feature.
 #' @param method [`character`] describing how the range should be included
-#'   (\code{"binary"} | \code{"distance"}).
-#' @param distance_max Numeric threshold on the maximum distance (Default:
-#'   \code{NULL}).
+#' (\code{"binary"} | \code{"distance"}).
+#' @param distance_max Numeric threshold on the maximum distance (Default: \code{NULL}).
 #' @param fraction An optional [`SpatRaster`] object that is multiplied with
-#'   digitized raster layer. Can be used to for example to remove or reduce the
-#'   expected value (Default: \code{NULL}).
+#' digitized raster layer. Can be used to for example to remove or reduce the
+#' expected value (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses
-#'   default prior assumptions.
-#' @aliases add_predictor_range
+#' default prior assumptions.
+#'
+#' @references
+#' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and
+#' expert maps for improved species range predictions. Global Ecology and Biogeography,
+#' 26(2), 243–258. https://doi.org/10.1111/geb.12539
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
 #'   add_predictor_range(range, method = "distance", distance_max = 2)
 #' }
 #'
-#' @references
-#' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and expert maps for improved species range predictions. Global Ecology and Biogeography, 26(2), 243–258. https://doi.org/10.1111/geb.12539
 #' @name add_predictor_range
 NULL
 
-#' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @exportMethod add_predictor_range
 #' @export
 methods::setGeneric(
   "add_predictor_range",
@@ -448,10 +439,7 @@ methods::setGeneric(
   function(x, layer, method = 'distance', distance_max = NULL, fraction = NULL, priors = NULL) standardGeneric("add_predictor_range"))
 
 #' Function for when distance raster is directly supplied (precomputed)
-#' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage
-#'   \S4method{add_predictor_range}{BiodiversityDistribution,SpatRaster,character,ANY,ANY}(x,layer,method,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "SpatRaster"),
@@ -462,12 +450,12 @@ methods::setMethod(
                             is.character(method)
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]', 'green', 'Adding range predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]', 'green', 'Adding range predictors...')
 
     # Check that env has a valid crs, if not raise critical warning and set to
     # background crs.
     if(is.na(terra::crs(layer,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provided range layer misses projection. Attempting to set it to that of the provided background...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provided range layer misses projection. Attempting to set it to that of the provided background...')
       terra::crs(layer) <- terra::crs(x$background)
     }
 
@@ -489,27 +477,27 @@ methods::setMethod(
     }
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
+    if(getOption('ibis.cleannames', default = TRUE)) names(layer) <- sanitize_names(names(layer))
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = layer, transform = 'none',derivates = 'none', priors)
+      y <- add_predictors(y, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', layer)
+      y$predictors <- y$predictors$set_data('range_distance', layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
-        x <- x$set_priors(priors)
+        y <- y$set_priors(priors)
       }
     }
-    return(x)
+    return(y)
   }
 )
 
-#' @name add_predictor_range
 #' @rdname add_predictor_range
-#' @usage
-#'   \S4method{add_predictor_range}{BiodiversityDistribution,sf,character,numeric,ANY,ANY}(x,layer,method,distance_max,fraction,priors)
 methods::setMethod(
   "add_predictor_range",
   methods::signature(x = "BiodiversityDistribution", layer = "sf"),
@@ -523,7 +511,7 @@ methods::setMethod(
                             is.null(priors) || inherits(priors,'PriorList')
     )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding range predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding range predictors...')
 
     # Reproject if necessary
     if(sf::st_crs(layer) != sf::st_crs(x$background)) layer <- sf::st_transform(layer, sf::st_crs(x$background))
@@ -585,23 +573,26 @@ methods::setMethod(
       layer <- layer * fraction
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
       assertthat::assert_that( all( priors$varnames() %in% names(dis) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(dis) <- sanitize_names(names(dis))
+    if(getOption('ibis.cleannames', default = TRUE)) names(dis) <- sanitize_names(names(dis))
 
     # Add as predictor
     if(is.Waiver(x$predictors)){
-      x <- add_predictors(x, env = dis, transform = 'none',derivates = 'none')
+      y <- add_predictors(y, env = dis, transform = 'none',derivates = 'none')
     } else {
-      x$predictors <- x$predictors$set_data('range_distance', dis)
+      y$predictors <- y$predictors$set_data('range_distance', dis)
     }
-    return(x)
+    return(y)
   }
 )
 
@@ -609,31 +600,29 @@ methods::setMethod(
 #'
 #' @description Remove a particular variable from an [distribution] object with
 #' a [`PredictorDataset-class`]. See Examples.
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the
-#'   environmental stack.
-#' @aliases rm_predictors
+#' environmental stack.
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
 #'  add_predictors(my_covariates) |>
 #'  rm_predictors(names = "Urban")
 #' }
+#'
 #' @name rm_predictors
 NULL
 
-#' @name rm_predictors
 #' @rdname rm_predictors
-#' @exportMethod rm_predictors
 #' @export
 methods::setGeneric(
   "rm_predictors",
   signature = methods::signature("x", "names"),
   function(x, names) standardGeneric("rm_predictors"))
 
-#' @name rm_predictors
 #' @rdname rm_predictors
-#' @usage \S4method{rm_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "rm_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
@@ -648,8 +637,11 @@ methods::setMethod(
                             all( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Finally set the data to the BiodiversityDistribution object
-    x$rm_predictors(names)
+    y$rm_predictors(names)
   }
 )
 
@@ -662,28 +654,25 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the
 #'   environmental stack.
-#' @aliases sel_predictors
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
 #'  add_predictors(my_covariates) |>
 #'  sel_predictors(names = c("Forest", "Elevation"))
 #' }
+#'
 #' @name sel_predictors
 NULL
 
-#' @name sel_predictors
 #' @rdname sel_predictors
-#' @exportMethod sel_predictors
 #' @export
 methods::setGeneric(
   "sel_predictors",
   signature = methods::signature("x", "names"),
   function(x, names) standardGeneric("sel_predictors"))
 
-#' @name sel_predictors
 #' @rdname sel_predictors
-#' @usage \S4method{sel_predictors}{BiodiversityDistribution,ANY}(x,names)
 methods::setMethod(
   "sel_predictors",
   methods::signature(x = "BiodiversityDistribution", names = "character"),
@@ -698,21 +687,23 @@ methods::setMethod(
                             any( names %in% x$get_predictor_names() ),
                             msg = 'Suggested variables not in model!')
 
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
     # Get current predictors
-    varnames <- x$get_predictor_names()
+    varnames <- y$get_predictor_names()
     varnames <- varnames[which(varnames %notin% names)]
 
     # Remove all predictors listed
-    if(length(varnames)>=1) x$rm_predictors(varnames)
+    if(length(varnames)>=1) {
+      y$rm_predictors(varnames)
+    } else { y }
   }
 )
 
 #### Predictors for scenarios -----
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
@@ -723,14 +714,12 @@ methods::setMethod(
     env <- raster_to_stars(env) # Convert to stars
 
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
-                   derivate_knots = derivate_knots, int_variables = int_variables, harmonize_na = harmonize_na, ...)
+                   derivate_knots = derivate_knots, int_variables = int_variables,
+                   harmonize_na = harmonize_na, ...)
   }
 )
 
-#' @name add_predictors
 #' @rdname add_predictors
-#' @usage
-#'   \S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),
@@ -754,7 +743,7 @@ methods::setMethod(
     obj <- x$get_model()
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding scenario predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding scenario predictors...')
 
     # Rename attributes if names is specified
     if(!is.null(names)){
@@ -765,13 +754,13 @@ methods::setMethod(
     # Harmonize NA values
     if(harmonize_na){
       stop('Missing data harmonization for stars not yet implemented!') #TODO
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
@@ -781,16 +770,17 @@ methods::setMethod(
       varn <- obj$get_coefficients()[['Feature']]
       # Are there any derivates present in the coefficients?
       if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
           for(dd in derivates){
             if(any(grep(dd, varn))){
-              env <- predictor_derivate(env, option = dd, nknots = derivate_knots, deriv = varn, int_variables = int_variables)
+              env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
+                                        deriv = varn, int_variables = int_variables)
             } else {
-              if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+              if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
             }
           }
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
       }
     }
 
@@ -805,16 +795,15 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod
+                               )
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+    y$set_predictors(pd)
   }
 )

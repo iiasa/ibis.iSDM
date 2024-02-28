@@ -2,37 +2,41 @@
 % Please edit documentation in R/project.R
 \name{project}
 \alias{project}
-\alias{project,}
-\alias{project-method}
 \alias{project.BiodiversityScenario}
+\alias{project,BiodiversityScenario-method}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
-\method{project}{BiodiversityScenario}(x, ...)
+project.BiodiversityScenario(x, ...)
 
-\S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
+\S4method{project}{BiodiversityScenario}(
+  x,
+  date_interpolation = "none",
+  stabilize = FALSE,
+  stabilize_method = "loess",
+  layer = "mean",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 }
 \arguments{
-\item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that
-some constrains such as \code{MigClim} can still simulate future change
-without projections.}
+\item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that some
+constrains such as \code{MigClim} can still simulate future change without projections.}
 
 \item{...}{passed on parameters.}
 
-\item{date_interpolation}{A \code{\link{character}} on whether dates should be
-interpolated. Options include \code{"none"} (Default), \code{"annual"},
-\code{"monthly"}, \code{"daily"}.}
+\item{date_interpolation}{A \code{\link{character}} on whether dates should be interpolated.
+Options include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.}
 
-\item{stabilize}{A \code{\link{logical}} value indicating whether the suitability
-projection should be stabilized (Default: \code{FALSE}).}
+\item{stabilize}{A \code{\link{logical}} value indicating whether the suitability projection
+should be stabilized (Default: \code{FALSE}).}
 
 \item{stabilize_method}{\code{\link{character}} stating the stabilization method to be
 applied. Currently supported is \code{`loess`}.}
 
-\item{layer}{A \code{\link{character}} specifying the layer to be projected (Default:
-\code{"mean"}).}
+\item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out
-further information during the model fitting (Default: \code{FALSE}).}
+\item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further
+information during the model fitting (Default: \code{FALSE}).}
 }
 \value{
 Saves \code{\link{stars}} objects of the obtained predictions in mod.

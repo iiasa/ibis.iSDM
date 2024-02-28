@@ -1,8 +1,6 @@
 # Further tests for model fits
 test_that('Add further tests for model fits', {
 
-  skip_if_not_installed("pdp")
-
   # Set to verbose
   options("ibis.setupmessages" = FALSE)
 
@@ -50,8 +48,13 @@ test_that('Add further tests for model fits', {
   suppressMessages(
     mod <- threshold(mod, method = "perc", format = "bin")
   )
+  expect_no_error(mod_poipo <- threshold(mod_poipo, method = "perc", value = .2))
   expect_gt(mod$get_thresholdvalue(),0)
   expect_length(mod$show_rasters(), 2)
+
+  # Make an ensemble and check that thresholds are also present
+  expect_no_error( ens <- ensemble(mod, mod_poipo, method = "mean"))
+  expect_length(names(ens), 3)
 
   # Summarize model
   expect_s3_class( summary(mod), "data.frame" )
@@ -71,15 +74,6 @@ test_that('Add further tests for model fits', {
   # ----------- #
   # Project with separate data
   pp <- mod$project(predictors |> as.data.frame(xy = TRUE, na.rm = FALSE))
-  expect_s4_class(pp, "SpatRaster")
-
-  # ----------- #
-  # Partial stuff
-  pp <- partial(mod, x.var = "bio19_mean_50km",plot = FALSE)
-  expect_s3_class(pp, "data.frame")
-
-  # Spartial
-  pp <- spartial(mod,x.var = "bio19_mean_50km",plot = FALSE)
   expect_s4_class(pp, "SpatRaster")
 
   # ----------- #
@@ -119,9 +113,20 @@ test_that('Add further tests for model fits', {
 
   # Make an ensemble
   expect_no_error(
-    o <- ensemble(mod1, mod2, mod3, method = "median")
+    o <- ensemble(mod1, mod2, mod3, method = "median",uncertainty = "range")
   )
   expect_s4_class(o, "SpatRaster")
+  expect_length(names(o), 2) # Should be at maximum 2 layers
+
+  # ----------- #
+  # Partial stuff
+  skip_if_not_installed("pdp")
+  pp <- partial(mod, x.var = "bio19_mean_50km",plot = FALSE)
+  expect_s3_class(pp, "data.frame")
+
+  # Spartial
+  pp <- spartial(mod,x.var = "bio19_mean_50km",plot = FALSE)
+  expect_s4_class(pp, "SpatRaster")
 
   # ----------- #
   # Write model outputs

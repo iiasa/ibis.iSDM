@@ -2,11 +2,12 @@
 % Please edit documentation in R/prior_inla.R
 \name{INLAPriors}
 \alias{INLAPriors}
+\alias{INLAPriors,vector,character-method}
 \title{Helper function when multiple variables and types are supplied for INLA}
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 
-\S4method{INLAPriors}{vector,character,ANY}(variables,type,hyper,...)
+\S4method{INLAPriors}{vector,character}(variables, type, hyper = c(0, 0.001), ...)
 }
 \arguments{
 \item{variables}{A \code{\link{vector}} of \code{\link{character}} matched against existing
@@ -14,8 +15,7 @@ predictors or latent effects.}
 
 \item{type}{A \code{\link{character}} specifying the type of prior to be set.}
 
-\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as
-hyper-parameters.}
+\item{hyper}{A \code{\link{vector}} with \code{\link{numeric}} values to be used as hyper-parameters.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -25,19 +25,19 @@ with the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()},

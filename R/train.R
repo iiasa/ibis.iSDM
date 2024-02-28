@@ -1,132 +1,129 @@
-#' @include utils.R bdproto-biodiversitydistribution.R utils-spatial.R
+#' @include class-biodiversitydistribution.R
 NULL
 
 #' Train the model from a given engine
 #'
 #' @description This function trains a [distribution()] model with the specified
-#'   engine and furthermore has some generic options that apply to all engines
-#'   (regardless of type). See Details with regards to such options.
+#' engine and furthermore has some generic options that apply to all engines
+#' (regardless of type). See Details with regards to such options.
 #'
-#'   Users are advised to check the help files for individual engines for advice
-#'   on how the estimation is being done.
-#' @details This function acts as a generic training function that - based on
-#'   the provided [`BiodiversityDistribution-class`] object creates a new
-#'   distribution model. The resulting object contains both a \code{"fit_best"}
-#'   object of the estimated model and, if \code{inference_only} is \code{FALSE}
-#'   a [SpatRaster] object named \code{"prediction"} that contains the spatial
-#'   prediction of the model. These objects can be requested via
-#'   \code{object$get_data("fit_best")}.
-#'
-#'   Other parameters in this function:
-#'
-#' * \code{"filter_predictors"} The parameter can be set to various options to remove highly correlated variables or those
-#'   with little additional information gain from the model prior to any
-#'   estimation. Available options are \code{"none"} (Default) \code{"pearson"}
-#'   for applying a \code{0.7} correlation cutoff, \code{"abess"} for the
-#'   regularization framework by Zhu et al. (2020), or \code{"RF"} or
-#'   \code{"randomforest"} for removing the least important variables according
-#'   to a randomForest model. **Note**: This function is only applied on
-#'   predictors for which no prior has been provided (e.g. potentially
-#'   non-informative ones).
-#'
-#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter search for several models, which can improve
-#'   prediction accuracy although through the a substantial increase in
-#'   computational cost.
-#'
-#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`] is supplied and when
-#'   the engine does not support joint integration of likelihoods. See also
-#'   Miller et al. (2019) in the references for more details on different types
-#'   of integration. Of course, if users want more control about this aspect,
-#'   another option is to fit separate models and make use of the [add_offset],
-#'   [add_offset_range] and [ensemble] functionalities.
-#'
-#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors to the range of values observed
-#'   during model training.
-#'
-#' @note There are no silver bullets in (correlative) species distribution
-#'   modelling and for each model the analyst has to understand the objective,
-#'   workflow and parameters than can be used to modify the outcomes. Different
-#'   predictions can be obtained from the same data and parameters and not all
-#'   necessarily make sense or are useful.
+#' Users are advised to check the help files for individual engines for advice
+#' on how the estimation is being done.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object).
 #' @param runname A [`character`] name of the trained run.
-#' @param filter_predictors A [`character`] defining if and how highly
-#'   correlated predictors are to be removed prior to any model estimation.
-#'   Available options are:
+#' @param filter_predictors A [`character`] defining if and how highly correlated
+#' predictors are to be removed prior to any model estimation. Available options are:
 #' * \code{"none"} No prior variable removal is performed (Default).
-#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
-#'   remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{"abess"} package (see References).
-#'   Note that this effectively fits a separate generalized linear model to
-#'   reduce the number of covariates.
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise
+#' comparisons to identify and remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the
+#' \code{"abess"} package (see References). Note that this effectively fits a separate
+#' generalized linear model to reduce the number of covariates.
 #' * \code{"boruta"} Uses the \code{"Boruta"} package to identify non-informative features.
-#'
 #' @param optim_hyperparam Parameter to tune the model by iterating over input
-#'   parameters or selection of predictors included in each iteration. Can be
-#'   set to \code{TRUE} if extra precision is needed (Default: \code{FALSE}).
-#'
-#' @param inference_only By default the engine is used to create a spatial
-#'   prediction of the suitability surface, which can take time. If only
-#'   inferences of the strength of relationship between covariates and
-#'   observations are required, this parameter can be set to \code{TRUE} to
-#'   ignore any spatial projection (Default: \code{FALSE}).
-#' @param only_linear Fit model only on linear baselearners and functions.
-#'   Depending on the engine setting this option to \code{FALSE} will result in
-#'   non-linear relationships between observations and covariates, often
-#'   increasing processing time (Default: \code{TRUE}). How non-linearity is
-#'   captured depends on the used engine.
+#' parameters or selection of predictors included in each iteration. Can be set
+#' to \code{TRUE} if extra precision is needed (Default: \code{FALSE}).
+#' @param inference_only By default the engine is used to create a spatial prediction
+#' of the suitability surface, which can take time. If only inferences of the strength
+#' of relationship between covariates and observations are required, this parameter
+#' can be set to \code{TRUE} to ignore any spatial projection (Default: \code{FALSE}).
+#' @param only_linear Fit model only on linear baselearners and functions. Depending
+#' on the engine setting this option to \code{FALSE} will result in non-linear
+#' relationships between observations and covariates, often increasing processing
+#' time (Default: \code{TRUE}). How non-linearity is captured depends on the used engine.
 #' @param method_integration A [`character`] with the type of integration that
-#'   should be applied if more than one [`BiodiversityDataset-class`] object is
-#'   provided in \code{x}. Particular relevant for engines that do not support
-#'   the integration of more than one dataset. Integration methods are generally
-#'   sensitive to the order in which they have been added to the
-#'   [`BiodiversityDistribution`] object.
-#'
-#'   Available options are:
-#' * \code{"predictor"} The predicted output of the first (or previously fitted) models are
-#'   added to the predictor stack and thus are predictors for subsequent models
-#'   (Default).
-#' * \code{"offset"} The predicted output of the first (or previously fitted) models are
-#'   added as spatial offsets to subsequent models. Offsets are back-transformed
-#'   depending on the model family. This option might not be supported for every
-#'   [`Engine`].
-#' * \code{"interaction"} Instead of fitting several separate models, the observations from each dataset
-#'   are combined and incorporated in the prediction as a factor interaction
-#'   with the "weaker" data source being partialed out during prediction. Here
-#'   the first dataset added determines the reference level (see Leung et al.
-#'   2019 for a description).
-#' * \code{"prior"} In this option we only make use of the coefficients from a previous model to define priors to be used in the next model.
-#'   Might not work with any engine!
-#' * \code{"weight"} This option only works for multiple biodiversity datasets with the same type (e.g. \code{"poipo"}).
-#'   Individual weight multipliers can be determined while setting up the model
-#'   (**Note: Default is 1**). Datasets are then combined for estimation and
-#'   weighted respectively, thus giving for example presence-only records less
-#'   weight than survey records.
-#'
-#' **Note that this parameter is ignored for engines that support joint likelihood estimation.**
-#' @param aggregate_observations [`logical`] on whether observations covering
-#'   the same grid cell should be aggregated (Default: \code{TRUE}).
+#' should be applied if more than one [`BiodiversityDataset-class`] object is
+#' provided in \code{x}. Particular relevant for engines that do not support the
+#' integration of more than one dataset. Integration methods are generally sensitive
+#' to the order in which they have been added to the [`BiodiversityDistribution`] object.
+#' Available options are:
+#' * \code{"predictor"} The predicted output of the first (or previously fitted)
+#' models are added to the predictor stack and thus are predictors for subsequent
+#' models (Default).
+#' * \code{"offset"} The predicted output of the first (or previously fitted) models
+#' are added as spatial offsets to subsequent models. Offsets are back-transformed
+#' depending on the model family. This option might not be supported for every [`Engine`].
+#' * \code{"interaction"} Instead of fitting several separate models, the observations
+#' from each dataset are combined and incorporated in the prediction as a factor
+#' interaction with the "weaker" data source being partialed out during prediction.
+#' Here the first dataset added determines the reference level (see Leung et al.
+#' 2019 for a description).
+#' * \code{"prior"} In this option we only make use of the coefficients from a
+#' previous model to define priors to be used in the next model. Might not work with any engine!
+#' * \code{"weight"} This option only works for multiple biodiversity datasets
+#' with the same type (e.g. \code{"poipo"}). Individual weight multipliers can be
+#' determined while setting up the model (**Note**: Default is 1). Datasets are
+#' then combined for estimation and weighted respectively, thus giving for example
+#' presence-only records less weight than survey records. **Note** that this parameter
+#' is ignored for engines that support joint likelihood estimation.
+#' @param aggregate_observations [`logical`] on whether observations covering the
+#' same grid cell should be aggregated (Default: \code{TRUE}).
 #' @param clamp [`logical`] whether predictions should be clamped to the range
-#'   of predictor values observed during model fitting (Default: \code{FALSE}).
-#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out
-#'   further information during the model fitting (Default: \code{FALSE}).
+#' of predictor values observed during model fitting (Default: \code{FALSE}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further
+#' information during the model fitting (Default: \code{FALSE}).
 #' @param ... further arguments passed on.
-#' @references
-#' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past and promising future for data integration methods to estimate species’ distributions. Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
-#' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
-#' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for countrywide α‐diversity and species distributions: illustration using &gt;6,000 plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
-#' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],
-#'   [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
+#'
+#' @details This function acts as a generic training function that - based on the
+#' provided [`BiodiversityDistribution-class`] object creates a new distribution model.
+#' The resulting object contains both a \code{"fit_best"} object of the estimated
+#' model and, if \code{inference_only} is \code{FALSE} a [SpatRaster] object named
+#' \code{"prediction"} that contains the spatial prediction of the model. These
+#' objects can be requested via \code{object$get_data("fit_best")}.
+#'
+#' Other parameters in this function:
+#' * \code{"filter_predictors"} The parameter can be set to various options to
+#' remove highly correlated variables or those with little additional information
+#' gain from the model prior to any estimation. Available options are \code{"none"}
+#' (Default) \code{"pearson"} for applying a \code{0.7} correlation cutoff, \code{"abess"}
+#' for the regularization framework by Zhu et al. (2020), or \code{"RF"} or
+#' \code{"randomforest"} for removing the least important variables according to a
+#' randomForest model. **Note**: This function is only applied on predictors for
+#' which no prior has been provided (e.g. potentially non-informative ones).
+#' * \code{"optim_hyperparam"} This option allows to make use of hyper-parameter
+#' search for several models, which can improve prediction accuracy although through
+#' the a substantial increase in computational cost.
+#' * \code{"method_integration"} Only relevant if more than one [`BiodiversityDataset`]
+#' is supplied and when the engine does not support joint integration of likelihoods.
+#' See also Miller et al. (2019) in the references for more details on different types
+#' of integration. Of course, if users want more control about this aspect, another
+#' option is to fit separate models and make use of the [add_offset], [add_offset_range]
+#' and [ensemble] functionalities.
+#' * \code{"clamp"} Boolean parameter to support a clamping of the projection predictors
+#' to the range of values observed during model training.
+#'
+#' @note There are no silver bullets in (correlative) species distribution modelling
+#' and for each model the analyst has to understand the objective, workflow and
+#' parameters than can be used to modify the outcomes. Different predictions can
+#' be obtained from the same data and parameters and not all necessarily make sense or are useful.
+#'
 #' @returns A [DistributionModel] object.
+#'
+#' @references
+#' * Miller, D.A.W., Pacifici, K., Sanderlin, J.S., Reich, B.J., 2019. The recent past
+#' and promising future for data integration methods to estimate species’ distributions.
+#' Methods Ecol. Evol. 10, 22–37. https://doi.org/10.1111/2041-210X.13110
+#' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm
+#' for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
+#' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for
+#'  countrywide α‐diversity and species distributions: illustration using &gt;6,000
+#'  plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
+#'
+#' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],
+#' [engine_inlabru], [engine_breg], [engine_stan], [engine_glm]
+#'
 #' @examples
 #'  # Load example data
-#'  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+#'  background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+#'  package='ibis.iSDM',mustWork = TRUE))
 #'  # Get test species
-#'  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+#'  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg',
+#'  package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 #'
 #'  # Get list of test predictors
-#'  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE),full.names = TRUE)
+#'  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM',
+#'  mustWork = TRUE),full.names = TRUE)
 #'  # Load them as rasters
 #'  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
 #'
@@ -144,32 +141,24 @@ NULL
 #'  mod
 #'
 #' @name train
-#' @exportMethod train
-#' @aliases train, train-method
-#' @export
 NULL
 
-#' @name train
 #' @rdname train
-#' @exportMethod train
 #' @export
 methods::setGeneric(
   "train",
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) standardGeneric("train"))
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) standardGeneric("train"))
 
-#' @name train
 #' @rdname train
-#' @usage
-#'   \S4method{train}{BiodiversityDistribution,character,character,logical,logical,logical,character,logical,logical,logical}(x,runname,filter_predictors,optim_hyperparam,inference_only,only_linear,method_integration,aggregate_observations,clamp,verbose,...)
 methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages'),...) {
+           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -186,27 +175,28 @@ methods::setMethod(
     )
     # Now make checks on completeness of the object
     assertthat::assert_that(!is.Waiver(x$engine),
+                            !is.null(x$engine),
                             msg = 'No engine set for training the distribution model.')
     assertthat::assert_that( x$show_biodiversity_length() > 0,
                              msg = 'No biodiversity data specified.')
     assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Collecting input parameters.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
     #filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
     filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
     # Define settings object for any other information
-    settings <- bdproto(NULL, Settings)
+    settings <- Settings$new()
     settings$set('filter_predictors', filter_predictors)
     settings$set('optim_hyperparam', optim_hyperparam)
     settings$set('only_linear',only_linear)
     settings$set('inference_only', inference_only)
     settings$set('clamp', clamp)
-    settings$set('ibis.cleannames', getOption("ibis.cleannames"))
+    settings$set('ibis.cleannames', getOption("ibis.cleannames", default = TRUE))
     settings$set('verbose', verbose)
-    settings$set('seed', getOption("ibis.seed"))
+    settings$set('seed', getOption("ibis.seed", default = 1000))
     # Other settings
     mc <- match.call(expand.dots = FALSE)
     settings$data <- c( settings$data, mc$... )
@@ -236,7 +226,7 @@ methods::setMethod(
 
     # Get overall Predictor data
     if(is.Waiver(x$get_predictor_names())) {
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
       # Dummy covariate of background raster
       # Check if the engine has a template and if so use that one
       if(is.Raster(x$engine$get_data("template"))){
@@ -250,7 +240,7 @@ methods::setMethod(
       model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
       model[['predictors_names']] <- 'dummy'
       model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
-      model[['predictors_object']] <- bdproto(NULL, PredictorDataset, id = new_id(), data = dummy)
+      model[['predictors_object']] <- PredictorDataset$new(id = new_id(), data = dummy)
     } else {
       # Convert Predictors to data.frame
       model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
@@ -258,7 +248,7 @@ methods::setMethod(
       # Check whether any of the variables are fully NA, if so exclude
       if( any( apply(model[['predictors']], 2, function(z) all(is.na(z))) )){
         chk <- which( apply(model[['predictors']], 2, function(z) all(is.na(z))) )
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   paste0('The following variables are fully missing and are removed:\n',
                                                          paste(names(chk),collapse = " | "))
         )
@@ -273,7 +263,7 @@ methods::setMethod(
       model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric'),
                                                 row.names = NULL)
       # Assign attribute to predictors to store the name of object
-      model[['predictors_object']] <- x$predictors
+      model[['predictors_object']] <- x$predictors$clone(deep = TRUE)
       rm(lu)
     }
 
@@ -283,14 +273,14 @@ methods::setMethod(
       # Get the method and check whether it is supported by the engine
       m <- attr(x$get_latent(),'method')
       if(x$get_engine() %notin% c("<INLA>", "<INLABRU>") & m == 'spde'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
       if(x$get_engine()=="<GDB>" & m == 'poly'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
       }
       if(x$get_engine()=="<BART>" & m == 'car'){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
       # Calculate latent spatial terms (saved in engine data)
@@ -403,7 +393,7 @@ methods::setMethod(
       if(control$type == "bias"){
         bias <- control
         if(bias$method == "partial"){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding bias variable using partial control.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding bias variable using partial control.')
           settings$set("bias_variable", names(bias$layer) )
           settings$set("bias_value", bias$bias_value )
           # Check that variable is already in the predictors object
@@ -508,7 +498,7 @@ methods::setMethod(
 
       # Remove missing values as several engines can't deal with those easily
       miss <- stats::complete.cases(env)
-      if(sum( !miss )>0 && getOption('ibis.setupmessages')) {
+      if(sum( !miss )>0 && getOption('ibis.setupmessages', default = TRUE)) {
         myLog('[Setup]','yellow', 'Excluded ', sum( !miss ), ' observations owing to missing values in covariates!' )
       }
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
@@ -543,7 +533,7 @@ methods::setMethod(
 
       # Biodiversity dataset specific predictor refinement if the option is set
       if(settings$get("filter_predictors")!= "none"){
-        if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow', paste0('Filtering predictors via ',
                                                                                   settings$get("filter_predictors"),'...'))
         # Make backups
         test <- env;test$x <- NULL;test$y <- NULL;test$Intercept <- NULL
@@ -568,7 +558,7 @@ methods::setMethod(
                                family = model[['biodiversity']][[id]]$family,
                                tune.type = "gic",
                                weight = NULL,
-                               verbose = getOption('ibis.setupmessages')
+                               verbose = getOption('ibis.setupmessages', default = TRUE)
                                )
 
         # For all factor variables, remove those with only the minimal value (e.g. 0)
@@ -590,7 +580,7 @@ methods::setMethod(
 
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Experimental: Integration by weights assumes identical data parameters!')
       # Check that all types and families can be combined
       types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
       fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
@@ -627,7 +617,7 @@ methods::setMethod(
       if(control$type == "bias"){
         bias <- control
         if(bias$method == "proximity"){
-          if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding proximity bias weights to points.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding proximity bias weights to points.')
           assertthat::assert_that(length(model$biodiversity)==1,
                                   msg = "This method is not yet implemented for multiple datasets.")
 
@@ -649,7 +639,7 @@ methods::setMethod(
     # Warning if Np is larger than Nb
     if(settings$get("filter_predictors") == "none"){
       if( sum(x$biodiversity$get_observations() )-1 <= length(model$predictors_names)){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', 'More predictors than observations! Consider settings optim_hyperparam or filter_predictors!')
       }
     }
 
@@ -673,7 +663,7 @@ methods::setMethod(
       # Check whether all priors variables do exist as predictors, otherwise remove
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         spec_priors$rm( spec_priors$exists(vv) )
       }
     } else { spec_priors <- new_waiver() }
@@ -717,7 +707,7 @@ methods::setMethod(
       } else if(x$limits$limits_method %in% c("nt2", "mess")){
           # If there are more than one data source, raise warning
           if(length(model$biodiversity)>1){
-            if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow',
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
                                                       'MESS and Novelty index work only for a single datasource. Combining all presence points...')
             coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
                                                tosf = TRUE)
@@ -761,7 +751,7 @@ methods::setMethod(
       }
 
       if(nrow(zones)==0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   'Occurrence points do not fall into any zones!')
         zones <- x$limits$layer  # Reset
       }
@@ -820,10 +810,13 @@ methods::setMethod(
     }
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','green','Adding engine-specific parameters.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Adding engine-specific parameters.')
 
     # Basic consistency checks
-    assertthat::assert_that(nrow(model$biodiversity[[1]]$observations)>0,
+    assertthat::assert_that(is.list(model$biodiversity),
+                            is.data.frame(model$predictors) && nrow(model$predictors)>0,
+                            length(model$predictors_names)>0,
+                            nrow(model$biodiversity[[1]]$observations)>0,
                             length(model[['biodiversity']][[1]][['expect']])>1,
                             all(c("predictors","background","biodiversity") %in% names(model) ),
                             length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
@@ -837,7 +830,7 @@ methods::setMethod(
     ids <- names(model$biodiversity)
     # Engine specific preparations
     #### INLA Engine ####
-    if( inherits(x$engine,'INLA-Engine') ){
+    if( x$engine$get_class() == 'INLA-Engine' ){
 
       # Create the mesh if not already present
       x$engine$create_mesh(model = model)
@@ -873,7 +866,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### INLABRU Engine ####
-    } else if( inherits(x$engine,'INLABRU-Engine') ){
+    } else if( x$engine$get_class() == 'INLABRU-Engine' ){
 
       # Create the mesh if not already present
       x$engine$create_mesh(model = model)
@@ -895,10 +888,6 @@ methods::setMethod(
                                                                 id = id,
                                                                 x = x,
                                                                 settings = settings)
-        # For each type include expected data
-        # expectation vector (area for integration points/nodes and 0 for presences)
-        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
-        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
       # Run the engine setup script
@@ -909,7 +898,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### GDB Engine ####
-    } else if( inherits(x$engine,"GDB-Engine") ){
+    } else if( x$engine$get_class() == "GDB-Engine" ){
 
       # For each formula, process in sequence
       for(id in ids){
@@ -1016,7 +1005,7 @@ methods::setMethod(
       }
       # ----------------------------------------------------------- #
       #### XGBoost Engine ####
-    } else if( inherits(x$engine,"XGBOOST-Engine") ){
+    } else if( x$engine$get_class() == "XGBOOST-Engine" ){
       # Create XGBboost regression and classification
 
       # TODO: Combine biodiversity datasets and add factor variable
@@ -1127,7 +1116,7 @@ methods::setMethod(
 
       # ----------------------------------------------------------- #
       #### BART Engine ####
-    } else if( inherits(x$engine,"BART-Engine") ){
+    } else if( x$engine$get_class() == "BART-Engine" ){
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
@@ -1239,7 +1228,7 @@ methods::setMethod(
         } # End of multiple likelihood function
 
       } # End of id loop
-    } else if( inherits(x$engine,"STAN-Engine") ){
+    } else if( x$engine$get_class() == "STAN-Engine" ){
       # ----------------------------------------------------------- #
       #### STAN Engine ####
       # Process per supplied dataset
@@ -1261,7 +1250,7 @@ methods::setMethod(
       out <- x$engine$train(model, settings)
 
 
-    } else if (inherits(x$engine,"BREG-Engine") ){
+    } else if ( x$engine$get_class() == "BREG-Engine" ){
       # ----------------------------------------------------------- #
       #### BREG Engine ####
       assertthat::assert_that(
@@ -1368,7 +1357,7 @@ methods::setMethod(
 
         } # End of multiple ides
       }
-    } else if (inherits(x$engine,"GLMNET-Engine") ){
+    } else if (x$engine$get_class() == "GLMNET-Engine" ){
       # ----------------------------------------------------------- #
       #### GLMNET Engine ####
       # For each formula, process in sequence
@@ -1469,7 +1458,7 @@ methods::setMethod(
           }
         } # End of multiple ides
       } # End of GLMNET engine
-    } else if (inherits(x$engine,"GLM-Engine") ){
+    } else if (x$engine$get_class() == "GLM-Engine" ){
       # ----------------------------------------------------------- #
       if(method_integration == "prior") warning("Priors not supported for GLM!")
       #### GLM Engine ####
@@ -1569,7 +1558,7 @@ methods::setMethod(
 
     if(is.null(out)) return(NULL)
 
-    if(getOption('ibis.setupmessages')) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
     # Clip to limits again to be sure
     if(!is.Waiver(x$get_limits())) {

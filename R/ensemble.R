@@ -1,6 +1,3 @@
-#' @include utils-spatial.R
-NULL
-
 #' Function to create an ensemble of multiple fitted models
 #'
 #' @description Ensemble models calculated on multiple models have often been
@@ -20,6 +17,27 @@ NULL
 #' cannot capture parameter uncertainty of individual models; rather it reflects
 #' variation among predictions which can be due to many factors including simply
 #' differences in model complexity.
+#'
+#' @param ... Provided [`DistributionModel`] or [`SpatRaster`] objects.
+#' @param method Approach on how the ensemble is to be created. See details for
+#' available options (Default: \code{'mean'}).
+#' @param weights (*Optional*) weights provided to the ensemble function if
+#' weighted means are to be constructed (Default: \code{NULL}).
+#' @param min.value A optional [`numeric`] stating a minimum value that needs
+#' to be surpassed in each layer before calculating and ensemble (Default: \code{NULL}).
+#' @param layer A [`character`] of the layer to be taken from each prediction
+#' (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
+#' names in ensembles of `SpatRaster` objects.
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be
+#' normalized to a scale of 0-1 (Default: \code{FALSE}).
+#' @param uncertainty A [`character`] indicating how the uncertainty among
+#' models should be calculated. Available options include \code{"none"}, the
+#' standard deviation (\code{"sd"}), the average of all PCA axes except the
+#' first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
+#' the range between the lowest and highest value (\code{"range"}).
+#' @param apply_threshold A [`logical`] flag (Default: \code{TRUE}) specifying
+#' whether threshold values should also be created via \code{"method"}. Only
+#' applies and works for [`DistributionModel`] and thresholds found.
 #'
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
@@ -43,59 +61,47 @@ NULL
 #' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
 #' of models constructed with different link functions, e.g. logistic vs [log].
 #' In this case the \code{"normalize"} parameter has to be set.
-#' @param ... Provided [`DistributionModel`] objects.
-#' @param method Approach on how the ensemble is to be created. See details for
-#'   available options (Default: \code{'mean'}).
-#' @param weights (*Optional*) weights provided to the ensemble function if
-#'   weighted means are to be constructed (Default: \code{NULL}).
-#' @param min.value A optional [`numeric`] stating a minimum value that needs
-#'   to be surpassed in each layer before calculating and ensemble
-#'   (Default: \code{NULL}).
-#' @param layer A [`character`] of the layer to be taken from each prediction
-#'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
-#'   names in ensembles of `SpatRaster` objects.
-#' @param normalize [`logical`] on whether the inputs of the ensemble should be
-#'   normalized to a scale of 0-1 (Default: \code{FALSE}).
-#' @param uncertainty A [`character`] indicating how the uncertainty among
-#'   models should be calculated. Available options include \code{"none"}, the
-#'   standard deviation (\code{"sd"}), the average of all PCA axes except the
-#'   first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
-#'   the range between the lowest and highest value (\code{"range"}).
-#' @references
-#' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022). Predictive performance of presence‐only species distribution models: a benchmark study with reproducible code. Ecological Monographs, 92(1), e01486.
-#' @examples
-#' \dontrun{
-#'  # Assumes previously computed predictions
-#'  ex <- ensemble(mod1, mod2, mod3, method = "mean")
-#'  names(ex)
 #'
-#'  # Make a bivariate plot (might require other packages)
-#'  bivplot(ex)
-#' }
 #' @returns A [`SpatRaster`] object containing the ensemble of the provided
 #'   predictions specified by \code{method} and a coefficient of variation
 #'   across all models.
-
-#' @name ensemble
-#' @aliases ensemble
+#'
+#' @references
+#' * Valavi, R., Guillera‐Arroita, G., Lahoz‐Monfort, J. J., & Elith, J. (2022).
+#' Predictive performance of presence‐only species distribution models: a benchmark
+#' study with reproducible code. Ecological Monographs, 92(1), e01486.
+#'
 #' @keywords train
-#' @exportMethod ensemble
-#' @export
+#'
+#' @examples
+#' # Method works for fitted models as well as as rasters
+#' r1 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5,
+#'  xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+#' r2 <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5,
+#'  xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .5))
+#' names(r1) <- names(r2) <- "mean"
+#'
+#' # Assumes previously computed predictions
+#' ex <- ensemble(r1, r2, method = "mean")
+#'
+#' terra::plot(ex)
+#'
+#' @name ensemble
 NULL
+
+#' @rdname ensemble
+#' @export
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
                     function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-                             normalize = FALSE, uncertainty = "cv") standardGeneric("ensemble"))
+                             normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE) standardGeneric("ensemble"))
 
-#' @name ensemble
 #' @rdname ensemble
-#' @usage
-#'   \S4method{ensemble}{ANY,character,numeric,numeric,character,logical,character}(...,method,weights,min.value,layer,normalize,uncertainty)
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
   function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-           normalize = FALSE, uncertainty = "cv"){
+           normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE){
     if(length(list(...))>1) {
       mc <- list(...)
     } else {
@@ -118,16 +124,14 @@ methods::setMethod(
     }
 
     # Further checks
-    assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
-                            msg = "No use calculating an ensemble on one object only..."
-    )
     assertthat::assert_that(
       is.character(method),
       is.null(min.value) || is.numeric(min.value),
-      is.null(layer) || is.character(layer),
+      is.null(layer) || ( is.character(layer) && length(layer) == 1 ),
       is.null(weights) || is.vector(weights),
       is.logical(normalize),
-      is.character(uncertainty)
+      is.character(uncertainty),
+      is.logical(apply_threshold)
     )
 
     # Check the method
@@ -136,16 +140,11 @@ methods::setMethod(
     # Uncertainty calculation
     uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
 
-    # Check that weight lengths is equal to provided distribution objects
-    if(!is.null(weights)) assertthat::assert_that(length(weights) == length(mods))
-    # If weights vector is numeric, standardize the weights
-    if(is.numeric(weights)) {
-      if(any(weights < 0)) weights[weights < 0] <- 0 # Assume those contribute anything
-      weights <- weights / sum(weights)
-    }
-
     # For Distribution model ensembles
     if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){
+      assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
+                              msg = "No use calculating an ensemble on one object only..."
+      )
       # Check that layers all have a prediction layer
       assertthat::assert_that(
         all( sapply(mods, function(x) !is.Waiver(x$get_data('prediction')) ) ),
@@ -161,9 +160,10 @@ methods::setMethod(
       ll_ras <- sapply(mods, function(x) x$get_data('prediction')[[layer]])
       # Ensure that the layers have the same resolution, otherwise align
       if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
         ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
       }
+
       # Now ensemble per layer entry
       out <- terra::rast()
       for(lyr in layer){
@@ -256,33 +256,74 @@ methods::setMethod(
         }
       }
 
+      # Check for threshold values and collate
+      if(apply_threshold){
+        ll_val <- sapply(mods, function(x) x$get_thresholdvalue())
+        # Incase no thresholds are found, ignore entirely
+        if(!all(any(sapply(ll_val, is.Waiver)))){
+          # Respecify weights as otherwise call below fails
+          if(any(sapply(ll_val, is.Waiver))){
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','yellow','Threshold values not found for all objects')
+            ll_val <- ll_val[-which(sapply(ll_val, is.Waiver))]
+            ll_val <- ll_val |> as.numeric()
+          }
+          if(is.null(weights)) weights <- rep(1, length(ll_val))
+
+          # Composite threshold
+          tr <- dplyr::case_when(
+            method == "mean" ~ mean(ll_val, na.rm = TRUE),
+            method == "median" ~ median(ll_val, na.rm = TRUE),
+            method == "max" ~ max(ll_val, na.rm = TRUE),
+            method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
+            .default = mean(ll_val, na.rm = TRUE)
+          )
+
+          # Ensemble the first layer
+          out <- c(out,
+                   threshold(out[[1]], method = "fixed", value = tr)
+          )
+        }
+      }
       assertthat::assert_that(is.Raster(out))
 
       return(out)
     } else if(is.Raster(mods[[1]])) {
       # Check that layer is present in supplied mods
-      if(!is.null(layer)){
-        assertthat::assert_that(
-          all( sapply(mods, function(x) layer %in% names(x) ) ),
-          msg = paste("Layer", text_red(layer), "not found in supplied objects!")
-        )
-      } else { layer <- 1 } # Take the first one
-      # TODO:
-      if(length(layer)>1) stop("Not implemented yet")
-      # Get prediction stacks from all mods
-      ll_ras <- sapply(mods, function(x) x[[layer]])
-      # Ensure that the layers have the same resolution, otherwise align
-      if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
-        if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
-        ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
+      if(terra::nlyr(mods[[1]])>1 && length(mods) == 1){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Single multiband raster found. Ignoring parameter layer and ensemble.')
+        layer <- 1
+        ras <- mods[[1]]
+      } else {
+        if(!is.null(layer)){
+          assertthat::assert_that(
+            all( sapply(mods, function(x) layer %in% names(x) ) ),
+            msg = paste("Layer", text_red(layer), "not found in supplied objects!")
+          )
+        } else { layer <- 1 } # Take the first one
+        # Get prediction stacks from all mods
+        ll_ras <- sapply(mods, function(x) x[[layer]])
+        # Ensure that the layers have the same resolution, otherwise align
+        if(!terra::compareGeom(ll_ras[[1]], ll_ras[[2]], stopOnError = FALSE)){
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Rasters need to be aligned. Check.')
+          ll_ras[[2]] <- terra::resample(ll_ras[[2]], ll_ras[[1]], method = "bilinear")
+        }
+        ras <- terra::rast(ll_ras)
       }
-      ras <- terra::rast(ll_ras)
       # Apply threshold if set. Set to 0 thus reducing the value of the ensembled
       # layer.
       if(!is.null(min.value)) ras[ras < min.value] <- 0
 
       # If normalize before running an ensemble if parameter set
       if(normalize) ras <- predictor_transform(ras, option = "norm")
+
+      # Check that weight lengths is equal to provided distribution objects
+      if(!is.null(weights) && !is.numeric(layer)) assertthat::assert_that(length(weights) == length(mods))
+      # If weights vector is numeric, standardize the weights
+      if(is.numeric(weights)) {
+        if(any(weights < 0)) weights[weights < 0] <- 0 # Assume those contribute anything
+        weights <- weights / sum(weights)
+      }
 
       # Now ensemble per layer entry
       out <- terra::rast()
@@ -353,7 +394,7 @@ methods::setMethod(
       if(all(sapply(mods, function(z) inherits(z, "stars")))){
         # Check that layer is in stars
         if(!assertthat::see_if(all( sapply(mods, function(z) layer %in% names(z)) ))){
-          if(getOption('ibis.setupmessages')) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','red','Provided layer not in objects. Taking first option!')
           layer <- names(mods[[1]])[1]
         }
         # Format to table
@@ -473,61 +514,59 @@ methods::setMethod(
 #' Function to create an ensemble of partial effects from multiple models
 #'
 #' @description Similar to the `ensemble()` function, this function creates an
-#'   ensemble of partial responses of provided distribution models fitted with
-#'   the [`ibis.iSDM-package`]. Through the `layer` parameter it can be
-#'   specified which part of the partial prediction should be averaged in an
-#'   ensemble (if given). This can be for instance the *mean* prediction and/or
-#'   the standard deviation *sd*. Ensemble partial is also being called if more
-#'   than one input [`DistributionModel`] object is provided to `partial`.
+#' ensemble of partial responses of provided distribution models fitted with
+#' the [`ibis.iSDM-package`]. Through the `layer` parameter it can be
+#' specified which part of the partial prediction should be averaged in an
+#' ensemble (if given). This can be for instance the *mean* prediction and/or
+#' the standard deviation *sd*. Ensemble partial is also being called if more
+#' than one input [`DistributionModel`] object is provided to `partial`.
 #'
-#'   By default the ensemble of partial responses is created as average across
-#'   all models with the uncertainty being the standard deviation of responses.
+#' By default the ensemble of partial responses is created as average across
+#' all models with the uncertainty being the standard deviation of responses.
+#'
+#' @param ... Provided [`DistributionModel`] objects from which partial responses
+#' can be called. In the future provided data.frames might be supported as well.
+#' @param x.var A [`character`] of the variable from which an ensemble is to be
+#' created.
+#' @param method Approach on how the ensemble is to be created. See details for
+#' options (Default: \code{'mean'}).
+#' @param layer A [`character`] of the layer to be taken from each prediction
+#' (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer names
+#' in ensembles of `SpatRaster` objects.
+#' @param newdata A optional [`data.frame`] or [`SpatRaster`] object supplied to
+#' the model (DefaultL \code{NULL}). This object needs to have identical names as the original predictors.
+#' @param normalize [`logical`] on whether the inputs of the ensemble should be
+#' normalized to a scale of 0-1 (Default: \code{TRUE}).
 #'
 #' @details Possible options for creating an ensemble includes:
 #' * \code{'mean'} - Calculates the mean of several predictions.
 #' * \code{'median'} - Calculates the median of several predictions.
 #'
 #' @note If a list is supplied, then it is assumed that each entry in the list
-#'   is a fitted [`DistributionModel`] object. Take care not to create an
-#'   ensemble of models constructed with different link functions, e.g. logistic
-#'   vs [log]. By default the response functions of each model are normalized.
-#' @param ... Provided [`DistributionModel`] objects from which partial
-#'   responses can be called. In the future provided data.frames might be
-#'   supported as well.
-#' @param x.var A [`character`] of the variable from which an ensemble is to be
-#'   created.
-#' @param method Approach on how the ensemble is to be created. See details for
-#'   options (Default: \code{'mean'}).
-#' @param layer A [`character`] of the layer to be taken from each prediction
-#'   (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer
-#'   names in ensembles of `SpatRaster` objects.
-#' @param newdata A optional [`data.frame`] or [`SpatRaster`] object supplied to
-#'   the model (DefaultL \code{NULL}). *Note: This object needs to have
-#'   identical names as the original predictors.*
-#' @param normalize [`logical`] on whether the inputs of the ensemble should be
-#'   normalized to a scale of 0-1 (Default: \code{TRUE}).
-#' @returns A [data.frame] with the combined partial effects of the supplied
-#'   models.
+#' is a fitted [`DistributionModel`] object. Take care not to create an ensemble
+#' of models constructed with different link functions, e.g. logistic vs [log].
+#' By default the response functions of each model are normalized.
+#'
+#' @returns A [data.frame] with the combined partial effects of the supplied models.
+#'
+#' @keywords train partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed models
 #'  ex <- ensemble_partial(mod1, mod2, mod3, method = "mean")
 #' }
-
+#'
 #' @name ensemble_partial
-#' @aliases ensemble_partial
-#' @keywords train, partial
-#' @exportMethod ensemble_partial
-#' @export
 NULL
+
+#' @rdname ensemble_partial
+#' @export
 methods::setGeneric("ensemble_partial",
                     signature = methods::signature("..."),
                     function(..., x.var, method = "mean", layer = "mean", newdata = NULL, normalize = TRUE) standardGeneric("ensemble_partial"))
 
-#' @name ensemble_partial
 #' @rdname ensemble_partial
-#' @usage
-#'   \S4method{ensemble_partial}{ANY,character,character,character,ANY,logical}(...,x.var,method,layer,newdata,normalize)
 methods::setMethod(
   "ensemble_partial",
   methods::signature("ANY"),
@@ -566,7 +605,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'median'), several.ok = FALSE)
 
-    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a partial ensemble...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","green","Creating a partial ensemble...")
 
     # Get variable range from the first object assuming they have similar variables
     # FIXME: Ideally make a consensus, otherwise assumes that same predictor been used
@@ -605,7 +644,7 @@ methods::setMethod(
 
     # Catch error in case none of them computed
     if(nrow(out)==0){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
       stop("No estimates found!")
     }
 
@@ -656,35 +695,36 @@ methods::setMethod(
 #' Function to create an ensemble of spartial effects from multiple models
 #'
 #' @inherit ensemble_partial description
-#' @inherit ensemble_partial details
-#' @inherit ensemble_partial note
+#'
 #' @inheritParams ensemble_partial
 #' @param min.value A optional [`numeric`] stating a minimum value that needs
 #'   to be surpassed in each layer before calculating and ensemble
 #'   (Default: \code{NULL}).
-#' @returns A [SpatRaster] object with the combined partial effects of the
-#'   supplied models.
+#'
+#' @inherit ensemble_partial details
+#' @inherit ensemble_partial note
+#'
+#' @returns A [SpatRaster] object with the combined partial effects of the supplied models.
+#'
+#' @keywords train partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed models
 #'  ex <- ensemble_spartial(mod1, mod2, mod3, method = "mean")
 #' }
-
+#'
 #' @name ensemble_spartial
-#' @aliases ensemble_spartial
-#' @keywords train, partial
-#' @exportMethod ensemble_spartial
-#' @export
 NULL
+
+#' @rdname ensemble_spartial
+#' @export
 methods::setGeneric("ensemble_spartial",
                     signature = methods::signature("..."),
                     function(..., x.var, method = "mean", layer = "mean",
                              newdata = NULL, min.value = NULL, normalize = TRUE) standardGeneric("ensemble_spartial"))
 
-#' @name ensemble_spartial
 #' @rdname ensemble_spartial
-#' @usage
-#'   \S4method{ensemble_spartial}{ANY,character,character,character,ANY,numeric,logical}(...,x.var,method,layer,newdata,min.value,normalize)
 methods::setMethod(
   "ensemble_spartial",
   methods::signature("ANY"),
@@ -721,7 +761,7 @@ methods::setMethod(
     # Check the method
     method <- match.arg(method, c('mean', 'median', 'max', 'min'), several.ok = FALSE)
 
-    if(getOption("ibis.setupmessages")) myLog("[Inference]","green","Creating a spartial ensemble...")
+    if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","green","Creating a spartial ensemble...")
 
     # If new data is provided
     if(!is.null(newdata)){
@@ -761,7 +801,7 @@ methods::setMethod(
         o <- try({obj$project(newdata = nd, layer = layer)},silent = TRUE)
       }
       if(inherits(o, "try-error")){
-        if(getOption('ibis.setupmessages')) myLog('[Inference]','red',paste0('Spartial calculation failed for ',class(obj)[1]))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Inference]','red',paste0('Spartial calculation failed for ',class(obj)[1]))
         next()
       }
       assertthat::assert_that(is.Raster(o))
@@ -773,12 +813,12 @@ methods::setMethod(
     }
     # Catch error in case none of them computed
     if(length(out)==0){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","red","None of the models seemed to contain the variable.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
       stop("No estimates found!")
     }
 
     if(length(out)==1){
-      if(getOption("ibis.setupmessages")) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
+      if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","yellow","Only a single model was estimated. Returning output.")
       new <- out[[1]]
     } else {
       # Now construct an ensemble by calling ensemble directly

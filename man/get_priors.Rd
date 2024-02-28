@@ -2,16 +2,17 @@
 % Please edit documentation in R/add_priors.R
 \name{get_priors}
 \alias{get_priors}
+\alias{get_priors,ANY,character-method}
 \title{Create priors from an existing distribution model}
 \usage{
 get_priors(mod, target_engine, ...)
 
-\S4method{get_priors}{ANY,character}(mod,target_engine,...)
+\S4method{get_priors}{ANY,character}(mod, target_engine, ...)
 }
 \arguments{
 \item{mod}{A fitted \code{\linkS4class{DistributionModel}} object. If instead a
-\code{\linkS4class{BiodiversityDistribution}} object is passed to this function, it
-simply returns the contained priors used for estimation (if any).}
+\code{\linkS4class{BiodiversityDistribution}} object is passed to this function, it simply
+returns the contained priors used for estimation (if any).}
 
 \item{target_engine}{A \code{\link{character}} for which the priors should be created.}
 
@@ -37,23 +38,24 @@ help pages on that topic!
     train()
  get_priors(mod, target_engine = "BART")
 }
+
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{priors}()},
 \code{\link{rm_priors}()}

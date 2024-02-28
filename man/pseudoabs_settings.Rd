@@ -2,9 +2,32 @@
 % Please edit documentation in R/pseudoabsence.R
 \name{pseudoabs_settings}
 \alias{pseudoabs_settings}
+\alias{pseudoabs_settings,ANY-method}
 \title{Settings for specifying pseudo-absence points within the model background}
 \usage{
-\S4method{pseudoabs_settings}{ANY,numeric,numeric,character,numeric,logical,logical,ANY}(background,nrpoints,min_ratio,method,buffer_distance,inside,layer,bias,...)
+pseudoabs_settings(
+  background = NULL,
+  nrpoints = 10000,
+  min_ratio = 0.25,
+  method = "random",
+  buffer_distance = 10000,
+  inside = FALSE,
+  layer = NULL,
+  bias = NULL,
+  ...
+)
+
+\S4method{pseudoabs_settings}{ANY}(
+  background = NULL,
+  nrpoints = 10000,
+  min_ratio = 0.25,
+  method = "random",
+  buffer_distance = 10000,
+  inside = FALSE,
+  layer = NULL,
+  bias = NULL,
+  ...
+)
 }
 \arguments{
 \item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background
@@ -13,35 +36,30 @@ is then added when the sampling is first called.}
 
 \item{nrpoints}{A \code{\link{numeric}} given the number of absence points to be
 created. Has to be larger than \code{0} and normally points are not created
-in excess of the number of cells of the background (Default: \code{10
-  000}).}
+in excess of the number of cells of the background (Default: \code{10000}).}
 
 \item{min_ratio}{A \code{\link{numeric}} with the minimum ratio of background points
 relative to the presence points. Setting this value to \code{1} generates
 an equal amount of absence points relative to the presence points. Usually
-ignored unless the ratio exceeds the \code{nrpoints} parameters (Default:
-\code{0.25}).}
+ignored unless the ratio exceeds the \code{nrpoints} parameters (Default: \code{0.25}).}
 
 \item{method}{\code{\link{character}} denoting how the sampling should be done. See
 details for options (Default: \code{"random"}).}
 
 \item{buffer_distance}{\code{\link{numeric}} A distance from the observations in which
 pseudo-absence points are not to be generated. Note that units follow the
-units of the projection (e.g. \code{m} or \code{°}). Only used when
-\code{method = "buffer"}.}
+units of the projection (e.g. \code{m} or \code{°}). Only used when \code{method = "buffer"}.}
 
 \item{inside}{A \code{\link{logical}} value of whether absence points should be sampled
 outside (Default) or inside a minimum convex polygon or range provided the
-respective method is chosen (parameter \code{method = "mcp"} or
-\code{method = "range"}).}
+respective method is chosen (parameter \code{method = "mcp"} or \code{method = "range"}).}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method
-\code{'zones'}) object indicating the range of a species. Only used with
-\code{method = "range"} or \code{method = "zones"} (Default: \code{NULL}).}
+\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method \code{'zones'})
+object indicating the range of a species. Only used with \code{method = "range"}
+or \code{method = "zones"} (Default: \code{NULL}).}
 
-\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and
-background. Absence points will be preferentially sampled in areas with
-higher (!) bias. (Default: \code{NULL}).}
+\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and background.
+Absence points will be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
 }
@@ -102,12 +120,13 @@ all_my_points <- add_pseudoabsence(
                       template = background,
                       settings = ass1)
 }
+
 }
 \references{
 \itemize{
-\item Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G, Warton DI. 2015. Point process
-models for presence-only analysis. Methods in Ecology and Evolution
-6:366–379. DOI: 10.1111/2041-210X.12352.
+\item Renner IW, Elith J, Baddeley A, Fithian W, Hastie T, Phillips SJ, Popovic G,
+Warton DI. 2015. Point process models for presence-only analysis. Methods in
+Ecology and Evolution 6:366–379. DOI: 10.1111/2041-210X.12352.
 \item Renner, I. W., & Warton, D. I. (2013). Equivalence of MAXENT and Poisson point
 process models for species distribution modeling in ecology. Biometrics,
 69(1), 274-281.

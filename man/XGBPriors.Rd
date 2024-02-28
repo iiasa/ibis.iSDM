@@ -2,19 +2,20 @@
 % Please edit documentation in R/prior_xgb.R
 \name{XGBPriors}
 \alias{XGBPriors}
+\alias{XGBPriors,character-method}
 \title{Helper function when multiple variables are supplied for XGBOOST}
 \usage{
 XGBPriors(variable, hyper = "increasing", ...)
 
-\S4method{XGBPriors}{character,character}(variable,hyper,...)
+\S4method{XGBPriors}{character}(variable, hyper = "increasing", ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent
 effects.}
 
-\item{hyper}{A \code{\link{character}} object describing the type of constrain.
-Available options are \code{'increasing'}, \code{'decreasing'},
-\code{'convex'}, \code{'concave'}, \code{'none'}.}
+\item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
+options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+\code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -24,18 +25,18 @@ same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},

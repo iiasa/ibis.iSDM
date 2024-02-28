@@ -39,5 +39,6 @@ neighbouring values
  # Harmonize predictors
  env <- predictor_homogenize_na(env)
 }
+
 }
 \keyword{utils}

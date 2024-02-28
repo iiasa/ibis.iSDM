@@ -2,6 +2,8 @@
 % Please edit documentation in R/distribution.R
 \name{distribution}
 \alias{distribution}
+\alias{distribution,SpatRaster-method}
+\alias{distribution,sf-method}
 \title{Create distribution modelling procedure}
 \usage{
 distribution(
@@ -12,9 +14,21 @@ distribution(
   limits_clip = FALSE
 )
 
-\S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+\S4method{distribution}{SpatRaster}(
+  background,
+  limits = NULL,
+  limits_method = "none",
+  mcp_buffer = 0,
+  limits_clip = FALSE
+)
 
-\S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
+\S4method{distribution}{sf}(
+  background,
+  limits = NULL,
+  limits_method = "none",
+  mcp_buffer = 0,
+  limits_clip = FALSE
+)
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
@@ -27,16 +41,15 @@ surface when intersected with input data (Default: \code{NULL}).}
 projection. Available options are \code{"none"} (Default), \code{"zones"}
 or \code{"mcp"}.}
 
-\item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default
-\code{0}). Only used if \code{"mcp"} is used.}
+\item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default \code{0}).
+Only used if \code{"mcp"} is used.}
 
 \item{limits_clip}{\code{\link{logical}} Should the limits clip all predictors before
-fitting a model (\code{TRUE}) or just the prediction (\code{FALSE},
-default).}
+fitting a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).}
 }
 \value{
-\code{\linkS4class{BiodiversityDistribution}} object containing data for
-building a biodiversity distribution modelling problem.
+\code{\linkS4class{BiodiversityDistribution}} object containing data for building
+a biodiversity distribution modelling problem.
 }
 \description{
 This function creates an object that contains all the data,
@@ -78,8 +91,10 @@ not set, then a \code{"Waiver"} object is returned instead.
 
 The following objects can be stored:
 \itemize{
-\item \code{object$biodiversity} A \code{\link{BiodiversityDatasetCollection}} object with the added biodiversity data.
-\item \code{object$engine} An \code{"engine"} object (e.g. \code{\link[=engine_inlabru]{engine_inlabru()}}) with function depended on the added engine.
+\item \code{object$biodiversity} A \code{\link{BiodiversityDatasetCollection}} object with
+the added biodiversity data.
+\item \code{object$engine} An \code{"engine"} object (e.g. \code{\link[=engine_inlabru]{engine_inlabru()}})
+with function depended on the added engine.
 \item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictions.
 \item \code{object$priors} A \code{\link{PriorList}} object with all specified priors.
 \item \code{object$log} A \code{\link{Log}} object that captures.
@@ -87,13 +102,19 @@ The following objects can be stored:
 
 Useful high-level functions to address those objects are for instance:
 \itemize{
-\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}} object contents. Can also be called via \link{print}.
-\item \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
-\item \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
+\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}}
+object contents. Can also be called via \link{print}.
+\item \code{object$get_biodiversity_equations()} Lists the equations used for each
+biodiversity dataset with given id. Defaults to all predictors.
+\item \code{object$get_biodiversity_types()} Lists the type of each specified
+biodiversity dataset with given id.
 \item \code{object$get_extent()} Outputs the \link[terra:ext]{terra::ext} of the modelling region.
-\item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[terra:ext]{terra::ext} and the \link[terra:crs]{terra::crs}.
-\item \code{object$get_extent_dimensions()} Outputs the \link[terra:ext]{terra::ext} dimension by calling the \code{"extent_dimensions()"} function.
-\item \code{object$get_predictor_names()} Returns a \link{character} vector with the names of all added predictors.
+\item \code{object$show_background_info()} Returns a \code{\link{list}} with the \link[terra:ext]{terra::ext}
+and the \link[terra:crs]{terra::crs}.
+\item \code{object$get_extent_dimensions()} Outputs the \link[terra:ext]{terra::ext} dimension by
+calling the \code{"extent_dimensions()"} function.
+\item \code{object$get_predictor_names()} Returns a \link{character} vector with the
+names of all added predictors.
 \item \code{object$get_prior_variables()} Returns a description of \code{\link{priors}} added.
 }
 
@@ -101,24 +122,23 @@ There are other functions as well but those are better accessed through their
 respective wrapper functions.
 }
 \examples{
-\dontrun{
- # Load background raster
- background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
- # Define model
- x <- distribution(background)
- x
- # Show names of the functions within the object
- names(x)
+# Load background raster
+background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+# Define model
+x <- distribution(background)
+x
 
-}
 }
 \references{
 \itemize{
-\item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
-\item Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
+\item Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A.,
+Dorazio, R.M., (2019) A practical guide for combining data to model species
+distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
+\item Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area
+hypotheses improves stacked species distribution model performance." Global
+Ecology and Biogeography 27, no. 1 (2018): 156-165.
 }
 }
 \seealso{
-\code{"bdproto"} on the general definition of \code{\link{proto}} objects and
-in particular \code{\link{BiodiversityDistribution}}.
+\code{\link{BiodiversityDistribution}} and other classes.
 }

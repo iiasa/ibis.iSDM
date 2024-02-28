@@ -16,5 +16,6 @@ A \link{character} object.
 engine_stan builds a list with stan model code. This function
 concatenates them together.
 }
-\keyword{stan,}
+\keyword{internal}
+\keyword{stan}
 \keyword{utils}

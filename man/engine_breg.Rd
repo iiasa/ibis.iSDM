@@ -15,11 +15,9 @@ engine_breg(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{iter}{\code{\link{numeric}} on the number of MCMC iterations to run (Default:
-\code{10000}).}
+\item{iter}{\code{\link{numeric}} on the number of MCMC iterations to run (Default: \code{10000}).}
 
-\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use for data
-augmentation.}
+\item{nthread}{\code{\link{numeric}} on the number of CPU-threads to use for data augmentation.}
 
 \item{type}{The mode used for creating posterior predictions. Either making
 \code{"link"} or \code{"response"} (Default: \code{"response"}).}
@@ -46,21 +44,24 @@ effects via the \code{"only_linear"} option specified in \link{train}.
 # Add BREG as an engine
 x <- distribution(background) |> engine_breg(iter = 1000)
 }
+
 }
 \references{
 \itemize{
-\item Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
-\item Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression. R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
+\item Nguyen, K., Le, T., Nguyen, V., Nguyen, T., & Phung, D. (2016, November). Multiple
+kernel learning with data augmentation. In Asian Conference on Machine Learning (pp. 49-64). PMLR.
+\item Steven L. Scott (2021). BoomSpikeSlab: MCMC for Spike and Slab Regression.
+R package version 1.2.4. https://CRAN.R-project.org/package=BoomSpikeSlab
 }
 }
 \seealso{
 Other engine: 
 \code{\link{engine_bart}()},
 \code{\link{engine_gdb}()},
-\code{\link{engine_glmnet}()},
 \code{\link{engine_glm}()},
-\code{\link{engine_inlabru}()},
+\code{\link{engine_glmnet}()},
 \code{\link{engine_inla}()},
+\code{\link{engine_inlabru}()},
 \code{\link{engine_stan}()},
 \code{\link{engine_xgboost}()}
 }

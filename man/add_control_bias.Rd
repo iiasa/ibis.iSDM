@@ -2,6 +2,7 @@
 % Please edit documentation in R/add_control_bias.R
 \name{add_control_bias}
 \alias{add_control_bias}
+\alias{add_control_bias,BiodiversityDistribution-method}
 \title{Add a control to a BiodiversityModel object to control biases}
 \usage{
 add_control_bias(
@@ -14,7 +15,15 @@ add_control_bias(
   add = TRUE
 )
 
-\S4method{add_control_bias}{BiodiversityDistribution,SpatRaster,character,ANY,numeric,numeric,logical}(x,layer,method,bias_value,maxdist,alpha,add)
+\S4method{add_control_bias}{BiodiversityDistribution}(
+  x,
+  layer,
+  method = "partial",
+  bias_value = NULL,
+  maxdist = NULL,
+  alpha = 1,
+  add = TRUE
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -53,20 +62,21 @@ location of biodiversity datasets. While the integration of other, presumably
 less biased data can be one way of controlling for sampling biases, another
 way is to control directly for the bias in the model. Currently supported
 methods are:
-
-\link{*} \code{"partial"} - An approach described by Warton et al. (2013) to
+\itemize{
+\item \code{"partial"} - An approach described by Warton et al. (2013) to
 control the biases in a model, by including a specified variable ("layer") in
 the model, but "partialling" it out during the projection phase. Specifically
 the variable is set to a specified value ("bias_value"), which is by default
 the minimum value observed across the background.
-\link{*} \code{"offset"} - Dummy
+\item \code{"offset"} - Dummy
 method that points to the \code{\link[=add_offset_bias]{add_offset_bias()}} functionality (see note).
 Makes use of offsets to factor out a specified bias variable.
-\link{*} \code{"proximity"} - Use the proximity or distance between points as a weight
+\item \code{"proximity"} - Use the proximity or distance between points as a weight
 in the model. This option effectively places greater weight on points farther
 away. \emph{Note:} In the best case this can control for spatial bias and
 aggregation, in the worst case it can place a lot of emphasis on points that
 likely outliers or misidentification (in terms of species).
+}
 
 See also details for some explanations.
 }
@@ -98,19 +108,24 @@ through the \code{\link[=add_offset_bias]{add_offset_bias()}} method. Setting th
    add_predictors(covariates) |>
    add_control_bias(biasvariable, bias_value = NULL)
 }
+
 }
 \references{
 \itemize{
-\item Warton, D.I., Renner, I.W. and Ramp, D., 2013. Model-based control of observer bias for the analysis of presence-only data in ecology. PloS one, 8(11), p.e79168.
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
-\item Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly estimating spatial sampling effort and habitat suitability for multiple species from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
+\item Warton, D.I., Renner, I.W. and Ramp, D., 2013. Model-based control of observer
+bias for the analysis of presence-only data in ecology. PloS one, 8(11), p.e79168.
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Botella, C., Joly, A., Bonnet, P., Munoz, F., & Monestiez, P. (2021). Jointly
+estimating spatial sampling effort and habitat suitability for multiple species
+from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 }
 }
 \seealso{
 \code{\link[=add_control_extrapolation]{add_control_extrapolation()}}
 }
-\concept{The spatial bias weighting was inspired by code in the
-  \code{enmSdmX} package.}
-\keyword{bias,}
+\concept{The spatial bias weighting was inspired by code in the \code{enmSdmX} package.}
+\keyword{bias}
 \keyword{control}
-\keyword{offset,}
+\keyword{offset}

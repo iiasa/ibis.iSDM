@@ -2,11 +2,12 @@
 % Please edit documentation in R/prior_bart.R
 \name{BARTPriors}
 \alias{BARTPriors}
+\alias{BARTPriors,character-method}
 \title{Helper function when multiple variables are supplied for a BART prior}
 \usage{
 BARTPriors(variable, hyper = 0.75, ...)
 
-\S4method{BARTPriors}{character,numeric}(variable,hyper,...)
+\S4method{BARTPriors}{character}(variable, hyper = 0.75, ...)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent
@@ -24,18 +25,18 @@ with the same hyper-parameters, but different variables.
 \seealso{
 Other prior: 
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()},

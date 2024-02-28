@@ -26,6 +26,7 @@ Options to set up ibis for parallel processing with future
 # Starts future job
 ibis_future(cores = 4)
 }
+
 }
 \seealso{
 \link{future}

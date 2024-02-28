@@ -2,13 +2,15 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset}
 \alias{add_offset}
+\alias{add_offset,BiodiversityDistribution,SpatRaster-method}
+\alias{add_offset,BiodiversityDistribution,sf-method}
 \title{Specify a spatial explicit offset}
 \usage{
 add_offset(x, layer, add = TRUE)
 
-\S4method{add_offset}{BiodiversityDistribution,SpatRaster,logical}(x,layer,add)
+\S4method{add_offset}{BiodiversityDistribution,SpatRaster}(x, layer, add = TRUE)
 
-\S4method{add_offset}{BiodiversityDistribution,sf,logical}(x,layer,add)
+\S4method{add_offset}{BiodiversityDistribution,sf}(x, layer, add = TRUE)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -53,10 +55,13 @@ during the estimation
    add_predictors(covariates) |>
    add_offset(nicheEstimate)
 }
+
 }
 \references{
 \itemize{
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and
+range estimates with Maxent and point process models by integrating spatially explicit
+information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 }
 }
 \seealso{
@@ -68,4 +73,4 @@ Other offset:
 }
 \concept{offset}
 \keyword{offset}
-\keyword{prior,}
+\keyword{prior}

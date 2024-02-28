@@ -2,18 +2,19 @@
 % Please edit documentation in R/prior_glmnet.R
 \name{GLMNETPriors}
 \alias{GLMNETPriors}
+\alias{GLMNETPriors,character-method}
 \title{Helper function when multiple variables are supplied for a GLMNET prior}
 \usage{
 GLMNETPriors(variable, hyper = 0, lims = c(-Inf, Inf))
 
-\S4method{GLMNETPriors}{character,numeric,ANY}(variable,hyper,lims,...)
+\S4method{GLMNETPriors}{character}(variable, hyper = 0, lims = c(-Inf, Inf))
 }
 \arguments{
 \item{variable}{A \code{\link{character}} variable passed on to the prior object.}
 
 \item{hyper}{A \code{\link{numeric}} value between \code{0} and \code{1} that state the
-penalization factor. By default this is set to \code{0}, implying the
-\code{"variable"} provided is not regularized at all.}
+penalization factor. By default this is set to \code{0}, implying the \code{"variable"}
+provided is not regularized at all.}
 
 \item{lims}{A \code{\link{numeric}} \code{\link{vector}} of the lower and upper limits for each
 coefficient (Default: \code{c(-Inf, Inf)}).}
@@ -24,19 +25,19 @@ the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()},

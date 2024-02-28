@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R
+#' @include class-prior.R
 NULL
 
 #' Create a new monotonic prior for boosted regressions
@@ -10,37 +10,36 @@ NULL
 #' regularized out during model fitting.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent
-#'   effects.
-#' @param hyper A [`character`] object describing the type of constrain.
-#'   Available options are \code{'increasing'}, \code{'decreasing'},
-#'   \code{'convex'}, \code{'concave'}, \code{'none'}.
+#' effects.
+#' @param hyper A [`character`] object describing the type of constrain. Available
+#' options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
+#' \code{'none'}.
 #' @param ... Variables passed on to prior object.
+#'
 #' @references
-#' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015). Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
+#' * Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H. (2015).
+#' Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
+#'
 #' @seealso [`Prior-class`] and [`GDBPrior`].
+#' @family prior
+#' @keywords priors
+#'
 #' @examples
 #' \dontrun{
 #'  pp <- XGBPrior("forest", "increasing")
 #' }
 #'
-#' @family prior
-#' @keywords priors
-#' @aliases XGBPrior
 #' @name XGBPrior
 NULL
 
-#' @name XGBPrior
 #' @rdname XGBPrior
-#' @exportMethod XGBPrior
 #' @export
 methods::setGeneric(
   "XGBPrior",
   signature = methods::signature("variable", "hyper"),
   function(variable, hyper = 'increasing', ...) standardGeneric("XGBPrior"))
 
-#' @name XGBPrior
 #' @rdname XGBPrior
-#' @usage \S4method{XGBPrior}{character,character}(variable,hyper,...)
 methods::setMethod(
   "XGBPrior",
   methods::signature(variable = "character", hyper = "character"),
@@ -56,38 +55,40 @@ methods::setMethod(
     hyper <- match.arg(hyper, c('increasing', 'decreasing','positive', 'negative', 'none'), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'XGBPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'XGBPrior',
       id = new_id(),
       variable = variable,
       value = hyper
     )
+    return(pp)
   }
 )
 
 #' Helper function when multiple variables are supplied for XGBOOST
-#' @name XGBPriors
+
 #' @description This is a helper function to specify several [XGBPrior] with the
 #' same hyper-parameters, but different variables.
-#' @rdname XGBPriors
-#' @exportMethod XGBPriors
+#'
 #' @inheritParams XGBPrior
-#' @aliases XGBPriors
+#'
 #' @family prior
 #' @keywords priors
+#'
+#' @name XGBPriors
+NULL
+
+#' @rdname XGBPriors
 #' @export
 methods::setGeneric(
   "XGBPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = 'increasing', ...) standardGeneric("XGBPriors"))
 
-#' @name XGBPriors
 #' @rdname XGBPriors
-#' @usage \S4method{XGBPriors}{character,character}(variable,hyper,...)
 methods::setMethod(
   "XGBPriors",
   methods::signature(variable = "character"),

@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_priors.R
 \name{rm_priors}
 \alias{rm_priors}
+\alias{rm_priors,BiodiversityDistribution-method}
 \title{Remove existing priors from an existing distribution object}
 \usage{
 rm_priors(x, names = NULL, ...)
 
-\S4method{rm_priors}{BiodiversityDistribution,ANY}(x,names,...)
+\S4method{rm_priors}{BiodiversityDistribution}(x, names = NULL, ...)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -16,9 +17,8 @@ rm_priors(x, names = NULL, ...)
 \item{...}{Other parameters passed down}
 }
 \description{
-This function allows to remove priors from an existing
-\link{distribution} object. In order to remove a set prior, the name of the
-prior has to be specified.
+This function allows to remove priors from an existing \link{distribution}
+object. In order to remove a set prior, the name of the prior has to be specified.
 }
 \examples{
 \dontrun{
@@ -29,23 +29,24 @@ prior has to be specified.
  # Remove again
  x <- x |> rm_priors("forest")
 }
+
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()}

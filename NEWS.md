@@ -1,4 +1,19 @@
-# ibis.iSDM 0.1.1 (current dev branch)
+# ibis.iSDM 0.1.2 (current dev branch)
+
+#### New features
+* Switched object structure to `R6` throughout for improved data and memory handling #44
+* Implemented a convenience function ro remove biodiversity datasets (`rm_biodiversity()`).
+
+#### Minor improvements and bug fixes
+* Added a logical parameter to `ensemble()` enabling compositing of thresholds if set #84
+* Support of multi-band rasters in `ensemble()` for convenience.
+* Fix of bug in `threshold()` for supplied point data and improved error messages.
+* Cleaner docs and structure
+* Adding `wrap_model`/`unwrap_model` functions
+* Added default parameters for all ibis specific options #90
+* Changing behaviour of weights in `engine_inlabru()` #93
+
+# ibis.iSDM 0.1.1
 
 #### New features
 * Added default `engine_glm()` for dependency-free inference and projection.
@@ -8,8 +23,8 @@
 #### Minor improvements and bug fixes
 * Minor corrective fixes and additions to `add_offset()`.
 * Switch to `engine_glm()` in many of the unittests for better coverage.
-* Several bug fixes and improvements in `thin_observations`
-* `global`, `probs`, and `centers` argument for better control of `thin_observations`
+* Several bug fixes and improvements in `thin_observations()`
+* `global`, `probs`, and `centers` argument for better control of `thin_observations()`
 * Harmonization of parameters for `spartial()` and addressing #80
 
 # ibis.iSDM 0.1.0

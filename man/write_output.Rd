@@ -2,29 +2,72 @@
 % Please edit documentation in R/write_output.R
 \name{write_output}
 \alias{write_output}
+\alias{write_output,ANY,character-method}
+\alias{write_output,BiodiversityScenario,character-method}
+\alias{write_output,SpatRaster,character-method}
+\alias{write_output,data.frame,character-method}
+\alias{write_output,stars,character-method}
 \title{Generic function to write spatial outputs}
 \usage{
-\S4method{write_output}{ANY,character,character,logical}(mod,fname,dt,verbose)
+write_output(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 
-\S4method{write_output}{BiodiversityScenario,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{ANY,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 
-\S4method{write_output}{SpatRaster,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{BiodiversityScenario,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 
-\S4method{write_output}{data.frame,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{SpatRaster,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 
-\S4method{write_output}{stars,character,character,logical}(mod,fname,dt,verbose)
+\S4method{write_output}{data.frame,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
+
+\S4method{write_output}{stars,character}(
+  mod,
+  fname,
+  dt = "FLT4S",
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
 }
 \arguments{
-\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}},
-\code{\link{terra}} or \code{\link{stars}} object.}
+\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link{terra}}
+or \code{\link{stars}} object.}
 
 \item{fname}{A \code{\link{character}} depicting an output filename.}
 
-\item{dt}{A \code{\link{character}} for the output datatype. Following the
-\code{\link[terra:writeRaster]{terra::writeRaster}} options (Default: \code{'FLT4S'}).}
+\item{dt}{A \code{\link{character}} for the output datatype. Following the \code{\link[terra:writeRaster]{terra::writeRaster}}
+options (Default: \code{'FLT4S'}).}
 
-\item{verbose}{\code{\link{logical}} indicating whether messages should be shown.
-Overwrites \code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
+\item{verbose}{\code{\link{logical}} indicating whether messages should be shown. Overwrites
+\code{getOption("ibis.setupmessages")} (Default: \code{TRUE}).}
 
 \item{...}{Any other arguments passed on the individual functions.}
 }
@@ -37,7 +80,8 @@ output files (e.g. projections) created with the \code{\link{ibis.iSDM-package}}
 possible to write outputs of fitted \code{\link{DistributionModel}},
 \code{\link{BiodiversityScenario}} or individual \code{\link{terra}} or \code{\link{stars}} objects. In
 case a \code{\link{data.frame}} is supplied, the output is written as csv file.
-\strong{For creating summaries of distribution and scenario parameters and performance, see \code{write_summary()}}
+\strong{For creating summaries of distribution and scenario parameters and performance,
+see \code{write_summary()}}
 }
 \note{
 By default output files will be overwritten if already existing!
@@ -50,5 +94,6 @@ x <- distribution(background)  |>
  engine_xgboost(nrounds = 2000) |> train(varsel = FALSE, only_linear = TRUE)
 write_output(x, "testmodel.tif")
 }
+
 }
 \keyword{utils}

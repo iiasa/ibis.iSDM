@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Project a fitted model to a new environment and covariates
@@ -10,6 +10,19 @@ NULL
 #' (e.g. transformations and derivates) in the same way as they have been during
 #' the initial modelling with [`distribution()`]. Any constrains specified in
 #' the scenario object are applied during the projection.
+#'
+#' @param x A [`BiodiversityScenario`] object with set predictors. Note that some
+#' constrains such as \code{MigClim} can still simulate future change without projections.
+#' @param date_interpolation A [`character`] on whether dates should be interpolated.
+#' Options include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
+#' @param stabilize A [`logical`] value indicating whether the suitability projection
+#' should be stabilized (Default: \code{FALSE}).
+#' @param stabilize_method [`character`] stating the stabilization method to be
+#' applied. Currently supported is \code{`loess`}.
+#' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
+#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further
+#' information during the model fitting (Default: \code{FALSE}).
+#' @param ... passed on parameters.
 #'
 #' @details In the background the function \code{x$project()} for the respective
 #' model object is called, where \code{x} is fitted model object. For specifics
@@ -49,23 +62,11 @@ NULL
 #' time step. This is conducted at the very of the processing steps and any
 #' thresholds will be recalculated afterwards.
 #'
-#' @seealso [`scenario()`]
-#' @param x A [`BiodiversityScenario`] object with set predictors. Note that
-#'   some constrains such as \code{MigClim} can still simulate future change
-#'   without projections.
-#' @param date_interpolation A [`character`] on whether dates should be
-#'   interpolated. Options include \code{"none"} (Default), \code{"annual"},
-#'   \code{"monthly"}, \code{"daily"}.
-#' @param stabilize A [`logical`] value indicating whether the suitability
-#'   projection should be stabilized (Default: \code{FALSE}).
-#' @param stabilize_method [`character`] stating the stabilization method to be
-#'   applied. Currently supported is \code{`loess`}.
-#' @param layer A [`character`] specifying the layer to be projected (Default:
-#'   \code{"mean"}).
-#' @param verbose Setting this [`logical`] value to \code{TRUE} prints out
-#'   further information during the model fitting (Default: \code{FALSE}).
-#' @param ... passed on parameters.
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.
+#'
+#' @seealso [`scenario()`]
+#' @keywords scenarios
+#'
 #' @examples
 #' \dontrun{
 #' # Fit a model
@@ -81,29 +82,22 @@ NULL
 #'         project()
 #' }
 #'
-#' @keywords scenarios
 #' @import terra
+#'
 #' @name project
-#' @exportMethod project
-#' @aliases project, project-method
-#' @export
 NULL
 
 #' @rdname project
-#' @method project BiodiversityScenario
-#' @keywords scenarios
 #' @export
 project.BiodiversityScenario <- function(x,...) project(x,...)
 
-#' @name project
 #' @rdname project
-#' @usage
-#'   \S4method{project}{BiodiversityScenario,character,logical,character,character,logical}(x,date_interpolation,stabilize,stabilize_method,layer,verbose)
+#' @export
 methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),
   function(x, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
-           layer = "mean", verbose = getOption('ibis.setupmessages'), ...){
+           layer = "mean", verbose = getOption('ibis.setupmessages', default = TRUE), ...){
     # MJ: Workaround to ensure project generic does not conflict with terra::project
     mod <- x
     # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
@@ -117,7 +111,7 @@ methods::setMethod(
     # Match methods
     date_interpolation <- match.arg(date_interpolation, c("none", "yearly", "annual", "monthly", "daily"), several.ok = FALSE)
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
-    if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages')) myLog('[Scenario]','red','Overwriting existing scenarios...')
+    if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
     fit <- mod$get_model()
@@ -129,11 +123,11 @@ methods::setMethod(
     new_preds <- mod$get_predictors()
     if(is.Waiver(new_preds)) stop('No scenario predictors found.')
     new_crs <- new_preds$get_projection()
-    if(is.na(new_crs)) if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Missing projection of future predictors.')
+    if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
     # Interpolate predictor set if specified
     if(date_interpolation!="none"){
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green',paste0('Interpolating dates for scenario predictors as: ', date_interpolation))
 
       new <- interpolate_gaps(new_preds$get_data(),
                               date_interpolation = date_interpolation)
@@ -154,7 +148,7 @@ methods::setMethod(
       # Get zones from the limiting area, e.g. those intersecting with input
       suppressMessages(
         suppressWarnings(
-          zones <- st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
+          zones <- sf::st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
                                    mod$get_limits()$layer
           )
         )
@@ -198,7 +192,7 @@ methods::setMethod(
       } else if(scenario_constraints[["dispersal"]]$method == "kissmig"){
         assertthat::assert_that( is.Raster(baseline_threshold))
         if(!is.Waiver(scenario_threshold)) {
-          if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Using kissmig to calculate updated distribution thresholds.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Using kissmig to calculate updated distribution thresholds.')
           scenario_threshold <- new_waiver()
         }
       } else {
@@ -206,7 +200,7 @@ methods::setMethod(
       }
     }
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
     }
     # ----------------------------- #
     #   Start of projection         #
@@ -225,14 +219,14 @@ methods::setMethod(
     df <- units::drop_units(df)
 
     # ------------------ #
-    if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Starting suitability projections for ',
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Starting suitability projections for ',
                                               length(unique(df$time)), ' timesteps.')
 
     # Now for each unique element, loop and project in order
     proj <- terra::rast()
     proj_thresh <- terra::rast()
 
-    if(getOption('ibis.setupmessages')){
+    if(getOption('ibis.setupmessages', default = TRUE)){
       pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
                                        total = length(unique(df$time)))
     }
@@ -341,7 +335,7 @@ methods::setMethod(
         # If threshold is found, check if it has values or is extinct?
         names(out_thresh) <-  paste0('threshold_', step)
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
-          if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold
         } else { baseline_threshold <- out_thresh }
         # Add to result stack
@@ -349,9 +343,9 @@ methods::setMethod(
       }
       # Add to result stack
       suppressWarnings( proj <- c(proj, out) )
-      if(getOption('ibis.setupmessages')) pb$tick()
+      if(getOption('ibis.setupmessages', default = TRUE)) pb$tick()
     }
-    if(getOption('ibis.setupmessages')) rm(pb)
+    if(getOption('ibis.setupmessages', default = TRUE)) rm(pb)
     terra::time(proj) <- times
     if(terra::nlyr(proj_thresh)>1) terra::time(proj_thresh) <- times
 
@@ -365,9 +359,9 @@ methods::setMethod(
           # Get Parameters
           params <- scenario_constraints$dispersal$params
 
-          if(getOption('ibis.setupmessages')) pb <- progress::progress_bar$new(total = terra::nlyr(proj))
+          if(getOption('ibis.setupmessages', default = TRUE)) pb <- progress::progress_bar$new(total = terra::nlyr(proj))
           for(lyr in 1:terra::nlyr(proj)){
-            if(getOption('ibis.setupmessages')) pb$tick()
+            if(getOption('ibis.setupmessages', default = TRUE)) pb$tick()
             # Normalize the projected suitability rasters to be in range 0-1000 and save
             hsMap <- predictor_transform(env = proj[[lyr]], option = "norm") * 1000
             # Write as filename in the destined folder
@@ -377,7 +371,7 @@ methods::setMethod(
               )
             rm(hsMap)
           }
-          if(getOption('ibis.setupmessages')) rm(pb)
+          if(getOption('ibis.setupmessages', default = TRUE)) rm(pb)
           # For threshold, define based on type
           tr <- ifelse(params[["rcThreshold"]] == "continuous", 0, 750) # Set to 75% as suitability threshold
 
@@ -467,7 +461,7 @@ methods::setMethod(
 
     # Should stabilization be applied?
     if(stabilize){
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','green','Applying stabilization.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Applying stabilization.')
       if(stabilize_method == "loess"){
         # FIXME: Could outsource this code
         impute.loess <- function(y, x.length = NULL, s = 0.75,
@@ -559,9 +553,9 @@ methods::setMethod(
     # --------------------------------- #
 
     # Return output by adding it to the scenario object
-    bdproto(NULL, mod,
-            scenarios = proj,
-            scenarios_migclim = mc
-            )
+    out <- mod$clone(deep = TRUE)
+    out$scenarios <- proj
+    out$scenarios_migclim <- mc
+    return(out)
   }
 )

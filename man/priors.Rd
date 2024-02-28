@@ -2,21 +2,21 @@
 % Please edit documentation in R/priors.R
 \name{priors}
 \alias{priors}
+\alias{priors,ANY-method}
 \title{Creates a new PriorList object}
 \usage{
 priors(x, ...)
 
-\S4method{priors}{Prior}(x,...)
+\S4method{priors}{ANY}(x, ...)
 
 priors(x, ...)
 
-\S4method{priors}{Prior}(x,...)
+\S4method{priors}{ANY}(x, ...)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{Prior}} object added to the list.}
 
-\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the
-list.}
+\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list.}
 }
 \value{
 A \code{\link{PriorList}} object.
@@ -39,16 +39,16 @@ objects can then be added to a \link{distribution} object with the \link{add_pri
 function.
 }
 \examples{
+p1 <- GDBPrior(variable = "Forest", hyper = "positive")
+p2 <- GDBPrior(variable = "Urban", hyper = "decreasing")
+priors(p1, p2)
+
 \dontrun{
 p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 priors(p1, p2)
 }
-\dontrun{
-p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
-p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
-priors(p1, p2)
-}
+
 }
 \seealso{
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
@@ -56,39 +56,39 @@ priors(p1, p2)
 \code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
 
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{rm_priors}()}
 
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
-\code{\link{BREGPriors}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
+\code{\link{BREGPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{rm_priors}()}

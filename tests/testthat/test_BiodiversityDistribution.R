@@ -1,8 +1,9 @@
 # Setting up a distribution model
 test_that('Setting up a distribution model',{
-  testthat::skip_on_cran()
+
   skip_if_not_installed('igraph')
-  skip_if_not_installed('INLA')
+
+  skip_on_cran()
 
   suppressWarnings( requireNamespace("terra", quietly = TRUE) )
   suppressWarnings( requireNamespace("sf", quietly = TRUE) )
@@ -49,12 +50,13 @@ test_that('Setting up a distribution model',{
   expect_equal(x$biodiversity$get_equations()[[1]],'<Default>')
   expect_true(is.Waiver(x$engine))
   expect_error(train(x)) # Try to solve without solver
+  expect_s3_class(x$biodiversity, "BiodiversityDatasetCollection")
 
   # Apply a mask
   expect_no_error( x$biodiversity$mask(virtual_range) )
   x <- distribution(background) |> add_biodiversity_poipo(virtual_points,
                                                          field_occurrence = 'Observed',
-                                                         name = 'Virtual points')
+                                                         name = 'Virtual points',docheck = FALSE)
 
   # And a range off
   invisible( suppressWarnings( suppressMessages(y <- x |> add_offset_range(virtual_range))) )
@@ -64,6 +66,11 @@ test_that('Setting up a distribution model',{
   # remove again
   x <- y$rm_offset()
   expect_true(is.Waiver( x$get_offset() ) )
+
+  # Add biodiversity data and remove again
+  y <- x$clone(deep = TRUE)
+  y <- rm_biodiversity(y, id = y$get_biodiversity_ids()[[1]])
+  expect_equal(y$show_biodiversity_length(), 0)
 
   # Try also different bias controls
   expect_no_error(x |> add_control_bias(predictors$hmi_mean_50km,method = "partial"))
@@ -115,14 +122,14 @@ test_that('Setting up a distribution model',{
   testthat::expect_s3_class(y, "BiodiversityDistribution")
   rm(y)
 
-  suppressWarnings( x <- x |> engine_inla() )
+  suppressWarnings( x <- x |> engine_glm() )
 
   # Do a check
-  expect_no_error(check(x))
+  suppressMessages( expect_no_error(check(x)) )
 
   # Mesh is not created yet
   expect_s3_class(x$engine$get_data("mesh"),'Waiver')
-  expect_equal(x$engine$name,'<INLA>')
+  expect_equal(x$engine$name,'<GLM>')
   expect_error(x$engine$calc_stack_poipo()) # Nothing to train on
 
   expect_s3_class(x$get_priors(),'Waiver')
@@ -144,6 +151,7 @@ test_that('Setting up a distribution model',{
   x <- distribution(background, limits_method = "mcp", mcp_buffer = 1000)
   expect_type(x$get_limits(), "list")
   expect_equal(x$get_limits()$limits_method, "mcp")
+  expect_null( x$get_engine() )
 
   y <- x |> engine_bart()
   expect_equal( y$get_engine(), "<BART>")
@@ -151,15 +159,18 @@ test_that('Setting up a distribution model',{
   expect_equal( y$get_engine(), "<BREG>")
   y <- x |> engine_gdb()
   expect_equal( y$get_engine(), "<GDB>")
-  y <- x |> engine_inla()
-  expect_equal( y$get_engine(), "<INLA>")
-  y <- x |> engine_inlabru()
-  expect_equal( y$get_engine(), "<INLABRU>")
   y <- x |> engine_xgboost()
   expect_equal( y$get_engine(), "<XGBOOST>")
 
   # Normal x should still be none
   expect_null( x$get_engine() )
+
+  # MJ: INLA call last to avoid errors upfront.
+  skip_if_not_installed('INLA')
+  y <- x |> engine_inla()
+  expect_equal( y$get_engine(), "<INLA>")
+  y <- x |> engine_inlabru()
+  expect_equal( y$get_engine(), "<INLABRU>")
 
   # MH: skip if no cmd stan path can be found, only quick-and-dirty fix for now
   skip_if_not_installed("cmdstanr")

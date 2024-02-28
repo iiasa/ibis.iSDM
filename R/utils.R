@@ -5,22 +5,31 @@
 #'
 #' @param a First [`vector`] object.
 #' @param b Second [`vector`] object.
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 `%notin%` = function(a, b){!(a %in% b)}
 
 #' Custom messaging function for scripts
 #'
 #' @description This functions prints a message with a custom header and colour.
+#'
 #' @param title The title in the log output
 #' @param col A [`character`] indicating the text colour to be used. Supported
-#'   are \code{'green'} / \code{'yellow'} / \code{'red'}
+#' are \code{'green'} / \code{'yellow'} / \code{'red'}
 #' @param ... Any additional outputs or words for display
+#'
+#' @keywords utils
+#'
 #' @examples
+#' \dontrun{
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
-#' @aliases myLog
-#' @keywords internal, utils
-#' @export
+#' }
+#'
+#' @keywords internal
 myLog <- function(title = "[Processing]", col = 'green', ...) {
   assertthat::assert_that(col %in% c('green','yellow','red'))
   textwrap <- switch (col,
@@ -35,31 +44,45 @@ myLog <- function(title = "[Processing]", col = 'green', ...) {
 }
 
 #' Colour helpers for message logs
+#'
 #' @param text A [`character`].
-#' @keywords internal, utils
-#' @aliases text_red
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 text_red <- function(text) { paste0('\033[31m',text,'\033[39m') }
+
 #' @inheritParams text_red
-#' @aliases text_yellow
 text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
+
 #' @inheritParams text_red
-#' @aliases text_green
 text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 
 #' Calculate the mode
+#'
 #' @param A [`vector`] of values or characters.
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
+
 #' Check whether function exist in name space
 #'
 #' @param x The [character] name of a package from which a function is needed.
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
   if (!requireNamespace(x, quietly = TRUE)) {
@@ -71,8 +94,12 @@ check_package <- function(x) {
 #' Camel case conversion of a string
 #'
 #' @param x A [`vector`] or [`character`] object.
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 to_camelcase <- function(x){
   assertthat::assert_that(is.character(x) || is.vector(x))
   substr(x, 1, 1) <- toupper(
@@ -83,17 +110,22 @@ to_camelcase <- function(x){
 
 #' Atomic representation of a name
 #'
-#' Return a pretty character representation of an object with elements and
-#' names.
+#' @description
+#' Return a pretty character representation of an object with elements and names.
+#'
 #' @param x A [`vector`] object
 #' @return [`character`] object.
+#'
+#' @keywords utils
 #' @concept function taken from `prioritizr` package
-#' @aliases name_atomic
-#' @keywords internal, utils
+#'
 #' @examples
 #' name_atomic(letters)
 #' name_atomic(letters, "characters")
+#'
 #' @noRd
+#'
+#' @keywords internal
 name_atomic <- function(x, description = "") {
   n <- length(x)
   if (nchar(description) > 0)
@@ -108,11 +140,15 @@ name_atomic <- function(x, description = "") {
 
 #' Aligns text with new characters
 #'
+#' @description
 #' Format text by adding a certain number of spaces after new line characters.
 #'
 #' @param x [`character`] text.
 #' @param n [`integer`] number of spaces.
+#'
 #' @return [`character`].
+#'
+#' @keywords utils
 #' @concept function taken from `prioritizr` package
 #'
 #' @examples
@@ -128,8 +164,9 @@ name_atomic <- function(x, description = "") {
 #' # print aligned text
 #' message(aligned_text)
 #'
-#' @keywords utils
 #' @noRd
+#'
+#' @keywords internal
 align_text <- function(x, n) {
   assertthat::assert_that(assertthat::is.string(x), assertthat::is.count(n))
   if (!grepl("\n", x))
@@ -141,12 +178,16 @@ align_text <- function(x, n) {
 #' Convert character to capital text
 #'
 #' @param x [`character`] text.
+#'
+#' @keywords utils
+#'
 #' @examples
 #' capitalize_text('presence')
 #' capitalize_text('ducks are the best birds')
 #'
-#' @keywords utils
 #' @noRd
+#'
+#' @keywords internal
 capitalize_text <- function(x) {
   assertthat::assert_that(is.character(x))
   s <- strsplit(x, " ")[[1]]
@@ -158,9 +199,14 @@ capitalize_text <- function(x) {
 #'
 #' @description This little wrapper converts and ensures that a vector of time
 #' objects are in POSIXct format.
+#'
 #' @param vec A [`vector`] with [`numeric`] or [`Posixct`] data
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 to_POSIXct <- function(vec){
   # Check th
   # Parse differently depending on time
@@ -189,11 +235,14 @@ to_POSIXct <- function(vec){
 }
 
 #' Hingeval transformation
+#'
 #' @param x A [`vector`] with numeric values.
 #' @param min [`numeric`] minimum value for the hinge transformation.
 #' @param max [`numeric`] maximum value for the hinge transformation.
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 hingeval <- function (x, min, max){
   ifelse(is.na(x),NA, pmin(1, pmax(0, (x - min)/(max - min),na.rm = TRUE),na.rm = TRUE))
 }
@@ -201,8 +250,10 @@ hingeval <- function (x, min, max){
 #' Threshold transformation
 #' @param x A [`vector`] with numeric values.
 #' @param knot [`numeric`] threshold value as cutoff.
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 thresholdval <- function(x, knot) {
     ifelse(x >= knot, 1, 0)
 }
@@ -215,15 +266,17 @@ thresholdval <- function(x, knot) {
 #' into a format
 #'
 #' @param names A [`vector`] of [`character`] vectors to be sanitized.
+#'
 #' @returns A [`vector`] of sanitized [`character`].
+#'
+#' @keywords utils
 #' @concept Inspired from [`inlabru`] \code{"bru_standardise_names"} function.
+#'
 #' @examples
 #' # Correct variable names
 #' vars <- c("Climate-temperature2015", "Elevation__sealevel", "Landuse.forest..meanshare")
 #' sanitize_names(vars)
 #'
-#' @aliases sanitize_names
-#' @keywords utils
 #' @export
 sanitize_names <- function(names){
   assertthat::assert_that(
@@ -252,22 +305,29 @@ sanitize_names <- function(names){
 #' @description Some computations take considerable amount of time to execute.
 #' This function provides a helper wrapper for running functions of the
 #' [`apply`] family to specified outputs.
-#' @details By default, the [parallel] package is used for parallel computation,
-#' however an option exists to use the [future] package instead.
-#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a
-#'   single core or parallel [apply] call.
+#'
+#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a single
+#' core or parallel [apply] call.
 #' @param FUN A [`function`] passed on for computation.
 #' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
-#' @param approach [`character`] for the parallelization approach taken
-#'   (Options: \code{"parallel"} or \code{"future"}).
-#' @param export_package A [`vector`] with packages to export for use on
-#'   parallel nodes (Default: \code{NULL}).
+#' @param approach [`character`] for the parallelization approach taken (Options:
+#' \code{"parallel"} or \code{"future"}).
+#' @param export_package A [`vector`] with packages to export for use on parallel
+#' nodes (Default: \code{NULL}).
+#'
+#' @details By default, the [parallel] package is used for parallel computation,
+#' however an option exists to use the [future] package instead.
+#'
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  run_par(list, mean, cores = 4)
 #' }
-#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
   assertthat::assert_that(
     is.list(X) || is.data.frame(X) || is.matrix(X),
@@ -356,16 +416,25 @@ run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packag
 #' an existing projection to the range of predictor values observed during model
 #' training. This function takes an internal model matrix and restricts the
 #' values seen in the predictor matrix to those observed during training.
-#' @note This function is meant to be used within a certain \code{"engine"} or
-#'   within [`project`].
-#' @param model A [`list`] with the input data used for inference. Created
-#'   during model setup.
+#'
+#' @param model A [`list`] with the input data used for inference. Created during model setup.
 #' @param pred An optional [`data.frame`] of the prediction container.
+#'
+#' @note This function is meant to be used within a certain \code{"engine"} or
+#' within [`project`].
+#'
 #' @returns A [`data.frame`] with the clamped predictors.
-#' @keywords utils, internal
-#' @references Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., &
-#'   Blair, M. E. (2017). Opening the black box: An open-source release of
-#'   Maxent. Ecography. https://doi.org/10.1111/ecog.03049
+#'
+#' @keywords utils
+#'
+#' @references
+#' Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017).
+#' Opening the black box: An open-source release of Maxent. Ecography.
+#' https://doi.org/10.1111/ecog.03049
+#'
+#' @noRd
+#'
+#' @keywords internal
 clamp_predictions <- function(model, pred){
   assertthat::assert_that(
     is.list(model),
@@ -412,17 +481,24 @@ clamp_predictions <- function(model, pred){
 #' @description Implementation of a Reverse Jackknife procedure as described by
 #' Chapman (2005). Can be used to identify outliers in environmental predictors
 #' or predictions.
+#'
 #' @param vals A [`numeric`] vector from which outliers are to be identified and
-#'   removed.
-#' @param procedure [`character`] denoting what to do with outliers. Options
-#'   include: \code{'missing'} (Default) and \code{'remove'}, with the former
-#'   replacing the outliers with \code{NA} and the latter removing them.
+#' removed.
+#' @param procedure [`character`] denoting what to do with outliers. Options include:
+#' \code{'missing'} (Default) and \code{'remove'}, with the former replacing the
+#' outliers with \code{NA} and the latter removing them.
+#'
 #' @references
-#' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity Information Facility, Copenhagen.
+#' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species
+#' and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity
+#' Information Facility, Copenhagen.
 #' @source [`bioGeo`] package code served as inspiration
-#' @aliases rm_outlier_revjack
+#'
 #' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 rm_outlier_revjack <- function(vals, procedure = "missing"){
   assertthat::assert_that(
     is.numeric(vals),
@@ -475,14 +551,17 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 #' @description This function aggregates provided point data to a reference
 #' grid, by, depending on the type, either counting the number of observations
 #' per grid cell or aggregating them via a sum.
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point
-#'   data.
+#'
+#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
 #' @param template A [`SpatRaster`] object that is aligned with the predictors.
-#' @param field_occurrence A [`character`] name of the column containing the
-#'   presence information (Default: \code{observed}).
+#' @param field_occurrence A [`character`] name of the column containing the presence
+#' information (Default: \code{observed}).
+#'
 #' @returns A [`sf`] object with the newly aggregated points.
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 aggregate_observations2grid <- function(df, template, field_occurrence = 'observed'){
   assertthat::assert_that(
     is.data.frame(df) || inherits(df, 'sf') || tibble::is_tibble(df),
@@ -546,18 +625,21 @@ aggregate_observations2grid <- function(df, template, field_occurrence = 'observ
 #' @description This is a small helper function that simply goes over all
 #' biodiversity sets in the model object.
 #' **This function is intended to only run within ibis and with the model packages created by it.**
-#' @param model A [`list`] object containing the biodiversity and predictor
-#'   objects.
+#'
+#' @param model A [`list`] object containing the biodiversity and predictor objects.
 #' @param include_absences A [`logical`] of whether absences should be included
-#'   (Default: \code{FALSE}).
+#' (Default: \code{FALSE}).
 #' @param point_column [`character`] on the column with observed values.
-#' @param addName [`logical`] Should the name of the feature be added (Default:
-#'   \code{FALSE}).
+#' @param addName [`logical`] Should the name of the feature be added
+#' (Default: \code{FALSE}).
 #' @param tosf [`logical`] of whether the output should be [`sf`] object
-#'   (Default: \code{FALSE}).
+#' (Default: \code{FALSE}).
+#'
 #' @returns A [`matrix`] or [`sf`] object with the newly aggregated points.
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 collect_occurrencepoints <- function(model, include_absences = FALSE,
                                      point_column = "observed",
                                      addName = FALSE,

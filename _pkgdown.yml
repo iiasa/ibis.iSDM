@@ -160,10 +160,11 @@ reference:
       - Settings
       - PredictorDataset
       - Log
-      - has_keyword("bdproto")
+      - has_keyword("classes")
 
   - title: Miscellaneous functions
-    desc: Other functions only relevant for development
+    desc: >
+     Other functions only relevant for development
     contents:
       - as.Id
       - is.Id

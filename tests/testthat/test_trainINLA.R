@@ -1,9 +1,10 @@
 # First check that INLA works
 test_that('Check that INLA works', {
-  skip_on_travis()
-  skip_on_cran()
-  skip_on_ci()
+
   skip_if_not_installed('INLA')
+
+  skip_on_cran()
+
 
   suppressWarnings(
     suppressPackageStartupMessages( requireNamespace("INLA") )
@@ -32,7 +33,7 @@ test_that('Check that INLA works', {
 test_that('Train a distribution model with INLA', {
 
   skip_if_not_installed('INLA')
-  skip_on_travis()
+
   skip_on_cran()
 
   options(ibis.setupmessages = FALSE)

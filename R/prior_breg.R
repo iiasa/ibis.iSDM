@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R
+#' @include class-prior.R
 NULL
 
 #' Create a new spike and slab prior for Bayesian generalized linear models
@@ -8,6 +8,11 @@ NULL
 #' priors are similar to the horseshoe priors used in regularized [engine_stan]
 #' models and penalize regressions by assuming most predictors having an effect
 #' of \code{0}.
+#'
+#' @param variable A [`character`] matched against existing predictors.
+#' @param hyper A [`numeric`] estimate of the mean regression coefficients.
+#' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability
+#' of the target variable (Default: \code{NULL}).
 #'
 #' @details The Zellner-style spike and slab prior for generalized linear models
 #' are specified as described in the \pkg{Boom} R-package. Currently supported
@@ -27,13 +32,16 @@ NULL
 #' coefficients and their direction, one can still provide an estimate of the
 #' inclusion probability. In other words:
 #' **The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.**
-#' @param variable A [`character`] matched against existing predictors.
-#' @param hyper A [`numeric`] estimate of the mean regression coefficients.
-#' @param ip A [`numeric`] estimate between 0 and 1 of the inclusion probability
-#'   of the target variable (Default: \code{NULL}).
+#'
 #' @references
-#' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster, Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection" Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
+#' * Hugh Chipman, Edward I. George, Robert E. McCulloch, M. Clyde, Dean P. Foster,
+#' Robert A. Stine (2001), "The Practical Implementation of Bayesian Model Selection"
+#' Lecture Notes-Monograph Series, Vol. 38, pp. 65-134. Institute of Mathematical Statistics.
+#'
 #' @seealso [`Prior-class`]
+#' @family prior
+#' @keywords priors
+#'
 #' @examples
 #' \dontrun{
 #' # Positive coefficient
@@ -43,24 +51,18 @@ NULL
 #' p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 #' p2
 #' }
-#' @family prior
-#' @keywords priors
-#' @aliases BREGPrior
+#'
 #' @name BREGPrior
 NULL
 
-#' @name BREGPrior
 #' @rdname BREGPrior
-#' @exportMethod BREGPrior
 #' @export
 methods::setGeneric(
   "BREGPrior",
   signature = methods::signature("variable"),
   function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPrior"))
 
-#' @name BREGPrior
 #' @rdname BREGPrior
-#' @usage \S4method{BREGPrior}{character,ANY,ANY}(variable,hyper,ip)
 methods::setMethod(
   "BREGPrior",
   methods::signature(variable = "character"),
@@ -77,41 +79,44 @@ methods::setMethod(
     if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Check that ip is between 0 and 1
     if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)
+
     # Create new prior object
-    bdproto(
-      'BREGPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'BREGPrior',
       id = new_id(),
       variable = variable,
       value = hyper,
       prob = ip
     )
+    return(pp)
   }
 )
 
 #' Helper function when multiple variables are supplied for a BREG prior
-#' @name BREGPriors
+
 #' @description This is a helper function to specify several [BREGPrior] with
 #' the same hyper-parameters, but different variables.
-#' @rdname BREGPriors
-#' @exportMethod BREGPriors
+#'
 #' @inheritParams BREGPrior
-#' @aliases BREGPriors
+#'
 #' @family prior
 #' @keywords priors
+#'
+#' @name BREGPriors
+NULL
+
+#' @rdname BREGPriors
 #' @export
 methods::setGeneric(
   "BREGPriors",
   signature = methods::signature("variable"),
   function(variable, hyper = NULL, ip = NULL) standardGeneric("BREGPriors"))
 
-#' @name BREGPriors
 #' @rdname BREGPriors
-#' @usage \S4method{BREGPriors}{character,ANY,ANY}(variable,hyper,ip)
 methods::setMethod(
   "BREGPriors",
   methods::signature(variable = "character"),

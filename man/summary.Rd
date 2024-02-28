@@ -55,6 +55,8 @@ x <- distribution(background) |>
  pp <- priors(p1,p2)
  summary(pp)
 }
+
+
 }
 \seealso{
 \code{\link[base:summary]{base::summary()}}.

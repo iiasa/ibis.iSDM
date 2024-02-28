@@ -1,8 +1,7 @@
 # ---- #
 # Train a full distribution model with glm base model
-test_that('Test controls', {
+test_that('Test controls and limits', {
 
-  skip_on_travis()
   skip_on_cran()
 
   # No messages
@@ -31,6 +30,8 @@ test_that('Test controls', {
   zones <- terra::as.factor( predictors$koeppen_50km )
   y <- x |> add_control_extrapolation(layer = zones, method = "zones")
   expect_false(y$get_limits() |> is.Waiver())
+  expect_length(y$get_limits(), 4) # Those are saved in limits in the object
+  expect_true(x$get_limits() |> is.Waiver()) # Check that original object remains correct
 
   # Add mcp limits
   y <- x |> add_control_extrapolation(method = "mcp")
@@ -72,4 +73,19 @@ test_that('Test controls', {
   # Create a scenario object and reuse limits
   expect_no_error( scenario(mod, reuse_limits = TRUE) )
 
+  # --- #
+  # Bias control checks
+  x <- x$rm_limits()
+  x <- x |> add_control_bias(layer = predictors$hmi_mean_50km)
+  # Train with bias
+  expect_no_error(
+    suppressWarnings(
+      mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
+                   varsel = "none", verbose = FALSE)
+    )
+  )
+  expect_length( x$get_control(), 4 )
+  settings <- mod$settings
+  expect_equal(settings$get("bias_variable"), "hmi_mean_50km")
 })
+

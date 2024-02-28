@@ -1,56 +1,58 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Add constrains to the modelled distribution projection using the MigClim
 #' approach
 #'
 #' @description This function adds constrain as defined by the MigClim approach
-#'   (Engler et al. 2013) to a [`BiodiversityScenario-class`] object to
-#'   constrain future projections. For a detailed description of MigClim, please
-#'   the respective reference and the UserGuide. **The default parameters chosen
-#'   here are suggestions.**
+#' (Engler et al. 2013) to a [`BiodiversityScenario-class`] object to
+#' constrain future projections. For a detailed description of MigClim, please
+#' the respective reference and the UserGuide. **The default parameters chosen
+#' here are suggestions.**
+#'
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
 #' @param rcThresholdMode A [`character`] of either **binary** or **continuous**
-#'   value (Default: **continuous**).
+#' value (Default: **continuous**).
 #' @param dispSteps [`numeric`] parameters on the number of dispersal steps.
-#'   Dispersal steps are executed for each timestep (prediction layer). and
-#'   ideally should be aligned with the number of steps for projection. Minimum
-#'   is \code{1} (Default) and maximum is \code{99}.
+#' Dispersal steps are executed for each timestep (prediction layer). and
+#' ideally should be aligned with the number of steps for projection. Minimum
+#' is \code{1} (Default) and maximum is \code{99}.
 #' @param dispKernel A [`vector`] with the number of the dispersal Kernel to be
-#'   applied. Can be set either to a uniform numeric [vector], e.g.
-#'   \code{c(1,1,1,1)} or to a proportional decline
-#'   \code{(1,0.4,0.16,0.06,0.03)} (Default).
+#' applied. Can be set either to a uniform numeric [vector], e.g.
+#' \code{c(1,1,1,1)} or to a proportional decline
+#' \code{(1,0.4,0.16,0.06,0.03)} (Default).
 #' **Depending on the resolution of the raster, this parameter needs to be adapted**
 #' @param barrierType A [character] indicating whether any set barrier should be
-#'   set as \code{'strong'} or \code{'weak'} barriers. Strong barriers prevent
-#'   any dispersal across the barrier and weak barriers only do so if the whole
-#'   \code{"dispKernel"} length is covered by the barrier (Default:
-#'   \code{'strong'}).
+#' set as \code{'strong'} or \code{'weak'} barriers. Strong barriers prevent
+#' any dispersal across the barrier and weak barriers only do so if the whole
+#' \code{"dispKernel"} length is covered by the barrier (Default: \code{'strong'}).
 #' @param lddFreq [`numeric`] parameter indicating the frequency of
-#'   long-distance dispersal (LDD) events. Default is \code{0}, so no
-#'   long-distance dispersal.
-#' @param lddRange A [`numeric`] value highlighting the minimum and maximum
-#'   distance of LDD events.
+#' long-distance dispersal (LDD) events. Default is \code{0}, so no long-distance dispersal.
+#' @param lddRange A [`numeric`] value highlighting the minimum and maximum distance of LDD events.
 #' **Note: The units for those distance are in cells, thus the projection units in the raster.**
 #' @param iniMatAge Initial maturity age. Used together with `propaguleProd` as
-#'   a proxy of population growth. Must be set to the cell age in time units
-#'   which are dispersal steps (Default: \code{1}).
-#' @param propaguleProd Probability of a source cell to produce propagules as a
-#'   function of time since colonization. Set as probability vector that defines
-#'   the probability of a cell producing propagules.
-#' @param replicateNb Number of replicates to be used for the analysis (Default:
-#'   \code{10}).
-#' @param dtmp A [`character`] to a folder where temporary files are to be
-#'   created.
+#' a proxy of population growth. Must be set to the cell age in time units
+#' which are dispersal steps (Default: \code{1}).
+#' @param propaguleProdProb Probability of a source cell to produce propagules as a
+#' function of time since colonization. Set as probability vector that defines
+#' the probability of a cell producing propagules.
+#' @param replicateNb Number of replicates to be used for the analysis (Default: \code{10}).
+#' @param dtmp A [`character`] to a folder where temporary files are to be created.
+#'
 #' @details The barrier parameter is defined through \code{"add_barrier"}.
-#' @seealso \code{"MigClim::MigClim.userGuide()"}
+#'
+#' @returns Adds a MigClim onstrain to a [`BiodiversityScenario`] object.
+#'
 #' @references
 #' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of
 #' dispersal constraints into projections of species distribution models.
 #' Ecography,
 #' * Robin Engler, Wim Hordijk and Loic Pellissier (2013). MigClim: Implementing dispersal
 #' into species distribution models. R package version 1.6.
-#' @returns Adds a MigClim onstrain to a [`BiodiversityScenario`] object.
+#'
+#' @family constraint
+#' @keywords scenario
+#'
 #' @examples
 #' \dontrun{
 #' # Assumes that a trained 'model' object exists
@@ -62,12 +64,10 @@ NULL
 #' }
 #'
 #' @name add_constraint_MigClim
-#' @aliases add_constraint_MigClim
-#' @family constraint
-#' @keywords scenario
-#' @exportMethod add_constraint_MigClim
-#' @export
 NULL
+
+#' @rdname add_constraint_MigClim
+#' @export
 methods::setGeneric("add_constraint_MigClim",
                     signature = methods::signature("mod"),
                     function(mod, rcThresholdMode = 'continuous', dispSteps = 1,
@@ -76,10 +76,7 @@ methods::setGeneric("add_constraint_MigClim",
                              iniMatAge = 1, propaguleProdProb = c(0.2, 0.6,0.8, 0.95),
                              replicateNb = 10, dtmp = terra::terraOptions(print = F)$tempdir ) standardGeneric("add_constraint_MigClim"))
 
-#' @name add_constraint_MigClim
 #' @rdname add_constraint_MigClim
-#' @usage
-#'   \S4method{add_constraint_MigClim}{BiodiversityScenario,character,numeric,numeric,character,numeric,numeric,numeric,numeric,numeric,character}(mod,rcThresholdMode,dispSteps,dispKernel,barrierType,lddFreq,lddRange,iniMatAge,propaguleProdProb,replicateNb,dtmp)
 methods::setMethod(
   "add_constraint_MigClim",
   methods::signature(mod = "BiodiversityScenario"),
@@ -172,9 +169,8 @@ methods::setMethod(
     cr[['dispersal']] <- list(method = "MigClim",
                               params = params)
 
-    new <- mod$set_constraints(cr)
-    return(
-      bdproto(NULL, new)
-    )
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(cr)
+    return( new )
   }
 )

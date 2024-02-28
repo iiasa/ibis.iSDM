@@ -1,6 +1,3 @@
-#' @include utils.R
-NULL
-
 #' Threshold a continuous prediction to a categorical layer
 #'
 #' @description It is common in many applications of species distribution
@@ -13,78 +10,87 @@ NULL
 #' \code{obj}, it is furthermore necessary to provide a [`sf`] object for
 #' validation as there is no [`DistributionModel`] to read this information
 #' from.
+#'
 #' **Note:** This of course also allows to estimate the threshold based on withheld data, for instance
 #' those created from an a-priori cross-validation procedure.
 #'
 #' For [`BiodiversityScenario`] objects, adding this function to the processing
 #' pipeline stores a threshold attribute in the created [scenario] object.
 #'
-#' @param obj A trained [`DistributionModel`] or alternatively a [`SpatRaster`]
-#'   object.
-#' @param method A specifc method for thresholding. See details for available
-#'   options.
-#' @param value A [`numeric`] value for thresholding if method is fixed
-#'   (Default: \code{NULL}).
-#' @param point A [`sf`] object containing observational data used for model
-#'   training.
-#' @param field_occurrence A [`character`] location of
-#'   biodiversity point records.
-#' @param format [`character`] indication of whether \code{"binary"},
-#'   \code{"normalize"} or \code{"percentile"} formatted thresholds are to be
-#'   created (Default: \code{"binary"}). Also see Muscatello et al. (2021).
-#' @param return_threshold Should threshold value be returned instead (Default:
-#'   \code{FALSE})
+#' @param obj A trained [`DistributionModel`] or alternatively a [`SpatRaster`] object.
+#' @param method A specifc method for thresholding. See details for available options.
+#' @param value A [`numeric`] value for thresholding if method is fixed (Default: \code{NULL}).
+#' @param point A [`sf`] object containing observational data used for model training.
+#' @param field_occurrence A [`character`] location of biodiversity point records.
+#' @param format [`character`] indication of whether \code{"binary"}, \code{"normalize"}
+#' or \code{"percentile"} formatted thresholds are to be created (Default: \code{"binary"}).
+#' Also see Muscatello et al. (2021).
+#' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
 #' @param ... other parameters not yet set.
+#'
 #' @details The following options are currently implemented:
-#' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value} to be set.
-#' * \code{'mtp'} = minimum training presence is used to find and set the lowest predicted suitability for any occurrence point.
-#' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter has to be set here.
-#' * \code{'min.cv'} = Threshold the raster so to minimize the coefficient of variation (cv) of the posterior. Uses the lowest tercile of the cv in space. Only feasible with Bayesian engines.
-#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires the \code{"modEvA"} package to be installed.
-#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the \code{"modEvA"} package to be installed.
-#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen similarity). Requires the \code{"modEvA"} package to be installed.
-#' * \code{'F1score'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
-#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
-#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records. Requires the \code{"modEvA"} package to be installed.
-#' * \code{'AUC'} = Determines the optimal AUC of presence records. Requires the \code{"modEvA"} package to be installed.
-#' @name threshold
+#' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value}
+#' to be set.
+#' * \code{'mtp'} = minimum training presence is used to find and set the lowest
+#' predicted suitability for any occurrence point.
+#' * \code{'percentile'} = For a percentile threshold. A \code{value} as parameter
+#' has to be set here.
+#' * \code{'min.cv'} = Threshold the raster so to minimize the coefficient of
+#' variation (cv) of the posterior. Uses the lowest tercile of the cv in space.
+#' Only feasible with Bayesian engines.
+#' * \code{'TSS'} = Determines the optimal TSS (True Skill Statistic). Requires
+#' the \code{"modEvA"} package to be installed.
+#' * \code{'kappa'} = Determines the optimal kappa value (Kappa). Requires the
+#' \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen
+#' similarity). Requires the \code{"modEvA"} package to be installed.
+#' * \code{'F1score'} = Determines the optimal sensitivity of presence records.
+#' Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records.
+#' Requires the \code{"modEvA"} package to be installed.
+#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records.
+#' Requires the \code{"modEvA"} package to be installed.
+#' * \code{'AUC'} = Determines the optimal AUC of presence records. Requires the
+#' \code{"modEvA"} package to be installed.
+#'
+#' @returns A [SpatRaster] if a [SpatRaster] object as input. Otherwise the threshold
+#' is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
+#'
 #' @references
-#' * Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence, thresholds and the performance of presence-absence models. Methods Ecol. Evol. 5, 54–64. https://doi.org/10.1111/2041-210X.12123
-#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
-#' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320. https://doi.org/10.1111/cobi.13669
+#' * Lawson, C.R., Hodgson, J.A., Wilson, R.J., Richards, S.A., 2014. Prevalence,
+#' thresholds and the performance of presence-absence models. Methods Ecol. Evol.
+#' 5, 54–64. https://doi.org/10.1111/2041-210X.12123
+#' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
+#' of species occurrence with presence-only data. J. Biogeogr. 40, 778–789. https://doi.org/10.1111/jbi.12058
+#' * Muscatello, A., Elith, J., Kujala, H., 2021. How decisions about fitting
+#' species distribution models affect conservation outcomes. Conserv. Biol. 35, 1309–1320.
+#' https://doi.org/10.1111/cobi.13669
+#'
 #' @seealso \code{"modEvA"}
-#' @returns A [SpatRaster] if a [SpatRaster] object as input. Otherwise the
-#'   threshold is added to the respective [`DistributionModel`] or
-#'   [`BiodiversityScenario`] object.
-#' @aliases threshold
+#'
 #' @examples
 #' \dontrun{
 #'  # Where mod is an estimated DistributionModel
 #'  tr <- threshold(mod)
 #'  tr$plot_threshold()
 #' }
-#' @export
+#'
+#' @name threshold
 NULL
 
-#' @name threshold
 #' @rdname threshold
-#' @exportMethod threshold
 #' @export
 methods::setGeneric(
   "threshold",
   signature = methods::signature("obj", "method", "value"),
   function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) standardGeneric("threshold"))
 
-#' Generic threshold with supplied DistributionModel object
-#' @name threshold
 #' @rdname threshold
-#' @usage
-#'   \S4method{threshold}{ANY,character,numeric,ANY,character,logical}(obj,method,value,point,format,return_threshold,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "ANY"),
   function(obj, method = 'mtp', value = NULL, point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
-    assertthat::assert_that(any( class(obj) %in% getOption('ibis.engines') ),
+    assertthat::assert_that(any( obj$get_name() %in% getOption('ibis.engines') ),
                             is.character(method),
                             is.null(value) || is.numeric(value),
                             is.character(format)
@@ -121,7 +127,7 @@ methods::setMethod(
       if(method %in% c('TSS','kappa','F1score','Sensitivity','Specificity',
                        'Misclass','Omission','Commission','Precision',
                        'PPI','PAI','OddsRatio')){
-        if(getOption('ibis.setupmessages')) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]','yellow','Ideally thresholds are created with independent data.\n Using training data.')
       }
       point <- collect_occurrencepoints(model = model,
                                         include_absences = TRUE,
@@ -129,15 +135,22 @@ methods::setMethod(
                                         addName = TRUE, tosf = TRUE
                                         )
     } else {
+      assertthat::assert_that(inherits(point, 'sf'),
+                              utils::hasName(point, field_occurrence),
+                              msg = paste0("Field ", field_occurrence, " not found in the layer!"))
       assertthat::assert_that(sf::st_crs(point) == sf::st_crs(obj$get_data('prediction')))
     }
 
     # If TSS or kappa is chosen, check whether there is poipa data among the sources
-    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity')) || length(unique(point$name)) > 1){
-      if(getOption('ibis.setupmessages')) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
+    if((!any(point[, field_occurrence, drop = TRUE]==0) & method %in% c('TSS','kappa','F1score','Sensitivity','Specificity'))){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]','red','Threshold method needs absence-data. Generating some now...')
       bg <- terra::rasterize(obj$model$background, emptyraster(obj$get_data('prediction')))
       ass <- model$biodiversity[[1]]$pseudoabsence_settings
       if(is.null(ass)) ass <- getOption("ibis.pseudoabsence") # Get Default settings
+
+      # Rename geometry to be consistent
+      point <- rename_geometry(point, "geometry")
+
       suppressMessages(
         abs <- add_pseudoabsence(df = point,
                                  field_occurrence = field_occurrence,
@@ -162,12 +175,13 @@ methods::setMethod(
     if(!inherits(point,"sf")){ point <- guess_sf(point) }
 
     # Now self call threshold
-    out <- .stackthreshold(obj = ras,method = method, value = value,point = point, format = format,
+    out <- .stackthreshold(obj = ras,method = method, value = value, point = point,
+                           field_occurrence = field_occurrence, format = format,
                            return_threshold = return_threshold)
     assertthat::assert_that(is.Raster(out))
     # Add result to new obj and clean up old thresholds before
     tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
-    new_obj <- obj
+    new_obj <- obj$clone(deep = TRUE)
     if(length(tr_lyr)>0) for(v in tr_lyr) new_obj$rm_threshold()
     new_obj <- new_obj$set_data(paste0("threshold_", method), out)
     # Return altered object
@@ -176,24 +190,34 @@ methods::setMethod(
 )
 
 #' @noRd
+#'
 #' @keywords internal
 .stackthreshold <- function(obj, method = 'fixed', value = NULL,
                             point = NULL, field_occurrence = "observed", format = "binary", return_threshold = FALSE, ...) {
   assertthat::assert_that(is.Raster(obj),
                           is.character(method),
                           inherits(point,'sf'),
+                          is.character(field_occurrence),
                           is.null(value) || is.numeric(value),
                           is.character(format)
   )
   # Match format
   format <- match.arg(format, c("binary", "normalize", "percentile"), several.ok = FALSE)
 
+  # Check for field occurrence field
+  if(!is.null(point)){
+    assertthat::assert_that(inherits(point, 'sf'),
+                            utils::hasName(point, field_occurrence),
+                            msg = paste0("Field ", field_occurrence, " not found in the layer!"))
+  }
+
   # Apply threshold on each entry
   if(return_threshold){
     # Return the threshold directly
     out <- vector()
     for(i in names(obj)) out <- c(out, threshold(obj[[i]], method = method,
-                                                                value = value, point = point,  format = format, return_threshold = return_threshold, ...) )
+                                                                value = value, point = point, field_occurrence = field_occurrence,
+                                                 format = format, return_threshold = return_threshold, ...) )
     names(out) <- names(obj)
   } else {
     # Return the raster instead
@@ -212,16 +236,14 @@ methods::setMethod(
     }
     # Now loop
     out <- threshold(obj, method = method,
-                     value = value, point = point, format = format,
+                     value = value, point = point, field_occurrence = field_occurrence,
+                     format = format,
                      return_threshold = return_threshold, ...)
   }
   return(out)
 }
 
-#' @name threshold
 #' @rdname threshold
-#' @usage
-#'   \S4method{threshold}{SpatRaster,character,ANY,ANY,character,logical}(obj,method,value,point,format,return_threshold)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "SpatRaster"),
@@ -382,14 +404,13 @@ methods::setMethod(
 
 #' Thresholds in scenario estimation
 #'
-#' @name threshold
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is
-#'   to be added.
+#' to be added.
 #' @param value A [`numeric`] value specifying the specific threshold for scenarios
-#'   (Default: \code{NULL} Grab from object).
+#' (Default: \code{NULL} Grab from object).
 #' @param ... Any other parameter. Used to fetch value if set somehow.
+#'
 #' @rdname threshold
-#' @usage \S4method{threshold}{BiodiversityScenario,ANY}(obj,value,...)
 methods::setMethod(
   "threshold",
   methods::signature(obj = "BiodiversityScenario"),
@@ -407,33 +428,37 @@ methods::setMethod(
     # Assert that predicted raster is present
     assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
 
+    # Make a clone copy of the object
+    new <- obj$clone(deep = TRUE)
+
     # Unless set, check
     if(is.null(value)){
       # Check that a threshold layer is available and get the methods and data from it
       assertthat::assert_that( length( grep('threshold', obj$get_model()$show_rasters()) ) >0 ,
                                msg = 'Call \' threshold \' for prediction first!')
       # Get threshold layer
-      tr_lyr <- grep('threshold', obj$get_model()$show_rasters(),value = TRUE)
+      tr_lyr <- grep('threshold', new$get_model()$show_rasters(), value = TRUE)
       if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
-      ras_tr <- obj$get_model()$get_data( tr_lyr[1] )
+      ras_tr <- new$get_model()$get_data( tr_lyr[1] )
       value <- attr(ras_tr[[1]], 'threshold')
       names(value) <- attr(ras_tr[[1]], 'method')
     } else {
       assertthat::assert_that(is.numeric(value))
       names(value) <- "fixed"
       # Check if scenario is already fitted
-      proj <- obj$get_data()
+      proj <- new$get_data()
+
       if(!is.Waiver(proj)){
         # Existing projection ?
-        if(getOption('ibis.setupmessages')) myLog('[Threshold]',
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Threshold]',
                                                   'green',
                                                   'Projection found. Applying threshold!')
-        new <- proj |> dplyr::select(suitability)
-        obj <- obj$apply_threshold(tr = value)
-        return( obj )
-        invisible()
+        new <- new$apply_threshold(tr = value)
+        return( new )
       }
+      rm(proj)
     }
-    bdproto(NULL, obj, threshold = value)
+    new$threshold <- value
+    return(new)
   }
 )

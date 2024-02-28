@@ -1,4 +1,4 @@
-#' @include utils.R bdproto-biodiversitydistribution.R
+#' @include class-biodiversitydistribution.R
 NULL
 
 #' Create distribution modelling procedure
@@ -29,17 +29,16 @@ NULL
 #' as well as a specified engine.**
 #'
 #' @param background Specification of the modelling background. Must be a
-#'   [`SpatRaster`] or [`sf`] object.
+#' [`SpatRaster`] or [`sf`] object.
 #' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction
-#'   surface when intersected with input data (Default: \code{NULL}).
+#' surface when intersected with input data (Default: \code{NULL}).
 #' @param limits_method A [`character`] of the method used for hard limiting a
-#'   projection. Available options are \code{"none"} (Default), \code{"zones"}
-#'   or \code{"mcp"}.
-#' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default
-#'   \code{0}). Only used if \code{"mcp"} is used.
+#' projection. Available options are \code{"none"} (Default), \code{"zones"}
+#' or \code{"mcp"}.
+#' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default \code{0}).
+#' Only used if \code{"mcp"} is used.
 #' @param limits_clip [`logical`] Should the limits clip all predictors before
-#'   fitting a model (\code{TRUE}) or just the prediction (\code{FALSE},
-#'   default).
+#' fitting a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).
 #'
 #' @details This function creates a [`BiodiversityDistribution-class`] object
 #' that in itself contains other functions and stores parameters and
@@ -53,57 +52,63 @@ NULL
 #' not set, then a \code{"Waiver"} object is returned instead.
 #'
 #' The following objects can be stored:
-#' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with the added biodiversity data.
-#' * \code{object$engine} An \code{"engine"} object (e.g. [`engine_inlabru()`]) with function depended on the added engine.
+#' * \code{object$biodiversity} A [`BiodiversityDatasetCollection`] object with
+#' the added biodiversity data.
+#' * \code{object$engine} An \code{"engine"} object (e.g. [`engine_inlabru()`])
+#' with function depended on the added engine.
 #' * \code{object$predictors} A [`PredictorDataset`] object with all set predictions.
 #' * \code{object$priors} A [`PriorList`] object with all specified priors.
 #' * \code{object$log} A [`Log`] object that captures.
 #'
 #' Useful high-level functions to address those objects are for instance:
-#' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`] object contents. Can also be called via [print].
-#' * \code{object$get_biodiversity_equations()} Lists the equations used for each biodiversity dataset with given id. Defaults to all predictors.
-#' * \code{object$get_biodiversity_types()} Lists the type of each specified biodiversity dataset with given id.
+#' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`]
+#' object contents. Can also be called via [print].
+#' * \code{object$get_biodiversity_equations()} Lists the equations used for each
+#' biodiversity dataset with given id. Defaults to all predictors.
+#' * \code{object$get_biodiversity_types()} Lists the type of each specified
+#' biodiversity dataset with given id.
 #' * \code{object$get_extent()} Outputs the [terra::ext] of the modelling region.
-#' * \code{object$show_background_info()} Returns a [`list`] with the [terra::ext] and the [terra::crs].
-#' * \code{object$get_extent_dimensions()} Outputs the [terra::ext] dimension by calling the \code{"extent_dimensions()"} function.
-#' * \code{object$get_predictor_names()} Returns a [character] vector with the names of all added predictors.
+#' * \code{object$show_background_info()} Returns a [`list`] with the [terra::ext]
+#' and the [terra::crs].
+#' * \code{object$get_extent_dimensions()} Outputs the [terra::ext] dimension by
+#' calling the \code{"extent_dimensions()"} function.
+#' * \code{object$get_predictor_names()} Returns a [character] vector with the
+#' names of all added predictors.
 #' * \code{object$get_prior_variables()} Returns a description of [`priors`] added.
 #'
 #' There are other functions as well but those are better accessed through their
 #' respective wrapper functions.
 #'
-#' @returns [`BiodiversityDistribution-class`] object containing data for
-#'   building a biodiversity distribution modelling problem.
+#' @returns [`BiodiversityDistribution-class`] object containing data for building
+#' a biodiversity distribution modelling problem.
 #'
-#' @seealso \code{"bdproto"} on the general definition of [`proto`] objects and
-#'   in particular [`BiodiversityDistribution`].
+#' @seealso [`BiodiversityDistribution`] and other classes.
 #'
 #' @references
-#' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A., Dorazio, R.M., (2019) A practical guide for combining data to model species distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
-#' * Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area hypotheses improves stacked species distribution model performance." Global Ecology and Biogeography 27, no. 1 (2018): 156-165.
-#' @aliases distribution
-#' @exportMethod distribution
-#' @name distribution
+#' * Fletcher, R.J., Hefley, T.J., Robertson, E.P., Zuckerberg, B., McCleery, R.A.,
+#' Dorazio, R.M., (2019) A practical guide for combining data to model species
+#' distributions. Ecology 100, e02710. https://doi.org/10.1002/ecy.2710
+#' * Cooper, Jacob C., and Jorge Soberón. "Creating individual accessible area
+#' hypotheses improves stacked species distribution model performance." Global
+#' Ecology and Biogeography 27, no. 1 (2018): 156-165.
 #'
 #' @examples
-#' \dontrun{
-#'  # Load background raster
-#'  background <- terra::rast(system.file("inst/extdata/europegrid_50km.tif",package = "ibis.iSDM"))
-#'  # Define model
-#'  x <- distribution(background)
-#'  x
-#'  # Show names of the functions within the object
-#'  names(x)
+#' # Load background raster
+#' background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
+#' # Define model
+#' x <- distribution(background)
+#' x
 #'
-#' }
+#' @name distribution
+NULL
+
+#' @rdname distribution
 #' @export
 methods::setGeneric("distribution",
                     signature = methods::signature("background"),
-                    function(background, limits = NULL, limits_method = "none", mcp_buffer = 0,limits_clip = FALSE) standardGeneric("distribution"))
+                    function(background, limits = NULL, limits_method = "none",
+                             mcp_buffer = 0,limits_clip = FALSE) standardGeneric("distribution"))
 
-#' @name distribution
-#' @usage
-#'   \S4method{distribution}{SpatRaster,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -119,8 +124,8 @@ methods::setMethod(
     assertthat::assert_that( inherits(background,'SpatRaster')  )
 
     # Check that provided background has a valid crs
-    if(!is.na(terra::crs(background,describe=TRUE)[['code']])){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Provide a background with a valid projection!')
+    if(is.na(terra::crs(background,describe=TRUE)[['code']])){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Provide a background with a valid projection!')
     }
 
     # Make an error check that units have a single units
@@ -132,7 +137,6 @@ methods::setMethod(
       assertthat::assert_that(length(vals)==1,
                               msg = "Values in background layer can only be unique!")
     }
-
 
     # Convert raster to dissolved polygons to get a study boundary
     newbg <- sf::st_as_sf(
@@ -148,9 +152,6 @@ methods::setMethod(
     distribution(newbg, limits, limits_method, mcp_buffer, limits_clip)
   })
 
-#' @name distribution
-#' @usage
-#'   \S4method{distribution}{sf,ANY,character,numeric,logical}(background,limits,limits_method,mcp_buffer,limits_clip)
 #' @rdname distribution
 methods::setMethod(
   "distribution",
@@ -177,7 +178,7 @@ methods::setMethod(
     assertthat::assert_that(mcp_buffer>=0, msg = "Buffered mcp distance has to be positive!")
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating distribution object...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating distribution object...')
 
     # Convert limits if provided
     if(!is.null(limits)){
@@ -216,9 +217,14 @@ methods::setMethod(
       if(is.null(limits)) limits <- new_waiver()
     }
 
+    # Create a dummy biodiversity dataset at initalization
+    bio <- BiodiversityDatasetCollection$new()
+
     # Create BiodiversityDistribution object
-    bdproto(NULL, BiodiversityDistribution,
-            background = background,
-            limits = limits
+    bd <- BiodiversityDistribution$new(
+      background = background,
+      limits = limits,
+      biodiversity = bio
     )
+    return(bd)
   })

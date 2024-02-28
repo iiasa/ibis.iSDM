@@ -12,22 +12,19 @@ formatGLOBIOM(
   template = NULL,
   shares_to_area = FALSE,
   use_gdalutils = FALSE,
-  verbose = getOption("ibis.setupmessages")
+  verbose = getOption("ibis.setupmessages", default = TRUE)
 )
 }
 \arguments{
-\item{fname}{A filename in \code{\link{character}} pointing to a GLOBIOM output in
-netCDF format.}
+\item{fname}{A filename in \code{\link{character}} pointing to a GLOBIOM output in netCDF format.}
 
-\item{oftype}{A \code{\link{character}} denoting the output type (Default:
-\code{'raster'}).}
+\item{oftype}{A \code{\link{character}} denoting the output type (Default: \code{'raster'}).}
 
 \item{ignore}{A \code{\link{vector}} of variables to be ignored (Default: \code{NULL}).}
 
 \item{period}{A \code{\link{character}} limiting the period to be returned from the
-formatted data. Options include \code{"reference"} for the first entry,
-\code{"projection"} for all entries but the first, and \code{"all"} for all
-entries (Default: \code{"reference"}).}
+formatted data. Options include \code{"reference"} for the first entry, \code{"projection"}
+for all entries but the first, and \code{"all"} for all entries (Default: \code{"reference"}).}
 
 \item{template}{An optional \code{\link{SpatRaster}} object towards which projects
 should be transformed.}
@@ -35,8 +32,7 @@ should be transformed.}
 \item{shares_to_area}{A \code{\link{logical}} on whether shares should be corrected to
 areas (if identified).}
 
-\item{use_gdalutils}{(Deprecated) \code{\link{logical}} on to use gdalutils hack
-around.}
+\item{use_gdalutils}{(Deprecated) \code{\link{logical}} on to use gdalutils hack-around.}
 
 \item{verbose}{\code{\link{logical}} on whether to be chatty.}
 }
@@ -52,6 +48,6 @@ the BIOCLIMA project. Likely of little use for anyone outside IIASA.
 # Expects a filename pointing to a netCDF file.
 covariates <- formatGLOBIOM(fname)
 }
+
 }
-\keyword{internal,}
 \keyword{utils}

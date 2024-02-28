@@ -37,6 +37,87 @@ test_that('Test various thresholds calculations', {
   tr4 <- threshold(r1, method = "min.cv",value = .2, point = ss)
   expect_s4_class(tr4, "SpatRaster")
 
+  # Rename the point information and test again
+  ss <- ss |> dplyr::rename(new = observed)
+  expect_no_error(
+    tr5 <- threshold(r1, method = "mtp", point = ss, field_occurrence = "new")
+  )
+
+  # --- #
+  # Skip below if modeva not installed
+  skip_if_not_installed("modEvA")
+  suppressWarnings(
+    requireNamespace("modEvA", quietly = TRUE)
+  )
+  expect_no_error(
+    tr6 <- threshold(r1, method = "TSS", point = ss, field_occurrence = "new")
+  )
+  expect_s4_class(tr6, 'SpatRaster')
+  # --- #
+})
+
+# --- #
+# Test threshold on fitted model
+test_that('Test Thresholds on fitted models', {
+
+  suppressWarnings(
+    requireNamespace("terra", quietly = TRUE)
+  )
+
+  # Don't print out as many messages
+  options("ibis.setupmessages" = FALSE)
+
+  # Load files
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  # Get list of test predictors
+  ll <- list.files(system.file('extdata/predictors',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  # --- #
+  # Fit a dummy model
+  fit <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points,field_occurrence = "Observed") |>
+    add_predictors(predictors) |>
+    engine_glm() |>
+    train()
+
+  # Now do thresholds on the fitted model
+  tr <- threshold(fit, method = "mtp")
+  expect_gt(tr$get_thresholdvalue(), 0)
+  expect_length(tr$show_rasters(), 2)
+  rm(tr)
+  expect_no_error(tr <- threshold(fit, method = "perc") )
+
+  # Try with an externally supplied point dataset
+  expect_error( tr <- threshold(fit, method = "mtp", point = virtual_points) )
+  # Renamed
+  expect_no_error( tr <- threshold(fit, method = "mtp",
+                                   point = virtual_points,
+                                   field_occurrence = "Observed") )
+
+  # --- #
+  # Skip below if modeva not installed
+  skip_if_not_installed("modEvA")
+  suppressWarnings(
+    requireNamespace("modEvA", quietly = TRUE)
+  )
+  poipa <- add_pseudoabsence(virtual_points, field_occurrence = "Observed",template = background)
+
+  fit <- distribution(background) |>
+    add_biodiversity_poipa(poipa, field_occurrence = "Observed") |>
+    add_predictors(predictors) |>
+    engine_glm() |>
+    train()
+
+  expect_error(
+    tr2 <- threshold(fit, method = "TSS", point = poipa, field_occurrence = "new")
+  )
+  expect_no_error(
+    tr2 <- threshold(fit, method = "TSS", point = poipa, field_occurrence = "Observed")
+  )
+  expect_length(tr2$show_rasters(), 2)
+
 })
 
 # --- #

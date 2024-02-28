@@ -213,7 +213,7 @@ the estimation.
 ## Fitting and Scenarios
 
 <details>
-<summary><b>There are too many messages. How can I run `ibis.iSDM` more verbosely ?</b>
+<summary><b>There are too many messages. How can I run `ibis.iSDM` less verbosely ?</b>
 </summary>
 
 There are two options that can be enabled to reduce the number of messages:

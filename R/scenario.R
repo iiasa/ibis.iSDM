@@ -1,41 +1,41 @@
-#' @include utils.R bdproto-biodiversityscenario.R
+#' @include class-biodiversityscenario.R
 NULL
 
 #' Create a new scenario based on trained model parameters
 #'
 #' @description This function creates a new [BiodiversityScenario-class] object
 #' that contains the projections of a model.
+#'
+#' @param fit A [`BiodiversityDistribution`] object containing a trained model.
+#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
+#' surface when intersected with the prediction data (Default: \code{NULL}).
+#' This can for instance be set as an expert-delineated constrain to limit spatial
+#' projections.
+#' @param reuse_limits A [`logical`] on whether to reuse limits if found in the
+#' trained [`BiodiversityDistribution`] object (Default: \code{FALSE}). See also notes!
+#' @param copy_model A [`logical`] of whether the model object is to be copied to
+#' the scenario object. Note that setting this option to \code{TRUE} can increase
+#' the required amount of memory (Default: \code{FALSE}).
+#'
 #' @note
 #' If a limit has been defined already during [train()], for example by adding
 #' an extrapolation limit [add_control_extrapolation()], this zonal layer can be
 #' reused for the projections. **Note: This effectively fixes the projections to certain areas.**
 #'
-#' @param fit A [`BiodiversityDistribution`] object containing a trained model.
-#' @param limits A [`SpatRaster`] or [`sf`] object that limits the projection
-#'   surface when intersected with the prediction data (Default: \code{NULL}).
-#'   This can for instance be set as an expert-delineated constrain to limit
-#'   spatial projections.
-#' @param reuse_limits A [`logical`] on whether to reuse limits if found in the
-#' trained [`BiodiversityDistribution`] object (Default: \code{FALSE}). See also notes!
-#'
-#' @param copy_model A [`logical`] of whether the model object is to be copied
-#'   to the scenario object. Note that setting this option to \code{TRUE} can
-#'   increase the required amount of memory (Default: \code{FALSE}).
-#' @aliases scenario
-#' @exportMethod scenario
-#' @name scenario
-#'
 #' @examples
 #' \dontrun{
 #'   scenario(fit, limits = island_area)
 #' }
+#'
+#' @name scenario
+NULL
+
+#' @rdname scenario
 #' @export
 methods::setGeneric("scenario",
                     signature = methods::signature("fit"),
                     function(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE) standardGeneric("scenario"))
 
-#' @name scenario
-#' @usage \S4method{scenario}{ANY,ANY,logical,logical}(fit,limits,reuse_limits,copy_model)
 #' @rdname scenario
 methods::setMethod(
   "scenario",
@@ -52,7 +52,7 @@ methods::setMethod(
     if(!copy_model){
       modelobject <- deparse(substitute(fit))
     } else {
-      if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
       modelobject <- fit
     }
     modelid <- fit$id
@@ -79,7 +79,7 @@ methods::setMethod(
     if(reuse_limits){
       # Check if limits have been found.
       if(fit$has_limits()){
-        if(getOption('ibis.setupmessages')) myLog('[Scenario]','yellow', "Found existing extrapolation limits and will reuse them!")
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow', "Found existing extrapolation limits and will reuse them!")
         settings <- fit$settings
         limits <- settings$get('limits')[['layer']]
       }
@@ -90,9 +90,12 @@ methods::setMethod(
       limits <- new_waiver()
     }
     # Create BiodiversityScenario object
-    bdproto(NULL, BiodiversityScenario,
-            modelobject = modelobject,
-            modelid = modelid,
-            limits = limits
-    )
+    sc <- BiodiversityScenario$new()
+    sc$t <- modelobject
+    sc$modelobject <- modelobject
+    sc$modelid <- modelid
+    sc$limits <- limits
+
+    return(sc)
+
   })

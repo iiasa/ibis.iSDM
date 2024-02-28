@@ -27,28 +27,24 @@ engine_stan(
 each chain (including warmup). (Default: \code{2000}).}
 
 \item{warmup}{A positive \code{\link{integer}} specifying the number of warmup (aka
-burnin) iterations per chain. If step-size adaptation is on (Default:
-\code{TRUE}), this also controls the number of iterations for which
-adaptation is run (and hence these warmup samples should not be used for
-inference). The number of warmup iterations should be smaller than
-\code{iter} and the default is \code{iter/2}.}
+burnin) iterations per chain. If step-size adaptation is on (Default: \code{TRUE}),
+this also controls the number of iterations for which adaptation is run (and
+hence these warmup samples should not be used for inference). The number of
+warmup iterations should be smaller than \code{iter} and the default is \code{iter/2}.}
 
-\item{init}{Initial values for parameters (Default: \code{'random'}). Can
-also be specified as \link{list} (see: \code{"rstan::stan"})}
+\item{init}{Initial values for parameters (Default: \code{'random'}). Can also
+be specified as \link{list} (see: \code{"rstan::stan"})}
 
-\item{cores}{If set to NULL take values from specified ibis option
-\code{getOption('ibis.nthread')}.}
+\item{cores}{If set to NULL take values from specified ibis option \code{getOption('ibis.nthread')}.}
 
-\item{algorithm}{Mode used to sample from the posterior. Available options
-are \code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See
-\code{"cmdstanr"} package for more details. (Default: \code{"sampling"}).}
+\item{algorithm}{Mode used to sample from the posterior. Available options are
+\code{"sampling"}, \code{"optimize"}, or \code{"variational"}. See \code{"cmdstanr"}
+package for more details. (Default: \code{"sampling"}).}
 
-\item{control}{See \code{"rstan::stan"} for more details on specifying the
-controls.}
+\item{control}{See \code{"rstan::stan"} for more details on specifying the controls.}
 
-\item{type}{The mode used for creating posterior predictions. Either
-summarizing the linear \code{"predictor"} or \code{"response"} (Default:
-\code{"response"}).}
+\item{type}{The mode used for creating posterior predictions. Either summarizing
+the linear \code{"predictor"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other variables}
 }
@@ -79,12 +75,17 @@ stancode of the model.
 # Add Stan as an engine
 x <- distribution(background) |> engine_stan(iter = 1000)
 }
+
 }
 \references{
 \itemize{
-\item Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'. https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
-\item Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
-\item Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
+\item Jonah Gabry and Rok Češnovar (2021). cmdstanr: R Interface to 'CmdStan'.
+https://mc-stan.org/cmdstanr, https://discourse.mc-stan.org.
+\item Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M.,
+... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of
+statistical software, 76(1), 1-32.
+\item Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization
+in the horseshoe and other shrinkage priors. Electronic Journal of Statistics, 11(2), 5018-5051.
 }
 }
 \seealso{
@@ -94,10 +95,10 @@ Other engine:
 \code{\link{engine_bart}()},
 \code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
-\code{\link{engine_glmnet}()},
 \code{\link{engine_glm}()},
-\code{\link{engine_inlabru}()},
+\code{\link{engine_glmnet}()},
 \code{\link{engine_inla}()},
+\code{\link{engine_inlabru}()},
 \code{\link{engine_xgboost}()}
 }
 \concept{engine}

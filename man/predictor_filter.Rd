@@ -7,8 +7,8 @@
 predictor_filter(env, keep = NULL, method = "pearson", ...)
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental
-covariates for a given species.}
+\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates
+for a given species.}
 
 \item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually
 variables for which prior information is known.}
@@ -35,23 +35,24 @@ Some of the options require different packages to be pre-installed, such as
 Available options are:
 \itemize{
 \item \code{"none"} No prior variable removal is performed (Default).
-\item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
-remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-\item \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{abess} package (see References). Note that this
-effectively fits a separate generalized linear model to reduce the number
-of covariates.
+\item \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise
+comparisons to identify and remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+\item \code{"abess"} A-priori adaptive best subset selection of covariates via the
+\code{abess} package (see References). Note that this effectively fits a separate
+generalized linear model to reduce the number of covariates.
 \item \code{"boruta"} Uses the \code{Boruta} package to identify non-informative features.
 }
 }
 \note{
 Using this function on predictors effectively means that a separate
-model is fitted on the data with all the assumptions that come with in
-(e.g. linearity, appropriateness of response, normality, etc).
+model is fitted on the data with all the assumptions that come with in (e.g.
+linearity, appropriateness of response, normality, etc).
 }
 \examples{
 \dontrun{
  # Remove highly correlated predictors
  env <- predictor_filter( env, option = "pearson")
 }
+
 }
 \keyword{utils}

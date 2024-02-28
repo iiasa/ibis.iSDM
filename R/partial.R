@@ -1,58 +1,57 @@
-#' @include utils.R
-NULL
-
 #' Obtain partial effects of trained model
 #'
 #' @description Create a partial response or effect plot of a trained model.
 #'
-#' @param mod A trained `DistributionModel` object with \code{fit_best} model
-#'   within.
+#' @param mod A trained `DistributionModel` object with \code{fit_best} model within.
 #' @param x.var A [character] indicating the variable for which a partial effect
-#'   is to be calculated.
+#' is to be calculated.
 #' @param constant A [numeric] constant to be inserted for all other variables.
-#'   Default calculates a mean per variable.
+#' Default calculates a mean per variable.
 #' @param variable_length [numeric] The interpolation depth (nr. of points) to
-#'   be used (Default: \code{100}).
+#' be used (Default: \code{100}).
 #' @param values [numeric] Directly specified values to compute partial effects
-#'   for. If this parameter is set to anything other than \code{NULL}, the
-#'   parameter \code{"variable_length"} is ignored (Default: \code{NULL}).
-#' @param newdata An optional [data.frame] with provided data for partial
-#'   estimation (Default: \code{NULL}).
+#' for. If this parameter is set to anything other than \code{NULL}, the parameter
+#' \code{"variable_length"} is ignored (Default: \code{NULL}).
+#' @param newdata An optional [data.frame] with provided data for partial estimation
+#' (Default: \code{NULL}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted?
 #' @param type A specified type, either \code{'response'} or \code{'predictor'}.
-#'   Can be missing.
+#' Can be missing.
 #' @param ... Other engine specific parameters.
-#' @seealso [partial]
+#'
 #' @details By default the mean is calculated across all parameters that are not
-#'   \code{x.var}. Instead a *constant* can be set (for instance \code{0}) to be
-#'   applied to the output.
+#' \code{x.var}. Instead a *constant* can be set (for instance \code{0}) to be
+#' applied to the output.
+#'
 #' @return A [data.frame] with the created partial response.
-#' @aliases partial
+#'
+#' @seealso [partial]
+#' @keywords partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Do a partial calculation of a trained model
 #'  partial(fit, x.var = "Forest.cover", plot = TRUE)
 #' }
-#' @keywords partial
-#' @export
+#'
 #' @name partial
+NULL
+
+#' @rdname partial
+#' @export
 methods::setGeneric(
   "partial",
-  signature = methods::signature("mod","x.var"),
-  function(mod, x.var, constant = NULL, variable_length = 100, values = NULL, newdata = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
+  signature = methods::signature("mod"),
+  function(mod, x.var = NULL, constant = NULL, variable_length = 100, values = NULL, newdata = NULL, plot = FALSE, type = "response", ...) standardGeneric("partial"))
 
-#' @name partial
 #' @rdname partial
-#' @usage
-#'   \S4method{partial}{ANY,character,ANY,numeric,ANY,ANY,logical,character}(mod,x.var,constant,variable_length,values,newdata,plot,type,...)
 methods::setMethod(
   "partial",
-  methods::signature(mod = "ANY", x.var = "character"),
-  function(mod, x.var, constant = NULL, variable_length = 100,
+  methods::signature(mod = "ANY"),
+  function(mod, x.var = NULL, constant = NULL, variable_length = 100,
            values = NULL, newdata = NULL, plot = FALSE, type = "response",...) {
-    assertthat::assert_that(!missing(x.var),msg = 'Specify a variable name in the model!')
     assertthat::assert_that(inherits(mod, "DistributionModel"),
-                            is.character(x.var),
+                            is.character(x.var) || is.null(x.var),
                             is.null(constant) || is.numeric(constant),
                             is.numeric(variable_length),
                             is.null(newdata) || is.data.frame(newdata),
@@ -69,8 +68,6 @@ methods::setMethod(
 )
 
 #' @rdname partial
-#' @method partial DistributionModel
-#' @keywords partial
 #' @export
 partial.DistributionModel <- function(mod, ...) mod$partial(...)
 
@@ -80,39 +77,43 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 #' of a trained model for a given variable. Differently from [partial] in space.
 #' However the result is a [`SpatRaster`] showing the spatial magnitude of the
 #' partial response.
+#'
 #' @param mod A [`DistributionModel-class`] object with trained model.
 #' @param x.var A [character] indicating the variable for which a partial effect
-#'   is to be calculated.
+#' is to be calculated.
 #' @param constant A [numeric] constant to be inserted for all other variables.
-#'   Default calculates the [mean] per variable.
+#' Default calculates the [mean] per variable.
 #' @param newdata A [`data.frame`] on which to calculate the spartial for. Can be
 #' for example created from a raster file (Default: \code{NULL}).
 #' @param plot A [logical] indication of whether the result is to be plotted?
 #' @param ... Other engine specific parameters.
-#' @seealso [partial]
+#'
 #' @details By default the [mean] is calculated across all parameters that are
-#'   not \code{x.var}. Instead a *constant* can be set (for instance \code{0})
-#'   to be applied to the output.
-#' @returns A [SpatRaster] containing the mapped partial response of the
-#'   variable.
-#' @aliases spartial
+#' not \code{x.var}. Instead a *constant* can be set (for instance \code{0}) to
+#' be applied to the output.
+#'
+#' @returns A [SpatRaster] containing the mapped partial response of the variable.
+#'
+#' @seealso [partial]
+#' @keywords partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Create and visualize the spartial effect
 #'  spartial(fit, x.var = "Forest.cover", plot = TRUE)
 #' }
-#' @keywords partial
-#' @export
+#'
 #' @name spartial
+NULL
+
+#' @rdname spartial
+#' @export
 methods::setGeneric(
   "spartial",
   signature = methods::signature("mod","x.var"),
   function(mod, x.var, constant = NULL, newdata = NULL, plot = FALSE, ...) standardGeneric("spartial"))
 
-#' @name spartial
 #' @rdname spartial
-#' @usage
-#'   \S4method{spartial}{ANY,character,ANY,ANY,logical}(mod,x.var,constant,newdata,plot,...)
 methods::setMethod(
   "spartial",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -134,8 +135,6 @@ methods::setMethod(
 )
 
 #' @rdname spartial
-#' @method spartial DistributionModel
-#' @keywords partial
 #' @export
 spartial.DistributionModel <- function(mod, ...) mod$spartial(...)
 
@@ -147,27 +146,32 @@ spartial.DistributionModel <- function(mod, ...) mod$spartial(...)
 #' provides more detail in the light of the data. It is also able to contrast
 #' different variables against each other and show the used data.
 #'
+#' @param mod A trained `DistributionModel` object. Requires a fitted model and
+#' inferred prediction.
+#' @param x.var A [character] indicating the variable to be investigated. Can be
+#' a [`vector`] of length \code{1} or \code{2}.
+#' @param df [`logical`] if plotting data should be returned instead (Default: \code{FALSE}).
+#' @param ... Other engine specific parameters.
+#'
 #' @details This functions calculates the observed density of presence and
 #' absence points over the whole surface of a specific variable. It can be used
 #' to visually inspect the fit of the model to data.
 #'
 #' @note By default all variables that are not \code{x.var} are hold constant at
 #' the mean.
-#' @param mod A trained `DistributionModel` object. Requires a fitted model and
-#'   inferred prediction.
-#' @param x.var A [character] indicating the variable to be investigated. Can be
-#'   a [`vector`] of length \code{1} or \code{2}.
-#' @param df [`logical`] if plotting data should be returned instead (Default:
-#'   \code{FALSE}).
-#' @param ... Other engine specific parameters.
+#'
+#' @returns A [`ggplot2`] object showing the marginal response in light of the data.
+#'
+#' @references
+#' * Warren, D.L., Matzke, N.J., Cardillo, M., Baumgartner, J.B., Beaumont, L.J.,
+#' Turelli, M., Glor, R.E., Huron, N.A., Simões, M., Iglesias, T.L. Piquet, J.C.,
+#'  and Dinnage, R. 2021. ENMTools 1.0: an R package for comparative ecological
+#'  biogeography. Ecography, 44(4), pp.504-511.
 #'
 #' @seealso [partial]
 #' @concept Visual style emulated from ENMTools package.
-#' @references
-#' * Warren, D.L., Matzke, N.J., Cardillo, M., Baumgartner, J.B., Beaumont, L.J., Turelli, M., Glor, R.E., Huron, N.A., Simões, M., Iglesias, T.L. Piquet, J.C., and Dinnage, R. 2021. ENMTools 1.0: an R package for comparative ecological biogeography. Ecography, 44(4), pp.504-511.
-#' @returns A [`ggplot2`] object showing the marginal response in light of the
-#'   data.
-#' @aliases partial_density
+#' @keywords partial
+#'
 #' @examples
 #' \dontrun{
 #'  # Do a partial calculation of a trained model
@@ -175,17 +179,18 @@ spartial.DistributionModel <- function(mod, ...) mod$spartial(...)
 #'  # Or with two variables
 #'  partial_density(fit, x.var = c("Forest.cover", "bio01"))
 #' }
-#' @keywords partial
-#' @export
+#'
 #' @name partial_density
+NULL
+
+#' @rdname partial_density
+#' @export
 methods::setGeneric(
   "partial_density",
   signature = methods::signature("mod","x.var"),
   function(mod, x.var, df = FALSE,...) standardGeneric("partial_density"))
 
-#' @name partial_density
 #' @rdname partial_density
-#' @usage \S4method{partial_density}{ANY,character,logical}(mod,x.var,df,...)
 methods::setMethod(
   "partial_density",
   methods::signature(mod = "ANY", x.var = "character"),
@@ -347,4 +352,3 @@ methods::setMethod(
     return(density.plot)
   }
 )
-

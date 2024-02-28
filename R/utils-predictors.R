@@ -1,54 +1,54 @@
-#' @include utils.R utils-spatial.R
-NULL
-
 #' Spatial adjustment of environmental predictors and raster stacks
 #'
-#' @description This function allows the transformation of provided
-#'   environmental predictors (in [`SpatRaster`] format). A common use case is
-#'   for instance the standardization (or scaling) of all predictors prior to
-#'   model fitting. This function works both with [`SpatRaster`] as well as with
-#'   [`stars`] objects.
-#' @details Available options are:
-#' * \code{'none'} The original layer(s) are returned.
-#' * \code{'scale'} This run the [`scale()`] function with default settings (1 Standard deviation) across all predictors.
-#'   A sensible default to for most model fitting.
-#' * \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
-#' * \code{'windsor'} This applies a 'windsorization' to an existing raster layer by setting the lowest, respectively
-#'   largest values to the value at a certain percentage level (e.g. 95%). Those
-#'   can be set via the parameter \code{"windsor_props"}.
-#' * \code{'windsor_thresh'} Same as option 'windsor', however in this case values are clamped to a thresholds
-#'   rather than certain percentages calculated on the data.
-#' * \code{'percentile'} This converts and bins all values into percentiles, e.g. the top 10% or lowest 10% of values and so on.
-#' * \code{'pca'} This option runs a principal component decomposition of all predictors (via [`prcomp()`]).
-#'   It returns new predictors resembling all components in order of the most
-#'   important ones. Can be useful to reduce collinearity, however note that
-#'   this changes all predictor names to 'PCX', where X is the number of the
-#'   component. The parameter \code{'pca.var'} can be modified to specify the
-#'   minimum variance to be covered by the axes.
-#' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife procedure.
-#'   Identified outliers are by default set to \code{NA}.
+#' @description This function allows the transformation of provided environmental
+#' predictors (in [`SpatRaster`] format). A common use case is for instance the
+#' standardization (or scaling) of all predictors prior to model fitting. This
+#' function works both with [`SpatRaster`] as well as with [`stars`] objects.
 #'
 #' @param env A [`SpatRaster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed
-#'   in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'},
-#'   \code{'windsor'}, \code{'windsor_thresh'}, \code{'percentile'}
-#'   \code{'pca'}, \code{'revjack'}). See Details.
+#' in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'}, \code{'windsor'},
+#' \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.
 #' @param windsor_props A [`numeric`] vector specifying the proportions to be
-#'   clipped for windsorization (Default: \code{c(.05,.95)}).
+#' clipped for windsorization (Default: \code{c(.05,.95)}).
 #' @param pca.var A [`numeric`] value between \code{>0} and \code{1} stating the
-#'   minimum amount of variance to be covered (Default: \code{0.8}).
-#' @param method As \code{'option'} for more intuitive method setting. Can be
-#'   left empty (in this case option has to be set).
+#' minimum amount of variance to be covered (Default: \code{0.8}).
+#' @param method As \code{'option'} for more intuitive method setting. Can be left
+#' empty (in this case option has to be set).
 #' @param ... other options (Non specified).
+#'
+#' @details Available options are:
+#' * \code{'none'} The original layer(s) are returned.
+#' * \code{'scale'} This run the [`scale()`] function with default settings
+#' (1 Standard deviation) across all predictors. A sensible default to for most model fitting.
+#' * \code{'norm'} This normalizes all predictors to a range from \code{0-1}.
+#' * \code{'windsor'} This applies a 'windsorization' to an existing raster layer
+#' by setting the lowest, respectively largest values to the value at a certain
+#' percentage level (e.g. 95%). Those can be set via the parameter \code{"windsor_props"}.
+#' * \code{'windsor_thresh'} Same as option 'windsor', however in this case values
+#' are clamped to a thresholds rather than certain percentages calculated on the data.
+#' * \code{'percentile'} This converts and bins all values into percentiles, e.g.
+#' the top 10% or lowest 10% of values and so on.
+#' * \code{'pca'} This option runs a principal component decomposition of all
+#' predictors (via [`prcomp()`]). It returns new predictors resembling all components
+#' in order of the most important ones. Can be useful to reduce collinearity, however
+#' note that this changes all predictor names to 'PCX', where X is the number of
+#' the component. The parameter \code{'pca.var'} can be modified to specify the
+#' minimum variance to be covered by the axes.
+#' * \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife
+#' procedure. Identified outliers are by default set to \code{NA}.
+#'
 #' @returns Returns a adjusted [`SpatRaster`] object of identical resolution.
+#'
 #' @seealso predictor_derivate
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #' # Where x is a SpatRaster
 #' new_x <- predictor_transform(x, option = 'scale')
 #' }
-#' @keywords utils
-#' @aliases predictor_transform
+#'
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
   assertthat::assert_that(
@@ -255,49 +255,51 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' Create spatial derivative of raster stacks
 #'
 #' @description This function creates derivatives of existing covariates and
-#'   returns them in Raster format. Derivative variables can in the machine
-#'   learning literature commonly be understood as one aspect of feature
-#'   engineering. They can be particularly powerful in introducing
-#'   non-linearities in otherwise linear models, for example is often done in
-#'   the popular Maxent framework.
+#' returns them in Raster format. Derivative variables can in the machine
+#' learning literature commonly be understood as one aspect of feature engineering.
+#' They can be particularly powerful in introducing non-linearities in otherwise
+#' linear models, for example is often done in the popular Maxent framework.
+#'
+#' @param env A [`SpatRaster`] object.
+#' @param option A [`vector`] stating whether predictors should be preprocessed in any
+#' way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param deriv A [`vector`] with [`character`] of specific derivates to create (Default: \code{NULL}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#' specifying the covariates  (Default: \code{NULL}).
+#' @param method As \code{'option'} for more intuitive method setting. Can be left
+#' empty (in this case option has to be set).
+#' @param ... other options (Non specified).
+#'
 #' @details Available options are:
 #' * \code{'none'} - The original layer(s) are returned.
-#' * \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of the provided layers.
-#' * \code{'hinge'} - Creates hinge transformation of covariates, which set all values lower than a set threshold to \code{0}
-#'   and all others to a range of \eqn{[0,1]}. The number of thresholds and thus
-#'   new derivates is specified via the parameter \code{'nknots'} (Default:
-#'   \code{4}).
-#' * \code{'interaction'} - Creates interactions between variables. Target variables have to be specified via \code{"int_variables"}.
-#' * \code{'thresh'} - A threshold transformation of covariates, which sets all values lower than a set threshold ot
-#'   \code{0} and those larger to \code{1}. The number of thresholds and thus
-#'   new derivates is specified via the parameter \code{'nknots'} (Default:
-#'   \code{4}).
-#' * \code{'bin'} - Creates a factor representation of a covariates by cutting the range of covariates by their percentiles.
-#'   The number of percentile cuts and thus new derivates is specified via the
-#'   parameter \code{'nknots'} (Default: \code{4}).
-#' @param env A [`SpatRaster`] object.
-#' @param option A [`vector`] stating whether predictors should be preprocessed
-#'   in any way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
-#'   \code{'thresh'}, \code{'bin'}).
-#' @param nknots The number of knots to be used for the transformation (Default:
-#'   \code{4}).
-#' @param deriv A [`vector`] with [`character`] of specific derivates to create
-#'   (Default: \code{NULL}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2}
-#'   specifying the covariates  (Default: \code{NULL}).
-#' @param method As \code{'option'} for more intuitive method setting. Can be
-#'   left empty (in this case option has to be set).
-#' @param ... other options (Non specified).
-#' @return Returns the derived adjusted [`SpatRaster`] objects of identical
-#'   resolution.
+#' * \code{'quadratic'} - A quadratic transformation (\eqn{x^{2}}) is created of
+#' the provided layers.
+#' * \code{'hinge'} - Creates hinge transformation of covariates, which set all
+#' values lower than a set threshold to \code{0} and all others to a range of \eqn{[0,1]}.
+#' The number of thresholds and thus new derivates is specified via the parameter
+#' \code{'nknots'} (Default: \code{4}).
+#' * \code{'interaction'} - Creates interactions between variables. Target variables
+#' have to be specified via \code{"int_variables"}.
+#' * \code{'thresh'} - A threshold transformation of covariates, which sets all
+#' values lower than a set threshold at \code{0} and those larger to \code{1}.
+#' The number of thresholds and thus new derivates is specified via the parameter
+#' \code{'nknots'} (Default: \code{4}).
+#' * \code{'bin'} - Creates a factor representation of a covariates by cutting the
+#' range of covariates by their percentiles. The number of percentile cuts and thus
+#' new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+#'
+#' @return Returns the derived adjusted [`SpatRaster`] objects of identical resolution.
+#'
 #' @seealso predictor_transform
-#' @aliases predictor_derivate
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #' # Create a hinge transformation of one or multiple SpatRaster.
 #' predictor_derivate(covs, option = "hinge", knots = 4)
 #' }
-#' @keywords utils
+#'
 #' @export
 predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, method = NULL, ...){
   assertthat::assert_that(
@@ -330,7 +332,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Decompose derivate variable names if set
     deriv <- grep(paste0(option, "__"), deriv, value = TRUE)
     if(length(deriv)==0){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','red','Predictors with derivates not found!')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Predictors with derivates not found!')
       return(NULL)
     }
     cutoffs <- do.call(rbind,strsplit(deriv, "__")) |> as.data.frame()
@@ -517,26 +519,30 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 #' Homogenize NA values across a set of predictors.
 #'
 #' @description This method allows the homogenization of missing data across a
-#'   set of environmental predictors. It is by default called when predictors
-#'   are added to [`BiodiversityDistribution`] object. Only grid cells with NAs
-#'   that contain values at some raster layers are homogenized. Additional
-#'   parameters allow instead of homogenization to fill the missing data with
-#'   neighbouring values
+#' set of environmental predictors. It is by default called when predictors
+#' are added to [`BiodiversityDistribution`] object. Only grid cells with NAs
+#' that contain values at some raster layers are homogenized. Additional
+#' parameters allow instead of homogenization to fill the missing data with
+#' neighbouring values
+#'
 #' @param env A [`SpatRaster`] object with the predictors.
 #' @param fill A [`logical`] value indicating whether missing data are to be
-#'   filled (Default: \code{FALSE}).
+#' filled (Default: \code{FALSE}).
 #' @param fill_method A [`character`] of the method for filling gaps to be used
-#'   (Default: \code{'ngb'}).
+#' (Default: \code{'ngb'}).
 #' @param return_na_cells A [`logical`] value of whether the ids of grid cells
-#'   with NA values is to be returned instead (Default: \code{FALSE}).
+#' with NA values is to be returned instead (Default: \code{FALSE}).
+#'
 #' @returns A [`SpatRaster`] object with the same number of layers as the input.
-#' @aliases predictor_homogenize_na
+#'
+#' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  # Harmonize predictors
 #'  env <- predictor_homogenize_na(env)
 #' }
-#' @keywords utils
+#'
 #' @export
 predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', return_na_cells = FALSE){
   assertthat::assert_that(
@@ -597,17 +603,22 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
 #' hinge transformation, e.g. a new range of values where any values lower than
 #' a certain knot are set to \code{0}, while the remainder is left at the
 #' original values.
+#'
 #' @param v A [`SpatRaster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis
-#'   for new names.
-#' @param nknots The number of knots to be used for the transformation (Default:
-#'   \code{4}).
-#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used
-#'   instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @concept Concept taken from the [maxnet] package.
+#' for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
+#' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used instead
+#' (Default: \code{NULL}).
+#'
 #' @returns A hinge transformed [`data.frame`].
+#'
+#' @keywords utils
+#' @concept Concept taken from the [maxnet] package.
+#'
 #' @noRd
+#'
+#' @keywords internal
 makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -646,17 +657,22 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
 #' threshold transformation, e.g. a new range of values where any values lower
 #' than a certain knot are set to \code{0}, while the remainder is set to
 #' \code{1}.
+#'
 #' @param v A [`Raster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis
-#'   for new names.
-#' @param nknots The number of knots to be used for the transformation (Default:
-#'   \code{4}).
+#' for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used
-#'   instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @concept Concept taken from the [maxnet] package.
+#' instead (Default: \code{NULL}).
+#'
 #' @returns A threshold transformed [`data.frame`].
+#'
+#' @keywords utils
+#' @concept Concept taken from the [maxnet] package.
+#'
 #' @noRd
+#'
+#' @keywords internal
 makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -682,17 +698,21 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
 #'
 #' @description This function takes predictor values and 'bins' them into
 #' categories based on a percentile split.
+#'
 #' @param v A [`SpatRaster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis
-#'   for new names.
-#' @param nknots The number of knots to be used for the transformation (Default:
-#'   \code{4}).
+#' for new names.
+#' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param cutoffs A [`numeric`] vector of optionally used cutoffs to be used
-#'   instead (Default: \code{NULL}).
-#' @keywords utils, internal
-#' @returns A binned transformed [`data.frame`] with columns representing each
-#'   bin.
+#' instead (Default: \code{NULL}).
+#'
+#' @returns A binned transformed [`data.frame`] with columns representing each bin.
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 makeBin <- function(v, n, nknots, cutoffs = NULL){
   assertthat::assert_that(is.Raster(v),
                           is.character(n),
@@ -735,44 +755,45 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 #' Filter a set of correlated predictors to fewer ones
 #'
 #' @description This function helps to remove highly correlated variables from a
-#'   set of predictors. It supports multiple options some of which require both
-#'   environmental predictors and observations, others only predictors.
+#' set of predictors. It supports multiple options some of which require both
+#' environmental predictors and observations, others only predictors.
 #'
-#'   Some of the options require different packages to be pre-installed, such as
-#'   \code{ranger} or \code{Boruta}.
+#' Some of the options require different packages to be pre-installed, such as
+#' \code{ranger} or \code{Boruta}.
+#'
+#' @param env A [`data.frame`] or [`matrix`] with extracted environmental covariates
+#' for a given species.
+#' @param keep A [`vector`] with variables to keep regardless. These are usually
+#' variables for which prior information is known.
+#' @param method Which method to use for constructing the correlation matrix
+#' (Options: \code{'pearson'} (Default), \code{'spearman'}| \code{'kendal'}),
+#' \code{"abess"}, or \code{"boruta"}.
+#' @param ... Other options for a specific method
 #'
 #' @details Available options are:
-#'
 #' * \code{"none"} No prior variable removal is performed (Default).
-#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise comparisons to identify and
-#'   remove highly collinear predictors (Pearson's \code{r >= 0.7}).
-#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the \code{abess} package (see References). Note that this
-#'   effectively fits a separate generalized linear model to reduce the number
-#'   of covariates.
+#' * \code{"pearson"}, \code{"spearman"} or \code{"kendall"} Makes use of pairwise
+#' comparisons to identify and remove highly collinear predictors (Pearson's \code{r >= 0.7}).
+#' * \code{"abess"} A-priori adaptive best subset selection of covariates via the
+#' \code{abess} package (see References). Note that this effectively fits a separate
+#' generalized linear model to reduce the number of covariates.
 #' * \code{"boruta"} Uses the \code{Boruta} package to identify non-informative features.
 #'
 #' @note Using this function on predictors effectively means that a separate
-#'   model is fitted on the data with all the assumptions that come with in
-#'   (e.g. linearity, appropriateness of response, normality, etc).
+#' model is fitted on the data with all the assumptions that come with in (e.g.
+#' linearity, appropriateness of response, normality, etc).
 #'
-#' @param env A [`data.frame`] or [`matrix`] with extracted environmental
-#'   covariates for a given species.
-#' @param keep A [`vector`] with variables to keep regardless. These are usually
-#'   variables for which prior information is known.
-#' @param method Which method to use for constructing the correlation matrix
-#'   (Options: \code{'pearson'} (Default), \code{'spearman'}| \code{'kendal'}),
-#'   \code{"abess"}, or \code{"boruta"}.
-#' @param ... Other options for a specific method
+#' @return A [`character`] [`vector`] of variable names to be excluded. If the
+#' function fails due to some reason return \code{NULL}.
 #'
 #' @keywords utils
-#' @return A [`character`] [`vector`] of variable names to be excluded. If the
-#'   function fails due to some reason return \code{NULL}.
-#' @aliases predictor_filter
+#'
 #' @examples
 #' \dontrun{
 #'  # Remove highly correlated predictors
 #'  env <- predictor_filter( env, option = "pearson")
 #' }
+#'
 #' @export
 predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
   assertthat::assert_that(
@@ -795,7 +816,7 @@ predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
       env, keep = keep, method = method, ...
     )
   } else if(method == "abess"){
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
     co <- predictors_filter_abess(
       env = env, keep = keep, method = method, ...
     )
@@ -817,11 +838,16 @@ predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
 #' Identify collinear predictors
 #'
 #' @inheritParams predictor_filter
-#' @param cutoff A [`numeric`] variable specifying the maximal correlation
-#'   cutoff.
-#' @concept Code inspired from the [`caret`] package
-#' @keywords utils, internal
+#' @param cutoff A [`numeric`] variable specifying the maximal correlation cutoff.
+#'
 #' @returns [`vector`] of variable names to exclude
+#'
+#' @keywords utils
+#' @concept Code inspired from the [`caret`] package
+#'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption('ibis.corPred'), method = 'pearson', ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env),
@@ -872,25 +898,34 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
 #'
 #' @description This is a wrapper function to fit the adaptive subset selection
 #' procedure outlined in Zhu et al. (2021) and Zhu et al. (2020).
-#' @inheritParams predictor_filter
 #'
-#' @param observed A [`vector`] with observational records to use for
-#'   determining variable importance.
-#' @param family A [`character`] indicating the family the observational data
-#'   originates from.
-#' @param tune.type [`character`] indicating the type used for subset
-#'   evaluation. Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as
-#'   listed in \code{abess}.
+#' @inheritParams predictor_filter
+#' @param observed A [`vector`] with observational records to use for determining
+#' variable importance.
+#' @param family A [`character`] indicating the family the observational data originates
+#' from.
+#' @param tune.type [`character`] indicating the type used for subset evaluation.
+#' Options are \code{c("gic", "ebic", "bic", "aic", "cv")} as listed in \code{abess}.
 #' @param lambda A [`numeric`] single lambda value for regularized best subset
-#'   selection (Default: \code{0}).
-#' @param weight Observation weights. When weight = \code{NULL}, we set weight =
-#'   \code{1} for each observation as default.
-#' @references
-#' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu, Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu, Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
-#' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen, Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
-#' @keywords utils, internal
-#' @aliases predictor_filter_abess
+#' selection (Default: \code{0}).
+#' @param weight Observation weights. When weight = \code{NULL}, we set weight = \code{1}
+#' for each observation as default.
+#'
 #' @returns A [`vector`] of variable names to exclude
+#'
+#' @references
+#' * abess: A Fast Best Subset Selection Library in Python and R. Jin Zhu, Liyuan Hu,
+#' Junhao Huang, Kangkang Jiang, Yanhang Zhang, Shiyun Lin, Junxian Zhu,
+#' Xueqin Wang (2021). arXiv preprint arXiv:2110.09697.
+#' * A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong Wen,
+#' Jin Zhu, Heping Zhang, Xueqin Wang. Proceedings of the National Academy of Sciences
+#' Dec 2020, 117 (52) 33117-33123; doi: 10.1073/pnas.2014241117
+#'
+#' @keywords utils
+#'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_abess <- function( env, observed, method, family, tune.type = "cv", lambda = 0,
                                        weight = NULL, keep = NULL, ...){
   # Security checks
@@ -969,22 +1004,29 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' shuffling original ones. Attributes that have significantly worst importance
 #' than shadow ones are being consecutively dropped.
 #'
+#' @inheritParams predictor_filter
+#' @param observed A [`vector`] with observational records to use for determining
+#' variable importance.
+#' @param iter [`numeric`] on the number of maximal runs (Default: \code{100}).
+#' Increase if too many tentative left.
+#' @param verbose [`logical`] whether to be chatty.
+#'
 #' @note This package depends on the \code{ranger} package to iteratively fit
 #' randomForest models.
 #'
-#' @inheritParams predictor_filter
-#' @param observed A [`vector`] with observational records to use for
-#'   determining variable importance.
-#' @param iter [`numeric`] on the number of maximal runs (Default: \code{100}).
-#'   Increase if too many tentative left.
-#' @param verbose [`logical`] whether to be chatty.
-#' @references
-#' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
-#' @keywords utils, internal
-#' @aliases predictor_filter_boruta
 #' @returns A [`vector`] of variable names to exclude.
+#'
+#' @references
+#' * Miron B. Kursa, Witold R. Rudnicki (2010). Feature Selection with the Boruta
+#' Package. Journal of Statistical Software, 36(11), 1-13. URL https://doi.org/10.18637/jss.v036.i11.
+#'
+#' @keywords utils
+#'
+#' @noRd
+#'
+#' @keywords internal
 predictors_filter_boruta <- function( env, obs, method, keep = NULL,
-                                      iter = 100, verbose = getOption('ibis.setupmessages'), ...){
+                                      iter = 100, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env) || is.matrix(env),
                           is.null(observed) || is.vector(observed),

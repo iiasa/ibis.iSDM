@@ -2,11 +2,12 @@
 % Please edit documentation in R/prior_breg.R
 \name{BREGPriors}
 \alias{BREGPriors}
+\alias{BREGPriors,character-method}
 \title{Helper function when multiple variables are supplied for a BREG prior}
 \usage{
 BREGPriors(variable, hyper = NULL, ip = NULL)
 
-\S4method{BREGPriors}{character,ANY,ANY}(variable,hyper,ip)
+\S4method{BREGPriors}{character}(variable, hyper = NULL, ip = NULL)
 }
 \arguments{
 \item{variable}{A \code{\link{character}} matched against existing predictors.}
@@ -22,19 +23,19 @@ the same hyper-parameters, but different variables.
 }
 \seealso{
 Other prior: 
-\code{\link{BARTPriors}()},
 \code{\link{BARTPrior}()},
+\code{\link{BARTPriors}()},
 \code{\link{BREGPrior}()},
-\code{\link{GDBPriors}()},
 \code{\link{GDBPrior}()},
-\code{\link{GLMNETPriors}()},
+\code{\link{GDBPriors}()},
 \code{\link{GLMNETPrior}()},
-\code{\link{INLAPriors}()},
+\code{\link{GLMNETPriors}()},
 \code{\link{INLAPrior}()},
-\code{\link{STANPriors}()},
+\code{\link{INLAPriors}()},
 \code{\link{STANPrior}()},
-\code{\link{XGBPriors}()},
+\code{\link{STANPriors}()},
 \code{\link{XGBPrior}()},
+\code{\link{XGBPriors}()},
 \code{\link{add_priors}()},
 \code{\link{get_priors}()},
 \code{\link{priors}()},

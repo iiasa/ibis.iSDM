@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-biodiversitydistribution.R bdproto-predictors.R bdproto-biodiversityscenario.R
+#' @include class-biodiversitydistribution.R class-predictors.R class-biodiversityscenario.R
 NULL
 
 #' Add GLOBIOM-DownScaleR derived predictors to a Biodiversity distribution
@@ -18,46 +18,44 @@ NULL
 #'
 #' The purpose of this script is to format the GLOBIOM outputs of *DownScale*
 #' for the use in the ibis.iSDM package.
+#'
+#' @param x A [`BiodiversityDistribution-class`] or [`BiodiversityScenario-class`] object.
+#' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
+#' @param names A [`vector`] of character names describing the environmental
+#' stack in case they should be renamed (Default: \code{NULL}).
+#' @param transform A [`vector`] stating whether predictors should be preprocessed
+#' in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})
+#' @param derivates A Boolean check whether derivate features should be considered
+#' (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )
+#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
+#' knots for derivate creation if relevant (Default: \code{4}).
+#' @param int_variables A [`vector`] with length greater or equal than \code{2}
+#' specifying the covariates (Default: \code{NULL}).
+#' @param bgmask Check whether the environmental data should be masked with the
+#' background layer (Default: \code{TRUE})
+#' @param harmonize_na A [`logical`] value indicating of whether NA values should
+#' be harmonized among predictors (Default: \code{FALSE})
+#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
+#' which uses default prior assumptions.
+#' @param ... Other parameters passed down
+#'
 #' @details See [`add_predictors()`] for additional parameters and
 #' customizations. For more (manual) control the function for formatting the
 #' GLOBIOM data can also be called directly via `formatGLOBIOM()`.
 #'
-#' @param x A [`BiodiversityDistribution-class`] or
-#'   [`BiodiversityScenario-class`] object.
-#' @param fname A [`character`] pointing to a netCDF with the GLOBIOM data.
-#' @param names A [`vector`] of character names describing the environmental
-#'   stack in case they should be renamed (Default: \code{NULL}).
-#' @param transform A [`vector`] stating whether predictors should be
-#'   preprocessed in any way (Options: \code{'none'},\code{'pca'},
-#'   \code{'scale'}, \code{'norm'})
-#' @param derivates A Boolean check whether derivate features should be
-#'   considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-#'   \code{'quad'}) )
-#' @param derivate_knots A single [`numeric`] or [`vector`] giving the number of
-#'   knots for derivate creation if relevant (Default: \code{4}).
-#' @param int_variables A [`vector`] with length greater or equal than \code{2}
-#'   specifying the covariates (Default: \code{NULL}).
-#' @param bgmask Check whether the environmental data should be masked with the
-#'   background layer (Default: \code{TRUE})
-#' @param harmonize_na A [`logical`] value indicating of whether NA values
-#'   should be harmonized among predictors (Default: \code{FALSE})
-#' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
-#'   which uses default prior assumptions.
-#' @param ... Other parameters passed down
 #' @seealso [add_predictors]
-#' @aliases add_predictors_globiom
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
 #'         add_predictors_globiom(fname = "", transform = 'none')
 #'  obj
 #' }
+#'
 #' @name add_predictors_globiom
 NULL
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @exportMethod add_predictors_globiom
 #' @export
 methods::setGeneric(
   "add_predictors_globiom",
@@ -66,10 +64,7 @@ methods::setGeneric(
            bgmask = TRUE, harmonize_na = FALSE,
            priors = NULL, ...) standardGeneric("add_predictors_globiom"))
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage
-#'   \S4method{add_predictors_globiom}{BiodiversityDistribution,character,ANY,character,character,numeric,ANY,logical,logical,ANY}(x,fname,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,priors,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution", fname = "character"),
@@ -95,7 +90,7 @@ methods::setMethod(
     )
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Formatting GLOBIOM inputs for species distribution modelling.')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Formatting GLOBIOM inputs for species distribution modelling.')
 
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
@@ -122,26 +117,29 @@ methods::setMethod(
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
     # If priors have been set, save them in the distribution object
     if(!is.null(priors)) {
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
-      x <- x$set_priors(priors)
+      y <- y$set_priors(priors)
     }
     # Harmonize NA values
     if(harmonize_na){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
     # Calculate derivates if set
     if('none' %notin% derivates){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
       new_env <- terra::rast()
       for(dd in derivates) {
         suppressWarnings(
@@ -168,23 +166,17 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
 
     # Finally set the data to the BiodiversityDistribution object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 
-#' @name add_predictors_globiom
 #' @rdname add_predictors_globiom
-#' @usage
-#'   \S4method{add_predictors_globiom}{BiodiversityScenario,character,ANY,character,character,numeric,ANY,logical}(x,fname,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
 methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityScenario", fname = "character"),
@@ -212,7 +204,7 @@ methods::setMethod(
     obj <- x$get_model()
 
     # Messenger
-    if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Adding GLOBIOM predictors to scenario object...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding GLOBIOM predictors to scenario object...')
 
     # Get and format the GLOBIOM data
     env <- formatGLOBIOM(fname = fname,
@@ -231,13 +223,13 @@ methods::setMethod(
     # Harmonize NA values
     if(harmonize_na){
       stop('Missing data harmonization for stars not yet implemented!') #TODO
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Harmonizing missing values...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
 
     # Standardization and scaling
     if('none' %notin% transform){
-      if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Transforming predictors...')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
     }
 
@@ -247,16 +239,16 @@ methods::setMethod(
       varn <- obj$get_coefficients()[['Feature']]
       # Are there any derivates present in the coefficients?
       if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','green','Creating predictor derivates...')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
         for(dd in derivates){
           if(any(grep(dd, varn))){
             env <- predictor_derivate(env, option = dd, nknots = derivate_knots, int_variables = int_variables, deriv = varn)
           } else {
-            if(getOption('ibis.setupmessages')) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
           }
         }
       } else {
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
       }
     }
 
@@ -273,17 +265,17 @@ methods::setMethod(
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) names(env) <- sanitize_names(names(env))
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
 
     # Finally set the data to the BiodiversityScenario object
-    x$set_predictors(
-      bdproto(NULL, PredictorDataset,
-              id = new_id(),
-              data = env,
-              timeperiod = timeperiod,
-              ...
-      )
-    )
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               timeperiod = timeperiod,
+                               ...)
+    y$set_predictors(pd)
   }
 )
 
@@ -292,34 +284,34 @@ methods::setMethod(
 #' @description This function expects a downscaled GLOBIOM output as created in
 #' the BIOCLIMA project. Likely of little use for anyone outside IIASA.
 #'
-#' @param fname A filename in [`character`] pointing to a GLOBIOM output in
-#'   netCDF format.
-#' @param oftype A [`character`] denoting the output type (Default:
-#'   \code{'raster'}).
+#' @param fname A filename in [`character`] pointing to a GLOBIOM output in netCDF format.
+#' @param oftype A [`character`] denoting the output type (Default: \code{'raster'}).
 #' @param ignore A [`vector`] of variables to be ignored (Default: \code{NULL}).
 #' @param period A [`character`] limiting the period to be returned from the
-#'   formatted data. Options include \code{"reference"} for the first entry,
-#'   \code{"projection"} for all entries but the first, and \code{"all"} for all
-#'   entries (Default: \code{"reference"}).
+#' formatted data. Options include \code{"reference"} for the first entry, \code{"projection"}
+#' for all entries but the first, and \code{"all"} for all entries (Default: \code{"reference"}).
 #' @param template An optional [`SpatRaster`] object towards which projects
-#'   should be transformed.
+#' should be transformed.
 #' @param shares_to_area A [`logical`] on whether shares should be corrected to
-#'   areas (if identified).
-#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack
-#'   around.
+#' areas (if identified).
+#' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack-around.
 #' @param verbose [`logical`] on whether to be chatty.
-#' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
-#' @aliases formatGLOBIOM
 #'
-#' @examples \dontrun{
+#' @return A [`SpatRaster`] stack with the formatted GLOBIOM predictors.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
 #' # Expects a filename pointing to a netCDF file.
 #' covariates <- formatGLOBIOM(fname)
 #' }
-#' @keywords internal, utils
+#'
+#' @export
 formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
                           period = "all", template = NULL, shares_to_area = FALSE,
                           use_gdalutils = FALSE,
-                          verbose = getOption("ibis.setupmessages")){
+                          verbose = getOption("ibis.setupmessages", default = TRUE)){
   assertthat::assert_that(
     file.exists(fname),
     assertthat::has_extension(fname, "nc"),
@@ -444,7 +436,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
         # curvilinear extrapolations for Europe Hacky approach now is to convert
         # to raster, crop, project and then convert back. Only use if gdalUtils
         # is installed
-        if(("gdalUtils" %in% utils::installed.packages()[,1])&&use_gdalutils){
+        if(("gdalUtilities" %in% utils::installed.packages()[,1])&&use_gdalutils){
           ff <- hack_project_stars(ff, template, use_gdalutils)
         } else {
           # Make background
@@ -457,7 +449,7 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
           # # And warp by projecting and resampling
           ff <- ff |> stars::st_warp(bg, crs = sf::st_crs(bg),
                                      cellsize = res, method = "near") |>
-            st_transform(crs = sf::st_crs(template))
+            sf::st_transform(crs = sf::st_crs(template))
         }
         # Overwrite full dimensions
         full_dis <- stars::st_dimensions(ff)

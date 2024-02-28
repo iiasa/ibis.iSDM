@@ -1,12 +1,17 @@
 #' Built formula for BART model
 #'
 #' @description This function built a formula for a `engine_bart()` model.
+#'
 #' @param obj A [`list()`] object containing the prepared model data for a given
-#'   biodiversity dataset.
-#' @author Martin Jung
+#' biodiversity dataset.
+#'
 #' @note Function is not meant to be run outside the train() call.
-#' @keywords internal
+#'
+#' @author Martin Jung
+#'
 #' @noRd
+#'
+#' @keywords internal
 built_formula_bart <- function(obj){
   assertthat::assert_that(
     is.list(obj),
@@ -26,7 +31,7 @@ built_formula_bart <- function(obj){
     # Convert to formula
     form <- to_formula(form)
   } else {
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
@@ -46,12 +51,17 @@ built_formula_bart <- function(obj){
 #' @description Variable importance measured in the proportion of total branches
 #' used for a given variable. Explicitly dropped variables are included as
 #' \code{0}.
+#'
 #' @param model A fitted [dbarts] model.
-#' @concept Taken from the \pkg{embarcadero} package.
+#'
 #' @return A [`data.frame`] with the variable importance information.
-#' @aliases varimp.bart
-#' @keywords utils, internal
+#'
+#' @keywords utils
+#' @concept Taken from the \pkg{embarcadero} package.
+#'
 #' @noRd
+#'
+#' @keywords internal
 varimp.bart <- function(model){
   assertthat::assert_that(class(model) == 'bart',
                           ("fit" %in% names(model)),
@@ -81,21 +91,25 @@ varimp.bart <- function(model){
 #'
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: \code{"All"}).
-#' @param equal Whether equal spacing on x breaks or quantiles is applied
-#'   (Default: \code{FALSE}).
-#' @param smooth Smoothing factor for the x breaks (works like partials).
-#'   (Default: \code{1}).
-#' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if
-#'   response was not binomial.
-#' @param values Either a [`numeric`] vector of supplied value ranges or
-#'   \code{NULL} (Default).
-#' @param variable_length A [`numeric`] on the number of partial effects to be
-#'   derived.
+#' @param x.var The predictor variables to be mapped (Default: \code{NULL}).
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
+#' @param transform Backtransform using pnorm or not. Set to \code{FALSE} if response
+#' was not binomial.
+#' @param values Either a [`numeric`] vector of supplied value ranges or \code{NULL} (Default).
+#' @param variable_length A [`numeric`] on the number of partial effects to be derived.
 #' @param plot Whether a model should be created (Default: \code{TRUE}).
-#' @concept Function taken and adapted from the [embarcadero] package.
+#'
+#' @return A [`SpatRaster`] layer containing the partial effect
+#'
 #' @references
-#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+#' regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858.
+#' https://doi.org/10.1111/2041-210X.13389
+#'
+#' @keywords utils
+#' @concept Function taken and adapted from the [embarcadero] package.
+#'
 #' @examples
 #' \dontrun{
 #' mod <- distribution(background) |>
@@ -106,17 +120,17 @@ varimp.bart <- function(model){
 #' bart_partial_effect(mod, "bio01mean.tif")
 #'
 #' }
-#' @return A [`SpatRaster`] layer containing the partial effect
-#' @aliases bart_partial_effect
-#' @keywords utils
+#'
 #' @noRd
-bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
-                                 smooth = 1, transform = TRUE, values = NULL,
-                                 variable_length = 100,plot = TRUE) {
+#'
+#' @keywords internal
+bart_partial_effect <- function(model, x.var, equal = FALSE,
+                                smooth = 1, transform = TRUE, values = NULL,
+                                variable_length = 100,plot = TRUE) {
 
   assertthat::assert_that(
     inherits(model,'bart'),
-    is.null(x.vars) || is.character(x.vars),
+    is.null(x.var) || is.character(x.var),
     is.logical(transform),
     is.logical(equal),
     is.numeric(smooth),
@@ -128,46 +142,43 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
   if (inherits(model,"bart")) {
     fitobj <- model$fit
   }
+
   # If no x.vars are specified, use all
   if(!is.null(values)){
     raw <- list()
-    raw[[x.vars]] <- values
+    raw[[x.var]] <- values
     raw <- raw |> as.data.frame()
   } else {
-    if (is.null(x.vars)) raw <- fitobj$data@x else raw <- fitobj$data@x[, x.vars]
+    raw <- fitobj$data@x[, x.var]
   }
 
   # Define binning in equal area width or not
   if(equal) {
-    if(!is.null(x.vars) && length(x.vars) == 1) {
+    if(!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
-    }
-    else {
-      minmax <- data.frame(mins = apply(raw, 2, min), maxs = apply(raw,
-                                                                   2, max))
+    } else {
+      minmax <- data.frame(mins = apply(raw, 2, min), maxs = apply(raw, 2, max))
     }
     lev <- lapply(c(1:nrow(minmax)), function(i) {
-      seq(minmax$mins[i], minmax$maxs[i], (minmax$maxs[i] -
-                                             minmax$mins[i])/(variable_length * smooth))
+      seq(minmax$mins[i], minmax$maxs[i], (minmax$maxs[i] - minmax$mins[i])/(variable_length * smooth))
     })
     for (i in 1:length(lev)) {
       if (length(lev) == 1) {
-        if (length(unique(raw)) == 2) {
+        if (length(unique(raw)) == 2) { # MH: What is this?
           lev[[i]] <- unique(raw)
         }
-      }
-      else {
+      } else {
         if (length(unique(raw[, i])) == 2) {
           lev[[i]] <- unique(raw[, i])
         }
       }
     }
-    pd <- dbarts::pdbart(model, xind = x.vars, levs = lev,
+    pd <- dbarts::pdbart(model, xind = x.var, levs = lev,
                          keepevery = variable_length, pl = FALSE)
 
   } else {
     levq = c(0.05, seq(0.1, 0.9, length.out = (variable_length-2)/smooth), 0.95)
-    pd <- dbarts::pdbart(model, xind = x.vars, levquants = levq,
+    pd <- dbarts::pdbart(model, xind = x.var, levquants = levq,
                          keepevery = 10, #levs = list(levq),
                          pl = FALSE)
   }
@@ -175,7 +186,7 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
   out <- data.frame()
   # Summarize the posterior
   for(i in 1:length(pd$fd)){
-    df <- data.frame(partial_effect = pd$levs[[i]])
+    df <- data.frame(variable =  pd$xlbs[[i]], partial_effect = pd$levs[[i]])
     # Summarize quantiles and sd from posterior
     ms <- as.data.frame(
       cbind( apply(pd$fd[[i]], 2, function(x) mean(x, na.rm = TRUE)),
@@ -187,27 +198,20 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
     if(transform) ms[,c("mean","q05","q50","q95","mode")] <- apply(ms[,c("mean","q05","q50","q95","mode")], 2, stats::pnorm)
     ms$cv <- ms$sd / ms$mean
-    ms$variable <- pd$xlbs[[i]]
     df <- cbind(df, ms)
     out <- rbind(out, df);rm(df)
   }
 
   # Create plot if specified
   if(plot){
-    # Construct overall plot. Might fail for multiple variables
-    g <- ggplot2::ggplot(out, ggplot2::aes(x = partial_effect, y = q50)) +
-      ggplot2::labs(title = "", y = expression(y^q50), x = unique(out$variable)) +
-      ggplot2::theme_light(base_size = 20) +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95),
-                           fill = "deepskyblue1", alpha = 0.3) +
-      ggplot2::geom_line(linewidth = 1.25) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
-                     axis.title.y = ggplot2::element_text(vjust = 1.7))
-    # If multiple variables, add facets
-    if(length(unique(out$variable))>1){
-      g <- g + ggplot2::facet_wrap(~variable)
-    }
-    g
+    # Construct overall plot.
+    g <- ggplot2::ggplot(data = out, ggplot2::aes(x = partial_effect)) +
+      ggplot2::theme_classic() +
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = q05, ymax = q95), fill = "grey85") +
+      ggplot2::geom_line(ggplot2::aes(y = mean)) +
+      ggplot2::facet_wrap(. ~ variable, scales = "free") +
+      ggplot2::labs(x = "Variable", y = "Partial effect")
+    print(g)
   }
   # Return the partial results
   return(out)
@@ -217,34 +221,38 @@ bart_partial_effect <- function (model, x.vars = NULL, equal = FALSE,
 #'
 #' @param model A fitted [dbarts::bart] model.
 #' @param envs A [`SpatRaster`] stack of predictors used in the model.
-#' @param x.vars The predictor variables to be mapped (Default: All).
-#' @param equal Whether equal spacing on x breaks or quantiles is applied
-#'   (Default: \code{FALSE}).
-#' @param smooth Smoothing factor for the x breaks (works like partials).
-#'   (Default: \code{1}).
-#' @param transform Backtransform using pnorm or not. Set to FALSE if response
-#'   was not Binomial.
-#' @concept Taken and adapted from embarcadero package.
-#' @references
-#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858. https://doi.org/10.1111/2041-210X.13389
+#' @param x.var The predictor variables to be mapped (Default: All).
+#' @param equal Whether equal spacing on x breaks or quantiles is applied (Default: \code{FALSE}).
+#' @param smooth Smoothing factor for the x breaks (works like partials). (Default: \code{1}).
+#' @param transform Backtransform using pnorm or not. Set to FALSE if response was not Binomial.
+#'
 #' @return A [`SpatRaster`] layer containing the partial effect.
-#' @aliases bart_partial_space
+#'
+#' @references
+#' * Carlson, CJ. embarcadero: Species distribution modelling with Bayesian additive
+#' regression trees in r. Methods Ecol Evol. 2020; 11: 850– 858.
+#' https://doi.org/10.1111/2041-210X.13389
+#'
 #' @keywords utils
+#' @concept Taken and adapted from embarcadero package.
+#'
 #' @noRd
-bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth = 1, transform = TRUE){
+#'
+#' @keywords internal
+bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth = 1, transform = TRUE){
   # Input checks
   assertthat::assert_that(
     inherits(model,'bart'),
     is.Raster(envs),
-    is.null(x.vars) || is.character(x.vars),
+    is.null(x.var) || is.character(x.var),
     is.logical(equal), is.numeric(smooth),
     is.logical(transform)
   )
   # No x.vars chosen, take all variables
-  if (is.null(x.vars)) raw <- model$fit$data@x else raw <- model$fit$data@x[, x.vars]
+  if (is.null(x.var)) raw <- model$fit$data@x else raw <- model$fit$data@x[, x.var]
 
   if (equal == TRUE) {
-    if (!is.null(x.vars) && length(x.vars) == 1) {
+    if (!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
     }
     else {
@@ -270,7 +278,7 @@ bart_partial_space <- function(model, envs, x.vars = NULL, equal = FALSE, smooth
     lev = c(0.05, seq(0.1, 0.9, 0.1/smooth), 0.95)
   }
   # Use barts to get partial effects
-  pd <- dbarts::pdbart(model, xind = x.vars, levquants = lev, pl = FALSE)
+  pd <- dbarts::pdbart(model, xind = x.var, levquants = lev, pl = FALSE)
   # Loop through
   for(i in 1:length(pd$fd)) {
     # Get first rasterlayer class

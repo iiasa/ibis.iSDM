@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-prior.R
+#' @include class-prior.R
 NULL
 
 #' Create a new STAN prior
@@ -7,40 +7,40 @@ NULL
 #' currently can be set on specific environmental predictors.
 #'
 #' @param variable A [`character`] matched against existing predictors or latent
-#'   effects.
+#' effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper
-#'   parameters. First entry is treated as mean (Default: \code{0}), the second
-#'   as the standard variation (Default: \code{2}) of a Gaussian distribution on
-#'   the respective coefficient.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper parameters.
+#' First entry is treated as mean (Default: \code{0}), the second as the standard
+#' variation (Default: \code{2}) of a Gaussian distribution on the respective coefficient.
 #' @param ... Variables passed on to prior object.
+#'
 #' @references
-#' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
-#' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal of statistical software, 76(1), 1-32.
+#' * Lemoine, N. P. (2019). Moving beyond noninformative priors: why and how to
+#' choose weakly informative priors in Bayesian analyses. Oikos, 128(7), 912-928.
+#' * Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M.,
+#'  ... & Riddell, A. (2017). Stan: A probabilistic programming language. Journal
+#'  of statistical software, 76(1), 1-32.
+#'
 #' @seealso [`Prior-class`].
+#' @family prior
+#' @keywords priors
+#'
 #' @examples
 #' \dontrun{
 #'  pp <- STANPrior("forest", "normal", c(0,1))
 #' }
 #'
-#' @family prior
-#' @keywords priors
-#' @aliases STANPrior
 #' @name STANPrior
 NULL
 
-#' @name STANPrior
 #' @rdname STANPrior
-#' @exportMethod STANPrior
 #' @export
 methods::setGeneric(
   "STANPrior",
   signature = methods::signature("variable", "type"),
   function(variable, type, hyper = c(0, 2), ...) standardGeneric("STANPrior"))
 
-#' @name STANPrior
 #' @rdname STANPrior
-#' @usage \S4method{STANPrior}{character,character,ANY}(variable,type,hyper,...)
 methods::setMethod(
   "STANPrior",
   methods::signature(variable = "character", type = "character"),
@@ -57,49 +57,46 @@ methods::setMethod(
     type <- match.arg(type, c('gaussian', 'normal'), several.ok = FALSE)
 
     # Sanitize names if specified
-    if(getOption('ibis.cleannames')) variable <- sanitize_names(variable)
+    if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
 
     # Create new prior object
-    bdproto(
-      'STANPrior',
-      Prior,
+    pp <- Prior$new(
+      name = 'STANPrior',
       id = new_id(),
       type = type,
       variable = variable,
-      value = hyper,
-      # plot
-      plot = function(self){
-        return(NULL) # TODO: Could implement some QoL plotting here
-      }
+      value = hyper
     )
+    return(pp)
   }
 )
 
 #' Helper function when multiple variables and types are supplied for STAN
 #'
-#' @name STANPriors
+
 #' @description This is a helper function to specify several [STANPrior] with
 #' the same hyper-parameters, but different variables.
+#'
 #' @param variables A [`vector`] of [`character`] matched against existing
-#'   predictors or latent effects.
+#' predictors or latent effects.
 #' @param type A [`character`] specifying the type of prior to be set.
-#' @param hyper A [`vector`] with [`numeric`] values to be used as
-#'   hyper-parameters.
+#' @param hyper A [`vector`] with [`numeric`] values to be used as hyper-parameters.
 #' @param ... Variables passed on to prior object
-#' @rdname STANPriors
+#'
 #' @family prior
-#' @aliases STANPriors
 #' @keywords priors
-#' @exportMethod STANPriors
+#'
+#' @name STANPriors
+NULL
+
+#' @rdname STANPriors
 #' @export
 methods::setGeneric(
   "STANPriors",
   signature = methods::signature("variables", "type"),
   function(variables, type, hyper = c(0, 2), ...) standardGeneric("STANPriors"))
 
-#' @name STANPriors
 #' @rdname STANPriors
-#' @usage \S4method{STANPriors}{vector,character,ANY}(variables,type,hyper,...)
 methods::setMethod(
   "STANPriors",
   methods::signature(variables = "vector", type = "character"),

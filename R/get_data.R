@@ -5,28 +5,34 @@
 #' used to easily obtain for example the estimated prediction from a model or
 #' the projected scenario from a `scenario()` object.
 #'
+#' @param obj Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
+#' @param what A [`character`] of specific layer to be returned if existing
+#' (Default: \code{NULL}).
+#'
 #' @note This function is essentially identical to querying the internal
 #' function \code{x$get_data()} from the object. However it does attempt some
 #' lazy character matching if what is supplied.
 #'
-#' @param obj Provided [`DistributionModel`] or [`BiodiversityScenario`] object.
-#' @param what A [`character`] of specific layer to be returned if existing
-#'   (Default: \code{NULL}).
+#' @returns A `SpatRaster` or "stars" object depending on the input.
+#'
 #' @keywords utils
+#'
 #' @examples
 #' \dontrun{
 #'  # Assumes previously computed model
 #'  get_data(fit)
 #' }
-#' @returns A `SpatRaster` or "stars" object depending on the input.
+#'
+#' @name get_data
+NULL
+
+#' @rdname get_data
 #' @export
 methods::setGeneric("get_data",
                     signature = methods::signature("obj"),
                     function(obj, what = NULL) standardGeneric("get_data"))
 
-#' @name get_data
 #' @rdname get_data
-#' @usage \S4method{get_data}{ANY,character}(obj,what)
 methods::setMethod(
   "get_data",
   methods::signature("ANY"),

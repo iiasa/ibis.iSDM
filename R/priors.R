@@ -1,4 +1,4 @@
-#' @include utils.R bdproto.R bdproto-priorlist.R bdproto-prior.R
+#' @include class-priorlist.R class-prior.R
 NULL
 
 #' Creates a new PriorList object
@@ -11,33 +11,29 @@ NULL
 #' function.
 #'
 #' @param x A [`Prior-class`] object added to the list.
-#' @param ... One or multiple additional [`Prior-class`] object added to the
-#'   list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#'
 #' @returns A [`PriorList`] object.
-#' @examples
-#' \dontrun{
-#' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
-#' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
-#' priors(p1, p2)
-#' }
+#'
 #' @seealso [`Prior-class`], [`PriorList-class`]
 #' @family prior
-#' @aliases priors
+#'
+#' @examples
+#' p1 <- GDBPrior(variable = "Forest", hyper = "positive")
+#' p2 <- GDBPrior(variable = "Urban", hyper = "decreasing")
+#' priors(p1, p2)
+#'
 #' @name priors
 NULL
 
-#' @name priors
 #' @rdname priors
-#' @exportMethod priors
 #' @export
 methods::setGeneric(
   "priors",
   signature = methods::signature('x'),
   function(x,...) standardGeneric("priors"))
 
-#' @name priors
 #' @rdname priors
-#' @usage \S4method{priors}{Prior}(x,...)
 methods::setMethod(
   "priors",
   methods::signature(x = "ANY"),
@@ -92,18 +88,14 @@ methods::setMethod(
     } else {
       # Remove duplicated variables, taking only the one added
       if(anyDuplicated(vars)>0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
+        if(getOption('ibis.setupmessages',default = TRUE)) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
         ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
       }
     }
 
     # Create new priorlist object and supply all objects here
-    bdproto(
-      NULL,
-      PriorList,
-      priors = ll
-      )
-
+    pl <- PriorList$new(priors = ll)
+    return(pl)
   }
 )
 
@@ -116,33 +108,31 @@ methods::setMethod(
 #' objects can then be added to a [distribution] object with the [add_priors]
 #' function.
 #'
-#' @param ... One or multiple additional [`Prior-class`] object added to the
-#'   list.
+#' @param ... One or multiple additional [`Prior-class`] object added to the list.
+#'
 #' @returns A [`PriorList`] object.
+#'
+#' @seealso [`Prior-class`], [`PriorList-class`]
+#' @family prior
+#'
 #' @examples
 #' \dontrun{
 #' p1 <- INLAPrior(variable = "Forest",type = "normal", hyper = c(1,1e4))
 #' p2 <- INLAPrior(variable = "Urban",type = "normal", hyper = c(0,1e-2))
 #' priors(p1, p2)
 #' }
-#' @seealso [`Prior-class`], [`PriorList-class`]
-#' @family prior
-#' @aliases priors
+#'
 #' @name priors
 NULL
 
-#' @name priors
 #' @rdname priors
-#' @exportMethod priors
 #' @export
 methods::setGeneric(
   "priors",
   signature = methods::signature('x'),
   function(x,...) standardGeneric("priors"))
 
-#' @name priors
 #' @rdname priors
-#' @usage \S4method{priors}{Prior}(x,...)
 methods::setMethod(
   "priors",
   methods::signature(x = "ANY"),
@@ -198,17 +188,13 @@ methods::setMethod(
     } else {
       # Remove duplicated variables, taking only the one added
       if(anyDuplicated(vars)>0){
-        if(getOption('ibis.setupmessages')) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Found duplicated prior variables. Taking last one added.')
         ll <- ll[-which(duplicated(vars,fromLast = TRUE))]
       }
     }
 
     # Create new priorlist object and supply all objects here
-    bdproto(
-      NULL,
-      PriorList,
-      priors = ll
-      )
-
+    pl <- PriorList$new(priors = ll)
+    return(pl)
   }
 )

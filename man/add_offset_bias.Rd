@@ -2,11 +2,12 @@
 % Please edit documentation in R/add_offset.R
 \name{add_offset_bias}
 \alias{add_offset_bias}
+\alias{add_offset_bias,BiodiversityDistribution,SpatRaster-method}
 \title{Specify a spatial explicit offset as bias}
 \usage{
 add_offset_bias(x, layer, add = TRUE, points = NULL)
 
-\S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster,logical,ANY}(x,layer,add,points)
+\S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster}(x, layer, add = TRUE, points = NULL)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -53,19 +54,22 @@ R-package.
    add_predictors(covariates) |>
    add_offset_bias(samplingBias)
 }
+
 }
 \references{
 \itemize{
-\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving niche and range estimates with Maxent and point process models by integrating spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
+\item Merow, C., Allen, J.M., Aiello-Lammens, M., Silander, J.A., 2016. Improving
+niche and range estimates with Maxent and point process models by integrating
+spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.12453
 }
 }
 \seealso{
 Other offset: 
+\code{\link{add_offset}()},
 \code{\link{add_offset_elevation}()},
 \code{\link{add_offset_range}()},
-\code{\link{add_offset}()},
 \code{\link{rm_offset}()}
 }
 \concept{offset}
 \keyword{offset}
-\keyword{prior,}
+\keyword{prior}

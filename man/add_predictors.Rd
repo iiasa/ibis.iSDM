@@ -2,6 +2,11 @@
 % Please edit documentation in R/add_predictors.R
 \name{add_predictors}
 \alias{add_predictors}
+\alias{add_predictors,BiodiversityDistribution,SpatRasterCollection-method}
+\alias{add_predictors,BiodiversityDistribution,SpatRaster-method}
+\alias{add_predictors,BiodiversityDistribution,stars-method}
+\alias{add_predictors,BiodiversityScenario,SpatRaster-method}
+\alias{add_predictors,BiodiversityScenario,stars-method}
 \title{Add predictors to a Biodiversity distribution object}
 \usage{
 add_predictors(
@@ -19,15 +24,80 @@ add_predictors(
   ...
 )
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRasterCollection}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityDistribution,SpatRaster,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,SpatRaster}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityDistribution,stars,ANY,character,character,numeric,ANY,logical,logical,logical,ANY}(x,env,names,transform,derivates,derivate_knots,int_variables,bgmask,harmonize_na,explode_factors,priors,...)
+\S4method{add_predictors}{BiodiversityDistribution,stars}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityScenario,SpatRaster,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+\S4method{add_predictors}{BiodiversityScenario,SpatRaster}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 
-\S4method{add_predictors}{BiodiversityScenario,stars,ANY,character,character,numeric,ANY,logical}(x,env,names,transform,derivates,derivate_knots,int_variables,harmonize_na,...)
+\S4method{add_predictors}{BiodiversityScenario,stars}(
+  x,
+  env,
+  names = NULL,
+  transform = "scale",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -37,13 +107,11 @@ add_predictors(
 \item{names}{A \code{\link{vector}} of character names describing the environmental
 stack in case they should be renamed.}
 
-\item{transform}{A \code{\link{vector}} stating whether predictors should be
-preprocessed in any way (Options: \code{'none'},\code{'pca'},
-\code{'scale'}, \code{'norm'})}
+\item{transform}{A \code{\link{vector}} stating whether predictors should be preprocessed
+in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 
 \item{derivates}{A Boolean check whether derivate features should be
-considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'},
-\code{'quad'}) )}
+considered (Options: \code{'none'}, \code{'thresh'}, \code{'hinge'}, \code{'quad'}) )}
 
 \item{derivate_knots}{A single \code{\link{numeric}} or \code{\link{vector}} giving the number of
 knots for derivate creation if relevant (Default: \code{4}).}
@@ -124,4 +192,5 @@ The function will return an error message if these are used.
         add_predictors(covariates, transform = 'scale')
  obj
 }
+
 }

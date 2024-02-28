@@ -1,12 +1,17 @@
 #' Built formula for glmnet model
 #'
 #' @description This function builds a formula for a `engine_glmnet()` model.
+#'
 #' @param obj A [`list()`] object containing the prepared model data for a given
-#'   biodiversity dataset.
+#' biodiversity dataset.
+#'
 #' @note Function is not meant to be run outside the train() call.
+#'
 #' @author Martin Jung
-#' @keywords internal
+#'
 #' @noRd
+#'
+#' @keywords internal
 built_formula_glmnet <- function(obj){
   assertthat::assert_that(
     is.list(obj),
@@ -26,7 +31,7 @@ built_formula_glmnet <- function(obj){
     # Convert to formula
     form <- to_formula(form)
   } else{
-    if(getOption('ibis.setupmessages')) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
@@ -47,14 +52,20 @@ built_formula_glmnet <- function(obj){
 #' @description This function was taken from the [`maxnet`] R-package to get
 #' some more informed default lambda values for the regularization.
 #'
-#' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for
-#'   background).
+#' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for background).
 #' @param m A [`model.matrix`] object.
+#'
 #' @references
-#' * Phillips S (2021). _maxnet: Fitting 'Maxent' Species Distribution Models with 'glmnet'_. R package version 0.1.4, <https://CRAN.R-project.org/package=maxnet>.
+#' * Phillips S (2021). _maxnet: Fitting 'Maxent' Species Distribution Models with 'glmnet'_.
+#' R package version 0.1.4, <https://CRAN.R-project.org/package=maxnet>.
+#'
 #' @source maxnet
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 default.regularization <- function(p, m){
   isproduct <- function(x) grepl(":", x) & !grepl("\\(", x)
   isquadratic <- function(x) grepl("^I\\(.*\\^2\\)", x)
@@ -109,10 +120,14 @@ default.regularization <- function(p, m){
 #' the one within 1 SE of minimum lambda, unless it falls on the very first
 #' value, likely indicating an overregularized model. In this case take the
 #' minimum value of all lambda's.
+#'
 #' @param obj A \code{"glmnet"} object.
-#' @aliases determine_lambda
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 determine_lambda <- function(obj){
   assertthat::assert_that(
     inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
@@ -144,9 +159,14 @@ determine_lambda <- function(obj){
 #' @description This helper function summarizes the coefficients from a glmnet
 #' model. The optimal lambda is determined through the [`determine_lambda`]
 #' function.
+#'
 #' @param obj An object created with \code{'cv.glmnet'}.
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 tidy_glmnet_summary <- function(obj){
   assertthat::assert_that(
     inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
@@ -183,9 +203,14 @@ tidy_glmnet_summary <- function(obj){
 #'
 #' @description This helper function summarizes the coefficients from a glm
 #' model.
+#'
 #' @param obj An object created with [stats::glm.fit()]
-#' @keywords internal, utils
+#'
+#' @keywords utils
+#'
 #' @noRd
+#'
+#' @keywords internal
 tidy_glm_summary <- function(obj){
   assertthat::assert_that(
     inherits(obj, 'glm')

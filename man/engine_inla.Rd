@@ -119,13 +119,23 @@ Priors can be set via \link{INLAPrior}.
 # Add INLA as an engine (with a custom mesh)
 x <- distribution(background) |> engine_inla(mesh = my_mesh)
 }
+
 }
 \references{
 \itemize{
-\item Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations (with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
-\item Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4), 423-498.
-\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.” Biometrika 1 (103): 49–70.
-\item Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023). Integrated species distribution models fitted in INLA are sensitive to mesh parameterisation. Ecography, e06391.
+\item Havard Rue, Sara Martino, and Nicholas Chopin (2009), Approximate Bayesian
+Inference for Latent Gaussian Models Using Integrated Nested Laplace Approximations
+(with discussion), Journal of the Royal Statistical Society B, 71, 319-392.
+\item Finn Lindgren, Havard Rue, and Johan Lindstrom (2011). An Explicit Link Between
+Gaussian Fields and Gaussian Markov Random Fields: The Stochastic Partial Differential
+Equation Approach (with discussion), Journal of the Royal Statistical Society B, 73(4),
+423-498.
+\item Simpson, Daniel, Janine B. Illian, S. H. Sørbye, and Håvard Rue. 2016. “Going
+Off Grid: Computationally Efficient Inference for Log-Gaussian Cox Processes.”
+Biometrika 1 (103): 49–70.
+\item Dambly, L. I., Isaac, N. J., Jones, K. E., Boughey, K. L., & O'Hara, R. B. (2023).
+Integrated species distribution models fitted in INLA are sensitive to mesh
+parameterisation. Ecography, e06391.
 }
 }
 \seealso{
@@ -133,8 +143,8 @@ Other engine:
 \code{\link{engine_bart}()},
 \code{\link{engine_breg}()},
 \code{\link{engine_gdb}()},
-\code{\link{engine_glmnet}()},
 \code{\link{engine_glm}()},
+\code{\link{engine_glmnet}()},
 \code{\link{engine_inlabru}()},
 \code{\link{engine_stan}()},
 \code{\link{engine_xgboost}()}
