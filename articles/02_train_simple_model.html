@@ -96,7 +96,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-02-27</h4>
+            <h4 data-toc-skip class="date">2024-02-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -417,51 +417,51 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 1 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species continuous</span></span>
 <span><span class="co">#&gt;       metric        value</span></span>
 <span><span class="co">#&gt; 1          n 175.00000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.87823832</span></span>
-<span><span class="co">#&gt; 3        mae   0.67285213</span></span>
-<span><span class="co">#&gt; 4    logloss   1.77440038</span></span>
-<span><span class="co">#&gt; 5   normgini  -0.07768924</span></span>
-<span><span class="co">#&gt; 6 cont.boyce   0.25845131</span></span>
+<span><span class="co">#&gt; 2       rmse   0.87760899</span></span>
+<span><span class="co">#&gt; 3        mae   0.67188632</span></span>
+<span><span class="co">#&gt; 4    logloss   1.77398200</span></span>
+<span><span class="co">#&gt; 5   normgini  -0.07450199</span></span>
+<span><span class="co">#&gt; 6 cont.boyce   0.26436976</span></span>
 <span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 0c996359-e598-46f7-acf2-f042be684e26 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 cede46e5-72dd-43d2-bd83-db3487203a33 Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
 <span><span class="co">#&gt; 1                    n 509.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6990334</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7603143</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.4190476</span></span>
-<span><span class="co">#&gt; 5            precision   0.7154472</span></span>
+<span><span class="co">#&gt; 2                  auc   0.6915483</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7504912</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.4093023</span></span>
+<span><span class="co">#&gt; 5            precision   0.6875000</span></span>
 <span><span class="co">#&gt; 6          sensitivity   0.5028571</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8952096</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3980667</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5906040</span></span>
-<span><span class="co">#&gt; 10             logloss   6.1451347</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5807026</span></span>
-<span><span class="co">#&gt; 12               kappa   0.4283636</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2396857</span></span></code></pre></div>
+<span><span class="co">#&gt; 7          specificity   0.8802395</span></span>
+<span><span class="co">#&gt; 8                  tss   0.3830967</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5808581</span></span>
+<span><span class="co">#&gt; 10             logloss   6.1549579</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5776340</span></span>
+<span><span class="co">#&gt; 12               kappa   0.4092591</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2495088</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can
@@ -495,38 +495,38 @@ accounts for spatial autocorrelation, some simply add the distance
 between observations as predictor (thus assuming that much of the
 spatial pattern can be explained by commonalities in the sampling
 process).</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the predictors again</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="fu">list.files</span>(<span class="fu">system.file</span>(<span class="st">"extdata/predictors/"</span>, <span class="at">package =</span> <span class="st">"ibis.iSDM"</span>), <span class="st">"*.tif"</span>,<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">subset</span>(predictors, <span class="fu">c</span>(<span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                                            <span class="st">"elevation_mean_50km"</span>,</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                                   <span class="st">"koeppen_50km"</span>))</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># One of them (Köppen) is a factor, we will now convert this to a true factor variable</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>predictors<span class="sc">$</span>koeppen_50km <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">as.factor</span>(predictors<span class="sc">$</span>koeppen_50km)</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a distribution modelling pipeline</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">distribution</span>(background) <span class="sc">|&gt;</span> </span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_biodiversity_poipo</span>(virtual_species, <span class="at">field_occurrence =</span> <span class="st">'Observed'</span>, <span class="at">name =</span> <span class="st">'Virtual points'</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_predictors</span>(predictors, <span class="at">transform =</span> <span class="st">'scale'</span>, <span class="at">derivates =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">engine_xgboost</span>(<span class="at">iter =</span> <span class="dv">8000</span>)</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>mod_null <span class="ot">&lt;-</span> <span class="fu">train</span>(x, <span class="at">runname =</span> <span class="st">'Normal PPM projection'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># And with an added constrain</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>mod_dist <span class="ot">&lt;-</span> <span class="fu">train</span>(x <span class="sc">|&gt;</span> <span class="fu">add_latent_spatial</span>(<span class="at">method =</span> <span class="st">"nnd"</span>),</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                  <span class="at">runname =</span> <span class="st">'PPM with NND constrain'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="sc">|---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span></span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="er">=========================================</span></span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>                                          </span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare both</span></span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(background, <span class="at">main =</span> <span class="st">"Biodiversity data"</span>); <span class="fu">plot</span>(virtual_species[<span class="st">'Observed'</span>], <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># Load the predictors again</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="fu">list.files</span>(<span class="fu">system.file</span>(<span class="st">"extdata/predictors/"</span>, <span class="at">package =</span> <span class="st">"ibis.iSDM"</span>), <span class="st">"*.tif"</span>,<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">subset</span>(predictors, <span class="fu">c</span>(<span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>                                            <span class="st">"elevation_mean_50km"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>                                   <span class="st">"koeppen_50km"</span>))</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co"># One of them (Köppen) is a factor, we will now convert this to a true factor variable</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>predictors<span class="sc">$</span>koeppen_50km <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">as.factor</span>(predictors<span class="sc">$</span>koeppen_50km)</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co"># Create a distribution modelling pipeline</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">distribution</span>(background) <span class="sc">|&gt;</span> </span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="fu">add_biodiversity_poipo</span>(virtual_species, <span class="at">field_occurrence =</span> <span class="st">'Observed'</span>, <span class="at">name =</span> <span class="st">'Virtual points'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  <span class="fu">add_predictors</span>(predictors, <span class="at">transform =</span> <span class="st">'scale'</span>, <span class="at">derivates =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="fu">engine_xgboost</span>(<span class="at">iter =</span> <span class="dv">8000</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>mod_null <span class="ot">&lt;-</span> <span class="fu">train</span>(x, <span class="at">runname =</span> <span class="st">'Normal PPM projection'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co"># And with an added constrain</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>mod_dist <span class="ot">&lt;-</span> <span class="fu">train</span>(x <span class="sc">|&gt;</span> <span class="fu">add_latent_spatial</span>(<span class="at">method =</span> <span class="st">"nnd"</span>),</span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>                  <span class="at">runname =</span> <span class="st">'PPM with NND constrain'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="sc">|---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="er">=========================================</span></span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a>                                          </span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="co"># Compare both</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="fu">plot</span>(background, <span class="at">main =</span> <span class="st">"Biodiversity data"</span>); <span class="fu">plot</span>(virtual_species[<span class="st">'Observed'</span>], <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-1.png" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_null</span><span class="op">)</span></span></code></pre></div>
