@@ -888,10 +888,6 @@ methods::setMethod(
                                                                 id = id,
                                                                 x = x,
                                                                 settings = settings)
-        # For each type include expected data
-        # expectation vector (area for integration points/nodes and 0 for presences)
-        if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
-        if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
       # Run the engine setup script

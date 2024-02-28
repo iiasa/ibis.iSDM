@@ -11,6 +11,7 @@
 * Cleaner docs and structure
 * Adding `wrap_model`/`unwrap_model` functions
 * Added default parameters for all ibis specific options #90
+* Changing behaviour of weights in `engine_inlabru()` #93
 
 # ibis.iSDM 0.1.1
 

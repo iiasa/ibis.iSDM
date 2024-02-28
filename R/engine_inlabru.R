@@ -479,6 +479,11 @@ engine_inlabru <- function(x,
       #                           msg = "Found issues with aligning coordinates within the domain most likely.")
       # # If not poipo but still poisson, prepare data as follows
       # }
+
+      # Get weights if set and rescale
+      w <-  model$biodiversity[[j]]$expect
+      w <- w / sum(w) * length(w)
+
       if(model$biodiversity[[j]]$family == "poisson"){
         # Calculate integration points for PPMs and to estimation data.frame
         ips <- self$calc_integration_points(model, mode = 'stack')
@@ -487,12 +492,15 @@ engine_inlabru <- function(x,
         new <- sp::rbind.SpatialPointsDataFrame(
           df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
           ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
+
         # Formulate the likelihood
         lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
                             family = model$biodiversity[[j]]$family,
                             data = new, # Combine presence and absence information
                             mesh = self$get_data('mesh'),
-                            E = c(model$biodiversity[[j]]$expect, abs_E), # Combine Exposure variants
+                            weights = c(w, rep(1, length(abs_E))),
+                            # expectation vector (area for integration points/nodes and 0 for presences)
+                            E = c( rep(0, nrow(model$biodiversity[[j]]$predictors) ), abs_E), # Combine Exposure variants
                             # include = include[[i]], # Don't need this as all variables included in equation
                             options = o
         )
@@ -507,7 +515,8 @@ engine_inlabru <- function(x,
                             family = model$biodiversity[[j]]$family,
                             data = df, # Combine presence and absence information
                             mesh = self$get_data('mesh'),
-                            Ntrials = model$biodiversity[[j]]$expect,
+                            weights = w,
+                            Ntrials = rep(1, nrow(model$biodiversity[[j]]$predictors) ),
                             # include = include[[i]], # Don't need this as all variables in equation are included
                             options = o
         )
