@@ -148,5 +148,8 @@ ggplot2::labs(x = \'Variable\', y = \'Partial effect\')
     # render_html file
     rmarkdown::render(input = file_rmd, output_file = file)
 
+    # make sure the temp file gets deleted
+    unlink(x = file_rmd)
+
   }
 )
