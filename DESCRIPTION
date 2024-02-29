@@ -145,6 +145,7 @@ Collate:
     'priors.R'
     'project.R'
     'pseudoabsence.R'
+    'render_html.R'
     'scenario.R'
     'similarity.R'
     'simulate_population_steps.R'
