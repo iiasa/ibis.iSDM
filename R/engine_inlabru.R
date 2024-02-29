@@ -1066,8 +1066,18 @@ engine_inlabru <- function(x,
       # Check that provided model exists and variable exist in model
       mod <- self$get_data('fit_best')
       model <- self$model
+
+      # FIXME: Added all predictor datasets if multiple are present, but something
+      # is not really working. Output looks strange
+
       df <- model$biodiversity[[1]]$predictors
-      df <- subset(df, select = mod$names.fixed[mod$names.fixed != "Intercept"])
+      if (length(model$biodiversity) > 1) {
+        for(i in 2:length(model$biodiversity)) {
+          df <- cbind(df,  model$biodiversity[[i]]$predictors[, !names(model$biodiversity[[i]]$predictors) %in% names(df)])
+        }
+      }
+
+      df <- subset(df, select = mod$names.fixed[grep("Intercept", mod$names.fixed, invert = TRUE)])
 
       assertthat::assert_that(inherits(mod,'bru'),
                               'model' %in% names(self),
@@ -1090,7 +1100,7 @@ engine_inlabru <- function(x,
 
       if(is.null(newdata)){
         # Calculate range of predictors
-        rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+        rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                      function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
         assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)

@@ -438,7 +438,7 @@ engine_glm <- function(x,
               }
 
               # Calculate range of predictors
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+              rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                            function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
               if(is.null(newdata)){
