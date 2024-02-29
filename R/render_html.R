@@ -71,14 +71,13 @@ methods::setMethod(
     eq <- mod$fits$fit_best_equation
 
     # calculate partial response
-    part_res <- ibis.iSDM::partial(mod = mod, plot = FALSE)
+    part_res <- partial(mod = mod, plot = FALSE)
 
     # setup some objects
-    col_sdm <- ibis.iSDM:::ibis_colours[['sdm_colour']]
+    col_sdm <- ibis_colours[['sdm_colour']]
     col_thres <- c("grey", "black")
 
     # The indentation has to be exactly as it is inside the cat
-
     cat("---
 title: \'", title, "\'
 author: \'", author, "\'
@@ -95,9 +94,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 *This report was created automatically by the `ibis.iSDM` package.*
 
-
-<!-- Box for general notes -->
-<br> <br>
+<br>
 
 ---
 
@@ -105,7 +102,7 @@ General notes: ", notes, "
 
 ---
 
-<br> <br>
+<br>
 
 ## Model information
 
@@ -117,8 +114,6 @@ Resolution: x=", res[1], " y=", res[2], "
 
 Offsets?: ", offsets, "
 
-<br>
-
 ## Prediction map
 \`\`\`{r plot_pred, echo = FALSE, out.width = \'75%\', fig.align = \'center\'}
 if (thres == \'none\') {
@@ -128,7 +123,6 @@ plot(mod$fits$prediction, main = \'Prediction\', col = col_sdm)
 plot(mod$fits[[4]], main = \'Threshold\', col = col_thres)
 par(mfrow = c(1,1))}
 \`\`\`
-
 
 ## Coefficients
 
@@ -149,11 +143,10 @@ ggplot2::theme_classic() +
 ggplot2::geom_line(ggplot2::aes(y = mean)) +
 ggplot2::facet_wrap(. ~ variable, scales = \'free\') +
 ggplot2::labs(x = \'Variable\', y = \'Partial effect\')
-\`\`\`
-", file = file_rmd, sep = "")
+\`\`\`", file = file_rmd, sep = "")
 
     # render_html file
-    rmarkdown::render_html(input = file_rmd, output_file = file)
+    rmarkdown::render(input = file_rmd, output_file = file)
 
   }
 )
