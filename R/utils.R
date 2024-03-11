@@ -467,8 +467,8 @@ clamp_predictions <- function(model, pred){
   # Now clamp the prediction matrix with the clamped variables
   for (v in intersect(vars_clamp$variable, names(pred))) {
     pred[, v] <- pmin(
-      pmax(pred[, v], vars_clamp$min[vars_clamp==v] ),
-      vars_clamp$max[vars_clamp==v])
+      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
+      vars_clamp$max[vars_clamp$variable==v])
   }
 
   assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
