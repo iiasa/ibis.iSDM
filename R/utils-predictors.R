@@ -1025,7 +1025,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' @noRd
 #'
 #' @keywords internal
-predictors_filter_boruta <- function( env, obs, method, keep = NULL,
+predictors_filter_boruta <- function( env, observed, method, keep = NULL,
                                       iter = 100, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env) || is.matrix(env),

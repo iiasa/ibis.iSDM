@@ -1,9 +1,16 @@
-# ibis.iSDM 0.1.2 (current dev branch)
+# ibis.iSDM 0.1.3 (current dev branch)
+
+#### New features
+* Add functions that creates HTML file base on `DistributionModel`.
+
+#### Minor improvements and bug fixes
+* Small fixes to ensure `boruta` filtering works (again)?
+
+# ibis.iSDM 0.1.2
 
 #### New features
 * Switched object structure to `R6` throughout for improved data and memory handling #44
 * Implemented a convenience function ro remove biodiversity datasets (`rm_biodiversity()`).
-* Add functions that creates HTML file base on `DistributionModel`.
 
 #### Minor improvements and bug fixes
 * Added a logical parameter to `ensemble()` enabling compositing of thresholds if set #84

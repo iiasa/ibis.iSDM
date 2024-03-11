@@ -25,7 +25,7 @@ NULL
 globalVariables(c("background", "band", "bi_class", "bias",
                   "change", "cid", "cell", "cluster",
                   "data",
-                  "form2",
+                  "form", "form2",
                   "geometry",
                   #MJ: Added self here hoping that does not crash all methods.
                   "self",

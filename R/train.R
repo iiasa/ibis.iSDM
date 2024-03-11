@@ -567,7 +567,7 @@ methods::setMethod(
         co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         # Remove variables if found
         if(length(co)>0){
-          env |> dplyr::select(-dplyr::all_of(co)) -> env
+          env <- env |> dplyr::select(-dplyr::all_of(co))
         }
 
       } else { co <- NULL }
