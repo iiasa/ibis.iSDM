@@ -459,7 +459,7 @@ clamp_predictions <- function(model, pred){
     o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
     names(o1) <- c("variable", "min")
     names(o2) <- c("variable", "max")
-    vars_clamp2 <- merge(o1, o2)
+    vars_clamp <- merge(o1, o2)
   }
   # --- #
   # Now clamp either predictors
