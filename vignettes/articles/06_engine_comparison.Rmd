@@ -24,6 +24,7 @@ Stating the name and function call of each engine and its supported model comple
 | Regularized elastic net regression (GLMNET)       |  ln        |  [`engine_glmnet()`]   |  x |  `GLMNETPrior()` |  | x |
 | Bayesian additive regression trees (BART)         |  nl        |  [`engine_bart()`]   | (x)|  `BARTPrior()` |   | x |
 | Bayesian regularized regression (BREG)            |  ln        |  [`engine_breg()`]   |    |  `BREGPrior()` |  | x |
+| Approximate point modelling (SCAMPR)              |  ln        |  [`engine_scampr()`]   |    |   | x  | x |
 | Gradient descent boosting (GDB)                   |  ln/nl     |   [`engine_gdb()`]   |  x |  `GDBPrior()` |  | x |
 | Integrated Nested Laplace approximation (INLA)    |  ln        |  [`engine_inla()`]   |  x |  `INLAPrior()` | x | x |
 | Integrated Nested Laplace approximation (INLABRU) |  ln        | [`engine_inlabru()`] |  x |  `INLAPrior()` | x | x |

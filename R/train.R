@@ -158,7 +158,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
            only_linear = TRUE, method_integration = "predictor",
-           aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
+           aggregate_observations = TRUE, clamp = TRUE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
     # Make load checks
@@ -434,8 +434,8 @@ methods::setMethod(
                                 msg = "Predictors in custom formula not found!")
       }
       # Rename observation column to 'observed'. Needs to be consistent for INLA
-      # FIXME: try and not use dplyr as dependency (although it is probably loaded already)
-      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations |> dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
+      model$biodiversity[[id]]$observations <- model$biodiversity[[id]]$observations |>
+        dplyr::rename('observed' = x$biodiversity$get_columns_occ()[[id]])
       names(model$biodiversity[[id]]$observations) <- tolower(names(model$biodiversity[[id]]$observations)) # Also generally transfer everything to lower case
 
       # If the type is polygon, convert to regular sampled points per covered grid cells
@@ -567,7 +567,7 @@ methods::setMethod(
         co <- unique(co, names(which(fac_mean == fac_min)) ) # Now add to co all those variables where the mean equals the minimum, indicating only absences
         # Remove variables if found
         if(length(co)>0){
-          env <- env |> dplyr::select(-dplyr::all_of(co))
+          env |> dplyr::select(-dplyr::all_of(co)) -> env
         }
 
       } else { co <- NULL }
@@ -814,6 +814,7 @@ methods::setMethod(
 
     # Basic consistency checks
     assertthat::assert_that(is.list(model$biodiversity),
+                            length(model$biodiversity)>=1,
                             is.data.frame(model$predictors) && nrow(model$predictors)>0,
                             length(model$predictors_names)>0,
                             nrow(model$biodiversity[[1]]$observations)>0,
@@ -1553,8 +1554,39 @@ methods::setMethod(
             rm(new)
           }
         } # End of multiple ides
-      } # End of GLM engine
-    } else { stop('Specified Engine not implemented yet.') }
+      }
+    } # End of GLM engine
+      # ----------------------------------------------------------- #
+      #### SCAMPR Engine ####
+      else if(x$engine$get_class() == "SCAMPR-Engine"){
+        if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
+        if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
+        if(length(model$biodiversity)==2){
+          if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
+            stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
+          }
+        }
+        # If set specify a SPDE effect
+        # if((!is.Waiver(x$latentfactors))){
+          # if(attr(x$get_latent(),'method') == "spde"){
+        #     x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
+        #   }
+        # }
+
+        # Process per supplied dataset
+        for(id in ids) {
+          # Update model formula in the model container
+          model$biodiversity[[id]]$equation <- built_formula_breg( model$biodiversity[[id]] )
+        }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model, settings)
+
+        # Now train the model and create a predicted distribution model
+        out <- x$engine$train(model2, settings)
+
+      } # End of SCAMPR engine
+    else { stop('Specified Engine not implemented yet.') }
 
     if(is.null(out)) return(NULL)
 

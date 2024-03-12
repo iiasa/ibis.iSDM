@@ -213,7 +213,7 @@ test_that('Train a distribution model with GDB', {
   )
 
   # Run a check (should work without errors at least)
-  expect_no_error( suppressMessages( check(mod) ) )
+  suppressMessages( check(mod) )
 
   # Expect summary
   expect_s3_class(summary(mod), "data.frame")
