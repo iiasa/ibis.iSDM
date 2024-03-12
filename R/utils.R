@@ -452,13 +452,14 @@ clamp_predictions <- function(model, pred){
     vars_clamp <- rbind(vars_clamp, rr)
     rm(rr)
   }
+
   # Aggregate if multiple variables
-  if(anyDuplicated(vars_clamp$variable)){
-    o1 <- aggregate(variable ~ min, data = vars_clamp,
-              FUN = function(x) min(x) )
-    o2 <- aggregate(variable ~ max, data = vars_clamp,
-                    FUN = function(x) max(x) )
-    vars_clamp <- merge(o1,o2)
+  if(anyDuplicated(vars_clamp$variable) > 0){
+    o1 <- aggregate(vars_clamp$min, by = list(vars_clamp$variable), FUN = min)
+    o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
+    names(o1) <- c("variable", "min")
+    names(o2) <- c("variable", "max")
+    vars_clamp <- merge(o1, o2)
   }
   # --- #
   # Now clamp either predictors
@@ -467,8 +468,8 @@ clamp_predictions <- function(model, pred){
   # Now clamp the prediction matrix with the clamped variables
   for (v in intersect(vars_clamp$variable, names(pred))) {
     pred[, v] <- pmin(
-      pmax(pred[, v], vars_clamp$min[vars_clamp==v] ),
-      vars_clamp$max[vars_clamp==v])
+      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
+      vars_clamp$max[vars_clamp$variable==v])
   }
 
   assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
