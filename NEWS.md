@@ -7,6 +7,7 @@
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?
 * Small fix to parameter in `train()` #102 @jeffreyhanson
+* Small helper function for combining 2 different formula objects `combine_formulas()`
 
 # ibis.iSDM 0.1.2
 
