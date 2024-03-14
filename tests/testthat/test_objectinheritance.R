@@ -124,3 +124,55 @@ test_that('Check that distribution objects are properly inherited', {
   xx <- xx |> add_offset_bias(layer = predictors$hmi_mean_50km)
   expect_length(xx$get_offset(), 2)
 })
+
+# Modify predictors objects
+test_that('Modify predictors objects', {
+
+  # Load packages
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
+  suppressWarnings( requireNamespace("sf", quietly = TRUE) )
+
+  options("ibis.setupmessages" = FALSE)
+
+  # Get background
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+
+  # Get test species
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  # Define distribution object
+  expect_no_error(
+    x <- distribution(background) |> add_predictors(predictors)
+  )
+  expect_s3_class(x$predictors, "PredictorDataset")
+
+  # Clone and alter
+  pp <- x$predictors$clone()
+  pp$rm_data('bio01_mean_50km')
+  expect_equal(pp$length(),13)
+  # Check for original
+  expect_equal(x$predictors$length(),14)
+
+  # Crop
+  expect_no_warning(
+    pp$crop_data(virtual_range)
+  )
+  expect_gt(x$predictors$ncell(), pp$ncell())
+
+  # Mask
+  expect_no_warning(
+    pp$mask(virtual_range)
+  )
+  expect_gt(x$predictors$ncell(), pp$ncell())
+  pp <- x$predictors$clone()
+  expect_equal(x$predictors$ncell(), pp$ncell())
+
+  # Manual reset
+  y <- x$clone(deep = TRUE)
+  y$predictors$crop_data(virtual_range)
+  expect_gt(x$predictors$ncell(), y$predictors$ncell())
+
+})

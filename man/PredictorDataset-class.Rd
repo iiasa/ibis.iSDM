@@ -45,6 +45,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-summary}{\code{PredictorDataset$summary()}}
 \item \href{#method-PredictorDataset-has_derivates}{\code{PredictorDataset$has_derivates()}}
 \item \href{#method-PredictorDataset-length}{\code{PredictorDataset$length()}}
+\item \href{#method-PredictorDataset-ncell}{\code{PredictorDataset$ncell()}}
 \item \href{#method-PredictorDataset-plot}{\code{PredictorDataset$plot()}}
 \item \href{#method-PredictorDataset-clone}{\code{PredictorDataset$clone()}}
 }
@@ -354,6 +355,19 @@ A \code{\link{logical}} flag.
 Number of Predictors in object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$length()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{numeric}} estimate
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-ncell"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-ncell}{}}}
+\subsection{Method \code{ncell()}}{
+Number of cells or values in object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$ncell()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

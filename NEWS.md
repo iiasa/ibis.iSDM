@@ -5,6 +5,7 @@
 
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?
+* Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
 
 # ibis.iSDM 0.1.2
 

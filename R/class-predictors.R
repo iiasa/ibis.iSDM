@@ -174,7 +174,11 @@ PredictorDataset <- R6::R6Class(
         self$data <- terra::crop(self$data, pol)
       } else {
         # Scenario
-        sf::st_crop(self$data, pol)
+        suppressWarnings(
+          suppressMessages(
+            self$data <- sf::st_crop(self$data, pol)
+          )
+        )
       }
       invisible(self)
     },
@@ -201,7 +205,7 @@ PredictorDataset <- R6::R6Class(
         prediction <- terra::mask(prediction, mask, inverse = inverse, ...)
 
         # Save data
-        self$fits[["data"]] <- prediction
+        self$data <- prediction
         invisible(self)
       }
     },
@@ -279,9 +283,7 @@ PredictorDataset <- R6::R6Class(
         } else {
           # Assume raster
           return(
-            round(
-              terra::summary( d ), digits = digits
-            )
+            terra::summary( d, digits = digits)
           )
         }
       }
@@ -306,6 +308,16 @@ PredictorDataset <- R6::R6Class(
         terra::nlyr(self$get_data())
       else
         base::length(self$get_data())
+    },
+
+    #' @description
+    #' Number of cells or values in object
+    #' @return A [`numeric`] estimate
+    ncell = function() {
+      if(inherits(self$get_data(),'SpatRaster'))
+        terra::ncell(self$get_data())
+      else
+        terra::ncell(self$get_data()) |> as.numeric()
     },
 
     #' @description

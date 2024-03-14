@@ -114,7 +114,7 @@ methods::setMethod(
     if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
-    fit <- mod$get_model()
+    fit <- mod$get_model(copy = TRUE)
     # Check that coefficients and model exist
     assertthat::assert_that(!is.Waiver(fit),
                             nrow(fit$get_coefficients())>0,
@@ -135,28 +135,28 @@ methods::setMethod(
       new_preds$set_data(new)
     }
 
-    # Get limits if present
+    # Get limits if flagged as present in scenario object
     if(!is.null( mod$get_limits() )){
-      # FIXME: Scenarios need to be checked that the right layer is taken!!
-      # Get prediction
-      n <- fit$show_rasters()[grep("threshold",fit$show_rasters())]
-      tr <- fit$get_data(n)[[1]]
-      tr <- cbind( terra::crds(tr), data.frame(thresh = values(tr)))
-      tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
-      tr <- tr |> (\(.) subset(., stats::complete.cases(thresh)))()
+      # Get Limit and settings from model
+      limit <- mod$get_limits()
 
-      # Get zones from the limiting area, e.g. those intersecting with input
-      suppressMessages(
-        suppressWarnings(
-          zones <- sf::st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
-                                   mod$get_limits()$layer
-          )
-        )
-      )
-      # Limit zones
-      zones <- subset(mod$get_limits()$layer, limit %in% unique(zones$limit) )
-      # Now clip all provided new predictors and background to this
-      new_preds$crop_data(zones)
+      # Clip new predictors
+      new_preds$crop_data(limit)
+
+      # Also adjust the model container
+      fit$model$background <- limit
+      # Clip the predictor object
+      fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
+      fit$model$predictors_object$crop_data(limit)
+      fit$model$predictors_object$mask(limit)
+      fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+      # And offset if found
+      if(!is.null(fit$model$offset_object)){
+        fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
+        fit$model$offset_object <- terra::crop(fit$model$offset_object, limit)
+        fit$model$offset_object <- terra::mask(fit$model$offset_object, limit)
+        fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+      }
     }
 
     # Check that predictor names are all present
@@ -167,22 +167,28 @@ methods::setMethod(
 
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
-    # Not get the baseline raster
-    thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
-    baseline_threshold <- mod$get_model()$get_data(thresh_reference)
     if(!is.Waiver(scenario_threshold)){
-      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
-    }
+      # Not get the baseline raster
+      thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+      baseline_threshold <- mod$get_model()$get_data(thresh_reference)
 
-    if(inherits(baseline_threshold, 'SpatRaster')){
-      baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
+      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
+      # Furthermore apply new limits also to existing predictions (again)
+      if(!is.null( mod$get_limits() )) baseline_threshold <- terra::crop(baseline_threshold, mod$get_limits())
+
+      if(inherits(baseline_threshold, 'SpatRaster')){
+        baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
+      }
+
+    } else {
+      baseline_threshold <- new_waiver()
     }
     # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
     scenario_simulations <- mod$get_simulation()
 
     # Create a template for use
-    template <- emptyraster( mod$get_predictors()$get_data() )
+    template <- emptyraster( new_preds$get_data() )
 
     #  --- Check that everything is there ---
     # Check that thresholds are set for constrains
@@ -235,7 +241,8 @@ methods::setMethod(
     for(step in times){ # step = times[1]
       # Get data
       nd <- subset(df, time == step)
-      assertthat::assert_that( !all(is.na(nd[, mod_pred_names])) )
+      assertthat::assert_that(nrow(nd)>0,
+                              !all(is.na(nd[, mod_pred_names])) )
 
       # Apply adaptability constrain
       if("adaptability" %in% names(scenario_constraints)){
