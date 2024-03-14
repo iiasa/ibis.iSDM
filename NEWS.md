@@ -2,7 +2,7 @@
 
 #### New features
 * Add functions that creates HTML file base on `DistributionModel`.
-* Added new engine `engine_scampr` for model-based integration.
+* Added new engine `engine_scampr()` for model-based integration.
 
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?

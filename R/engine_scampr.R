@@ -281,12 +281,15 @@ engine_scampr <- function(x,
                              scampr.quad.size = model$biodiversity[[1]]$observations[,'scampr.quad.size', drop = TRUE])
       )
       df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed", "scampr.quad.size","x","y"))
-
+      # Get overall equation
+      equation <- model$biodiversity[[1]]$equation
     } else if(model.type == "PA") {
       df <- cbind(model$biodiversity[[1]]$predictors,
                   data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE])
       )
       df <- subset(df, select = c(model$biodiversity[[1]]$predictors_names, "observed", "x","y"))
+      # Get overall equation
+      equation <- model$biodiversity[[1]]$equation
     } else {
       # Integrated model
       if(model$biodiversity[[1]]$type=="poipo"){
@@ -311,7 +314,9 @@ engine_scampr <- function(x,
       te1 <- attr(terms.formula(model$biodiversity[[1]]$equation), "term.labels")
       te2 <- attr(terms.formula(model$biodiversity[[2]]$equation), "term.labels")
       if(!all(te1 %in% te2) || !(length(te1)==length(te2))){
-        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0('Dataset-specific formulas are not yet supported. Taking the first one specified!'))
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0('Dataset-specific formulas are not yet supported. Combining both objects!'))
+        equation <- combine_formulas(model$biodiversity[[1]]$equation,
+                                     model$biodiversity[[2]]$equation)
       }
 
       assertthat::assert_that(
@@ -321,8 +326,6 @@ engine_scampr <- function(x,
         utils::hasName(df.pa, "x"),utils::hasName(df.pa, "y")
       )
     }
-    # Get overall equation
-    equation <- model$biodiversity[[1]]$equation
 
     # Get full prediction container
     full <- model$predictors
