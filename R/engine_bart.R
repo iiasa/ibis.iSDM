@@ -284,9 +284,7 @@ engine_bart <- function(x,
     # Process and add priors if set
     params <- self$get_data("params")
     if(!is.Waiver(model$priors)){
-      assertthat::assert_that(
-        all( model$priors$varnames() %in% model$biodiversity[[1]]$predictors_names )
-      )
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Match position of variables with monotonic constrains
       mc <- rep(1 / length( model$biodiversity[[1]]$predictors_names ), length( model$biodiversity[[1]]$predictors_names ) )
       names(mc) <- model$biodiversity[[1]]$predictors_names

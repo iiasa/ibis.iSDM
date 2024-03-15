@@ -336,6 +336,7 @@ engine_breg <- function(x,
 
     # Priors
     if(!is.Waiver(model$priors)){
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Define a family specific Boom prior
       pp <- setup_prior_boom(form = form,
                              data = df,

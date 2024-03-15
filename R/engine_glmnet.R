@@ -367,6 +367,7 @@ engine_glmnet <- function(x,
     }
 
     if(!is.Waiver(model$priors)){
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Reset those contained in the prior object
       for(v in model$priors$varnames()){
         if(!(v %in% names(p.fac))) next()
