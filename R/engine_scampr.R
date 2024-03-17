@@ -22,8 +22,12 @@ NULL
 #' supports only presence-only PPMs and presence/absence Binary GLMs, or 'IDM'
 #' (for an integrated data model).
 #'
+#' @note
+#' * The package can currently be installed from github directly only \code{"ElliotDovers/scampr"}
+#' * Presence-absence models in SCAMPR currently only support cloglog link functions!
+#'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param type The mode used for creating (posterior or prior) predictions. Either making
+#' @param type The mode used for creating (posterior or prior) predictions. Either stting
 #' \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param dens A [`character`] on how predictions are made, either from the \code{"posterior"} (Default)
 #' or \code{"prior"}.
@@ -193,8 +197,15 @@ engine_scampr <- function(x,
                                                rep(1, nrow(presabs)-length(model$biodiversity[[j]]$expect) ))
         }
 
-        # Assign quad weights name and coord name check
-        presabs$scampr.quad.size <- ifelse(presabs$observed==0, 1, 0)
+        # Assign quadrature weights name and coord name check
+        w <- ppm_weights(df = presabs,
+                         pa = presabs$observed,
+                         bg = bg,
+                         use_area = TRUE,
+                         weight = 1e-6, # Arbitrary small weight
+                         type = "DWPR" # Weights for down-weighted Poisson regression
+        )
+        presabs$scampr.quad.size <- w
         assertthat::assert_that(utils::hasName(presabs,"x"),
                                 utils::hasName(presabs,"y"),
                                 length(unique(presabs$scampr.quad.size))==2)
@@ -311,20 +322,33 @@ engine_scampr <- function(x,
       }
 
       # Compare terms and raise warning otherwise
-      te1 <- attr(terms.formula(model$biodiversity[[1]]$equation), "term.labels")
-      te2 <- attr(terms.formula(model$biodiversity[[2]]$equation), "term.labels")
+      te1 <- attr(stats::terms.formula(model$biodiversity[[1]]$equation), "term.labels")
+      te2 <- attr(stats::terms.formula(model$biodiversity[[2]]$equation), "term.labels")
       if(!all(te1 %in% te2) || !(length(te1)==length(te2))){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red',paste0('Dataset-specific formulas are not yet supported. Combining both objects!'))
         equation <- combine_formulas(model$biodiversity[[1]]$equation,
                                      model$biodiversity[[2]]$equation)
+      } else {
+        equation <- model$biodiversity[[1]]$equation
       }
 
       assertthat::assert_that(
+        is.formula(equation),
         nrow(df.po)>0,
         utils::hasName(df.po, "x"),utils::hasName(df.po, "y"),
         nrow(df.pa)>0,
         utils::hasName(df.pa, "x"),utils::hasName(df.pa, "y")
       )
+    }
+
+    # Check for spatial effects
+    if(!is.Waiver(model$latent)){
+      # Simply use a flag and rely on FRK::auto_basis() function
+      # In the future we could allow more flexibility here if needed
+      if(model$latent == 'poly') latent <- TRUE else latent <- FALSE
+      latent <- TRUE
+    } else {
+      latent <- FALSE
     }
 
     # Get full prediction container
@@ -374,7 +398,7 @@ engine_scampr <- function(x,
               model.type = model.type,
               coord.names = c("x", "y"),
               latent.po.biasing = FALSE,
-              include.sre = FALSE, # TODO
+              include.sre = latent, # TODO
               se = TRUE,
               maxit = params$maxit # Number iterations
             )
@@ -386,14 +410,14 @@ engine_scampr <- function(x,
           fit_scampr <- try({
             scampr::scampr(
               formula = equation,
-              # bias.formula = ~ 1, # FIXME: This does not work at the moment.
+              bias.formula = ~ 1, # FIXME: This does not work at the moment.
               pa.data = df.pa,
               data = df.po,
               model.type = model.type,
               latent.po.biasing = FALSE,
               coord.names = c("x", "y"),
               quad.weights.name = "scampr.quad.size",
-              include.sre = FALSE, # TODO
+              include.sre = latent, # TODO
               se = TRUE,
               maxit = params$maxit # Number iterations
             )
@@ -451,130 +475,24 @@ engine_scampr <- function(x,
     }
     # Compute end of computation time
     settings$set('end.time', Sys.time())
+    # Also append other parameters to settings
+    for(entry in names(params)) settings$set(entry, params[[entry]])
+    # Also save model type
+    settings$set('model.type', model.type)
 
     # Definition of SCAMPR Model object ----
     obj <- DistributionModel # Make a copy to set new functions
 
     # Partial effect functions
-    obj$set("public", "partial",
-            function(x.var = NULL, constant = NULL, variable_length = 100,
-                     values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
-              assertthat::assert_that(is.character(x.var) || is.null(x.var),
-                                      is.null(constant) || is.numeric(constant),
-                                      is.null(type) || is.character(type),
-                                      is.null(newdata) || is.data.frame(newdata),
-                                      is.numeric(variable_length)
-              )
-              # Settings
-              settings <- self$settings
-
-              mod <- self$get_data('fit_best')
-              model <- self$model
-              co <- stats::coefficients(mod) |> names() # Get model coefficient names
-              # Set type
-              if(is.null(type)) type <- self$settings$get("type")
-              type <- match.arg(type, c("link", "response"), several.ok = FALSE)
-              settings$set("type", type)
-
-              # Get data
-              df <- model$biodiversity[[length(model$biodiversity)]]$predictors
-              df <- subset(df, select = attr(mod$terms, "term.labels"))
-              variables <- names(df)
-
-              # Match x.var to argument
-              if(is.null(x.var)){
-                x.var <- variables
-              } else {
-                x.var <- match.arg(x.var, variables, several.ok = TRUE)
-              }
-
-              # Calculate range of predictors
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                           function(x) range(x, na.rm = TRUE)) |> as.data.frame()
-
-              if(is.null(newdata)){
-                # if values are set, make sure that they cover the data.frame
-                if(!is.null(values)){
-                  assertthat::assert_that(length(x.var) == 1)
-                  df2 <- list()
-                  df2[[x.var]] <- values
-                  # Then add the others
-                  for(var in colnames(df)){
-                    if(var == x.var) next()
-                    df2[[var]] <- mean(df[[var]], na.rm = TRUE)
-                  }
-                  df2 <- df2 |> as.data.frame()
-                } else {
-                  df2 <- list()
-                  for(i in x.var) {
-                    df2[[i]] <- as.data.frame(seq(rr[1,i],rr[2,i], length.out = variable_length))
-                  }
-                  df2 <- do.call(cbind, df2); names(df2) <- x.var
-                }
-              } else {
-                # Assume all variables are present
-                df2 <- dplyr::select(newdata, dplyr::any_of(variables))
-                assertthat::assert_that(nrow(df2)>1, ncol(df2)>1)
-              }
-
-              # Get offset if set
-              if(!is.Waiver(model$offset)){
-                of <- model$offset$spatial_offset
-              } else of <- new_waiver()
-
-              # Inverse link function
-              ilf <- switch (settings$get('type'),
-                             "link" = NULL,
-                             "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                                 exp, logistic)
-              )
-
-              pp <- data.frame()
-              pb <- progress::progress_bar$new(total = length(x.var))
-              for(v in x.var){
-                if(!is.Waiver(of)){
-                  # Predict with offset
-                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                                     ice = FALSE, center = FALSE,
-                                     type = "regression", newoffset = of,
-                                     inv.link = ilf,
-                                     plot = FALSE, rug = TRUE, train = df)
-                } else {
-                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                                     ice = FALSE, center = FALSE,
-                                     type = "regression", inv.link = ilf,
-                                     plot = FALSE, rug = TRUE, train = df
-                  )
-                }
-                p1 <- p1[, c(v, "yhat")]
-                names(p1) <- c("partial_effect", "mean")
-                p1 <- cbind(variable = v, p1)
-                pp <- rbind(pp, p1)
-                rm(p1)
-                if(length(x.var) > 1) pb$tick()
-              }
-
-              if(plot){
-                # Make a plot
-                g <- ggplot2::ggplot(data = pp, ggplot2::aes(x = partial_effect)) +
-                  ggplot2::theme_classic() +
-                  ggplot2::geom_line(ggplot2::aes(y = mean)) +
-                  ggplot2::facet_wrap(. ~ variable, scales = "free") +
-                  ggplot2::labs(x = "Variable", y = "Partial effect")
-                print(g)
-              }
-              return(pp)
-            }, overwrite = TRUE)
-
-    # Spatial partial dependence plot
-    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL, plot = TRUE, type = NULL){
-      assertthat::assert_that(is.character(x.var),
-                              "model" %in% names(self),
+    # Partial effects
+    obj$set("public", "partial", function(x.var = NULL, constant = NULL, variable_length = 100,
+                                          values = NULL, newdata = NULL, plot = FALSE, type = NULL, ...){
+      assertthat::assert_that(is.character(x.var) || is.null(x.var),
                               is.null(constant) || is.numeric(constant),
+                              is.null(type) || is.character(type),
                               is.null(newdata) || is.data.frame(newdata),
-                              is.logical(plot),
-                              is.character(type) || is.null(type)
-      )
+                              is.numeric(variable_length))
+
       # Settings
       settings <- self$settings
       # Set type
@@ -584,55 +502,182 @@ engine_scampr <- function(x,
 
       mod <- self$get_data('fit_best')
       model <- self$model
-      # For Integrated model, take the last one
-      fam <- model$biodiversity[[length(model$biodiversity)]]$family
+      df <- model$biodiversity[[1]]$predictors
+      df <- df |> dplyr::select("x","y", dplyr::any_of(names(df)))
 
-      # If new data is set
+      # Match x.var to argument
+      if(is.null(x.var)){
+        x.var <- colnames(df)
+      } else {
+        x.var <- match.arg(x.var, colnames(df), several.ok = TRUE)
+      }
+
+      # Take newdata or generate partial dummy
+      if(is.null(newdata)){
+
+        rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+                     function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+
+        assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)
+
+        df_partial <- list()
+        if(!is.null(values)){ assertthat::assert_that(length(values) >= 1) }
+        # Add all others as constant
+        if(is.null(constant)){
+          for(n in names(rr)) df_partial[[n]] <- rep( mean(df[[n]], na.rm = TRUE), variable_length )
+        } else {
+          for(n in names(rr)) df_partial[[n]] <- rep( constant, variable_length )
+        }
+        # Convert list to data.frame (same class as if newdata is provided)
+        df_partial <- do.call(cbind, df_partial) |> as.data.frame()
+      } else {
+        df_partial <- newdata |> dplyr::select(dplyr::any_of(names(df)))
+      }
+      # Check if x and y present as this is required for scampr
+      if(!utils::hasName(df_partial, "x") || !utils::hasName(df_partial, "y")){
+        df_partial$x <- seq(min(df$x),max(df$x), length.out = nrow(df_partial))
+        df_partial$y <- seq(min(df$y),max(df$y), length.out = nrow(df_partial))
+      }
+
+      # create list to store results
+      o <- vector(mode = "list", length = length(x.var))
+      names(o) <- x.var
+
+      # loop through x.var
+      for(v in x.var) {
+
+        df2 <- df_partial
+
+        if(!is.null(values)){
+          df2[, v] <- values
+        } else {
+          df2[, v] <- seq(rr[1, v], rr[2, v], length.out = variable_length)
+        }
+
+        # Correct and reset any factor levels if set
+        if(any(model$predictors_types$type=="factor")){
+          lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
+          df2[model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(lvl[1], levels = lvl)
+        }
+
+        pred_scampr <- predict(
+          mod,
+          newdata = df2,
+          type = settings$get('type'),
+          # use.formula = "presence-only",
+          dens = 'prior', # More broader predictions
+          include.bias.accounting = FALSE
+        )            # Also attach the partial variable
+
+        # Add variable name for consistency
+        pred_part <- data.frame("variable" = v, "mean" = pred_scampr,
+                                "partial_effect" = df2[[v]])
+
+        o[[v]] <- pred_part
+        rm(pred_part)
+      }
+      # Combine all
+      o <- do.call(what = rbind, args = c(o, make.row.names = FALSE))
+
+      if(plot){
+        # Make a plot
+        g <- ggplot2::ggplot(data = o, ggplot2::aes(x = partial_effect)) +
+          ggplot2::theme_classic() +
+          ggplot2::geom_line(ggplot2::aes(y = mean)) +
+          ggplot2::facet_wrap(. ~ variable, scales = "free") +
+          ggplot2::labs(x = "Variable", y = "Partial effect")
+        print(g)
+      }
+      # Return the data
+      return(o)
+    },overwrite = TRUE)
+
+    # Spatial partial dependence plot
+    obj$set("public", "spartial", function(x.var, constant = NULL, newdata = NULL,
+                                           plot = TRUE, type = NULL){
+      assertthat::assert_that(is.character(x.var) || is.null(x.var),
+                              "model" %in% names(self),
+                              is.null(constant) || is.numeric(constant),
+                              is.logical(plot),
+                              is.character(type) || is.null(type)
+      )
+
+      # Settings
+      settings <- self$settings
+      # Set type
+      if(is.null(type)) type <- self$settings$get("type")
+      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+      settings$set("type", type)
+
+      mod <- self$get_data('fit_best')
+      model <- self$model
+
+      # Check if newdata is defined, if yes use that one instead
       if(!is.null(newdata)){
         df <- newdata
+        assertthat::assert_that(nrow(df) == nrow(model$biodiversity[[1]]$predictors))
       } else {
+        # df <- model$biodiversity[[1]]$predictors
         df <- model$predictors
-        df$w <- model$exposure
       }
-      assertthat::assert_that(all(x.var %in% colnames(df)))
-      df$rowid <- 1:nrow(df)
+      df <- df |> dplyr::select("x","y", dplyr::any_of(names(df)))
+
       # Match x.var to argument
-      x.var <- match.arg(x.var, names(df), several.ok = FALSE)
+      if(is.null(x.var)){
+        x.var <- colnames(df)
+      } else {
+        x.var <- match.arg(x.var, names(df), several.ok = FALSE)
+      }
+
+      # Make spatial container for prediction
+      prediction <- model_to_background(model)
 
       # Add all others as constant
       if(is.null(constant)){
-        for(n in names(df)) if(!n %in% c(x.var, "rowid", "w")) df[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
+        for(n in names(df)) if(n != x.var) df[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
       } else {
-        for(n in names(df)) if(!n %in% c(x.var, "rowid", "w")) df[[n]] <- constant
+        for(n in names(df)) if(n != x.var) df[[n]] <- constant
       }
-      # Reclassify factor levels
+
       if(any(model$predictors_types$type=="factor")){
         lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
         df[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]] <-
           factor(lvl[1], levels = lvl)
+        # FIXME: Assigning the first level (usually reference) for now. But ideally find a way to skip factors from partial predictions
       }
 
-      # Predict
-      pred_glm <- stats::predict.glm(
-        object = mod,
-        newdata = df,
-        weights = df$w, # The second entry of unique contains the non-observed variables
-        se.fit = FALSE,
-        na.action = "na.pass",
-        fam = fam,
-        type = type
-      ) |> as.data.frame()
-      assertthat::assert_that(nrow(pred_glm)>0, nrow(pred_glm) == nrow(df))
+      # Make a subset of non-na values
+      df$rowid <- 1:nrow(df)
+      df_sub <- subset(df, stats::complete.cases(df))
 
-      # Now create spatial prediction
-      prediction <- fill_rasters(pred_glm, model_to_background(model))
-      names(prediction) <- paste0("spartial_",x.var)
+      # Attempt prediction
+      out <- try({
+        predict(object = mod,
+                newdata = df_sub,
+                type = settings$get('type'),
+                dens = settings$get('dens'),
+                include.bias.accounting = FALSE)
+      },silent = TRUE)
+
+      # FIXME NOTE:
+      # Hard transform owing to model unable to do other link functions
+      if(settings$get('model.type') =="PA" && settings$get('type') == "response") out <- ilink(out, "cloglog")
+
+      if(!inherits(out,"try-error")){
+        # Fill output with summaries of the posterior
+        prediction[df_sub$rowid] <- out
+        names(prediction) <- "mean"
+      } else {
+        stop("Spartial prediction of scampr failed...")
+      }
 
       # Do plot and return result
-      if(plot) terra::plot(prediction, col = ibis_colours$ohsu_palette)
+      if(plot){
+        terra::plot(prediction, col = ibis_colours$ohsu_palette,
+                    main = paste0("Spartial effect of ", x.var, collapse = ","))
+      }
       return(prediction)
-    },
-    overwrite = TRUE)
+    },overwrite = TRUE)
 
     # Convergence check
     obj$set("public", "has_converged", function(){
@@ -656,7 +701,7 @@ engine_scampr <- function(x,
       }
       type <- match.arg(type, c("raw", "inverse", "pearson"),several.ok = FALSE)
       # Calculate residuals
-      rd <- residuals(obj, type = type)
+      rd <- stats::residuals(obj, type = type)
       return(rd)
     }, overwrite = TRUE)
 
@@ -664,10 +709,24 @@ engine_scampr <- function(x,
     obj$set("public", "get_coefficients", function(){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- data.frame(Feature = names(obj$coefficients), Beta = coef(obj)) |>
-        dplyr::bind_cols(confint(obj))
+      model <- self$model
+      suppressWarnings(
+        cofs <- data.frame("Feature" = names(obj$coefficients), "Beta" = stats::coef(obj)) |>
+          dplyr::bind_cols(stats::confint(obj))
+      )
       names(cofs) <- make.names(names(cofs))
+      # Subset only to variables in predictor frame
+      cofs <- subset(cofs, Feature %in% c('(Intercept)', model$predictors_names))
       return(cofs)
+    }, overwrite = TRUE)
+
+    # Function for plotting spartials
+    obj$set("public", "plot_spatial", function(){
+      # Get model for object
+      model <- self$model
+      if(!is.Waiver(model$latent)){
+        stop("Plotting of spatial field not yet implemented!")
+      }
     }, overwrite = TRUE)
 
     # Engine-specific projection function
@@ -687,8 +746,6 @@ engine_scampr <- function(x,
 
       mod <- self$get_data('fit_best')
       model <- self$model
-      # For Integrated model, take the last one
-      fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
       # Clamp?
       if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
@@ -704,27 +761,36 @@ engine_scampr <- function(x,
         }
       }
 
+      # Prediction container
+      prediction <- model_to_background(model)
+
       df <- newdata
-      df$w <- model$exposure # Also get exposure variable
       df$rowid <- 1:nrow(df)
       if(!is.Waiver(model$offset)) ofs <- model$offset else ofs <- NULL
       assertthat::assert_that(nrow(df)>0)
+      # Make a subset of non-na values
+      df_sub <- subset(df, stats::complete.cases(df))
 
-      pred_fit <- predict(
-        object = mod,
-        newdata = df,
-        dens = params$dens,
-        include.bias.accounting = FALSE,
-        type = type
-      ) |> as.data.frame()
+      # Attempt prediction
+      out <- try({
+        predict(object = mod,
+                newdata = df_sub,
+                type = settings$get('type'),
+                dens = settings$get('dens'),
+                include.bias.accounting = FALSE)
+      },silent = TRUE)
 
-      names(pred_fit) <- layer
-      assertthat::assert_that(nrow(pred_fit)>0, nrow(pred_fit) == nrow(fit))
+      # FIXME NOTE:
+      # Hard transform owing to model unable to do other link functions
+      if(settings$get('model.type') =="PA" && settings$get('type') == "response") out <- ilink(out, "cloglog")
 
-      # Now create spatial prediction
-      prediction <- fill_rasters(pred_fit,
-                                 model_to_background(model)
-      )
+      if(!inherits(out,"try-error")){
+        # Fill output with summaries of the posterior
+        prediction[df_sub$rowid] <- out
+        names(prediction) <- layer
+      } else {
+        stop("Projection of scampr failed...")
+      }
 
       return(prediction)
     }, overwrite = TRUE)

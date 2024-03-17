@@ -200,7 +200,7 @@ combine_formulas <- function(..., combine = "both", env=parent.frame()) {
 
   if(any(c("rhs", "both") %in% combine)){
     un <- unlist(rhs)
-    rhs <- Map(`[`, rhs, relist(!duplicated(un), skeleton = rhs))
+    rhs <- Map(`[`, rhs, utils::relist(!duplicated(un), skeleton = rhs))
   }  else {
     rhs <- do.call(paste, c(rhs, sep=" + "))
   }
@@ -214,7 +214,7 @@ combine_formulas <- function(..., combine = "both", env=parent.frame()) {
 
   # Return "lhs ~ rhs" as a formula in the calling environment.
   suppressWarnings(
-    f <- as.formula(paste0(lhs, " ~ ", rhs), env)
+    f <- stats::as.formula(paste0(lhs, " ~ ", rhs), env)
   )
   return( f )
 }

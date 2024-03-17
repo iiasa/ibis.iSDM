@@ -183,7 +183,7 @@ methods::setMethod(
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
     # --- #
-    #filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
+    # filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
     filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
@@ -276,8 +276,8 @@ methods::setMethod(
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
-      if(x$get_engine()=="<GDB>" & m == 'poly'){
-        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Replacing polynominal with P-splines for GDB.')
+      if(x$get_engine() %in% c("<GDB>","<SCAMPR>") & m == 'poly'){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Replacing polynominal with P-splines for ', x$get_engine())
       }
       if(x$get_engine()=="<BART>" & m == 'car'){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
@@ -286,7 +286,7 @@ methods::setMethod(
       # Calculate latent spatial terms (saved in engine data)
       if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
         # If model is polynominal, get coordinates of first entry for names of transformation
-        if(m == 'poly' & x$get_engine()!="<GDB>"){
+        if(m == 'poly' & x$get_engine() %notin% c("<GDB>","<SCAMPR>")){
           # And the full predictor container
           coords_poly <- polynominal_transform(model$predictors[,c('x','y')], degree = 2)
           model$predictors <- cbind(model$predictors, coords_poly)
@@ -1566,12 +1566,6 @@ methods::setMethod(
             stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
           }
         }
-        # If set specify a SPDE effect
-        # if((!is.Waiver(x$latentfactors))){
-          # if(attr(x$get_latent(),'method') == "spde"){
-        #     x$engine$calc_latent_spatial(type = attr(x$get_latent(),'method'), priors = model[['priors']])
-        #   }
-        # }
 
         # Process per supplied dataset
         for(id in ids) {

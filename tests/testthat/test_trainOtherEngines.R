@@ -541,4 +541,112 @@ test_that('Train a distribution model with INLABRU', {
   expect_s3_class(mod$get_equation(), 'formula')
 })
 
+# Tests for scampr
+test_that('Train a distribution model with SCAMPR', {
+
+  skip_if_not_installed('scampr')
+  skip_if_not_installed('TMB')
+  skip_on_cran()
+  skip_on_ci()
+  skip_on_covr()
+
+  suppressWarnings( requireNamespace('scampr', quietly = TRUE) )
+
+  # Set to verbose
+  options("ibis.setupmessages" = FALSE)
+
+  # Load data
+  # Background Raster
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  # Get test species
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
+  # Get list of test predictors
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+  # Load them as rasters
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  # Also generate some absence points
+  poa <- virtual_points |> add_pseudoabsence(field_occurrence = 'Observed',template = background)
+
+  # Now set them one up step by step
+  x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors, transform = 'none',derivates = 'none') |>
+    engine_scampr()
+  expect_equal(x$get_engine(), "<SCAMPR>")
+
+  # Train the model
+  suppressWarnings(
+    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
+                 verbose = FALSE)
+  )
+
+  # Run a check (should work without errors at least)
+  expect_no_error( suppressMessages( check(mod) ) )
+
+  # Expect summary
+  expect_s3_class(summary(mod), "data.frame")
+  expect_s3_class(mod$show_duration(), "difftime")
+  expect_equal(length(mod$show_rasters()), 1) # Now predictions found
+  expect_s3_class(mod$settings, "Settings")
+
+  # --- #
+  # Some checks
+  expect_true("get_data" %in% names(mod))
+  expect_true("plot" %in% names(mod))
+  expect_true("summary" %in% names(mod))
+
+  # Test some basic non-sense calculations
+  tr <- threshold(mod)
+  expect_type(tr$get_thresholdvalue(), "double")
+
+  # Can we get a centroid from both objects
+  expect_s3_class(mod$get_centroid(), "sf")
+  expect_s3_class(tr$get_centroid(), "sf")
+
+  # Nor conventional partials work
+  expect_no_error(ex <- partial(mod, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do spartials work
+  expect_no_error(ex <- spartial(mod, x.var = "CLC3_312_mean_50km"))
+
+  # --- #
+  # Also adding spatial effects
+  # Train the model
+  expect_no_error(
+    suppressWarnings(
+      mod2 <- train(x |> add_latent_spatial(method = "poly"), "test", inference_only = FALSE, only_linear = TRUE,
+                    verbose = FALSE)
+    )
+  )
+
+  ex <- ensemble(mod, mod2)
+  expect_s4_class(ex, "SpatRaster")
+
+  # Do ensemble partials work?
+  expect_no_error(ex <- ensemble_partial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_s3_class(ex, 'data.frame')
+
+  # Do ensemble spartials work
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_true(is.Raster(ex))
+
+  # Get layer
+  expect_s4_class(mod |> get_data(), "SpatRaster")
+
+  # Expect data.frame
+  expect_s3_class(mod$get_coefficients(), 'data.frame')
+  expect_s3_class(mod2$get_coefficients(), 'data.frame')
+
+  # Expect formula
+  expect_s3_class(mod$get_equation(), 'formula')
+
+  suppressWarnings(
+    expect_vector(mod$get_residuals())
+  )
+})
+
+
 # TODO: Engine stan to be tested

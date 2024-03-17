@@ -9,7 +9,7 @@ engine_scampr(x, type = "response", dens = "posterior", maxit = 100, ...)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{type}{The mode used for creating (posterior or prior) predictions. Either making
+\item{type}{The mode used for creating (posterior or prior) predictions. Either stting
 \code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{dens}{A \code{\link{character}} on how predictions are made, either from the \code{"posterior"} (Default)
@@ -40,6 +40,12 @@ and presence-absence point occurrence data.
 This engine may only be used to predict for one or two datasets at most. It
 supports only presence-only PPMs and presence/absence Binary GLMs, or 'IDM'
 (for an integrated data model).
+}
+\note{
+\itemize{
+\item The package can currently be installed from github directly only \code{"ElliotDovers/scampr"}
+\item Presence-absence models in SCAMPR currently only support cloglog link functions!
+}
 }
 \examples{
 \dontrun{
