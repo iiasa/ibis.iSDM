@@ -1,5 +1,5 @@
 # Test scenario creation and constraints
-test_that('Testing functions for spatial-temporal data in stars', {
+test_that('Testing data prep functions for spatial-temporal data in stars', {
 
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
@@ -62,6 +62,20 @@ test_that('Testing functions for spatial-temporal data in stars', {
   )
   expect_length(new, 9)
   expect_length(stars::st_get_dimension_values(new, 3), 81)
+
+  # --- #
+  # Create derivates of stars data for testing
+  test <- pred_future[1]
+  expect_length(test, 1)
+  expect_no_error(new <- predictor_derivate(test, option = "none"))
+  expect_length(new, 1)
+  expect_no_error(new <- predictor_derivate(test, option = "quad"))
+  expect_length(new, 2)
+  expect_no_error(new <- predictor_derivate(test, option = "hinge", nknots = 4))
+  expect_length(new, 5)
+  # expect_no_error(new <- predictor_derivate(test, option = "thresh",nknots = 4))
+  # expect_length(new, 2)
+  # expect_no_error(new <- predictor_derivate(test, option = "bin",nknots = 4))
 
   # --- #
   # Create threshold

@@ -6,6 +6,7 @@
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?
 * Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
+* Fixed bug with adding `predictor_derivate()` to scenario predictors and added unit tests #106
 
 # ibis.iSDM 0.1.2
 

@@ -324,7 +324,12 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
                       several.ok = FALSE)
 
   # None, return as is
-  if(option == 'none') return(env)
+  if(option == 'none' || 'none' %in% option) return(env)
+
+  # If deriv is not set, assume all variables should be derivated and set
+  if(is.null(deriv)){
+    deriv <- paste0(option, "__", names(env))
+  }
 
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
@@ -343,10 +348,16 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Create a list to house the results
     env_list <- list()
     for(name in cutoffs$deriv){
-      env_list[[name]] <- terra::rast(env[cutoffs[which(cutoffs$deriv==name),2]]) # Specify original raster
+      # Specify original raster
+      o <- stars_to_raster( env[cutoffs[which(cutoffs$deriv==name),2]] )
+      env_list[[name]] <- Reduce(c, o)
+      rm(o)
     }
     assertthat::assert_that(length(env_list) > 0)
   } else {cutoffs <- NULL}
+
+  # Output list
+  new_env <- list()
 
   # Simple quadratic transformation
   if(option == 'quadratic'){
@@ -358,10 +369,12 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       }
       names(new_env) <- paste0('quad__', names(env))
     } else {
-      # Stars processing
-      new_env <- lapply(env_list, function(x) {
-        terra::app(x, function(z) I(z^2))
-      })
+      # Convert to quadratic transform (without terra::app as this uses the time dimension)
+      new_env <- lapply(env_list, function(z){
+        o <- (z^2)
+        names(o) <- paste0('quad__', names(o))
+        return(o)
+      } )
     }
   }
 
@@ -387,17 +400,40 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o[] <- hingeval(env_list[[val]][[k]][], cu[1], cu[2])
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings( cu <- as.numeric(cu) )
+        # If derivate variables are supplied, use them as cutoffs
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeHinge(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = FALSE) # Convert to pmin and pmax
+        }
+
+        # Assume specific cutoffs provided via deriv parameter
+        nn <- terra::rast()
+        for(k in 1:terra::nlyr(env_list[[val]]) ){
+          # For each cutoff
+          for(i in seq(1, length(cu),2)){
+            o <- emptyraster(env_list[[val]][[k]])
+            first <- cu[i]
+            last <- cu[i+1]
+
+            o[] <- hingeval(env_list[[val]][[k]][], first, last)
+            terra::time(o) <- terra::time( env_list[[val]][[k]] )
+            names(o) <- paste0(val, "__",first,"_",last)
+            suppressWarnings( nn <- append(nn, o) )
+            rm(o)
+          }
+        }
+        # Add to new environment
+        new_env[[val]] <- nn
+        rm(nn)
         }
       }
       invisible(gc())
-    }
   }
 
   # For thresholds
@@ -497,21 +533,35 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     }
   }
 
-  # If stars convert back to stars object
+  # If stars convert results back to stars object
   if(inherits(env, 'stars')){
     # Add the original layers back
-    for(name in names(env)){
-      env_list[[name]] <- terra::rast(env[name]) # Specify original raster
+    if(option == "quadratic"){
+      o <- stars::st_as_stars(new_env[[cutoffs$deriv]], crs = sf::st_crs(env))
+      names(o) <- cutoffs$deriv
+    } else {
+      o <- list()
+      for(val in unique(names(new_env[[cutoffs$deriv]])) ){
+        o[[val]] <- stars::st_as_stars(new_env[[cutoffs$deriv]][val])
+      }
+      o <- Reduce("c", o)
     }
 
-    # Convert list back to stars
-    new_env <- do.call(
-      stars:::c.stars,
-      lapply(env_list, function(x) stars::st_as_stars(x))
+    # Correct band if different
+    suppressWarnings(
+      test <- all(!stars::st_get_dimension_values(env, 3) != stars::st_get_dimension_values(o, 3 ))
     )
-    # Reset names of attributes
-    names(new_env) <- c( cutoffs$deriv, names(env))
-    new_env <- stars::st_set_dimensions(new_env, which = 3, values = times, names = "time")
+    if(test){
+      o <- stars::st_set_dimensions(o, 3, values = stars::st_get_dimension_values(env, 3))
+    }
+
+    # Try again with transform
+    new <- try({ c(env, o) },silent = TRUE)
+    if(inherits(new, "try-error")){
+      # Replace dimensions and check again.
+      stars::st_dimensions(o) <- stars::st_dimensions(env)
+    }
+    new_env <- c(env, o)
   }
   return(new_env)
 }
