@@ -382,9 +382,7 @@ engine_xgboost <- function(x,
 
     # Process and add priors if set
     if(!is.Waiver(model$priors)){
-      assertthat::assert_that(
-        all( model$priors$varnames() %in% model$biodiversity[[1]]$predictors_names )
-      )
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Match position of variables with monotonic constrains
       mc <- rep(0, ncol(train_cov))
       names(mc) <- colnames(train_cov)

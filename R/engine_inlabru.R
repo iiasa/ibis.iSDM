@@ -578,6 +578,7 @@ engine_inlabru <- function(x,
 
         # Specify priors if set
         if(!is.Waiver(model$priors)){
+          assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
           # If a prior has been specified
           if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
             vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]

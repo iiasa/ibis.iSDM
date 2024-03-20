@@ -367,6 +367,7 @@ engine_glmnet <- function(x,
     }
 
     if(!is.Waiver(model$priors)){
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Reset those contained in the prior object
       for(v in model$priors$varnames()){
         if(!(v %in% names(p.fac))) next()
@@ -792,7 +793,12 @@ engine_glmnet <- function(x,
       }
 
       df <- newdata
-      df$w <- model$exposure # Also get exposure variable
+      if(nrow(df)!=length(model$exposure)){
+        # Assume the maximum (usually 1e6)
+        df$w <- model$exposure[which.max(model$exposure)]
+      } else {
+        df$w <- model$exposure # Also get exposure variable
+      }
       # Make a subset of non-na values
       df$rowid <- 1:nrow(df)
       df_sub <- base::subset(df, stats::complete.cases(df))

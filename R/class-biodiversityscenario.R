@@ -127,18 +127,21 @@ BiodiversityScenario <- R6::R6Class(
 
     #' @description
     #' Get the actual model used for projection
+    #' @param copy A [`logical`] flag on whether a deep copy should be created.
     #' @return A DistributionModel object.
-    get_model = function(){
+    get_model = function(copy = FALSE){
       if(is.Waiver(self$modelobject)) return( new_waiver() )
       else {
         if(inherits(self$modelobject, "DistributionModel")){
-          return( self$modelobject )
+          obj <- self$modelobject
         } else {
           if(!exists(self$modelobject)) return( FALSE ) else {
-            return( get(self$modelobject) )
+            obj <- get(self$modelobject)
           }
         }
       }
+      if(copy) obj <- obj$clone(deep = TRUE)
+      return( obj )
     },
 
     #' @description
@@ -651,6 +654,16 @@ BiodiversityScenario <- R6::R6Class(
       return(
         tibble::add_column( summarise_change(scenario), runname = runname, .before = 1)
       )
+    },
+
+    #' @description
+    #' Calculate slopes across the projection
+    #' @param what A [`character`] with layer to be plotted (default: \code{"suitability"}).
+    #' @param oftype [`character`] of the output type.
+    #' @return A plot of the scenario slopes
+    plot_scenarios_slope = function(what = 'suitability', oftype = "stars"){
+      self$calc_scenarios_slope(what = what, plot = TRUE, oftype = oftype)
+      invisible()
     },
 
     #' @description
