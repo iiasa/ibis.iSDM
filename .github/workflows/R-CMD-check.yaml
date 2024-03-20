@@ -67,6 +67,7 @@ jobs:
             any::glmnetUtils,
             any::pdp,
             stan-dev/cmdstanr,
+            ElliotDovers/scampr,
             any::igraph,
             any::lwgeom,
             any::ncmeta,

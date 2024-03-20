@@ -2,9 +2,12 @@
 
 #### New features
 * Add functions that creates HTML file base on `DistributionModel`.
+* Added new engine `engine_scampr()` for model-based integration.
 
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?
+* Small fix to parameter in `train()` #102 @jeffreyhanson
+* Small helper function for combining 2 different formula objects `combine_formulas()`
 * Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
 * Fixed bug with adding `predictor_derivate()` to scenario predictors and added unit tests #106
 

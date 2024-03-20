@@ -28,7 +28,7 @@ train(
   only_linear = TRUE,
   method_integration = "predictor",
   aggregate_observations = TRUE,
-  clamp = FALSE,
+  clamp = TRUE,
   verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )

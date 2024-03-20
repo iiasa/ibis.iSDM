@@ -123,6 +123,7 @@ Collate:
     'utils-inla.R'
     'engine_inla.R'
     'engine_inlabru.R'
+    'engine_scampr.R'
     'engine_stan.R'
     'engine_xgboost.R'
     'ensemble.R'
@@ -166,3 +167,5 @@ Collate:
     'validate.R'
     'write_output.R'
     'zzz.R'
+Remotes:
+  ElliotDovers/scampr
