@@ -715,7 +715,7 @@ engine_scampr <- function(x,
       )
       names(cofs) <- make.names(names(cofs))
       # Subset only to variables in predictor frame
-      cofs <- subset(cofs, "Feature" %in% c('(Intercept)', model$predictors_names))
+      cofs <- subset(cofs, Feature %in% c('(Intercept)', model$predictors_names))
       return(cofs)
     }, overwrite = TRUE)
 

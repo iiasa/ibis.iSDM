@@ -639,9 +639,13 @@ test_that('Train a distribution model with SCAMPR', {
   # Expect data.frame
   expect_s3_class(mod$get_coefficients(), 'data.frame')
   expect_s3_class(mod2$get_coefficients(), 'data.frame')
+  expect_gt(nrow(mod$get_coefficients()),0)
 
   # Expect formula
   expect_s3_class(mod$get_equation(), 'formula')
+
+  # Get convergence check variables
+  expect_type(mod$has_converged(), 'integer')
 
   suppressWarnings(
     expect_vector(mod$get_residuals())
