@@ -1,6 +1,7 @@
 #' Built formula for BREG model
 #'
 #' @description This function built a formula for a `engine_breg()` model.
+#' @param model A [`list()`] object containing the full prepared model data.
 #' @param obj A [`list()`] object containing the prepared model data for a given
 #' biodiversity dataset.
 #'
@@ -11,8 +12,9 @@
 #' @noRd
 #'
 #' @keywords internal
-built_formula_breg <- function(obj){
+built_formula_breg <- function(model, obj){
   assertthat::assert_that(
+    is.list(model),
     is.list(obj),
     length(obj) > 0,
     assertthat::has_name(obj, "observations"),
@@ -43,6 +45,10 @@ built_formula_breg <- function(obj){
       all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
     )
   }
+
+  # Add offset here if found. Generally breg does not support offsets, but
+  # This helper function is used by other engines as well as generic
+  if(!is.Waiver(model$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
 
   return(form)
 }

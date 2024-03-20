@@ -31,7 +31,7 @@ NULL
 #' \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param dens A [`character`] on how predictions are made, either from the \code{"posterior"} (Default)
 #' or \code{"prior"}.
-#' @param maxit A [`numeric`] on the number of iterations for the optimizer (Default: \code{100}).
+#' @param maxit A [`numeric`] on the number of iterations for the optimizer (Default: \code{500}).
 #' @param ... Other parameters passed on.
 #'
 #' @returns An [Engine].
@@ -58,7 +58,7 @@ NULL
 engine_scampr <- function(x,
                        type = "response",
                        dens = "posterior",
-                       maxit = 100,
+                       maxit = 500,
                        ...) {
 
   # Check whether package is available
@@ -216,7 +216,6 @@ engine_scampr <- function(x,
         # Preprocessing security checks
         assertthat::assert_that( all( model$biodiversity[[j]]$observations[['observed']] >= 0 ),
                                  any(!is.na(presabs[['observed']])),
-                                 length(model$biodiversity[[j]]$expect) == nrow(model$biodiversity[[j]]$observations),
                                  nrow(df) == nrow(model$biodiversity[[j]]$observations)
         )
 
@@ -356,15 +355,15 @@ engine_scampr <- function(x,
     assertthat::assert_that(nrow(full)>1) # Security check?
 
     # Get offset and add it to exposure
-    # if(!is.Waiver(model$offset)){
-    #   # Add offset to full prediction and load vector
-    #   ofs <- model$biodiversity[[1]]$offset[, 'spatial_offset']
-    #   ofs_pred <- model$offset[,'spatial_offset']
-    #   # Add to data.frame and form
-    #   form <- stats::update.formula(form, . ~ . + offset(spatial_offset))
-    #   df$spatial_offset <- ofs
-    #   full$spatial_offset <- ofs_pred
-    # } else { ofs <- NULL; ofs_pred <- NULL }
+    if(!is.Waiver(model$offset)){
+      # Add offset to full prediction and load vector
+      # Get whichever is poipo
+      ind <- which(sapply(model$biodiversity, function(z) z$type)=="poipo")
+      ofs <- model$biodiversity[[ind]]$offset[, 'spatial_offset']
+      ofs_pred <- model$offset[,'spatial_offset']
+      df$spatial_offset <- ofs
+      full$spatial_offset <- ofs_pred
+    } else { ofs <- NULL; ofs_pred <- NULL }
 
     # Clamp?
     if( settings$get("clamp") ) full <- clamp_predictions(model, full)
@@ -398,7 +397,7 @@ engine_scampr <- function(x,
               model.type = model.type,
               coord.names = c("x", "y"),
               latent.po.biasing = FALSE,
-              include.sre = latent, # TODO
+              include.sre = latent,
               se = TRUE,
               maxit = params$maxit # Number iterations
             )
@@ -417,7 +416,7 @@ engine_scampr <- function(x,
               latent.po.biasing = FALSE,
               coord.names = c("x", "y"),
               quad.weights.name = "scampr.quad.size",
-              include.sre = latent, # TODO
+              include.sre = latent,
               se = TRUE,
               maxit = params$maxit # Number iterations
             )
@@ -716,7 +715,7 @@ engine_scampr <- function(x,
       )
       names(cofs) <- make.names(names(cofs))
       # Subset only to variables in predictor frame
-      cofs <- subset(cofs, Feature %in% c('(Intercept)', model$predictors_names))
+      cofs <- subset(cofs, "Feature" %in% c('(Intercept)', model$predictors_names))
       return(cofs)
     }, overwrite = TRUE)
 

@@ -188,7 +188,7 @@ combine_formulas <- function(..., combine = "both", env=parent.frame()) {
   )
   combine <- match.arg(combine, choices = c("rhs", "lhs", "both"),several.ok = FALSE)
   # drop "~" and extract left/right hand sides (LHS/RHS)
-  obj <- lapply(list(...), function(.) as.character(as.formula(.))[-1])
+  obj <- lapply(list(...), function(.) as.character(stats::as.formula(.))[-1])
   rhs <- mapply(`[`, obj, lengths(obj) - 0, SIMPLIFY=FALSE)
   lhs <- mapply(`[`, obj, lengths(obj) - 1, SIMPLIFY=FALSE)
 

@@ -4,7 +4,7 @@
 \alias{engine_scampr}
 \title{Engine for process models using scampr}
 \usage{
-engine_scampr(x, type = "response", dens = "posterior", maxit = 100, ...)
+engine_scampr(x, type = "response", dens = "posterior", maxit = 500, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -15,7 +15,7 @@ engine_scampr(x, type = "response", dens = "posterior", maxit = 100, ...)
 \item{dens}{A \code{\link{character}} on how predictions are made, either from the \code{"posterior"} (Default)
 or \code{"prior"}.}
 
-\item{maxit}{A \code{\link{numeric}} on the number of iterations for the optimizer (Default: \code{100}).}
+\item{maxit}{A \code{\link{numeric}} on the number of iterations for the optimizer (Default: \code{500}).}
 
 \item{...}{Other parameters passed on.}
 }

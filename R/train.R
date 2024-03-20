@@ -1261,7 +1261,7 @@ methods::setMethod(
       # For each formula, process in sequence
       for(id in ids){
 
-        model$biodiversity[[id]]$equation <- built_formula_breg( model$biodiversity[[id]] )
+        model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
 
         # Remove those not part of the modelling
         model2 <- model
@@ -1570,7 +1570,7 @@ methods::setMethod(
         # Process per supplied dataset
         for(id in ids) {
           # Update model formula in the model container
-          model$biodiversity[[id]]$equation <- built_formula_breg( model$biodiversity[[id]] )
+          model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
         }
 
         # Run the engine setup script
