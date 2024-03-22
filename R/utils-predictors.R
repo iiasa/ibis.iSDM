@@ -408,7 +408,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
           suppressWarnings( cu <- strsplit(names(o), "_") |>
                               unlist() |>
                               as.numeric())
-          cu <- subset(cu, complete.cases(cu))
+          cu <- subset(cu, stats::complete.cases(cu))
           cu <- matrix(cu,ncol=2,byrow = FALSE) # Convert to pmin and pmax
         }
 
