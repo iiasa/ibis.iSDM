@@ -621,15 +621,19 @@ engine_gdb <- function(x,
                                                       type = type, aggregate = 'sum'))
 
         # Check duplicates. If bbs is present and non-linear, use bbs estimate
-        if(!self$settings$data$only_linear){
-          # Combine with
-          out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
-        } else {
-          # Combine with
-          out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[,grep(v, colnames(pp))])
-        }
+        # MH: As far as I see it the pp will always only store the result of the
+        # current variable due to which = v, so we can just grab the first column
+        out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v], mean = pp[, 1])
+
+        # if(!self$settings$data$only_linear){
+        #   # Combine with
+        #   out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+        #                          mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
+        # } else {
+        #   # Combine with
+        #   out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+        #                          mean = pp[,grep(v, colnames(pp))])
+        # }
       }
 
       # bind to one data.frame
