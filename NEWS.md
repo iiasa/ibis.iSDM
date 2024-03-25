@@ -10,6 +10,7 @@
 * Small helper function for combining 2 different formula objects `combine_formulas()`
 * Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
 * Fixed bug with adding `predictor_derivate()` to scenario predictors and added unit tests #106
+* Several fixes related to different engines and priors
 
 # ibis.iSDM 0.1.2
 
