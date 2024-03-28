@@ -856,19 +856,15 @@ BiodiversityScenario <- R6::R6Class(
           writeGeoTiff(ras_migclim, fname = fname, dt = dt)
         }
       } else if(type %in% c('nc','ncdf')) {
-        # Save as netcdf, for now in individual files
-        for(i in 1:length(ras)){
-          # Band specific output
-          fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], tools::file_ext(fname))
-          stars::write_stars(
-            obj = ras,
-            layer = 1:length(ras),
-            dsn = fname2,
-            type = ifelse(is.factor(ras[[1]]), "Byte", dtstars),
-            NA_value = NA_real_,
-            update = ifelse(file.exists(fname2), TRUE, FALSE),
-            normalize_path = TRUE,
-            progress = TRUE
+        # Save as netcdf. In this case we check if it is a single
+        # or multi-dimensional array
+        if(length(ras)>1){
+          rasm <- ras |> merge() # Merge variables into a dimension
+          # Write as multi-dimensional netcdf
+          suppressWarnings(
+            stars::write_mdim(x = rasm,
+                              filename = fname,
+                              as_float = ifelse(dt %in% c("Float32","Float64"),TRUE,FALSE))
           )
         }
         if(!is.Waiver(self$scenarios_migclim)){

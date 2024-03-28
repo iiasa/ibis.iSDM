@@ -593,8 +593,13 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       o <- Reduce("c", o)
     } else {
       o <- list()
-      for(val in unique(names(new_env[[cutoffs$deriv]])) ){
-        o[[val]] <- stars::st_as_stars(new_env[[cutoffs$deriv]][val])
+      # Get all names
+      n <- lapply(new_env, function(z) names(z) |> unique() )
+      # Hacky...
+      for(i in 1:length(n) ){
+        for(val in n[[i]]){
+          o[[val]] <- stars::st_as_stars(new_env[[i]][val])
+        }
       }
       o <- Reduce("c", o)
     }

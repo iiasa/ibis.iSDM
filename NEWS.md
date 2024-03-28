@@ -10,6 +10,7 @@
 * Small helper function for combining 2 different formula objects `combine_formulas()`
 * Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
 * Bug fixes with adding `predictor_derivate()` to scenario predictors and added unit tests #106
+# Changed default output for netcdf files to multidimensional arrays #109
 
 # ibis.iSDM 0.1.2
 

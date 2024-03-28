@@ -141,6 +141,8 @@ methods::setMethod(
 
     # data.frames will be written by default as csv files for consistency
     fname <- paste0( tools::file_path_sans_ext(fname), ".csv")
+    if(file.exists(fname)) warning('Overwritting existing file...')
+
     utils::write.csv(x = mod, file = fname, ...)
     invisible()
   }
@@ -162,14 +164,27 @@ methods::setMethod(
       inherits(mod, "stars"), msg = "Supplied list object needs to be a stars object."
     )
 
+    if(file.exists(fname)) warning('Overwritting existing file...')
+
     # Define filename
     fname <- paste0( tools::file_path_sans_ext(fname), ".nc")
-    # TODO: Align with write NetCDF function further below
-    stars::write_stars(
-      obj = mod,
-      dsn = fname,
-      layer = names(mod),
-      ...)
+
+    # If there are multiple bands, merge first use mdim
+    if(length(mod)>1){
+      # Converge variable names into attributes
+      modm <- merge(mod)
+      suppressWarnings(
+        stars::write_mdim(x = modm,
+                          filename = fname,
+                          ...)
+      )
+    } else {
+      stars::write_stars(
+        obj = mod,
+        dsn = fname,
+        layer = names(mod),
+        ...)
+    }
     invisible()
   }
 )
@@ -201,6 +216,8 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   if(any(is.factor(file))){
     file <- terra::droplevels(file)
   }
+
+  if(file.exists(fname)) warning('Overwritting existing file...')
 
   # Save output
   terra::writeRaster(
@@ -242,6 +259,8 @@ writeNetCDF <- function(file, fname,
   check_package('ncdf4')
   if(!isNamespaceLoaded("ncdf4")) { attachNamespace("ncdf4");requireNamespace('ncdf4') }
   if(!assertthat::has_extension(fname,"nc")) fname <- paste0(fname,".nc")
+
+  if(file.exists(fname)) warning('Overwritting existing file...')
 
   # Output NetCDF file
   terra::writeCDF(x = file,

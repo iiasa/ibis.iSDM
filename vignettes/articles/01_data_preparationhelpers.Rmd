@@ -409,8 +409,8 @@ sf::st_crs(pred_future) <- sf::st_crs(4326)
 # Scale
 new <- predictor_transform(pred_future, option = "scale")
 
-# Add hinge transformed variables to the scenario object
-new2 <- predictor_derivate(pred_future, option = "hinge")
+# Add quadratic transformed variables to the scenario object
+new2 <- predictor_derivate(pred_future, option = "quad")
 # New variable names
 names(new2)
 
