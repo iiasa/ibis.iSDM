@@ -30,7 +30,7 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   #MJ: Added self here hoping that does not crash all methods.
                   "self",
                   "id", "included", "i",
-                  "km", "vt",
+                  "km", "vt", "V2",
                   "limit", "lower", "layer",
                   "median", "model", "mad",
                   "name",

@@ -450,8 +450,16 @@ DistributionModel <- R6::R6Class(
     #' @param x A [`character`] stating what should be returned.
     #' @return A [`SpatRaster`] object with the prediction.
     get_data = function(x = "prediction") {
-      if (!x %in% names(self$fits))
+      rr <- names(self$fits)
+      if(!x %in% names(self$fits)){
+        # Check if x is present in rr, if so print a message
+        if(length(grep(x,rr))>0){
+          if(getOption('ibis.setupmessages', default = TRUE)){
+            myLog('[Estimation]','yellow','Output not found, but found: ', grep(x,rr,value = TRUE)[1])
+          }
+        }
         return(new_waiver())
+      }
       return(self$fits[[x]])
     },
 
@@ -678,7 +686,7 @@ DistributionModel <- R6::R6Class(
       assertthat::assert_that(
         is.character(fname),
         type %in% c('gtif','gtiff','tif','nc','ncdf'),
-        'fits' %in% self$ls(),
+        'fits' %in% names(self),
         dt %in% c('LOG1S','INT1S','INT1U','INT2S','INT2U','INT4S','INT4U','FLT4S','FLT8S')
       )
       type <- tolower(type)
@@ -688,9 +696,17 @@ DistributionModel <- R6::R6Class(
 
       # Get raster file in fitted object
       cl <- sapply(self$fits, class)
-      ras <- self$fits[[grep('SpatRaster', cl,ignore.case = T)]]
+      if(length( grep('SpatRaster', cl,ignore.case = T) )==0){
+        # Security check in case for some reason there are no predictions
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Output]','red','No predictions found?')
+        return(NULL)
+      }
+      ras <- self$fits[grep('SpatRaster', cl,ignore.case = T)]
       assertthat::assert_that(length(ras)>0,
                               msg = "No prediction to save found.")
+
+      # If is a list (multiple SpatRaster) -> Combine
+      if(is.list(ras)) ras <- Reduce('c', ras)
 
       # Check that no-data value is not present in ras
       assertthat::assert_that(any(!terra::global(ras, "min", na.rm = TRUE)[,1] <= -9999),

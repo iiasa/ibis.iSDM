@@ -389,3 +389,29 @@ stars::st_get_dimension_values(new, 3)
 
 ```
 
+### Derivates of scenario predictors
+
+As with `SpatRaster` covariates, it is also possible to create transformed or 
+derivate versions of scenario predictors through the same helper function.
+
+```{r}
+# Load some stars rasters
+ll <- list.files(system.file('extdata/predictors_presfuture/',
+                             package = 'ibis.iSDM',
+                             mustWork = TRUE),full.names = TRUE)
+
+# Load the same files future ones
+suppressWarnings(
+  pred_future <- stars::read_stars(ll[1:3]) |> dplyr::slice('Time', seq(1, 86, by = 10))
+)
+sf::st_crs(pred_future) <- sf::st_crs(4326)
+
+# Scale
+new <- predictor_transform(pred_future, option = "scale")
+
+# Add hinge transformed variables to the scenario object
+new2 <- predictor_derivate(pred_future, option = "hinge")
+# New variable names
+names(new2)
+
+```

@@ -21,25 +21,30 @@ PredictorDataset <- R6::R6Class(
     #' @field id The id for this collection as [`character`].
     #' @field data A predictor dataset usually as [`SpatRaster`].
     #' @field name A name for this object.
+    #' @field transformed Saves whether the predictors have been transformed somehow.
     #' @field timeperiod A timeperiod field
     id           = character(0),
     data         = new_waiver(),
     name         = character(0),
+    transformed  = logical(0),
     timeperiod   = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list
     #' @param id The id for this collection as [`character`].
     #' @param data A predictor dataset usually as [`SpatRaster`].
+    #' @param transformed A [`logical`] flag if predictors have been transformed. Assume not.
     #' @param ... Any other parameters found.
     #' @return NULL
-    initialize = function(id, data, ...){
+    initialize = function(id, data, transformed = FALSE, ...){
       assertthat::assert_that(
-        is.Id(id) || is.character(id)
+        is.Id(id) || is.character(id),
+        is.logical(transformed)
       )
       self$name <- 'Biodiversity data'
       self$id <- id
       self$data <- data
+      self$transformed <- transformed
       # Get Dots and save too
       dots <- list(...)
       for(el in names(dots)){
@@ -296,7 +301,17 @@ PredictorDataset <- R6::R6Class(
     #' @return A [`logical`] flag.
     has_derivates = function(){
       return(
-        base::length( grep("hinge__|bin__|quad__|thresh__", self$get_names() ) ) > 0
+        base::length( grep("hinge_|bin_|quadratic_|thresh_|interaction_", self$get_names() ) ) > 0
+      )
+    },
+
+    #' @description
+    #' Predictors have been transformed?
+    #' @seealso [predictor_transform()]
+    #' @return A [`logical`] flag.
+    is_transformed = function(){
+      return(
+        self$transformed
       )
     },
 

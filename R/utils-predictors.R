@@ -196,10 +196,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
       # Sample covariance from stack and fit PCA
       covMat <- terra::layerCor(env, fun = "cov", na.rm = TRUE)
-      pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
-      # Add means and grid cells
-      pca$center <- covMat$mean
-      pca$n.obs <- terra::ncell(env)
+      pca <- terra::princomp(env) # Use Terra directly
 
       # Check how many components are requested:
       if(pca.var<1){
@@ -208,7 +205,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         nComp <- length( which(props <= pca.var) )
       }
       # Predict principle components
-      out <- terra::predict(env, pca,na.rm = TRUE, index = 1:nComp)
+      out <- terra::predict(env, pca, index = 1:nComp)
       names(out) <- paste0("PC", 1:nComp)
 
       return(out)
@@ -328,19 +325,19 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 
   # If deriv is not set, assume all variables should be derivated and set
   if(is.null(deriv)){
-    deriv <- paste0(option, "__", names(env))
+    deriv <- paste0(option, "_", names(env))
   }
 
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
     assertthat::assert_that(!is.null(deriv),msg = "Derivate names could not be found!")
     # Decompose derivate variable names if set
-    deriv <- grep(paste0(option, "__"), deriv, value = TRUE)
+    deriv <- grep(paste0(option, "_"), deriv, value = TRUE)
     if(length(deriv)==0){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Predictors with derivates not found!')
       return(NULL)
     }
-    cutoffs <- do.call(rbind,strsplit(deriv, "__")) |> as.data.frame()
+    cutoffs <- do.call(rbind,strsplit(deriv, "_")) |> as.data.frame()
     cutoffs$deriv <- deriv
 
     lyrs <- names(env) # Names of predictors
@@ -367,12 +364,12 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       } else {
         new_env <- terra::app(env, function(x) I(x^2))
       }
-      names(new_env) <- paste0('quad__', names(env))
+      names(new_env) <- paste0('quadratic_', names(env))
     } else {
       # Convert to quadratic transform (without terra::app as this uses the time dimension)
       new_env <- lapply(env_list, function(z){
         o <- (z^2)
-        names(o) <- paste0('quad__', names(o))
+        names(o) <- paste0('quadratic_', names(o))
         return(o)
       } )
     }
@@ -423,7 +420,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
 
             o[] <- hingeval(env_list[[val]][[k]][], first, last)
             terra::time(o) <- terra::time( env_list[[val]][[k]] )
-            names(o) <- paste0(val, "__",first,"_",last)
+            names(o) <- paste0(val, "_",first,"_",last)
             suppressWarnings( nn <- append(nn, o) )
             rm(o)
           }
@@ -432,7 +429,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         new_env[[val]] <- nn
         rm(nn)
         }
-      }
+    }
       invisible(gc())
   }
 
@@ -457,14 +454,30 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o[] <- thresholdval(env_list[[val]][[k]][], cu)
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings(cu <- as.numeric(cu) )
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeThresh(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu, byrow = FALSE) # Convert to pmin and pmax
         }
+        nn <- terra::rast()
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          # For each cutoff
+          for(i in seq(1, length(cu))){
+            o <- emptyraster(env_list[[val]][[k]])
+            o[] <- thresholdval(env_list[[val]][[k]][], cu[i])
+            terra::time(o) <- terra::time( env_list[[val]][[k]] )
+            names(o) <- paste0(val, "_",cu[i])
+            suppressWarnings( nn <- append(nn, o) )
+            rm(o)
+          }
+        }
+        new_env[[val]] <- nn
+        rm(nn)
       }
       invisible(gc())
     }
@@ -490,16 +503,32 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o <- terra::classify(env_list[[val]][[k]], cu)
-          o[is.na(o)] <- 0
-          o <- terra::mask(o, env_list[[val]][[k]] )
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings( cu <- as.numeric(cu) )
+        nn <- terra::rast()
+        # If NA, set
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeBin(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = TRUE) # Convert to pmin and pmax
+          cu <- cbind(cu, 1:nrow(cu))
         }
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          newcu <- cu
+          # Set smallest and largest value to global minimum/maximum to account for rounding issues
+          newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
+          newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
+
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          terra::time(o) <- terra::time( env_list[[val]][[k]] )
+          names(o) <- paste0(val, "_",nrow(newcu))
+          suppressWarnings( nn <- append(nn, o) )
+          rm(o, newcu)
+        }
+        new_env[[val]] <- nn
       }
       invisible(gc())
     }
@@ -511,34 +540,57 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.null(int_variables)){
       int_variables <- attr(env, "int_variables")
     }
-    assertthat::assert_that(is.vector(int_variables))
+    # If interaction check that vector is not null and exactly 2
+    assertthat::assert_that(!is.null(int_variables),
+                            is.vector(int_variables),
+                            msg = "Provide a vector of 2 variables for an interaction!")
+
+    # Make unique combinations
+    ind <- utils::combn(int_variables, 2)
 
     if(is.Raster(env)){
-      # Make unique combinations
-      ind <- utils::combn(int_variables, 2)
-
       # Now for each combination build new variable
       new_env <- terra::rast()
 
       for(i in 1:ncol(ind)){
         # Multiply first with second entry
         o <- env[[ind[1,i]]] * env[[ind[2,i]]]
-        names(o) <- paste0('inter__', ind[1, i],".", ind[2, i])
+        names(o) <- paste0('interaction_', ind[1, i],".", ind[2, i])
         suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
       # Stars processing
-      stop("Not yet implemented!")
+      cu <- subset(cutoffs, V2 %in% ind) # Get only relevant variables
+
+      for(i in 1:ncol(ind)){
+        # For each layer
+        first <- cu$deriv[cu[,2]==ind[1,i]]
+        last <- cu$deriv[cu[,2]==ind[2,i]]
+        # Multiply first with second entry
+        o <- env_list[[first]] * env_list[[last]]
+        val <- paste0('interaction_', ind[1, i],".", ind[2, i]) # Interaction term
+        names(o) <- rep(paste0(val),terra::nlyr(o))
+        new_env[[val]] <- o
+        rm(o)
+      }
     }
   }
 
   # If stars convert results back to stars object
   if(inherits(env, 'stars')){
     # Add the original layers back
-    if(option == "quadratic"){
-      o <- stars::st_as_stars(new_env[[cutoffs$deriv]], crs = sf::st_crs(env))
-      names(o) <- cutoffs$deriv
+    if(option %in% c("quadratic")){
+      o <- lapply(new_env, function(z) {
+        stars::st_as_stars(z, crs = sf::st_crs(env))
+      })
+      o <- Reduce("c", o)
+    } else if(option == "interaction"){
+      o <- list()
+      for(val in names(new_env)){
+        o[[val]] <- stars::st_as_stars(new_env[[val]])
+      }
+      o <- Reduce("c", o)
     } else {
       o <- list()
       for(val in unique(names(new_env[[cutoffs$deriv]])) ){
@@ -690,8 +742,8 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
   lh <- outer(v[] |> as.vector(), utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
   # Hinge starting from min
   rh <- outer(v[] |> as.vector(), k[-1], function(w, h) hingeval(w, v.min, h))
-  colnames(lh) <- paste0("hinge__",n,'__', round( utils::head(k, -1), 2),'_', round(v.max, 2))
-  colnames(rh) <- paste0("hinge__",n,'__', round( v.min, 2),'_', round(k[-1], 2))
+  colnames(lh) <- paste0("hinge_",n,'_', round( utils::head(k, -1), 2),'_', round(v.max, 2))
+  colnames(rh) <- paste0("hinge_",n,'_', round( v.min, 2),'_', round(k[-1], 2))
   o <- as.data.frame(
     cbind(lh, rh)
   )
@@ -738,7 +790,7 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
   }
   if(length(k)<=1) return(NULL)
   f <- outer(v[] |> as.vector(), k, function(w, t) ifelse(w >= t, 1, 0))
-  colnames(f) <- paste0("thresh__", n, "__",  round(k, 2))
+  colnames(f) <- paste0("thresh_", n, "_",  round(k, 2))
   f <- as.data.frame(f)
   attr(f, "deriv.thresh") <- k
   return(f)
@@ -793,7 +845,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   cu.brk <- gsub(",","_",cu.brk)
   cu.brk <- gsub("\\(|\\]", "", cu.brk)
   # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
-  names(out) <- paste0("bin__",n, "__", cu.brk )
+  names(out) <- paste0("bin_",n, "_", cu.brk )
   for(i in 1:terra::nlyr(out)){
     attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
   }

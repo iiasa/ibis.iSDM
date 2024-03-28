@@ -61,21 +61,34 @@ test_that('Testing data prep functions for spatial-temporal data in stars', {
     new <- interpolate_gaps(pred_future, date_interpolation = "annual")
   )
   expect_length(new, 9)
-  expect_length(stars::st_get_dimension_values(new, 3), 81)
+  expect_length(stars::st_get_dimension_values(new, "time"), 81)
 
   # --- #
   # Create derivates of stars data for testing
   test <- pred_future[1]
   expect_length(test, 1)
+  # Nothing
   expect_no_error(new <- predictor_derivate(test, option = "none"))
-  expect_length(new, 1)
+  expect_length(new, 1); expect_true(utils::hasName(new,"bio01"))
+  # Quadratic transform
   expect_no_error(new <- predictor_derivate(test, option = "quad"))
-  expect_length(new, 2)
+  expect_length(new, 2); expect_true(utils::hasName(new,"bio01"))
+  # Hinge transform
   expect_no_error(new <- predictor_derivate(test, option = "hinge", nknots = 4))
-  expect_length(new, 5)
-  # expect_no_error(new <- predictor_derivate(test, option = "thresh",nknots = 4))
-  # expect_length(new, 2)
-  # expect_no_error(new <- predictor_derivate(test, option = "bin",nknots = 4))
+  expect_length(new, 5); expect_true(utils::hasName(new,"bio01"))
+  # Threshold transform
+  expect_no_error(new <- predictor_derivate(test, option = "thresh",nknots = 4))
+  expect_length(new, 4);expect_true(utils::hasName(new,"bio01"))
+  # Binning
+  expect_no_error(new <- predictor_derivate(test, option = "bin",nknots = 4))
+  expect_length(new, 2);expect_true(utils::hasName(new,"bio01"))
+  # Interaction
+  test <- pred_future[1:2]
+  expect_length(test, 2)
+  expect_error(new <- predictor_derivate(test, option = "interaction"))
+  expect_no_error(new <- predictor_derivate(test, option = "interaction", int_variables = names(test)))
+  expect_length(new, 3)
+  expect_true(utils::hasName(new,"bio01"));expect_true(utils::hasName(new,"bio12"))
 
   # --- #
   # Create threshold

@@ -32,6 +32,18 @@ constraints.}
 Add dispersal constraint to an existing \code{scenario}
 }
 \details{
+\strong{Dispersal}:
+Parameters for \code{'method'}:
+\itemize{
+\item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
+\item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
+}
+
+A comprehensive overview of the benefits of including dispersal constrains in
+species distribution models can be found in Bateman et al. (2013).
+
 The following additional parameters can bet set:
 \itemize{
 \item \code{pext}: \code{\link{numeric}} indicator for \code{`kissmig`} of the probability a
@@ -39,6 +51,13 @@ colonized cell becomes uncolonised, i.e., the species gets locally extinct
 (Default: \code{0.1}).
 \item \code{pcor}: \code{\link{numeric}} probability that corner cells are considered in the
 3x3 neighbourhood (Default: \code{0.2}).
+}
+}
+\references{
+\itemize{
+\item Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013).
+Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact
+modelling. Diversity and Distributions, 19(10), 1224-1234.
 }
 }
 \seealso{
