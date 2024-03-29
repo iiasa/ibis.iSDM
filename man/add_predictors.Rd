@@ -13,7 +13,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -29,7 +29,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -45,7 +45,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -61,7 +61,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -77,7 +77,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -93,7 +93,7 @@ add_predictors(
   x,
   env,
   names = NULL,
-  transform = "scale",
+  transform = "none",
   derivates = "none",
   derivate_knots = 4,
   int_variables = NULL,
@@ -139,7 +139,9 @@ which uses default prior assumptions.}
 
 \item{state}{A \code{\link{matrix}} with one value per variable (column) providing either a ( \code{stats::mean()}, \code{stats::sd()} )
 for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
-option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).}
+option \code{'norm'}. Effectively applies their value range for rescaling. In the case of provided
+\code{stars} data to a \link{BiodiversityScenario} object, the state variables are attempted to be compiled from
+the predictor ranges used for model inferrence (Default: \code{NULL}).}
 
 \item{...}{Other parameters passed down}
 

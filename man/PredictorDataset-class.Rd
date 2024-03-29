@@ -11,6 +11,8 @@ This class describes the PredictorDataset and is used to store covariates within
 \code{\link[=predictor_derivate]{predictor_derivate()}}
 
 \code{\link[=predictor_transform]{predictor_transform()}}
+
+\code{\link[=predictor_transform]{predictor_transform()}}
 }
 \keyword{classes}
 \section{Public fields}{
@@ -49,6 +51,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-summary}{\code{PredictorDataset$summary()}}
 \item \href{#method-PredictorDataset-has_derivates}{\code{PredictorDataset$has_derivates()}}
 \item \href{#method-PredictorDataset-is_transformed}{\code{PredictorDataset$is_transformed()}}
+\item \href{#method-PredictorDataset-get_transformed_params}{\code{PredictorDataset$get_transformed_params()}}
 \item \href{#method-PredictorDataset-length}{\code{PredictorDataset$length()}}
 \item \href{#method-PredictorDataset-ncell}{\code{PredictorDataset$ncell()}}
 \item \href{#method-PredictorDataset-plot}{\code{PredictorDataset$plot()}}
@@ -366,6 +369,19 @@ Predictors have been transformed?
 
 \subsection{Returns}{
 A \code{\link{logical}} flag.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-get_transformed_params"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-get_transformed_params}{}}}
+\subsection{Method \code{get_transformed_params()}}{
+Get transformation params.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$get_transformed_params()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{matrix}} flag.
 }
 }
 \if{html}{\out{<hr>}}

@@ -20,11 +20,14 @@ test_that('Test various thresholds calculations', {
   # Try different formats
   tr1a <- threshold(r1, method = "fixed", value = .5,format = "binary")
   expect_s4_class(tr1a, "SpatRaster")
+  # Check that attributes are there
+  expect_equal(attr(tr1a,'threshold'), 0.5)
   tr1b <- threshold(r1, method = "fixed", value = .5,format = "norm")
   expect_s4_class(tr1b, "SpatRaster")
   tr1c <- threshold(r1, method = "fixed", value = .5,format = "perc")
   expect_s4_class(tr1c, "SpatRaster")
-  expect_true(is.factor(tr1c))
+  expect_length(unique(tr1c)[,1], 10)
+
 
   expect_error( tr2 <- threshold(r1, method = "perc", value = .1) )
   tr2 <- threshold(r1, method = "perc", value = .1, point = ss)

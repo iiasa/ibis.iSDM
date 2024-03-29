@@ -131,10 +131,11 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     } else {
       out <- lapply(env_list, function(x) {
         if(!is.null(state)){
-          nx1 <- t(state) # For minmax needs to be inverted
+          nx1 <- t(state[,names(x)]) # For minmax needs to be inverted
           nx2 <- terra::global(x, "range",na.rm = TRUE)
           # Get global minimum/maximum
-          nx <- cbind(min = apply(cbind(nx1,nx2), 1, min), max = apply(cbind(nx1,nx2), 1, max))
+          nx <- cbind(min = apply(cbind(nx1,nx2), 1, function(z) min(z, na.rm = TRUE)),
+                      max = apply(cbind(nx1,nx2), 1, function(z) max(z, na.rm = TRUE)) ) |> t()
         } else {
           nx <- terra::minmax(x)
         }
@@ -174,7 +175,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
       }
       perc <- unique(perc)
-      out <- terra::classify(env, t(perc))
+      out <- terra::classify(env, t(perc)) |> terra::as.int()
       attr(out, "transform_params") <- perc
     } else {
       out <- lapply(env_list, function(x) {
@@ -186,10 +187,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- unique(perc)
         # For terra need to loop here as classify does not support multiple columns
         o <- terra::rast()
-        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) ))
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) |> terra::as.int() ))
         return(o)
       })
-      assertthat::assert_that( all( sapply(out, function(z) all(is.factor(z))) ))
     }
   }
 

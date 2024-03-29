@@ -97,14 +97,14 @@ NULL
 methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL, bgmask = TRUE,
+  function(x, env, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL, bgmask = TRUE,
            harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ...) standardGeneric("add_predictors"))
 
 #' @rdname add_predictors
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+  function(x, env, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
@@ -120,7 +120,7 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+  function(x, env, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
@@ -266,7 +266,7 @@ methods::setMethod(
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
-  function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
+  function(x, env, names = NULL, transform = 'none', derivates = 'none', derivate_knots = 4, int_variables = NULL,
            bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
@@ -760,8 +760,12 @@ methods::setMethod(
 
     # Get state if not set
     if(transform != 'none' && is.null(state)){
-      if(option %in% c('scale', 'norm')){
+      if(transform %in% c('scale', 'norm')){
         if(inherits(model$predictors_object, "PredictorDataset")){
+          assertthat::assert_that(
+            transform == attr(model$predictors_object$get_data(), 'transform'),
+            msg = "Model transformation does not match provided option"
+          )
           state <- model$predictors_object$get_transformed_params()
         }
         assertthat::assert_that(
