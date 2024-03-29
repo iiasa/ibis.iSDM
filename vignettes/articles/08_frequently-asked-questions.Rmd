@@ -393,3 +393,23 @@ options('ibis.cleannames' = FALSE)
 
 ```
 </details>
+
+<details>
+<summary><b>I saved my scenario outputs, how can I load them again ?</b>
+</summary>
+Particular when multi-dimensional scenarios (e.g. those with more than 1 variable)
+are created, it is necessary to also read them in as multi-dimensional array. 
+By default and from Version 0.1.3 onwards, files with ending 'nc' (netcdf)
+and with multiple variables are stored as such. To read them in:
+
+
+```{r, echo=TRUE,eval=FALSE}
+library(stars)
+sc <- stars::read_mdim('myscenarioprojection.nc')
+# Split the attribute variable up
+sc <- sc |> split()
+# Check
+sc
+
+```
+</details>

@@ -149,6 +149,16 @@ methods::setMethod(
 #' instance \code{`kissmig`}.
 #'
 #' @details
+#' **Dispersal**:
+#' Parameters for \code{'method'}:
+#' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
+#' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
+#'
+#' A comprehensive overview of the benefits of including dispersal constrains in
+#' species distribution models can be found in Bateman et al. (2013).
+#'
 #' The following additional parameters can bet set:
 #' * \code{pext}: [`numeric`] indicator for \code{`kissmig`} of the probability a
 #' colonized cell becomes uncolonised, i.e., the species gets locally extinct
@@ -156,6 +166,10 @@ methods::setMethod(
 #' * \code{pcor}: [`numeric`] probability that corner cells are considered in the
 #' 3x3 neighbourhood (Default: \code{0.2}).
 #'
+#' @references
+#' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013).
+#' Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact
+#'  modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' @family constraint
 #' @keywords scenario
 #'
@@ -423,6 +437,19 @@ methods::setMethod(
 #' deviation) to which extrapolations should be performed.
 #' @param resistance A [`SpatRaster`] object describing a resistance surface or
 #' barrier for use in connectivity constrains (Default: \code{NULL}).
+#'
+#' @details
+#' * \code{hardbarrier} - Defines a hard barrier to any dispersal events. By
+#' definition this sets all values larger
+#' than \code{0} in the barrier layer to \code{0} in the projection. Barrier has
+#' to be provided through the \code{"resistance"} parameter.
+#' * \code{resistance} - Allows the provision of a static or dynamic layer that is
+#' multiplied with the projection at each time step. Can for example be used to
+#' reduce the suitability of any given area (using pressures not included in the model).
+#' The respective layer(s) have to be provided through the \code{"resistance"} parameter.
+#' Provided layers are incorporated as \code{abs(resistance - 1)} and multiplied with
+#' the prediction.
+#'
 #'
 #' @family constraint
 #' @keywords scenario

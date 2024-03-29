@@ -51,10 +51,10 @@ NULL
 #'
 #' Available options for creating derivates are:
 #' * \code{'none'} - No additional predictor derivates are created.
-#' * \code{'quad'} - Adds quadratic transformed predictors.
+#' * \code{'quad'} - Adds quadratic derivate predictors.
 #' * \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
-#' * \code{'thresh'} - Add threshold transformed predictors.
-#' * \code{'hinge'} - Add hinge transformed predictors.
+#' * \code{'thresh'} - Add threshold derivate predictors.
+#' * \code{'hinge'} - Add hinge derivate predictors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
 #' @note
@@ -161,6 +161,7 @@ methods::setMethod(
       assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
       y <- y$set_priors(priors)
     }
+
     # Harmonize NA values
     if(harmonize_na){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
@@ -248,6 +249,7 @@ methods::setMethod(
     # Finally set the data to the BiodiversityDistribution object
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
+                               transformed = ifelse('none' %notin% transform, TRUE, FALSE ),
                                ...)
     y$set_predictors(pd)
   }
@@ -727,7 +729,7 @@ methods::setMethod(
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = TRUE)
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin'), several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction'), several.ok = TRUE)
 
     assertthat::validate_that(inherits(env,'stars'), msg = 'Projection rasters need to be stars stack!')
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
@@ -762,25 +764,37 @@ methods::setMethod(
     if('none' %notin% transform){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) env <- predictor_transform(env, option = tt)
+    } else {
+      # Check regardless
+      try({ test <- obj$model$predictors_object$is_transformed() },silent = TRUE)
+      if(!inherits(test, 'try-error')){
+        if(test) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Option to transform predictors set to None, yet transformed variables were used in trained model?')
+      }
     }
 
-    # # Calculate derivates if set
+    # Calculate derivates if set
     if('none' %notin% derivates){
       # Get variable names
-      varn <- obj$get_coefficients()[['Feature']]
+      varn <- obj$get_coefficients()[,1]
       # Are there any derivates present in the coefficients?
-      if(any( length( grep("hinge__|bin__|quad__|thresh__", varn ) ) > 0 )){
-          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
-          for(dd in derivates){
-            if(any(grep(dd, varn))){
-              env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
-                                        deriv = varn, int_variables = int_variables)
-            } else {
-              if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among coefficients!'))
-            }
+      if(any( length( grep("hinge_|bin_|quadratic_|thresh_|interaction_", varn ) ) > 0 )){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
+        for(dd in derivates){
+          if(any(grep(dd, varn))){
+            env <- predictor_derivate(env, option = dd, nknots = derivate_knots,
+                                      deriv = grep(dd,varn, value=TRUE), int_variables = int_variables)
+          } else {
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red', paste0(derivates,' derivates should be created, but not found among model coefficients!'))
           }
+        }
       } else {
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','No derivates found among coefficients. None created for projection!')
+      }
+    } else {
+      # Check regardless as security check
+      try({ test <- obj$model$predictors_object$has_derivates() },silent = TRUE)
+      if(!inherits(test, 'try-error')){
+        if(test) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Option to create derivates set to None, but likely derivates found among coefficients?')
       }
     }
 
@@ -800,6 +814,7 @@ methods::setMethod(
     # Finally set the data to the BiodiversityScenario object
     pd <- PredictorDataset$new(id = new_id(),
                                data = env,
+                               transformed = ifelse('none' %notin% transform, TRUE, FALSE ),
                                timeperiod = timeperiod
                                )
     # Make a clone copy of the object

@@ -9,6 +9,8 @@ This class describes the PredictorDataset and is used to store covariates within
 }
 \seealso{
 \code{\link[=predictor_derivate]{predictor_derivate()}}
+
+\code{\link[=predictor_transform]{predictor_transform()}}
 }
 \keyword{classes}
 \section{Public fields}{
@@ -19,6 +21,8 @@ This class describes the PredictorDataset and is used to store covariates within
 \item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
 
 \item{\code{name}}{A name for this object.}
+
+\item{\code{transformed}}{Saves whether the predictors have been transformed somehow.}
 
 \item{\code{timeperiod}}{A timeperiod field}
 }
@@ -44,6 +48,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-show}{\code{PredictorDataset$show()}}
 \item \href{#method-PredictorDataset-summary}{\code{PredictorDataset$summary()}}
 \item \href{#method-PredictorDataset-has_derivates}{\code{PredictorDataset$has_derivates()}}
+\item \href{#method-PredictorDataset-is_transformed}{\code{PredictorDataset$is_transformed()}}
 \item \href{#method-PredictorDataset-length}{\code{PredictorDataset$length()}}
 \item \href{#method-PredictorDataset-ncell}{\code{PredictorDataset$ncell()}}
 \item \href{#method-PredictorDataset-plot}{\code{PredictorDataset$plot()}}
@@ -56,7 +61,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \subsection{Method \code{new()}}{
 Initializes the object and creates an empty list
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$new(id, data, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$new(id, data, transformed = FALSE, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -65,6 +70,8 @@ Initializes the object and creates an empty list
 \item{\code{id}}{The id for this collection as \code{\link{character}}.}
 
 \item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
+
+\item{\code{transformed}}{A \code{\link{logical}} flag if predictors have been transformed. Assume not.}
 
 \item{\code{...}}{Any other parameters found.}
 }
@@ -342,6 +349,19 @@ A \code{\link{data.frame}} summarizing the data.
 Indication if there are any predictors that are derivates of outers
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$has_derivates()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{logical}} flag.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-is_transformed"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-is_transformed}{}}}
+\subsection{Method \code{is_transformed()}}{
+Predictors have been transformed?
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$is_transformed()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

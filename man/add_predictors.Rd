@@ -163,10 +163,10 @@ remove extreme outliers.
 Available options for creating derivates are:
 \itemize{
 \item \code{'none'} - No additional predictor derivates are created.
-\item \code{'quad'} - Adds quadratic transformed predictors.
+\item \code{'quad'} - Adds quadratic derivate predictors.
 \item \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
-\item \code{'thresh'} - Add threshold transformed predictors.
-\item \code{'hinge'} - Add hinge transformed predictors.
+\item \code{'thresh'} - Add threshold derivate predictors.
+\item \code{'hinge'} - Add hinge derivate predictors.
 \item \code{'bin'} - Add predictors binned by their percentiles.
 }
 }
