@@ -740,7 +740,7 @@ methods::setMethod(
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, state = NULL, ... ) {
     # names = names = NULL; transform = 'none'; derivates = 'none'; derivate_knots = 4; int_variables = NULL;harmonize_na = FALSE; state = NULL
     # Try and match transform and derivatives arguments
-    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = TRUE)
+    transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = FALSE) # Several ok set to FALSE as states are not working otherwise
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction'), several.ok = TRUE)
 
     assertthat::validate_that(inherits(env,'stars'), msg = 'Projection rasters need to be stars stack!')
@@ -749,7 +749,7 @@ methods::setMethod(
                             is.null(int_variables) || is.character(int_variables),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(harmonize_na),
-                            is.matrix(state) || is.null(state)
+                            (is.matrix(state) || is.data.frame(state)) || is.null(state)
     )
     # Some stars checks
     assertthat::validate_that(length(env) >= 1)
@@ -757,6 +757,19 @@ methods::setMethod(
     # Get model object
     obj <- x$get_model()
     model <- obj$model
+
+    # Get state if not set
+    if(transform != 'none' && is.null(state)){
+      if(option %in% c('scale', 'norm')){
+        if(inherits(model$predictors_object, "PredictorDataset")){
+          state <- model$predictors_object$get_transformed_params()
+        }
+        assertthat::assert_that(
+          all(names(state) %in% names(env)),
+          msg = "Missing predictors for some state variables."
+        )
+      }
+    }
 
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding scenario predictors...')
@@ -779,19 +792,6 @@ methods::setMethod(
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
       for(tt in transform) {
         # Update, in this case we calculate and transfer the initial conditions depending on the option
-        if(tt == 'scale' & is.null(state)){
-          state <- cbind( apply(model$predictors[,names(env)], 2, function(z) mean(z, na.rm = TRUE)),
-                          apply(model$predictors[,names(env)], 2, function(z) sd(z, na.rm = TRUE))) |> t()
-        } else if(tt == 'norm' & is.null(state)){
-          state <- cbind( sapply(model$predictors[,names(env)], function(z) min(z, na.rm = TRUE)),
-                          sapply(model$predictors[,names(env)], function(z) max(z, na.rm = TRUE))) |> t()
-        } else if(tt == 'percentile' & is.null(state)){
-          state <- cbind( sapply(model$predictors[,names(env)], function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE)) ) |>
-            t()
-        } else {
-          # Dummy data.frame as not year coded
-          state <- data.frame()
-        }
         env <- predictor_transform(env, option = tt,state = state)
       }
     } else {

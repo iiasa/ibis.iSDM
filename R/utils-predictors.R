@@ -58,11 +58,12 @@
 #'
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
+  # windsor_props = c(.05,.95); pca.var = 0.8; method = NULL
   assertthat::assert_that(
     is.Raster(env) || inherits(env, 'stars'),
     # Support multiple options
     is.numeric(windsor_props) & length(windsor_props)==2,
-    is.list(state) || is.null(state),
+    (is.matrix(state)||is.data.frame(state)) || is.null(state),
     is.numeric(pca.var)
   )
   # Convenience function
@@ -117,7 +118,11 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   if(option == 'norm'){
     if(is.Raster(env)){
       if(!is.null(state)){
-        nx <- t(state) # For minmax needs to be inverted
+        nx1 <- t(state) # For minmax needs to be inverted
+        # Calculate new
+        nx2 <- terra::global(env, "range",na.rm = TRUE)
+        # Get global minimum/maximum
+        nx <- cbind(min = apply(cbind(nx1,nx2), 1, min), max = apply(cbind(nx1,nx2), 1, max))
       } else {
         nx <- terra::global(env, "range",na.rm = TRUE) |> t()
       }
@@ -126,7 +131,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     } else {
       out <- lapply(env_list, function(x) {
         if(!is.null(state)){
-          nx <- t(state) # For minmax needs to be inverted
+          nx1 <- t(state) # For minmax needs to be inverted
+          nx2 <- terra::global(x, "range",na.rm = TRUE)
+          # Get global minimum/maximum
+          nx <- cbind(min = apply(cbind(nx1,nx2), 1, min), max = apply(cbind(nx1,nx2), 1, max))
         } else {
           nx <- terra::minmax(x)
         }
@@ -149,7 +157,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     } else {
       out <- lapply(env_list, function(x){
         if(!is.null(state)){
-          terra::scale(x, center = state['mean',], scale = state['sd',])
+          terra::scale(x, center = state['mean',names(x)[1]], scale = state['sd',names(x)[1]])
         } else {
           terra::scale(x, center = TRUE, scale = TRUE)
         }
