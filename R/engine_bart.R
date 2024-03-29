@@ -286,8 +286,8 @@ engine_bart <- function(x,
     if(!is.Waiver(model$priors)){
       assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Match position of variables with monotonic constrains
-      mc <- rep(1 / length( model$biodiversity[[1]]$predictors_names ), length( model$biodiversity[[1]]$predictors_names ) )
-      names(mc) <- model$biodiversity[[1]]$predictors_names
+      mc <- rep(1 / length(model$predictors_names), length(model$predictors_names))
+      names(mc) <- model$predictors_names
       for(v in model$priors$varnames()){
         mc[v] <- model$priors$get(v)
       }
@@ -365,7 +365,9 @@ engine_bart <- function(x,
 
     # Specify splitprobs depending on whether priors have been set
     if( !is.Waiver(params[["priors"]]) ){
-      splitprobs = params[["priors"]]
+      splitprobs <- params[["priors"]]
+      # make sure to only include probs of current model
+      splitprobs <- splitprobs[names(splitprobs) %in% model$biodiversity[[1]]$predictors_names]
     } else { splitprobs = NULL }
 
     # --- #

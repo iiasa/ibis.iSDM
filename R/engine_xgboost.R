@@ -508,6 +508,11 @@ engine_xgboost <- function(x,
     # Get number of rounds from parameters
     nrounds <- params$nrounds;params$nrounds <- NULL
 
+    # make sure to only include priors of current model
+    if (!is.null(params$monotone_constraints)) {
+      params$monotone_constraints <- params$monotone_constraints[model$biodiversity[[1]]$predictors_names]
+    }
+
     # --- #
     # Pass this parameter possibly on from upper level
     # This implements a simple grid search for optimal parameter values
