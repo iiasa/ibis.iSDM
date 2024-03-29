@@ -159,7 +159,11 @@ methods::setMethod(
       }
     }
 
-    # Check that predictor names are all present
+    # Check that model has any (?) coefficients
+    assertthat::assert_that( nrow(fit$get_coefficients())>0,
+                             msg = paste0('No coefficients found in model.') )
+
+    # Check that predictor names are all present.
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
     assertthat::assert_that( all(mod_pred_names %in% pred_names),
@@ -170,6 +174,7 @@ methods::setMethod(
     if(!is.Waiver(scenario_threshold)){
       # Not get the baseline raster
       thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+      assertthat::assert_that(!is.na(thresh_reference))
       baseline_threshold <- mod$get_model()$get_data(thresh_reference)
 
       if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
@@ -205,11 +210,12 @@ methods::setMethod(
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
+
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
     }
     # ----------------------------- #
-    #   Start of projection         #
+    ####   Start of projection   ####
     # ----------------------------- #
 
     # Now convert to data.frame and subset
@@ -226,7 +232,7 @@ methods::setMethod(
 
     # ------------------ #
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Starting suitability projections for ',
-                                              length(unique(df$time)), ' timesteps.')
+                                              length(unique(df$time)), ' timesteps from ', paste(range(df$time), collapse = " <> "))
 
     # Now for each unique element, loop and project in order
     proj <- terra::rast()
@@ -302,7 +308,7 @@ methods::setMethod(
             # Returns a layer of two with both the simulated threshold and the masked suitability raster
             names(out) <- paste0(c('threshold_', 'suitability_'), step)
             # Add threshold to result stack
-            suppressWarnings( proj_thresh <- c(proj_thresh, out[[1]] ) )
+            suppressWarnings( proj_thresh = c(proj_thresh, out[[1]] ) )
             baseline_threshold <- out[[1]]
             out <- out[[2]]
           }
@@ -339,7 +345,8 @@ methods::setMethod(
             )
           }
         }
-        # If threshold is found, check if it has values or is extinct?
+
+        # If threshold is found, check if it has values, so if projected suitability falls below the threshold
         names(out_thresh) <-  paste0('threshold_', step)
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')

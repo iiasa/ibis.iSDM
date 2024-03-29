@@ -5,7 +5,12 @@
 #' standardization (or scaling) of all predictors prior to model fitting. This
 #' function works both with [`SpatRaster`] as well as with [`stars`] objects.
 #'
-#' @param env A [`SpatRaster`] object.
+#' @note
+#' If future covariates are rescaled or normalized, it is highly recommended to use the
+#' statistical moments on which the models were trained for any variable transformations,
+#' also to ensure that variable ranges are consistent among relative values.
+#'
+#' @param env A [`SpatRaster`] or [`stars`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed
 #' in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'}, \code{'windsor'},
 #' \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.
@@ -15,8 +20,10 @@
 #' minimum amount of variance to be covered (Default: \code{0.8}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left
 #' empty (in this case option has to be set).
+#' @param state A [`matrix`] with one value per variable (column) providing either a ( `stats::mean()`, `stats::sd()` )
+#' for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
+#' option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).
 #' @param ... other options (Non specified).
-#'
 #' @details Available options are:
 #' * \code{'none'} The original layer(s) are returned.
 #' * \code{'scale'} This run the [`scale()`] function with default settings
@@ -50,11 +57,12 @@
 #' }
 #'
 #' @export
-predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
+predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
   assertthat::assert_that(
     is.Raster(env) || inherits(env, 'stars'),
     # Support multiple options
     is.numeric(windsor_props) & length(windsor_props)==2,
+    is.list(state) || is.null(state),
     is.numeric(pca.var)
   )
   # Convenience function
@@ -72,8 +80,23 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Nothing to be done
   if(option == 'none') return(env)
 
+  if(!is.null(state)){
+    assertthat::assert_that(
+      is.matrix(state) || is.data.frame(state),
+      msg = "Supplied state variable needs to be in a matrix with variables being columns and statistical moments being rows!"
+    )
+    # Reruns
+    assertthat::assert_that( all(colnames(state) %in% names(env)),
+                             all(colnames(state) == names(env)),
+                             msg = "Provided state estimates need to be present for all variables and in the same order!")
+  }
+
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
+    if(is.null(state)){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','When transforming future variables, ensure that unit ranges are comparable (parameter state)!')
+    }
+
     lyrs <- names(env) # Names of predictors
     times <- stars::st_get_dimension_values(env, which = 3) # Assume this being the time attribute
     dims <- stars::st_dimensions(env)
@@ -93,11 +116,20 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Normalization
   if(option == 'norm'){
     if(is.Raster(env)){
-      nx <- terra::minmax(env)
+      if(!is.null(state)){
+        nx <- t(state) # For minmax needs to be inverted
+      } else {
+        nx <- terra::global(env, "range",na.rm = TRUE) |> t()
+      }
       out <- (env - nx[1,]) / (nx[2,] - nx[1,])
+      attr(out, "transform_params") <- nx
     } else {
       out <- lapply(env_list, function(x) {
-        nx <- terra::minmax(x)
+        if(!is.null(state)){
+          nx <- t(state) # For minmax needs to be inverted
+        } else {
+          nx <- terra::minmax(x)
+        }
         (x - nx[1,]) / (nx[2,] - nx[1,])
       })
     }
@@ -105,21 +137,44 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Scaling
   if(option == 'scale'){
     if(is.Raster(env)){
-      out <- terra::scale(env, center = TRUE, scale = TRUE)
+      if(!is.null(state)){
+        out <- terra::scale(env, center = state['mean',], scale = state['sd',])
+      } else {
+        out <- terra::scale(env, center = TRUE, scale = TRUE)
+        attr(out, "transform_params") <- cbind(
+          terra::global(env, "mean", na.rm = TRUE),
+          terra::global(env, "sd", na.rm = TRUE)
+        ) |> t()
+      }
     } else {
-      out <- lapply(env_list, function(x) terra::scale(x, center = TRUE, scale = TRUE))
+      out <- lapply(env_list, function(x){
+        if(!is.null(state)){
+          terra::scale(x, center = state['mean',], scale = state['sd',])
+        } else {
+          terra::scale(x, center = TRUE, scale = TRUE)
+        }
+      })
     }
   }
 
   # Percentile cutting
   if(option == 'percentile'){
     if(is.Raster(env)){
-      perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+      if(!is.null(state)){
+        perc <- state |> t()
+      } else {
+        perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+      }
       perc <- unique(perc)
       out <- terra::classify(env, t(perc))
+      attr(out, "transform_params") <- perc
     } else {
       out <- lapply(env_list, function(x) {
-        perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+        if(!is.null(state)){
+          perc <- state |> t()
+        } else {
+          perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+        }
         perc <- unique(perc)
         # For terra need to loop here as classify does not support multiple columns
         o <- terra::rast()
@@ -132,11 +187,12 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
   # Windsorization
   if(option == 'windsor'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     win <- function(x, windsor_props){
       xq <- stats::quantile(x = x[], probs = windsor_props, na.rm = TRUE)
       min.value <- xq[1]
       max.value <- xq[2]
-      if(is.vector(env)) out <- units::drop_units(env) else out <- env
+      if(is.vector(x)) out <- units::drop_units(x) else out <- x
       out[out < min.value] <- min.value
       out[out > max.value] <- max.value
       out
@@ -147,8 +203,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- lapply(env_list, function(x) win(x, windsor_props))
     }
   } else if(option == 'windsor_thresh'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     win_tr <- function(x, windsor_thresh){
-      if(is.vector(env)) out <- units::drop_units(env) else out <- env
+      if(is.vector(x)) out <- units::drop_units(x) else out <- x
       out[out < windsor_thresh[1]] <- windsor_thresh[1]
       out[out > windsor_thresh[2]] <- windsor_thresh[2]
       out
@@ -180,6 +237,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Principle component separation of variables
   # Inspiration taken from RSToolbox package
   if(option == 'pca'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     if(is.Raster(env)){
       assertthat::assert_that(terra::nlyr(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
 

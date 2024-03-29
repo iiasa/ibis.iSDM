@@ -9,12 +9,13 @@ predictor_transform(
   option,
   windsor_props = c(0.05, 0.95),
   pca.var = 0.8,
+  state = NULL,
   method = NULL,
   ...
 )
 }
 \arguments{
-\item{env}{A \code{\link{SpatRaster}} object.}
+\item{env}{A \code{\link{SpatRaster}} or \code{\link{stars}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed
 in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'}, \code{'windsor'},
@@ -25,6 +26,10 @@ clipped for windsorization (Default: \code{c(.05,.95)}).}
 
 \item{pca.var}{A \code{\link{numeric}} value between \code{>0} and \code{1} stating the
 minimum amount of variance to be covered (Default: \code{0.8}).}
+
+\item{state}{A \code{\link{matrix}} with one value per variable (column) providing either a ( \code{stats::mean()}, \code{stats::sd()} )
+for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
+option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).}
 
 \item{method}{As \code{'option'} for more intuitive method setting. Can be left
 empty (in this case option has to be set).}
@@ -63,6 +68,11 @@ minimum variance to be covered by the axes.
 \item \code{'revjack'} Removes outliers from the supplied stack via a reverse jackknife
 procedure. Identified outliers are by default set to \code{NA}.
 }
+}
+\note{
+If future covariates are rescaled or normalized, it is highly recommended to use the
+statistical moments on which the models were trained for any variable transformations,
+also to ensure that variable ranges are consistent among relative values.
 }
 \examples{
 \dontrun{

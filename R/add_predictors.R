@@ -27,8 +27,14 @@ NULL
 #' should be harmonized among predictors (Default: \code{FALSE}).
 #' @param explode_factors [`logical`] of whether any factor variables should be
 #' split up into binary variables (one per class). (Default: \code{FALSE}).
+#' @param name description
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
 #' which uses default prior assumptions.
+#' @param state A [`matrix`] with one value per variable (column) providing either a ( `stats::mean()`, `stats::sd()` )
+#' for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
+#' option \code{'norm'}. Effectively applies their value range for rescaling. In the case of provided
+#' \code{stars} data to a [BiodiversityScenario] object, the state variables are attempted to be compiled from
+#' the predictor ranges used for model inferrence (Default: \code{NULL}).
 #' @param ... Other parameters passed down
 #'
 #' @details
@@ -92,21 +98,21 @@ methods::setGeneric(
   "add_predictors",
   signature = methods::signature("x", "env"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL, bgmask = TRUE,
-           harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ...) standardGeneric("add_predictors"))
+           harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ...) standardGeneric("add_predictors"))
 
 #' @rdname add_predictors
 methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRasterCollection"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
-           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     # Convert env to stack if it is a single layer only
     if(!is.Raster(env)) env <- terra::rast(env)
     add_predictors(x, env, names, transform, derivates, derivate_knots,
                    int_variables, bgmask, harmonize_na, explode_factors,
-                   priors, ...)
+                   priors, state, ...)
   }
 )
 
@@ -115,7 +121,7 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "SpatRaster"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
-           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor') , several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction') , several.ok = TRUE)
@@ -127,7 +133,8 @@ methods::setMethod(
                             is.vector(derivate_knots) || is.numeric(derivate_knots),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
-                            is.null(priors) || inherits(priors,'PriorList')
+                            is.null(priors) || inherits(priors,'PriorList'),
+                            is.matrix(state) || is.null(state)
     )
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors...')
@@ -260,7 +267,7 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityDistribution", env = "stars"),
   function(x, env, names = NULL, transform = 'scale', derivates = 'none', derivate_knots = 4, int_variables = NULL,
-           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, ... ) {
+           bgmask = TRUE, harmonize_na = FALSE, explode_factors = FALSE, priors = NULL, state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             !missing(env))
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Taking first time entry from object.')
@@ -270,7 +277,7 @@ methods::setMethod(
     if(is.list(env)) env <- env[[1]]
     x <- add_predictors(x, env, names, transform, derivates, derivate_knots,
                         int_variables, bgmask, harmonize_na, explode_factors,
-                        priors, ...)
+                        priors, state, ...)
     return( x )
   }
 )
@@ -710,14 +717,18 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "SpatRaster"),
   function(x, env, names = NULL, transform = 'none', derivates = 'none',
-           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE,state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             !missing(env))
     env <- raster_to_stars(env) # Convert to stars
 
+    # TODO:
+    # Calculate scaling state
+
+    # Load from initial files
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
                    derivate_knots = derivate_knots, int_variables = int_variables,
-                   harmonize_na = harmonize_na, ...)
+                   harmonize_na = harmonize_na, state = state, ...)
   }
 )
 
@@ -726,7 +737,8 @@ methods::setMethod(
   "add_predictors",
   methods::signature(x = "BiodiversityScenario", env = "stars"),
   function(x, env, names = NULL, transform = 'none', derivates = 'none',
-           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, ... ) {
+           derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE, state = NULL, ... ) {
+    # names = names = NULL; transform = 'none'; derivates = 'none'; derivate_knots = 4; int_variables = NULL;harmonize_na = FALSE; state = NULL
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = TRUE)
     derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction'), several.ok = TRUE)
@@ -736,13 +748,15 @@ methods::setMethod(
                             is.vector(derivate_knots) || is.numeric(derivate_knots),
                             is.null(int_variables) || is.character(int_variables),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
-                            is.logical(harmonize_na)
+                            is.logical(harmonize_na),
+                            is.matrix(state) || is.null(state)
     )
     # Some stars checks
     assertthat::validate_that(length(env) >= 1)
 
     # Get model object
     obj <- x$get_model()
+    model <- obj$model
 
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding scenario predictors...')
@@ -763,7 +777,23 @@ methods::setMethod(
     # Standardization and scaling
     if('none' %notin% transform){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Transforming predictors...')
-      for(tt in transform) env <- predictor_transform(env, option = tt)
+      for(tt in transform) {
+        # Update, in this case we calculate and transfer the initial conditions depending on the option
+        if(tt == 'scale' & is.null(state)){
+          state <- cbind( apply(model$predictors[,names(env)], 2, function(z) mean(z, na.rm = TRUE)),
+                          apply(model$predictors[,names(env)], 2, function(z) sd(z, na.rm = TRUE))) |> t()
+        } else if(tt == 'norm' & is.null(state)){
+          state <- cbind( sapply(model$predictors[,names(env)], function(z) min(z, na.rm = TRUE)),
+                          sapply(model$predictors[,names(env)], function(z) max(z, na.rm = TRUE))) |> t()
+        } else if(tt == 'percentile' & is.null(state)){
+          state <- cbind( sapply(model$predictors[,names(env)], function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE)) ) |>
+            t()
+        } else {
+          # Dummy data.frame as not year coded
+          state <- data.frame()
+        }
+        env <- predictor_transform(env, option = tt,state = state)
+      }
     } else {
       # Check regardless
       try({ test <- obj$model$predictors_object$is_transformed() },silent = TRUE)

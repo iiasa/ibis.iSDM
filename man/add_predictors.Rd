@@ -21,6 +21,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 
@@ -36,6 +37,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 
@@ -51,6 +53,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 
@@ -66,6 +69,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 
@@ -81,6 +85,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 
@@ -96,6 +101,7 @@ add_predictors(
   harmonize_na = FALSE,
   explode_factors = FALSE,
   priors = NULL,
+  state = NULL,
   ...
 )
 }
@@ -131,7 +137,13 @@ split up into binary variables (one per class). (Default: \code{FALSE}).}
 \item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
 which uses default prior assumptions.}
 
+\item{state}{A \code{\link{matrix}} with one value per variable (column) providing either a ( \code{stats::mean()}, \code{stats::sd()} )
+for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
+option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).}
+
 \item{...}{Other parameters passed down}
+
+\item{name}{description}
 }
 \description{
 This function allows to add predictors to \link{distribution} or

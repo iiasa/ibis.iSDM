@@ -316,6 +316,18 @@ PredictorDataset <- R6::R6Class(
     },
 
     #' @description
+    #' Get transformation params.
+    #' @seealso [predictor_transform()]
+    #' @return A [`matrix`] flag.
+    get_transformed_params = function(){
+      if(self$transformed){
+        return( attr(self$get_data(), 'transform_params') )
+      } else {
+        return(NULL)
+      }
+    },
+
+    #' @description
     #' Number of Predictors in object
     #' @return A [`numeric`] estimate
     length = function() {
