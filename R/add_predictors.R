@@ -772,9 +772,12 @@ methods::setMethod(
             msg = "Model transformation does not match provided option"
           )
           state <- model$predictors_object$get_transformed_params()
+          # Subset again to be sure
+          state <- state[,which(colnames(state) %in% names(env))]
         }
         assertthat::assert_that(
           all(names(state) %in% names(env)),
+          all(names(env) %in% colnames(state)),
           msg = "Missing predictors for some state variables."
         )
       }

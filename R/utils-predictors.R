@@ -58,7 +58,7 @@
 #'
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
-  # windsor_props = c(.05,.95); pca.var = 0.8; method = NULL
+  # option="scale"; windsor_props = c(.05,.95); pca.var = 0.8; method = NULL
   assertthat::assert_that(
     is.Raster(env) || inherits(env, 'stars'),
     # Support multiple options
