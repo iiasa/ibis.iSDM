@@ -864,7 +864,12 @@ emptyraster <- function(x, ...) { # add name, filename,
                 crs = terra::crs(x),
                 ext = terra::ext(x), ...)
   } else {
-    emptyraster( stars_to_raster(x)[[1]] )
+    crs <- sf::st_crs(x)
+    terra::rast(nrows = nrow(x), ncols = ncol(x),
+                crs = terra::crs(crs$wkt),
+                ext = terra::ext(sf::st_bbox(x)),
+                resolution = stars::st_res(x),
+                ...)
   }
 }
 
