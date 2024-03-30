@@ -469,6 +469,37 @@ methods::setMethod(
       # Add attributes on the method of ensemble
       attr(out, "method") <- method
 
+      # Check for threshold values and collate
+      if(apply_threshold){
+        ll_val <- sapply(mods, function(x) x$get_thresholdvalue())
+        # Incase no thresholds are found, ignore entirely
+        if(!all(any(sapply(ll_val, is.Waiver)))){
+          # Respecify weights as otherwise call below fails
+          if(any(sapply(ll_val, is.Waiver))){
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Ensemble]','yellow','Threshold values not found for all objects')
+            ll_val <- ll_val[-which(sapply(ll_val, is.Waiver))]
+            ll_val <- ll_val |> as.numeric()
+          }
+          if(is.null(weights)) weights <- rep(1, length(ll_val))
+
+          # Composite threshold
+          tr <- dplyr::case_when(
+            method == "mean" ~ mean(ll_val, na.rm = TRUE),
+            method == "median" ~ median(ll_val, na.rm = TRUE),
+            method == "max" ~ max(ll_val, na.rm = TRUE),
+            method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
+            .default = mean(ll_val, na.rm = TRUE)
+          )
+
+          # reclassify to binary
+          new <- out
+          new[new < tr[[1]]] <- 0; new[new >= tr[[1]]] <- 1
+          names(new) <- 'ensemble_threshold'
+          out <- c(out, new)
+        }
+      }
+
       # --- #
       if(uncertainty != 'none'){
         if(uncertainty == "pca") {

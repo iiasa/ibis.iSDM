@@ -722,9 +722,6 @@ methods::setMethod(
                             !missing(env))
     env <- raster_to_stars(env) # Convert to stars
 
-    # TODO:
-    # Calculate scaling state
-
     # Load from initial files
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
                    derivate_knots = derivate_knots, int_variables = int_variables,
@@ -758,6 +755,14 @@ methods::setMethod(
     obj <- x$get_model()
     model <- obj$model
 
+    # Subset to target predictors only
+    if(length(model$predictors_names) != length(names(env))){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Found less variables in fitted model than supplied. Subsetting...')
+      env <- env |> dplyr::select(dplyr::any_of(model$predictors_names))
+      assertthat::assert_that(length(env)>0,
+                              msg = "No matching variables found!")
+    }
+
     # Get state if not set
     if(transform != 'none' && is.null(state)){
       if(transform %in% c('scale', 'norm')){
@@ -776,7 +781,7 @@ methods::setMethod(
     }
 
     # Messenger
-    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding scenario predictors...')
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Adding scenario predictors...')
 
     # Rename attributes if names is specified
     if(!is.null(names)){

@@ -320,7 +320,7 @@ methods::setMethod(
             # Returns a layer of two with both the simulated threshold and the masked suitability raster
             names(out) <- paste0(c('threshold_', 'suitability_'), step)
             # Add threshold to result stack
-            suppressWarnings( proj_thresh = c(proj_thresh, out[[1]] ) )
+            suppressWarnings( proj_thresh <- c(proj_thresh, out[[1]] ) )
             baseline_threshold <- out[[1]]
             out <- out[[2]]
           }
@@ -554,15 +554,27 @@ methods::setMethod(
     # --------------------------------- #
     # # # # # # # # # # # # # # # # # # #
     # Finally convert to stars and rename
-    proj <- stars::st_as_stars(proj,
-                               crs = sf::st_crs(new_crs)
-    ); names(proj) <- 'suitability'
+    if(terra::nlyr(proj)==1){
+      # For layers with a single time step, use conversion function
+      proj <- raster_to_stars(proj)
+      names(proj) <- 'suitability'
+    } else {
+      proj <- stars::st_as_stars(proj,
+                                 crs = sf::st_crs(new_crs)
+      ); names(proj) <- 'suitability'
+    }
 
     if(terra::hasValues(proj_thresh)){
-      # Add the thresholded maps as well
-      proj_thresh <- stars::st_as_stars(proj_thresh,
-                                       crs = sf::st_crs(new_crs)
-      ); names(proj_thresh) <- 'threshold'
+      if(terra::nlyr(proj_thresh)==1){
+        if(is.na(terra::time(proj_thresh))) terra::time(proj_thresh) <- terra::time(proj)
+        proj_thresh <- raster_to_stars(proj_thresh)
+        names(proj_thresh) <- 'threshold'
+      } else {
+        # Add the thresholded maps as well
+        proj_thresh <- stars::st_as_stars(proj_thresh,
+                                          crs = sf::st_crs(new_crs)
+        ); names(proj_thresh) <- 'threshold'
+      }
       # Correct band if different
       if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
         proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))

@@ -303,10 +303,6 @@ methods::setMethod(
     }
   }
 
-  # Get original baseline threshold
-  ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 1
-
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
     baseline_threshold[resistance == 1] <- 2
@@ -324,8 +320,6 @@ methods::setMethod(
   # Now multiply the net suitability projection with this mask
   # Thus removing any grid cells outside
   out <- new_suit * ras_dis
-  # Mask with original so as to retain non-zero values
-  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -360,10 +354,6 @@ methods::setMethod(
       message('Very small average dispersal vlaue provided. Check that they are in unit m!')
     }
   }
-
-  # Get original baseline threshold
-  ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 1
 
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
