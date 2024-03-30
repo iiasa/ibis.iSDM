@@ -153,6 +153,9 @@ methods::setMethod(
 #' Parameters for \code{'method'}:
 #' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 #' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' #' The negative exponential kernel is defined as:
+#' \deqn{f(x) = \frac{1}{2 \pi a^2} e^{-\frac{x}{a}}}{fx = 1 / (2 * pi * a^2) * exp(-x / a)}
+#' where \eqn{a} is the mean dispersal distance (in m) divided by 2.
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
@@ -166,6 +169,9 @@ methods::setMethod(
 #' * \code{pcor}: [`numeric`] probability that corner cells are considered in the
 #' 3x3 neighbourhood (Default: \code{0.2}).
 #'
+#' @note
+#' Unless otherwise stated, the default unit of supplied distance values (e.g. average dispersal
+#' distance) should be in \code{"m"}.
 #' @references
 #' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013).
 #' Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact
@@ -283,14 +289,19 @@ methods::setMethod(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
-    is.null(resistance) || is.Raster(resistance),
-    # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold))==2
+    is.null(resistance) || is.Raster(resistance)
   )
+
+  # Check for small lon-lat values
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1){
+      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+    }
+  }
 
   # Get original baseline threshold
   ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 0
+  ori.tr[ori.tr>0] <- 1
 
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
@@ -328,19 +339,27 @@ methods::setMethod(
 #' @noRd
 #'
 #' @keywords internal
-.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
+.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = TRUE, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
+    is.logical(normalize),
     is.null(resistance) || is.Raster(resistance),
     # Check that baseline threshold raster is binomial
     length(unique(baseline_threshold)[,1])==2
   )
 
+  # Check for small lon-lat values
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1){
+      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+    }
+  }
+
   # Get original baseline threshold
   ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 0
+  ori.tr[ori.tr>0] <- 1
 
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
@@ -350,23 +369,22 @@ methods::setMethod(
     baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
 
-  # Inverse of mean dispersal distance
-  alpha <- 1/value
+  # Divide alpha values by 2
+  alpha <- value/2
 
   # Grow baseline raster by using an exponentially weighted kernel
   ras_dis <- terra::gridDist(baseline_threshold, target = 1)
+  # Normalized (with a constant) negative exponential kernel
+  ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
+  # Equivalent to alpha = 1/value and
+  # ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
   if(normalize){
-    # Normalized (with a constant) negative exponential kernel
-    ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
-  } else {
-    ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
+    ras_dis <- predictor_transform(ras_dis, option = 'norm')
   }
 
   # Now multiply the net suitability projection with this mask Thus removing any
   # non-suitable grid cells (0) and changing the value of those within reach
   out <- new_suit * ras_dis
-  # Mask with original so as to retain non-zero values
-  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -604,7 +622,7 @@ methods::setMethod(
         value > 0, msg = "Specify a value threshold (SD) and names of predictors, for which
         we do not expect the species to persist."
       )
-      if(is.null(names)) names <- character()
+      if(is.null(names)) names <- NA
       co[['adaptability']] <- list(method = method,
                                    params = c("names" = names, "value" = value,
                                               "increment" = increment))
@@ -654,9 +672,9 @@ methods::setMethod(
   for(id in names(model$biodiversity)){
     sub <- model$biodiversity[[id]]
     # Which are presence data
-    is_presence <- which(sub$observations[['observed']] > 0)
+    is_presence <- which(factor_to_numeric(sub$observations[['observed']]) > 0)
     df <- rbind(df,
-                sub$predictors[is_presence, names])
+                sub$predictors[is_presence, sub$predictors_names])
   }
   rr <- sapply(df, function(x) range(x, na.rm = TRUE))   # Calculate ranges
   rsd <- sapply(df, function(x) stats::sd(x, na.rm = TRUE))   # Calculate standard deviation
@@ -668,6 +686,7 @@ methods::setMethod(
   # Now 'clamp' all predictor values beyond these names to 0, e.g. partial out
   nd <- newdata
   for(n in names){
+    if(!(n %in% names(rr))) next() # If variable not present in model frame, skip
     # Calc min
     min_ex <- which(nd[,n] < rr[1,n])
     max_ex <- which(nd[,n] > rr[2,n])

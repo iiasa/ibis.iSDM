@@ -37,6 +37,9 @@ Parameters for \code{'method'}:
 \itemize{
 \item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
 \item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' The negative exponential kernel is defined as:
+\deqn{f(x) = \frac{1}{2 \pi a^2} e^{-\frac{x}{a}}}{fx = 1 / (2 * pi * a^2) * exp(-x / a)}
+where \eqn{a} is the mean dispersal distance (in m) divided by 2.
 \item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 \item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 }
@@ -52,6 +55,10 @@ colonized cell becomes uncolonised, i.e., the species gets locally extinct
 \item \code{pcor}: \code{\link{numeric}} probability that corner cells are considered in the
 3x3 neighbourhood (Default: \code{0.2}).
 }
+}
+\note{
+Unless otherwise stated, the default unit of supplied distance values (e.g. average dispersal
+distance) should be in \code{"m"}.
 }
 \references{
 \itemize{

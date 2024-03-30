@@ -54,6 +54,7 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-get_predictor_names}{\code{BiodiversityScenario$get_predictor_names()}}
 \item \href{#method-BiodiversityScenario-get_timeperiod}{\code{BiodiversityScenario$get_timeperiod()}}
 \item \href{#method-BiodiversityScenario-get_constraints}{\code{BiodiversityScenario$get_constraints()}}
+\item \href{#method-BiodiversityScenario-rm_constraints}{\code{BiodiversityScenario$rm_constraints()}}
 \item \href{#method-BiodiversityScenario-get_threshold}{\code{BiodiversityScenario$get_threshold()}}
 \item \href{#method-BiodiversityScenario-get_thresholdvalue}{\code{BiodiversityScenario$get_thresholdvalue()}}
 \item \href{#method-BiodiversityScenario-apply_threshold}{\code{BiodiversityScenario$apply_threshold()}}
@@ -235,6 +236,19 @@ Get constrains for model
 
 \subsection{Returns}{
 A \code{\link{list}} with the constraints within the scenario.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-rm_constraints"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-rm_constraints}{}}}
+\subsection{Method \code{rm_constraints()}}{
+Remove contraints from model
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$rm_constraints()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible
 }
 }
 \if{html}{\out{<hr>}}

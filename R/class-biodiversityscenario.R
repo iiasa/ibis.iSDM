@@ -191,6 +191,14 @@ BiodiversityScenario <- R6::R6Class(
     },
 
     #' @description
+    #' Remove contraints from model
+    #' @return Invisible
+    rm_constraints = function(){
+      self$constraints <- new_waiver()
+      invisible()
+    },
+
+    #' @description
     #' Get thresholds if specified.
     #' @seealso [threshold()]
     #' @return A [`list`] with method and value for the threshold.
@@ -479,6 +487,11 @@ BiodiversityScenario <- R6::R6Class(
 
       # Not get the baseline raster
       baseline <- self$get_model()$get_data(thresh_reference)
+      # Set all NA values to 0 (in case projected was limited)
+      if(obj$has_limits()){
+        baseline[is.na(baseline)] <- 0
+        baseline <- terra::mask(baseline, obj$model$background) # Mask with background
+      }
       # Get only the variable
       if(terra::nlyr(baseline)>1) baseline <- terra::subset(baseline, grep(variable, names(baseline)))
       # And the last scenario prediction

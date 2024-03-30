@@ -185,9 +185,13 @@ methods::setMethod(
         baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
       }
 
+      # Set all NA values to 0 (and then mask by background?)
+      baseline_threshold[is.na(baseline_threshold)]<-0
+
     } else {
       baseline_threshold <- new_waiver()
     }
+
     # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
     scenario_simulations <- mod$get_simulation()
@@ -290,10 +294,12 @@ methods::setMethod(
           # MigClim simulations are run posthoc
           if(scenario_constraints$dispersal$method %in% c("sdd_fixed", "sdd_nexpkernel")){
             out <- switch (scenario_constraints$dispersal$method,
-                           "sdd_fixed" = .sdd_fixed(baseline_threshold, out,
+                           "sdd_fixed" = .sdd_fixed(baseline_threshold,
+                                                    new_suit = out,
                                                     value = scenario_constraints$dispersal$params[1],
                                                     resistance = resistance ),
-                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold, out,
+                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold,
+                                                              new_suit = out,
                                                               value = scenario_constraints$dispersal$params[1],
                                                               resistance = resistance)
             )
