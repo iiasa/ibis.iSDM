@@ -78,6 +78,8 @@ projection within a certain area (e.g. a species range or an island).
 \item \code{minsize} - Allows to specify a certain size that must be satisfied in
 order for a thresholded patch to be occupied. Can be thought of as a minimum
 size requirement. See \code{add_constraint_minsize()} for the required parameters.
+\item \code{threshold} - Applies the set threshold as a constrain directly on the
+suitability projections. Requires a threshold to be set.
 }
 }
 \examples{
@@ -110,6 +112,7 @@ Other constraint:
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
+\code{\link{add_constraint_threshold}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

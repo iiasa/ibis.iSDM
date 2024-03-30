@@ -115,6 +115,12 @@ methods::setMethod(
 
     # Get the model object
     fit <- mod$get_model(copy = TRUE)
+    # Get background
+    background <- fit$model$background
+
+    assertthat::assert_that(!is.na(terra::crs( background )),
+                            msg = "Model background has no CRS which will only cause problems. Rerun and set!")
+
     # Check that coefficients and model exist
     assertthat::assert_that(!is.Waiver(fit),
                             nrow(fit$get_coefficients())>0,
@@ -177,7 +183,7 @@ methods::setMethod(
       assertthat::assert_that(!is.na(thresh_reference))
       baseline_threshold <- mod$get_model()$get_data(thresh_reference)
 
-      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
+      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
       # Furthermore apply new limits also to existing predictions (again)
       if(!is.null( mod$get_limits() )) baseline_threshold <- terra::crop(baseline_threshold, mod$get_limits())
 
@@ -268,7 +274,7 @@ methods::setMethod(
       # Project suitability
       out <- fit$project(newdata = nd, layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
-      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( fit$model$background )
+      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
@@ -349,6 +355,14 @@ methods::setMethod(
                                      establishment_step = scenario_constraints$min_size$params["establishment_step"] |>
                                        as.logical()
             )
+          }
+        }
+
+        # Apply threshold to suitability projections if added as constraint
+        if("threshold" %in% names(scenario_constraints)){
+          if(scenario_constraints$threshold$method=="threshold"){
+            out <- terra::mask(out, baseline_threshold, maskvalues = 0,
+                               updatevalue = scenario_constraints$threshold$params["updatevalue"])
           }
         }
 
@@ -470,12 +484,12 @@ methods::setMethod(
       proj <- terra::mask(proj, scenario_constraints$boundary$params$layer)
       # Get background and ensure that all values outside are set to 0
       proj[is.na(proj)] <- 0
-      proj <- terra::mask(proj, fit$model$background )
+      proj <- terra::mask(proj, background )
       # Also for thresholds if existing
       if(terra::nlyr(proj_thresh)>0 && terra::hasValues(proj_thresh) ){
         proj_thresh <- terra::mask(proj_thresh, scenario_constraints$boundary$params$layer)
         proj_thresh[is.na(proj_thresh)] <- 0
-        proj_thresh <- terra::mask(proj_thresh, fit$model$background )
+        proj_thresh <- terra::mask(proj_thresh, background )
       }
     }
 

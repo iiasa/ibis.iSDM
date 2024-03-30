@@ -57,6 +57,8 @@ NULL
 #' * \code{minsize} - Allows to specify a certain size that must be satisfied in
 #' order for a thresholded patch to be occupied. Can be thought of as a minimum
 #' size requirement. See `add_constraint_minsize()` for the required parameters.
+#' * \code{threshold} - Applies the set threshold as a constrain directly on the
+#' suitability projections. Requires a threshold to be set.
 #'
 #' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #'
@@ -105,7 +107,7 @@ methods::setMethod(
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
                                     "hardbarrier","resistance",
-                                    "boundary", "minsize",
+                                    "boundary", "minsize", "threshold",
                                     "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
@@ -126,6 +128,8 @@ methods::setMethod(
                   "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
                   # --- #
                   "boundary" = add_constraint_boundary(mod, ...),
+                  # --- #
+                  "threshold" = add_constraint_threshold(mod, ...),
                   # --- #
                   "minsize" = add_constraint_minsize(mod, ...)
     )
@@ -889,6 +893,69 @@ methods::setMethod(
       co[['boundary']] <- list(method = method,
                                    params = c("layer" = layer))
     }
+    # --- #
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(co)
+    return( new )
+  }
+)
+
+#' Adds a threshold constraint to a scenario object
+#'
+#' @description
+#' This option adds a [`threshold()`] constraint to a scenario projection,
+#' thus effectively applying the threshold as mask to each projection step made
+#' during the scenario projection.
+#'
+#' Applying this constraint thus means that the \code{"suitability"} projection is
+#' clipped to the threshold. This method requires
+#' the `threshold()` set for a scenario object.
+#'
+#' It could be in theory possible to re calculate the threshold for each time step
+#' based on supplied parameters or even observation records. So far this option has
+#' not been necessary to implement.
+#'
+#' @note
+#' Threshold values are taken from the original fitted model.
+#'
+#' @inheritParams add_constraint
+#' @param updatevalue A [`numeric`] indicating to what the masked out values (those outside)
+#' the threshold should become (Default: \code{NA}).
+#'
+#' @family constraint
+#' @keywords scenario
+#'
+#' @examples
+#' \dontrun{
+#' # Add scenario constraint
+#' scenario(fit) |> threshold() |>
+#' add_constraint_threshold()
+#' }
+#'
+#' @name add_constraint_threshold
+NULL
+
+#' @rdname add_constraint_threshold
+#' @export
+methods::setGeneric("add_constraint_threshold",
+                    signature = methods::signature("mod"),
+                    function(mod, updatevalue = NA, ...) standardGeneric("add_constraint_threshold"))
+
+#' @rdname add_constraint_threshold
+methods::setMethod(
+  "add_constraint_threshold",
+  methods::signature(mod = "BiodiversityScenario"),
+  function(mod, updatevalue = NA, ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      is.na(updatevalue) || is.numeric(updatevalue)
+    )
+
+    # Add processing method #
+    # --- #
+    co <- list()
+    co[['threshold']] <- list(method = "threshold",
+                             params = c("updatevalue" = updatevalue))
     # --- #
     new <- mod$clone(deep = TRUE)
     new <- new$set_constraints(co)

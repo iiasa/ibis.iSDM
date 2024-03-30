@@ -338,6 +338,12 @@ test_that('Scenarios and constraints', {
   expect_equal(names(mod3$get_constraints()), "min_size")
   expect_s3_class( mod3$get_data()['threshold'], "stars")
 
+  # Threshold constraint
+  expect_no_error(
+    mod4 <- mod |> threshold(value = .2) |> add_constraint_threshold() |> project()
+  )
+  expect_equal(names(mod4$get_constraints()), "threshold")
+
   # --- #
   # Check that stabilization works
   mods <- mod |> project(stabilize = TRUE)
