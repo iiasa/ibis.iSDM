@@ -115,6 +115,12 @@ methods::setMethod(
 
     # Get the model object
     fit <- mod$get_model(copy = TRUE)
+    # Get background
+    background <- fit$model$background
+
+    assertthat::assert_that(!is.na(terra::crs( background )),
+                            msg = "Model background has no CRS which will only cause problems. Rerun and set!")
+
     # Check that coefficients and model exist
     assertthat::assert_that(!is.Waiver(fit),
                             nrow(fit$get_coefficients())>0,
@@ -159,7 +165,11 @@ methods::setMethod(
       }
     }
 
-    # Check that predictor names are all present
+    # Check that model has any (?) coefficients
+    assertthat::assert_that( nrow(fit$get_coefficients())>0,
+                             msg = paste0('No coefficients found in model.') )
+
+    # Check that predictor names are all present.
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
     assertthat::assert_that( all(mod_pred_names %in% pred_names),
@@ -170,9 +180,10 @@ methods::setMethod(
     if(!is.Waiver(scenario_threshold)){
       # Not get the baseline raster
       thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+      assertthat::assert_that(!is.na(thresh_reference))
       baseline_threshold <- mod$get_model()$get_data(thresh_reference)
 
-      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
+      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
       # Furthermore apply new limits also to existing predictions (again)
       if(!is.null( mod$get_limits() )) baseline_threshold <- terra::crop(baseline_threshold, mod$get_limits())
 
@@ -180,9 +191,13 @@ methods::setMethod(
         baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
       }
 
+      # Set all NA values to 0 (and then mask by background?)
+      baseline_threshold[is.na(baseline_threshold)]<-0
+
     } else {
       baseline_threshold <- new_waiver()
     }
+
     # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
     scenario_simulations <- mod$get_simulation()
@@ -205,11 +220,12 @@ methods::setMethod(
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
+
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
     }
     # ----------------------------- #
-    #   Start of projection         #
+    ####   Start of projection   ####
     # ----------------------------- #
 
     # Now convert to data.frame and subset
@@ -226,7 +242,7 @@ methods::setMethod(
 
     # ------------------ #
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Starting suitability projections for ',
-                                              length(unique(df$time)), ' timesteps.')
+                                              length(unique(df$time)), ' timesteps from ', paste(range(df$time), collapse = " <> "))
 
     # Now for each unique element, loop and project in order
     proj <- terra::rast()
@@ -258,7 +274,7 @@ methods::setMethod(
       # Project suitability
       out <- fit$project(newdata = nd, layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
-      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( fit$model$background )
+      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
@@ -284,10 +300,12 @@ methods::setMethod(
           # MigClim simulations are run posthoc
           if(scenario_constraints$dispersal$method %in% c("sdd_fixed", "sdd_nexpkernel")){
             out <- switch (scenario_constraints$dispersal$method,
-                           "sdd_fixed" = .sdd_fixed(baseline_threshold, out,
+                           "sdd_fixed" = .sdd_fixed(baseline_threshold,
+                                                    new_suit = out,
                                                     value = scenario_constraints$dispersal$params[1],
                                                     resistance = resistance ),
-                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold, out,
+                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold,
+                                                              new_suit = out,
                                                               value = scenario_constraints$dispersal$params[1],
                                                               resistance = resistance)
             )
@@ -339,7 +357,16 @@ methods::setMethod(
             )
           }
         }
-        # If threshold is found, check if it has values or is extinct?
+
+        # Apply threshold to suitability projections if added as constraint
+        if("threshold" %in% names(scenario_constraints)){
+          if(scenario_constraints$threshold$method=="threshold"){
+            out <- terra::mask(out, baseline_threshold, maskvalues = 0,
+                               updatevalue = scenario_constraints$threshold$params["updatevalue"])
+          }
+        }
+
+        # If threshold is found, check if it has values, so if projected suitability falls below the threshold
         names(out_thresh) <-  paste0('threshold_', step)
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
@@ -457,12 +484,12 @@ methods::setMethod(
       proj <- terra::mask(proj, scenario_constraints$boundary$params$layer)
       # Get background and ensure that all values outside are set to 0
       proj[is.na(proj)] <- 0
-      proj <- terra::mask(proj, fit$model$background )
+      proj <- terra::mask(proj, background )
       # Also for thresholds if existing
       if(terra::nlyr(proj_thresh)>0 && terra::hasValues(proj_thresh) ){
         proj_thresh <- terra::mask(proj_thresh, scenario_constraints$boundary$params$layer)
         proj_thresh[is.na(proj_thresh)] <- 0
-        proj_thresh <- terra::mask(proj_thresh, fit$model$background )
+        proj_thresh <- terra::mask(proj_thresh, background )
       }
     }
 
@@ -527,15 +554,27 @@ methods::setMethod(
     # --------------------------------- #
     # # # # # # # # # # # # # # # # # # #
     # Finally convert to stars and rename
-    proj <- stars::st_as_stars(proj,
-                               crs = sf::st_crs(new_crs)
-    ); names(proj) <- 'suitability'
+    if(terra::nlyr(proj)==1){
+      # For layers with a single time step, use conversion function
+      proj <- raster_to_stars(proj)
+      names(proj) <- 'suitability'
+    } else {
+      proj <- stars::st_as_stars(proj,
+                                 crs = sf::st_crs(new_crs)
+      ); names(proj) <- 'suitability'
+    }
 
     if(terra::hasValues(proj_thresh)){
-      # Add the thresholded maps as well
-      proj_thresh <- stars::st_as_stars(proj_thresh,
-                                       crs = sf::st_crs(new_crs)
-      ); names(proj_thresh) <- 'threshold'
+      if(terra::nlyr(proj_thresh)==1){
+        if(is.na(terra::time(proj_thresh))) terra::time(proj_thresh) <- terra::time(proj)
+        proj_thresh <- raster_to_stars(proj_thresh)
+        names(proj_thresh) <- 'threshold'
+      } else {
+        # Add the thresholded maps as well
+        proj_thresh <- stars::st_as_stars(proj_thresh,
+                                          crs = sf::st_crs(new_crs)
+        ); names(proj_thresh) <- 'threshold'
+      }
       # Correct band if different
       if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
         proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))

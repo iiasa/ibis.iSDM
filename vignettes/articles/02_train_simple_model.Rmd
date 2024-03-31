@@ -160,6 +160,7 @@ print("Fit model")
 # Finally train
 fit <- train(mod,
              runname =  "Test INLA run",
+             aggregate_observations = FALSE, # Don't aggregate point counts per grid cell
              verbose = FALSE # Don't be chatty
              )
 

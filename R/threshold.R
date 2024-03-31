@@ -404,6 +404,15 @@ methods::setMethod(
 
 #' Thresholds in scenario estimation
 #'
+#' @description
+#' For [BiodiversityScenario] objects a set `threshold()` simply indicates that
+#' the projection should create and use thresholds as part of the results.
+#' The threshold values for this are either taken from the provided model or
+#' through an optional provide parameter \code{value}.
+#'
+#' If instead the aim is to apply thresholds to each step of the suitability
+#' projection, see [`add_constraint_threshold()`].
+#'
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is
 #' to be added.
 #' @param value A [`numeric`] value specifying the specific threshold for scenarios
