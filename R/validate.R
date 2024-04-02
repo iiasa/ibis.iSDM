@@ -217,10 +217,17 @@ methods::setMethod(
       }
 
       # method-specific test of PO/PA data
-      n_test <- ifelse(test = method == "discrete", yes = 2, no = 1)
+      if (method == "discrete") {
 
-      assertthat::assert_that(nrow(df2) > 2, length(unique(df2[[point_column]]) ) >= n_test,
-                              msg = "Validation was not possible owing to missing data.")
+        assertthat::assert_that(nrow(df2) > 2, any(df2[[point_column]] == 0),
+                                msg = "Validation was not possible owing to missing data.")
+
+      } else {
+
+        assertthat::assert_that(nrow(df2) > 2, any(df2[[point_column]] >= 1),
+                                msg = "Validation was not possible owing to missing data.")
+
+      }
 
       # Validate the threshold
       out <- try({.validatethreshold(df2 = df2, point_column = point_column, mod = mod,
