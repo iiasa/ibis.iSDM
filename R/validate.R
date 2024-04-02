@@ -186,9 +186,7 @@ methods::setMethod(
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
     df <- subset(df, stats::complete.cases(df))
-    assertthat::assert_that( nrow(df)> 2,
-                             length( unique(df[[point_column]]) )>1,
-                             msg = "Validation was not possible owing to missing data.")
+
     # --- #
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','green','Calculating validation statistics')
@@ -217,9 +215,16 @@ methods::setMethod(
         o <- o |> sf::st_drop_geometry()
         df2 <- rbind(df2, as.data.frame(o))
       }
+
+      # method-specific test of PO/PA data
+      n_test <- ifelse(test = method == "discrete", yes = 2, no = 1)
+
+      assertthat::assert_that(nrow(df2) > 2, length(unique(df2[[point_column]]) ) >= n_test,
+                              msg = "Validation was not possible owing to missing data.")
+
       # Validate the threshold
       out <- try({.validatethreshold(df2 = df2, point_column = point_column, mod = mod,
-                                name = dataset, method = method, id = as.character(mod$id))
+                                     name = dataset, method = method, id = as.character(mod$id))
       })
       if(inherits(out, "try-error")) return(NULL)
       results <- rbind.data.frame(results, out)
