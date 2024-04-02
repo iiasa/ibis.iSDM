@@ -27,7 +27,6 @@ NULL
 #' should be harmonized among predictors (Default: \code{FALSE}).
 #' @param explode_factors [`logical`] of whether any factor variables should be
 #' split up into binary variables (one per class). (Default: \code{FALSE}).
-#' @param name description
 #' @param priors A [`PriorList-class`] object. Default is set to \code{NULL}
 #' which uses default prior assumptions.
 #' @param state A [`matrix`] with one value per variable (column) providing either a ( `stats::mean()`, `stats::sd()` )

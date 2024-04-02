@@ -144,8 +144,6 @@ option \code{'norm'}. Effectively applies their value range for rescaling. In th
 the predictor ranges used for model inferrence (Default: \code{NULL}).}
 
 \item{...}{Other parameters passed down}
-
-\item{name}{description}
 }
 \description{
 This function allows to add predictors to \link{distribution} or
