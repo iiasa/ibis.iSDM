@@ -32,6 +32,9 @@ jobs:
           sudo apt-get -y install \
           libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
 
+      - name: Install inla
+        run: Rscript -e 'install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"),dep=TRUE)'
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.

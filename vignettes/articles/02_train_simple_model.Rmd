@@ -82,12 +82,9 @@ virtual_species <- sf::st_read(system.file("extdata/input_data.gpkg",package = "
 # Predictors
 predictors <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 # Make use only of a few of them
-# predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
-#                                    "CLC3_112_mean_50km","CLC3_132_mean_50km",
-#                                    "CLC3_211_mean_50km","CLC3_312_mean_50km",
-#                                    "elevation_mean_50km"))
-
-predictors <- subset(predictors, c("bio03_mean_50km", "CLC3_312_mean_50km",
+predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_mean_50km",
+                                   "CLC3_112_mean_50km","CLC3_132_mean_50km",
+                                   "CLC3_211_mean_50km","CLC3_312_mean_50km",
                                    "elevation_mean_50km"))
 ```
 
