@@ -3,7 +3,7 @@
 
 # The ibis framework - An **I**ntegrated model for **B**iod**I**versity distribution projection**S**
 
-<img align="right" src="vignettes/figures/logo.png" alt="logo" width="180" height = "180">
+<img align="right" src="man/figures/logo.png" alt="logo" width="180" height = "180">
 
 <!-- https://shields.io/  For Badges later -->
 <!-- badges: start -->
@@ -60,7 +60,7 @@ Jung, Martin. 2023. “An Integrated Species Distribution Modelling
 Framework for Heterogeneous Biodiversity Data.” Ecological Informatics,
 102127, [DOI](https://doi.org/10.1016/j.ecoinf.2023.102127)
 
-## Acknowledgement <a href="https://iiasa.ac.at"><img src="vignettes/figures/iiasa_logo_blue.png" alt="IIASA" align="right" width="300"/></a>
+## Acknowledgement <a href="https://iiasa.ac.at"><img src="man/figures/iiasa_logo_blue.png" alt="IIASA" align="right" width="300"/></a>
 
 **ibis.iSDM** is developed and maintained by the Biodiversity, Ecology
 and Conservation group at the International Institute for Applied
