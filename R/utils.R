@@ -248,7 +248,7 @@ to_POSIXct <- function(vec){
     if(nchar(vec[1])==4){
       # Assume that the numeric is a year
       out <- paste0(vec, "-01-01")
-      if('lubridate' %in% installed.packages()[,1]){
+      if('lubridate' %in% utils::installed.packages()[,1]){
         check_package("lubridate")
         out <- lubridate::as_date(out)
       }
