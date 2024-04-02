@@ -549,7 +549,7 @@ methods::setMethod(
     } else {
       # Save the prediction as data.frame if set
       if(!is.Waiver(x$get_data("prediction"))){
-        x$fits$prediction <- terra::as.data.frame(x$get_data(), xy = TRUE, na.rm = NA)
+        x$fits$prediction <- terra::as.data.frame(x$get_data(), xy = TRUE, na.rm = FALSE)
       }
     }
 
