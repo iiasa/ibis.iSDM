@@ -209,8 +209,9 @@ methods::setMethod(
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
 
-    # --- #
-    #### Defining model objects ----
+    #### Defining model objects ####
+    # ----------------------------------------------------------- #
+
     # Set model object for fitting
     model <- list()
 
@@ -822,15 +823,24 @@ methods::setMethod(
                             all(c("predictors","background","biodiversity") %in% names(model) ),
                             length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
     )
+    #### Engine specific code starts below ####
     # --------------------------------------------------------------------- #
-    #### Engine specific code starts below                               ####
-    # --------------------------------------------------------------------- #
+
     # Number of dataset types, families and ids
     types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
     fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
     ids <- names(model$biodiversity)
-    # Engine specific preparations
+
+    # create list to store old models
+    if (length(ids) > 1 && method_integration == "predictor") {
+      out_int <- vector(mode = "list", length = length(ids) -1)
+      names(out_int) <- ids[-length(ids)]
+    } else {
+      out_int <- new_waiver()
+    }
+
     #### INLA Engine ####
+    # ----------------------------------------------------------- #
     if( x$engine$get_class() == 'INLA-Engine' ){
 
       # Create the mesh if not already present
@@ -865,8 +875,8 @@ methods::setMethod(
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-      # ----------------------------------------------------------- #
-      #### INLABRU Engine ####
+    #### INLABRU Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == 'INLABRU-Engine' ){
 
       # Create the mesh if not already present
@@ -897,8 +907,8 @@ methods::setMethod(
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-      # ----------------------------------------------------------- #
-      #### GDB Engine ####
+    #### GDB Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "GDB-Engine" ){
 
       # For each formula, process in sequence
@@ -927,8 +937,14 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
+
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
@@ -1004,8 +1020,9 @@ methods::setMethod(
           }
         } # End of multiple ids
       }
-      # ----------------------------------------------------------- #
-      #### XGBoost Engine ####
+
+    #### XGBoost Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "XGBOOST-Engine" ){
       # Create XGBboost regression and classification
 
@@ -1037,8 +1054,14 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
+
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1115,8 +1138,8 @@ methods::setMethod(
         }
       }
 
-      # ----------------------------------------------------------- #
-      #### BART Engine ####
+    #### BART Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "BART-Engine" ){
 
       # TODO: Combine biodiversity datasets and add factor variable
@@ -1147,8 +1170,13 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1229,9 +1257,11 @@ methods::setMethod(
         } # End of multiple likelihood function
 
       } # End of id loop
+
+    #### STAN Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "STAN-Engine" ){
-      # ----------------------------------------------------------- #
-      #### STAN Engine ####
+
       # Process per supplied dataset
       for(id in ids) {
         # TODO
@@ -1250,10 +1280,10 @@ methods::setMethod(
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-
+    #### BREG Engine ####
+    # ----------------------------------------------------------- #
     } else if ( x$engine$get_class() == "BREG-Engine" ){
-      # ----------------------------------------------------------- #
-      #### BREG Engine ####
+
       assertthat::assert_that(
         !(method_integration == "offset" && any(types == "poipa")),
         msg = "Due to engine limitations BREG models do not support offsets for presence-absence models!"
@@ -1281,7 +1311,13 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1358,9 +1394,11 @@ methods::setMethod(
 
         } # End of multiple ides
       }
+
+    #### GLMNET Engine ####
+    # ----------------------------------------------------------- #
     } else if (x$engine$get_class() == "GLMNET-Engine" ){
-      # ----------------------------------------------------------- #
-      #### GLMNET Engine ####
+
       # For each formula, process in sequence
       for(id in ids){
 
@@ -1384,7 +1422,13 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1459,10 +1503,13 @@ methods::setMethod(
           }
         } # End of multiple ides
       } # End of GLMNET engine
+
+    #### GLM Engine ####
+    # ----------------------------------------------------------- #
     } else if (x$engine$get_class() == "GLM-Engine" ){
-      # ----------------------------------------------------------- #
+
       if(method_integration == "prior") warning("Priors not supported for GLM!")
-      #### GLM Engine ####
+
       # For each formula, process in sequence
       for(id in ids){
 
@@ -1484,7 +1531,13 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
+        # save previous outs
+        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
+          out_int[[id]] <- out
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1555,33 +1608,36 @@ methods::setMethod(
           }
         } # End of multiple ides
       }
-    } # End of GLM engine
-      # ----------------------------------------------------------- #
-      #### SCAMPR Engine ####
-      else if(x$engine$get_class() == "SCAMPR-Engine"){
-        if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
-        if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
-        if(length(model$biodiversity)==2){
-          if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
-            stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
-          }
+
+    #### SCAMPR Engine ####
+    # ----------------------------------------------------------- #
+    } else if(x$engine$get_class() == "SCAMPR-Engine"){
+
+      if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
+      if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
+      if(length(model$biodiversity)==2){
+        if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
+          stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
         }
+      }
 
-        # Process per supplied dataset
-        for(id in ids) {
-          # Update model formula in the model container
-          model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
-        }
+      # Process per supplied dataset
+      for(id in ids) {
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
+      }
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model, settings)
+      # Run the engine setup script
+      model2 <- x$engine$setup(model, settings)
 
-        # Now train the model and create a predicted distribution model
-        out <- x$engine$train(model2, settings)
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model2, settings)
 
-      } # End of SCAMPR engine
-    else { stop('Specified Engine not implemented yet.') }
+    # wrong engine selected
+    } else { stop('Specified Engine not implemented yet.')}
 
+
+    #### Wrap up ####
     if(is.null(out)) return(NULL)
 
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
@@ -1597,6 +1653,9 @@ methods::setMethod(
     } else {
       out$settings$set("has_limits", FALSE)
     }
+
+    # adding integrated model steps
+    if (!is.Waiver(out_int)) out$model_int <- out_int
 
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
