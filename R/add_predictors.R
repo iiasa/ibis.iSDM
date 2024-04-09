@@ -755,11 +755,10 @@ methods::setMethod(
     model <- obj$model
 
     # Subset to target predictors only
-    if(length(model$predictors_names) != length(names(env))){
+    if(length(names(env)) > length(model$predictors_names)) {
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Found less variables in fitted model than supplied. Subsetting...')
       env <- env |> dplyr::select(dplyr::any_of(model$predictors_names))
-      assertthat::assert_that(length(env)>0,
-                              msg = "No matching variables found!")
+      assertthat::assert_that(length(env)>0, msg = "No matching variables found!")
     }
 
     # Get state if not set

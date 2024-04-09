@@ -90,7 +90,6 @@ methods::setMethod(
     }
     # Create BiodiversityScenario object
     sc <- BiodiversityScenario$new()
-    sc$t <- modelobject
     sc$modelobject <- modelobject
     sc$modelid <- modelid
     sc$limits <- limits
