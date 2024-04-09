@@ -833,10 +833,10 @@ methods::setMethod(
 
     # create list to store old models
     if (length(ids) > 1 && method_integration == "predictor") {
-      out_int <- vector(mode = "list", length = length(ids) -1)
-      names(out_int) <- ids[-length(ids)]
+      .internals <- vector(mode = "list", length = length(ids) -1)
+      names(.internals) <- ids[-length(ids)]
     } else {
-      out_int <- new_waiver()
+      .internals <- new_waiver()
     }
 
     #### INLA Engine ####
@@ -941,8 +941,9 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1058,8 +1059,9 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
 
 
@@ -1174,8 +1176,9 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1315,8 +1318,9 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1424,11 +1428,12 @@ methods::setMethod(
         }
 
         out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1535,8 +1540,9 @@ methods::setMethod(
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
         # save previous outs
-        if (!is.Waiver(out_int) && id != ids[length(ids)]) {
-          out_int[[id]] <- out
+        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+          .internals[[id]] <- list(fit_best = out$fits$fit_best,
+                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
         }
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1638,6 +1644,8 @@ methods::setMethod(
 
 
     #### Wrap up ####
+    # ----------------------------------------------------------- #
+
     if(is.null(out)) return(NULL)
 
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
@@ -1655,7 +1663,15 @@ methods::setMethod(
     }
 
     # adding integrated model steps
-    if (!is.Waiver(out_int)) out$model_int <- out_int
+    if (!is.Waiver(.internals)) out$.internals <- .internals
+
+    # remove not used predictors
+    pred_temp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+
+    out$model$predictors_object$rm_data(out$model$predictors_names[!out$model$predictors_names %in% pred_temp])
+    out$model$predictors_names <- out$model$predictors_object$get_names()
+    out$model$predictors_types <- out$model$predictors_types[out$model$predictors_types$predictors %in% pred_temp, ]
+    out$model$predictors <- out$model$predictors[, c("x", "y", pred_temp)]
 
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()

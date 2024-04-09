@@ -24,9 +24,9 @@ DistributionModel <- R6::R6Class(
     id = character(),
     name = character(),
     model = list(),
-    model_int = new_waiver(),
     settings = new_waiver(),
     fits = list(),
+    .internals = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list
