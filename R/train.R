@@ -860,8 +860,7 @@ methods::setMethod(
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_inla(model = model,
-                                                                id = id,
-                                                                x = x,
+                                                                id = id, x = x,
                                                                 settings = settings)
 
         # For each type include expected data
@@ -869,8 +868,20 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
+
       # Run the engine setup script
       model <- x$engine$setup(model, settings)
+
+      # remove not used predictors
+      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_prs <- model$predictors_object$get_names()
+      model$predictors_names <- pred_tmp
+      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      }
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -896,13 +907,23 @@ methods::setMethod(
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_inla(model = model,
-                                                                id = id,
-                                                                x = x,
+                                                                id = id, x = x,
                                                                 settings = settings)
       }
 
       # Run the engine setup script
       x$engine$setup(model, settings)
+
+      # remove not used predictors
+      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_prs <- model$predictors_object$get_names()
+      model$predictors_names <- pred_tmp
+      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      }
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -926,6 +947,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -938,13 +970,14 @@ methods::setMethod(
           settings2$set('inference_only', inference_only)
         }
 
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
-        # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
           .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+                                   predictors_names = model2$predictors_names,
+                                   predictors = model2$predictors)
         }
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1044,6 +1077,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1056,14 +1100,14 @@ methods::setMethod(
           settings2$set('inference_only', inference_only)
         }
 
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
-        # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
           .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+                                   predictors_names = model2$predictors_names,
+                                   predictors = model2$predictors)
         }
-
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1160,6 +1204,17 @@ methods::setMethod(
 
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
+
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1303,6 +1358,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1315,13 +1381,14 @@ methods::setMethod(
           settings2$set('inference_only', inference_only)
         }
 
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
-        # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
           .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+                                   predictors_names = model2$predictors_names,
+                                   predictors = model2$predictors)
         }
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1415,6 +1482,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1427,11 +1505,12 @@ methods::setMethod(
           settings2$set('inference_only', inference_only)
         }
 
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
           .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+                                   predictors_names = model2$predictors_names,
+                                   predictors = model2$predictors)
         }
         rm(model2, settings2)
 
@@ -1528,6 +1607,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)]){
@@ -1537,13 +1627,14 @@ methods::setMethod(
           settings2$set('inference_only', inference_only)
         }
 
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
-        # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
           .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+                                   predictors_names = model2$predictors_names,
+                                   predictors = model2$predictors)
         }
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1664,14 +1755,6 @@ methods::setMethod(
 
     # adding integrated model steps
     if (!is.Waiver(.internals)) out$.internals <- .internals
-
-    # remove not used predictors
-    pred_temp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
-
-    out$model$predictors_object$rm_data(out$model$predictors_names[!out$model$predictors_names %in% pred_temp])
-    out$model$predictors_names <- out$model$predictors_object$get_names()
-    out$model$predictors_types <- out$model$predictors_types[out$model$predictors_types$predictors %in% pred_temp, ]
-    out$model$predictors <- out$model$predictors[, c("x", "y", pred_temp)]
 
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
