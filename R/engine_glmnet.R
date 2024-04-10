@@ -833,8 +833,20 @@ engine_glmnet <- function(x,
       assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
       # Now create spatial prediction
-      prediction <- model_to_background(model)
-      prediction[df_sub$rowid] <- pred_gn[, layer]
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[df_sub$rowid] <- pred_gn[, layer]
+      } else {
+        assertthat::assert_that(utils::hasName(df_sub,"x")&&utils::hasName(df_sub,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(df_sub[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[] <- pred_gn[, layer]
+      }
 
       return(prediction)
     },overwrite = TRUE)

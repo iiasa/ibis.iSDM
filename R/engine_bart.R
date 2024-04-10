@@ -612,9 +612,11 @@ engine_bart <- function(x,
     },overwrite = TRUE)
 
     # Engine-specific projection function
-    obj$set("public", "project", function(newdata, type = "response", layer = 'mean'){
+    obj$set("public", "project", function(newdata, type = NULL, layer = 'mean'){
       assertthat::assert_that(!missing(newdata),
-                              is.data.frame(newdata))
+                              is.data.frame(newdata),
+                              is.character(type) || is.null(type)
+      )
 
       # get model data
       model <- self$model
@@ -622,10 +624,15 @@ engine_bart <- function(x,
       # Define rowids as those with no missing data
       rownames(newdata) <- 1:nrow(newdata)
       newdata$rowid <- as.numeric( rownames(newdata) )
+      newdata_copy <- newdata
       newdata <- subset(newdata, stats::complete.cases(newdata))
 
       # Also get settings for bias values
       settings <- self$settings
+      # Set type
+      if(is.null(type)) type <- self$settings$get("type")
+      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+      settings$set("type", type)
 
       # Clamp?
       if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
@@ -647,28 +654,35 @@ engine_bart <- function(x,
                              type = type) |> t()
       )
       assertthat::assert_that(nrow(pred_bart) == nrow(newdata))
-      # Fill output with summaries of the posterior
-      prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-      if(inherits(prediction, "try-error")){
-        prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-          emptyraster()
-      }
 
-      if(layer == "mean"){
-        prediction[newdata$rowid] <- matrixStats::rowMeans2(pred_bart)
-      } else if(layer == "sd"){
-        prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart)
-      } else if(layer == "q05"){
-        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.05))
-      } else if(layer == "q50" || layer == "median"){
-        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.5))
-      } else if(layer == "q95"){
-        prediction[newdata$rowid] <- matrixStats::rowQuantiles(pred_bart, probs = c(.95))
-      } else if(layer == "mode"){
-        prediction[newdata$rowid] <- apply(pred_bart, 1, mode)
-      } else if(layer == "cv"){
-        prediction[newdata$rowid] <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
-      } else { message("Custom posterior summary not yet implemented.")}
+      # Obtain prediction outputs depending on layer
+      val <- switch(layer,
+        "mean" = matrixStats::rowMeans2(pred_bart),
+        "sd" = matrixStats::rowSds(pred_bart),
+        "q05" = matrixStats::rowQuantiles(pred_bart, probs = c(.05)),
+        "q50" = matrixStats::rowQuantiles(pred_bart, probs = c(.5)),
+        "median" = matrixStats::rowQuantiles(pred_bart, probs = c(.5)),
+        "q95" = matrixStats::rowQuantiles(pred_bart, probs = c(.95)),
+        "mode" = apply(pred_bart, 1, mode),
+        "cv" <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
+      )
+
+      # Fill output with summaries of the posterior
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[newdata$rowid] <- val
+      } else {
+        assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(newdata_copy[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[newdata$rowid] <- val
+      }
+      try({rm(val, newdata_copy, pred_bart)},silent = TRUE)
       return(prediction)
     },overwrite = TRUE)
 

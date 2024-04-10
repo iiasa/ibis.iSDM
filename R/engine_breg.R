@@ -832,14 +832,21 @@ engine_breg <- function(x,
       }
 
       # Now create spatial prediction
-      prediction <- try({emptyraster( self$model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-      if(inherits(prediction, "try-error")){
-        prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-          emptyraster()
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[df_sub$rowid] <- out[,layer]
+      } else {
+        assertthat::assert_that(utils::hasName(df_sub,"x")&&utils::hasName(df_sub,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(df_sub[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[] <- out[,layer]
       }
-      prediction[df_sub$rowid] <- out[,layer]
       names(prediction) <- layer
-
       return(prediction)
     },overwrite = TRUE)
 

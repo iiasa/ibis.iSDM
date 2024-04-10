@@ -664,13 +664,19 @@ engine_stan <- function(x,
       )
 
       # Fill output with summaries of the posterior
-      prediction <- try({emptyraster( self$model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-      if(inherits(prediction, "try-error")){
-        prediction <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-          emptyraster()
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+      } else {
+        assertthat::assert_that(utils::hasName(newdata,"x")&&utils::hasName(newdata,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(newdata[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
       }
       prediction <- fill_rasters(pred_stan, prediction)
-
       return(prediction)
 
     },overwrite = TRUE)

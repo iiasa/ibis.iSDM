@@ -176,3 +176,59 @@ test_that('Modify predictors objects', {
   expect_gt(x$predictors$ncell(), y$predictors$ncell())
 
 })
+
+# Modify scenario objects
+test_that('Modify scenario objects', {
+
+  # Load packages
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
+  suppressWarnings( requireNamespace("sf", quietly = TRUE) )
+  suppressWarnings( requireNamespace("stars", quietly = TRUE) )
+
+  options("ibis.setupmessages" = FALSE)
+
+  # Get background
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+
+  # Get test species
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
+  virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE),'range',quiet = TRUE)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = T)
+
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  # Make a dummy model
+  expect_no_error(
+    fit <- distribution(background) |> add_biodiversity_poipo(virtual_points,field_occurrence = "Observed") |> add_predictors(predictors) |> engine_glm() |> train()
+  )
+
+  # Define scenario object
+  expect_no_error(
+    sc <- scenario(fit, copy_model = TRUE)
+  )
+  expect_equal(sc$modelid, fit$id)
+
+  # Add some predictors
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    sc |> add_predictors(future_dummy)
+  )
+  expect_s3_class(sc$get_predictors(), 'Waiver')
+  sc <- sc |> add_predictors(future_dummy)
+
+  # Add constraint
+  sc |> add_constraint(method = 'sdd_nexp', value = 1e3)
+  expect_s3_class(sc$get_constraints(), 'Waiver')
+  # Try and add the same constraint. By default this should replace the previous one
+  sc <- sc |> add_constraint(method = 'sdd_nexp', value = 1e3)
+  expect_type(sc$get_constraints(), "list")
+  expect_length(sc$get_constraints(),1)
+  sc2 <- sc |> add_constraint(method = 'sdd_nexp', value = 1e3)
+  expect_type(sc2$get_constraints(), "list")
+  expect_length(sc2$get_constraints(),1)
+  sc2 <- sc |> add_constraint_adaptability(method = "nichelimit")
+  expect_type(sc2$get_constraints(), "list")
+  expect_length(sc2$get_constraints(),2)
+
+})

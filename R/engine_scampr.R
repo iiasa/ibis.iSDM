@@ -760,9 +760,6 @@ engine_scampr <- function(x,
         }
       }
 
-      # Prediction container
-      prediction <- model_to_background(model)
-
       df <- newdata
       df$rowid <- 1:nrow(df)
       if(!is.Waiver(model$offset)) ofs <- model$offset else ofs <- NULL
@@ -785,7 +782,22 @@ engine_scampr <- function(x,
 
       if(!inherits(out,"try-error")){
         # Fill output with summaries of the posterior
-        prediction[df_sub$rowid] <- out
+
+        # Now create spatial prediction container
+        if(nrow(newdata)==nrow(model$predictors)){
+          prediction <- try({model_to_background(model)}, silent = TRUE)
+          prediction[df_sub$rowid] <- out
+        } else {
+          assertthat::assert_that(utils::hasName(df_sub,"x")&&utils::hasName(df_sub,"y"),
+                                  msg = "Projection data.frame has no valid coordinates or differs in grain!")
+          prediction <- try({
+            terra::rast(df_sub[,c("x", "y")],
+                        crs = terra::crs(model$background),
+                        type = "xyz") |>
+              emptyraster()
+          }, silent = TRUE)
+          prediction[] <- out
+        }
         names(prediction) <- layer
       } else {
         stop("Projection of scampr failed...")

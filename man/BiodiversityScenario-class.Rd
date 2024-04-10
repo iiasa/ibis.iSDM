@@ -329,7 +329,7 @@ Set new constrains
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A \code{\link{SpatRaster}} object to be added as as constraint.}
+\item{\code{x}}{A \code{\link{list}} object with constraint settings.}
 }
 \if{html}{\out{</div>}}
 }

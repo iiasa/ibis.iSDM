@@ -719,7 +719,11 @@ methods::setMethod(
            derivate_knots = 4, int_variables = NULL, harmonize_na = FALSE,state = NULL, ... ) {
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
                             !missing(env))
-    env <- raster_to_stars(env) # Convert to stars
+    # Check that raster has a time dimension
+    assertthat::assert_that(terra::has.time(env),msg = "SpatRaster needs a time dimension!")
+
+    # Convert to stars
+    env <- raster_to_stars(env)
 
     # Load from initial files
     add_predictors(x, env, names = names, transform = transform, derivates = derivates,
