@@ -972,9 +972,6 @@ methods::setMethod(
 
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
         rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1019,7 +1016,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1100,9 +1100,6 @@ methods::setMethod(
 
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
         rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1146,7 +1143,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1226,10 +1226,6 @@ methods::setMethod(
 
         out <- x$engine$train(model2, settings2)
         rm(model2, settings2)
-        # save previous outs
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1273,7 +1269,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")[["mean"]]
@@ -1378,9 +1377,6 @@ methods::setMethod(
 
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
         rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1424,7 +1420,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1500,9 +1499,6 @@ methods::setMethod(
 
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
         rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1545,7 +1541,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1620,9 +1619,6 @@ methods::setMethod(
 
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- out
-        }
         rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1665,7 +1661,10 @@ methods::setMethod(
                 model$biodiversity[[other_id]]$equation <- ff
               } # Else skip
             }
-
+            # add to internals
+            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
