@@ -973,9 +973,7 @@ methods::setMethod(
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$predictors_names,
-                                   predictors = model2$predictors)
+          .internals[[id]] <- out
         }
         rm(model2, settings2)
 
@@ -1103,9 +1101,7 @@ methods::setMethod(
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$predictors_names,
-                                   predictors = model2$predictors)
+          .internals[[id]] <- out
         }
         rm(model2, settings2)
 
@@ -1232,8 +1228,7 @@ methods::setMethod(
         rm(model2, settings2)
         # save previous outs
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$biodiversity[[1]]$predictors_names)
+          .internals[[id]] <- out
         }
 
         # Add Prediction of model to next object if multiple are supplied
@@ -1384,9 +1379,7 @@ methods::setMethod(
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$predictors_names,
-                                   predictors = model2$predictors)
+          .internals[[id]] <- out
         }
         rm(model2, settings2)
 
@@ -1508,9 +1501,7 @@ methods::setMethod(
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$predictors_names,
-                                   predictors = model2$predictors)
+          .internals[[id]] <- out
         }
         rm(model2, settings2)
 
@@ -1630,9 +1621,7 @@ methods::setMethod(
         # train model and save outputs
         out <- x$engine$train(model2, settings2)
         if (!is.Waiver(.internals) && id != ids[length(ids)]) {
-          .internals[[id]] <- list(fit_best = out$fits$fit_best,
-                                   predictors_names = model2$predictors_names,
-                                   predictors = model2$predictors)
+          .internals[[id]] <- out
         }
         rm(model2, settings2)
 
