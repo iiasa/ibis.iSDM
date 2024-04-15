@@ -248,7 +248,7 @@ methods::setMethod(
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "time", unlist(int_pred_names, use.name = FALSE),
+    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "time", unlist(int_pred_names, use.names = FALSE),
                                             mod_pred_names)))
     df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
