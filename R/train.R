@@ -185,8 +185,12 @@ methods::setMethod(
     # check names of biodiv data
     if (x$show_biodiversity_length() > 1) {
       if (getOption('ibis.setupmessages', default = TRUE) && length(unique(unlist(x$biodiversity$get_names()))) == 1) {
-        myLog('[Setup]','yellow','It is advised to supply unique biodiversity dataset names')
+        myLog('[Setup]','yellow','It is advised to supply unique biodiversity dataset names.')
       }
+      if (getOption('ibis.setupmessages', default = TRUE) && x$show_biodiversity_length() > 2) {
+        myLog('[Setup]','yellow','Using more than two biodiversity datasets is experimental.')
+      }
+
     }
 
     # Messenger
@@ -987,47 +991,39 @@ methods::setMethod(
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
             names(new) <- pred_name
 
-            # Add the object to the overall prediction object
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1114,47 +1110,40 @@ methods::setMethod(
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
-          # Adding the prediction to the model object
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
-            names(new) <- pred_name
-            # Add the object to the overall prediction object
-            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
+            names(new) <- pred_name
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
+
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
+
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1240,47 +1229,39 @@ methods::setMethod(
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")[[1]] # Only take the mean!
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
-            }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1392,46 +1373,39 @@ methods::setMethod(
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1514,45 +1488,39 @@ methods::setMethod(
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1634,45 +1602,39 @@ methods::setMethod(
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
-            # add to internals
-            if (!is.Waiver(.internals) && id != ids[length(ids)]) {
+
+            # store result in internals
+            if (!is.Waiver(.internals)) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){

@@ -765,7 +765,8 @@ methods::setMethod(
       }
     # some predictors also in .interals object
     } else {
-      pred_tmp <- c(model$predictors_names, c(sapply(obj$.internals, function(i) i$model$model$predictors_names)))
+      pred_tmp <- c(model$predictors_names, unlist(sapply(obj$.internals, function(i) i$model$model$predictors_names),
+                                                   use.names = FALSE))
       if(length(names(env)) > length(pred_tmp) - 1) {
         if(getOption('ibis.setupmessages', default = TRUE)){
           myLog('[Scenario]','yellow','Found less variables in fitted model than in scenarios object. Subsetting...')
