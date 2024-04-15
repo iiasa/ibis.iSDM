@@ -173,15 +173,25 @@ methods::setMethod(
       is.logical(clamp),
       is.logical(verbose)
     )
+
     # Now make checks on completeness of the object
-    assertthat::assert_that(!is.Waiver(x$engine),
-                            !is.null(x$engine),
+    assertthat::assert_that(!is.Waiver(x$engine), !is.null(x$engine),
                             msg = 'No engine set for training the distribution model.')
-    assertthat::assert_that( x$show_biodiversity_length() > 0,
-                             msg = 'No biodiversity data specified.')
-    assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
+    assertthat::assert_that(x$show_biodiversity_length() > 0,
+                            msg = 'No biodiversity data specified.')
+    assertthat::assert_that('observed' %notin% x$get_predictor_names(),
+                            msg = 'observed is not an allowed predictor name.' )
+
+    # check names of biodiv data
+    if (x$show_biodiversity_length() > 1) {
+      if (getOption('ibis.setupmessages', default = TRUE) && length(unique(unlist(x$biodiversity$get_names()))) == 1) {
+        myLog('[Setup]','yellow','It is advised to supply unique biodiversity dataset names')
+      }
+    }
+
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
+
     # --- #
     # filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
