@@ -130,7 +130,7 @@ methods::setMethod(
 
     # Create a new biodiversity dataset
     bd <- BiodiversityDataset$new(
-      name = ifelse(is.null(name), "Species: ",name),
+      name = ifelse(is.null(name), substring(id[[1]], 1, 8), name),
       id = id,
       equation = formula,
       family = family,
@@ -268,7 +268,7 @@ methods::setMethod(
 
     # Define the biodiversity object
     bd <- BiodiversityDataset$new(
-      name = ifelse(is.null(name), "Species: ",name),
+      name = ifelse(is.null(name), substring(id[[1]], 1, 8), name),
       id = id,
       equation = formula,
       family = family,
@@ -460,7 +460,7 @@ methods::setMethod(
 
       # Define the biodiversity object
       bd <- BiodiversityDataset$new(
-        name = ifelse(is.null(name), "Species: ",name),
+        name = ifelse(is.null(name), substring(id[[1]], 1, 8), name),
         id = id,
         equation = formula,
         family = family,
@@ -681,7 +681,7 @@ methods::setMethod(
 
       # Define the biodiversity object
       bd <- BiodiversityDataset$new(
-        name = ifelse(is.null(name), "Species: ",name),
+        name = ifelse(is.null(name), substring(id[[1]], 1, 8), name),
         id = id,
         equation = formula,
         family = family,
