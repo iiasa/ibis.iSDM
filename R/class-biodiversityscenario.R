@@ -264,13 +264,19 @@ BiodiversityScenario <- R6::R6Class(
 
     #' @description
     #' Set new constrains
-    #' @param x A [`SpatRaster`] object to be added as as constraint.
+    #' @param x A [`list`] object with constraint settings.
     #' @return This object.
     set_constraints = function(x){
+      assertthat::assert_that(is.list(x))
       if(!is.Waiver(self$get_constraints())){
         cr <- self$get_constraints()
-        # FIXME: Remove duplicates
-        self$constraints <- c(cr, x)
+        if(names(x) %in% names(cr)){
+          cr[[names(x)]] <- NULL
+          self$constraints <- c(cr, x)
+        } else {
+          # Combine lists
+          self$constraints <- c(cr, x)
+        }
       } else {
         self$constraints <- x
       }

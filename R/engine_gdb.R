@@ -531,21 +531,31 @@ engine_gdb <- function(x,
       # Add rowid
       newdata$rowid <- 1:nrow(newdata)
       # Subset to non-missing data
-      newdata <- subset(newdata, stats::complete.cases(newdata))
-      # Make empty template
-      temp <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-      if(inherits(temp, "try-error")){
-        temp <- terra::rast(self$model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-          emptyraster()
-      }
+      newdata_sub <- subset(newdata, stats::complete.cases(newdata))
+
       # Predict
       y <- suppressWarnings(
-        mboost::predict.mboost(object = mod, newdata = newdata,
+        mboost::predict.mboost(object = mod, newdata = newdata_sub,
                                type = type, aggregate = 'sum')
       )
-      temp[as.numeric(newdata$rowid)] <- y[,1]
-      names(temp) <- "mean" # Rename to mean, layer parameter gets ignored
-      return(temp)
+
+      # Make empty template
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[as.numeric(newdata_sub$rowid)] <- y[,1]
+      } else {
+        assertthat::assert_that(utils::hasName(newdata_sub,"x")&&utils::hasName(newdata_sub,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(newdata_sub[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[] <- y[,1]
+      }
+      names(prediction) <- "mean" # Rename to mean, layer parameter gets ignored for this engine
+      return(prediction)
     },overwrite = TRUE)
 
     # Partial effect

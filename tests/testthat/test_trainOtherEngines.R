@@ -93,6 +93,13 @@ test_that('Train a distribution model with XGboost', {
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
+  skip_if_not_installed('stars')
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
+  )
 })
 
 # ---- #
@@ -174,6 +181,12 @@ test_that('Train a distribution model with Breg', {
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
+  skip_if_not_installed('stars')
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()  )
 })
 
 # ---- #
@@ -267,6 +280,14 @@ test_that('Train a distribution model with GDB', {
 
   # Expect formula
   expect_s3_class(mod$get_equation(), 'formula')
+
+  skip_if_not_installed('stars')
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
+  )
 })
 
 # ---- #
@@ -351,7 +372,7 @@ test_that('Train a distribution model with glmnet', {
 
   # Do ensemble spartials work
   mod2 <- x |> add_priors(pp) |> train(only_linear = TRUE)
-  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "CLC3_312_mean_50km"))
+  expect_no_error(ex <- ensemble_spartial(mod,mod2, x.var = "bio01_mean_50km"))
   expect_true(is.Raster(ex))
 
   # Added here to tests as it is quick
@@ -383,6 +404,13 @@ test_that('Train a distribution model with glmnet', {
   # Expect formula
   expect_s3_class(mod$get_equation(), "formula")
 
+  skip_if_not_installed('stars')
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
+  )
 })
 
 # ---- #
@@ -453,6 +481,12 @@ test_that('Train a distribution model with bart', {
   # Get layer
   expect_s4_class(mod |> get_data(), "SpatRaster")
 
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
+  )
 })
 
 # ---- #
@@ -541,6 +575,13 @@ test_that('Train a distribution model with INLABRU', {
 
   # Expect formula
   expect_s3_class(mod$get_equation(), 'formula')
+
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
+  )
 })
 
 # Tests for scampr
@@ -651,6 +692,14 @@ test_that('Train a distribution model with SCAMPR', {
 
   suppressWarnings(
     expect_vector(mod$get_residuals())
+  )
+
+  skip_if_not_installed('stars')
+  # Make a dummy projection with the same data
+  future_dummy <- predictors
+  terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
+  expect_no_error(
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()
   )
 })
 

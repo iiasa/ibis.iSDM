@@ -303,6 +303,14 @@ methods::setMethod(
     }
   }
 
+  # Check that baseline threshold raster is binomial
+  if(length(unique(baseline_threshold)[,1])==1){
+    # Try and add no-data and see if that helps
+    baseline_threshold[is.na(baseline_threshold)] <- 0
+    assertthat::assert_that( length(unique(baseline_threshold)[,1])==2,
+                             msg = "Baseline map for fixed kernel has less than 2 values?")
+  }
+
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
     baseline_threshold[resistance == 1] <- 2
@@ -343,10 +351,16 @@ methods::setMethod(
     is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
     is.logical(normalize),
-    is.null(resistance) || is.Raster(resistance),
-    # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold)[,1])==2
+    is.null(resistance) || is.Raster(resistance)
   )
+
+  # Check that baseline threshold raster is binomial
+  if(length(unique(baseline_threshold)[,1])==1){
+    # Try and add no-data and see if that helps
+    baseline_threshold[is.na(baseline_threshold)] <- 0
+    assertthat::assert_that( length(unique(baseline_threshold)[,1])==2,
+                             msg = "Baseline map for nexp kernel has less than 2 values?")
+  }
 
   # Check for small lon-lat values
   if(terra::is.lonlat(baseline_threshold)){

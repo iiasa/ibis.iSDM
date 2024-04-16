@@ -466,6 +466,23 @@ DistributionModel <- R6::R6Class(
     },
 
     #' @description
+    #' Small internal helper function to directly get the model object
+    #' @return A fitted model if existing.
+    get_model = function() {
+      rr <- names(self$fits)
+      if(!("fit_best" %in% names(self$fits))){
+        # Check if x is present in rr, if so print a message
+        if(getOption('ibis.setupmessages', default = TRUE)){
+          myLog('[Estimation]','yellow','No fitted model found...')
+        }
+        return(new_waiver())
+      } else {
+        return(self$fits$fit_best)
+      }
+      return(self$fits[[x]])
+    },
+
+    #' @description
     #' Set new fit for this Model.
     #' @param x The name of the new fit.
     #' @param value The [`SpatRaster`] layer to be inserted.

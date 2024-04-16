@@ -3,7 +3,7 @@
 \name{add_predictors_model}
 \alias{add_predictors_model}
 \alias{add_predictors_model,BiodiversityDistribution-method}
-\title{Add predictors from a fitted model to a Biodiversity distribution object}
+\title{Add predictions from a fitted model to a Biodiversity distribution object}
 \usage{
 add_predictors_model(
   x,
