@@ -368,6 +368,10 @@ methods::setMethod(
 
         # If threshold is found, check if it has values, so if projected suitability falls below the threshold
         names(out_thresh) <-  paste0('threshold_', step)
+        if( is.na( terra::global(out_thresh, 'max', na.rm = TRUE) )[1] ){
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Threshold not found. Using last years threshold.')
+          out_thresh <- baseline_threshold
+        }
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold
@@ -570,6 +574,11 @@ methods::setMethod(
         proj_thresh <- raster_to_stars(proj_thresh)
         names(proj_thresh) <- 'threshold'
       } else {
+        # Small check as there are bugs with categorical data
+        if(terra::is.factor(proj_thresh[[1]])) {
+          proj_thresh <- terra::as.int(proj_thresh)
+          proj_thresh[proj_thresh<0] <- 0 # Negative values (sometimes occur from factor conversion) should be 0
+        }
         # Add the thresholded maps as well
         proj_thresh <- stars::st_as_stars(proj_thresh,
                                           crs = sf::st_crs(new_crs)
